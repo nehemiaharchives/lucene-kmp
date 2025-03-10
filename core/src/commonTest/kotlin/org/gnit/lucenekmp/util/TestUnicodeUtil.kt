@@ -1,8 +1,10 @@
 package org.gnit.lucenekmp.util
 
-import kotlin.test.*
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.random.Random
+import kotlin.test.*
+import kotlin.sequences.toList
 
 /*
  * Some of this code came from the excellent Unicode
@@ -102,12 +104,8 @@ class TestUnicodeUtil : LuceneTestCase() {
         val num: Int = atLeast(50000)
         for (i in 0..<num) {
             val s: String = randomUnicodeString(Random)
-            // Skip empty strings since BytesRef doesn't allow empty arrays
-            if (s.isEmpty()) continue
-
             val utf8 = ByteArray(UnicodeUtil.maxUTF8Length(s.length))
             val utf8Len = UnicodeUtil.UTF16toUTF8(s, 0, s.length, utf8)
-
             assertEquals(
                 s.codePointCount(0, s.length),
                 UnicodeUtil.codePointCount(newBytesRef(utf8, 0, utf8Len))
@@ -128,6 +126,34 @@ class TestUnicodeUtil : LuceneTestCase() {
             IllegalArgumentException::class
         ) {
             UnicodeUtil.codePointCount(newBytesRef(bytes))
+        }
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    @Test
+    fun testUTF8toUTF32() {
+        var utf32 = IntArray(0)
+        val num = atLeast(50000)
+        for (i in 0..<num) {
+            val s: String = TestUtil.randomUnicodeString(Random)
+            val utf8 = ByteArray(UnicodeUtil.maxUTF8Length(s.length))
+            val utf8Len = UnicodeUtil.UTF16toUTF8(s, 0, s.length, utf8)
+            utf32 = ArrayUtil.grow(utf32, utf8Len)
+            val utf32Len = UnicodeUtil.UTF8toUTF32(newBytesRef(utf8, 0, utf8Len), utf32)
+
+            val codePoints: IntArray = s.codePointsSeq().toList().toIntArray()
+            if (!ArrayUtil.equals(codePoints, 0, codePoints.size, utf32, 0, codePoints.size)) {
+                println("FAILED")
+                for (j in 0..<s.length) {
+                    println("  char[" + j + "]=" + s[j].code.toHexString())
+                }
+                println()
+                assertEquals(codePoints.size, utf32Len)
+                for (j in codePoints.indices) {
+                    println("  " + utf32[j].toHexString() + " vs " + codePoints[j].toHexString())
+                }
+                fail("mismatch")
+            }
         }
     }
 

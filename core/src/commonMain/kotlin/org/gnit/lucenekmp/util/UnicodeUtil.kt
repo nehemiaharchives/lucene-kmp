@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.util
 
 import org.apache.lucene.util.BytesRef
+import kotlin.jvm.JvmOverloads
 
 /*
  * Some of this code came from the excellent Unicode
@@ -616,3 +617,29 @@ fun String.codePointCount(start: Int = 0, end: Int = length): Int {
 
 private fun Char.isHighSurrogate(): Boolean = this in '\uD800'..'\uDBFF'
 private fun Char.isLowSurrogate(): Boolean = this in '\uDC00'..'\uDFFF'
+
+/**
+ * Returns a sequence of Unicode code point values from this string.
+ *
+ * Any surrogate pairs are combined into a single code point (using the formula:
+ *   ((high - 0xD800) shl 10) + (low - 0xDC00) + 0x10000).
+ * Other characters (including unpaired surrogates) are zero-extended.
+ */
+fun String.codePointsSeq(): Sequence<Int> = sequence<Int> {
+    var i = 0
+    while (i < this@codePointsSeq.length) {
+        val c = this@codePointsSeq[i]
+        if (c in '\uD800'..'\uDBFF' &&
+            i + 1 < this@codePointsSeq.length &&
+            this@codePointsSeq[i + 1] in '\uDC00'..'\uDFFF') {
+            val high = c.code - 0xD800
+            val low = this@codePointsSeq[i + 1].code - 0xDC00
+            val codePoint = (high shl 10) + low + 0x10000
+            yield(codePoint)
+            i += 2
+        } else {
+            yield(c.code)
+            i++
+        }
+    }
+}

@@ -408,18 +408,20 @@ open class LuceneTestCase {
             ) { bytesIn.size >= offset + length }
 
             // randomly set a non-zero offset
-            val startOffset = if (Random.nextBoolean()) {
+            val startOffset = /*if (Random.nextBoolean()) {
                 Random.nextInt(1, 20)
             } else {
                 0
-            }
+            }*/
+                Random.nextInt(1, 20)
 
             // also randomly set an end padding:
-            val endPadding = if (Random.nextBoolean()) {
+            val endPadding = /*if (Random.nextBoolean()) {
                 Random.nextInt(1, 20)
             } else {
                 0
-            }
+            }*/
+                Random.nextInt(1, 20)
 
             val bytes = ByteArray(startOffset + length + endPadding)
 

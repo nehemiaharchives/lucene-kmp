@@ -1,3 +1,4 @@
 package org.gnit.lucenekmp.search
 
-public class IndexSearcher
+abstract class QueryVisitor {
+}
