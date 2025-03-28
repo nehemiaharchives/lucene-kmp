@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.util
 
-import org.gnit.lucenekmp.util.ArrayUtil.Companion.ByteArrayComparator
+import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.jdkport.Arrays.mismatch
+import org.gnit.lucenekmp.jdkport.ArraysSupport
 import kotlin.math.min
 import kotlin.reflect.KClass
 
@@ -180,7 +182,7 @@ class ArrayUtil {
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun <T> growExact(array: Array<T?>, newLength: Int): Array<T?> = array.copyOf(newLength)
+        fun <T> growExact(array: Array<T>, newLength: Int): Array<T> = array.copyOf(newLength) as Array<T>
 
         /** Returns a larger array, generally over-allocating exponentially  */
         fun <T> grow(array: Array<T?>): Array<T?> {
@@ -197,6 +199,15 @@ class ArrayUtil {
                 val newLength: Int =
                     oversize(minSize, RamUsageEstimator.NUM_BYTES_OBJECT_REF)
                 return growExact<T?>(array, newLength)
+            } else return array
+        }
+
+        fun <T> grow(array: Array<T>, minSize: Int): Array<T> {
+            if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
+            if (array.size < minSize) {
+                val newLength: Int =
+                    oversize(minSize, RamUsageEstimator.NUM_BYTES_OBJECT_REF)
+                return growExact<T>(array, newLength)
             } else return array
         }
 
@@ -471,14 +482,6 @@ class ArrayUtil {
             introSort<T>(a, 0, a.size, comp)
         }
 
-        fun <T : Comparable<T>> naturalOrder(): Comparator<T> =
-            NaturalOrderComparator as Comparator<T>
-
-        private object NaturalOrderComparator : Comparator<Comparable<Any?>> {
-            override fun compare(a: Comparable<Any?>, b: Comparable<Any?>): Int = a.compareTo(b)
-        }
-
-
         /**
          * Sorts the given array slice in natural order. This method uses the intro sort algorithm, but
          * falls back to insertion sort for small arrays.
@@ -540,7 +543,7 @@ class ArrayUtil {
          * @param fromIndex start index (inclusive)
          * @param toIndex end index (exclusive)
          */
-        fun <T : Comparable<T>> timSort(a: Array<T>, fromIndex: Int, toIndex: Int) {
+        fun <T: Comparable<T>> timSort(a: Array<T>, fromIndex: Int, toIndex: Int) {
             if (toIndex - fromIndex <= 1) return
             timSort(a, fromIndex, toIndex, naturalOrder() /*java.util.Comparator.naturalOrder<T>()*/)
         }
@@ -753,6 +756,24 @@ class ArrayUtil {
             return copy
         }
 
+        fun <T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
+            val subLength = to - from
+            val type: KClass<out Array<T?>> = array::class
+            val copy: Array<T?> =
+                /* if (type == Array<Any>::class)
+                    arrayOfNulls<Any>(subLength) as Array<T>
+                else
+                    java.lang.reflect.Array.newInstance(type.getComponentType(), subLength)*/
+
+                arrayOfNulls<Any?>(subLength) as Array<T?>
+
+            /*java.lang.System.arraycopy(array, from, copy, 0, subLength)*/
+
+            array.copyInto(copy, 0, from, to)
+
+            return copy
+        }
+
         /** Comparator for a fixed number of bytes.  */
         fun interface ByteArrayComparator {
             /**
@@ -831,50 +852,6 @@ class ArrayUtil {
             return intA.compareTo(intB)
         }
 
-        /**
-         * Throws an IndexOutOfBoundsException if the range [fromIndex, toIndex) is invalid
-         * for an array of the given length.
-         */
-        private fun rangeCheck(length: Int, fromIndex: Int, toIndex: Int) {
-            if (fromIndex < 0 || toIndex > length || fromIndex > toIndex) {
-                throw IndexOutOfBoundsException("Range [$fromIndex, $toIndex) out of bounds for length $length")
-            }
-        }
-
-        /**
-         * Returns the first index i (0 ≤ i < len) for which
-         * a[aOffset + i] != b[bOffset + i]. If no such index exists, returns -1.
-         */
-        private fun mismatch(
-            a: ByteArray, aOffset: Int,
-            b: ByteArray, bOffset: Int,
-            len: Int
-        ): Int {
-            for (i in 0 until len) {
-                if (a[aOffset + i] != b[bOffset + i]) {
-                    return i
-                }
-            }
-            return -1
-        }
-
-        /**
-         * Returns the first index (0 ≤ i < len) at which the elements of the two [IntArray]s differ,
-         * when compared over the given [length] starting at [aFromIndex] and [bFromIndex] respectively.
-         * Returns -1 if no mismatch is found.
-         */
-        fun mismatch(
-            a: IntArray, aFromIndex: Int,
-            b: IntArray, bFromIndex: Int,
-            len: Int
-        ): Int {
-            for (i in 0 until len) {
-                if (a[aFromIndex + i] != b[bFromIndex + i]) {
-                    return i
-                }
-            }
-            return -1
-        }
 
         /**
          * Compare exactly the bytes in the slices [aFromIndex, aToIndex) and [bFromIndex, bToIndex)
@@ -889,8 +866,8 @@ class ArrayUtil {
             a: ByteArray, aFromIndex: Int, aToIndex: Int,
             b: ByteArray, bFromIndex: Int, bToIndex: Int
         ): Int {
-            rangeCheck(a.size, aFromIndex, aToIndex)
-            rangeCheck(b.size, bFromIndex, bToIndex)
+            Arrays.rangeCheck(a.size, aFromIndex, aToIndex)
+            Arrays.rangeCheck(b.size, bFromIndex, bToIndex)
 
             val aLength = aToIndex - aFromIndex
             val bLength = bToIndex - bFromIndex
@@ -904,40 +881,5 @@ class ArrayUtil {
                 aLength - bLength
             }
         }
-
-        /**
-         * ported from java.util.Arrays.equals(int[] a, int aFromIndex, int aToIndex,
-         *                                  int[] b, int bFromIndex, int bToIndex)
-         *
-         * Returns true if the two specified subarrays of [IntArray]s are equal.
-         *
-         * Two arrays are considered equal if the number of elements in each range is the same and
-         * every corresponding pair of elements in the ranges is equal.
-         *
-         * @param a the first array to be tested for equality.
-         * @param aFromIndex the index (inclusive) of the first element in the first array to test.
-         * @param aToIndex the index (exclusive) of the last element in the first array to test.
-         * @param b the second array to be tested for equality.
-         * @param bFromIndex the index (inclusive) of the first element in the second array to test.
-         * @param bToIndex the index (exclusive) of the last element in the second array to test.
-         * @return true if the two arrays are equal over the specified ranges.
-         * @throws IllegalArgumentException if fromIndex > toIndex.
-         * @throws IndexOutOfBoundsException if indices are out of bounds.
-         */
-        fun equals(
-            a: IntArray, aFromIndex: Int, aToIndex: Int,
-            b: IntArray, bFromIndex: Int, bToIndex: Int
-        ): Boolean {
-            rangeCheck(a.size, aFromIndex, aToIndex)
-            rangeCheck(b.size, bFromIndex, bToIndex)
-
-            val aLength = aToIndex - aFromIndex
-            val bLength = bToIndex - bFromIndex
-            if (aLength != bLength) return false
-
-            // If mismatch returns -1, then no differing index was found.
-            return mismatch(a, aFromIndex, b, bFromIndex, aLength) < 0
-        }
-
     }// end of companion object
 }

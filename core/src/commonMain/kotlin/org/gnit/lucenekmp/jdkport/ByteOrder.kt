@@ -1,4 +1,4 @@
-package org.gnit.lucenekmp.util
+package org.gnit.lucenekmp.jdkport
 
 /**
  * ported from java.nio.ByteOrder

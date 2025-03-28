@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.util
 
 import dev.scottpierce.envvar.EnvVar
+import org.gnit.lucenekmp.jdkport.ByteOrder
 
 
 /**
@@ -281,7 +282,9 @@ object BitUtil {
     }
 }
 
-// Reads 8 bytes in big-endian order from this ByteArray starting at the given offset.
+/**
+ * Reads 8 bytes in big-endian order from this ByteArray starting at the given offset.
+ */
 fun ByteArray.getLongBE(offset: Int): Long {
     require(offset >= 0 && offset + 8 <= size) { "Invalid offset: $offset" }
     return (this[offset].toLong() and 0xFF shl 56) or
@@ -294,11 +297,166 @@ fun ByteArray.getLongBE(offset: Int): Long {
             (this[offset + 7].toLong() and 0xFF)
 }
 
-// Reads 4 bytes in big-endian order from this ByteArray starting at the given offset.
+/**
+ * Reads 4 bytes in big-endian order from this ByteArray starting at the given offset.
+ */
 fun ByteArray.getIntBE(offset: Int): Int {
     require(offset >= 0 && offset + 4 <= size) { "Invalid offset: $offset" }
     return (this[offset].toInt() and 0xFF shl 24) or
             (this[offset + 1].toInt() and 0xFF shl 16) or
             (this[offset + 2].toInt() and 0xFF shl 8) or
             (this[offset + 3].toInt() and 0xFF)
+}
+
+/**
+ * Sets a 32-bit integer into this ByteArray in big-endian order.
+ *
+ * @param offset the start index in the array.
+ * @param value the integer value to write.
+ * @return the written integer value.
+ */
+fun ByteArray.setIntBE(offset: Int, value: Int) {
+    this[offset]     = (value shr 24).toByte()
+    this[offset + 1] = (value shr 16).toByte()
+    this[offset + 2] = (value shr 8).toByte()
+    this[offset + 3] = value.toByte()
+}
+
+/**
+ * Reads 2 bytes from this ByteArray in big-endian order, starting at [offset],
+ * and returns the result as a Short.
+ */
+fun ByteArray.getShortBE(offset: Int): Short {
+    require(offset >= 0 && offset + 2 <= size) { "Invalid offset: $offset" }
+    return (((this[offset].toInt() and 0xFF) shl 8) or (this[offset + 1].toInt() and 0xFF)).toShort()
+}
+
+/**
+ * Writes [value] as a big-endian short into this ByteArray at the specified [offset].
+ */
+fun ByteArray.setShortBE(offset: Int, value: Short) {
+    require(offset in 0..(size - 2)) { "Invalid offset $offset for array of size $size" }
+    // In big-endian, the most-significant byte is at the lowest address.
+    this[offset] = (value.toInt() shr 8).toByte()
+    this[offset + 1] = value.toByte()
+}
+
+/**
+ * Writes [value] as a little-endian short into this ByteArray at the specified [offset].
+ */
+fun ByteArray.getIntLE(offset: Int, value: Int): Int {
+    require(offset in 0..(size - 2)) { "Invalid offset $offset for array of size $size" }
+    return (this[offset].toInt() and 0xFF) or
+            ((this[offset + 1].toInt() and 0xFF) shl 8) or
+            ((this[offset + 2].toInt() and 0xFF) shl 16) or
+            ((this[offset + 3].toInt() and 0xFF) shl 24)
+}
+
+/**
+ * Writes [value] as a little-endian short into this ByteArray at the specified [offset].
+ */
+fun ByteArray.putShortLE(offset: Int, value: Short) {
+    require(offset in 0..(size - 2)) { "Invalid offset $offset for array of size $size" }
+    // In little-endian, the least-significant byte is at the lowest address.
+    this[offset] = value.toInt().and(0xFF).toByte()
+    this[offset + 1] = (value.toInt().shr(8)).and(0xFF).toByte()
+}
+
+/**
+ * Writes a 32-bit integer into the byte array at the given [offset] in little-endian order.
+ */
+fun ByteArray.putIntLE(offset: Int, value: Int) {
+    this[offset]     = (value and 0xFF).toByte()
+    this[offset + 1] = ((value shr 8) and 0xFF).toByte()
+    this[offset + 2] = ((value shr 16) and 0xFF).toByte()
+    this[offset + 3] = ((value shr 24) and 0xFF).toByte()
+}
+
+/**
+ * Writes the lowest [numBytes] bytes of the [value] into the [ByteArray] in little‑endian order,
+ * starting at [offset].
+ */
+fun ByteArray.putIntLEPartial(offset: Int, value: Int, numBytes: Int) {
+    for (i in 0 until numBytes) {
+        this[offset + i] = ((value shr (8 * i)) and 0xFF).toByte()
+    }
+}
+
+
+/**
+ * Writes [value] as a little-endian long into this ByteArray at the specified [offset].
+ */
+fun ByteArray.putLongLE(offset: Int, value: Long) {
+    require(offset in 0..(size - 8)) { "Invalid offset $offset for array of size $size" }
+    this[offset] = value.and(0xFF).toByte()
+    this[offset + 1] = (value shr 8).and(0xFF).toByte()
+    this[offset + 2] = (value shr 16).and(0xFF).toByte()
+    this[offset + 3] = (value shr 24).and(0xFF).toByte()
+    this[offset + 4] = (value shr 32).and(0xFF).toByte()
+    this[offset + 5] = (value shr 40).and(0xFF).toByte()
+    this[offset + 6] = (value shr 48).and(0xFF).toByte()
+    this[offset + 7] = (value shr 56).and(0xFF).toByte()
+}
+
+/**
+ * Sets a 64-bit long into this ByteArray in big-endian order.
+ *
+ * @param offset the start index in the array.
+ * @param value the long value to write.
+ */
+fun ByteArray.setLongBE(offset: Int, value: Long) {
+    this[offset]     = (value shr 56).toByte()
+    this[offset + 1] = (value shr 48).toByte()
+    this[offset + 2] = (value shr 40).toByte()
+    this[offset + 3] = (value shr 32).toByte()
+    this[offset + 4] = (value shr 24).toByte()
+    this[offset + 5] = (value shr 16).toByte()
+    this[offset + 6] = (value shr 8).toByte()
+    this[offset + 7] = value.toByte()
+}
+
+/**
+ * Reads 2 bytes in little-endian order from this ByteArray starting at the given offset.
+ *
+ * @param offset the offset to read from
+ * @return the little-endian short value
+ */
+fun ByteArray.getShortLE(offset: Int): Short {
+    require(offset in 0..(size - 2)) { "Invalid offset: $offset for array of size $size" }
+    // In little-endian, the first byte is the least-significant.
+    val lo = this[offset].toInt() and 0xFF
+    val hi = this[offset + 1].toInt() and 0xFF
+    return ((hi shl 8) or lo).toShort()
+}
+
+/**
+ * Reads 4 bytes in little-endian order from this ByteArray starting at the given offset.
+ *
+ * @param offset the offset to read from
+ * @return the little-endian int value
+ */
+fun ByteArray.getIntLE(offset: Int): Int {
+    require(offset >= 0 && offset + 4 <= size) { "Invalid offset: $offset" }
+    return (this[offset].toInt() and 0xFF) or
+            ((this[offset + 1].toInt() and 0xFF) shl 8) or
+            ((this[offset + 2].toInt() and 0xFF) shl 16) or
+            ((this[offset + 3].toInt() and 0xFF) shl 24)
+}
+
+/**
+ * Reads 8 bytes in little-endian order from this ByteArray starting at the given offset.
+ *
+ * @param offset the offset to read from
+ * @return the little-endian long value
+ */
+fun ByteArray.getLongLE(offset: Int): Long {
+    require(offset >= 0 && offset + 8 <= size) { "Invalid offset: $offset" }
+    return (this[offset].toLong() and 0xFF) or
+            ((this[offset + 1].toLong() and 0xFF) shl 8) or
+            ((this[offset + 2].toLong() and 0xFF) shl 16) or
+            ((this[offset + 3].toLong() and 0xFF) shl 24) or
+            ((this[offset + 4].toLong() and 0xFF) shl 32) or
+            ((this[offset + 5].toLong() and 0xFF) shl 40) or
+            ((this[offset + 6].toLong() and 0xFF) shl 48) or
+            ((this[offset + 7].toLong() and 0xFF) shl 56)
 }

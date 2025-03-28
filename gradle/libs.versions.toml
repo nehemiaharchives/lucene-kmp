@@ -1,13 +1,19 @@
 [versions]
 agp = "8.5.2"
-kotlin = "2.1.10"
+kotlin = "2.1.20"
+kotlinx-io = "0.7.0"
 android-minSdk = "24"
 android-compileSdk = "34"
 kotlinenvvar = "1.0.0"
+kmath = "0.4.2"
+kotlinx-coroutines = "1.10.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlinenvvar = { module = "io.github.scottpierce:kotlin-env-var", version.ref = "kotlinenvvar" }
+kmath = { module = "space.kscience:kmath-core" , version.ref = "kmath" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

@@ -22,7 +22,7 @@ abstract class Query {
      * @param boost The boost that is propagated by the parent queries.
      */
     @Throws(Exception::class /* IOException::class */)
-    fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
+    open fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         throw UnsupportedOperationException("Query $this does not implement createWeight")
     }
 
@@ -41,7 +41,7 @@ abstract class Query {
      * @see IndexSearcher.rewrite
      */
     @Throws(Exception::class /* IOException::class */)
-    fun rewrite(indexSearcher: IndexSearcher): Query {
+    open fun rewrite(indexSearcher: IndexSearcher): Query {
         return this
     }
 

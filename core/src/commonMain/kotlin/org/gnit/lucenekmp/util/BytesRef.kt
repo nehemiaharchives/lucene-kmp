@@ -1,4 +1,4 @@
-package org.apache.lucene.util
+package org.gnit.lucenekmp.util
 
 /**
  * Represents byte[], as a slice (offset + length) into an existing byte[]. The [bytes]
@@ -41,7 +41,7 @@ class BytesRef : Comparable<BytesRef> {
     var bytes: ByteArray
 
     /** Offset of first valid byte. */
-    val offset: Int
+    var offset: Int
 
     /** Length of used bytes. */
     var length: Int

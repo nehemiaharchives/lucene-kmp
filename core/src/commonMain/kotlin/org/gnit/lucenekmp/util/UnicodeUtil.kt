@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import org.apache.lucene.util.BytesRef
-import kotlin.jvm.JvmOverloads
+import kotlin.math.ceil
 
 /*
  * Some of this code came from the excellent Unicode
@@ -493,6 +492,67 @@ class UnicodeUtil {
 
             return reuse
         }
+
+        /**
+         * Cover JDK 1.5 API. Create a String from an array of codePoints.
+         *
+         * @param codePoints The code array
+         * @param offset The start of the text in the code point array
+         * @param count The number of code points
+         * @return a String representing the code points between offset and count
+         * @throws IllegalArgumentException If an invalid code point is encountered
+         * @throws IndexOutOfBoundsException If the offset or count are out of bounds.
+         */
+        fun newString(codePoints: IntArray, offset: Int, count: Int): String {
+            require(count >= 0)
+            var chars = CharArray(count)
+            var w = 0
+            var r = offset
+            val e = offset + count
+            while (r < e) {
+                val cp = codePoints[r]
+                require(!(cp < 0 || cp > 0x10ffff))
+                while (true) {
+                    try {
+                        if (cp < 0x010000) {
+                            chars[w] = cp.toChar()
+                            w++
+                        } else {
+                            chars[w] =
+                                (LEAD_SURROGATE_OFFSET_ + (cp shr LEAD_SURROGATE_SHIFT_)).toChar()
+                            chars[w + 1] =
+                                (TRAIL_SURROGATE_MIN_VALUE + (cp and TRAIL_SURROGATE_MASK_)).toChar()
+                            w += 2
+                        }
+                        break
+                    } catch (ex: IndexOutOfBoundsException) {
+                        val newlen = (ceil(codePoints.size.toDouble() * (w + 2) / (r - offset + 1))).toInt()
+                        val temp = CharArray(newlen)
+                        /*java.lang.System.arraycopy(chars, 0, temp, 0, w)*/
+                        chars.copyInto(
+                            destination = temp,
+                            destinationOffset = 0,
+                            startIndex = 0,
+                            endIndex = w
+                        )
+
+                        chars = temp
+                    }
+                }
+                ++r
+            }
+            return createString(chars, 0, w)
+        }
+
+        fun createString(value: CharArray, offset: Int, count: Int): String {
+            // Validate the range
+            if (offset < 0 || count < 0 || offset > value.size - count) {
+                throw IndexOutOfBoundsException("Invalid range: offset=$offset, count=$count, array size=${value.size}")
+            }
+            // Create a new string from the subarray (copies the characters)
+            return value.concatToString(offset, offset + count)
+        }
+
 
         // for debugging
         @OptIn(ExperimentalStdlibApi::class)

@@ -28,7 +28,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(libs.kotlinx.io)
                 implementation(libs.kotlinenvvar)
+                implementation(libs.kmath)
+                implementation(libs.kotlinx.coroutines)
             }
         }
         val commonTest by getting {

@@ -18,8 +18,8 @@ interface Accountable {
      *
      * @see Accountables
      */
-    fun getChildResources(): Collection<Accountable> {
-        return emptyList()
+    fun getChildResources(): MutableCollection<Accountable> {
+        return mutableListOf()
     }
 
     companion object {

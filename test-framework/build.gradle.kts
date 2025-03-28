@@ -29,6 +29,7 @@ kotlin {
                 implementation(project(":core"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinenvvar)
+                implementation(libs.kmath)
             }
         }
         val commonTest by getting {
