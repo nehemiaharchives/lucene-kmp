@@ -1,9 +1,8 @@
 package org.gnit.lucenekmp.store
 
 import kotlinx.io.IOException
-import org.gnit.lucenekmp.util.addExact
-import org.gnit.lucenekmp.util.bitCount
-
+import org.gnit.lucenekmp.jdkport.Math.addExact
+import org.gnit.lucenekmp.jdkport.bitCount
 
 /**
  * A [DataOutput] for appending data to a file in a [Directory].
@@ -15,7 +14,7 @@ import org.gnit.lucenekmp.util.bitCount
  *
  * @see IndexInput
  */
-abstract class IndexOutput protected constructor(resourceDescription: String, name: String?) : DataOutput(),
+abstract class IndexOutput protected constructor(resourceDescription: String, name: String) : DataOutput(),
     AutoCloseable {
     /**
      * Full description of this output, e.g. which class such as `FSIndexOutput`, and the full
@@ -29,7 +28,7 @@ abstract class IndexOutput protected constructor(resourceDescription: String, na
      */
     // TODO: can we somehow use this as the default resource description or something?
     /** Just the name part from `resourceDescription`  */
-    val name: String?
+    val name: String
 
     /**
      * Sole constructor. resourceDescription should be non-null, opaque string describing this

@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.store
 
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.index.IndexFileNames
-import org.gnit.lucenekmp.util.Character
+import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.util.IOUtils
 
 
@@ -65,7 +65,7 @@ abstract class Directory : AutoCloseable {
      * @throws IOException in case of I/O error
      */
     @Throws(IOException::class)
-    abstract fun fileLength(name: String?): Long
+    abstract fun fileLength(name: String): Long
 
     /**
      * Creates a new, empty file in the directory and returns an [IndexOutput] instance for
@@ -152,7 +152,7 @@ abstract class Directory : AutoCloseable {
      * @throws IOException in case of I/O error
      */
     @Throws(IOException::class)
-    fun openChecksumInput(name: String): ChecksumIndexInput? {
+    fun openChecksumInput(name: String): ChecksumIndexInput {
         return BufferedChecksumIndexInput(openInput(name, IOContext.READONCE))
     }
 
@@ -175,7 +175,7 @@ abstract class Directory : AutoCloseable {
      * Copies an existing `src` file from directory `from` to a non-existent file `dest` in this directory. The given IOContext is only used for opening the destination file.
      */
     @Throws(IOException::class)
-    fun copyFrom(from: Directory, src: String, dest: String, context: IOContext) {
+    open fun copyFrom(from: Directory, src: String, dest: String, context: IOContext) {
         var success = false
         try {
             from.openInput(src, IOContext.READONCE).use { `is` ->
@@ -202,7 +202,7 @@ abstract class Directory : AutoCloseable {
      * @throws AlreadyClosedException if this directory is closed.
      */
     @Throws(AlreadyClosedException::class)
-    protected fun ensureOpen() {
+    open fun ensureOpen() {
     }
 
     @get:Throws(IOException::class)

@@ -46,7 +46,7 @@ class SegmentInfo(
     /** Id that uniquely identifies this segment.  */
     private val id: ByteArray
 
-    private var codec: Codec
+    private var codec: Codec?
 
     private var diagnostics: MutableMap<String, String>
 
@@ -82,9 +82,7 @@ class SegmentInfo(
         private set
 
     fun setDiagnostics(diagnostics: MutableMap<String, String>) {
-        this.diagnostics = java.util.Map.copyOf<String, String>(
-            requireNotNull<MutableMap<String, String>>(diagnostics)
-        )
+        this.diagnostics = HashMap<String, String>(diagnostics)
     }
 
     /**
@@ -98,7 +96,7 @@ class SegmentInfo(
      */
     fun addDiagnostics(diagnostics: MutableMap<String, String>) {
         requireNotNull<MutableMap<String, String>>(diagnostics)
-        val copy: MutableMap<String, String> = java.util.HashMap<String, String>(this.diagnostics)
+        val copy: MutableMap<String, String> = HashMap<String, String>(this.diagnostics)
         copy.putAll(diagnostics!!)
         setDiagnostics(copy)
     }
@@ -122,7 +120,7 @@ class SegmentInfo(
 
     /** Return [Codec] that wrote this segment.  */
     fun getCodec(): Codec {
-        return codec
+        return codec!!
     }
 
     /** Returns number of documents in this segment (deletions are not taken into account).  */
@@ -139,8 +137,8 @@ class SegmentInfo(
 
     /** Return all files referenced by this SegmentInfo.  */
     fun files(): MutableSet<String> {
-        checkNotNull(setFiles) { "files were not computed yet; segment=" + name + " maxDoc=" + maxDoc }
-        return java.util.Collections.unmodifiableSet<String>(setFiles)
+        checkNotNull(setFiles) { "files were not computed yet; segment=$name maxDoc=$maxDoc" }
+        return setFiles!!
     }
 
     override fun toString(): String {
@@ -158,7 +156,7 @@ class SegmentInfo(
      * sorted by the timestamp field in descending order (this part is omitted for unsorted segments).
      */
     fun toString(delCount: Int): String {
-        val s: java.lang.StringBuilder = java.lang.StringBuilder()
+        val s = StringBuilder()
         s.append(name).append('(').append(if (version == null) "" else version).append(')').append(':')
         val cfs = if (this.useCompoundFile) 'c' else 'C'
         s.append(cfs)
@@ -192,7 +190,7 @@ class SegmentInfo(
     }
 
     /** We consider another SegmentInfo instance equal if it has the same dir and same name.  */
-    override fun equals(obj: Any): Boolean {
+    override fun equals(obj: Any?): Boolean {
         if (this === obj) return true
         if (obj is SegmentInfo) {
             return obj.dir === dir && obj.name == name
@@ -223,7 +221,7 @@ class SegmentInfo(
         return id.clone()
     }
 
-    private var setFiles: MutableSet<String> = null
+    private var setFiles: MutableSet<String>? = null
 
     /**
      * Construct a new complete SegmentInfo instance from input.
@@ -241,14 +239,12 @@ class SegmentInfo(
         this.useCompoundFile = isCompoundFile
         this.hasBlocks = hasBlocks
         this.codec = codec
-        this.diagnostics = java.util.Map.copyOf<String, String>(
-            requireNotNull<MutableMap<String, String>>(diagnostics)
-        )
+        this.diagnostics = HashMap<String, String>(diagnostics)
+
         this.id = id
         require(id.size == StringHelper.ID_LENGTH) { "invalid id: " + id.contentToString() }
-        this.attributes = java.util.Map.copyOf<String, String>(
-            requireNotNull<MutableMap<String, String>>(attributes)
-        )
+        this.attributes = HashMap<String, String>(attributes)
+
         this.indexSort = indexSort
     }
 
@@ -273,18 +269,14 @@ class SegmentInfo(
     }
 
     private fun checkFileNames(files: MutableCollection<String>) {
-        val m: java.util.regex.Matcher = IndexFileNames.CODEC_FILE_PATTERN.matcher("")
+        val pattern = IndexFileNames.CODEC_FILE_PATTERN
         for (file in files) {
-            m.reset(file)
-            require(m.matches()) {
-                ("invalid codec filename '"
-                        + file
-                        + "', must match: "
-                        + IndexFileNames.CODEC_FILE_PATTERN.pattern())
+            require(pattern.matches(file)) {
+                "invalid codec filename '$file', must match: ${pattern.pattern}"
             }
             require(
                 !file.lowercase().endsWith(".tmp")
-            ) { "invalid codec filename '" + file + "', cannot end with .tmp extension" }
+            ) { "invalid codec filename '$file', cannot end with .tmp extension" }
         }
     }
 
