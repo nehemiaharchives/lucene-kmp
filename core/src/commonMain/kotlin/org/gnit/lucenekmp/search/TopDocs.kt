@@ -1,26 +1,21 @@
 package org.gnit.lucenekmp.search
 
+import org.gnit.lucenekmp.jdkport.Math.addExact
 import org.gnit.lucenekmp.util.PriorityQueue
 import kotlin.jvm.JvmRecord
 import kotlin.math.min
 
 
 /** Represents hits returned by [IndexSearcher.search].  */
-class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
+open class TopDocs(
     /** The total number of hits for the query.  */
-    var totalHits: TotalHits
-
+    var totalHits: TotalHits,
     /** The top hits for the query.  */
-    var scoreDocs: Array<ScoreDoc>
-
-    /** Constructs a TopDocs.  */
-    init {
-        this.totalHits = totalHits
-        this.scoreDocs = scoreDocs
-    }
+    var scoreDocs: Array<ScoreDoc>?
+) {
 
     // Refers to one hit:
-    private class ShardRef(// Which shard (index into shardHits[]):
+    class ShardRef(// Which shard (index into shardHits[]):
         val shardIndex: Int
     ) {
         // Which hit within the shard:
@@ -37,11 +32,10 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
         shardHits: Array<TopDocs>,
         tieBreakerComparator: Comparator<ScoreDoc>
     ) : PriorityQueue<ShardRef>(shardHits.size) {
-        val shardHits: Array<Array<ScoreDoc>?>
+        val shardHits: Array<Array<ScoreDoc>?> = kotlin.arrayOfNulls<Array<ScoreDoc>>(shardHits.size)
         val tieBreakerComparator: Comparator<ScoreDoc>
 
         init {
-            this.shardHits = kotlin.arrayOfNulls<Array<ScoreDoc>>(shardHits.size)
             for (shardIDX in shardHits.indices) {
                 this.shardHits[shardIDX] = shardHits[shardIDX].scoreDocs
             }
@@ -49,7 +43,7 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
         }
 
         // Returns true if first is < second
-        public override fun lessThan(first: ShardRef, second: ShardRef): Boolean {
+        override fun lessThan(first: ShardRef, second: ShardRef): Boolean {
             require(first != second)
             val firstScoreDoc: ScoreDoc = shardHits[first.shardIndex]!![first.hitIndex]
             val secondScoreDoc: ScoreDoc = shardHits[second.shardIndex]!![second.hitIndex]
@@ -63,19 +57,16 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
         }
     }
 
-    private class MergeSortQueue(sort: Sort, shardHits: Array<TopDocs>, tieBreaker: Comparator<ScoreDoc>) :
+    private class MergeSortQueue(sort: Sort, shardHits: Array<TopDocs>, val tieBreaker: Comparator<ScoreDoc>) :
         PriorityQueue<ShardRef>(shardHits.size) {
         // These are really FieldDoc instances:
-        val shardHits: Array<Array<ScoreDoc>>
-        val comparators: Array<FieldComparator<*>>
+        val shardHits: Array<Array<ScoreDoc>?> = kotlin.arrayOfNulls<Array<ScoreDoc>>(shardHits.size)
+        val comparators: Array<FieldComparator<*>?>
         val reverseMul: IntArray
-        val tieBreaker: Comparator<ScoreDoc>
 
         init {
-            this.shardHits = kotlin.arrayOfNulls<Array<ScoreDoc>>(shardHits.size)
-            this.tieBreaker = tieBreaker
             for (shardIDX in shardHits.indices) {
-                val shard: Array<ScoreDoc> = shardHits[shardIDX].scoreDocs
+                val shard: Array<ScoreDoc>? = shardHits[shardIDX].scoreDocs
                 // System.out.println("  init shardIdx=" + shardIDX + " hits=" + shard);
                 if (shard != null) {
                     this.shardHits[shardIDX] = shard
@@ -87,24 +78,24 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
                                     + shardIDX
                                     + " was not sorted by the provided Sort (expected FieldDoc but got ScoreDoc)")
                         }
-                        val fd: FieldDoc = sd as FieldDoc
-                        requireNotNull(fd.fields) { "shard " + shardIDX + " did not set sort field values (FieldDoc.fields is null)" }
+                        val fd: FieldDoc = sd
+                        requireNotNull(fd.fields) { "shard $shardIDX did not set sort field values (FieldDoc.fields is null)" }
                     }
                 }
             }
 
-            val sortFields: Array<SortField> = sort.getSort()
-            comparators = kotlin.arrayOfNulls<FieldComparator>(sortFields.size)
+            val sortFields: Array<SortField> = sort.sort
+            comparators = kotlin.arrayOfNulls<FieldComparator<*>>(sortFields.size)
             reverseMul = IntArray(sortFields.size)
             for (compIDX in sortFields.indices) {
                 val sortField: SortField = sortFields[compIDX]
                 comparators[compIDX] = sortField.getComparator(1, Pruning.NONE)
-                reverseMul[compIDX] = if (sortField.getReverse()) -1 else 1
+                reverseMul[compIDX] = if (sortField.reverse) -1 else 1
             }
         }
 
         // Returns true if first is < second
-        public override fun lessThan(first: ShardRef, second: ShardRef): Boolean {
+        override fun lessThan(first: ShardRef, second: ShardRef): Boolean {
             require(first != second)
             val firstFD: FieldDoc = shardHits[first.shardIndex]!![first.hitIndex] as FieldDoc
             val secondFD: FieldDoc = shardHits[second.shardIndex]!![second.hitIndex] as FieldDoc
@@ -113,13 +104,16 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
             // firstFD.score + "\n    second=" + second + " doc=" + secondFD.doc + " score=" +
             // secondFD.score);
             for (compIDX in comparators.indices) {
-                val comp: FieldComparator = comparators[compIDX]
+                val comp: FieldComparator<Any?> = comparators[compIDX]!! as FieldComparator<Any?>
 
                 // System.out.println("    cmp idx=" + compIDX + " cmp1=" + firstFD.fields[compIDX] + "
                 // cmp2=" + secondFD.fields[compIDX] + " reverse=" + reverseMul[compIDX]);
                 val cmp: Int =
                     (reverseMul[compIDX]
-                            * comp.compareValues(firstFD.fields[compIDX], secondFD.fields[compIDX]))
+                            * comp.compareValues(
+                        firstFD.fields!![compIDX] as FieldComparator<Any?>,
+                        secondFD.fields!![compIDX] as FieldComparator<Any?>
+                    ))
 
                 if (cmp != 0) {
                     // System.out.println("    return " + (cmp < 0));
@@ -136,16 +130,18 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
     companion object {
         /** Internal comparator with shardIndex  */
         private val SHARD_INDEX_TIE_BREAKER: Comparator<ScoreDoc> =
-            Comparator.comparingInt<ScoreDoc>(java.util.function.ToIntFunction { d: ScoreDoc -> d.shardIndex })
+            Comparator { a, b -> a.shardIndex.compareTo(b.shardIndex) }
 
         /** Internal comparator with docID  */
         private val DOC_ID_TIE_BREAKER: Comparator<ScoreDoc> =
-            Comparator.comparingInt<ScoreDoc>(java.util.function.ToIntFunction { d: ScoreDoc -> d.doc })
+            Comparator { a, b -> a.doc.compareTo(b.doc) }
 
         /** Default comparator  */
-        private val DEFAULT_TIE_BREAKER: Comparator<ScoreDoc> = SHARD_INDEX_TIE_BREAKER.thenComparing(
-            DOC_ID_TIE_BREAKER
-        )
+        private val DEFAULT_TIE_BREAKER: Comparator<ScoreDoc> =
+            Comparator<ScoreDoc> { a, b ->
+                val result = SHARD_INDEX_TIE_BREAKER.compare(a, b)
+                if (result != 0) result else DOC_ID_TIE_BREAKER.compare(a, b)
+            }
 
         /**
          * Use the tie breaker if provided. If tie breaker returns 0 signifying equal values, we use hit
@@ -236,7 +232,13 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
          */
         fun merge(sort: Sort, start: Int, topN: Int, shardHits: Array<TopFieldDocs>): TopFieldDocs {
             requireNotNull(sort) { "sort must be non-null when merging field-docs" }
-            return mergeAux(sort, start, topN, shardHits, DEFAULT_TIE_BREAKER) as TopFieldDocs
+            return mergeAux(
+                sort,
+                start,
+                topN,
+                shardHits.map { it as TopDocs }.toTypedArray(),
+                DEFAULT_TIE_BREAKER
+            ) as TopFieldDocs
         }
 
         /**
@@ -252,7 +254,13 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
             tieBreaker: Comparator<ScoreDoc>
         ): TopFieldDocs {
             requireNotNull(sort) { "sort must be non-null when merging field-docs" }
-            return mergeAux(sort, start, topN, shardHits, tieBreaker) as TopFieldDocs
+            return mergeAux(
+                sort,
+                start,
+                topN,
+                shardHits.map { it as TopDocs }.toTypedArray(),
+                tieBreaker
+            ) as TopFieldDocs
         }
 
         /**
@@ -260,7 +268,7 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
          * that docs should be sorted by score.
          */
         private fun mergeAux(
-            sort: Sort, start: Int, size: Int, shardHits: Array<TopDocs>, tieBreaker: Comparator<ScoreDoc>
+            sort: Sort?, start: Int, size: Int, shardHits: Array<TopDocs>, tieBreaker: Comparator<ScoreDoc>
         ): TopDocs {
             val queue: PriorityQueue<ShardRef>
             if (sort == null) {
@@ -276,19 +284,19 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
                 val shard = shardHits[shardIDX]
                 // totalHits can be non-zero even if no hits were
                 // collected, when searchAfter was used:
-                totalHitCount += shard.totalHits.value()
+                totalHitCount += shard.totalHits.value
                 // If any hit count is a lower bound then the merged
                 // total hit count is a lower bound as well
-                if (shard.totalHits.relation() == TotalHits.Relation.GREATER_THAN_OR_EQUAL_TO) {
+                if (shard.totalHits.relation == TotalHits.Relation.GREATER_THAN_OR_EQUAL_TO) {
                     totalHitsRelation = TotalHits.Relation.GREATER_THAN_OR_EQUAL_TO
                 }
-                if (shard.scoreDocs != null && shard.scoreDocs!!.size > 0) {
+                if (shard.scoreDocs != null && shard.scoreDocs!!.isNotEmpty()) {
                     availHitCount += shard.scoreDocs!!.size
                     queue.add(ShardRef(shardIDX))
                 }
             }
 
-            val hits: Array<ScoreDoc>
+            val hits: Array<ScoreDoc?>
             var unsetShardIndex = false
             if (availHitCount <= start) {
                 hits = kotlin.arrayOfNulls<ScoreDoc>(0)
@@ -328,9 +336,9 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
 
             val totalHits: TotalHits = TotalHits(totalHitCount, totalHitsRelation)
             if (sort == null) {
-                return TopDocs(totalHits, hits)
+                return TopDocs(totalHits, hits as Array<ScoreDoc>?)
             } else {
-                return TopFieldDocs(totalHits, hits, sort.getSort())
+                return TopFieldDocs(totalHits, hits as Array<ScoreDoc>, sort.sort)
             }
         }
 
@@ -353,7 +361,7 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
             require(topN >= 1) { "topN must be >= 1, got $topN" }
             require(k >= 1) { "k must be >= 1, got $k" }
 
-            var shardIndexSet: Boolean = null
+            var shardIndexSet: Boolean? = null
             for (topDocs in hits) {
                 for (scoreDoc in topDocs.scoreDocs!!) {
                     val thisShardIndexSet = scoreDoc.shardIndex != -1
@@ -364,54 +372,40 @@ class TopDocs(totalHits: TotalHits, scoreDocs: Array<ScoreDoc>) {
             }
 
             // Compute the rrf score as a double to reduce accuracy loss due to floating-point arithmetic.
-            val rrfScore: MutableMap<ShardIndexAndDoc, Double> = java.util.HashMap<ShardIndexAndDoc, Double>()
+            val rrfScore: MutableMap<ShardIndexAndDoc, Double> = mutableMapOf<ShardIndexAndDoc, Double>()
             var totalHitCount: Long = 0
             for (topDoc in hits) {
                 // A document is a hit globally if it is a hit for any of the top docs, so we compute the
                 // total hit count as the max total hit count.
-                totalHitCount = java.lang.Math.max(totalHitCount, topDoc.totalHits.value())
-                for (i in topDoc.scoreDocs.indices) {
+                totalHitCount = kotlin.math.max(totalHitCount, topDoc.totalHits.value)
+                for (i in topDoc.scoreDocs!!.indices) {
                     val scoreDoc: ScoreDoc = topDoc.scoreDocs!![i]
                     val rank: Int = i + 1
-                    val rrfScoreContribution: Double = 1.0 / java.lang.Math.addExact(k, rank)
-                    rrfScore.compute(
-                        ShardIndexAndDoc(scoreDoc.shardIndex, scoreDoc.doc)
-                    ) { `_`: ShardIndexAndDoc, score: Double -> (if (score == null) 0.0 else score) + rrfScoreContribution }
+                    val rrfScoreContribution: Double = 1.0 / addExact(k, rank)
+                    val key = ShardIndexAndDoc(scoreDoc.shardIndex, scoreDoc.doc)
+                    val oldValue = rrfScore[key] ?: 0.0
+                    rrfScore[key] = oldValue + rrfScoreContribution
                 }
             }
 
             val rrfScoreRank: MutableList<MutableMap.MutableEntry<ShardIndexAndDoc, Double>> =
-                java.util.ArrayList<MutableMap.MutableEntry<ShardIndexAndDoc, Double>>(rrfScore.entries)
-            rrfScoreRank.sort( // Sort by descending score
-                java.util.Map.Entry.comparingByValue<ShardIndexAndDoc, Double>()
-                    .reversed() // Tie-break by doc ID, then shard index (like TopDocs#merge)
-                    .thenComparing(
-                        java.util.Map.Entry.comparingByKey<ShardIndexAndDoc, Double>(
-                            Comparator.comparingInt<org.gnit.lucenekmp.search.TopDocs.ShardIndexAndDoc>(
-                                ShardIndexAndDoc::doc
-                            )
-                        )
-                    )
-                    .thenComparing(
-                        java.util.Map.Entry.comparingByKey<ShardIndexAndDoc, Double>(
-                            Comparator.comparingInt<org.gnit.lucenekmp.search.TopDocs.ShardIndexAndDoc>(
-                                ShardIndexAndDoc::shardIndex
-                            )
-                        )
-                    )
+                rrfScore.entries.toMutableList()
+            rrfScoreRank.sortWith(compareByDescending<MutableMap.MutableEntry<ShardIndexAndDoc, Double>> { it.value }
+                .thenBy { it.key.doc }
+                .thenBy { it.key.shardIndex }
             )
 
-            val rrfScoreDocs: Array<ScoreDoc> = kotlin.arrayOfNulls<ScoreDoc>(min(topN, rrfScoreRank.size))
+            val rrfScoreDocs: Array<ScoreDoc?> = kotlin.arrayOfNulls<ScoreDoc>(min(topN, rrfScoreRank.size))
             for (i in rrfScoreDocs.indices) {
-                val entry = rrfScoreRank.get(i)
-                val doc = entry.key!!.doc
-                val shardIndex = entry.key!!.shardIndex
-                val score = entry.value!!.toFloat()
+                val entry = rrfScoreRank[i]
+                val doc = entry.key.doc
+                val shardIndex = entry.key.shardIndex
+                val score = entry.value.toFloat()
                 rrfScoreDocs[i] = ScoreDoc(doc, score, shardIndex)
             }
 
             val totalHits: TotalHits = TotalHits(totalHitCount, TotalHits.Relation.GREATER_THAN_OR_EQUAL_TO)
-            return TopDocs(totalHits, rrfScoreDocs)
+            return TopDocs(totalHits, rrfScoreDocs as Array<ScoreDoc>)
         }
     }
 }

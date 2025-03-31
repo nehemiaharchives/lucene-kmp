@@ -4,7 +4,7 @@ import kotlin.jvm.JvmOverloads
 
 
 /** Holds one hit in [TopDocs].  */
-class ScoreDoc
+open class ScoreDoc
 /** Constructs a ScoreDoc.  */ @JvmOverloads constructor(
     /**
      * A hit document's number.

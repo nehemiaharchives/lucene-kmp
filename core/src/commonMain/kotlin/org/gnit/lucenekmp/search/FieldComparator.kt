@@ -124,15 +124,10 @@ abstract class FieldComparator<T> {
      * specified).
      */
     class RelevanceComparator(numHits: Int) : FieldComparator<Float>(), LeafFieldComparator {
-        private val scores: FloatArray
+        private val scores: FloatArray = FloatArray(numHits)
         private var bottom = 0f
         private lateinit var scorer: Scorable
         private var topValue = 0f
-
-        /** Creates a new comparator based on relevance for `numHits`.  */
-        init {
-            scores = FloatArray(numHits)
-        }
 
         override fun compare(slot1: Int, slot2: Int): Int {
             return Float.compare(scores[slot2], scores[slot1])
@@ -193,19 +188,12 @@ abstract class FieldComparator<T> {
      */
     class TermValComparator(numHits: Int, private val field: String, sortMissingLast: Boolean) :
         FieldComparator<BytesRef>(), LeafFieldComparator {
-        private val values: Array<BytesRef?>
-        private val tempBRs: Array<BytesRefBuilder?>
+        private val values: Array<BytesRef?> = kotlin.arrayOfNulls<BytesRef>(numHits)
+        private val tempBRs: Array<BytesRefBuilder?> = kotlin.arrayOfNulls<BytesRefBuilder>(numHits)
         private var docTerms: BinaryDocValues? = null
         private var bottom: BytesRef? = null
         private var topValue: BytesRef? = null
-        private val missingSortCmp: Int
-
-        /** Sole constructor.  */
-        init {
-            values = kotlin.arrayOfNulls<BytesRef>(numHits)
-            tempBRs = kotlin.arrayOfNulls<BytesRefBuilder>(numHits)
-            missingSortCmp = if (sortMissingLast) 1 else -1
-        }
+        private val missingSortCmp: Int = if (sortMissingLast) 1 else -1
 
         @Throws(IOException::class)
         private fun getValueForDoc(doc: Int): BytesRef? {
