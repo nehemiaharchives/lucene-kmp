@@ -110,7 +110,7 @@ protected constructor() : BytesRefIterator {
 
     /** Returns current term. Do not call this when the enum is unpositioned.  */
     @Throws(IOException::class)
-    abstract fun term(): BytesRef
+    abstract fun term(): BytesRef?
 
     /**
      * Returns ordinal position for current term. This is an optional method (the codec may throw

@@ -14,7 +14,6 @@ import org.gnit.lucenekmp.index.MergeState
 import org.gnit.lucenekmp.index.NumericDocValues
 import org.gnit.lucenekmp.index.OrdinalMap
 import org.gnit.lucenekmp.index.PostingsEnum
-import org.gnit.lucenekmp.index.SegmentWriteState // javadocs
 import org.gnit.lucenekmp.index.SortedDocValues
 import org.gnit.lucenekmp.index.SortedNumericDocValues
 import org.gnit.lucenekmp.index.SortedSetDocValues
@@ -27,6 +26,7 @@ import org.gnit.lucenekmp.util.LongBitSet
 import org.gnit.lucenekmp.util.LongValues
 import org.gnit.lucenekmp.util.packed.PackedInts
 import kotlinx.io.IOException
+import org.gnit.lucenekmp.search.DocIdSetIterator
 
 
 /**
@@ -108,12 +108,10 @@ protected constructor() : AutoCloseable {
     @Throws(IOException::class)
     fun merge(mergeState: MergeState) {
         for (docValuesProducer in mergeState.docValuesProducers) {
-            if (docValuesProducer != null) {
-                docValuesProducer.checkIntegrity()
-            }
+            docValuesProducer?.checkIntegrity()
         }
 
-        for (mergeFieldInfo in mergeState.mergeFieldInfos) {
+        for (mergeFieldInfo in mergeState.mergeFieldInfos!!) {
             val type: DocValuesType = mergeFieldInfo.getDocValuesType()
             if (type !== DocValuesType.NONE) {
                 if (type === DocValuesType.NUMERIC) {
@@ -127,23 +125,21 @@ protected constructor() : AutoCloseable {
                 } else if (type === DocValuesType.SORTED_NUMERIC) {
                     mergeSortedNumericField(mergeFieldInfo, mergeState)
                 } else {
-                    throw java.lang.AssertionError("type=" + type)
+                    throw AssertionError("type=$type")
                 }
             }
         }
     }
 
     /** Tracks state of one numeric sub-reader that we are merging  */
-    private class NumericDocValuesSub(docMap: MergeState.DocMap, values: NumericDocValues) : DocIDMerger.Sub(docMap) {
-        val values: NumericDocValues
+    private class NumericDocValuesSub(docMap: MergeState.DocMap, val values: NumericDocValues) : DocIDMerger.Sub(docMap) {
 
         init {
-            this.values = values
-            require(values.docID() === -1)
+            require(values.docID() == -1)
         }
 
         @Throws(IOException::class)
-        public override fun nextDoc(): Int {
+        override fun nextDoc(): Int {
             return values.nextDoc()
         }
     }
@@ -161,16 +157,16 @@ protected constructor() : AutoCloseable {
             mergeFieldInfo,
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
-                public override fun getNumeric(fieldInfo: FieldInfo): NumericDocValues {
+                override fun getNumeric(fieldInfo: FieldInfo): NumericDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong fieldInfo" }
 
-                    val subs: MutableList<NumericDocValuesSub> = java.util.ArrayList<NumericDocValuesSub>()
-                    require(mergeState.docMaps.length === mergeState.docValuesProducers.length)
-                    for (i in 0..<mergeState.docValuesProducers.length) {
-                        var values: NumericDocValues = null
-                        val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
+                    val subs: MutableList<NumericDocValuesSub> = mutableListOf<NumericDocValuesSub>()
+                    require(mergeState.docMaps!!.size == mergeState.docValuesProducers.size)
+                    for (i in 0..<mergeState.docValuesProducers.size) {
+                        var values: NumericDocValues? = null
+                        val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
                         if (docValuesProducer != null) {
-                            val readerFieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(mergeFieldInfo.name)
+                            val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
                                 && readerFieldInfo.getDocValuesType() === DocValuesType.NUMERIC
                             ) {
@@ -188,16 +184,14 @@ protected constructor() : AutoCloseable {
     }
 
     /** Tracks state of one binary sub-reader that we are merging  */
-    private class BinaryDocValuesSub(docMap: MergeState.DocMap, values: BinaryDocValues) : DocIDMerger.Sub(docMap) {
-        val values: BinaryDocValues
+    private class BinaryDocValuesSub(docMap: MergeState.DocMap, val values: BinaryDocValues) : DocIDMerger.Sub(docMap) {
 
         init {
-            this.values = values
-            require(values.docID() === -1)
+            require(values.docID() == -1)
         }
 
         @Throws(IOException::class)
-        public override fun nextDoc(): Int {
+        override fun nextDoc(): Int {
             return values.nextDoc()
         }
     }
@@ -215,17 +209,17 @@ protected constructor() : AutoCloseable {
             mergeFieldInfo,
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
-                public override fun getBinary(fieldInfo: FieldInfo): BinaryDocValues {
+                override fun getBinary(fieldInfo: FieldInfo): BinaryDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong fieldInfo" }
 
-                    val subs: MutableList<BinaryDocValuesSub> = java.util.ArrayList<BinaryDocValuesSub>()
+                    val subs: MutableList<BinaryDocValuesSub> = mutableListOf<BinaryDocValuesSub>()
 
                     var cost: Long = 0
-                    for (i in 0..<mergeState.docValuesProducers.length) {
-                        var values: BinaryDocValues = null
-                        val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
+                    for (i in 0..<mergeState.docValuesProducers.size) {
+                        var values: BinaryDocValues? = null
+                        val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
                         if (docValuesProducer != null) {
-                            val readerFieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(mergeFieldInfo.name)
+                            val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
                                 && readerFieldInfo.getDocValuesType() === DocValuesType.BINARY
                             ) {
@@ -234,7 +228,7 @@ protected constructor() : AutoCloseable {
                         }
                         if (values != null) {
                             cost += values.cost()
-                            subs.add(BinaryDocValuesSub(mergeState.docMaps[i], values))
+                            subs.add(BinaryDocValuesSub(mergeState.docMaps!![i], values))
                         }
                     }
 
@@ -243,40 +237,36 @@ protected constructor() : AutoCloseable {
                     val finalCost = cost
 
                     return object : BinaryDocValues() {
-                        private var current: BinaryDocValuesSub = null
+                        private var current: BinaryDocValuesSub? = null
                         private var docID = -1
 
-                        public override fun docID(): Int {
+                        override fun docID(): Int {
                             return docID
                         }
 
                         @Throws(IOException::class)
-                        public override fun nextDoc(): Int {
+                        override fun nextDoc(): Int {
                             current = docIDMerger.next()
-                            if (current == null) {
-                                docID = NO_MORE_DOCS
-                            } else {
-                                docID = current.mappedDocID
-                            }
+                            current?.let { docID = it.mappedDocID }
                             return docID
                         }
 
                         @Throws(IOException::class)
-                        public override fun advance(target: Int): Int {
+                        override fun advance(target: Int): Int {
                             throw UnsupportedOperationException()
                         }
 
                         @Throws(IOException::class)
-                        public override fun advanceExact(target: Int): Boolean {
+                        override fun advanceExact(target: Int): Boolean {
                             throw UnsupportedOperationException()
                         }
 
-                        public override fun cost(): Long {
+                        override fun cost(): Long {
                             return finalCost
                         }
 
                         @Throws(IOException::class)
-                        public override fun binaryValue(): BytesRef {
+                        override fun binaryValue(): BytesRef? {
                             return current!!.values.binaryValue()
                         }
                     }
@@ -285,17 +275,15 @@ protected constructor() : AutoCloseable {
     }
 
     /** Tracks state of one sorted numeric sub-reader that we are merging  */
-    private class SortedNumericDocValuesSub(docMap: MergeState.DocMap, values: SortedNumericDocValues) :
+    private class SortedNumericDocValuesSub(docMap: MergeState.DocMap, val values: SortedNumericDocValues) :
         DocIDMerger.Sub(docMap) {
-        val values: SortedNumericDocValues
 
         init {
-            this.values = values
-            require(values.docID() === -1)
+            require(values.docID() == -1)
         }
 
         @Throws(IOException::class)
-        public override fun nextDoc(): Int {
+        override fun nextDoc(): Int {
             return values.nextDoc()
         }
     }
@@ -317,14 +305,14 @@ protected constructor() : AutoCloseable {
                     require(fieldInfo === mergeFieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
-                    val subs: MutableList<SortedNumericDocValuesSub> = java.util.ArrayList<SortedNumericDocValuesSub>()
+                    val subs: MutableList<SortedNumericDocValuesSub> = mutableListOf<SortedNumericDocValuesSub>()
                     var cost: Long = 0
                     var allSingletons = true
-                    for (i in 0..<mergeState.docValuesProducers.length) {
-                        val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
-                        var values: SortedNumericDocValues = null
+                    for (i in 0..<mergeState.docValuesProducers.size) {
+                        val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
+                        var values: SortedNumericDocValues? = null
                         if (docValuesProducer != null) {
-                            val readerFieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(mergeFieldInfo.name)
+                            val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
                                 && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED_NUMERIC
                             ) {
@@ -338,7 +326,7 @@ protected constructor() : AutoCloseable {
                         if (allSingletons && DocValues.unwrapSingleton(values) == null) {
                             allSingletons = false
                         }
-                        subs.add(SortedNumericDocValuesSub(mergeState.docMaps[i], values))
+                        subs.add(SortedNumericDocValuesSub(mergeState.docMaps!![i], values))
                     }
 
                     if (allSingletons) {
@@ -346,7 +334,7 @@ protected constructor() : AutoCloseable {
                         // We specialize for that case since it makes it easier for codecs to optimize
                         // for single-valued fields.
                         val singleValuedSubs: MutableList<NumericDocValuesSub> =
-                            java.util.ArrayList<NumericDocValuesSub>()
+                            mutableListOf<NumericDocValuesSub>()
                         for (sub in subs) {
                             val singleValuedValues: NumericDocValues =
                                 checkNotNull(DocValues.unwrapSingleton(sub.values))
@@ -364,44 +352,40 @@ protected constructor() : AutoCloseable {
 
                     return object : SortedNumericDocValues() {
                         private var docID = -1
-                        private var currentSub: SortedNumericDocValuesSub = null
+                        private var currentSub: SortedNumericDocValuesSub? = null
 
-                        public override fun docID(): Int {
+                        override fun docID(): Int {
                             return docID
                         }
 
                         @Throws(IOException::class)
-                        public override fun nextDoc(): Int {
+                        override fun nextDoc(): Int {
                             currentSub = docIDMerger.next()
-                            if (currentSub == null) {
-                                docID = NO_MORE_DOCS
-                            } else {
-                                docID = currentSub.mappedDocID
-                            }
+                            currentSub?.let { docID = it.mappedDocID }
 
                             return docID
                         }
 
                         @Throws(IOException::class)
-                        public override fun advance(target: Int): Int {
+                        override fun advance(target: Int): Int {
                             throw UnsupportedOperationException()
                         }
 
                         @Throws(IOException::class)
-                        public override fun advanceExact(target: Int): Boolean {
+                        override fun advanceExact(target: Int): Boolean {
                             throw UnsupportedOperationException()
                         }
 
-                        public override fun docValueCount(): Int {
+                        override fun docValueCount(): Int {
                             return currentSub!!.values.docValueCount()
                         }
 
-                        public override fun cost(): Long {
+                        override fun cost(): Long {
                             return finalCost
                         }
 
                         @Throws(IOException::class)
-                        public override fun nextValue(): Long {
+                        override fun nextValue(): Long {
                             return currentSub!!.values.nextValue()
                         }
                     }
@@ -414,31 +398,23 @@ protected constructor() : AutoCloseable {
      * [SortedDocValues.lookupOrd] or [SortedSetDocValues.lookupOrd] on every
      * call to [TermsEnum.next].
      */
-    private class MergedTermsEnum(ordinalMap: OrdinalMap, subs: Array<TermsEnum>) : BaseTermsEnum() {
-        private val subs: Array<TermsEnum>
-        private val ordinalMap: OrdinalMap
-        private val valueCount: Long
+    private class MergedTermsEnum(private val ordinalMap: OrdinalMap, private val subs: Array<TermsEnum>) : BaseTermsEnum() {
+        private val valueCount: Long = ordinalMap.valueCount
         private var ord: Long = -1
-        private var term: BytesRef = null
-
-        init {
-            this.ordinalMap = ordinalMap
-            this.subs = subs
-            this.valueCount = ordinalMap.getValueCount()
-        }
+        private var term: BytesRef? = null
 
         @Throws(IOException::class)
-        public override fun term(): BytesRef {
+        override fun term(): BytesRef? {
             return term
         }
 
         @Throws(IOException::class)
-        public override fun ord(): Long {
+        override fun ord(): Long {
             return ord
         }
 
         @Throws(IOException::class)
-        public override fun next(): BytesRef {
+        override fun next(): BytesRef? {
             if (++ord >= valueCount) {
                 return null
             }
@@ -448,64 +424,60 @@ protected constructor() : AutoCloseable {
             do {
                 term = sub.next()
             } while (sub.ord() < subOrd)
-            require(sub.ord() === subOrd)
+            require(sub.ord() == subOrd)
             return term
         }
 
-        public override fun attributes(): AttributeSource {
+        override fun attributes(): AttributeSource {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun seekCeil(text: BytesRef): SeekStatus {
+        override fun seekCeil(text: BytesRef): SeekStatus {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun seekExact(ord: Long) {
+        override fun seekExact(ord: Long) {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun docFreq(): Int {
+        override fun docFreq(): Int {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun totalTermFreq(): Long {
+        override fun totalTermFreq(): Long {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun postings(reuse: PostingsEnum, flags: Int): PostingsEnum {
+        override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun impacts(flags: Int): ImpactsEnum {
+        override fun impacts(flags: Int): ImpactsEnum {
             throw UnsupportedOperationException()
         }
 
         @Throws(IOException::class)
-        public override fun termState(): TermState {
+        override fun termState(): TermState {
             throw UnsupportedOperationException()
         }
     }
 
     /** Tracks state of one sorted sub-reader that we are merging  */
-    private class SortedDocValuesSub(docMap: MergeState.DocMap, values: SortedDocValues, map: LongValues) :
+    private class SortedDocValuesSub(docMap: MergeState.DocMap, val values: SortedDocValues, val map: LongValues) :
         DocIDMerger.Sub(docMap) {
-        val values: SortedDocValues
-        val map: LongValues
 
         init {
-            this.values = values
-            this.map = map
-            require(values.docID() === -1)
+            require(values.docID() == -1)
         }
 
         @Throws(IOException::class)
-        public override fun nextDoc(): Int {
+        override fun nextDoc(): Int {
             return values.nextDoc()
         }
     }
@@ -519,12 +491,12 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     fun mergeSortedField(fieldInfo: FieldInfo, mergeState: MergeState) {
-        val toMerge: MutableList<SortedDocValues> = java.util.ArrayList<SortedDocValues>()
-        for (i in 0..<mergeState.docValuesProducers.length) {
-            var values: SortedDocValues = null
-            val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
+        val toMerge: MutableList<SortedDocValues> = mutableListOf<SortedDocValues>()
+        for (i in 0..<mergeState.docValuesProducers.size) {
+            var values: SortedDocValues?? = null
+            val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
             if (docValuesProducer != null) {
-                val readerFieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(fieldInfo.name)
+                val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(fieldInfo.name)
                 if (readerFieldInfo != null && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED) {
                     values = docValuesProducer.getSorted(readerFieldInfo)
                 }
@@ -539,48 +511,48 @@ protected constructor() : AutoCloseable {
         val dvs: Array<SortedDocValues> = toMerge.toTypedArray<SortedDocValues>()
 
         // step 1: iterate thru each sub and mark terms still in use
-        val liveTerms: Array<TermsEnum> = kotlin.arrayOfNulls<TermsEnum>(dvs.size)
+        val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(dvs.size)
         val weights = LongArray(liveTerms.size)
         for (sub in 0..<numReaders) {
             val dv: SortedDocValues = dvs[sub]
-            val liveDocs: Bits = mergeState.liveDocs[sub]
+            val liveDocs: Bits? = mergeState.liveDocs[sub]
             if (liveDocs == null) {
                 liveTerms[sub] = dv.termsEnum()
-                weights[sub] = dv.getValueCount()
+                weights[sub] = dv.valueCount.toLong()
             } else {
-                val bitset: LongBitSet = LongBitSet(dv.getValueCount())
+                val bitset = LongBitSet(dv.valueCount.toLong())
                 var docID: Int
-                while ((dv.nextDoc().also { docID = it }) != NO_MORE_DOCS) {
+                while ((dv.nextDoc().also { docID = it }) != DocIdSetIterator.NO_MORE_DOCS) {
                     if (liveDocs.get(docID)) {
                         val ord: Int = dv.ordValue()
                         if (ord >= 0) {
-                            bitset.set(ord)
+                            bitset.set(ord.toLong())
                         }
                     }
                 }
-                liveTerms[sub] = BitsFilteredTermsEnum(dv.termsEnum(), bitset)
+                liveTerms[sub] = BitsFilteredTermsEnum(dv.termsEnum()!!, bitset)
                 weights[sub] = bitset.cardinality()
             }
         }
 
         // step 2: create ordinal map (this conceptually does the "merging")
-        val map: OrdinalMap = OrdinalMap.build(null, liveTerms, weights, PackedInts.COMPACT)
+        val map: OrdinalMap = OrdinalMap.build(null, liveTerms as Array<TermsEnum>, weights, PackedInts.COMPACT)
 
         // step 3: add field
         addSortedField(
             fieldInfo,
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
-                public override fun getSorted(fieldInfoIn: FieldInfo): SortedDocValues {
+                override fun getSorted(fieldInfoIn: FieldInfo): SortedDocValues {
                     require(fieldInfoIn === fieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
-                    val subs: MutableList<SortedDocValuesSub> = java.util.ArrayList<SortedDocValuesSub>()
-                    for (i in 0..<mergeState.docValuesProducers.length) {
-                        var values: SortedDocValues = null
-                        val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
+                    val subs: MutableList<SortedDocValuesSub> = mutableListOf<SortedDocValuesSub>()
+                    for (i in 0..<mergeState.docValuesProducers.size) {
+                        var values: SortedDocValues? = null
+                        val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
                         if (docValuesProducer != null) {
-                            val readerFieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(fieldInfo.name)
+                            val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(fieldInfo.name)
                             if (readerFieldInfo != null
                                 && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED
                             ) {
@@ -591,7 +563,7 @@ protected constructor() : AutoCloseable {
                             values = DocValues.emptySorted()
                         }
 
-                        subs.add(SortedDocValuesSub(mergeState.docMaps[i], values, map.getGlobalOrds(i)))
+                        subs.add(SortedDocValuesSub(mergeState.docMaps!![i], values, map.getGlobalOrds(i)))
                     }
 
                     return mergeSortedValues(subs, mergeState.needsIndexSort, map)
@@ -600,24 +572,20 @@ protected constructor() : AutoCloseable {
     }
 
     /** Tracks state of one sorted set sub-reader that we are merging  */
-    private class SortedSetDocValuesSub(docMap: MergeState.DocMap, values: SortedSetDocValues, map: LongValues) :
+    private class SortedSetDocValuesSub(docMap: MergeState.DocMap, val values: SortedSetDocValues, val map: LongValues) :
         DocIDMerger.Sub(docMap) {
-        val values: SortedSetDocValues
-        val map: LongValues
 
         init {
-            this.values = values
-            this.map = map
-            require(values.docID() === -1)
+            require(values.docID() == -1)
         }
 
         @Throws(IOException::class)
-        public override fun nextDoc(): Int {
+        override fun nextDoc(): Int {
             return values.nextDoc()
         }
 
         override fun toString(): String {
-            return "SortedSetDocValuesSub(mappedDocID=" + mappedDocID + " values=" + values + ")"
+            return "SortedSetDocValuesSub(mappedDocID=$mappedDocID values=$values)"
         }
     }
 
@@ -630,12 +598,12 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     fun mergeSortedSetField(mergeFieldInfo: FieldInfo, mergeState: MergeState) {
-        val toMerge: MutableList<SortedSetDocValues> = java.util.ArrayList<SortedSetDocValues>()
-        for (i in 0..<mergeState.docValuesProducers.length) {
-            var values: SortedSetDocValues = null
-            val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
+        val toMerge: MutableList<SortedSetDocValues> = mutableListOf<SortedSetDocValues>()
+        for (i in 0..<mergeState.docValuesProducers.size) {
+            var values: SortedSetDocValues? = null
+            val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
             if (docValuesProducer != null) {
-                val fieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(mergeFieldInfo.name)
+                val fieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                 if (fieldInfo != null && fieldInfo.getDocValuesType() === DocValuesType.SORTED_SET) {
                     values = docValuesProducer.getSortedSet(fieldInfo)
                 }
@@ -647,18 +615,18 @@ protected constructor() : AutoCloseable {
         }
 
         // step 1: iterate thru each sub and mark terms still in use
-        val liveTerms: Array<TermsEnum> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
+        val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
         val weights = LongArray(liveTerms.size)
         for (sub in liveTerms.indices) {
             val dv: SortedSetDocValues = toMerge.get(sub)
-            val liveDocs: Bits = mergeState.liveDocs[sub]
+            val liveDocs: Bits? = mergeState.liveDocs[sub]
             if (liveDocs == null) {
                 liveTerms[sub] = dv.termsEnum()
-                weights[sub] = dv.getValueCount()
+                weights[sub] = dv.valueCount
             } else {
-                val bitset: LongBitSet = LongBitSet(dv.getValueCount())
+                val bitset: LongBitSet = LongBitSet(dv.valueCount)
                 var docID: Int
-                while ((dv.nextDoc().also { docID = it }) != NO_MORE_DOCS) {
+                while ((dv.nextDoc().also { docID = it }) != DocIdSetIterator.NO_MORE_DOCS) {
                     if (liveDocs.get(docID)) {
                         for (i in 0..<dv.docValueCount()) {
                             bitset.set(dv.nextOrd())
@@ -671,27 +639,27 @@ protected constructor() : AutoCloseable {
         }
 
         // step 2: create ordinal map (this conceptually does the "merging")
-        val map: OrdinalMap = OrdinalMap.build(null, liveTerms, weights, PackedInts.COMPACT)
+        val map: OrdinalMap = OrdinalMap.build(null, liveTerms as Array<TermsEnum>, weights, PackedInts.COMPACT)
 
         // step 3: add field
         addSortedSetField(
             mergeFieldInfo,
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
-                public override fun getSortedSet(fieldInfo: FieldInfo): SortedSetDocValues {
+                override fun getSortedSet(fieldInfo: FieldInfo): SortedSetDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
-                    val subs: MutableList<SortedSetDocValuesSub> = java.util.ArrayList<SortedSetDocValuesSub>()
+                    val subs: MutableList<SortedSetDocValuesSub> = mutableListOf<SortedSetDocValuesSub>()
 
                     var cost: Long = 0
                     var allSingletons = true
 
-                    for (i in 0..<mergeState.docValuesProducers.length) {
-                        var values: SortedSetDocValues = null
-                        val docValuesProducer: DocValuesProducer = mergeState.docValuesProducers[i]
+                    for (i in 0..<mergeState.docValuesProducers.size) {
+                        var values: SortedSetDocValues? = null
+                        val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
                         if (docValuesProducer != null) {
-                            val readerFieldInfo: FieldInfo = mergeState.fieldInfos[i].fieldInfo(mergeFieldInfo.name)
+                            val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
                                 && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED_SET
                             ) {
@@ -706,7 +674,7 @@ protected constructor() : AutoCloseable {
                             allSingletons = false
                         }
                         subs.add(
-                            SortedSetDocValuesSub(mergeState.docMaps[i], values, map.getGlobalOrds(i))
+                            SortedSetDocValuesSub(mergeState.docMaps!![i], values, map.getGlobalOrds(i))
                         )
                     }
 
@@ -715,7 +683,7 @@ protected constructor() : AutoCloseable {
                         // We specialize for that case since it makes it easier for codecs to optimize
                         // for single-valued fields.
                         val singleValuedSubs: MutableList<SortedDocValuesSub> =
-                            java.util.ArrayList<SortedDocValuesSub>()
+                            mutableListOf<SortedDocValuesSub>()
                         for (sub in subs) {
                             val singleValuedValues: SortedDocValues =
                                 checkNotNull(DocValues.unwrapSingleton(sub.values))
@@ -735,65 +703,61 @@ protected constructor() : AutoCloseable {
 
                     return object : SortedSetDocValues() {
                         private var docID = -1
-                        private var currentSub: SortedSetDocValuesSub = null
+                        private var currentSub: SortedSetDocValuesSub? = null
 
-                        public override fun docID(): Int {
+                        override fun docID(): Int {
                             return docID
                         }
 
                         @Throws(IOException::class)
-                        public override fun nextDoc(): Int {
+                        override fun nextDoc(): Int {
                             currentSub = docIDMerger.next()
-                            if (currentSub == null) {
-                                docID = NO_MORE_DOCS
-                            } else {
-                                docID = currentSub.mappedDocID
-                            }
+                            currentSub?.let { docID = it.mappedDocID }
 
                             return docID
                         }
 
                         @Throws(IOException::class)
-                        public override fun advance(target: Int): Int {
+                        override fun advance(target: Int): Int {
                             throw UnsupportedOperationException()
                         }
 
                         @Throws(IOException::class)
-                        public override fun advanceExact(target: Int): Boolean {
+                        override fun advanceExact(target: Int): Boolean {
                             throw UnsupportedOperationException()
                         }
 
                         @Throws(IOException::class)
-                        public override fun nextOrd(): Long {
+                        override fun nextOrd(): Long {
                             val subOrd: Long = currentSub!!.values.nextOrd()
                             return currentSub!!.map.get(subOrd)
                         }
 
-                        public override fun docValueCount(): Int {
+                        override fun docValueCount(): Int {
                             return currentSub!!.values.docValueCount()
                         }
 
-                        public override fun cost(): Long {
+                        override fun cost(): Long {
                             return finalCost
                         }
 
                         @Throws(IOException::class)
-                        public override fun lookupOrd(ord: Long): BytesRef {
+                        override fun lookupOrd(ord: Long): BytesRef {
                             val segmentNumber: Int = map.getFirstSegmentNumber(ord)
                             val segmentOrd: Long = map.getFirstSegmentOrd(ord)
                             return toMerge.get(segmentNumber).lookupOrd(segmentOrd)
                         }
 
-                        val valueCount: Long
-                            get() = map.getValueCount()
+                        override val valueCount: Long
+                            get() = map.valueCount
 
                         @Throws(IOException::class)
-                        public override fun termsEnum(): TermsEnum {
-                            val subs: Array<TermsEnum> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
+                        override fun termsEnum(): TermsEnum {
+                            val subs: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
                             for (sub in subs.indices) {
-                                subs[sub] = toMerge.get(sub).termsEnum()
+                                subs[sub] = toMerge[sub].termsEnum()
                             }
-                            return MergedTermsEnum(map, subs)
+                            return MergedTermsEnum(map, subs as Array<TermsEnum>)
                         }
                     }
                 }
@@ -810,7 +774,7 @@ protected constructor() : AutoCloseable {
         }
 
         @Throws(IOException::class)
-        protected override fun accept(term: BytesRef): AcceptStatus {
+        override fun accept(term: BytesRef): AcceptStatus {
             if (liveTerms.get(ord())) {
                 return AcceptStatus.YES
             } else {
@@ -834,39 +798,39 @@ protected constructor() : AutoCloseable {
 
             return object : NumericDocValues() {
                 private var docID = -1
-                private var current: NumericDocValuesSub = null
+                private var current: NumericDocValuesSub? = null
 
-                public override fun docID(): Int {
+                override fun docID(): Int {
                     return docID
                 }
 
                 @Throws(IOException::class)
-                public override fun nextDoc(): Int {
+                override fun nextDoc(): Int {
                     current = docIDMerger.next()
                     if (current == null) {
                         docID = NO_MORE_DOCS
                     } else {
-                        docID = current.mappedDocID
+                        docID = current!!.mappedDocID
                     }
                     return docID
                 }
 
                 @Throws(IOException::class)
-                public override fun advance(target: Int): Int {
+                override fun advance(target: Int): Int {
                     throw UnsupportedOperationException()
                 }
 
                 @Throws(IOException::class)
-                public override fun advanceExact(target: Int): Boolean {
+                override fun advanceExact(target: Int): Boolean {
                     throw UnsupportedOperationException()
                 }
 
-                public override fun cost(): Long {
+                override fun cost(): Long {
                     return finalCost
                 }
 
                 @Throws(IOException::class)
-                public override fun longValue(): Long {
+                override fun longValue(): Long {
                     return current!!.values.longValue()
                 }
             }
@@ -886,60 +850,60 @@ protected constructor() : AutoCloseable {
 
             return object : SortedDocValues() {
                 private var docID = -1
-                private var current: SortedDocValuesSub = null
+                private var current: SortedDocValuesSub? = null
 
-                public override fun docID(): Int {
+                override fun docID(): Int {
                     return docID
                 }
 
                 @Throws(IOException::class)
-                public override fun nextDoc(): Int {
+                override fun nextDoc(): Int {
                     current = docIDMerger.next()
                     if (current == null) {
                         docID = NO_MORE_DOCS
                     } else {
-                        docID = current.mappedDocID
+                        docID = current!!.mappedDocID
                     }
                     return docID
                 }
 
                 @Throws(IOException::class)
-                public override fun ordValue(): Int {
+                override fun ordValue(): Int {
                     val subOrd: Int = current!!.values.ordValue()
                     require(subOrd != -1)
-                    return current!!.map.get(subOrd) as Int
+                    return current!!.map.get(subOrd.toLong()).toInt()
                 }
 
-                public override fun advance(target: Int): Int {
+                override fun advance(target: Int): Int {
                     throw UnsupportedOperationException()
                 }
 
                 @Throws(IOException::class)
-                public override fun advanceExact(target: Int): Boolean {
+                override fun advanceExact(target: Int): Boolean {
                     throw UnsupportedOperationException()
                 }
 
-                public override fun cost(): Long {
+                override fun cost(): Long {
                     return finalCost
                 }
 
-                val valueCount: Int
-                    get() = map.getValueCount() as Int
+                override val valueCount: Int
+                    get() = map.valueCount.toInt()
 
                 @Throws(IOException::class)
-                public override fun lookupOrd(ord: Int): BytesRef {
-                    val segmentNumber: Int = map.getFirstSegmentNumber(ord)
-                    val segmentOrd = map.getFirstSegmentOrd(ord) as Int
+                override fun lookupOrd(ord: Int): BytesRef {
+                    val segmentNumber: Int = map.getFirstSegmentNumber(ord.toLong())
+                    val segmentOrd = map.getFirstSegmentOrd(ord.toLong()).toInt()
                     return subs.get(segmentNumber).values.lookupOrd(segmentOrd)
                 }
 
                 @Throws(IOException::class)
-                public override fun termsEnum(): TermsEnum {
-                    val termsEnurmSubs: Array<TermsEnum> = kotlin.arrayOfNulls<TermsEnum>(subs.size)
-                    for (sub in termsEnurmSubs.indices) {
-                        termsEnurmSubs[sub] = subs.get(sub).values.termsEnum()
+                override fun termsEnum(): TermsEnum {
+                    val termsEnumSubs: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(subs.size)
+                    for (sub in termsEnumSubs.indices) {
+                        termsEnumSubs[sub] = subs[sub].values.termsEnum()
                     }
-                    return MergedTermsEnum(map, termsEnurmSubs)
+                    return MergedTermsEnum(map, termsEnumSubs as Array<TermsEnum>)
                 }
             }
         }
@@ -963,15 +927,15 @@ protected constructor() : AutoCloseable {
             require(isSingleValued(docToValueCount))
             return object : Iterable<Number> {
                 override fun iterator(): MutableIterator<Number> {
-                    val countIterator: MutableIterator<Number> = docToValueCount.iterator()
-                    val valuesIterator: MutableIterator<Number> = values.iterator()
+                    val countIterator: Iterator<Number> = docToValueCount.iterator()
+                    val valuesIterator: Iterator<Number> = values.iterator()
                     return object : MutableIterator<Number> {
                         override fun hasNext(): Boolean {
                             return countIterator.hasNext()
                         }
 
                         override fun next(): Number {
-                            val count = countIterator.next()!!.toInt()
+                            val count = countIterator.next().toInt()
                             if (count == 0) {
                                 return missingValue
                             } else {

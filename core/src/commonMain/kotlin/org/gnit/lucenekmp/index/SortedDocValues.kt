@@ -77,7 +77,7 @@ protected constructor() : DocValuesIterator() {
      * [TermsEnum.seekExact].
      */
     @Throws(IOException::class)
-    fun termsEnum(): TermsEnum? {
+    open fun termsEnum(): TermsEnum? {
         return SortedDocValuesTermsEnum(this)
     }
 
