@@ -12,6 +12,15 @@ class Character {
         const val UNASSIGNED: Byte = 0
         const val ERROR: Int = -0x1
         const val DIRECTIONALITY_UNDEFINED: Byte = -1
+        const val SIZE: Int = 16
+
+        /**
+         * The number of bytes used to represent a `char` value in unsigned
+         * binary form.
+         *
+         * @since 1.8
+         */
+        const val BYTES: Int = SIZE / Byte.SIZE_BITS //2
 
         /**
          * The minimum value of a
