@@ -404,7 +404,7 @@ protected constructor() : IndexReader() {
      * null if there are no point fields.
      */
     @Throws(IOException::class)
-    abstract fun getPointValues(field: String): PointValues
+    abstract fun getPointValues(field: String): PointValues?
 
     /**
      * Checks consistency of this reader.
