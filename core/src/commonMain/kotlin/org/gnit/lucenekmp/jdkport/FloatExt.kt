@@ -107,3 +107,20 @@ fun Float.Companion.intBitsToFloat(bits: Int): Float {
     }
 }
 
+val Float.Companion.PRECISION: Int
+    get() = 24
+
+val Float.Companion.MIN_EXPONENT: Int
+    get() = 1 - Float.MAX_EXPONENT // -126
+
+val Float.Companion.MAX_EXPONENT: Int
+    get() = (1 shl (Float.SIZE - Float.PRECISION - 1)) - 1 // 127
+
+
+/**
+ * The number of bits used to represent a `float` value.
+ *
+ * @since 1.5
+ */
+val Float.Companion.SIZE: Int
+    get() = 32

@@ -85,7 +85,7 @@ interface KnnCollector {
      *
      * @lucene.experimental
      */
-    class Decorator(protected val collector: KnnCollector) : KnnCollector {
+    open class Decorator(protected val collector: KnnCollector) : KnnCollector {
         override fun earlyTerminated(): Boolean {
             return collector.earlyTerminated()
         }
