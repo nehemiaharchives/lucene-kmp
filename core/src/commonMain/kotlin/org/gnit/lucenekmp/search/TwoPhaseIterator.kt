@@ -11,7 +11,7 @@ import kotlinx.io.IOException
  * @lucene.experimental
  */
 abstract class TwoPhaseIterator protected constructor(approximation: DocIdSetIterator) {
-    protected open val approximation: DocIdSetIterator
+    open val approximation: DocIdSetIterator
 
     /** Takes the approximation to be returned by [.approximation]. Not null.  */
     init {
