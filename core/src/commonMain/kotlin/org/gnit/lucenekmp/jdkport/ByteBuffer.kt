@@ -172,6 +172,25 @@ open class ByteBuffer private constructor(
         return this
     }
 
+    // -- Other stuff --
+    /**
+     * Tells whether or not this buffer is backed by an accessible byte
+     * array.
+     *
+     *
+     *  If this method returns `true` then the [array][.array]
+     * and [arrayOffset][.arrayOffset] methods may safely be invoked.
+     *
+     *
+     * @return  `true` if, and only if, this buffer
+     * is backed by an array and is not read-only
+     */
+    /*
+    NOT_TODO will not implement this for now
+    fun hasArray(): Boolean {
+        return (hb != null) && !isReadOnly
+    }*/
+
     private fun getArray(index: Int, dst: ByteArray, offset: Int, length: Int): ByteBuffer {
         // Simple implementation: copy bytes one by one using the get() method
         // We're not implementing the JNI direct memory copy optimization from the Java version
@@ -337,6 +356,94 @@ open class ByteBuffer private constructor(
         return this
     }
 
+    /**
+     * Relative *put* method for writing a short
+     * value&nbsp;&nbsp;*(optional operation)*.
+     *
+     *
+     *  Writes two bytes containing the given short value, in the
+     * current byte order, into this buffer at the current position, and then
+     * increments the position by two.
+     *
+     * @param  value
+     * The short value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     * If there are fewer than two bytes
+     * remaining in this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     * If this buffer is read-only
+     */
+    fun putShort(value: Short): ByteBuffer {
+        // Ensure there are at least 2 bytes left between position and limit
+        if (remaining() < 2) {
+            throw BufferOverflowException("Not enough space to write 2 bytes at position $position with limit $limit")
+        }
+
+        // Write according to the current byte order
+        if (order == ByteOrder.BIG_ENDIAN) {
+            buffer.setByteAt(position.toLong(), (value.toInt() shr 8).toByte())
+            buffer.setByteAt(position.toLong() + 1, value.toByte())
+        } else {
+            // LITTLE_ENDIAN
+            buffer.setByteAt(position.toLong(), value.toByte())
+            buffer.setByteAt(position.toLong() + 1, (value.toInt() shr 8).toByte())
+        }
+
+        // Advance the position by 2 bytes
+        position += 2
+        return this
+    }
+
+    /**
+     * Relative *put* method for writing an int
+     * value&nbsp;&nbsp;*(optional operation)*.
+     *
+     *
+     *  Writes four bytes containing the given int value, in the
+     * current byte order, into this buffer at the current position, and then
+     * increments the position by four.
+     *
+     * @param  value
+     * The int value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     * If there are fewer than four bytes
+     * remaining in this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     * If this buffer is read-only
+     */
+    fun putInt(value: Int): ByteBuffer {
+        // Ensure there are at least 4 bytes left between position and limit
+        if (remaining() < 4) {
+            throw BufferOverflowException("Not enough space to write 4 bytes at position $position with limit $limit")
+        }
+
+        // Write according to the current byte order
+        if (order == ByteOrder.BIG_ENDIAN) {
+            buffer.setByteAt(position.toLong(), (value shr 24).toByte())
+            buffer.setByteAt(position.toLong() + 1, (value shr 16).toByte())
+            buffer.setByteAt(position.toLong() + 2, (value shr 8).toByte())
+            buffer.setByteAt(position.toLong() + 3, value.toByte())
+        } else {
+            // LITTLE_ENDIAN
+            buffer.setByteAt(position.toLong(), value.toByte())
+            buffer.setByteAt(position.toLong() + 1, (value shr 8).toByte())
+            buffer.setByteAt(position.toLong() + 2, (value shr 16).toByte())
+            buffer.setByteAt(position.toLong() + 3, (value shr 24).toByte())
+        }
+
+        // Advance the position by 4 bytes
+        position += 4
+        return this
+    }
+
     fun putBuffer(pos: Int, src: ByteBuffer, srcPos: Int, n: Int) {
         // Simple buffer-to-buffer copy implementation without direct memory access
         // Copy bytes one by one from src to this buffer
@@ -457,9 +564,19 @@ open class ByteBuffer private constructor(
         return this
     }
 
-
     /** Returns the number of bytes remaining between position and limit. */
     fun remaining(): Int = limit - position
+
+    /**
+     * Tells whether there are any elements between the current position and
+     * the limit.
+     *
+     * @return  `true` if, and only if, there is at least one element
+     * remaining in this buffer
+     */
+    fun hasRemaining(): Boolean {
+        return position < limit
+    }
 
     /** Sets the mark at the current position. */
     fun mark(): ByteBuffer {

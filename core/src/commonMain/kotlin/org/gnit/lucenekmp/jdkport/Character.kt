@@ -13,6 +13,26 @@ class Character {
         const val ERROR: Int = -0x1
         const val DIRECTIONALITY_UNDEFINED: Byte = -1
 
+        /**
+         * The minimum value of a
+         * [Unicode high-surrogate code unit](http://www.unicode.org/glossary/#high_surrogate_code_unit)
+         * in the UTF-16 encoding, constant `'\u005CuD800'`.
+         * A high-surrogate is also known as a *leading-surrogate*.
+         *
+         * @since 1.5
+         */
+        const val MIN_HIGH_SURROGATE: Char = '\uD800'
+
+        /**
+         * The maximum value of a
+         * [Unicode high-surrogate code unit](http://www.unicode.org/glossary/#high_surrogate_code_unit)
+         * in the UTF-16 encoding, constant `'\u005CuDBFF'`.
+         * A high-surrogate is also known as a *leading-surrogate*.
+         *
+         * @since 1.5
+         */
+        const val MAX_HIGH_SURROGATE: Char = '\uDBFF'
+
         fun charCount(codePoint: Int): Int {
             return if (codePoint >= MIN_SUPPLEMENTARY_CODE_POINT) 2 else 1
         }
@@ -50,6 +70,31 @@ class Character {
          */
         fun isLowerCase(codePoint: Int): Boolean {
             return CharacterData.of(codePoint).isLowerCase(codePoint)
+        }
+
+        /**
+         * Determines if the given `char` value is a
+         * [Unicode high-surrogate code unit](http://www.unicode.org/glossary/#high_surrogate_code_unit)
+         * (also known as *leading-surrogate code unit*).
+         *
+         *
+         * Such values do not represent characters by themselves,
+         * but are used in the representation of
+         * [supplementary characters](#supplementary)
+         * in the UTF-16 encoding.
+         *
+         * @param  ch the `char` value to be tested.
+         * @return `true` if the `char` value is between
+         * [.MIN_HIGH_SURROGATE] and
+         * [.MAX_HIGH_SURROGATE] inclusive;
+         * `false` otherwise.
+         * @see Character.isLowSurrogate
+         * @see Character.UnicodeBlock.of
+         * @since  1.5
+         */
+        fun isHighSurrogate(ch: Char): Boolean {
+            // Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE
+            return ch >= MIN_HIGH_SURROGATE && ch.code < (MAX_HIGH_SURROGATE.code + 1)
         }
 
         /**

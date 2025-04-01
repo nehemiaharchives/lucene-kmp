@@ -37,7 +37,7 @@ abstract class DataOutput {
      * @see DataInput.readBytes
      */
     @Throws(IOException::class)
-    fun writeBytes(b: ByteArray?, length: Int) {
+    open fun writeBytes(b: ByteArray, length: Int) {
         writeBytes(b, 0, length)
     }
 
@@ -50,7 +50,7 @@ abstract class DataOutput {
      * @see DataInput.readBytes
      */
     @Throws(IOException::class)
-    abstract fun writeBytes(b: ByteArray?, offset: Int, length: Int)
+    abstract fun writeBytes(b: ByteArray, offset: Int, length: Int)
 
     /**
      * Writes an int as four bytes (LE byte order).
@@ -59,7 +59,7 @@ abstract class DataOutput {
      * @see BitUtil.VH_LE_INT
      */
     @Throws(IOException::class)
-    fun writeInt(i: Int) {
+    open fun writeInt(i: Int) {
         writeByte(i.toByte())
         writeByte((i shr 8).toByte())
         writeByte((i shr 16).toByte())
@@ -73,7 +73,7 @@ abstract class DataOutput {
      * @see BitUtil.VH_LE_SHORT
      */
     @Throws(IOException::class)
-    fun writeShort(i: Short) {
+    open fun writeShort(i: Short) {
         writeByte(i.toByte())
         writeByte((i.toInt() shr 8).toByte())
     }
@@ -216,7 +216,7 @@ abstract class DataOutput {
      * @see BitUtil.VH_LE_LONG
      */
     @Throws(IOException::class)
-    fun writeLong(i: Long) {
+    open fun writeLong(i: Long) {
         writeInt(i.toInt())
         writeInt((i shr 32).toInt())
     }
@@ -267,7 +267,7 @@ abstract class DataOutput {
      * @see DataInput.readString
      */
     @Throws(IOException::class)
-    fun writeString(s: String) {
+    open fun writeString(s: String) {
         val utf8Result: BytesRef = BytesRef(s)
         writeVInt(utf8Result.length)
         writeBytes(utf8Result.bytes, utf8Result.offset, utf8Result.length)
@@ -277,7 +277,7 @@ abstract class DataOutput {
 
     /** Copy numBytes bytes from input to ourself.  */
     @Throws(IOException::class)
-    fun copyBytes(input: DataInput, numBytes: Long) {
+    open fun copyBytes(input: DataInput, numBytes: Long) {
         require(numBytes >= 0) { "numBytes=" + numBytes }
         var left = numBytes
         /*if (copyBuffer == null) copyBuffer = ByteArray(COPY_BUFFER_SIZE)*/
@@ -302,7 +302,7 @@ abstract class DataOutput {
      * @throws NullPointerException if `map` is null.
      */
     @Throws(IOException::class)
-    fun writeMapOfStrings(map: MutableMap<String, String>) {
+    open fun writeMapOfStrings(map: MutableMap<String, String>) {
         writeVInt(map.size)
         for (entry in map.entries) {
             writeString(entry.key)
@@ -321,7 +321,7 @@ abstract class DataOutput {
      * @throws NullPointerException if `set` is null.
      */
     @Throws(IOException::class)
-    fun writeSetOfStrings(set: MutableSet<String>) {
+    open fun writeSetOfStrings(set: MutableSet<String>) {
         writeVInt(set.size)
         for (value in set) {
             writeString(value)

@@ -1,10 +1,9 @@
 package org.gnit.lucenekmp.store
 
 import kotlinx.io.IOException
+import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.GroupVIntUtil
-import org.gnit.lucenekmp.util.Objects
-
 
 /**
  * Abstract base class for performing read operations of Lucene's low-level data types.
