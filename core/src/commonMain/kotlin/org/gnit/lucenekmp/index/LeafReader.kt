@@ -208,7 +208,7 @@ protected constructor() : IndexReader() {
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    abstract fun getFloatVectorValues(field: String): FloatVectorValues
+    abstract fun getFloatVectorValues(field: String): FloatVectorValues?
 
     /**
      * Returns [ByteVectorValues] for this field, or null if no [ByteVectorValues] were

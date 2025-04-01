@@ -72,7 +72,7 @@ interface KnnCollector {
      *
      * @return The collected top documents
      */
-    fun topDocs(): TopDocs
+    fun topDocs(): TopDocs?
 
     /**
      * @return the search strategy used by this collector, can be null
@@ -114,7 +114,7 @@ interface KnnCollector {
             return collector.minCompetitiveSimilarity()
         }
 
-        override fun topDocs(): TopDocs {
+        override fun topDocs(): TopDocs? {
             return collector.topDocs()
         }
 

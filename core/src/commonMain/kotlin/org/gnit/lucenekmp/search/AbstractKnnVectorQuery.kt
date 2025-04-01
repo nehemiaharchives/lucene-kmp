@@ -32,7 +32,7 @@ import org.gnit.lucenekmp.util.Bits
  *  * If the kNN search visits too many vectors without completing, stop and run an exact search
  *
  */
-internal abstract class AbstractKnnVectorQuery(
+abstract class AbstractKnnVectorQuery(
     /**
      * @return the knn vector field where the knn vector search happens.
      */
