@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.index
 
+import kotlinx.io.IOException
+import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.store.ByteBuffersDataInput
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput
 import org.gnit.lucenekmp.util.Accountable
@@ -13,19 +15,13 @@ import org.gnit.lucenekmp.util.StringHelper
  *
  * @lucene.internal
  */
-class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuffer>, private val size: Long) :
+class PrefixCodedTerms private constructor(private val content: MutableList<ByteBuffer>, private val size: Long) :
     Accountable {
-    private val content: MutableList<java.nio.ByteBuffer>
     private var delGen: Long = 0
     private var lazyHash = 0
 
-    init {
-        this.content = java.util.Objects.requireNonNull<MutableList<java.nio.ByteBuffer?>?>(content)
-    }
-
-    public override fun ramBytesUsed(): Long {
-        return content.stream().mapToLong { buf: java.nio.ByteBuffer? -> buf.capacity() }
-            .sum() + 2 * java.lang.Long.BYTES
+    override fun ramBytesUsed(): Long {
+        return content.sumOf { buf: ByteBuffer -> buf.capacity.toLong() } + 2 * Long.SIZE_BYTES
     }
 
     /** Records del gen for this packet.  */
@@ -49,7 +45,7 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
 
         /** add a term. This fully consumes in the incoming [BytesRef].  */
         fun add(field: String, bytes: BytesRef) {
-            assert(lastTerm.equals(Term("")) || Term(field, bytes).compareTo(lastTerm) > 0)
+            require(lastTerm == Term("") || Term(field, bytes) > lastTerm)
 
             try {
                 val prefix: Int
@@ -71,8 +67,8 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
                 lastTerm.bytes = lastTermBytes.get()
                 lastTerm.field = field
                 size += 1
-            } catch (e: java.io.IOException) {
-                throw java.lang.RuntimeException(e)
+            } catch (e: IOException) {
+                throw RuntimeException(e)
             }
         }
 
@@ -83,21 +79,13 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
     }
 
     /** An iterator over the list of terms stored in a [PrefixCodedTerms].  */
-    class TermIterator private constructor(delGen: Long, input: ByteBuffersDataInput) : FieldTermIterator() {
-        val input: ByteBuffersDataInput
+    class TermIterator internal constructor(val delGen: Long, val input: ByteBuffersDataInput) : FieldTermIterator() {
         val builder: BytesRefBuilder = BytesRefBuilder()
-        val bytes: BytesRef? = builder.get()
-        val end: Long
-        val delGen: Long
+        val bytes: BytesRef = builder.get()
+        val end: Long = input.length()
         var field: String? = ""
 
-        init {
-            this.input = input
-            end = input.length()
-            this.delGen = delGen
-        }
-
-        public override fun next(): BytesRef? {
+        override fun next(): BytesRef? {
             if (input.position() < end) {
                 try {
                     val code: Int = input.readVInt()
@@ -109,8 +97,8 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
                     val suffix: Int = input.readVInt()
                     readTermBytes(prefix, suffix)
                     return bytes
-                } catch (e: java.io.IOException) {
-                    throw java.lang.RuntimeException(e)
+                } catch (e: IOException) {
+                    throw RuntimeException(e)
                 }
             } else {
                 field = null
@@ -118,8 +106,8 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
             }
         }
 
-        // TODO: maybe we should freeze to FST or automaton instead?
-        @Throws(java.io.IOException::class)
+        // TODO: maybe we should freeze to FST or automaton instead
+        @Throws(IOException::class)
         private fun readTermBytes(prefix: Int, suffix: Int) {
             builder.grow(prefix + suffix)
             input.readBytes(builder.bytes(), prefix, suffix)
@@ -131,20 +119,20 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
          * Returns current field. This method should not be called after iteration is done. Note that
          * you may use == to detect a change in field.
          */
-        public override fun field(): String? {
+        override fun field(): String? {
             return field
         }
 
         // Copied from parent-class because javadoc doesn't do it for some reason
         /** Del gen of the current term.  */
-        public override fun delGen(): Long {
+        override fun delGen(): Long {
             return delGen
         }
     }
 
     /** Return an iterator over the terms stored in this [PrefixCodedTerms].  */
     fun iterator(): TermIterator {
-        return PrefixCodedTerms.TermIterator(delGen, ByteBuffersDataInput(content))
+        return TermIterator(delGen, ByteBuffersDataInput(content))
     }
 
     /** Return the number of terms stored in this [PrefixCodedTerms].  */
@@ -169,7 +157,7 @@ class PrefixCodedTerms private constructor(content: MutableList<java.nio.ByteBuf
             return true
         }
 
-        if (obj == null || javaClass != obj.javaClass) {
+        if (obj == null || this::class != obj::class) {
             return false
         }
 
