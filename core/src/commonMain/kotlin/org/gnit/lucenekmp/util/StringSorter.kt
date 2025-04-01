@@ -59,7 +59,7 @@ abstract class StringSorter protected constructor(cmp: Comparator<BytesRef>) : S
         return this.MSBStringRadixSorter(cmp)
     }
 
-    protected fun fallbackSorter(cmp: Comparator<BytesRef>): Sorter {
+    protected open fun fallbackSorter(cmp: Comparator<BytesRef>): Sorter {
         return object : IntroSorter() {
             override fun swap(i: Int, j: Int) {
                 this@StringSorter.swap(i, j)

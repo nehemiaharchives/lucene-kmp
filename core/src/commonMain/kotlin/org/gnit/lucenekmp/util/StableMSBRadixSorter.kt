@@ -70,7 +70,7 @@ abstract class StableMSBRadixSorter(maxLength: Int) : MSBRadixSorter(maxLength) 
     }
 
     /** A MergeSorter taking advantage of temporary storage.  */
-    protected abstract class MergeSorter : Sorter() {
+    abstract class MergeSorter : Sorter() {
         override fun sort(from: Int, to: Int) {
             checkRange(from, to)
             mergeSort(from, to)
