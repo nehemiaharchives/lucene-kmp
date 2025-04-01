@@ -290,7 +290,7 @@ open class Field : IndexableField {
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
-    fun setLongValue(value: Long) {
+    open fun setLongValue(value: Long) {
         require(fieldsData is Long) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Long" }
         fieldsData = value
     }

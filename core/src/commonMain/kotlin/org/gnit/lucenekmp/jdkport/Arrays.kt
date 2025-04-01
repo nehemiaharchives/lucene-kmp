@@ -590,8 +590,21 @@ object Arrays {
      * @param a the array to be sorted
      */
     fun sort(a: IntArray) {
+        dualPivotQuicksort(a, 0, a.size)
+    }
 
-        dualPivotQuicksort(a, /*0,*/ 0, a.size)
+    /**
+     * Sorts the specified array into ascending numerical order.
+     *
+     * @implNote The sorting algorithm is a Dual-Pivot Quicksort
+     * by Vladimir Yaroslavskiy, Jon Bentley, and Joshua Bloch. This algorithm
+     * offers O(n log(n)) performance on all data sets, and is typically
+     * faster than traditional (one-pivot) Quicksort implementations.
+     *
+     * @param a the array to be sorted
+     */
+    fun sort(a: LongArray) {
+        dualPivotQuicksort(a, 0, a.size)
     }
 
 
@@ -631,8 +644,7 @@ object Arrays {
      *
      *
      * The implementation was adapted from Tim Peters's list sort for Python
-     * ([
- * TimSort](http://svn.python.org/projects/python/trunk/Objects/listsort.txt)).  It uses techniques from Peter McIlroy's "Optimistic
+     * ([TimSort](http://svn.python.org/projects/python/trunk/Objects/listsort.txt)).  It uses techniques from Peter McIlroy's "Optimistic
      * Sorting and Information Theoretic Complexity", in Proceedings of the
      * Fourth Annual ACM-SIAM Symposium on Discrete Algorithms, pp 467-474,
      * January 1993.
@@ -695,7 +707,57 @@ object Arrays {
         }
     }
 
+    private fun dualPivotQuicksort(a: LongArray, low: Int, high: Int) {
+        if (low < high) {
+            // Choose two pivots: p from a[low] and q from a[high]
+            if (a[low] > a[high]) swap(a, low, high)
+            val p = a[low]
+            val q = a[high]
+
+            var l = low + 1    // will track the boundary for elements < p
+            var g = high - 1   // will track the boundary for elements > q
+            var k = l
+
+            while (k <= g) {
+                when {
+                    a[k] < p -> {
+                        swap(a, k, l)
+                        l++
+                        k++
+                    }
+
+                    a[k] > q -> {
+                        swap(a, k, g)
+                        g--
+                        // Don't increment k here as we need to re-examine the swapped element
+                    }
+
+                    else -> {
+                        // Element is between p and q (inclusive)
+                        k++
+                    }
+                }
+            }
+
+            l--  // pivot p will go here
+            g++  // pivot q will go here
+            swap(a, low, l)
+            swap(a, high, g)
+
+            // Recursively sort three parts:
+            dualPivotQuicksort(a, low, l - 1)
+            dualPivotQuicksort(a, l + 1, g - 1)
+            dualPivotQuicksort(a, g + 1, high)
+        }
+    }
+
     private fun swap(a: IntArray, i: Int, j: Int) {
+        val temp = a[i]
+        a[i] = a[j]
+        a[j] = temp
+    }
+
+    private fun swap(a: LongArray, i: Int, j: Int) {
         val temp = a[i]
         a[i] = a[j]
         a[j] = temp
