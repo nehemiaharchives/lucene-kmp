@@ -30,8 +30,8 @@ class Sort(vararg fields: SortField) {
      * is still a tie after all SortFields are checked, the internal Lucene docid is used to break it.
      */
     init {
-        require(fields.size != 0) { "There must be at least 1 sort field" }
-        this.fields = fields
+        require(fields.isNotEmpty()) { "There must be at least 1 sort field" }
+        this.fields = arrayOf(*fields)
     }
 
     val sort: Array<SortField>
@@ -54,19 +54,19 @@ class Sort(vararg fields: SortField) {
     @Throws(IOException::class)
     fun rewrite(searcher: IndexSearcher?): Sort {
         var changed = false
-        val rewrittenSortFields: Array<SortField> = kotlin.arrayOfNulls<SortField>(fields.size)
+        val rewrittenSortFields: Array<SortField?> = kotlin.arrayOfNulls<SortField>(fields.size)
         for (i in fields.indices) {
-            rewrittenSortFields[i] = fields[i].rewrite(searcher)
+            rewrittenSortFields[i] = fields[i].rewrite(searcher!!)
             if (fields[i] !== rewrittenSortFields[i]) {
                 changed = true
             }
         }
 
-        return if (changed) Sort(*rewrittenSortFields) else this
+        return if (changed) Sort(*rewrittenSortFields as Array<SortField>) else this
     }
 
     override fun toString(): String {
-        val buffer: java.lang.StringBuilder = java.lang.StringBuilder()
+        val buffer = StringBuilder()
         for (i in fields.indices) {
             buffer.append(fields[i].toString())
             if ((i + 1) < fields.size) buffer.append(',')
