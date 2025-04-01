@@ -241,7 +241,6 @@ object Arrays {
     }
 
 
-
     /**
      * Compares two `int` arrays lexicographically over the specified
      * ranges.
@@ -573,6 +572,29 @@ object Arrays {
     }
 
 
+    /*
+     * Sorting methods. Note that all public "sort" methods take the
+     * same form: performing argument checks if necessary, and then
+     * expanding arguments into those required for the internal
+     * implementation methods residing in other package-private
+     * classes (except for legacyMergeSort, included in this class).
+     */
+    /**
+     * Sorts the specified array into ascending numerical order.
+     *
+     * @implNote The sorting algorithm is a Dual-Pivot Quicksort
+     * by Vladimir Yaroslavskiy, Jon Bentley, and Joshua Bloch. This algorithm
+     * offers O(n log(n)) performance on all data sets, and is typically
+     * faster than traditional (one-pivot) Quicksort implementations.
+     *
+     * @param a the array to be sorted
+     */
+    fun sort(a: IntArray) {
+
+        dualPivotQuicksort(a, /*0,*/ 0, a.size)
+    }
+
+
     fun sort(a: IntArray, fromIndex: Int, toIndex: Int) {
         rangeCheck(a.size, fromIndex, toIndex)
         dualPivotQuicksort(a, fromIndex, toIndex - 1)
@@ -629,43 +651,43 @@ object Arrays {
         Timsort.sort(a, c)
     }
 
-    /**
-     * Sorts the subarray a [low] [high] (both ends inclusive) in ascending order
-     * using a dual-pivot quicksort algorithm.
-     */
     private fun dualPivotQuicksort(a: IntArray, low: Int, high: Int) {
         if (low < high) {
             // Choose two pivots: p from a[low] and q from a[high]
             if (a[low] > a[high]) swap(a, low, high)
             val p = a[low]
             val q = a[high]
+
             var l = low + 1    // will track the boundary for elements < p
             var g = high - 1   // will track the boundary for elements > q
             var k = l
+
             while (k <= g) {
                 when {
                     a[k] < p -> {
                         swap(a, k, l)
                         l++
+                        k++
                     }
-                    a[k] >= q -> {
-                        while (k < g && a[g] > q) {
-                            g--
-                        }
+
+                    a[k] > q -> {
                         swap(a, k, g)
                         g--
-                        if (a[k] < p) {
-                            swap(a, k, l)
-                            l++
-                        }
+                        // Don't increment k here as we need to re-examine the swapped element
+                    }
+
+                    else -> {
+                        // Element is between p and q (inclusive)
+                        k++
                     }
                 }
-                k++
             }
-            l-- // pivot p will go here
-            g++ // pivot q will go here
+
+            l--  // pivot p will go here
+            g++  // pivot q will go here
             swap(a, low, l)
             swap(a, high, g)
+
             // Recursively sort three parts:
             dualPivotQuicksort(a, low, l - 1)
             dualPivotQuicksort(a, l + 1, g - 1)

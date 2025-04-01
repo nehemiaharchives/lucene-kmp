@@ -261,7 +261,7 @@ open class Field : IndexableField {
      * NOTE: the provided BytesRef is not copied so be sure not to change it until you're done with
      * this field.
      */
-    fun setBytesValue(value: BytesRef) {
+    open fun setBytesValue(value: BytesRef) {
         require(fieldsData is BytesRef) {
             ("cannot change value type from "
                     + fieldsData!!::class.simpleName
@@ -284,7 +284,7 @@ open class Field : IndexableField {
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
-    fun setIntValue(value: Int) {
+    open fun setIntValue(value: Int) {
         require(fieldsData is Int) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Integer" }
         fieldsData = value
     }

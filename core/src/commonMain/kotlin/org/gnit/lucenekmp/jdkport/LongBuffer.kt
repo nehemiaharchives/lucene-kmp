@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.io.Buffer
-import kotlinx.io.EOFException
 import kotlin.math.min
 
 
@@ -142,6 +141,14 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
             }
         }
         return result
+    }
+
+    /**
+     * Sets this buffer's position. If the mark is defined and larger than the new position then it is discarded.
+     */
+    fun position(newPosition: Int): LongBuffer {
+        this.position = newPosition
+        return this
     }
 
     /**

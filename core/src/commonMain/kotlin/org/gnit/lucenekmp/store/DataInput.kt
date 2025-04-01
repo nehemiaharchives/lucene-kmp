@@ -87,7 +87,7 @@ abstract class DataInput : Cloneable {
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    fun readGroupVInt(dst: IntArray, offset: Int) {
+    open fun readGroupVInt(dst: IntArray, offset: Int) {
         GroupVIntUtil.readGroupVInt(this, dst, offset)
     }
 
@@ -171,7 +171,7 @@ abstract class DataInput : Cloneable {
      * @param len the number of floats to read
      */
     @Throws(IOException::class)
-    fun readFloats(floats: FloatArray, offset: Int, len: Int) {
+    open fun readFloats(floats: FloatArray, offset: Int, len: Int) {
         Objects.checkFromIndexSize(offset, len, floats.size)
         for (i in 0..<len) {
             floats[offset + i] = Float.fromBits(readInt()) /*java.lang.Float.intBitsToFloat(readInt())*/

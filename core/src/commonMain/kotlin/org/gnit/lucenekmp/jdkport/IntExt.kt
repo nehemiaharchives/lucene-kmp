@@ -87,6 +87,11 @@ private fun formatUnsignedIntUTF16(value: Int, shift: Int, buf: CharArray, len: 
     } while (charPos > 0)
 }
 
+@OptIn(ExperimentalStdlibApi::class)
+fun Int.Companion.toHexString(i: Int): String {
+    return i.toHexString()
+}
+
 /**
  * Returns the number of zero bits preceding the highest-order ("leftmost") one-bit in the
  * two's complement binary representation of the specified [Int] value.  Returns 32 if the
