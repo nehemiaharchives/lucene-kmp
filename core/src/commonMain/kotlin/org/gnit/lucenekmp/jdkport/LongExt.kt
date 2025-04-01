@@ -227,3 +227,15 @@ private fun Long.Companion.formatUnsignedLong0(`val`: Long, shift: Int, buf: Byt
         `val` = `val` ushr shift
     } while (charPos > offset)
 }
+
+/**
+ * Returns a hash code for a `long` value; compatible with
+ * `Long.hashCode()`.
+ *
+ * @param value the value to hash
+ * @return a hash code value for a `long` value.
+ * @since 1.8
+ */
+fun Long.Companion.hashCode(value: Long): Int {
+    return (value xor (value ushr 32)).toInt()
+}

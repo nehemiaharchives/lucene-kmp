@@ -825,6 +825,12 @@ object Arrays {
         )
     }
 
+    fun fill(a: LongArray, value: Long) {
+        a.fill(
+            element = value
+        )
+    }
+
     fun fill(a: FloatArray, value: Float) {
         a.fill(
             element = value
