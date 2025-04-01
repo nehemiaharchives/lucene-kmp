@@ -199,7 +199,7 @@ protected constructor() : IndexReader() {
      * confined to the thread that created it.
      */
     @Throws(IOException::class)
-    abstract fun getDocValuesSkipper(field: String): DocValuesSkipper
+    abstract fun getDocValuesSkipper(field: String): DocValuesSkipper?
 
     /**
      * Returns [FloatVectorValues] for this field, or null if no [FloatVectorValues] were
