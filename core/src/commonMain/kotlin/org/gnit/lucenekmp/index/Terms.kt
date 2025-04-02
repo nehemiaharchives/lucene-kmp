@@ -175,7 +175,7 @@ protected constructor() {
         }
 
     @get:Throws(IOException::class)
-    val stats: Any
+    open val stats: Any
         /** Expert: returns additional information about this Terms instance for debugging purposes.  */
         get() {
             val sb = StringBuilder()
