@@ -3,11 +3,9 @@ package org.gnit.lucenekmp.index
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.index.TermsEnum.SeekStatus
 import org.gnit.lucenekmp.jdkport.Arrays
-import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.compareUnsigned
 import org.gnit.lucenekmp.jdkport.signum
 import org.gnit.lucenekmp.jdkport.toUnsignedLong
-import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.getIntBE
@@ -20,7 +18,7 @@ import org.gnit.lucenekmp.util.getShortBE
  * the current position of the [TermsEnum] must be performed via this wrapper class, not
  * directly on the wrapped [TermsEnum].
  */
-internal class TermsEnumIndex(var termsEnum: TermsEnum, val subIndex: Int) {
+open class TermsEnumIndex(var termsEnum: TermsEnum?, val subIndex: Int) {
     private var currentTerm: BytesRef? = null
     private var currentTermPrefix8: Long = 0
 
@@ -38,28 +36,28 @@ internal class TermsEnumIndex(var termsEnum: TermsEnum, val subIndex: Int) {
     }
 
     @Throws(IOException::class)
-    fun next(): BytesRef {
-        val term: BytesRef = termsEnum.next()!!
+    fun next(): BytesRef? {
+        val term: BytesRef? = termsEnum!!.next()
         setTerm(term)
         return term
     }
 
     @Throws(IOException::class)
     fun seekCeil(term: BytesRef): SeekStatus {
-        val status: SeekStatus = termsEnum.seekCeil(term)
+        val status: SeekStatus = termsEnum!!.seekCeil(term)
         if (status === SeekStatus.END) {
             setTerm(null)
         } else {
-            setTerm(termsEnum.term())
+            setTerm(termsEnum!!.term())
         }
         return status
     }
 
     @Throws(IOException::class)
     fun seekExact(term: BytesRef): Boolean {
-        val found: Boolean = termsEnum.seekExact(term)
+        val found: Boolean = termsEnum!!.seekExact(term)
         if (found) {
-            setTerm(termsEnum.term())
+            setTerm(termsEnum!!.term())
         } else {
             setTerm(null)
         }
@@ -68,8 +66,8 @@ internal class TermsEnumIndex(var termsEnum: TermsEnum, val subIndex: Int) {
 
     @Throws(IOException::class)
     fun seekExact(ord: Long) {
-        termsEnum.seekExact(ord)
-        setTerm(termsEnum.term())
+        termsEnum!!.seekExact(ord)
+        setTerm(termsEnum!!.term())
     }
 
     @Throws(IOException::class)
@@ -113,7 +111,7 @@ internal class TermsEnumIndex(var termsEnum: TermsEnum, val subIndex: Int) {
     }
 
     /** Wrapper around a term that allows for quick equals comparisons.  */
-    internal class TermState {
+    class TermState {
         internal val term: BytesRefBuilder = BytesRefBuilder()
         internal var termPrefix8: Long = 0
 

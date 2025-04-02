@@ -88,6 +88,8 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
         }
     }
 
+    fun getHeapArray() = heap
+
     /**
      * Adds all elements of the collection into the queue. This method should be preferred over
      * calling [.add] in loop if all elements are known in advance as it builds queue
