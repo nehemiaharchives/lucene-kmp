@@ -14,7 +14,7 @@ import org.gnit.lucenekmp.util.BytesRef
 
 
 /** An in-place update to a DocValues field.  */
-internal abstract class DocValuesUpdate protected constructor(
+abstract class DocValuesUpdate protected constructor(
     type: DocValuesType,
     term: Term,
     field: String,
@@ -79,7 +79,7 @@ internal abstract class DocValuesUpdate protected constructor(
     }
 
     /** An in-place update to a binary DocValues field  */
-    internal class BinaryDocValuesUpdate private constructor(
+    class BinaryDocValuesUpdate private constructor(
         term: Term,
         field: String,
         private val value: BytesRef?,
@@ -133,7 +133,7 @@ internal abstract class DocValuesUpdate protected constructor(
     }
 
     /** An in-place update to a numeric DocValues field  */
-    internal class NumericDocValuesUpdate private constructor(
+    class NumericDocValuesUpdate private constructor(
         term: Term,
         field: String,
         private val value: Long,

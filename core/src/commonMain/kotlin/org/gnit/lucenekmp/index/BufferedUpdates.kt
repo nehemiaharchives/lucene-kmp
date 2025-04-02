@@ -26,7 +26,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 // NOTE: instances of this class are accessed either via a private
 // instance on DocumentWriterPerThread, or via sync'd code by
 // DocumentsWriterDeleteQueue
-internal class BufferedUpdates(val segmentName: String) : Accountable {
+class BufferedUpdates(val segmentName: String) : Accountable {
     @OptIn(ExperimentalAtomicApi::class)
     val numFieldUpdates: AtomicInt = AtomicInt(0)
 
@@ -142,7 +142,7 @@ internal class BufferedUpdates(val segmentName: String) : Accountable {
         return bytesUsed.get() + fieldUpdatesBytesUsed.get() + deleteTerms.ramBytesUsed()
     }
 
-    internal class DeletedTerms : Accountable {
+    class DeletedTerms : Accountable {
         private val bytesUsed: Counter = Counter.newCounter()
         private val pool: ByteBlockPool = ByteBlockPool(DirectTrackingAllocator(bytesUsed))
         private val deleteTerms: MutableMap<String, BytesRefIntMap> = HashMap<String, BytesRefIntMap>()
@@ -203,7 +203,7 @@ internal class BufferedUpdates(val segmentName: String) : Accountable {
             }.toMutableSet()
         }
 
-        internal interface DeletedTermConsumer<E : Exception> {
+        interface DeletedTermConsumer<E : Exception> {
             @Throws(Exception::class)
             fun accept(term: Term, docId: Int)
         }

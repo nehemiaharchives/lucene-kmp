@@ -30,7 +30,7 @@ import kotlin.math.min
  * updates have a value. Lastly, if all updates share the same value for a numeric field we only
  * store the value once.
  */
-internal class FieldUpdatesBuffer private constructor(
+class FieldUpdatesBuffer private constructor(
     private val bytesUsed: Counter,
     initialValue: DocValuesUpdate,
     docUpTo: Int,
