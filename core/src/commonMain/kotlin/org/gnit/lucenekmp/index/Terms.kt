@@ -35,7 +35,7 @@ protected constructor() {
      * **NOTE**: the returned TermsEnum cannot seek.
      */
     @Throws(IOException::class)
-    fun intersect(compiled: CompiledAutomaton, startTerm: BytesRef?): TermsEnum {
+    open fun intersect(compiled: CompiledAutomaton, startTerm: BytesRef?): TermsEnum {
         // TODO: could we factor out a common interface b/w
         // CompiledAutomaton and FST  Then we could pass FST there too,
         // and likely speed up resolving terms to deleted docs ... but
@@ -98,7 +98,7 @@ protected constructor() {
     abstract fun hasPayloads(): Boolean
 
     @get:Throws(IOException::class)
-    val min: BytesRef
+    open val min: BytesRef?
         /**
          * Returns the smallest term (in lexicographic order) in the field. Note that, just like other
          * term measures, this measure does not take deleted documents into account. This returns null
@@ -107,7 +107,7 @@ protected constructor() {
         get() = iterator().next()!!
 
     @get:Throws(IOException::class)
-    val max: BytesRef?
+    open val max: BytesRef?
         /**
          * Returns the largest term (in lexicographic order) in the field. Note that, just like other term
          * measures, this measure does not take deleted documents into account. This returns null when
