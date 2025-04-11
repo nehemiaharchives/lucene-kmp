@@ -46,7 +46,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
         }
 
         @Throws(IOException::class)
-        override fun terms(field: String?): Terms {
+        override fun terms(field: String?): Terms? {
             return `in`.terms(field)!!
         }
 

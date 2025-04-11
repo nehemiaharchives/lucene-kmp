@@ -106,6 +106,18 @@ class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.Mer
 
     companion object{
 
+        /**
+         * Hard limit on maximum number of documents that may be added to the index. If you try to add
+         * more than this you'll hit `IllegalArgumentException`.
+         */
+        // We defensively subtract 128 to be well below the lowest
+        // ArrayUtil.MAX_ARRAY_LENGTH on "typical" JVMs.  We don't just use
+        // ArrayUtil.MAX_ARRAY_LENGTH here because this can vary across JVMs:
+        const val MAX_DOCS: Int = Int.Companion.MAX_VALUE - 128
+
+        /** Maximum value of the token position in an indexed field.  */
+        const val MAX_POSITION: Int = Int.Companion.MAX_VALUE - 128
+
         /** Returns true if `indexSort` is a prefix of `otherSort`.  */
         fun isCongruentSort(indexSort: Sort, otherSort: Sort): Boolean {
             val fields1: Array<SortField> = indexSort.sort
