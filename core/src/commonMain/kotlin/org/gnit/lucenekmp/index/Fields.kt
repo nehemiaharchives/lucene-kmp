@@ -12,9 +12,9 @@ import kotlinx.io.IOException
  */
 abstract class Fields
 /** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
-protected constructor() : Iterable<String?> {
+protected constructor() : Iterable<String> {
     /** Returns an iterator that will step through all fields names. This will not return null.  */
-    abstract override fun iterator(): MutableIterator<String?>
+    abstract override fun iterator(): MutableIterator<String>
 
     /** Get the [Terms] for this field. This will return null if the field does not exist.  */
     @Throws(IOException::class)
@@ -28,6 +28,6 @@ protected constructor() : Iterable<String?> {
 
     companion object {
         /** Zero-length `Fields` array.  */
-        val EMPTY_ARRAY: Array<Fields?> = kotlin.arrayOfNulls<Fields>(0)
+        val EMPTY_ARRAY: Array<Fields> = emptyArray<Fields>()
     }
 }

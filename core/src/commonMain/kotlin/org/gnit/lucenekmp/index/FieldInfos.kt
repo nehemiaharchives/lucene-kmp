@@ -19,7 +19,7 @@ import kotlin.jvm.JvmRecord
  *
  * @lucene.experimental
  */
-class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
+open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     private val hasFreq: Boolean
     private val hasPostings: Boolean
     private val hasProx: Boolean
@@ -161,47 +161,47 @@ class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     }
 
     /** Returns true if any fields have freqs  */
-    fun hasFreq(): Boolean {
+    open fun hasFreq(): Boolean {
         return hasFreq
     }
 
     /** Returns true if any fields have postings  */
-    fun hasPostings(): Boolean {
+    open fun hasPostings(): Boolean {
         return hasPostings
     }
 
     /** Returns true if any fields have positions  */
-    fun hasProx(): Boolean {
+    open fun hasProx(): Boolean {
         return hasProx
     }
 
     /** Returns true if any fields have payloads  */
-    fun hasPayloads(): Boolean {
+    open fun hasPayloads(): Boolean {
         return hasPayloads
     }
 
     /** Returns true if any fields have offsets  */
-    fun hasOffsets(): Boolean {
+    open fun hasOffsets(): Boolean {
         return hasOffsets
     }
 
     /** Returns true if any fields have term vectors  */
-    fun hasTermVectors(): Boolean {
+    open fun hasTermVectors(): Boolean {
         return hasTermVectors
     }
 
     /** Returns true if any fields have norms  */
-    fun hasNorms(): Boolean {
+    open fun hasNorms(): Boolean {
         return hasNorms
     }
 
     /** Returns true if any fields have DocValues  */
-    fun hasDocValues(): Boolean {
+    open fun hasDocValues(): Boolean {
         return hasDocValues
     }
 
     /** Returns true if any fields have PointValues  */
-    fun hasPointValues(): Boolean {
+    open fun hasPointValues(): Boolean {
         return hasPointValues
     }
 
@@ -211,7 +211,7 @@ class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     }
 
     /** Returns the number of fields  */
-    fun size(): Int {
+    open fun size(): Int {
         return byName.size
     }
 
@@ -228,8 +228,8 @@ class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
      *
      * @return the FieldInfo object or null when the given fieldName doesn't exist.
      */
-    fun fieldInfo(fieldName: String): FieldInfo? {
-        return byName[fieldName]
+    open fun fieldInfo(fieldName: String): FieldInfo {
+        return byName[fieldName]!!
     }
 
     /**
@@ -239,7 +239,7 @@ class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
      * @return the FieldInfo object or null when the given fieldNumber doesn't exist.
      * @throws IllegalArgumentException if fieldNumber is negative
      */
-    fun fieldInfo(fieldNumber: Int): FieldInfo? {
+    open fun fieldInfo(fieldNumber: Int): FieldInfo? {
         require(fieldNumber >= 0) { "Illegal field number: $fieldNumber" }
         return if (fieldNumber >= byNumber.size) null else byNumber[fieldNumber]
     }

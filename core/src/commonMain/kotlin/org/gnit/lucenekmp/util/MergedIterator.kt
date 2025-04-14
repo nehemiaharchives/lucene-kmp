@@ -29,13 +29,15 @@ package org.gnit.lucenekmp.util
 class MergedIterator<T : Comparable<T>>(
     private val removeDuplicates: Boolean,
     vararg iterators: MutableIterator<T>
-) : MutableIterator<T?> {
+) : MutableIterator<T>, Iterable<T> {
     private var current: T? = null
     private val queue: TermMergeQueue<T> = TermMergeQueue<T>(iterators.size)
     private val top: Array<SubIterator<T>?>
     private var numTop = 0
 
     constructor(vararg iterators: MutableIterator<T>) : this(true, *iterators)
+
+    constructor(removeDuplicates: Boolean, iteratorArray: Array<MutableIterator<T>>) : this(removeDuplicates, *iteratorArray)
 
     init {
         top = kotlin.arrayOfNulls<SubIterator<T>>(iterators.size)
@@ -64,7 +66,7 @@ class MergedIterator<T : Comparable<T>>(
         return false
     }
 
-    override fun next(): T? {
+    override fun next(): T {
         // restore queue
         pushTop()
 
@@ -77,7 +79,7 @@ class MergedIterator<T : Comparable<T>>(
         if (current == null) {
             throw NoSuchElementException()
         }
-        return current
+        return current!!
     }
 
     override fun remove() {
@@ -86,11 +88,11 @@ class MergedIterator<T : Comparable<T>>(
 
     private fun pullTop() {
         require(numTop == 0)
-        top[numTop++] = queue.pop()
+        top[numTop++] = queue.pop()!!
         if (removeDuplicates) {
             // extract all subs from the queue that have the same top element
             while (queue.size() != 0 && queue.top()!!.current!!.equals(top[0]!!.current)) {
-                top[numTop++] = queue.pop()
+                top[numTop++] = queue.pop()!!
             }
         }
         current = top[0]!!.current
@@ -110,8 +112,12 @@ class MergedIterator<T : Comparable<T>>(
         numTop = 0
     }
 
+    override fun iterator(): Iterator<T> {
+        return this
+    }
+
     private class SubIterator<I : Comparable<I>> {
-        var iterator: MutableIterator<I>? = null
+        var iterator: MutableIterator<I?>? = null
         var current: I? = null
         var index: Int = 0
     }

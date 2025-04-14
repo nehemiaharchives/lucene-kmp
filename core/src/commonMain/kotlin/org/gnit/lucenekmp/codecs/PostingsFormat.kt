@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.codecs
 
 
 import kotlinx.io.IOException
+import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.util.NamedSPILoader
 
@@ -81,7 +82,7 @@ abstract class PostingsFormat protected constructor(override val name: String) :
 
     companion object {
         /** Zero-length `PostingsFormat` array.  */
-        val EMPTY: Array<PostingsFormat> = kotlin.arrayOfNulls<PostingsFormat>(0)
+        val EMPTY: Array<PostingsFormat> = emptyArray<PostingsFormat>()
 
         /** looks up a format by name  */
         fun forName(name: String): PostingsFormat {

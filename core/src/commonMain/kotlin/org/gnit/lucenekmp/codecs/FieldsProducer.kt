@@ -27,7 +27,7 @@ protected constructor() : Fields(), AutoCloseable {
     @Throws(IOException::class)
     abstract fun checkIntegrity()
 
-    val mergeInstance: FieldsProducer
+    open val mergeInstance: FieldsProducer
         /**
          * Returns an instance optimized for merging. This instance may only be consumed in the thread
          * that called [.getMergeInstance].

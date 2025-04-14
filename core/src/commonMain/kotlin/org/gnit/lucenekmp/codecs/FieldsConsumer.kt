@@ -49,7 +49,7 @@ protected constructor() : AutoCloseable {
      * etc).
      */
     @Throws(IOException::class)
-    fun merge(mergeState: MergeState, norms: NormsProducer) {
+    open fun merge(mergeState: MergeState, norms: NormsProducer) {
         val fields: MutableList<Fields> = mutableListOf<Fields>()
         val slices: MutableList<ReaderSlice> = mutableListOf<ReaderSlice>()
 
