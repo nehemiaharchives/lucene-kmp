@@ -1,5 +1,8 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.ClassLoader
+import org.gnit.lucenekmp.jdkport.ServiceLoader
+import org.gnit.lucenekmp.jdkport.getClassLoader
 import kotlin.concurrent.Volatile
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
@@ -12,17 +15,17 @@ import kotlin.reflect.KClass
  */
 class NamedSPILoader<S : NamedSPILoader.NamedSPI> @JvmOverloads constructor(
     clazz: KClass<S>,
-    classloader: java.lang.ClassLoader = null
+    classloader: ClassLoader? = null
 ) : Iterable<S> {
     @Volatile
     private var services = mutableMapOf<String, S>()
     private val clazz: KClass<S>
 
     init {
-        var classloader: java.lang.ClassLoader = classloader
+        var classloader: ClassLoader? = classloader
         this.clazz = clazz
         // if clazz' classloader is not a parent of the given one, we scan clazz's classloader, too:
-        val clazzClassloader: java.lang.ClassLoader = clazz.getClassLoader()
+        val clazzClassloader: ClassLoader = clazz.getClassLoader()
         if (classloader == null) {
             classloader = clazzClassloader
         }
@@ -46,11 +49,11 @@ class NamedSPILoader<S : NamedSPILoader.NamedSPI> @JvmOverloads constructor(
      * *This method is expensive and should only be called for discovery of new service
      * providers on the given classpath/classloader!*
      */
-    fun reload(classloader: java.lang.ClassLoader) {
-        java.util.Objects.requireNonNull<java.lang.ClassLoader>(classloader, "classloader")
-        val services: java.util.LinkedHashMap<String, S> = java.util.LinkedHashMap<String, S>(this.services)
-        for (service in java.util.ServiceLoader.load<S>(clazz, classloader)) {
-            val name: String = service.getName()
+    fun reload(classloader: ClassLoader) {
+        requireNotNull<ClassLoader>(classloader) { "classloader must not be null" }
+        val services: LinkedHashMap<String, S> = LinkedHashMap<String, S>(this.services)
+        for (service in ServiceLoader.load<S>(clazz, classloader)) {
+            val name: String = service.name
             // only add the first one for each name, later services will be ignored
             // this allows to place services before others in classpath to make
             // them used instead of others
@@ -59,7 +62,7 @@ class NamedSPILoader<S : NamedSPILoader.NamedSPI> @JvmOverloads constructor(
                 services.put(name, service)
             }
         }
-        this.services = java.util.Collections.unmodifiableMap<String, S>(services)
+        this.services = services
     }
 
     fun lookup(name: String): S {
