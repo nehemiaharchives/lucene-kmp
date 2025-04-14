@@ -31,7 +31,7 @@ protected constructor() : KnnVectorValues() {
      * @return a [VectorScorer] instance or null
      */
     @Throws(IOException::class)
-    fun scorer(query: ByteArray): VectorScorer {
+    open fun scorer(query: ByteArray): VectorScorer {
         throw UnsupportedOperationException()
     }
 

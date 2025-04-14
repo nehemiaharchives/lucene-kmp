@@ -27,7 +27,7 @@ abstract class KnnVectorValues {
      * implementation returns the argument and is appropriate for dense values implementations where
      * every doc has a single value.
      */
-    fun ordToDoc(ord: Int): Int {
+    open fun ordToDoc(ord: Int): Int {
         return ord
     }
 
