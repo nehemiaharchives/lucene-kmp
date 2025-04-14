@@ -11,7 +11,6 @@ import org.gnit.lucenekmp.index.FieldInfos
 import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.index.KnnVectorValues.DocIndexIterator
 import org.gnit.lucenekmp.index.MergeState
-import org.gnit.lucenekmp.index.MergeState.DocMap
 import org.gnit.lucenekmp.index.Sorter
 import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.internal.hppc.IntIntHashMap
@@ -31,11 +30,11 @@ protected constructor() : Accountable, AutoCloseable {
 
     /** Flush all buffered data on disk *  */
     @Throws(IOException::class)
-    abstract fun flush(maxDoc: Int, sortMap: DocMap)
+    abstract fun flush(maxDoc: Int, sortMap: Sorter.DocMap)
 
     /** Write field for merging  */
     @Throws(IOException::class)
-    fun mergeOneField(fieldInfo: FieldInfo, mergeState: MergeState) {
+    open fun mergeOneField(fieldInfo: FieldInfo, mergeState: MergeState) {
         when (fieldInfo.vectorEncoding) {
             BYTE -> {
                 val byteWriter: KnnFieldVectorsWriter<ByteArray> =
@@ -106,7 +105,7 @@ protected constructor() : Accountable, AutoCloseable {
     }
 
     /** Tracks state of one sub-reader that we are merging  */
-    internal class FloatVectorValuesSub(docMap: DocMap, val values: FloatVectorValues) : DocIDMerger.Sub(docMap) {
+    internal class FloatVectorValuesSub(docMap: MergeState.DocMap, val values: FloatVectorValues) : DocIDMerger.Sub(docMap) {
         val iterator: DocIndexIterator = values.iterator()
 
         init {
@@ -123,7 +122,7 @@ protected constructor() : Accountable, AutoCloseable {
         }
     }
 
-    class ByteVectorValuesSub(docMap: DocMap, val values: ByteVectorValues) : DocIDMerger.Sub(docMap) {
+    class ByteVectorValuesSub(docMap: MergeState.DocMap, val values: ByteVectorValues) : DocIDMerger.Sub(docMap) {
         val iterator: DocIndexIterator = values.iterator()
 
         init {
@@ -170,11 +169,11 @@ protected constructor() : Accountable, AutoCloseable {
         @Throws(IOException::class)
         private fun <V, S> mergeVectorValues(
             knnVectorsReaders: Array<KnnVectorsReader?>,
-            docMaps: Array<DocMap>?,
+            docMaps: Array<MergeState.DocMap>?,
             mergingField: FieldInfo,
             sourceFieldInfos: Array<FieldInfos?>,
             valuesSupplier: IOFunction<KnnVectorsReader, V>,
-            newSub: (DocMap, V) -> S
+            newSub: (MergeState.DocMap, V) -> S
         ): MutableList<S> {
             val subs: MutableList<S> = ArrayList()
             if (knnVectorsReaders.isEmpty() || docMaps == null) {
@@ -207,8 +206,8 @@ protected constructor() : Accountable, AutoCloseable {
                     mergeState.docMaps,
                     fieldInfo,
                     mergeState.fieldInfos,
-                    IOFunction { knnVectorsReader -> knnVectorsReader.getFloatVectorValues(fieldInfo.name) }
-                ) { docMap: DocMap, values: FloatVectorValues ->
+                    IOFunction { knnVectorsReader -> knnVectorsReader.getFloatVectorValues(fieldInfo.name)!! }
+                ) { docMap: MergeState.DocMap, values: FloatVectorValues ->
                     FloatVectorValuesSub(
                         docMap,
                         values
@@ -228,8 +227,8 @@ protected constructor() : Accountable, AutoCloseable {
                     mergeState.docMaps,
                     fieldInfo,
                     mergeState.fieldInfos,
-                    IOFunction { knnVectorsReader -> knnVectorsReader.getByteVectorValues(fieldInfo.name) }
-                ) { docMap: DocMap, values: ByteVectorValues ->
+                    IOFunction { knnVectorsReader -> knnVectorsReader.getByteVectorValues(fieldInfo.name)!! }
+                ) { docMap: MergeState.DocMap, values: ByteVectorValues ->
                     ByteVectorValuesSub(
                         docMap,
                         values

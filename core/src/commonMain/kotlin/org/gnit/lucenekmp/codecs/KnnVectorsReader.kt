@@ -32,7 +32,7 @@ protected constructor() : AutoCloseable {
      * never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getFloatVectorValues(field: String): FloatVectorValues
+    abstract fun getFloatVectorValues(field: String): FloatVectorValues?
 
     /**
      * Returns the [ByteVectorValues] for the given `field`. The behavior is undefined if
@@ -40,7 +40,7 @@ protected constructor() : AutoCloseable {
      * never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getByteVectorValues(field: String): ByteVectorValues
+    abstract fun getByteVectorValues(field: String): ByteVectorValues?
 
     /**
      * Return the k nearest neighbor documents as determined by comparison of their vector values for
@@ -104,7 +104,7 @@ protected constructor() : AutoCloseable {
         field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
     )
 
-    val mergeInstance: KnnVectorsReader
+    open val mergeInstance: KnnVectorsReader
         /**
          * Returns an instance optimized for merging. This instance may only be consumed in the thread
          * that called [.getMergeInstance].
@@ -121,6 +121,6 @@ protected constructor() : AutoCloseable {
      * The default implementation is empty
      */
     @Throws(IOException::class)
-    fun finishMerge() {
+    open fun finishMerge() {
     }
 }

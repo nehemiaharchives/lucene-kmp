@@ -18,5 +18,5 @@ interface HnswGraphProvider {
      * @throws IOException when reading potentially off-heap graph fails
      */
     @Throws(IOException::class)
-    fun getGraph(field: String): HnswGraph
+    fun getGraph(field: String): HnswGraph?
 }
