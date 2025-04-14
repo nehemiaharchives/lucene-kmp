@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.codecs
 
 import kotlinx.io.IOException
+import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.util.NamedSPILoader
 
@@ -40,7 +41,7 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
     }
 
     /** Unique name that's used to retrieve this format when reading the index.  */
-    val name: String
+    override lateinit var name: String
 
     /**
      * Creates a new docvalues format.
@@ -76,7 +77,7 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
     abstract fun fieldsProducer(state: SegmentReadState): DocValuesProducer
 
     override fun toString(): String {
-        return "DocValuesFormat(name=" + name + ")"
+        return "DocValuesFormat(name=$name)"
     }
 
     companion object {
