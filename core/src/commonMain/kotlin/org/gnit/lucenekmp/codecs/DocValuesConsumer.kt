@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs
 
-
 import org.gnit.lucenekmp.index.BaseTermsEnum
 import org.gnit.lucenekmp.index.BinaryDocValues
 import org.gnit.lucenekmp.index.DocIDMerger
@@ -25,9 +24,8 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.LongBitSet
 import org.gnit.lucenekmp.util.LongValues
 import org.gnit.lucenekmp.util.packed.PackedInts
-import kotlinx.io.IOException
 import org.gnit.lucenekmp.search.DocIdSetIterator
-
+import kotlinx.io.IOException
 
 /**
  * Abstract API that consumes numeric, binary and sorted docvalues. Concrete implementations of this
@@ -106,7 +104,7 @@ protected constructor() : AutoCloseable {
      * copying, etc).
      */
     @Throws(IOException::class)
-    fun merge(mergeState: MergeState) {
+    open fun merge(mergeState: MergeState) {
         for (docValuesProducer in mergeState.docValuesProducers) {
             docValuesProducer?.checkIntegrity()
         }
@@ -301,7 +299,7 @@ protected constructor() : AutoCloseable {
             mergeFieldInfo,
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
-                public override fun getSortedNumeric(fieldInfo: FieldInfo): SortedNumericDocValues {
+                override fun getSortedNumeric(fieldInfo: FieldInfo): SortedNumericDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
@@ -618,13 +616,13 @@ protected constructor() : AutoCloseable {
         val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
         val weights = LongArray(liveTerms.size)
         for (sub in liveTerms.indices) {
-            val dv: SortedSetDocValues = toMerge.get(sub)
+            val dv: SortedSetDocValues = toMerge[sub]
             val liveDocs: Bits? = mergeState.liveDocs[sub]
             if (liveDocs == null) {
                 liveTerms[sub] = dv.termsEnum()
                 weights[sub] = dv.valueCount
             } else {
-                val bitset: LongBitSet = LongBitSet(dv.valueCount)
+                val bitset = LongBitSet(dv.valueCount)
                 var docID: Int
                 while ((dv.nextDoc().also { docID = it }) != DocIdSetIterator.NO_MORE_DOCS) {
                     if (liveDocs.get(docID)) {
@@ -745,7 +743,7 @@ protected constructor() : AutoCloseable {
                         override fun lookupOrd(ord: Long): BytesRef {
                             val segmentNumber: Int = map.getFirstSegmentNumber(ord)
                             val segmentOrd: Long = map.getFirstSegmentOrd(ord)
-                            return toMerge.get(segmentNumber).lookupOrd(segmentOrd)
+                            return toMerge[segmentNumber].lookupOrd(segmentOrd)
                         }
 
                         override val valueCount: Long
@@ -894,7 +892,7 @@ protected constructor() : AutoCloseable {
                 override fun lookupOrd(ord: Int): BytesRef {
                     val segmentNumber: Int = map.getFirstSegmentNumber(ord.toLong())
                     val segmentOrd = map.getFirstSegmentOrd(ord.toLong()).toInt()
-                    return subs.get(segmentNumber).values.lookupOrd(segmentOrd)
+                    return subs[segmentNumber].values.lookupOrd(segmentOrd)
                 }
 
                 @Throws(IOException::class)
