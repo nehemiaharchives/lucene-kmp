@@ -103,6 +103,15 @@ object BitUtil {
      */
     /*val VH_NATIVE_INT: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(IntArray::class.java, NATIVE_BYTE_ORDER)*/
+    object VH_NATIVE_INT {
+        fun get(nextBlocks: ByteArray, offset: Int): Int {
+            return when (NATIVE_BYTE_ORDER) {
+                ByteOrder.BIG_ENDIAN -> nextBlocks.getIntBE(offset)
+                ByteOrder.LITTLE_ENDIAN -> nextBlocks.getIntLE(offset)
+                else -> throw IllegalStateException("Unknown byte order")
+            }
+        }
+    }
 
     /**
      * A [VarHandle] to read/write native endian `long` from a byte array. Shape: `long vh.get(byte[] arr, int ofs)` and `void vh.set(byte[] arr, int ofs, long val)`

@@ -773,6 +773,14 @@ object Arrays {
         )
     }
 
+    fun fill(a: ShortArray, fromIndex: Int, toIndex: Int, value: Short) {
+        a.fill(
+            element = value,
+            fromIndex = fromIndex,
+            toIndex = toIndex
+        )
+    }
+
     fun fill(a: IntArray, fromIndex: Int, toIndex: Int, value: Int) {
         a.fill(
             element = value,
@@ -814,6 +822,12 @@ object Arrays {
     }
 
     fun fill(a: ByteArray, value: Byte) {
+        a.fill(
+            element = value
+        )
+    }
+
+    fun fill(a: ShortArray, value: Short) {
         a.fill(
             element = value
         )
