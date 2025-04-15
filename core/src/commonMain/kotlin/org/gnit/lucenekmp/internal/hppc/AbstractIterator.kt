@@ -44,7 +44,7 @@ abstract class AbstractIterator<E> : MutableIterator<E?> {
      *
      * @return Returns the next value for the iterator or chain-calls [.done].
      */
-    protected abstract fun fetch(): E
+    protected abstract fun fetch(): E?
 
     /**
      * Call when done.
