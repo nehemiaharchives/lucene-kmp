@@ -51,7 +51,7 @@ protected constructor() : DocValuesIterator() {
      * @param key Key to look up
      */
     @Throws(IOException::class)
-    fun lookupTerm(key: BytesRef): Int {
+    open fun lookupTerm(key: BytesRef): Int {
         var low = 0
         var high = this.valueCount - 1
 
