@@ -45,7 +45,7 @@ object IndexFileNames {
                     .append(base)
                     .append('_')
                     .append(gen.toString(Character.MAX_RADIX))
-            if (ext.length > 0) {
+            if (ext.isNotEmpty()) {
                 res.append('.').append(ext)
             }
             return res.toString()
@@ -68,16 +68,16 @@ object IndexFileNames {
      * **NOTE:** all custom files should be named using this method, or otherwise some
      * structures may fail to handle them properly (such as if they are added to compound files).
      */
-    fun segmentFileName(segmentName: String, segmentSuffix: String, ext: String): String? {
-        if (ext.length > 0 || segmentSuffix.length > 0) {
+    fun segmentFileName(segmentName: String, segmentSuffix: String, ext: String): String {
+        if (ext.isNotEmpty() || segmentSuffix.isNotEmpty()) {
             require(!ext.startsWith("."))
-            val sb: StringBuilder =
+            val sb =
                 StringBuilder(segmentName.length + 2 + segmentSuffix.length + ext.length)
             sb.append(segmentName)
-            if (segmentSuffix.length > 0) {
+            if (segmentSuffix.isNotEmpty()) {
                 sb.append('_').append(segmentSuffix)
             }
-            if (ext.length > 0) {
+            if (ext.isNotEmpty()) {
                 sb.append('.').append(ext)
             }
             return sb.toString()
@@ -90,10 +90,10 @@ object IndexFileNames {
      * Returns true if the given filename ends with the given extension. One should provide a
      * *pure* extension, without '.'.
      */
-    fun matchesExtension(filename: String, ext: String?): Boolean {
+    fun matchesExtension(filename: String, ext: String): Boolean {
         // It doesn't make a difference whether we allocate a StringBuilder ourself
         // or not, since there's only 1 '+' operator.
-        return filename.endsWith("." + ext)
+        return filename.endsWith(".$ext")
     }
 
     /** locates the boundary of the segment name, or -1  */
@@ -127,17 +127,17 @@ object IndexFileNames {
     /** Returns the generation from this file name, or 0 if there is no generation.  */
     fun parseGeneration(filename: String): Long {
         require(filename.startsWith("_"))
-        val parts: Array<String?> =
+        val parts: Array<String> =
             stripExtension(filename).substring(1).split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         // 4 cases:
         // segment.ext
         // segment_gen.ext
         // segment_codec_suffix.ext
         // segment_gen_codec_suffix.ext
-        if (parts.size == 2 || parts.size == 4) {
-            return parts[1]!!.toLong(Character.MAX_RADIX)
+        return if (parts.size == 2 || parts.size == 4) {
+            parts[1].toLong(Character.MAX_RADIX)
         } else {
-            return 0
+            0
         }
     }
 
@@ -173,10 +173,10 @@ object IndexFileNames {
      */
     fun getExtension(filename: String): String? {
         val idx = filename.indexOf('.')
-        if (idx == -1) {
-            return null
+        return if (idx == -1) {
+            null
         } else {
-            return filename.substring(idx + 1)
+            filename.substring(idx + 1)
         }
     }
 
@@ -184,7 +184,7 @@ object IndexFileNames {
     /**
      * All files created by codecs must match this pattern (checked in SegmentInfo).
      */
-    /* val CODEC_FILE_PATTERN: java.util.regex.Pattern = java.util.regex.Pattern.compile("_[a-z0-9]+(_.*)?\\..*") */
-    val CODEC_FILE_PATTERN: Regex = Regex("_[a-z0-9]+(_.*)?\\..*")
+    /* val CODEC_FILE_PATTERN: java.util.regex.Pattern = java.util.regex.Pattern.compile("_[a-z0-9]+(_.*)\\..*") */
+    val CODEC_FILE_PATTERN: Regex = Regex("_[a-z0-9]+(_.*)\\..*")
 
 }
