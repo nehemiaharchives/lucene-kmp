@@ -125,4 +125,38 @@ object Math {
             return a.toInt()
         }
     }
+
+    /**
+     * Returns the floor modulus of the `long` arguments.
+     *
+     *
+     * The floor modulus is `r = x - (floorDiv(x, y) * y)`,
+     * has the same sign as the divisor `y` or is zero, and
+     * is in the range of `-abs(y) < r < +abs(y)`.
+     *
+     *
+     *
+     * The relationship between `floorDiv` and `floorMod` is such that:
+     *
+     *  * `floorDiv(x, y) * y + floorMod(x, y) == x`
+     *
+     *
+     *
+     * For examples, see [.floorMod].
+     *
+     * @param x the dividend
+     * @param y the divisor
+     * @return the floor modulus `x - (floorDiv(x, y) * y)`
+     * @throws ArithmeticException if the divisor `y` is zero
+     * @see .floorDiv
+     * @since 1.8
+     */
+    fun floorMod(x: Long, y: Long): Long {
+        val r = x % y
+        // if the signs are different and modulo not zero, adjust result
+        if ((x xor y) < 0 && r != 0L) {
+            return r + y
+        }
+        return r
+    }
 }

@@ -33,7 +33,7 @@ protected constructor() : AutoCloseable {
      * the given field is not [DocValuesType.BINARY]. The return value is never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getBinary(field: FieldInfo): BinaryDocValues?
+    abstract fun getBinary(field: FieldInfo): BinaryDocValues
 
     /**
      * Returns [SortedDocValues] for this field. The returned instance need not be thread-safe:
@@ -41,7 +41,7 @@ protected constructor() : AutoCloseable {
      * the given field is not [DocValuesType.SORTED]. The return value is never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getSorted(field: FieldInfo): SortedDocValues?
+    abstract fun getSorted(field: FieldInfo): SortedDocValues
 
     /**
      * Returns [SortedNumericDocValues] for this field. The returned instance need not be
@@ -50,7 +50,7 @@ protected constructor() : AutoCloseable {
      * never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues?
+    abstract fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues
 
     /**
      * Returns [SortedSetDocValues] for this field. The returned instance need not be
@@ -59,7 +59,7 @@ protected constructor() : AutoCloseable {
      * never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getSortedSet(field: FieldInfo): SortedSetDocValues?
+    abstract fun getSortedSet(field: FieldInfo): SortedSetDocValues
 
     /**
      * Returns a [DocValuesSkipper] for this field. The returned instance need not be
