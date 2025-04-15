@@ -208,7 +208,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * @param length the number of bytes to prefetch
      */
     @Throws(IOException::class)
-    fun prefetch(offset: Long, length: Long) {
+    open fun prefetch(offset: Long, length: Long) {
     }
 
     /**

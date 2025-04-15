@@ -33,7 +33,7 @@ protected constructor() : AutoCloseable {
     @Throws(IOException::class)
     abstract fun checkIntegrity()
 
-    val mergeInstance: NormsProducer
+    open val mergeInstance: NormsProducer
         /**
          * Returns an instance optimized for merging. This instance may only be used from the thread that
          * acquires it.
