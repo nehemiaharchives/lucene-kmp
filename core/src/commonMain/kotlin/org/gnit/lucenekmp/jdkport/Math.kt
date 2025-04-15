@@ -58,6 +58,24 @@ object Math {
     }
 
     /**
+     * Returns the product of the arguments,
+     * throwing an exception if the result overflows an `int`.
+     *
+     * @param x the first value
+     * @param y the second value
+     * @return the result
+     * @throws ArithmeticException if the result overflows an int
+     * @since 1.8
+     */
+    fun multiplyExact(x: Int, y: Int): Int {
+        val r = x.toLong() * y.toLong()
+        if (r.toInt().toLong() != r) {
+            throw ArithmeticException("integer overflow")
+        }
+        return r.toInt()
+    }
+
+    /**
      * Returns the closest `int` to the argument, with ties
      * rounding to positive infinity.
      *

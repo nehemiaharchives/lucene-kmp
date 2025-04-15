@@ -40,18 +40,35 @@ object BitUtil {
      */
     /*val VH_LE_SHORT: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(ShortArray::class.java, ByteOrder.LITTLE_ENDIAN)*/
+    object VH_LE_SHORT {
+        fun set(nextBlocks: ByteArray, offset: Int, s: Short) {
+            nextBlocks.setShortLE(offset, s)
+        }
+    }
 
     /**
      * A [VarHandle] to read/write little endian `int` from a byte array. Shape: `int vh.get(byte[] arr, int ofs)` and `void vh.set(byte[] arr, int ofs, int val)`
      */
     /*val VH_LE_INT: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(IntArray::class.java, ByteOrder.LITTLE_ENDIAN)*/
+    object VH_LE_INT {
+        fun set(nextBlocks: ByteArray, offset: Int, i: Int) {
+            nextBlocks.setIntLE(offset, i)
+        }
+    }
+
 
     /**
      * A [VarHandle] to read/write little endian `long` from a byte array. Shape: `long vh.get(byte[] arr, int ofs)` and `void vh.set(byte[] arr, int ofs, long val)`
      */
     /*val VH_LE_LONG: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(LongArray::class.java, ByteOrder.LITTLE_ENDIAN)*/
+    object VH_LE_LONG {
+        fun set(nextBlocks: ByteArray, offset: Int, l: Long) {
+            nextBlocks.setLongLE(offset, l)
+        }
+    }
+
 
     /**
      * A [VarHandle] to read/write little endian `float` from a byte array. Shape: `float vh.get(byte[] arr, int ofs)` and `void vh.set(byte[] arr, int ofs, float val)`
@@ -353,6 +370,17 @@ fun ByteArray.getIntLE(offset: Int, value: Int): Int {
 }
 
 /**
+ * Writes [value] as a little-endian int into this ByteArray at the specified [offset].
+ */
+fun ByteArray.setIntLE(offset: Int, value: Int) {
+    require(offset in 0..(size - 4)) { "Invalid offset $offset for array of size $size" }
+    this[offset] = (value and 0xFF).toByte()
+    this[offset + 1] = ((value shr 8) and 0xFF).toByte()
+    this[offset + 2] = ((value shr 16) and 0xFF).toByte()
+    this[offset + 3] = ((value shr 24) and 0xFF).toByte()
+}
+
+/**
  * Writes [value] as a little-endian short into this ByteArray at the specified [offset].
  */
 fun ByteArray.putShortLE(offset: Int, value: Short) {
@@ -430,6 +458,19 @@ fun ByteArray.getShortLE(offset: Int): Short {
 }
 
 /**
+ * Writes a 16-bit short into the byte array at the given [offset] in little-endian order.
+ *
+ * @param offset the start index in the array.
+ * @param value the short value to write.
+ */
+fun ByteArray.setShortLE(offset: Int, value: Short) {
+    require(offset in 0..(size - 2)) { "Invalid offset $offset for array of size $size" }
+    // In little-endian, the least-significant byte is at the lowest address.
+    this[offset] = (value.toInt() and 0xFF).toByte()
+    this[offset + 1] = (value.toInt().shr(8) and 0xFF).toByte()
+}
+
+/**
  * Reads 4 bytes in little-endian order from this ByteArray starting at the given offset.
  *
  * @param offset the offset to read from
@@ -459,4 +500,22 @@ fun ByteArray.getLongLE(offset: Int): Long {
             ((this[offset + 5].toLong() and 0xFF) shl 40) or
             ((this[offset + 6].toLong() and 0xFF) shl 48) or
             ((this[offset + 7].toLong() and 0xFF) shl 56)
+}
+
+/**
+ * Writes a 64-bit long into the byte array at the given [offset] in little-endian order.
+ *
+ * @param offset the start index in the array.
+ * @param value the long value to write.
+ */
+fun ByteArray.setLongLE(offset: Int, value: Long) {
+    require(offset in 0..(size - 8)) { "Invalid offset $offset for array of size $size" }
+    this[offset] = (value and 0xFF).toByte()
+    this[offset + 1] = ((value shr 8) and 0xFF).toByte()
+    this[offset + 2] = ((value shr 16) and 0xFF).toByte()
+    this[offset + 3] = ((value shr 24) and 0xFF).toByte()
+    this[offset + 4] = ((value shr 32) and 0xFF).toByte()
+    this[offset + 5] = ((value shr 40) and 0xFF).toByte()
+    this[offset + 6] = ((value shr 48) and 0xFF).toByte()
+    this[offset + 7] = ((value shr 56) and 0xFF).toByte()
 }
