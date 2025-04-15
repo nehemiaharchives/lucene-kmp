@@ -47,8 +47,8 @@ abstract class IndexOutput protected constructor(resourceDescription: String, na
     /** Returns the current position in this file, where the next write will occur.  */
     abstract val filePointer: Long
 
-    @get:Throws(IOException::class)
-    abstract val checksum: Long
+    /** Returns the current checksum of bytes written so far */
+    abstract fun getChecksum(): Long
 
     override fun toString(): String {
         return resourceDescription

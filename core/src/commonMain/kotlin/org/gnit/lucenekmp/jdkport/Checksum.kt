@@ -73,6 +73,16 @@ interface Checksum {
         }
     }
 
+    fun update(byteBuffer: ByteBuffer) {
+        // Process until the ByteBuffer is empty.
+        while (byteBuffer.hasRemaining()) {
+            val chunkSize = min(byteBuffer.remaining(), 4096)
+            val temp = ByteArray(chunkSize)
+            byteBuffer.get(temp, 0, chunkSize)
+            update(temp, 0, temp.size)
+        }
+    }
+
     /**
      * Returns the current checksum value.
      *
