@@ -607,8 +607,12 @@ object Arrays {
         dualPivotQuicksort(a, 0, a.size)
     }
 
-
     fun sort(a: IntArray, fromIndex: Int, toIndex: Int) {
+        rangeCheck(a.size, fromIndex, toIndex)
+        dualPivotQuicksort(a, fromIndex, toIndex - 1)
+    }
+
+    fun sort(a: LongArray, fromIndex: Int, toIndex: Int) {
         rangeCheck(a.size, fromIndex, toIndex)
         dualPivotQuicksort(a, fromIndex, toIndex - 1)
     }
