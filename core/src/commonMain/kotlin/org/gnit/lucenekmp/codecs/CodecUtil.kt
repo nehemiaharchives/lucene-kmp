@@ -27,7 +27,7 @@ object CodecUtil {
     const val CODEC_MAGIC: Int = 0x3fd76c17
 
     /** Constant to identify the start of a codec footer.  */
-    val FOOTER_MAGIC: Int = CODEC_MAGIC.inv()
+    const val FOOTER_MAGIC: Int = CODEC_MAGIC.inv()
 
     /**
      * Writes a codec header, which records both a string to identify the file and a version number.
@@ -226,7 +226,7 @@ object CodecUtil {
      */
     @Throws(IOException::class)
     fun checkIndexHeader(
-        `in`: DataInput,
+        `in`:  DataInput,
         codec: String?,
         minVersion: Int,
         maxVersion: Int,
@@ -653,7 +653,7 @@ object CodecUtil {
      */
     @Throws(IOException::class)
     fun writeCRC(output: IndexOutput) {
-        val value: Long = output.checksum
+        val value: Long = output.getChecksum()
         check((value and -0x100000000L) == 0L) { "Illegal CRC-32 checksum: $value (resource=$output)" }
         writeBELong(output, value)
     }
