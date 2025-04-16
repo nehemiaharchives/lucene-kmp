@@ -26,6 +26,20 @@ object MathUtil {
         return ret
     }
 
+    fun log(x: Int, base: Int): Int {
+        var x = x
+        if (base == 2) {
+            // This specialized method is 30x faster.
+            return if (x <= 0) 0 else 31 - x.countLeadingZeroBits() /* java.lang.Integer.numberOfLeadingZeros(x)*/
+        } else require(base > 1) { "base must be > 1" }
+        var ret = 0
+        while (x >= base) {
+            x /= base
+            ret++
+        }
+        return ret
+    }
+
     /** Calculates logarithm in a given base with doubles.  */
     fun log(base: Double, x: Double): Double {
         return ln(x) / ln(base)
