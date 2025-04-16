@@ -166,6 +166,16 @@ object BitUtil {
     /*@Deprecated("Better use little endian unless it is needed for backwards compatibility.")
     val VH_BE_INT: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(IntArray::class.java, ByteOrder.BIG_ENDIAN)*/
+    object VH_BE_INT {
+        fun get(nextBlocks: ByteArray, offset: Int): Int {
+            return nextBlocks.getIntBE(offset)
+        }
+
+        fun set(nextBlocks: ByteArray, offset: Int, i: Int) {
+            nextBlocks.setIntBE(offset, i)
+        }
+    }
+
 
     /**
      * A [VarHandle] to read/write big endian `long` from a byte array. Shape: `long
