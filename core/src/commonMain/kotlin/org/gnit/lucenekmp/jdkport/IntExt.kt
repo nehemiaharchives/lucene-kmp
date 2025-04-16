@@ -221,3 +221,19 @@ fun Int.Companion.digits(): CharArray {
         'u', 'v', 'w', 'x', 'y', 'z'
     )
 }
+
+/**
+ * Returns the value obtained by reversing the order of the bytes in the
+ * two's complement representation of the specified `int` value.
+ *
+ * @param i the value whose bytes are to be reversed
+ * @return the value obtained by reversing the bytes in the specified
+ * `int` value.
+ * @since 1.5
+ */
+fun Int.Companion.reverseBytes(i: Int): Int {
+    return (i shl 24) or
+            ((i and 0xff00) shl 8) or
+            ((i ushr 8) and 0xff00) or
+            (i ushr 24)
+}

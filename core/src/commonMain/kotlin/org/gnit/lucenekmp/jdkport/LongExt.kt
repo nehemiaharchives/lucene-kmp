@@ -229,6 +229,22 @@ private fun Long.Companion.formatUnsignedLong0(`val`: Long, shift: Int, buf: Byt
 }
 
 /**
+ * Returns the value obtained by reversing the order of the bytes in the
+ * two's complement representation of the specified `long` value.
+ *
+ * @param i the value whose bytes are to be reversed
+ * @return the value obtained by reversing the bytes in the specified
+ * `long` value.
+ * @since 1.5
+ */
+fun Long.Companion.reverseBytes(i: Long): Long {
+    var i = i
+    i = (i and 0x00ff00ff00ff00ffL) shl 8 or ((i ushr 8) and 0x00ff00ff00ff00ffL)
+    return (i shl 48) or ((i and 0xffff0000L) shl 16) or
+            ((i ushr 16) and 0xffff0000L) or (i ushr 48)
+}
+
+/**
  * Returns a hash code for a `long` value; compatible with
  * `Long.hashCode()`.
  *

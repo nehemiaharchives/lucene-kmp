@@ -52,11 +52,14 @@ object BitUtil {
     /*val VH_LE_INT: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(IntArray::class.java, ByteOrder.LITTLE_ENDIAN)*/
     object VH_LE_INT {
+        fun get(nextBlocks: ByteArray, offset: Int): Int {
+            return nextBlocks.getIntLE(offset)
+        }
+
         fun set(nextBlocks: ByteArray, offset: Int, i: Int) {
             nextBlocks.setIntLE(offset, i)
         }
     }
-
 
     /**
      * A [VarHandle] to read/write little endian `long` from a byte array. Shape: `long vh.get(byte[] arr, int ofs)` and `void vh.set(byte[] arr, int ofs, long val)`
@@ -64,6 +67,10 @@ object BitUtil {
     /*val VH_LE_LONG: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(LongArray::class.java, ByteOrder.LITTLE_ENDIAN)*/
     object VH_LE_LONG {
+        fun get(nextBlocks: ByteArray, offset: Int): Long {
+            return nextBlocks.getLongLE(offset)
+        }
+
         fun set(nextBlocks: ByteArray, offset: Int, l: Long) {
             nextBlocks.setLongLE(offset, l)
         }
