@@ -85,7 +85,7 @@ class BKDRadixSelector(// BKD tree configuration
     @Throws(IOException::class)
     fun select(
         points: PathSlice,
-        partitionSlices: Array<PathSlice>,
+        partitionSlices: Array<PathSlice?>,
         from: Long,
         to: Long,
         partitionPoint: Long,
