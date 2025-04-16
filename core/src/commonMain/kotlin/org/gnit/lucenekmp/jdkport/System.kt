@@ -135,6 +135,15 @@ object System {
         )
     }
 
+    fun arraycopy(src: ByteArray, srcPos: Int, dest: ByteArray, destPos: Int, length: Int) {
+        src.copyInto(
+            destination = dest,
+            destinationOffset = destPos,
+            startIndex = srcPos,
+            endIndex = srcPos + length
+        )
+    }
+
     fun arraycopy(src: LongArray, srcPos: Int, dest: LongArray, destPos: Int, length: Int) {
         src.copyInto(
             destination = dest,

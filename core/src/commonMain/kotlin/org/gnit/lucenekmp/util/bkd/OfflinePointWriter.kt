@@ -75,7 +75,7 @@ open class OfflinePointWriter(
     }
 
     @Throws(IOException::class)
-    protected fun getReader(start: Long, length: Long, reusableBuffer: ByteArray): OfflinePointReader {
+    fun getReader(start: Long, length: Long, reusableBuffer: ByteArray): OfflinePointReader {
         require(closed) { "point writer is still open and trying to get a reader" }
         require(start + length <= count) { "start=$start length=$length count=$count" }
         require(expectedCount == 0L || count == expectedCount)

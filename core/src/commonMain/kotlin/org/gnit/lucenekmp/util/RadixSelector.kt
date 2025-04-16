@@ -31,7 +31,7 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
      * strings are equal. This fallback selector is used when the range becomes narrow or when the
      * maximum level of recursion has been exceeded.
      */
-    protected fun getFallbackSelector(d: Int): Selector? {
+    protected open fun getFallbackSelector(d: Int): Selector? {
         return object : IntroSelector() {
             override fun swap(i: Int, j: Int) {
                 this@RadixSelector.swap(i, j)

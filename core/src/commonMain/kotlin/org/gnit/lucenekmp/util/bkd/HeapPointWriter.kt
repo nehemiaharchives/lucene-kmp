@@ -91,8 +91,8 @@ class HeapPointWriter(private val config: BKDConfig, val size: Int) : PointWrite
     }
 
     /** Return the byte at position `k` of the point at position `i`  */
-    fun byteAt(i: Int, k: Int): Int {
-        return block[i * config.bytesPerDoc() + k].toInt() and 0xff
+    fun byteAt(i: Int, k: Int): Byte {
+        return (block[i * config.bytesPerDoc() + k].toInt() and 0xff).toByte()
     }
 
     /**

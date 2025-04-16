@@ -18,23 +18,14 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
     // we store one histogram per recursion level
     private val histograms = kotlin.arrayOfNulls<IntArray>(LEVEL_THRESHOLD)
     private val endOffsets = IntArray(HISTOGRAM_SIZE)
-    private val commonPrefix: IntArray
-
-    /**
-     * Sole constructor.
-     *
-     * @param maxLength the maximum length of keys, pass [Integer.MAX_VALUE] if unknown.
-     */
-    init {
-        this.commonPrefix = IntArray(min(24, maxLength))
-    }
+    private val commonPrefix: IntArray = IntArray(min(24, maxLength))
 
     /**
      * Return the k-th byte of the entry at index `i`, or `-1` if its length is less than
      * or equal to `k`. This may only be called with a value of `i` between `0`
      * included and `maxLength` excluded.
      */
-    protected abstract fun byteAt(i: Int, k: Int): Int
+    protected abstract fun byteAt(i: Int, k: Int): Byte
 
     /**
      * Get a fall-back sorter which may assume that the first k bytes of all compared strings are
@@ -52,7 +43,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
                     val b2 = byteAt(j, o)
                     if (b1 != b2) {
                         return b1 - b2
-                    } else if (b1 == -1) {
+                    } else if (b1.toInt() == -1) {
                         break
                     }
                 }
@@ -63,7 +54,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
                 pivot.setLength(0)
                 for (o in k..<maxLength) {
                     val b = byteAt(i, o)
-                    if (b == -1) {
+                    if (b.toInt() == -1) {
                         break
                     }
                     pivot.append(b.toByte())
@@ -72,7 +63,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
 
             override fun comparePivot(j: Int): Int {
                 for (o in 0..<pivot.length()) {
-                    val b1: Int = (pivot.byteAt(o) and 0xff.toByte()).toInt()
+                    val b1 = pivot.byteAt(o) and 0xff.toByte()
                     val b2 = byteAt(j, k + o)
                     if (b1 != b2) {
                         return b1 - b2
@@ -200,7 +191,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
         var commonPrefixLength = min(commonPrefix.size, maxLength - k)
         var j = 0
         while (j < commonPrefixLength) {
-            val b = byteAt(from, k + j)
+            val b = byteAt(from, k + j).toInt()
             commonPrefix[j] = b
             if (b == -1) {
                 commonPrefixLength = j + 1
@@ -220,7 +211,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
         var i: Int = from + 1
         outer@ while (i < to) {
             for (j in 0..<commonPrefixLength) {
-                val b = byteAt(i, k + j)
+                val b = byteAt(i, k + j).toInt()
                 if (b != commonPrefix[j]) {
                     commonPrefixLength = j
                     if (commonPrefixLength == 0) { // we have no common prefix

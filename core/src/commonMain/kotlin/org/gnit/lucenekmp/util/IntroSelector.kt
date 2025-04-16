@@ -216,7 +216,7 @@ abstract class IntroSelector : Selector() {
      * Compare entries found in slots `i` and `j`. The contract for the returned
      * value is the same as [Comparator.compare].
      */
-    protected fun compare(i: Int, j: Int): Int {
+    protected open fun compare(i: Int, j: Int): Int {
         setPivot(i)
         return comparePivot(j)
     }
