@@ -188,7 +188,7 @@ protected constructor() : AutoCloseable {
      * adding to this writer
      */
     @Throws(IOException::class)
-    fun merge(mergeState: MergeState) {
+    open fun merge(mergeState: MergeState) {
         // check each incoming reader
         for (reader in mergeState.pointsReaders) {
             reader?.checkIntegrity()
