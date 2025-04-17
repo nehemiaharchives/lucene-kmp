@@ -4,11 +4,32 @@
 
 ## What is it?
 
-This repository contains a lucene-kmp library project, intended to demonstrate a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) library that is deployable to [Maven Central](https://central.sonatype.com/).
+This repository contains a lucene-kmp library project, a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [apache lucene](https://github.com/apache/lucene/) that is deployable to [Maven Central](https://central.sonatype.com/).
 
-The library has only one function: generate the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence) starting from platform-provided numbers. Also, it has a test for each platform just to be sure that tests run.
+## Supported platforms
+* jvm
+* android
+* iOS (iosX64, iosArm64, iosSimulatorArm64)
 
-Note that no other actions or tools usually required for the library development are set up, such as [tracking of backwards compatibility](https://kotlinlang.org/docs/jvm-api-guidelines-backward-compatibility.html#tools-designed-to-enforce-backward-compatibility), explicit API mode, licensing, contribution guideline, code of conduct and others. You can find a guide for best practices for designing Kotlin libraries [here](https://kotlinlang.org/docs/api-guidelines-introduction.html).
+## Lucene Java Source Project
+currently the port is based on following commit of lucene main branch
+```
+commit ec75fcad5a4208c7b9e35e870229d9b703cda8f3 (HEAD -> main, origin/main, origin/HEAD)
+Author: Robert Muir <rmuir@apache.org>
+Date:   Sun Mar 2 14:11:10 2025 -0500
+
+    reformat the python code with 'make reformat' and enable format in CI check
+
+    currently the python code has a mix of indentation, styles, imports
+    ordering, etc. for example, it is very difficult to work with mixed
+    indentation levels: the language is sensitive to indentation.
+
+    reformat all the code with 'make reformat' and enable format checks when
+    linting. It works like spotless, just don't think about it.
+```
+
+## TODO
+* need to catch up with lucene main branch automatically using AI agent such as [jetbrains junie](https://www.jetbrains.com/junie/) one commit by commit.
 
 ## How to publish?
 
