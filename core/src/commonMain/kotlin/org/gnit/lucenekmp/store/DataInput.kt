@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.store
 
 import kotlinx.io.IOException
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.GroupVIntUtil
@@ -14,7 +15,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
  * must be cloned before used in another thread. Subclasses must therefore implement [ ][.clone], returning a new `DataInput` which operates on the same underlying resource, but
  * positioned independently.
  */
-abstract class DataInput : Cloneable {
+abstract class DataInput : Cloneable<DataInput> {
     /**
      * Reads and returns a single byte.
      *
@@ -100,7 +101,7 @@ abstract class DataInput : Cloneable {
      * @see DataOutput.writeVInt
      */
     @Throws(IOException::class)
-    open fun readVInt(): Int {
+    fun readVInt(): Int {
         var b = readByte()
         var i = b.toInt() and 0x7F
         var shift = 7
@@ -234,12 +235,8 @@ abstract class DataInput : Cloneable {
      * Expert: Subclasses must ensure that clones may be positioned at different points in the
      * input from each other and from the stream they were cloned from.
      */
-    public override fun clone(): DataInput {
-        try {
-            return super.clone() as DataInput
-        } catch (e: Exception) {
-            throw Error("This cannot happen: Failing to clone DataInput", e)
-        }
+    override fun clone(): DataInput {
+        throw UnsupportedOperationException("Subclasses of DataInput must implement clone()")
     }
 
     /**
