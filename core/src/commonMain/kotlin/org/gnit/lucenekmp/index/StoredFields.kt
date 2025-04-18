@@ -63,7 +63,7 @@ protected constructor() {
      * use [DocumentStoredFieldVisitor].
      */
     @Throws(IOException::class)
-    abstract fun document(docID: Int, visitor: StoredFieldVisitor?)
+    abstract fun document(docID: Int, visitor: StoredFieldVisitor)
 
     /**
      * Like [.document] but only loads the specified fields. Note that this is simply sugar

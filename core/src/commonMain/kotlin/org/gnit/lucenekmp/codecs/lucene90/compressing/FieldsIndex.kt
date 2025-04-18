@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.jdkport.Cloneable
 import kotlinx.io.IOException
 
 
-internal abstract class FieldsIndex : Cloneable<FieldsIndex>, AutoCloseable {
+abstract class FieldsIndex : Cloneable<FieldsIndex>, AutoCloseable {
     /** Get the ID of the block that contains the given docID.  */
     abstract fun getBlockID(docID: Int): Long
 

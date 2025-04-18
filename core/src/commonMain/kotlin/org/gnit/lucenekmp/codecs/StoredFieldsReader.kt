@@ -30,7 +30,7 @@ protected constructor() : StoredFields(), Cloneable, AutoCloseable {
     @Throws(IOException::class)
     abstract fun checkIntegrity()
 
-    val mergeInstance: StoredFieldsReader
+    open val mergeInstance: StoredFieldsReader
         /**
          * Returns an instance optimized for merging. This instance may not be cloned.
          *

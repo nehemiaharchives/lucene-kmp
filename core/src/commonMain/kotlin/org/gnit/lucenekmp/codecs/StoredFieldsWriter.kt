@@ -39,7 +39,7 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Called when a document and all its fields have been added.  */
     @Throws(IOException::class)
-    fun finishDocument() {
+    open fun finishDocument() {
     }
 
     /** Writes a stored int value.  */
@@ -60,7 +60,7 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Writes a stored binary value from a [StoredFieldDataInput].  */
     @Throws(IOException::class)
-    fun writeField(info: FieldInfo, value: StoredFieldDataInput) {
+    open fun writeField(info: FieldInfo, value: StoredFieldDataInput) {
         val length: Int = value.length
         val bytes = ByteArray(length)
         value.getDataInput().readBytes(bytes, 0, length)
@@ -108,7 +108,7 @@ protected constructor() : AutoCloseable, Accountable {
      * etc).
      */
     @Throws(IOException::class)
-    fun merge(mergeState: MergeState): Int {
+    open fun merge(mergeState: MergeState): Int {
         val subs: MutableList<StoredFieldsMergeSub> = ArrayList<StoredFieldsMergeSub>()
         for (i in 0..<mergeState.storedFieldsReaders.size) {
             val storedFieldsReader: StoredFieldsReader = mergeState.storedFieldsReaders[i]!!
