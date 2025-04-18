@@ -141,7 +141,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * implements absolute reads as seek+read.
      */
     @Throws(IOException::class)
-    fun randomAccessSlice(offset: Long, length: Long): RandomAccessInput? {
+    fun randomAccessSlice(offset: Long, length: Long): RandomAccessInput {
         val slice = slice("randomaccess", offset, length)
         if (slice is RandomAccessInput) {
             // slice() already supports random access
