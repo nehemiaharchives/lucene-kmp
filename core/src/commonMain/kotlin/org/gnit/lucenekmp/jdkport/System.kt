@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import dev.scottpierce.envvar.EnvVar
+
 
 /**
  * ported from java.lang.System, only contains things needed for lucenekmp
@@ -16,6 +18,49 @@ package org.gnit.lucenekmp.jdkport
  * @since   1.0
  */
 object System {
+
+    /**
+     * ported from java.lang.System.getProperty() but implementation is EnvVar
+     *
+     *
+     * Gets the system property indicated by the specified key.
+     *
+     * First, if there is a security manager, its
+     * `checkPropertyAccess` method is called with the
+     * `key` as its argument.
+     *
+     *
+     * If there is no current set of system properties, a set of system
+     * properties is first created and initialized in the same manner as
+     * for the `getProperties` method.
+     *
+     * @param      key   the name of the system property.
+     * @param      def   a default value.
+     * @return     the string value of the system property,
+     * or the default value if there is no property with that key.
+     *
+     * @throws     SecurityException  if a security manager exists and its
+     * `checkPropertyAccess` method doesn't allow
+     * access to the specified system property.
+     * @throws     NullPointerException if `key` is `null`.
+     * @throws     IllegalArgumentException if `key` is empty.
+     * @see .setProperty
+     *
+     * @see java.lang.SecurityManager.checkPropertyAccess
+     * @see java.lang.System.getProperties
+     */
+    fun getProperty(key: String, def: String?): String? {
+        // TODO need better implementation for each platform using expect/actual pattern
+        var result : String? = EnvVar[key]
+
+        if(result == null && def != null) {
+            result = def
+        }
+
+        return result
+    }
+
+
     /**
      * ported from java.lang.System.arraycopy()
      *
