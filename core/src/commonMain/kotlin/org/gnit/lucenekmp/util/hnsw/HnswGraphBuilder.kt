@@ -153,7 +153,7 @@ open class HnswGraphBuilder protected constructor(
     }
 
     @Throws(IOException::class)
-    fun addGraphNode(node: Int, scorer: UpdateableRandomVectorScorer) {
+    open fun addGraphNode(node: Int, scorer: UpdateableRandomVectorScorer) {
         check(!frozen) { "Graph builder is already frozen" }
         val nodeLevel = getRandomGraphLevel(ml, random)
         // first add nodes to all levels
