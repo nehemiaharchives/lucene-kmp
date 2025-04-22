@@ -47,7 +47,7 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Called after a doc and all its fields have been added.  */
     @Throws(IOException::class)
-    fun finishDocument() {
+    open fun finishDocument() {
     }
 
     /**
@@ -61,7 +61,7 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Called after a field and all its terms have been added.  */
     @Throws(IOException::class)
-    fun finishField() {
+    open fun finishField() {
     }
 
     /**
@@ -70,7 +70,7 @@ protected constructor() : AutoCloseable, Accountable {
     ` *  times respectively.
      */
     @Throws(IOException::class)
-    abstract fun startTerm(term: BytesRef?, freq: Int)
+    abstract fun startTerm(term: BytesRef, freq: Int)
 
     /** Called after a term and all its positions have been added.  */
     @Throws(IOException::class)
@@ -109,7 +109,7 @@ protected constructor() : AutoCloseable, Accountable {
     // TODO: we should probably nuke this and make a more efficient 4.x format
     // PreFlex-RW could then be slow and buffer (it's only used in tests...)
     @Throws(IOException::class)
-    fun addProx(numProx: Int, positions: DataInput?, offsets: DataInput?) {
+    open fun addProx(numProx: Int, positions: DataInput?, offsets: DataInput?) {
         var position = 0
         var lastOffset = 0
         var payload: BytesRefBuilder? = null
@@ -179,7 +179,7 @@ protected constructor() : AutoCloseable, Accountable {
      * merging (bulk-byte copying, etc).
      */
     @Throws(IOException::class)
-    fun merge(mergeState: MergeState): Int {
+    open fun merge(mergeState: MergeState): Int {
         val subs: MutableList<TermVectorsMergeSub> = ArrayList<TermVectorsMergeSub>()
         for (i in 0..<mergeState.termVectorsReaders.size) {
             val reader: TermVectorsReader? = mergeState.termVectorsReaders[i]
