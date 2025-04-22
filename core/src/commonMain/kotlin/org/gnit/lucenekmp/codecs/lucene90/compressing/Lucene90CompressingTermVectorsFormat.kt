@@ -16,7 +16,7 @@ import kotlinx.io.IOException
  *
  * @lucene.experimental
  */
-class Lucene90CompressingTermVectorsFormat(
+open class Lucene90CompressingTermVectorsFormat(
     private val formatName: String,
     private val segmentSuffix: String,
     private val compressionMode: CompressionMode,
