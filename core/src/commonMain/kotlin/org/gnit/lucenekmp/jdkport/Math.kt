@@ -159,4 +159,44 @@ object Math {
         }
         return r
     }
+
+    /**
+     * Returns the floating-point value adjacent to `f` in
+     * the direction of positive infinity.  This method is
+     * semantically equivalent to `nextAfter(f,
+     * Float.POSITIVE_INFINITY)`; however, a `nextUp`
+     * implementation may run faster than its equivalent
+     * `nextAfter` call.
+     *
+     *
+     * Special Cases:
+     *
+     *  *  If the argument is NaN, the result is NaN.
+     *
+     *  *  If the argument is positive infinity, the result is
+     * positive infinity.
+     *
+     *  *  If the argument is zero, the result is
+     * [Float.MIN_VALUE]
+     *
+     *
+     *
+     * @apiNote This method corresponds to the nextUp
+     * operation defined in IEEE 754.
+     *
+     * @param f starting floating-point value
+     * @return The adjacent floating-point value closer to positive
+     * infinity.
+     * @since 1.6
+     */
+    fun nextUp(f: Float): Float {
+        // Use a single conditional and handle the likely cases first.
+        if (f < Float.Companion.POSITIVE_INFINITY) {
+            // Add +0.0 to get rid of a -0.0 (+0.0 + -0.0 => +0.0).
+            val transducer = Float.floatToRawIntBits(f + 0.0f)
+            return Float.intBitsToFloat(transducer + (if (transducer >= 0) 1 else -1))
+        } else { // f is NaN or +Infinity
+            return f
+        }
+    }
 }
