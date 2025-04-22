@@ -7,11 +7,11 @@ import org.gnit.lucenekmp.search.TotalHits
 /**
  * Wraps a provided KnnCollector object, translating the provided vectorId ordinal to a documentId
  */
-class OrdinalTranslatedKnnCollector(collector: KnnCollector, private val vectorOrdinalToDocId: IntToIntFunction) :
+class OrdinalTranslatedKnnCollector(collector: KnnCollector, private val vectorOrdinalToDocId: (Int) -> Int) :
     KnnCollector.Decorator(collector) {
 
     override fun collect(vectorId: Int, similarity: Float): Boolean {
-        return super.collect(vectorOrdinalToDocId.apply(vectorId), similarity)
+        return super.collect(vectorOrdinalToDocId(vectorId), similarity)
     }
 
     override fun topDocs(): TopDocs {

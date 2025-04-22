@@ -40,7 +40,7 @@ interface RandomVectorScorer {
      * @param acceptDocs the accept docs
      * @return the accept docs
      */
-    fun getAcceptOrds(acceptDocs: Bits): Bits {
+    fun getAcceptOrds(acceptDocs: Bits): Bits? {
         return acceptDocs
     }
 

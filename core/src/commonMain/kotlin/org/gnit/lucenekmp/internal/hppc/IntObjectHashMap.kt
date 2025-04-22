@@ -186,7 +186,7 @@ class IntObjectHashMap<VType>
         }
     }
 
-    fun get(key: Int): VType? {
+    operator fun get(key: Int): VType? {
         if (((key) == 0)) {
             return if (hasEmptyKey) values!![mask + 1] as VType? else null
         } else {

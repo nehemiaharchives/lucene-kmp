@@ -10,7 +10,7 @@ import kotlinx.io.IOException
  */
 interface QuantizedVectorsReader : AutoCloseable, Accountable {
     @Throws(IOException::class)
-    fun getQuantizedVectorValues(fieldName: String): QuantizedByteVectorValues
+    fun getQuantizedVectorValues(fieldName: String): QuantizedByteVectorValues?
 
-    fun getQuantizationState(fieldName: String): ScalarQuantizer
+    fun getQuantizationState(fieldName: String): ScalarQuantizer?
 }

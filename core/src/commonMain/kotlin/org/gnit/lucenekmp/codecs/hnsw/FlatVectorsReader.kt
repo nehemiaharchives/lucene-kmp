@@ -73,4 +73,6 @@ abstract class FlatVectorsReader
          * The default implementation returns `this`
          */
         get() = this
+
+    fun getMergeInstance() = mergeInstance
 }
