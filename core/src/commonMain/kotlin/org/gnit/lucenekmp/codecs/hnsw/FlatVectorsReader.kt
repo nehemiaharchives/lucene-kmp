@@ -26,7 +26,7 @@ import kotlinx.io.IOException
 abstract class FlatVectorsReader
 /** Sole constructor  */ protected constructor(
     /** Scorer for flat vectors  */
-    val flatVectorScorer: FlatVectorsScorer
+    val vectorScorer: FlatVectorsScorer
 ) : KnnVectorsReader(), Accountable {
     /**
      * @return the [FlatVectorsScorer] for this reader.
