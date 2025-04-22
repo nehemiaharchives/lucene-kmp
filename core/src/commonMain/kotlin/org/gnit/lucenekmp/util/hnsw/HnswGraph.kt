@@ -50,7 +50,7 @@ protected constructor() {
     abstract fun size(): Int
 
     /** Returns max node id, inclusive. Normally this value will be size - 1.  */
-    fun maxNodeId(): Int {
+    open fun maxNodeId(): Int {
         return size() - 1
     }
 

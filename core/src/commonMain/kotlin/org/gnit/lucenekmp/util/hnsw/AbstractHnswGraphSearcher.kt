@@ -58,7 +58,7 @@ abstract class AbstractHnswGraphSearcher {
      */
     @Throws(IOException::class)
     fun search(
-        results: KnnCollector, scorer: RandomVectorScorer, graph: HnswGraph, acceptOrds: Bits
+        results: KnnCollector, scorer: RandomVectorScorer, graph: HnswGraph, acceptOrds: Bits?
     ) {
         val eps = findBestEntryPoint(scorer, graph, results)
         require(eps != null && eps.size > 0)

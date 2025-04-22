@@ -57,5 +57,9 @@ abstract class InfoStream : AutoCloseable {
                 }
                 defaultInfoStream = infoStream
             }
+
+        fun getDefault(): InfoStream {
+            return defaultInfoStream
+        }
     }
 }
