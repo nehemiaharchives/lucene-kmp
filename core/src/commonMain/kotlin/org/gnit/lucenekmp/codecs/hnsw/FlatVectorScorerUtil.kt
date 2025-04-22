@@ -17,4 +17,6 @@ object FlatVectorScorerUtil {
          * method may be optimized on certain platforms. Otherwise, a DefaultFlatVectorScorer is returned.
          */
         get() = IMPL.getLucene99FlatVectorsScorer()
+
+    fun getLucene99FlatVectorsScorer() = lucene99FlatVectorsScorer
 }
