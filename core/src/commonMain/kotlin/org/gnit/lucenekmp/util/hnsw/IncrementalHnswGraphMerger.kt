@@ -87,7 +87,7 @@ open class IncrementalHnswGraphMerger(
      * @throws IOException If an error occurs while reading from the merge state
      */
     @Throws(IOException::class)
-    protected fun createBuilder(mergedVectorValues: KnnVectorValues, maxOrd: Int): HnswBuilder {
+    protected open fun createBuilder(mergedVectorValues: KnnVectorValues, maxOrd: Int): HnswBuilder {
         if (initReader == null) {
             return HnswGraphBuilder.create(
                 scorerSupplier, M, beamWidth, HnswGraphBuilder.randSeed, maxOrd

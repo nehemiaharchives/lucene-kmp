@@ -27,7 +27,7 @@ class HnswConcurrentMergeBuilder(
     scorerSupplier: RandomVectorScorerSupplier,
     beamWidth: Int,
     hnsw: OnHeapHnswGraph,
-    initializedNodes: BitSet
+    initializedNodes: BitSet?
 ) : HnswBuilder {
     private val workers: Array<ConcurrentMergeWorker?>
     private val hnswLock: HnswLock
