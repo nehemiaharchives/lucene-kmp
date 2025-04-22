@@ -61,6 +61,22 @@ fun Float.Companion.isNaN(v: Float): Boolean = v != v
 fun Float.Companion.isFinite(f: Float): Boolean = abs(f) <= MAX_VALUE
 
 /**
+ * Returns `true` if the specified number is infinitely
+ * large in magnitude, `false` otherwise.
+ *
+ * @apiNote
+ * This method corresponds to the isInfinite operation defined in
+ * IEEE 754.
+ *
+ * @param   v   the value to be tested.
+ * @return  `true` if the argument is positive infinity or
+ * negative infinity; `false` otherwise.
+ */
+fun Float.Companion.isInfinite(v: Float): Boolean {
+    return abs(v) > MAX_VALUE
+}
+
+/**
  * Returns an integer representing the raw bits of the given [value] according
  * to the IEEE 754 floating-point "single format" bit layout.
  *

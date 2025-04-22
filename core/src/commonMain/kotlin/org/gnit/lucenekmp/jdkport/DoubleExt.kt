@@ -33,6 +33,22 @@ fun Double.Companion.doubleToLongBits(value: Double): Long {
 }
 
 /**
+ * Returns `true` if the specified number is a
+ * Not-a-Number (NaN) value, `false` otherwise.
+ *
+ * @apiNote
+ * This method corresponds to the isNaN operation defined in IEEE
+ * 754.
+ *
+ * @param   v   the value to be tested.
+ * @return  `true` if the value of the argument is NaN;
+ * `false` otherwise.
+ */
+fun Double.Companion.isNaN(v: Double): Boolean {
+    return (v != v)
+}
+
+/**
  * Compares the two specified `double` values. The sign
  * of the integer value returned is the same as that of the
  * integer that would be returned by the call:
