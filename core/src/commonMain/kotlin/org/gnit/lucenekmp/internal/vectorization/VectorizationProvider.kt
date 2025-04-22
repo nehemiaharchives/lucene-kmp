@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.internal.vectorization
 
+import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
+
 abstract class VectorizationProvider {
     companion object {
         fun getInstance(): VectorizationProvider = DefaultVectorizationProvider()
@@ -9,4 +11,7 @@ abstract class VectorizationProvider {
      * Returns a singleton (stateless) [VectorUtilSupport] to support SIMD usage in [ ].
      */
     abstract fun getVectorUtilSupport(): VectorUtilSupport
+
+    /** Returns a FlatVectorsScorer that supports the Lucene99 format.  */
+    abstract fun getLucene99FlatVectorsScorer(): FlatVectorsScorer
 }
