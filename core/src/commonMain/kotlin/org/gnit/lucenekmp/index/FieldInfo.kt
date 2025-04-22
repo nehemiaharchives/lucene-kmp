@@ -341,6 +341,38 @@ class FieldInfo(
         this.checkConsistency()
     }
 
+    fun getIndexOptions(): IndexOptions {
+        return indexOptions
+    }
+
+    fun getDocValuesGen(): Long {
+        return dvGen
+    }
+
+    fun getPointDimensionCount(): Int {
+        return pointDimensionCount
+    }
+
+    fun getPointIndexDimensionCount(): Int {
+        return pointIndexDimensionCount
+    }
+
+    fun getPointNumBytes(): Int {
+        return pointNumBytes
+    }
+
+    fun getVectorDimension(): Int {
+        return vectorDimension
+    }
+
+    fun getVectorEncoding(): VectorEncoding {
+        return vectorEncoding
+    }
+
+    fun getVectorSimilarityFunction(): VectorSimilarityFunction {
+        return vectorSimilarityFunction
+    }
+
     /**
      * Returns [DocValuesType] of the docValues; this is `DocValuesType.NONE` if the field
      * has no docvalues.
