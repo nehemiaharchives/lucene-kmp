@@ -15,14 +15,14 @@ import kotlinx.io.IOException
 abstract class FlatVectorsWriter
 /** Sole constructor  */ protected constructor(
     /** Scorer for flat vectors  */
-    val flatVectorScorer: FlatVectorsScorer
+    val vectorScorer: FlatVectorsScorer
 ) : KnnVectorsWriter() {
     /**
      * @return the [FlatVectorsScorer] for this reader.
      */
 
     fun getFlatVectorScorer(): FlatVectorsScorer {
-        return flatVectorScorer
+        return vectorScorer
     }
 
     /**

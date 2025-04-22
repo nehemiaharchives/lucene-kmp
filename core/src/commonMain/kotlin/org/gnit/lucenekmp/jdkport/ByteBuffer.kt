@@ -52,6 +52,72 @@ open class ByteBuffer private constructor(
     }
 
     /**
+     * port of java.nio.ByteBuffer.array()
+     * Returns a copy of the byte array that backs this buffer.
+     */
+    fun array(): ByteArray {
+        // Create a byte array with the capacity of the buffer
+        val byteArray = ByteArray(capacity)
+
+        // Save the current position and limit
+        val savedPosition = position
+        val savedLimit = limit
+
+        try {
+            // Reset position to start and set limit to capacity to access all data
+            position = 0
+            limit = capacity
+
+            // Copy all bytes from the buffer to the array
+            get(byteArray)
+
+            return byteArray
+        } finally {
+            // Restore the original position and limit
+            position = savedPosition
+            limit = savedLimit
+        }
+    }
+
+    /**
+     *
+     * Tells whether or not this buffer is backed by an accessible byte array.
+     * For this implementation, we always return true since we can always
+     * create and return a byte array copy of the buffer contents.
+     *
+     * @return `true` since we can always create a byte array representation
+     */
+    fun hasArray(): Boolean {
+        return true
+    }
+
+    /**
+     * Returns the offset within this buffer's backing array of the first
+     * element of the buffer&nbsp;&nbsp;*(optional operation)*.
+     *
+     * If this buffer is backed by an array then buffer position *p*
+     * corresponds to array index *p*&nbsp;+&nbsp;`arrayOffset()`.
+     *
+     * Invoke the [hasArray][.hasArray] method before invoking this
+     * method in order to ensure that this buffer has an accessible backing
+     * array.
+     *
+     * @return The offset within this buffer's array (always 0 for this implementation)
+     *
+     * @throws UnsupportedOperationException
+     * If this buffer is not backed by an accessible array
+     */
+    fun arrayOffset(): Int {
+        // Since our array() method always creates a new array with the buffer contents,
+        // the offset is always 0 in this implementation
+        if (!hasArray()) {
+            throw UnsupportedOperationException("Buffer does not have a backing array")
+        }
+        return 0
+    }
+
+
+    /**
      * Sets this buffer's limit.
      *
      * If the current position is greater than the new limit, the position is set to the new limit.

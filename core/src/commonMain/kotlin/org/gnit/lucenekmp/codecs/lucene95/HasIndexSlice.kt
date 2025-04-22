@@ -9,4 +9,8 @@ import org.gnit.lucenekmp.store.IndexInput
 interface HasIndexSlice {
     /** Returns an IndexInput from which to read this instance's values.  */
     val slice: IndexInput?
+
+    fun getSlice(): IndexInput? {
+        return slice
+    }
 }

@@ -141,7 +141,7 @@ protected constructor() : Accountable, AutoCloseable {
 
     /** View over multiple vector values supporting iterator-style access via DocIdMerger.  */
     object MergedVectorValues {
-        private fun validateFieldEncoding(fieldInfo: FieldInfo, expected: VectorEncoding) {
+        private fun validateFieldEncoding(fieldInfo: FieldInfo?, expected: VectorEncoding) {
             require(fieldInfo != null && fieldInfo.hasVectorValues())
             val fieldEncoding: VectorEncoding = fieldInfo.vectorEncoding
             if (fieldEncoding !== expected) {
@@ -159,7 +159,7 @@ protected constructor() : Accountable, AutoCloseable {
          * @return true if the fieldInfos has vector values for the field.
          */
         fun hasVectorValues(fieldInfos: FieldInfos, fieldName: String): Boolean {
-            if (fieldInfos.hasVectorValues() == false) {
+            if (!fieldInfos.hasVectorValues()) {
                 return false
             }
             val info: FieldInfo? = fieldInfos.fieldInfo(fieldName)
@@ -201,12 +201,12 @@ protected constructor() : Accountable, AutoCloseable {
         ): FloatVectorValues {
             validateFieldEncoding(fieldInfo, FLOAT32)
             return MergedFloat32VectorValues(
-                mergeVectorValues<FloatVectorValues, FloatVectorValuesSub>(
+                mergeVectorValues(
                     mergeState.knnVectorsReaders,
                     mergeState.docMaps,
                     fieldInfo,
                     mergeState.fieldInfos,
-                    IOFunction { knnVectorsReader -> knnVectorsReader.getFloatVectorValues(fieldInfo.name)!! }
+                    { knnVectorsReader -> knnVectorsReader.getFloatVectorValues(fieldInfo.name)!! }
                 ) { docMap: MergeState.DocMap, values: FloatVectorValues ->
                     FloatVectorValuesSub(
                         docMap,
@@ -222,12 +222,12 @@ protected constructor() : Accountable, AutoCloseable {
         fun mergeByteVectorValues(fieldInfo: FieldInfo, mergeState: MergeState): ByteVectorValues {
             validateFieldEncoding(fieldInfo, BYTE)
             return MergedByteVectorValues(
-                mergeVectorValues<ByteVectorValues, ByteVectorValuesSub>(
+                mergeVectorValues(
                     mergeState.knnVectorsReaders,
                     mergeState.docMaps,
                     fieldInfo,
                     mergeState.fieldInfos,
-                    IOFunction { knnVectorsReader -> knnVectorsReader.getByteVectorValues(fieldInfo.name)!! }
+                    { knnVectorsReader -> knnVectorsReader.getByteVectorValues(fieldInfo.name)!! }
                 ) { docMap: MergeState.DocMap, values: ByteVectorValues ->
                     ByteVectorValuesSub(
                         docMap,
@@ -424,8 +424,8 @@ protected constructor() : Accountable, AutoCloseable {
         fun mapOldOrdToNewOrd(
             oldDocIds: DocsWithFieldSet,
             sortMap: Sorter.DocMap,
-            old2NewOrd: IntArray,
-            new2OldOrd: IntArray,
+            old2NewOrd: IntArray?,
+            new2OldOrd: IntArray?,
             newDocsWithField: DocsWithFieldSet?
         ) {
             // TODO: a similar function exists in IncrementalHnswGraphMerger#getNewOrdMapping
@@ -452,7 +452,7 @@ protected constructor() : Accountable, AutoCloseable {
             Arrays.sort(newDocIds)
             var newOrd = 0
             for (newDocId in newDocIds) {
-                val currOldOrd: Int = newIdToOldOrd.get(newDocId)!!
+                val currOldOrd: Int = newIdToOldOrd.get(newDocId)
                 if (old2NewOrd != null) {
                     old2NewOrd[currOldOrd] = newOrd
                 }

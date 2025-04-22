@@ -40,13 +40,13 @@ abstract class KnnVectorValues {
 
     val vectorByteLength: Int
         /** Returns the vector byte length, defaults to dimension multiplied by float byte size  */
-        get() = dimension() * this.encoding!!.byteSize
+        get() = dimension() * this.encoding.byteSize
 
     /** The vector encoding of these values.  */
     abstract val encoding: VectorEncoding
 
     /** Returns a Bits accepting docs accepted by the argument and having a vector value  */
-    fun getAcceptOrds(acceptDocs: Bits): Bits {
+    open fun getAcceptOrds(acceptDocs: Bits?): Bits? {
         // FIXME: change default to return acceptDocs and provide this impl
         // somewhere more specialized (in every non-dense impl).
         /*if (acceptDocs == null) {
@@ -54,7 +54,7 @@ abstract class KnnVectorValues {
         }*/
         return object : Bits {
             override fun get(index: Int): Boolean {
-                return acceptDocs.get(ordToDoc(index))
+                return acceptDocs!!.get(ordToDoc(index))
             }
 
             override fun length(): Int {
