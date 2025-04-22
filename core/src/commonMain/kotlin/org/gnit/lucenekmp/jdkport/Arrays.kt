@@ -552,6 +552,7 @@ object Arrays {
         return binarySearch0(a, fromIndex, toIndex, key)
     }
 
+
     // Like public version, but without range checks.
     private fun binarySearch0(
         a: IntArray, fromIndex: Int, toIndex: Int,
@@ -571,6 +572,74 @@ object Arrays {
         return -(low + 1) // key not found.
     }
 
+    /**
+     * Searches a range of
+     * the specified array of floats for the specified value using
+     * the binary search algorithm.
+     * The range must be sorted
+     * (as by the [.sort] method)
+     * prior to making this call. If
+     * it is not sorted, the results are undefined. If the range contains
+     * multiple elements with the specified value, there is no guarantee which
+     * one will be found. This method considers all NaN values to be
+     * equivalent and equal.
+     *
+     * @param a the array to be searched
+     * @param fromIndex the index of the first element (inclusive) to be
+     * searched
+     * @param toIndex the index of the last element (exclusive) to be searched
+     * @param key the value to be searched for
+     * @return index of the search key, if it is contained in the array
+     * within the specified range;
+     * otherwise, `(-(*insertion point*) - 1)`. The
+     * *insertion point* is defined as the point at which the
+     * key would be inserted into the array: the index of the first
+     * element in the range greater than the key,
+     * or `toIndex` if all
+     * elements in the range are less than the specified key. Note
+     * that this guarantees that the return value will be &gt;= 0 if
+     * and only if the key is found.
+     * @throws IllegalArgumentException
+     * if `fromIndex > toIndex`
+     * @throws ArrayIndexOutOfBoundsException
+     * if `fromIndex < 0 or toIndex > a.length`
+     * @since 1.6
+     */
+    fun binarySearch(
+        a: FloatArray, fromIndex: Int, toIndex: Int,
+        key: Float
+    ): Int {
+        rangeCheck(a.size, fromIndex, toIndex)
+        return binarySearch0(a, fromIndex, toIndex, key)
+    }
+
+    // Like public version, but without range checks.
+    private fun binarySearch0(
+        a: FloatArray, fromIndex: Int, toIndex: Int,
+        key: Float
+    ): Int {
+        var low = fromIndex
+        var high = toIndex - 1
+
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val midVal = a[mid]
+
+            if (midVal < key) low = mid + 1 // Neither val is NaN, thisVal is smaller
+            else if (midVal > key) high = mid - 1 // Neither val is NaN, thisVal is larger
+            else {
+                val midBits = Float.floatToIntBits(midVal)
+                val keyBits = Float.floatToIntBits(key)
+                if (midBits == keyBits)  // Values are equal
+                    return mid // Key found
+                else if (midBits < keyBits)  // (-0.0, 0.0) or (!NaN, NaN)
+                    low = mid + 1
+                else  // (0.0, -0.0) or (NaN, !NaN)
+                    high = mid - 1
+            }
+        }
+        return -(low + 1) // key not found.
+    }
 
     /*
      * Sorting methods. Note that all public "sort" methods take the
@@ -768,6 +837,8 @@ object Arrays {
     }
 
     fun toString(a: IntArray): String = a.joinToString()
+
+    fun toString(a: FloatArray): String = a.joinToString()
 
     fun fill(a: ByteArray, fromIndex: Int, toIndex: Int, value: Byte) {
         a.fill(

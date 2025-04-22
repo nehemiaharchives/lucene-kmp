@@ -198,7 +198,25 @@ object System {
         )
     }
 
+    fun arraycopy(src: IntArray, srcPos: Int, dest: IntArray, destPos: Int, length: Int) {
+        src.copyInto(
+            destination = dest,
+            destinationOffset = destPos,
+            startIndex = srcPos,
+            endIndex = srcPos + length
+        )
+    }
+
     fun arraycopy(src: LongArray, srcPos: Int, dest: LongArray, destPos: Int, length: Int) {
+        src.copyInto(
+            destination = dest,
+            destinationOffset = destPos,
+            startIndex = srcPos,
+            endIndex = srcPos + length
+        )
+    }
+
+    fun arraycopy(src: FloatArray, srcPos: Int, dest: FloatArray, destPos: Int, length: Int) {
         src.copyInto(
             destination = dest,
             destinationOffset = destPos,
