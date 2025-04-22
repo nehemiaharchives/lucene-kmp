@@ -15,7 +15,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
  * must be cloned before used in another thread. Subclasses must therefore implement [ ][.clone], returning a new `DataInput` which operates on the same underlying resource, but
  * positioned independently.
  */
-abstract class DataInput : Cloneable<DataInput> {
+    abstract class DataInput : Cloneable<DataInput> {
     /**
      * Reads and returns a single byte.
      *
@@ -101,7 +101,7 @@ abstract class DataInput : Cloneable<DataInput> {
      * @see DataOutput.writeVInt
      */
     @Throws(IOException::class)
-    fun readVInt(): Int {
+    open fun readVInt(): Int {
         var b = readByte()
         var i = b.toInt() and 0x7F
         var shift = 7

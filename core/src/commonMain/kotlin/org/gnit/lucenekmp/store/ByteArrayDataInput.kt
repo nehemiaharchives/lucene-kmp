@@ -20,6 +20,14 @@ class ByteArrayDataInput : DataInput {
     var position: Int = 0
     private var limit = 0
 
+    fun getPosition(): Int {
+        return position
+    }
+
+    fun setPosition(position: Int) {
+        this.position = position
+    }
+
     constructor(bytes: ByteArray) {
         reset(bytes)
     }

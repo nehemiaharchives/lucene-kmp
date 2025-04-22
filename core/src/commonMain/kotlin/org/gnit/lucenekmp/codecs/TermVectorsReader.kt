@@ -27,7 +27,7 @@ protected constructor() : TermVectors(), Cloneable, AutoCloseable {
     /** Create a clone that one caller at a time may use to read term vectors.  */
     public abstract override fun clone(): TermVectorsReader
 
-    val mergeInstance: TermVectorsReader
+    open val mergeInstance: TermVectorsReader
         /**
          * Returns an instance optimized for merging. This instance may only be consumed in the thread
          * that called [.getMergeInstance].

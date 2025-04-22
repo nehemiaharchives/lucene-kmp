@@ -25,7 +25,7 @@ protected constructor() {
      * prefetching all documents up-front.
      */
     @Throws(IOException::class)
-    fun prefetch(docID: Int) {
+    open fun prefetch(docID: Int) {
     }
 
     /**
