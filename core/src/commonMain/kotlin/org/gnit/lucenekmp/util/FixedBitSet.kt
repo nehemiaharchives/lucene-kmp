@@ -223,8 +223,12 @@ class FixedBitSet : BitSet {
         return -1
     }
 
+    fun getBits(): LongArray {
+        return bits
+    }
+
     @Throws(IOException::class)
-    public override fun or(iter: DocIdSetIterator) {
+    override fun or(iter: DocIdSetIterator) {
         checkUnpositioned(iter)
         iter.nextDoc()
         iter.intoBitSet(DocIdSetIterator.NO_MORE_DOCS, this, 0)
@@ -517,7 +521,7 @@ class FixedBitSet : BitSet {
         return FixedBits(bits, numBits)
     }
 
-    public override fun applyMask(bitSet: FixedBitSet, offset: Int) {
+    override fun applyMask(bitSet: FixedBitSet, offset: Int) {
         // Note: Some scorers don't track maxDoc and may thus call this method with an offset that is
         // beyond bitSet.length()
         val length = min(bitSet.length(), length() - offset)

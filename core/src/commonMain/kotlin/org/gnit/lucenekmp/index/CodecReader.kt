@@ -24,12 +24,20 @@ protected constructor() : LeafReader() {
      */
     abstract val fieldsReader: StoredFieldsReader
 
+    fun getFieldInfos(): FieldInfos {
+        return fieldInfos
+    }
+
     /**
      * Expert: retrieve underlying TermVectorsReader
      *
      * @lucene.internal
      */
-    abstract val termVectorsReader: TermVectorsReader
+    abstract val termVectorsReader: TermVectorsReader?
+
+    fun getTermVectorsReader(): TermVectorsReader? {
+        return termVectorsReader
+    }
 
     /**
      * Expert: retrieve underlying NormsProducer
@@ -38,12 +46,20 @@ protected constructor() : LeafReader() {
      */
     abstract val normsReader: NormsProducer
 
+    fun getNormsReader(): NormsProducer {
+        return normsReader
+    }
+
     /**
      * Expert: retrieve underlying DocValuesProducer
      *
      * @lucene.internal
      */
     abstract val docValuesReader: DocValuesProducer
+
+    fun getDocValuesReader(): DocValuesProducer {
+        return docValuesReader
+    }
 
     /**
      * Expert: retrieve underlying FieldsProducer
@@ -52,12 +68,20 @@ protected constructor() : LeafReader() {
      */
     abstract val postingsReader: FieldsProducer
 
+    fun getPostingsReader(): FieldsProducer {
+        return postingsReader
+    }
+
     /**
      * Expert: retrieve underlying PointsReader
      *
      * @lucene.internal
      */
     abstract val pointsReader: PointsReader
+
+    fun getPointsReader(): PointsReader {
+        return pointsReader
+    }
 
     /**
      * Expert: retrieve underlying VectorReader
@@ -66,19 +90,23 @@ protected constructor() : LeafReader() {
      */
     abstract val vectorReader: KnnVectorsReader
 
+    fun getVectorReader(): KnnVectorsReader {
+        return vectorReader
+    }
+
     @Throws(IOException::class)
-    public override fun storedFields(): StoredFields {
+    override fun storedFields(): StoredFields {
         val reader: StoredFields = this.fieldsReader
         return object : StoredFields() {
             @Throws(IOException::class)
-            public override fun prefetch(docID: Int) {
+            override fun prefetch(docID: Int) {
                 // Don't trust the codec to do proper checks
                 Objects.checkIndex(docID, maxDoc())
                 reader.prefetch(docID)
             }
 
             @Throws(IOException::class)
-            public override fun document(docID: Int, visitor: StoredFieldVisitor?) {
+            override fun document(docID: Int, visitor: StoredFieldVisitor) {
                 // Don't trust the codec to do proper checks
                 Objects.checkIndex(docID, maxDoc())
                 reader.document(docID, visitor)
@@ -87,17 +115,17 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun termVectors(): TermVectors {
-        val reader: TermVectorsReader = this.termVectorsReader
-        if (reader == null) {
-            return TermVectors.EMPTY
+    override fun termVectors(): TermVectors {
+        val reader: TermVectorsReader? = this.termVectorsReader
+        return if (reader == null) {
+            TermVectors.EMPTY
         } else {
-            return reader
+            reader
         }
     }
 
     @Throws(IOException::class)
-    public override fun terms(field: String): Terms? {
+    override fun terms(field: String): Terms? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null || fi.indexOptions === IndexOptions.NONE) {
@@ -110,7 +138,7 @@ protected constructor() : LeafReader() {
     // returns the FieldInfo that corresponds to the given field and type, or
     // null if the field does not exist, or not indexed as the requested
     // DovDocValuesType.
-    private fun getDVField(field: String, type: DocValuesType): FieldInfo {
+    private fun getDVField(field: String, type: DocValuesType): FieldInfo? {
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null) {
             // Field does not exist
@@ -129,7 +157,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getNumericDocValues(field: String): NumericDocValues {
+    override fun getNumericDocValues(field: String): NumericDocValues? {
         ensureOpen()
         val fi = getDVField(field, DocValuesType.NUMERIC)
         if (fi == null) {
@@ -139,7 +167,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getBinaryDocValues(field: String): BinaryDocValues {
+    override fun getBinaryDocValues(field: String): BinaryDocValues? {
         ensureOpen()
         val fi = getDVField(field, DocValuesType.BINARY)
         if (fi == null) {
@@ -149,7 +177,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getSortedDocValues(field: String): SortedDocValues {
+    override fun getSortedDocValues(field: String): SortedDocValues? {
         ensureOpen()
         val fi = getDVField(field, DocValuesType.SORTED)
         if (fi == null) {
@@ -159,7 +187,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getSortedNumericDocValues(field: String): SortedNumericDocValues {
+    override fun getSortedNumericDocValues(field: String): SortedNumericDocValues? {
         ensureOpen()
 
         val fi = getDVField(field, DocValuesType.SORTED_NUMERIC)
@@ -170,7 +198,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getSortedSetDocValues(field: String): SortedSetDocValues {
+    override fun getSortedSetDocValues(field: String): SortedSetDocValues? {
         ensureOpen()
         val fi = getDVField(field, DocValuesType.SORTED_SET)
         if (fi == null) {
@@ -180,7 +208,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getDocValuesSkipper(field: String): DocValuesSkipper {
+    override fun getDocValuesSkipper(field: String): DocValuesSkipper? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null || fi.docValuesSkipIndexType() === DocValuesSkipIndexType.NONE) {
@@ -190,10 +218,10 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getNormValues(field: String): NumericDocValues {
+    override fun getNormValues(field: String): NumericDocValues? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
-        if (fi == null || fi.hasNorms() === false) {
+        if (fi == null || !fi.hasNorms()) {
             // Field does not exist or does not index norms
             return null
         }
@@ -202,7 +230,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getPointValues(field: String): PointValues {
+    override fun getPointValues(field: String): PointValues? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null || fi.getPointDimensionCount() == 0) {
@@ -214,7 +242,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getFloatVectorValues(field: String): FloatVectorValues {
+    override fun getFloatVectorValues(field: String): FloatVectorValues? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null || fi.vectorDimension == 0 || fi.vectorEncoding !== VectorEncoding.FLOAT32) {
@@ -226,7 +254,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun getByteVectorValues(field: String): ByteVectorValues {
+    override fun getByteVectorValues(field: String): ByteVectorValues? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null || fi.vectorDimension == 0 || fi.vectorEncoding !== VectorEncoding.BYTE) {
@@ -238,7 +266,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun searchNearestVectors(
+    override fun searchNearestVectors(
         field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits
     ) {
         ensureOpen()
@@ -251,7 +279,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    public override fun searchNearestVectors(
+    override fun searchNearestVectors(
         field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
     ) {
         ensureOpen()
@@ -264,11 +292,11 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    protected override fun doClose() {
+    override fun doClose() {
     }
 
     @Throws(IOException::class)
-    public override fun checkIntegrity() {
+    override fun checkIntegrity() {
         ensureOpen()
 
         // terms/postings
@@ -293,7 +321,7 @@ protected constructor() : LeafReader() {
 
         // term vectors
         if (this.termVectorsReader != null) {
-            this.termVectorsReader.checkIntegrity()
+            this.termVectorsReader?.checkIntegrity()
         }
 
         // points

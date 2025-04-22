@@ -42,7 +42,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     private val byName: MutableMap<String, FieldInfo>
 
     /** Iterator in ascending order of field number.  */
-    private var values: MutableCollection<FieldInfo> = mutableListOf<FieldInfo>()
+    private var values: MutableCollection<FieldInfo> = mutableListOf()
 
     /**
      * Constructs a new FieldInfos from an array of FieldInfo objects. The array can be used directly
@@ -85,11 +85,10 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
 
             hasTermVectors = hasTermVectors or info.hasTermVectors()
             hasPostings = hasPostings or (info.indexOptions !== IndexOptions.NONE)
-            hasProx = hasProx or (info.indexOptions.compareTo(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) >= 0)
+            hasProx = hasProx or (info.indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
             hasFreq = hasFreq or (info.indexOptions !== IndexOptions.DOCS)
             hasOffsets = hasOffsets or
-                    (info.indexOptions.compareTo(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
-                            >= 0)
+                    (info.indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
             hasNorms = hasNorms or info.hasNorms()
             hasDocValues = hasDocValues or (info.getDocValuesType() !== DocValuesType.NONE)
             hasPayloads = hasPayloads or info.hasPayloads()
@@ -130,7 +129,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                 val existing: FieldInfo = byNumber[fieldInfo.number]
                 require(existing == null) {
                     ("duplicate field numbers: "
-                            + existing!!.name
+                            + existing.name
                             + " and "
                             + fieldInfo.name
                             + " have: "
@@ -147,13 +146,13 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                     // Arrays.stream(byNumber).filter(Objects::nonNull).toList(),
                     // mainly when the input FieldInfo[] is small compared to maxFieldNumber.
                     Arrays.sort<FieldInfo>(
-                        infos,
-                        Comparator { fi1: FieldInfo, fi2: FieldInfo ->
-                            Int.compare(
-                                fi1.number,
-                                fi2.number
-                            )
-                        })
+                        infos
+                    ) { fi1: FieldInfo, fi2: FieldInfo ->
+                        Int.compare(
+                            fi1.number,
+                            fi2.number
+                        )
+                    }
                 }
                 values = mutableListOf(*infos)
             }
@@ -228,8 +227,8 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
      *
      * @return the FieldInfo object or null when the given fieldName doesn't exist.
      */
-    open fun fieldInfo(fieldName: String): FieldInfo {
-        return byName[fieldName]!!
+    open fun fieldInfo(fieldName: String): FieldInfo? {
+        return byName[fieldName]
     }
 
     /**
@@ -320,13 +319,13 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
             val fieldName: String = fi.name
             verifySoftDeletedFieldName(fieldName, fi.isSoftDeletesField)
             verifyParentFieldName(fieldName, fi.isParentField)
-            var fieldProperties = this.fieldProperties.get(fieldName)
+            var fieldProperties = this.fieldProperties[fieldName]
 
             if (fieldProperties != null) {
                 verifySameSchema(fi)
             } else { // first time we see this field in this index
                 val fieldNumber: Int
-                if (fi.number !== -1 && numberToName.containsKey(fi.number) === false) {
+                if (fi.number != -1 && numberToName.containsKey(fi.number) == false) {
                     // cool - we can use this number globally
                     fieldNumber = fi.number
                 } else {
@@ -412,7 +411,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
 
         private fun verifySameSchema(fi: FieldInfo) {
             val fieldName: String = fi.name
-            val fieldProperties: FieldProperties = this.fieldProperties.get(fieldName)!!
+            val fieldProperties: FieldProperties = this.fieldProperties[fieldName]!!
             val currentOpts = fieldProperties.indexOptions
             verifySameIndexOptions(fieldName, currentOpts, fi.indexOptions)
             if (currentOpts !== IndexOptions.NONE) {
@@ -486,7 +485,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                         false,
                         false,
                         IndexOptions.NONE,
-                        dvType!!,
+                        dvType,
                         DocValuesSkipIndexType.NONE,
                         -1,
                         mutableMapOf(),
@@ -502,7 +501,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                 addOrGet(fi)
             } else {
                 // verify that field is doc values only field with the give doc values type
-                val fieldProperties: FieldProperties = this.fieldProperties.get(fieldName)!!
+                val fieldProperties: FieldProperties = this.fieldProperties[fieldName]!!
                 val fieldDvType = fieldProperties.docValuesType
                 require(dvType === fieldDvType) {
                     ("Can't update ["
@@ -559,9 +558,8 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
          * `dvType` returns a new FieldInfo based based on the options in global field numbers
          */
         fun constructFieldInfo(fieldName: String, dvType: DocValuesType, newFieldNumber: Int): FieldInfo? {
-            val fieldProperties: FieldProperties?
 
-            fieldProperties = this.fieldProperties.get(fieldName)
+            val fieldProperties = this.fieldProperties[fieldName]
 
             if (fieldProperties == null) return null
             val dvType0 = fieldProperties.docValuesType
@@ -575,7 +573,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                 false,
                 false,
                 IndexOptions.NONE,
-                dvType!!,
+                dvType,
                 DocValuesSkipIndexType.NONE,
                 -1,
                 mutableMapOf(),
@@ -601,7 +599,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     }
 
     internal class Builder(globalFieldNumbers: FieldNumbers) {
-        private val byName: MutableMap<String, FieldInfo> = mutableMapOf<String, FieldInfo>()
+        private val byName: MutableMap<String, FieldInfo> = mutableMapOf()
         val globalFieldNumbers: FieldNumbers
         private var finished = false
 

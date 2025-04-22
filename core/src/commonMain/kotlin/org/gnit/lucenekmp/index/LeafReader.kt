@@ -57,13 +57,13 @@ protected constructor() : IndexReader() {
     abstract val coreCacheHelper: CacheHelper
 
     @Throws(IOException::class)
-    public override fun docFreq(term: Term): Int {
+    override fun docFreq(term: Term): Int {
         val terms: Terms = Terms.getTerms(this, term.field())
         val termsEnum: TermsEnum = terms.iterator()
-        if (termsEnum.seekExact(term.bytes())) {
-            return termsEnum.docFreq()
+        return if (termsEnum.seekExact(term.bytes())) {
+            termsEnum.docFreq()
         } else {
-            return 0
+            0
         }
     }
 
@@ -76,10 +76,10 @@ protected constructor() : IndexReader() {
     override fun totalTermFreq(term: Term): Long {
         val terms: Terms = Terms.getTerms(this, term.field())
         val termsEnum: TermsEnum = terms.iterator()
-        if (termsEnum.seekExact(term.bytes())) {
-            return termsEnum.totalTermFreq()
+        return if (termsEnum.seekExact(term.bytes())) {
+            termsEnum.totalTermFreq()
         } else {
-            return 0
+            0
         }
     }
 
@@ -157,41 +157,41 @@ protected constructor() : IndexReader() {
      * for this field. The returned instance should only be used by a single thread.
      */
     @Throws(IOException::class)
-    abstract fun getNumericDocValues(field: String): NumericDocValues
+    abstract fun getNumericDocValues(field: String): NumericDocValues?
 
     /**
      * Returns [BinaryDocValues] for this field, or null if no binary doc values were indexed
      * for this field. The returned instance should only be used by a single thread.
      */
     @Throws(IOException::class)
-    abstract fun getBinaryDocValues(field: String): BinaryDocValues
+    abstract fun getBinaryDocValues(field: String): BinaryDocValues?
 
     /**
      * Returns [SortedDocValues] for this field, or null if no [SortedDocValues] were
      * indexed for this field. The returned instance should only be used by a single thread.
      */
     @Throws(IOException::class)
-    abstract fun getSortedDocValues(field: String): SortedDocValues
+    abstract fun getSortedDocValues(field: String): SortedDocValues?
 
     /**
      * Returns [SortedNumericDocValues] for this field, or null if no [ ] were indexed for this field. The returned instance should only be used
      * by a single thread.
      */
     @Throws(IOException::class)
-    abstract fun getSortedNumericDocValues(field: String): SortedNumericDocValues
+    abstract fun getSortedNumericDocValues(field: String): SortedNumericDocValues?
 
     /**
      * Returns [SortedSetDocValues] for this field, or null if no [SortedSetDocValues]
      * were indexed for this field. The returned instance should only be used by a single thread.
      */
     @Throws(IOException::class)
-    abstract fun getSortedSetDocValues(field: String): SortedSetDocValues
+    abstract fun getSortedSetDocValues(field: String): SortedSetDocValues?
 
     /**
      * Returns [NumericDocValues] representing norms for this field, or null if no [ ] were indexed. The returned instance should only be used by a single thread.
      */
     @Throws(IOException::class)
-    abstract fun getNormValues(field: String): NumericDocValues
+    abstract fun getNormValues(field: String): NumericDocValues?
 
     /**
      * Returns a [DocValuesSkipper] allowing skipping ranges of doc IDs that are not of
@@ -217,7 +217,7 @@ protected constructor() : IndexReader() {
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    abstract fun getByteVectorValues(field: String): ByteVectorValues
+    abstract fun getByteVectorValues(field: String): ByteVectorValues?
 
     /**
      * Return the k nearest neighbor documents as determined by comparison of their vector values for
@@ -263,7 +263,7 @@ protected constructor() : IndexReader() {
         }
         val collector: KnnCollector = TopKnnCollector(k, visitedLimit)
         searchNearestVectors(field, target, collector, acceptDocs)
-        return collector.topDocs()
+        return collector.topDocs()!!
     }
 
     /**
@@ -300,7 +300,7 @@ protected constructor() : IndexReader() {
         if (fi == null || fi.vectorDimension == 0) {
             return TopDocsCollector.EMPTY_TOPDOCS
         }
-        val byteVectorValues: ByteVectorValues = getByteVectorValues(fi.name)
+        val byteVectorValues: ByteVectorValues? = getByteVectorValues(fi.name)
         if (byteVectorValues == null) {
             return TopDocsCollector.EMPTY_TOPDOCS
         }
@@ -310,7 +310,7 @@ protected constructor() : IndexReader() {
         }
         val collector: KnnCollector = TopKnnCollector(k, visitedLimit)
         searchNearestVectors(field, target, collector, acceptDocs)
-        return collector.topDocs()
+        return collector.topDocs()!!
     }
 
     /**
