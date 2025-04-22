@@ -128,6 +128,8 @@ open class HnswGraphBuilder protected constructor(
     override val graph: OnHeapHnswGraph
         get() = hnsw
 
+    fun getGraph() = hnsw
+
     /** add vectors in range [minOrd, maxOrd)  */
     @Throws(IOException::class)
     protected fun addVectors(minOrd: Int, maxOrd: Int) {

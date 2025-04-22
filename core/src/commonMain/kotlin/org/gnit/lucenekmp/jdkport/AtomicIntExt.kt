@@ -31,20 +31,6 @@ fun AtomicInt.decrementAndGet() = this.decrementAndFetch()
  * @return the updated value
  * @since 1.8
  */
-/*fun accumulateAndGet(
-    x: Int,
-    accumulatorFunction: java.util.function.IntBinaryOperator
-): Int {
-    var prev: Int = get()
-    var next = 0
-    var haveNext = false
-    while (true) {
-        if (!haveNext) next = accumulatorFunction.applyAsInt(prev, x)
-        if (weakCompareAndSetVolatile(prev, next)) return next
-        haveNext = (prev == (get().also { prev = it }))
-    }
-}*/
-// following function is porting above java specific function to kotlin common.
 @OptIn(ExperimentalAtomicApi::class)
 fun AtomicInt.accumulateAndGet(
     x: Int,
@@ -73,6 +59,23 @@ fun AtomicInt.weakCompareAndSetVolatile(expectedValue: Int, newValue: Int): Bool
     // Kotlin doesn't have a direct equivalent to Java's weakCompareAndSet,
     // so we use compareAndSet which provides stronger guarantees
     return this.compareAndSet(expectedValue, newValue)
+}
+
+/**
+ * Atomically adds the given value to the current value.
+ *
+ * @param delta the value to add
+ * @return the previous value
+ */
+@OptIn(ExperimentalAtomicApi::class)
+fun AtomicInt.getAndAdd(delta: Int): Int {
+    var prev: Int
+    var next: Int
+    do {
+        prev = this.load()
+        next = prev + delta
+    } while (!this.compareAndSet(prev, next))
+    return prev
 }
 
 @OptIn(ExperimentalAtomicApi::class)
