@@ -17,10 +17,18 @@ abstract class FlatFieldVectorsWriter<T> : KnnFieldVectorsWriter<T>() {
      */
     abstract val vectors: MutableList<T>
 
+    fun getVectors(): MutableList<T> {
+        return vectors
+    }
+
     /**
      * @return the docsWithFieldSet for the field writer
      */
     abstract val docsWithFieldSet: DocsWithFieldSet
+
+    fun getDocsWithFieldSet(): DocsWithFieldSet {
+        return docsWithFieldSet
+    }
 
     /**
      * indicates that this writer is done and no new vectors are allowed to be added

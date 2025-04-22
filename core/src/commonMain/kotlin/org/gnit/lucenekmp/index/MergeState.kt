@@ -69,7 +69,7 @@ class MergeState {
     val infoStream: InfoStream
 
     /** Executor for intra merge activity  */
-    val intraMergeTaskExecutor: Executor
+    val intraMergeTaskExecutor: Executor?
 
     /** Indicates if the index needs to be sorted *  */
     var needsIndexSort: Boolean = false

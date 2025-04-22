@@ -21,6 +21,10 @@ abstract class FlatVectorsWriter
      * @return the [FlatVectorsScorer] for this reader.
      */
 
+    fun getFlatVectorScorer(): FlatVectorsScorer {
+        return flatVectorScorer
+    }
+
     /**
      * Add a new field for indexing
      *

@@ -125,6 +125,8 @@ open class HnswGraphBuilder protected constructor(
             return this.graph
         }
 
+    fun getCompletedGraph() = completedGraph
+
     override val graph: OnHeapHnswGraph
         get() = hnsw
 

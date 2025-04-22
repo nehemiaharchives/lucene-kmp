@@ -30,7 +30,7 @@ protected constructor() : Accountable, AutoCloseable {
 
     /** Flush all buffered data on disk *  */
     @Throws(IOException::class)
-    abstract fun flush(maxDoc: Int, sortMap: Sorter.DocMap)
+    abstract fun flush(maxDoc: Int, sortMap: Sorter.DocMap?)
 
     /** Write field for merging  */
     @Throws(IOException::class)
@@ -426,7 +426,7 @@ protected constructor() : Accountable, AutoCloseable {
             sortMap: Sorter.DocMap,
             old2NewOrd: IntArray,
             new2OldOrd: IntArray,
-            newDocsWithField: DocsWithFieldSet
+            newDocsWithField: DocsWithFieldSet?
         ) {
             // TODO: a similar function exists in IncrementalHnswGraphMerger#getNewOrdMapping
             //       maybe we can do a further refactoring
