@@ -7,6 +7,9 @@ import kotlinx.io.files.FileNotFoundException
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
+import org.gnit.lucenekmp.jdkport.BufferedReader
+import org.gnit.lucenekmp.jdkport.Charset
+import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.util.IOUtils.rethrowAlways
 
