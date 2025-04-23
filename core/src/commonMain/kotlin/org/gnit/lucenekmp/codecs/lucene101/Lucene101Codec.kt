@@ -38,20 +38,15 @@ import kotlin.jvm.JvmOverloads
  *
  * @lucene.experimental
  */
-class Lucene101Codec @JvmOverloads constructor(mode: Mode? = Mode.BEST_SPEED) : Codec("Lucene101") {
+class Lucene101Codec @JvmOverloads constructor(mode: Mode = Mode.BEST_SPEED) : Codec("Lucene101") {
     /** Configuration option for the codec.  */
-    enum class Mode(storedMode: Lucene90StoredFieldsFormat.Mode) {
+    enum class Mode(val storedMode: Lucene90StoredFieldsFormat.Mode) {
         /** Trade compression ratio for retrieval speed.  */
         BEST_SPEED(Lucene90StoredFieldsFormat.Mode.BEST_SPEED),
 
         /** Trade retrieval speed for compression ratio.  */
         BEST_COMPRESSION(Lucene90StoredFieldsFormat.Mode.BEST_COMPRESSION);
 
-        private val storedMode: Lucene90StoredFieldsFormat.Mode
-
-        init {
-            this.storedMode = java.util.Objects.requireNonNull<Lucene90StoredFieldsFormat.Mode?>(storedMode)
-        }
     }
 
     private val vectorsFormat: TermVectorsFormat = Lucene90TermVectorsFormat()
@@ -61,80 +56,68 @@ class Lucene101Codec @JvmOverloads constructor(mode: Mode? = Mode.BEST_SPEED) : 
     private val compoundFormat: CompoundFormat = Lucene90CompoundFormat()
     private val normsFormat: NormsFormat = Lucene90NormsFormat()
 
-    private val defaultPostingsFormat: PostingsFormat
+    private val defaultPostingsFormat: PostingsFormat = Lucene101PostingsFormat()
     private val postingsFormat: PostingsFormat = object : PerFieldPostingsFormat() {
-        public override fun getPostingsFormatForField(field: String?): PostingsFormat {
+        override fun getPostingsFormatForField(field: String): PostingsFormat {
             return this@Lucene101Codec.getPostingsFormatForField(field)
         }
     }
 
-    private val defaultDVFormat: DocValuesFormat
+    private val defaultDVFormat: DocValuesFormat = Lucene90DocValuesFormat()
     private val docValuesFormat: DocValuesFormat = object : PerFieldDocValuesFormat() {
-        public override fun getDocValuesFormatForField(field: String?): DocValuesFormat {
+        override fun getDocValuesFormatForField(field: String): DocValuesFormat {
             return this@Lucene101Codec.getDocValuesFormatForField(field)
         }
     }
 
-    private val defaultKnnVectorsFormat: KnnVectorsFormat
+    private val defaultKnnVectorsFormat: KnnVectorsFormat = Lucene99HnswVectorsFormat()
     private val knnVectorsFormat: KnnVectorsFormat = object : PerFieldKnnVectorsFormat() {
-        public override fun getKnnVectorsFormatForField(field: String?): KnnVectorsFormat {
+        override fun getKnnVectorsFormatForField(field: String): KnnVectorsFormat {
             return this@Lucene101Codec.getKnnVectorsFormatForField(field)
         }
     }
 
-    private val storedFieldsFormat: StoredFieldsFormat
+    private val storedFieldsFormat: StoredFieldsFormat = Lucene90StoredFieldsFormat(mode.storedMode)
 
     /**
      * Instantiates a new codec, specifying the stored fields compression mode to use.
      *
      * @param mode stored fields compression mode to use for newly flushed/merged segments.
      */
-    /** Instantiates a new codec.  */
-    init {
-        this.storedFieldsFormat =
-            Lucene90StoredFieldsFormat(
-                java.util.Objects.requireNonNull<org.apache.lucene.codecs.lucene101.Lucene101Codec.Mode?>(
-                    mode
-                ).storedMode
-            )
-        this.defaultPostingsFormat = Lucene101PostingsFormat()
-        this.defaultDVFormat = Lucene90DocValuesFormat()
-        this.defaultKnnVectorsFormat = Lucene99HnswVectorsFormat()
-    }
 
-    public override fun storedFieldsFormat(): StoredFieldsFormat {
+    override fun storedFieldsFormat(): StoredFieldsFormat {
         return storedFieldsFormat
     }
 
-    public override fun termVectorsFormat(): TermVectorsFormat {
+    override fun termVectorsFormat(): TermVectorsFormat {
         return vectorsFormat
     }
 
-    public override fun postingsFormat(): PostingsFormat {
+    override fun postingsFormat(): PostingsFormat {
         return postingsFormat
     }
 
-    public override fun fieldInfosFormat(): FieldInfosFormat {
+    override fun fieldInfosFormat(): FieldInfosFormat {
         return fieldInfosFormat
     }
 
-    public override fun segmentInfoFormat(): SegmentInfoFormat {
+    override fun segmentInfoFormat(): SegmentInfoFormat {
         return segmentInfosFormat
     }
 
-    public override fun liveDocsFormat(): LiveDocsFormat {
+    override fun liveDocsFormat(): LiveDocsFormat {
         return liveDocsFormat
     }
 
-    public override fun compoundFormat(): CompoundFormat {
+    override fun compoundFormat(): CompoundFormat {
         return compoundFormat
     }
 
-    public override fun pointsFormat(): PointsFormat? {
+    override fun pointsFormat(): PointsFormat {
         return Lucene90PointsFormat()
     }
 
-    public override fun knnVectorsFormat(): KnnVectorsFormat {
+    override fun knnVectorsFormat(): KnnVectorsFormat {
         return knnVectorsFormat
     }
 
@@ -148,7 +131,7 @@ class Lucene101Codec @JvmOverloads constructor(mode: Mode? = Mode.BEST_SPEED) : 
      * **WARNING:** if you subclass, you are responsible for index backwards compatibility:
      * future version of Lucene are only guaranteed to be able to read the default implementation,
      */
-    fun getPostingsFormatForField(field: String?): PostingsFormat {
+    fun getPostingsFormatForField(field: String): PostingsFormat {
         return defaultPostingsFormat
     }
 
@@ -163,7 +146,7 @@ class Lucene101Codec @JvmOverloads constructor(mode: Mode? = Mode.BEST_SPEED) : 
      * **WARNING:** if you subclass, you are responsible for index backwards compatibility:
      * future version of Lucene are only guaranteed to be able to read the default implementation.
      */
-    fun getDocValuesFormatForField(field: String?): DocValuesFormat {
+    fun getDocValuesFormatForField(field: String): DocValuesFormat {
         return defaultDVFormat
     }
 
@@ -177,15 +160,15 @@ class Lucene101Codec @JvmOverloads constructor(mode: Mode? = Mode.BEST_SPEED) : 
      * **WARNING:** if you subclass, you are responsible for index backwards compatibility:
      * future version of Lucene are only guaranteed to be able to read the default implementation.
      */
-    fun getKnnVectorsFormatForField(field: String?): KnnVectorsFormat {
+    fun getKnnVectorsFormatForField(field: String): KnnVectorsFormat {
         return defaultKnnVectorsFormat
     }
 
-    public override fun docValuesFormat(): DocValuesFormat {
+    override fun docValuesFormat(): DocValuesFormat {
         return docValuesFormat
     }
 
-    public override fun normsFormat(): NormsFormat {
+    override fun normsFormat(): NormsFormat {
         return normsFormat
     }
 }
