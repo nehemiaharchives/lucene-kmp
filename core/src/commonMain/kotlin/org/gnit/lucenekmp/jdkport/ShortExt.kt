@@ -39,3 +39,15 @@ fun Short.Companion.toUnsignedLong(x: Short): Long {
     return (x.toLong()) and 0xffffL
 }
 
+/**
+ * Returns the value obtained by reversing the order of the bytes in the
+ * two's complement representation of the specified `short` value.
+ *
+ * @param i the value whose bytes are to be reversed
+ * @return the value obtained by reversing (or, equivalently, swapping)
+ * the bytes in the specified `short` value.
+ * @since 1.5
+ */
+fun Short.Companion.reverseBytes(i: Short): Short {
+    return (((i.toInt() and 0xFF00) shr 8) or (i.toInt() shl 8)).toShort()
+}
