@@ -480,6 +480,46 @@ object Arrays {
     }
 
     /**
+     * Copies the specified range of the specified array into a new array.
+     * The initial index of the range (`from`) must lie between zero
+     * and `original.length`, inclusive.  The value at
+     * `original[from]` is placed into the initial element of the copy
+     * (unless `from == original.length` or `from == to`).
+     * Values from subsequent elements in the original array are placed into
+     * subsequent elements in the copy.  The final index of the range
+     * (`to`), which must be greater than or equal to `from`,
+     * may be greater than `original.length`, in which case
+     * `(byte)0` is placed in all elements of the copy whose index is
+     * greater than or equal to `original.length - from`.  The length
+     * of the returned array will be `to - from`.
+     *
+     * @param original the array from which a range is to be copied
+     * @param from the initial index of the range to be copied, inclusive
+     * @param to the final index of the range to be copied, exclusive.
+     * (This index may lie outside the array.)
+     * @return a new array containing the specified range from the original array,
+     * truncated or padded with zeros to obtain the required length
+     * @throws ArrayIndexOutOfBoundsException if `from < 0`
+     * or `from > original.length`
+     * @throws IllegalArgumentException if `from > to`
+     * @throws NullPointerException if `original` is null
+     * @since 1.6
+     */
+    fun copyOfRange(original: ByteArray, from: Int, to: Int): ByteArray {
+        if (from == 0 && to == original.size) {
+            return original.clone()
+        }
+        val newLength = to - from
+        require(newLength >= 0) { "$from > $to" }
+        val copy = ByteArray(newLength)
+        System.arraycopy(
+            original, from, copy, 0,
+            min(original.size - from, newLength)
+        )
+        return copy
+    }
+
+    /**
      * Throws an IndexOutOfBoundsException if the range [fromIndex, toIndex) is invalid
      * for an array of the given length.
      */
