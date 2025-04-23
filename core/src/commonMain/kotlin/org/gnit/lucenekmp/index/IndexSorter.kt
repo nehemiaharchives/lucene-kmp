@@ -77,6 +77,10 @@ interface IndexSorter {
      */
     val providerName: String
 
+    fun getProviderName(): String {
+        return providerName
+    }
+
     /** Provide a NumericDocValues instance for a LeafReader  */
     interface NumericDocValuesProvider {
         /** Returns the NumericDocValues instance for this LeafReader  */
@@ -94,25 +98,19 @@ interface IndexSorter {
     /** Sorts documents based on integer values from a NumericDocValues instance  */
     class IntSorter(
         override val providerName: String,
-        private val missingValue: Int,
+        private val missingValue: Int?,
         reverse: Boolean,
         private val valuesProvider: NumericDocValuesProvider
     ) : IndexSorter {
-        private val reverseMul: Int
-
-        /** Creates a new IntSorter  */
-        init {
-            this.reverseMul = if (reverse) -1 else 1
-        }
+        private val reverseMul: Int = if (reverse) -1 else 1
 
         @Throws(IOException::class)
         override fun getComparableProviders(readers: MutableList<out LeafReader>): Array<ComparableProvider> {
             val providers = kotlin.arrayOfNulls<ComparableProvider>(readers.size)
-            val missingValue: Long
-            if (this.missingValue != null) {
-                missingValue = this.missingValue.toLong()
+            val missingValue: Long = if (this.missingValue != null) {
+                this.missingValue.toLong()
             } else {
-                missingValue = 0L
+                0L
             }
 
             for (readerIndex in readers.indices) {
@@ -121,10 +119,10 @@ interface IndexSorter {
                 providers[readerIndex] =
                     object : ComparableProvider {
                         override fun getAsComparableLong(docID: Int): Long {
-                            if (values.advanceExact(docID)) {
-                                return values.longValue()
+                            return if (values.advanceExact(docID)) {
+                                values.longValue()
                             } else {
-                                return missingValue
+                                missingValue
                             }
                         }
                     }
@@ -145,7 +143,7 @@ interface IndexSorter {
                 if (docID == NO_MORE_DOCS) {
                     break
                 }
-                values[docID] = dvs.longValue() as Int
+                values[docID] = dvs.longValue().toInt()
             }
 
             return object : DocComparator {
@@ -158,7 +156,7 @@ interface IndexSorter {
             }
         }
 
-        fun getProviderName(): String {
+        override fun getProviderName(): String {
             return providerName
         }
     }
@@ -166,38 +164,28 @@ interface IndexSorter {
     /** Sorts documents based on long values from a NumericDocValues instance  */
     class LongSorter(
         override val providerName: String,
-        private val missingValue: Long,
+        private val missingValue: Long?,
         reverse: Boolean,
         private val valuesProvider: NumericDocValuesProvider
     ) : IndexSorter {
-        private val reverseMul: Int
-
-        /** Creates a new LongSorter  */
-        init {
-            this.reverseMul = if (reverse) -1 else 1
-        }
+        private val reverseMul: Int = if (reverse) -1 else 1
 
         @Throws(IOException::class)
         override fun getComparableProviders(readers: MutableList<out LeafReader>): Array<ComparableProvider> {
             val providers = kotlin.arrayOfNulls<ComparableProvider>(readers.size)
-            val missingValue: Long
-            if (this.missingValue != null) {
-                missingValue = this.missingValue
-            } else {
-                missingValue = 0L
-            }
+            val missingValue: Long = this.missingValue ?: 0L
 
             for (readerIndex in readers.indices) {
-                val values = valuesProvider.get(readers.get(readerIndex))
+                val values = valuesProvider.get(readers[readerIndex])
 
                 providers[readerIndex] =
                     object : ComparableProvider {
                         @Throws(IOException::class)
                         override fun getAsComparableLong(docID: Int): Long {
-                            if (values.advanceExact(docID)) {
-                                return values.longValue()
+                            return if (values.advanceExact(docID)) {
+                                values.longValue()
                             } else {
-                                return missingValue
+                                missingValue
                             }
                         }
                     }
@@ -231,7 +219,7 @@ interface IndexSorter {
             }
         }
 
-        fun getProviderName(): String {
+        override fun getProviderName(): String {
             return providerName
         }
     }
@@ -239,31 +227,26 @@ interface IndexSorter {
     /** Sorts documents based on float values from a NumericDocValues instance  */
     class FloatSorter(
         override val providerName: String,
-        private val missingValue: Float,
+        private val missingValue: Float?,
         reverse: Boolean,
         private val valuesProvider: NumericDocValuesProvider
     ) : IndexSorter {
-        private val reverseMul: Int
-
-        /** Creates a new FloatSorter  */
-        init {
-            this.reverseMul = if (reverse) -1 else 1
-        }
+        private val reverseMul: Int = if (reverse) -1 else 1
 
         @Throws(IOException::class)
         override fun getComparableProviders(readers: MutableList<out LeafReader>): Array<ComparableProvider> {
             val providers = kotlin.arrayOfNulls<ComparableProvider>(readers.size)
-            val missValueBits: Int = Float.floatToIntBits(if (missingValue != null) missingValue else 0.0f)
+            val missValueBits: Int = Float.floatToIntBits(missingValue ?: 0.0f)
 
             for (readerIndex in readers.indices) {
-                val values = valuesProvider.get(readers.get(readerIndex))
+                val values = valuesProvider.get(readers[readerIndex])
 
                 providers[readerIndex] =
                     object : ComparableProvider {
                         @Throws(IOException::class)
                         override fun getAsComparableLong(docID: Int): Long {
                             val valueBits =
-                                if (values.advanceExact(docID)) values.longValue() as Int else missValueBits
+                                if (values.advanceExact(docID)) values.longValue().toInt() else missValueBits
                             return NumericUtils.sortableFloatBits(valueBits).toLong()
                         }
                     }
@@ -284,7 +267,7 @@ interface IndexSorter {
                 if (docID == NO_MORE_DOCS) {
                     break
                 }
-                values[docID] = Float.intBitsToFloat(dvs.longValue() as Int)
+                values[docID] = Float.intBitsToFloat(dvs.longValue().toInt())
             }
 
             return object : DocComparator {
@@ -297,7 +280,7 @@ interface IndexSorter {
             }
         }
 
-        fun getProviderName(): String {
+        override fun getProviderName(): String {
             return providerName
         }
     }
@@ -305,25 +288,20 @@ interface IndexSorter {
     /** Sorts documents based on double values from a NumericDocValues instance  */
     class DoubleSorter(
         override val providerName: String,
-        private val missingValue: Double,
+        private val missingValue: Double?,
         reverse: Boolean,
         private val valuesProvider: NumericDocValuesProvider
     ) : IndexSorter {
-        private val reverseMul: Int
-
-        /** Creates a new DoubleSorter  */
-        init {
-            this.reverseMul = if (reverse) -1 else 1
-        }
+        private val reverseMul: Int = if (reverse) -1 else 1
 
         @Throws(IOException::class)
         override fun getComparableProviders(readers: MutableList<out LeafReader>): Array<ComparableProvider> {
             val providers = kotlin.arrayOfNulls<ComparableProvider>(readers.size)
             val missingValueBits: Long =
-                Double.doubleToLongBits(if (missingValue != null) missingValue else 0.0)
+                Double.doubleToLongBits(missingValue ?: 0.0)
 
             for (readerIndex in readers.indices) {
-                val values = valuesProvider.get(readers.get(readerIndex))
+                val values = valuesProvider.get(readers[readerIndex])
 
                 providers[readerIndex] =
                     object : ComparableProvider {
@@ -364,7 +342,7 @@ interface IndexSorter {
             }
         }
 
-        fun getProviderName(): String {
+        override fun getProviderName(): String {
             return providerName
         }
     }
@@ -376,27 +354,21 @@ interface IndexSorter {
         reverse: Boolean,
         private val valuesProvider: SortedDocValuesProvider
     ) : IndexSorter {
-        private val reverseMul: Int
-
-        /** Creates a new StringSorter  */
-        init {
-            this.reverseMul = if (reverse) -1 else 1
-        }
+        private val reverseMul: Int = if (reverse) -1 else 1
 
         @Throws(IOException::class)
         override fun getComparableProviders(readers: MutableList<out LeafReader>): Array<ComparableProvider> {
             val providers = kotlin.arrayOfNulls<ComparableProvider>(readers.size)
-            val values: Array<SortedDocValues?> = kotlin.arrayOfNulls<SortedDocValues>(readers.size)
+            val values: Array<SortedDocValues?> = kotlin.arrayOfNulls(readers.size)
             for (i in readers.indices) {
                 val sorted = valuesProvider.get(readers[i])
                 values[i] = sorted
             }
             val ordinalMap: OrdinalMap = OrdinalMap.build(null, values as Array<SortedDocValues>, PackedInts.DEFAULT)
-            val missingOrd: Int
-            if (missingValue === SortField.STRING_LAST) {
-                missingOrd = Int.Companion.MAX_VALUE
+            val missingOrd: Int = if (missingValue === SortField.STRING_LAST) {
+                Int.Companion.MAX_VALUE
             } else {
-                missingOrd = Int.Companion.MIN_VALUE
+                Int.Companion.MIN_VALUE
             }
 
             for (readerIndex in readers.indices) {
@@ -406,11 +378,11 @@ interface IndexSorter {
                     object : ComparableProvider {
                         @Throws(IOException::class)
                         override fun getAsComparableLong(docID: Int): Long {
-                            if (readerValues.advanceExact(docID)) {
+                            return if (readerValues.advanceExact(docID)) {
                                 // translate segment's ord to global ord space:
-                                return globalOrds.get(readerValues.ordValue().toLong())
+                                globalOrds.get(readerValues.ordValue().toLong())
                             } else {
-                                return missingOrd.toLong()
+                                missingOrd.toLong()
                             }
                         }
                     }
@@ -421,11 +393,10 @@ interface IndexSorter {
         @Throws(IOException::class)
         override fun getDocComparator(reader: LeafReader, maxDoc: Int): DocComparator {
             val sorted = valuesProvider.get(reader)
-            val missingOrd: Int
-            if (missingValue === SortField.STRING_LAST) {
-                missingOrd = Int.Companion.MAX_VALUE
+            val missingOrd: Int = if (missingValue === SortField.STRING_LAST) {
+                Int.Companion.MAX_VALUE
             } else {
-                missingOrd = Int.Companion.MIN_VALUE
+                Int.Companion.MIN_VALUE
             }
 
             val ords = IntArray(maxDoc)
@@ -446,7 +417,7 @@ interface IndexSorter {
             }
         }
 
-        fun getProviderName(): String {
+        override fun getProviderName(): String {
             return providerName
         }
     }

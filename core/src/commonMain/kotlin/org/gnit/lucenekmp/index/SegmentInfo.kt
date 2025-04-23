@@ -16,16 +16,16 @@ import org.gnit.lucenekmp.util.Version
 class SegmentInfo(
     dir: Directory,
     version: Version,
-    minVersion: Version,
+    minVersion: Version?,
     name: String,
     maxDoc: Int,
     isCompoundFile: Boolean,
     hasBlocks: Boolean,
-    codec: Codec,
+    codec: Codec?,
     diagnostics: MutableMap<String, String>,
     id: ByteArray,
     attributes: MutableMap<String, String>,
-    indexSort: Sort
+    indexSort: Sort?
 ) {
     /** Unique segment name in the directory.  */
     val name: String
@@ -43,6 +43,10 @@ class SegmentInfo(
      */
     var useCompoundFile: Boolean
 
+    fun getUseCompoundFile(): Boolean {
+        return useCompoundFile
+    }
+
     /** Id that uniquely identifies this segment.  */
     private val id: ByteArray
 
@@ -58,7 +62,7 @@ class SegmentInfo(
     var attributes: MutableMap<String, String>
         private set
 
-    private val indexSort: Sort
+    private val indexSort: Sort?
 
     // Tracks the Lucene version this segment was created with, since 3.1. Null
     // indicates an older than 3.0 index, and it's used to detect a too old index.
@@ -71,7 +75,7 @@ class SegmentInfo(
     // flush segments, that is the version that wrote it. For merged segments,
     // this is the minimum minVersion of all the segments that have been merged
     // into this segment
-    var minVersion: Version
+    var minVersion: Version?
 
     /**
      * Returns true if this segment contains documents written as blocks.
@@ -81,8 +85,12 @@ class SegmentInfo(
     var hasBlocks: Boolean
         private set
 
+    fun getHasBlocks(): Boolean {
+        return hasBlocks
+    }
+
     fun setDiagnostics(diagnostics: MutableMap<String, String>) {
-        this.diagnostics = HashMap<String, String>(diagnostics)
+        this.diagnostics = HashMap(diagnostics)
     }
 
     /**
@@ -95,15 +103,19 @@ class SegmentInfo(
      * @param diagnostics the additional diagnostics
      */
     fun addDiagnostics(diagnostics: MutableMap<String, String>) {
-        requireNotNull<MutableMap<String, String>>(diagnostics)
+        requireNotNull(diagnostics)
         val copy: MutableMap<String, String> = HashMap<String, String>(this.diagnostics)
-        copy.putAll(diagnostics!!)
+        copy.putAll(diagnostics)
         setDiagnostics(copy)
     }
 
     /** Returns diagnostics saved into the segment when it was written. The map is immutable.  */
     fun getDiagnostics(): MutableMap<String, String> {
         return diagnostics
+    }
+
+    fun getAttributes(): MutableMap<String, String> {
+        return attributes
     }
 
     /** Sets the hasBlocks property to true. This setting is viral and can't be unset.  */
@@ -212,7 +224,7 @@ class SegmentInfo(
      * Return the minimum Lucene version that contributed documents to this segment, or `null`
      * if it is unknown.
      */
-    fun getMinVersion(): Version {
+    fun getMinVersion(): Version? {
         return minVersion
     }
 
@@ -250,7 +262,7 @@ class SegmentInfo(
 
     /** Sets the files written for this segment.  */
     fun setFiles(files: MutableCollection<String>) {
-        setFiles = HashSet<String>()
+        setFiles = HashSet()
         addFiles(files)
     }
 
@@ -264,7 +276,7 @@ class SegmentInfo(
 
     /** Add this file to the set of files written for this segment.  */
     fun addFile(file: String) {
-        checkFileNames(mutableSetOf<String>(file))
+        checkFileNames(mutableSetOf(file))
         setFiles!!.add(namedForThisSegment(file))
     }
 
@@ -305,7 +317,7 @@ class SegmentInfo(
      * make a copy on write for every attribute change.
      */
     fun putAttribute(key: String, value: String): String {
-        val newMap: HashMap<String, String> = HashMap<String, String>(attributes)
+        val newMap: HashMap<String, String> = HashMap(attributes)
         val oldValue: String = newMap.put(key, value)!!
         // This needs to be thread-safe because multiple threads may be updating (different) attributes
         // at the same time due to concurrent merging, plus some threads may be calling toString() on
@@ -315,14 +327,14 @@ class SegmentInfo(
     }
 
     /** Return the sort order of this segment, or null if the index has no sort.  */
-    fun getIndexSort(): Sort {
+    fun getIndexSort(): Sort? {
         return indexSort
     }
 
     companion object {
         // TODO: remove these from this class, for now this is the representation
         /** Used by some member fields to mean not present (e.g., norms, deletions).  */
-        val NO: Int = -1 // e.g. no norms; no deletes;
+        const val NO: Int = -1 // e.g. no norms; no deletes;
 
         /** Used by some member fields to mean present (e.g., norms, deletions).  */
         const val YES: Int = 1 // e.g. have norms; have deletes;

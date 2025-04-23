@@ -42,6 +42,10 @@ class Sort(vararg fields: SortField) {
          */
         get() = fields
 
+    fun getSort(): Array<SortField> {
+        return fields
+    }
+
     /**
      * Rewrites the SortFields in this Sort, returning a new Sort if any of the fields changes during
      * their rewriting.
