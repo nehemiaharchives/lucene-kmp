@@ -5,7 +5,7 @@ package org.gnit.lucenekmp.index
  *
  * @lucene.experimental
  */
-class OrdTermState
+open class OrdTermState
 /** Sole constructor.  */
     : TermState() {
     /** Term ordinal, i.e. its position in the full list of sorted terms.  */
