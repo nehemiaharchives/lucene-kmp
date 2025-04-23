@@ -35,6 +35,11 @@ object IOUtils {
         close(objects.asList())
     }
 
+    @Throws(IOException::class)
+    fun close(vararg objects: AutoCloseable?) {
+        close(objects.asList().filterNotNull())
+    }
+
     /** Closes all given AutoCloseables.&#8203;:contentReference[oaicite:0]{index=0}
      * @see #close(vararg AutoCloseable) */
     @Throws(IOException::class)
@@ -56,6 +61,10 @@ object IOUtils {
      * Some of the objects may be null; they are ignored. */
     fun closeWhileHandlingException(vararg objects: AutoCloseable) {
         closeWhileHandlingException(objects.asList())
+    }
+
+    fun closeWhileHandlingException(vararg objects: AutoCloseable?) {
+        closeWhileHandlingException(objects.asList().filterNotNull())
     }
 
     /** Closes all given AutoCloseables, suppressing all thrown non-Error exceptions.&#8203;:contentReference[oaicite:1]{index=1}

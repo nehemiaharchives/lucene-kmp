@@ -1,24 +1,25 @@
 package org.gnit.lucenekmp.internal.vectorization
 
-import org.gnit.lucenekmp.internal.vectorization.PostingDecodingUtil
+import org.gnit.lucenekmp.codecs.hnsw.DefaultFlatVectorScorer
+import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
 import org.gnit.lucenekmp.store.IndexInput
 
 /** Default provider returning scalar implementations.  */
 internal class DefaultVectorizationProvider : VectorizationProvider() {
-    val vectorUtilSupport: VectorUtilSupport
+    val vectorUtilSupport: VectorUtilSupport = DefaultVectorUtilSupport()
 
-    init {
-        vectorUtilSupport = DefaultVectorUtilSupport()
-    }
+    val lucene99FlatVectorsScorer: FlatVectorsScorer
+        get() = DefaultFlatVectorScorer.INSTANCE
 
-    /*val lucene99FlatVectorsScorer: FlatVectorsScorer
-        get() = DefaultFlatVectorScorer.INSTANCE*/
-
-    fun newPostingDecodingUtil(input: IndexInput): PostingDecodingUtil? {
+    override fun newPostingDecodingUtil(input: IndexInput): PostingDecodingUtil {
         return PostingDecodingUtil(input)
     }
 
     override fun getVectorUtilSupport(): VectorUtilSupport {
         return vectorUtilSupport
+    }
+
+    override fun getLucene99FlatVectorsScorer(): FlatVectorsScorer {
+        return lucene99FlatVectorsScorer
     }
 }
