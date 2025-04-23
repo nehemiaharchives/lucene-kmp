@@ -318,6 +318,8 @@ class ByteBlockPool(private val allocator: Allocator) : Accountable {
         /** the current position (in absolute value) of this byte pool  */
         get() = (bufferUpto * allocator.blockSize + byteUpto).toLong()
 
+    fun getPosition() = position
+
     /** Retrieve the buffer at the specified index from the buffer pool.  */
     fun getBuffer(bufferIndex: Int): ByteArray {
         return buffers[bufferIndex]!!
