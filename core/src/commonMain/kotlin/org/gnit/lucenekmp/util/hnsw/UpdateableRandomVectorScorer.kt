@@ -23,7 +23,7 @@ interface UpdateableRandomVectorScorer : RandomVectorScorer {
     fun setScoringOrdinal(node: Int)
 
     /** Creates a default scorer for random access vectors.  */
-    class AbstractUpdateableRandomVectorScorer(private val values: KnnVectorValues) : UpdateableRandomVectorScorer {
+    open class AbstractUpdateableRandomVectorScorer(private val values: KnnVectorValues) : UpdateableRandomVectorScorer {
         override fun score(node: Int): Float {
             TODO("Not yet implemented")
         }
@@ -36,7 +36,7 @@ interface UpdateableRandomVectorScorer : RandomVectorScorer {
             return values.ordToDoc(ord)
         }
 
-        override fun getAcceptOrds(acceptDocs: Bits): Bits {
+        override fun getAcceptOrds(acceptDocs: Bits): Bits? {
             return values.getAcceptOrds(acceptDocs)
         }
 

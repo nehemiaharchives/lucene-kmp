@@ -45,7 +45,7 @@ interface RandomVectorScorer {
     }
 
     /** Creates a default scorer for random access vectors.  */
-    class AbstractRandomVectorScorer(private val values: KnnVectorValues) : RandomVectorScorer {
+    open class AbstractRandomVectorScorer(private val values: KnnVectorValues) : RandomVectorScorer {
 
         override fun score(node: Int): Float {
             TODO("Not yet implemented")
@@ -59,7 +59,7 @@ interface RandomVectorScorer {
             return values.ordToDoc(ord)
         }
 
-        override fun getAcceptOrds(acceptDocs: Bits): Bits {
+        override fun getAcceptOrds(acceptDocs: Bits): Bits? {
             return values.getAcceptOrds(acceptDocs)
         }
     }
