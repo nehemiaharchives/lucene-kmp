@@ -29,6 +29,10 @@ class ByteArrayDataOutput : DataOutput {
         reset(BytesRef.EMPTY_BYTES)
     }
 
+    fun getPosition(): Int {
+        return position
+    }
+
     @JvmOverloads
     fun reset(bytes: ByteArray, offset: Int = 0, len: Int = bytes.size) {
         this.bytes = bytes

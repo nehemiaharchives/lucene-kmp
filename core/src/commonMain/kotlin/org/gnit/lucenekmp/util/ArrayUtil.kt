@@ -189,6 +189,10 @@ class ArrayUtil {
             return grow<T?>(array, 1 + array.size)
         }
 
+        fun <T> grow(array: Array<T>): Array<T> {
+            return grow(array, 1 + array.size)
+        }
+
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating
          * exponentially

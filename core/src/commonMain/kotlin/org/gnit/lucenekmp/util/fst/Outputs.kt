@@ -74,6 +74,10 @@ abstract class Outputs<T> {
      */
     abstract val noOutput: T
 
+    fun getNoOutput(): T {
+        return noOutput
+    }
+
     abstract fun outputToString(output: T): String
 
     // TODO: maybe make valid(T output) public...  for asserts

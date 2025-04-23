@@ -102,6 +102,86 @@ object Arrays {
     }
 
     /**
+     * Finds and returns the relative index of the first mismatch between two
+     * `int` arrays over the specified ranges, otherwise return -1 if no
+     * mismatch is found.  The index will be in the range of 0 (inclusive) up to
+     * the length (inclusive) of the smaller range.
+     *
+     *
+     * If the two arrays, over the specified ranges, share a common prefix
+     * then the returned relative index is the length of the common prefix and
+     * it follows that there is a mismatch between the two elements at that
+     * relative index within the respective arrays.
+     * If one array is a proper prefix of the other, over the specified ranges,
+     * then the returned relative index is the length of the smaller range and
+     * it follows that the relative index is only valid for the array with the
+     * larger range.
+     * Otherwise, there is no mismatch.
+     *
+     *
+     * Two non-`null` arrays, `a` and `b` with specified
+     * ranges [`aFromIndex`, `aToIndex`) and
+     * [`bFromIndex`, `bToIndex`) respectively, share a common
+     * prefix of length `pl` if the following expression is true:
+     * <pre>`pl >= 0 &&
+     * pl < Math.min(aToIndex - aFromIndex, bToIndex - bFromIndex) &&
+     * Arrays.equals(a, aFromIndex, aFromIndex + pl, b, bFromIndex, bFromIndex + pl) &&
+     * a[aFromIndex + pl] != b[bFromIndex + pl]
+    `</pre> *
+     * Note that a common prefix length of `0` indicates that the first
+     * elements from each array mismatch.
+     *
+     *
+     * Two non-`null` arrays, `a` and `b` with specified
+     * ranges [`aFromIndex`, `aToIndex`) and
+     * [`bFromIndex`, `bToIndex`) respectively, share a proper
+     * prefix if the following expression is true:
+     * <pre>`(aToIndex - aFromIndex) != (bToIndex - bFromIndex) &&
+     * Arrays.equals(a, 0, Math.min(aToIndex - aFromIndex, bToIndex - bFromIndex),
+     * b, 0, Math.min(aToIndex - aFromIndex, bToIndex - bFromIndex))
+    `</pre> *
+     *
+     * @param a the first array to be tested for a mismatch
+     * @param aFromIndex the index (inclusive) of the first element in the
+     * first array to be tested
+     * @param aToIndex the index (exclusive) of the last element in the
+     * first array to be tested
+     * @param b the second array to be tested for a mismatch
+     * @param bFromIndex the index (inclusive) of the first element in the
+     * second array to be tested
+     * @param bToIndex the index (exclusive) of the last element in the
+     * second array to be tested
+     * @return the relative index of the first mismatch between the two arrays
+     * over the specified ranges, otherwise `-1`.
+     * @throws IllegalArgumentException
+     * if `aFromIndex > aToIndex` or
+     * if `bFromIndex > bToIndex`
+     * @throws ArrayIndexOutOfBoundsException
+     * if `aFromIndex < 0 or aToIndex > a.length` or
+     * if `bFromIndex < 0 or bToIndex > b.length`
+     * @throws NullPointerException
+     * if either array is `null`
+     * @since 9
+     */
+    fun mismatch(
+        a: IntArray, aFromIndex: Int, aToIndex: Int,
+        b: IntArray, bFromIndex: Int, bToIndex: Int
+    ): Int {
+        rangeCheck(a.size, aFromIndex, aToIndex)
+        rangeCheck(b.size, bFromIndex, bToIndex)
+
+        val aLength = aToIndex - aFromIndex
+        val bLength = bToIndex - bFromIndex
+        val length = min(aLength, bLength)
+        val i: Int = ArraysSupport.mismatch(
+            a, aFromIndex,
+            b, bFromIndex,
+            length
+        )
+        return if (i < 0 && aLength != bLength) length else i
+    }
+
+    /**
      * Returns the first index (0 ≤ i < len) at which the elements of the two [IntArray]s differ,
      * when compared over the given [length] starting at [aFromIndex] and [bFromIndex] respectively.
      * Returns -1 if no mismatch is found.
@@ -207,7 +287,7 @@ object Arrays {
     }
 
     /**
-     * ported from java.util.Arrays.equals(int[] a, int aFromIndex, int aToIndex,
+     * ported from equals(int[] a, int aFromIndex, int aToIndex,
      *                                  int[] b, int bFromIndex, int bToIndex)
      *
      * Returns true if the two specified subarrays of [IntArray]s are equal.
