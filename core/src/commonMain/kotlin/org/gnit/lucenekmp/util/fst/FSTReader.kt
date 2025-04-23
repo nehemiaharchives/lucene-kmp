@@ -12,7 +12,7 @@ interface FSTReader : Accountable {
      *
      * @return the reverse BytesReader
      */
-    val reverseBytesReader: BytesReader
+    fun getReverseBytesReader(): BytesReader
 
     /**
      * Write this FST to another DataOutput
