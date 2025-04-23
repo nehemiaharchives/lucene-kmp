@@ -684,6 +684,10 @@ object PackedInts {
          */
         abstract val bitsPerValue: Int
 
+        open fun getBitsPerValue(): Int {
+            return bitsPerValue
+        }
+
         /**
          * Set the value at the given index in the array.
          *
@@ -753,7 +757,7 @@ object PackedInts {
             require(bitsPerValue > 0 && bitsPerValue <= 64) { "bitsPerValue=$bitsPerValue" }
         }
 
-        fun getBitsPerValue(): Int {
+        override fun getBitsPerValue(): Int {
             return bitsPerValue
         }
 
