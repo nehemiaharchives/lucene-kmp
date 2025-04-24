@@ -160,23 +160,22 @@ class FSTCompiler<T> private constructor(
         }
     }
 
-    val fSTReader: FSTReader
-        /**
-         * Get the respective [FSTReader] of the [DataOutput]. To call this method, you need
-         * to use the default DataOutput or [.getOnHeapReaderWriter], otherwise we will throw
-         * an exception.
-         *
-         * @return the DataOutput as FSTReader
-         * @throws IllegalStateException if the DataOutput does not implement FSTReader
-         */
-        get() {
-            if (dataOutput is FSTReader) {
-                return dataOutput as FSTReader
-            }
-            throw IllegalStateException(
-                "The DataOutput must implement FSTReader, but got $dataOutput"
-            )
+    /**
+     * Get the respective [FSTReader] of the [DataOutput]. To call this method, you need
+     * to use the default DataOutput or [.getOnHeapReaderWriter], otherwise we will throw
+     * an exception.
+     *
+     * @return the DataOutput as FSTReader
+     * @throws IllegalStateException if the DataOutput does not implement FSTReader
+     */
+    fun getFSTReader(): FSTReader {
+        if (dataOutput is FSTReader) {
+            return dataOutput as FSTReader
         }
+        throw IllegalStateException(
+            "The DataOutput must implement FSTReader, but got $dataOutput"
+        )
+    }
 
     /**
      * Fluent-style constructor for FST [FSTCompiler].

@@ -347,8 +347,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         return metadata.numBytes
     }
 
-    val emptyOutput: T
-        get() = metadata.emptyOutput
+    fun getEmptyOutput(): T? = metadata.emptyOutput
 
     /**
      * Save the FST to DataOutput.
@@ -945,9 +944,9 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         }
     }
 
-    fun getBytesReader() : BytesReader
-        /** Returns a [BytesReader] for this FST, positioned at position 0.  */
-         = fstReader.getReverseBytesReader()
+    fun getBytesReader(): BytesReader
+            /** Returns a [BytesReader] for this FST, positioned at position 0.  */
+            = fstReader.getReverseBytesReader()
 
     /** Reads bytes stored in an FST.  */
     abstract class BytesReader : DataInput() {
@@ -968,7 +967,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         val outputs: Outputs<T>,
         // if non-null, this FST accepts the empty string and
         // produces this output
-        var emptyOutput: T,
+        var emptyOutput: T?,
         startNode: Long,
         version: Int,
         numBytes: Long
@@ -988,7 +987,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             this.numBytes = numBytes
         }
 
-        fun getEmptyOutput(): T {
+        fun getEmptyOutput(): T? {
             return emptyOutput
         }
 

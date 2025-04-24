@@ -38,7 +38,7 @@ protected constructor() : AutoCloseable {
     @Throws(IOException::class)
     abstract fun writeTerm(
         term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer
-    ): BlockTermState
+    ): BlockTermState?
 
     /**
      * Encode metadata as long[] and byte[]. `absolute` controls whether current term is delta
