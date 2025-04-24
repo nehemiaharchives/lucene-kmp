@@ -945,9 +945,9 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         }
     }
 
-    val bytesReader: BytesReader
+    fun getBytesReader() : BytesReader
         /** Returns a [BytesReader] for this FST, positioned at position 0.  */
-        get() = fstReader.getReverseBytesReader()
+         = fstReader.getReverseBytesReader()
 
     /** Reads bytes stored in an FST.  */
     abstract class BytesReader : DataInput() {
@@ -986,6 +986,10 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             this.startNode = startNode
             this.version = version
             this.numBytes = numBytes
+        }
+
+        fun getEmptyOutput(): T {
+            return emptyOutput
         }
 
         /**

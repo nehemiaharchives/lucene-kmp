@@ -3,7 +3,6 @@ package org.gnit.lucenekmp.index
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
-import org.gnit.lucenekmp.util.IOBooleanSupplier
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 
 
@@ -106,6 +105,8 @@ protected constructor() {
          */
         get() = iterator().next()!!
 
+    fun getMin() = min
+
     @get:Throws(IOException::class)
     open val max: BytesRef?
         /**
@@ -174,10 +175,11 @@ protected constructor() {
             }
         }
 
-    @get:Throws(IOException::class)
-    open val stats: Any
-        /** Expert: returns additional information about this Terms instance for debugging purposes.  */
-        get() {
+    fun getMax() = max
+
+    /** Expert: returns additional information about this Terms instance for debugging purposes.  */
+    fun getStats(): Any
+         {
             val sb = StringBuilder()
             sb.append("impl=").append(this::class.simpleName)
             sb.append(",size=").append(size())

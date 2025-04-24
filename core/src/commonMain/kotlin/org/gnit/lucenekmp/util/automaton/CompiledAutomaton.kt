@@ -26,7 +26,7 @@ import kotlin.experimental.and
  *
  * @lucene.experimental
  */
-class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolean, isBinary: Boolean) : Accountable {
+class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean, isBinary: Boolean) : Accountable {
     /**
      * Automata are compiled into different internal forms for the most efficient execution depending
      * upon the language they accept.
@@ -34,10 +34,13 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
     enum class AUTOMATON_TYPE {
         /** Automaton that accepts no strings.  */
         NONE,
+
         /** Automaton that accepts all possible strings.  */
         ALL,
+
         /** Automaton that accepts only a single fixed string.  */
         SINGLE,
+
         /** Catch-all for any other automata.  */
         NORMAL
     }
@@ -91,7 +94,12 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
      * automaton is one the cases in [CompiledAutomaton.AUTOMATON_TYPE]. Set finite to true if
      * the automaton is finite, otherwise set to false if infinite or you don't know.
      */
-    constructor(automaton: Automaton, finite: kotlin.Boolean, simplify: kotlin.Boolean) : this(automaton, finite, simplify, false)
+    constructor(automaton: Automaton, finite: kotlin.Boolean, simplify: kotlin.Boolean) : this(
+        automaton,
+        finite,
+        simplify,
+        false
+    )
 
     private val transition: Transition = Transition()
 
@@ -165,7 +173,8 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
                 } else {
                     term =
                         BytesRef(
-                            UnicodeUtil.newString(singleton.ints, singleton.offset, singleton.length))
+                            UnicodeUtil.newString(singleton.ints, singleton.offset, singleton.length)
+                        )
                 }
                 sinkState = -1
                 nfaRunAutomaton = null
@@ -233,7 +242,7 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
         var idx: kotlin.Int = idx
         var maxIndex: kotlin.Int = -1
         var numTransitions: kotlin.Int = automaton!!.initTransition(state, transition)
-        for (i in 0 ..< numTransitions) {
+        for (i in 0..<numTransitions) {
             automaton!!.getNextTransition(transition)
             if (transition.min < leadLabel) {
                 maxIndex = i
@@ -295,8 +304,9 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
      * Return a [TermsEnum] intersecting the provided [Terms] with the terms accepted by
      * this automaton.
      */
-    @kotlin.Throws(IOException::class) fun getTermsEnum(terms: Terms): TermsEnum? {
-        when (type){
+    @kotlin.Throws(IOException::class)
+    fun getTermsEnum(terms: Terms): TermsEnum? {
+        when (type) {
             AUTOMATON_TYPE.NONE -> return TermsEnum.EMPTY
             AUTOMATON_TYPE.ALL -> return terms.iterator()
             AUTOMATON_TYPE.SINGLE -> return SingleTermsEnum(terms.iterator(), term)
@@ -309,11 +319,12 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
     /** Report back to a QueryVisitor how this automaton matches terms  */
     fun visit(visitor: QueryVisitor, parent: Query, field: String) {
         if (visitor.acceptField(field)) {
-            when (type){
-                AUTOMATON_TYPE.NORMAL -> visitor.consumeTermsMatching(parent, field, {runAutomaton!!})
+            when (type) {
+                AUTOMATON_TYPE.NORMAL -> visitor.consumeTermsMatching(parent, field, { runAutomaton!! })
                 AUTOMATON_TYPE.NONE -> {}
                 AUTOMATON_TYPE.ALL -> visitor.consumeTermsMatching(
-                    parent, field, {ByteRunAutomaton(Automata.makeAnyString())})
+                    parent, field, { ByteRunAutomaton(Automata.makeAnyString()) })
+
                 AUTOMATON_TYPE.SINGLE -> visitor.consumeTerms(parent, Term(field, term!!))
             }
         }
@@ -417,33 +428,28 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
         }
     }
 
-    val byteRunnable: ByteRunnable?
-        /**
-         * Get a [ByteRunnable] instance, it will be different depending on whether a NFA or DFA is
-         * passed in, and does not guarantee returning non-null object
-         */
-        get() {
-            // they can be both null but not both non-null
-            require(nfaRunAutomaton == null || runAutomaton == null)
-            if (nfaRunAutomaton == null) {
-                return runAutomaton
-            }
-            return nfaRunAutomaton
+    /**
+     * Get a [ByteRunnable] instance, it will be different depending on whether a NFA or DFA is
+     * passed in, and does not guarantee returning non-null object
+     */
+    fun getByteRunnable(): ByteRunnable? {
+        // they can be both null but not both non-null
+        require(nfaRunAutomaton == null || runAutomaton == null)
+        if (nfaRunAutomaton == null) {
+            return runAutomaton
         }
+        return nfaRunAutomaton
+    }
 
-    val transitionAccessor: TransitionAccessor?
-        /**
-         * Get a [TransitionAccessor] instance, it will be different depending on whether a NFA or
-         * DFA is passed in, and does not guarantee returning non-null object
-         */
-        get() {
-            // they can be both null but not both non-null
-            require(nfaRunAutomaton == null || automaton == null)
-            if (nfaRunAutomaton == null) {
-                return automaton
-            }
-            return nfaRunAutomaton
-        }
+    /**
+     * Get a [TransitionAccessor] instance, it will be different depending on whether a NFA or
+     * DFA is passed in, and does not guarantee returning non-null object
+     */
+    fun getTransitionAccessor(): TransitionAccessor? {
+        // they can be both null but not both non-null
+        require(nfaRunAutomaton == null || automaton == null)
+        return if (nfaRunAutomaton == null) automaton else nfaRunAutomaton
+    }
 
     override fun hashCode(): Int {
         val prime = 31
@@ -480,6 +486,7 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
                 + RamUsageEstimator.sizeOfObject(term)
                 + RamUsageEstimator.sizeOfObject(transition))
     }
+
     companion object {
         private val BASE_RAM_BYTES: kotlin.Long = RamUsageEstimator.shallowSizeOfInstance(CompiledAutomaton::class)
 
@@ -488,11 +495,11 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
             val numStates: Int = automaton.numStates
             val t = Transition()
             var foundState: Int = -1
-            for (s in 0 ..< numStates) {
+            for (s in 0..<numStates) {
                 if (automaton.isAccept(s)) {
                     val count: Int = automaton.initTransition(s, t)
                     var isSinkState = false
-                    for (i in 0 ..< count) {
+                    for (i in 0..<count) {
                         automaton.getNextTransition(t)
                         if (t.dest == s && t.min == 0 && t.max == 0xff) {
                             isSinkState = true
@@ -509,4 +516,5 @@ class CompiledAutomaton (automaton: Automaton, finite: Boolean, simplify: Boolea
             return foundState
         }
 
-    }}
+    }
+}
