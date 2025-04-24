@@ -191,6 +191,15 @@ object System {
         )
     }
 
+    fun <T> arraycopy(src: Array<T>, srcPos: Int, dest: Array<T>, destPos: Int, length: Int) {
+        src.copyInto(
+            destination = dest,
+            destinationOffset = destPos,
+            startIndex = srcPos,
+            endIndex = srcPos + length
+        )
+    }
+
     fun arraycopy(src: BooleanArray, srcPos: Int, dest: BooleanArray, destPos: Int, length: Int) {
         src.copyInto(
             destination = dest,
