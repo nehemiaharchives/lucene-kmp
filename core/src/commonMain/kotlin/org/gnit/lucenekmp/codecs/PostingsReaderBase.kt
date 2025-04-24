@@ -47,7 +47,7 @@ protected constructor() : AutoCloseable {
     /** Must fully consume state, since after this call that TermState may be reused.  */
     @Throws(IOException::class)
     abstract fun postings(
-        fieldInfo: FieldInfo, state: BlockTermState, reuse: PostingsEnum, flags: Int
+        fieldInfo: FieldInfo, state: BlockTermState, reuse: PostingsEnum?, flags: Int
     ): PostingsEnum
 
     /**

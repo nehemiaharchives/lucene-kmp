@@ -67,7 +67,7 @@ protected constructor() : BytesRefIterator {
      * **NOTE**: The returned [IOBooleanSupplier] must be consumed in the same thread.
      */
     @Throws(IOException::class)
-    abstract fun prepareSeekExact(text: BytesRef): IOBooleanSupplier
+    abstract fun prepareSeekExact(text: BytesRef): IOBooleanSupplier?
 
     /**
      * Seeks to the specified term, if it exists, or to the next (ceiling) term. Returns SeekStatus to

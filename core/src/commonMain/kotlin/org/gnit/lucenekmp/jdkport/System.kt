@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
 import dev.scottpierce.envvar.EnvVar
+import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.util.fst.FST.Arc
 
 
 /**
@@ -172,6 +174,15 @@ object System {
     }
 
     fun arraycopy(src: Array<Any?>, srcPos: Int, dest: Array<Any?>, destPos: Int, length: Int) {
+        src.copyInto(
+            destination = dest,
+            destinationOffset = destPos,
+            startIndex = srcPos,
+            endIndex = srcPos + length
+        )
+    }
+
+    fun <T> arraycopy(src: Array<T?>, srcPos: Int, dest: Array<T?>, destPos: Int, length: Int) {
         src.copyInto(
             destination = dest,
             destinationOffset = destPos,

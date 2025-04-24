@@ -39,7 +39,7 @@ protected constructor() : TermsEnum() {
     }
 
     @Throws(IOException::class)
-    override fun prepareSeekExact(text: BytesRef): IOBooleanSupplier {
+    override fun prepareSeekExact(text: BytesRef): IOBooleanSupplier? {
         return IOBooleanSupplier { seekExact(text) }
     }
 
