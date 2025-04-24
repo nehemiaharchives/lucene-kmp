@@ -47,6 +47,85 @@ class Character {
         }
 
         /**
+         * Returns the code point at the given index of the
+         * `CharSequence`. If the `char` value at
+         * the given index in the `CharSequence` is in the
+         * high-surrogate range, the following index is less than the
+         * length of the `CharSequence`, and the
+         * `char` value at the following index is in the
+         * low-surrogate range, then the supplementary code point
+         * corresponding to this surrogate pair is returned. Otherwise,
+         * the `char` value at the given index is returned.
+         *
+         * @param seq a sequence of `char` values (Unicode code
+         * units)
+         * @param index the index to the `char` values (Unicode
+         * code units) in `seq` to be converted
+         * @return the Unicode code point at the given index
+         * @throws NullPointerException if `seq` is null.
+         * @throws IndexOutOfBoundsException if the value
+         * `index` is negative or not less than
+         * [seq.length()][CharSequence.length].
+         * @since  1.5
+         */
+        fun codePointAt(seq: CharSequence, index: Int): Int {
+            var index = index
+            val c1 = seq[index]
+            if (isHighSurrogate(c1) && ++index < seq.length) {
+                val c2 = seq[index]
+                if (c2.isLowSurrogate()) {
+                    return toCodePoint(c1, c2)
+                }
+            }
+            return c1.code
+        }
+
+        /**
+         * Returns the code point at the given index of the
+         * `char` array, where only array elements with
+         * `index` less than `limit` can be used. If
+         * the `char` value at the given index in the
+         * `char` array is in the high-surrogate range, the
+         * following index is less than the `limit`, and the
+         * `char` value at the following index is in the
+         * low-surrogate range, then the supplementary code point
+         * corresponding to this surrogate pair is returned. Otherwise,
+         * the `char` value at the given index is returned.
+         *
+         * @param a the `char` array
+         * @param index the index to the `char` values (Unicode
+         * code units) in the `char` array to be converted
+         * @param limit the index after the last array element that
+         * can be used in the `char` array
+         * @return the Unicode code point at the given index
+         * @throws NullPointerException if `a` is null.
+         * @throws IndexOutOfBoundsException if the `index`
+         * argument is negative or not less than the `limit`
+         * argument, or if the `limit` argument is negative or
+         * greater than the length of the `char` array.
+         * @since  1.5
+         */
+        fun codePointAt(a: CharArray, index: Int, limit: Int): Int {
+            if (index >= limit || index < 0 || limit > a.size) {
+                throw IndexOutOfBoundsException()
+            }
+            return codePointAtImpl(a, index, limit)
+        }
+
+        // throws ArrayIndexOutOfBoundsException if index out of bounds
+        fun codePointAtImpl(a: CharArray, index: Int, limit: Int): Int {
+            var index = index
+            val c1 = a[index]
+            if (isHighSurrogate(c1) && ++index < limit) {
+                val c2 = a[index]
+                if (c2.isLowSurrogate()) {
+                    return toCodePoint(c1, c2)
+                }
+            }
+            return c1.code
+        }
+
+        /**
          * Determines if the specified character (Unicode code point) is a
          * lowercase character.
          *

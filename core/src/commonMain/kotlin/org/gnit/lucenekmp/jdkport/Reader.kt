@@ -85,25 +85,3 @@ abstract class Reader: Readable, AutoCloseable {
         return nRead
     }
 }
-
-/**
- * A minimal multiplatform abstraction for writing characters.
- */
-abstract class Writer {
-    /**
-     * Writes [len] characters from [cbuf] starting at offset [off].
-     */
-    abstract fun write(cbuf: CharArray, off: Int, len: Int)
-
-    /**
-     * Closes the writer.
-     */
-    abstract fun close()
-
-    /**
-     * Convenience: Writes the given string.
-     */
-    open fun write(str: String) {
-        write(str.toCharArray(), 0, str.length)
-    }
-}
