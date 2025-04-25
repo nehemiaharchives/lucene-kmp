@@ -264,7 +264,7 @@ protected constructor() : AutoCloseable {
                         }
 
                         @Throws(IOException::class)
-                        override fun binaryValue(): BytesRef? {
+                        override fun binaryValue(): BytesRef {
                             return current!!.values.binaryValue()
                         }
                     }
