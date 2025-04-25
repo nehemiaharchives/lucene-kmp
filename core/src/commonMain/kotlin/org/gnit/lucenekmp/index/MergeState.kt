@@ -79,7 +79,7 @@ class MergeState {
         readers: MutableList<CodecReader>,
         segmentInfo: SegmentInfo,
         infoStream: InfoStream,
-        intraMergeTaskExecutor: Executor
+        intraMergeTaskExecutor: Executor?
     ) {
         verifyIndexSort(readers, segmentInfo)
         this.infoStream = infoStream
@@ -99,7 +99,7 @@ class MergeState {
 
         var numDocs = 0
         for (i in 0..<numReaders) {
-            val reader: CodecReader = readers.get(i)
+            val reader: CodecReader = readers[i]
 
             maxDocs[i] = reader.maxDoc()
             liveDocs[i] = reader.liveDocs
@@ -156,14 +156,12 @@ class MergeState {
         val docMaps = kotlin.arrayOfNulls<DocMap>(numReaders)
 
         for (i in 0..<numReaders) {
-            val reader: LeafReader = readers.get(i)
+            val reader: LeafReader = readers[i]
             val liveDocs: Bits? = reader.liveDocs
-
-            val delDocMap: PackedLongValues?
-            if (liveDocs != null) {
-                delDocMap = removeDeletes(reader.maxDoc(), liveDocs)
+            val delDocMap: PackedLongValues? = if (liveDocs != null) {
+                removeDeletes(reader.maxDoc(), liveDocs)
             } else {
-                delDocMap = null
+                null
             }
 
             val docBase = totalDocs
@@ -185,7 +183,7 @@ class MergeState {
 
     @OptIn(ExperimentalTime::class)
     @Throws(IOException::class)
-    private fun buildDocMaps(readers: MutableList<CodecReader>, indexSort: Sort): Array<DocMap>? {
+    private fun buildDocMaps(readers: MutableList<CodecReader>, indexSort: Sort?): Array<DocMap>? {
         if (indexSort == null) {
             // no index sort ... we only must map around deletions, and rebase to the merged segment's
             // docID space
@@ -237,7 +235,7 @@ class MergeState {
         knnVectorsReaders: Array<KnnVectorsReader?>,
         maxDocs: IntArray,
         infoStream: InfoStream,
-        intraMergeTaskExecutor: Executor,
+        intraMergeTaskExecutor: Executor?,
         needsIndexSort: Boolean
     ) {
         this.docMaps = docMaps
@@ -260,17 +258,17 @@ class MergeState {
 
     companion object {
         private fun verifyIndexSort(readers: MutableList<CodecReader>, segmentInfo: SegmentInfo) {
-            val indexSort: Sort = segmentInfo.getIndexSort()
+            val indexSort: Sort? = segmentInfo.getIndexSort()
             if (indexSort == null) {
                 return
             }
             for (leaf in readers) {
-                val segmentSort: Sort = leaf.metaData.sort
-                require(!(segmentSort == null || isCongruentSort(indexSort, segmentSort) == false)) {
+                val segmentSort: Sort? = leaf.metaData.sort
+                require(!(segmentSort == null || !isCongruentSort(indexSort, segmentSort))) {
                     ("index sort mismatch: merged segment has sort="
                             + indexSort
                             + " but to-be-merged segment has sort="
-                            + (if (segmentSort == null) "null" else segmentSort))
+                            + (segmentSort ?: "null"))
                 }
             }
         }
@@ -281,7 +279,7 @@ class MergeState {
             var del = 0
             for (i in 0..<maxDoc) {
                 docMapBuilder.add((i - del).toLong())
-                if (liveDocs.get(i) == false) {
+                if (!liveDocs.get(i)) {
                     ++del
                 }
             }

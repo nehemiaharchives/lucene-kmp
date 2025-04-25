@@ -131,7 +131,7 @@ internal class Lucene90DocValuesConsumer(
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
                 override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-                    return DocValues.singleton(valuesProducer.getNumeric(field)!!)
+                    return DocValues.singleton(valuesProducer.getNumeric(field))
                 }
             }
         if (field.docValuesSkipIndexType() !== DocValuesSkipIndexType.NONE) {
@@ -245,7 +245,7 @@ internal class Lucene90DocValuesConsumer(
         var globalMinValue = Long.Companion.MAX_VALUE
         var globalDocCount = 0
         var maxDocId = -1
-        val accumulators: MutableList<SkipAccumulator> = ArrayList<SkipAccumulator>()
+        val accumulators: MutableList<SkipAccumulator> = ArrayList()
         var accumulator: SkipAccumulator? = null
         val maxAccumulators = 1 shl (SKIP_INDEX_LEVEL_SHIFT * (SKIP_INDEX_MAX_LEVEL - 1))
         var doc: Int = values.nextDoc()
@@ -279,7 +279,7 @@ internal class Lucene90DocValuesConsumer(
             doc = values.nextDoc()
         }
 
-        if (accumulators.isEmpty() == false) {
+        if (!accumulators.isEmpty()) {
             globalMaxValue = max(globalMaxValue, accumulator!!.maxValue)
             globalMinValue = min(globalMinValue, accumulator.minValue)
             globalDocCount += accumulator.docCount
@@ -299,7 +299,7 @@ internal class Lucene90DocValuesConsumer(
     @Throws(IOException::class)
     private fun writeLevels(accumulators: MutableList<SkipAccumulator>) {
         val accumulatorsLevels: MutableList<MutableList<SkipAccumulator>> =
-            ArrayList<MutableList<SkipAccumulator>>(SKIP_INDEX_MAX_LEVEL)
+            ArrayList(SKIP_INDEX_MAX_LEVEL)
         accumulatorsLevels.add(accumulators)
         for (i in 0..<SKIP_INDEX_MAX_LEVEL - 1) {
             accumulatorsLevels.add(buildLevel(accumulatorsLevels[i]))
@@ -346,13 +346,13 @@ internal class Lucene90DocValuesConsumer(
                 val v: Long = values.nextValue()
 
                 if (gcd != 1L) {
-                    if (v < Long.Companion.MIN_VALUE / 2 || v > Long.Companion.MAX_VALUE / 2) {
+                    gcd = if (v < Long.Companion.MIN_VALUE / 2 || v > Long.Companion.MAX_VALUE / 2) {
                         // in that case v - minValue might overflow and make the GCD computation return
                         // wrong results. Since these extreme values are unlikely, we just discard
                         // GCD computation for them
-                        gcd = 1
+                        1
                     } else {
-                        gcd = MathUtil.gcd(gcd, v - firstValue)
+                        MathUtil.gcd(gcd, v - firstValue)
                     }
                 }
 
@@ -581,7 +581,7 @@ internal class Lucene90DocValuesConsumer(
         var doc: Int = values.nextDoc()
         while (doc != DocIdSetIterator.NO_MORE_DOCS) {
             numDocsWithField++
-            val v: BytesRef = values.binaryValue()
+            val v: BytesRef = values.binaryValue()!!
             val length: Int = v.length
             data?.writeBytes(v.bytes, v.offset, v.length)
             minLength = min(length, minLength)
@@ -630,7 +630,7 @@ internal class Lucene90DocValuesConsumer(
             var doc: Int = values.nextDoc()
             while (doc != DocIdSetIterator.NO_MORE_DOCS
             ) {
-                addr += values.binaryValue().length
+                addr += values.binaryValue()!!.length
                 writer.add(addr)
                 doc = values.nextDoc()
             }
@@ -993,7 +993,7 @@ internal class Lucene90DocValuesConsumer(
     companion object {
         private fun buildLevel(accumulators: MutableList<SkipAccumulator>): MutableList<SkipAccumulator> {
             val levelSize = 1 shl SKIP_INDEX_LEVEL_SHIFT
-            val collector: MutableList<SkipAccumulator> = ArrayList<SkipAccumulator>()
+            val collector: MutableList<SkipAccumulator> = ArrayList()
             var i = 0
             while (i < accumulators.size - levelSize + 1) {
                 collector.add(SkipAccumulator.Companion.merge(accumulators, i, levelSize))

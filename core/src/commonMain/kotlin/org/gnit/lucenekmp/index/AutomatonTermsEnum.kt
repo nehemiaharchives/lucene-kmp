@@ -4,7 +4,6 @@ import kotlinx.io.IOException
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
-import org.gnit.lucenekmp.util.IOBooleanSupplier
 import org.gnit.lucenekmp.util.IntsRefBuilder
 import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.automaton.ByteRunnable
@@ -38,7 +37,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
     private val byteRunnable: ByteRunnable
 
     // common suffix of the automaton
-    private val commonSuffixRef: BytesRef
+    private val commonSuffixRef: BytesRef?
 
     // true if the automaton accepts a finite language
     private val finite: Boolean
@@ -73,8 +72,8 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
     init {
         require(compiled.type === CompiledAutomaton.AUTOMATON_TYPE.NORMAL) { "please use CompiledAutomaton.getTermsEnum instead" }
         this.finite = compiled.finite
-        this.byteRunnable = compiled.byteRunnable!!
-        this.transitionAccessor = compiled.transitionAccessor!!
+        this.byteRunnable = compiled.getByteRunnable()!!
+        this.transitionAccessor = compiled.getTransitionAccessor()!!
         this.commonSuffixRef = compiled.commonSuffixRef!!
 
         // No need to track visited states for a finite language without loops.
@@ -100,20 +99,20 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
      * Returns true if the term matches the automaton. Also stashes away the term to assist with smart
      * enumeration.
      */
-    protected override fun accept(term: BytesRef): AcceptStatus {
+    override fun accept(term: BytesRef): AcceptStatus {
         if (commonSuffixRef == null || StringHelper.endsWith(term, commonSuffixRef)) {
-            if (byteRunnable.run(
+            return if (byteRunnable.run(
                     term.bytes,
                     term.offset,
                     term.length
                 )
-            ) return if (linear) AcceptStatus.YES else AcceptStatus.YES_AND_SEEK
-            else return if (linear && term.compareTo(linearUpperBound) < 0)
+            ) if (linear) AcceptStatus.YES else AcceptStatus.YES_AND_SEEK
+            else if (linear && term < linearUpperBound)
                 AcceptStatus.NO
             else
                 AcceptStatus.NO_AND_SEEK
         } else {
-            return if (linear && term.compareTo(linearUpperBound) < 0)
+            return if (linear && term < linearUpperBound)
                 AcceptStatus.NO
             else
                 AcceptStatus.NO_AND_SEEK
@@ -134,10 +133,10 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
         }
 
         // seek to the next possible string;
-        if (nextString()) {
-            return seekBytesRef.get() // reposition
+        return if (nextString()) {
+            seekBytesRef.get() // reposition
         } else {
-            return null // no more possible strings can match
+            null // no more possible strings can match
         }
     }
 
@@ -146,7 +145,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
      * we set an upper bound and act like a TermRangeQuery for this portion of the term space.
      */
     private fun setLinear(position: Int) {
-        require(linear == false)
+        require(!linear)
 
         var state = 0
         var maxInterval = 0xff
@@ -314,7 +313,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
                     state = transition.dest
 
                     // append the minimum transition
-                    seekBytesRef.append(transition.min as Byte)
+                    seekBytesRef.append(transition.min.toByte())
 
                     // we found a loop, record it for faster enumeration
                     if (!linear && isVisited(state)) {

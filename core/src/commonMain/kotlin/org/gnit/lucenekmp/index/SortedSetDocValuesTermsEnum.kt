@@ -8,12 +8,7 @@ import org.gnit.lucenekmp.util.BytesRefBuilder
 /** Implements a [TermsEnum] wrapping a provided [SortedSetDocValues].  */
 internal class SortedSetDocValuesTermsEnum(private val values: SortedSetDocValues) : BaseTermsEnum() {
     private var currentOrd: Long = -1
-    private val scratch: BytesRefBuilder
-
-    /** Creates a new TermsEnum over the provided values  */
-    init {
-        scratch = BytesRefBuilder()
-    }
+    private val scratch: BytesRefBuilder = BytesRefBuilder()
 
     @Throws(IOException::class)
     override fun seekCeil(text: BytesRef): SeekStatus {
@@ -28,7 +23,7 @@ internal class SortedSetDocValuesTermsEnum(private val values: SortedSetDocValue
                 return SeekStatus.END
             } else {
                 // TODO: hmm can we avoid this "extra" lookup:
-                scratch.copyBytes(values.lookupOrd(currentOrd))
+                scratch.copyBytes(values.lookupOrd(currentOrd)!!)
                 return SeekStatus.NOT_FOUND
             }
         }
@@ -50,7 +45,7 @@ internal class SortedSetDocValuesTermsEnum(private val values: SortedSetDocValue
     override fun seekExact(ord: Long) {
         require(ord >= 0 && ord < values.valueCount)
         currentOrd = ord.toInt().toLong()
-        scratch.copyBytes(values.lookupOrd(currentOrd))
+        scratch.copyBytes(values.lookupOrd(currentOrd)!!)
     }
 
     @Throws(IOException::class)
@@ -59,7 +54,7 @@ internal class SortedSetDocValuesTermsEnum(private val values: SortedSetDocValue
         if (currentOrd >= values.valueCount) {
             return null
         }
-        scratch.copyBytes(values.lookupOrd(currentOrd))
+        scratch.copyBytes(values.lookupOrd(currentOrd)!!)
         return scratch.get()
     }
 
@@ -82,7 +77,7 @@ internal class SortedSetDocValuesTermsEnum(private val values: SortedSetDocValue
     }
 
     @Throws(IOException::class)
-    override fun postings(reuse: PostingsEnum, flags: Int): PostingsEnum {
+    override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
         throw UnsupportedOperationException()
     }
 
@@ -94,7 +89,7 @@ internal class SortedSetDocValuesTermsEnum(private val values: SortedSetDocValue
     @Throws(IOException::class)
     override fun seekExact(term: BytesRef, state: TermState) {
         require(state != null && state is OrdTermState)
-        this.seekExact((state as OrdTermState).ord)
+        this.seekExact(state.ord)
     }
 
     @Throws(IOException::class)

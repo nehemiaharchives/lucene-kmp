@@ -24,7 +24,7 @@ import kotlin.math.min
 //import java.io.PrintStream
 
 /** Iterates through terms in this field.  */
-internal class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
+class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
     // Lazy init:
     var `in`: IndexInput? = null
 
@@ -1140,7 +1140,7 @@ internal class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
         throw UnsupportedOperationException()
     }
 
-    internal class OutputAccumulator : DataInput() {
+    class OutputAccumulator : DataInput() {
         var outputs: Array<BytesRef?> = kotlin.arrayOfNulls(16)
         var current: BytesRef? = null
         var num: Int = 0

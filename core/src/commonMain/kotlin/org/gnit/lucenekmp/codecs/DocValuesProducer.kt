@@ -25,7 +25,7 @@ protected constructor() : AutoCloseable {
      * the given field is not [DocValuesType.NUMERIC]. The return value is never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getNumeric(field: FieldInfo): NumericDocValues?
+    abstract fun getNumeric(field: FieldInfo): NumericDocValues
 
     /**
      * Returns [BinaryDocValues] for this field. The returned instance need not be thread-safe:

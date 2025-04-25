@@ -19,11 +19,11 @@ internal object PerFieldMergeState {
      * @return The new MergeState with restricted fields
      */
     fun restrictFields(`in`: MergeState, fields: MutableCollection<String>): MergeState {
-        val fieldInfos: Array<FieldInfos?> = kotlin.arrayOfNulls<FieldInfos>(`in`.fieldInfos.size)
+        val fieldInfos: Array<FieldInfos?> = kotlin.arrayOfNulls(`in`.fieldInfos.size)
         for (i in 0..<`in`.fieldInfos.size) {
             fieldInfos[i] = FilterFieldInfos(`in`.fieldInfos[i]!!, fields)
         }
-        val fieldsProducers: Array<FieldsProducer?> = kotlin.arrayOfNulls<FieldsProducer>(`in`.fieldsProducers.size)
+        val fieldsProducers: Array<FieldsProducer?> = kotlin.arrayOfNulls(`in`.fieldsProducers.size)
         for (i in 0..<`in`.fieldsProducers.size) {
             fieldsProducers[i] =
                 if (`in`.fieldsProducers[i] == null)
@@ -155,7 +155,7 @@ internal object PerFieldMergeState {
             return filtered.size
         }
 
-        override fun fieldInfo(fieldName: String): FieldInfo {
+        override fun fieldInfo(fieldName: String): FieldInfo? {
             require(filteredNames.contains(fieldName)) {
                 ("The field named '"
                         + fieldName
@@ -182,7 +182,7 @@ internal object PerFieldMergeState {
 
         companion object {
             private fun toArray(src: FieldInfos): Array<FieldInfo> {
-                val res: Array<FieldInfo?> = kotlin.arrayOfNulls<FieldInfo>(src.size())
+                val res: Array<FieldInfo?> = kotlin.arrayOfNulls(src.size())
                 var i = 0
                 for (fi in src) {
                     res[i++] = fi
@@ -194,7 +194,7 @@ internal object PerFieldMergeState {
 
     private class FilterFieldsProducer(private val `in`: FieldsProducer, filterFields: MutableCollection<String>) :
         FieldsProducer() {
-        private val filtered: MutableList<String> = ArrayList<String>(filterFields)
+        private val filtered: MutableList<String> = ArrayList(filterFields)
 
         override fun iterator(): MutableIterator<String> {
             return filtered.iterator()

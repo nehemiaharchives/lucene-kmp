@@ -123,7 +123,7 @@ class Lucene90PointsReader(private val readState: SegmentReadState) : PointsRead
      * @lucene.internal
      */
     override fun getValues(fieldName: String): PointValues {
-        val fieldInfo: FieldInfo = readState.fieldInfos.fieldInfo(fieldName)
+        val fieldInfo: FieldInfo? = readState.fieldInfos.fieldInfo(fieldName)
         requireNotNull(fieldInfo) { "field=\"$fieldName\" is unrecognized" }
         require(fieldInfo.pointDimensionCount != 0) { "field=\"$fieldName\" did not index point values" }
 

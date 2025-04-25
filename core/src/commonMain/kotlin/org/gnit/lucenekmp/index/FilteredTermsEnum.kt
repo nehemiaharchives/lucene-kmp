@@ -117,22 +117,22 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
      * Returns the related attributes, the returned [AttributeSource] is shared with the
      * delegate `TermsEnum`.
      */
-    public override fun attributes(): AttributeSource {
+    override fun attributes(): AttributeSource {
         return tenum.attributes()
     }
 
     @Throws(IOException::class)
-    public override fun term(): BytesRef {
+    override fun term(): BytesRef? {
         return tenum.term()
     }
 
     @Throws(IOException::class)
-    public override fun docFreq(): Int {
+    override fun docFreq(): Int {
         return tenum.docFreq()
     }
 
     @Throws(IOException::class)
-    public override fun totalTermFreq(): Long {
+    override fun totalTermFreq(): Long {
         return tenum.totalTermFreq()
     }
 
@@ -142,7 +142,7 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
      * @throws UnsupportedOperationException In general, subclasses do not support seeking.
      */
     @Throws(IOException::class)
-    public override fun seekExact(term: BytesRef): Boolean {
+    override fun seekExact(term: BytesRef): Boolean {
         throw UnsupportedOperationException(this::class.qualifiedName + " does not support seeking")
     }
 
@@ -152,7 +152,7 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
      * @throws UnsupportedOperationException In general, subclasses do not support seeking.
      */
     @Throws(IOException::class)
-    public override fun prepareSeekExact(text: BytesRef): IOBooleanSupplier {
+    override fun prepareSeekExact(text: BytesRef): IOBooleanSupplier {
         throw UnsupportedOperationException(this::class.qualifiedName + " does not support seeking")
     }
 
@@ -162,7 +162,7 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
      * @throws UnsupportedOperationException In general, subclasses do not support seeking.
      */
     @Throws(IOException::class)
-    public override fun seekCeil(term: BytesRef): SeekStatus {
+    override fun seekCeil(term: BytesRef): SeekStatus {
         throw UnsupportedOperationException(this::class.qualifiedName + " does not support seeking")
     }
 
@@ -172,23 +172,23 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
      * @throws UnsupportedOperationException In general, subclasses do not support seeking.
      */
     @Throws(IOException::class)
-    public override fun seekExact(ord: Long) {
+    override fun seekExact(ord: Long) {
         throw UnsupportedOperationException(this::class.qualifiedName + " does not support seeking")
     }
 
     @Throws(IOException::class)
-    public override fun ord(): Long {
+    override fun ord(): Long {
         return tenum.ord()
     }
 
     @Throws(IOException::class)
-    public override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
-        return tenum.postings(reuse, flags)!!
+    override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
+        return tenum.postings(reuse, flags)
     }
 
     @Throws(IOException::class)
-    public override fun impacts(flags: Int): ImpactsEnum {
-        return tenum.impacts(flags)!!
+    override fun impacts(flags: Int): ImpactsEnum {
+        return tenum.impacts(flags)
     }
 
     /**
@@ -197,19 +197,19 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
      * @throws UnsupportedOperationException In general, subclasses do not support seeking.
      */
     @Throws(IOException::class)
-    public override fun seekExact(term: BytesRef, state: TermState) {
+    override fun seekExact(term: BytesRef, state: TermState) {
         throw UnsupportedOperationException(this::class.qualifiedName + " does not support seeking")
     }
 
     /** Returns the filtered enums term state  */
     @Throws(IOException::class)
-    public override fun termState(): TermState {
+    override fun termState(): TermState {
         checkNotNull(tenum)
         return tenum.termState()
     }
 
     @Throws(IOException::class)
-    public override fun next(): BytesRef? {
+    override fun next(): BytesRef? {
         // System.out.println("FTE.next doSeek=" + doSeek);
         // new Throwable().printStackTrace(System.out);
         while (true) {
@@ -221,7 +221,7 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
                 // tenum);
                 // Make sure we always seek forward:
                 require(
-                    actualTerm == null || t == null || t.compareTo(actualTerm!!) > 0
+                    actualTerm == null || t == null || t > actualTerm!!
                 ) { "curTerm=$actualTerm seekTerm=$t" }
                 if (t == null || tenum.seekCeil(t) === SeekStatus.END) {
                     // no more terms to seek to or enum exhausted

@@ -22,13 +22,13 @@ object StringHelper {
      * @param currentTerm The second [BytesRef] to compare
      * @return The number of common elements (from the start of each).
      */
-    fun bytesDifference(priorTerm: BytesRef, currentTerm: BytesRef): Int {
+    fun bytesDifference(priorTerm: BytesRef, currentTerm: BytesRef?): Int {
         val mismatch: Int =
             Arrays.mismatch(
                 priorTerm.bytes,
                 priorTerm.offset,
                 priorTerm.offset + priorTerm.length,
-                currentTerm.bytes,
+                currentTerm!!.bytes,
                 currentTerm.offset,
                 currentTerm.offset + currentTerm.length
             )

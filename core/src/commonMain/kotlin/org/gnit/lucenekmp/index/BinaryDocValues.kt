@@ -14,5 +14,5 @@ protected constructor() : DocValuesIterator() {
      * @return binary value
      */
     @Throws(IOException::class)
-    abstract fun binaryValue(): BytesRef
+    abstract fun binaryValue(): BytesRef?
 }

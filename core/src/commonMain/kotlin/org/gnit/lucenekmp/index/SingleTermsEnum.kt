@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.util.BytesRef
  * want to preserve MultiTermQuery semantics such as [MultiTermQuery.getRewriteMethod].
  */
 class SingleTermsEnum(tenum: TermsEnum, termText: BytesRef?) : FilteredTermsEnum(tenum) {
-    private val singleRef: BytesRef?
+    private val singleRef: BytesRef? = termText
 
     /**
      * Creates a new `SingleTermsEnum`.
@@ -19,11 +19,10 @@ class SingleTermsEnum(tenum: TermsEnum, termText: BytesRef?) : FilteredTermsEnum
      * After calling the constructor the enumeration is already pointing to the term, if it exists.
      */
     init {
-        singleRef = termText
         setInitialSeekTerm(termText)
     }
 
-    protected override fun accept(term: BytesRef?): AcceptStatus? {
-        return if (term!!.equals(singleRef)) AcceptStatus.YES else AcceptStatus.END
+    override fun accept(term: BytesRef): AcceptStatus {
+        return if (term == singleRef) AcceptStatus.YES else AcceptStatus.END
     }
 }

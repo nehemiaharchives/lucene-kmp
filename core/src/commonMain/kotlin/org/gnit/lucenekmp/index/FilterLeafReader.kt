@@ -41,7 +41,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
             this.`in` = `in`
         }
 
-        override fun iterator(): MutableIterator<String?> {
+        override fun iterator(): MutableIterator<String> {
             return `in`.iterator()
         }
 
@@ -120,9 +120,10 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
             return `in`.hasPayloads()
         }
 
-        @get:Throws(IOException::class)
-        override val stats: Any
-            get() = `in`.stats
+        @Throws(IOException::class)
+        override fun getStats(): Any{
+            return `in`.getStats()
+        }
     }
 
     /** Base class for filtering [TermsEnum] implementations.  */
@@ -202,7 +203,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
         }
 
         @Throws(IOException::class)
-        override fun prepareSeekExact(text: BytesRef): IOBooleanSupplier {
+        override fun prepareSeekExact(text: BytesRef): IOBooleanSupplier? {
             return `in`.prepareSeekExact(text)
         }
 
@@ -317,7 +318,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
     }
 
     @Throws(IOException::class)
-    override fun getByteVectorValues(field: String): ByteVectorValues {
+    override fun getByteVectorValues(field: String): ByteVectorValues? {
         return delegate.getByteVectorValues(field)
     }
 
@@ -376,45 +377,45 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
     }
 
     @Throws(IOException::class)
-    override fun getNumericDocValues(field: String): NumericDocValues {
+    override fun getNumericDocValues(field: String): NumericDocValues? {
         ensureOpen()
-        return delegate.getNumericDocValues(field!!)
+        return delegate.getNumericDocValues(field)
     }
 
     @Throws(IOException::class)
-    override fun getBinaryDocValues(field: String): BinaryDocValues {
+    override fun getBinaryDocValues(field: String): BinaryDocValues? {
         ensureOpen()
-        return delegate.getBinaryDocValues(field!!)
+        return delegate.getBinaryDocValues(field)
     }
 
     @Throws(IOException::class)
-    override fun getSortedDocValues(field: String): SortedDocValues {
+    override fun getSortedDocValues(field: String): SortedDocValues? {
         ensureOpen()
-        return delegate.getSortedDocValues(field!!)
+        return delegate.getSortedDocValues(field)
     }
 
     @Throws(IOException::class)
-    override fun getSortedNumericDocValues(field: String): SortedNumericDocValues {
+    override fun getSortedNumericDocValues(field: String): SortedNumericDocValues? {
         ensureOpen()
-        return delegate.getSortedNumericDocValues(field!!)
+        return delegate.getSortedNumericDocValues(field)
     }
 
     @Throws(IOException::class)
-    override fun getSortedSetDocValues(field: String): SortedSetDocValues {
+    override fun getSortedSetDocValues(field: String): SortedSetDocValues? {
         ensureOpen()
-        return delegate.getSortedSetDocValues(field!!)
+        return delegate.getSortedSetDocValues(field)
     }
 
     @Throws(IOException::class)
-    override fun getDocValuesSkipper(field: String): DocValuesSkipper {
+    override fun getDocValuesSkipper(field: String): DocValuesSkipper? {
         ensureOpen()
-        return delegate.getDocValuesSkipper(field!!)!!
+        return delegate.getDocValuesSkipper(field)
     }
 
     @Throws(IOException::class)
-    override fun getNormValues(field: String): NumericDocValues {
+    override fun getNormValues(field: String): NumericDocValues? {
         ensureOpen()
-        return delegate.getNormValues(field!!)
+        return delegate.getNormValues(field)
     }
 
     override val metaData: LeafMetaData

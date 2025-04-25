@@ -104,7 +104,7 @@ class Sorter internal constructor(sort: Sort) {
 
         if (metaData.hasBlocks && fieldInfos.parentField != null) {
             val parents: BitSet =
-                BitSet.of(reader.getNumericDocValues(fieldInfos.parentField), reader.maxDoc())
+                BitSet.of(reader.getNumericDocValues(fieldInfos.parentField)!!, reader.maxDoc())
             comparatorWrapper = { input ->
                 object : IndexSorter.DocComparator {
                     override fun compare(docID1: Int, docID2: Int): Int {

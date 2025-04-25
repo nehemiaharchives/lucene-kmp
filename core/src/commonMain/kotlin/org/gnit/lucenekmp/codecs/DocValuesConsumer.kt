@@ -264,7 +264,7 @@ protected constructor() : AutoCloseable {
                         }
 
                         @Throws(IOException::class)
-                        override fun binaryValue(): BytesRef {
+                        override fun binaryValue(): BytesRef? {
                             return current!!.values.binaryValue()
                         }
                     }
@@ -740,7 +740,7 @@ protected constructor() : AutoCloseable {
                         }
 
                         @Throws(IOException::class)
-                        override fun lookupOrd(ord: Long): BytesRef {
+                        override fun lookupOrd(ord: Long): BytesRef? {
                             val segmentNumber: Int = map.getFirstSegmentNumber(ord)
                             val segmentOrd: Long = map.getFirstSegmentOrd(ord)
                             return toMerge[segmentNumber].lookupOrd(segmentOrd)
@@ -889,7 +889,7 @@ protected constructor() : AutoCloseable {
                     get() = map.valueCount.toInt()
 
                 @Throws(IOException::class)
-                override fun lookupOrd(ord: Int): BytesRef {
+                override fun lookupOrd(ord: Int): BytesRef? {
                     val segmentNumber: Int = map.getFirstSegmentNumber(ord.toLong())
                     val segmentOrd = map.getFirstSegmentOrd(ord.toLong()).toInt()
                     return subs[segmentNumber].values.lookupOrd(segmentOrd)

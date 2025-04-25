@@ -1242,7 +1242,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         }
 
         @Throws(IOException::class)
-        fun getPayload(): BytesRef? {
+        override fun getPayload(): BytesRef? {
             checkPosition()
             if (payloadIndex == null || payload.length === 0) {
                 return null

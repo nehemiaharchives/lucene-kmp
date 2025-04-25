@@ -178,7 +178,7 @@ protected constructor() {
     fun getMax() = max
 
     /** Expert: returns additional information about this Terms instance for debugging purposes.  */
-    fun getStats(): Any
+    open fun getStats(): Any
          {
             val sb = StringBuilder()
             sb.append("impl=").append(this::class.simpleName)

@@ -65,8 +65,8 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
     abstract fun getKnnVectorsFormatForField(field: String): KnnVectorsFormat
 
     private inner class FieldsWriter(private val segmentWriteState: SegmentWriteState) : KnnVectorsWriter() {
-        private val formats: MutableMap<KnnVectorsFormat, WriterAndSuffix> = HashMap<KnnVectorsFormat, WriterAndSuffix>()
-        private val suffixes: MutableMap<String, Int> = HashMap<String, Int>()
+        private val formats: MutableMap<KnnVectorsFormat, WriterAndSuffix> = HashMap()
+        private val suffixes: MutableMap<String, Int> = HashMap()
 
         @Throws(IOException::class)
         override fun addField(fieldInfo: FieldInfo): KnnFieldVectorsWriter<*> {
@@ -75,7 +75,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
         }
 
         @Throws(IOException::class)
-        override fun flush(maxDoc: Int, sortMap: Sorter.DocMap) {
+        override fun flush(maxDoc: Int, sortMap: Sorter.DocMap?) {
             for (was in formats.values) {
                 was.writer.flush(maxDoc, sortMap)
             }
@@ -163,7 +163,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             this.fieldInfos = readState.fieldInfos
             // Init each unique format:
             var success = false
-            val formats: MutableMap<String, KnnVectorsReader> = HashMap<String, KnnVectorsReader>()
+            val formats: MutableMap<String, KnnVectorsReader> = HashMap()
             try {
                 // Read field name -> format name
                 for (fi in readState.fieldInfos) {
@@ -199,7 +199,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             this.fieldInfos = fieldsReader.fieldInfos
             for (fi in this.fieldInfos) {
                 if (fi.hasVectorValues() && fieldsReader.fields.containsKey(fi.number)) {
-                    this.fields.put(fi.number, fieldsReader.fields.get(fi.number)!!.mergeInstance)
+                    this.fields.put(fi.number, fieldsReader.fields[fi.number]!!.mergeInstance)
                 }
             }
         }
@@ -224,7 +224,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             if (info == null) {
                 return null
             }
-            return fields.get(info.number)
+            return fields[info.number]
         }
 
         @Throws(IOException::class)
@@ -239,7 +239,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             val info: FieldInfo? = fieldInfos.fieldInfo(field)
             var reader: KnnVectorsReader? = null
             if (info != null) {
-                reader = fields.get(info.number)
+                reader = fields[info.number]
             }
             if (info == null || reader == null) {
                 return null
@@ -253,7 +253,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             var reader: KnnVectorsReader? = null
 
             if(info != null) {
-                reader = fields.get(info.number)
+                reader = fields[info.number]
             }
 
             if (info == null || reader == null) {
@@ -272,7 +272,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             val info: FieldInfo? = fieldInfos.fieldInfo(field)
             var reader: KnnVectorsReader? = null
             if(info != null) {
-                reader = fields.get(info.number)
+                reader = fields[info.number]
             }
 
             if (info == null || reader == null) {
@@ -287,7 +287,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             var reader: KnnVectorsReader? = null
 
             if(info != null) {
-                reader = fields.get(info.number)
+                reader = fields[info.number]
             }
 
             if (info == null || reader == null) {
@@ -298,8 +298,8 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
 
         @Throws(IOException::class)
         override fun getGraph(field: String): HnswGraph? {
-            val info: FieldInfo = fieldInfos.fieldInfo(field)
-            val knnVectorsReader: KnnVectorsReader = fields.get(info.number)!!
+            val info: FieldInfo? = fieldInfos.fieldInfo(field)
+            val knnVectorsReader: KnnVectorsReader = fields[info!!.number]!!
             return if (knnVectorsReader is HnswGraphProvider) {
                 (knnVectorsReader as HnswGraphProvider).getGraph(field)
             } else {

@@ -45,7 +45,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
      */
     internal class FieldsGroup(val fields: MutableList<String>, val suffix: Int, val state: SegmentWriteState) {
         internal class Builder(val suffix: Int, val state: SegmentWriteState) {
-            val fields: MutableSet<String> = HashSet<String>()
+            val fields: MutableSet<String> = HashSet()
 
             fun addField(field: String): Builder {
                 fields.add(field)
@@ -53,7 +53,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
             }
 
             fun build(): FieldsGroup {
-                val fieldList: MutableList<String> = ArrayList<String>(fields)
+                val fieldList: MutableList<String> = ArrayList(fields)
                 fieldList.sort()
                 return FieldsGroup(fieldList, suffix, state)
             }
@@ -62,7 +62,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
     }
 
     private inner class FieldsWriter(val writeState: SegmentWriteState) : FieldsConsumer() {
-        val toClose: MutableList<AutoCloseable> = ArrayList<AutoCloseable>()
+        val toClose: MutableList<AutoCloseable> = ArrayList()
 
         @Throws(IOException::class)
         override fun write(fields: Fields, norms: NormsProducer) {
@@ -102,7 +102,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
                 .map { it.iterator() }
                 .toTypedArray()
 
-            val indexedFieldNames: Iterable<String> = MergedIterator<String>(
+            val indexedFieldNames: Iterable<String> = MergedIterator(
                 removeDuplicates = true,
                 iteratorArray = mutableIterators
             )
@@ -133,14 +133,14 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
         ): MutableMap<PostingsFormat, FieldsGroup> {
             // Maps a PostingsFormat instance to the suffix it should use
             val formatToGroupBuilders: MutableMap<PostingsFormat, FieldsGroup.Builder> =
-                HashMap<PostingsFormat, FieldsGroup.Builder>()
+                HashMap()
 
             // Holds last suffix of each PostingFormat name
-            val suffixes: MutableMap<String, Int> = HashMap<String, Int>()
+            val suffixes: MutableMap<String, Int> = HashMap()
 
             // Assign field -> PostingsFormat
             for (field in indexedFieldNames) {
-                val fieldInfo: FieldInfo = writeState.fieldInfos.fieldInfo(field)
+                val fieldInfo: FieldInfo? = writeState.fieldInfos.fieldInfo(field)
                 // TODO: This should check current format from the field attribute
                 val format: PostingsFormat = getPostingsFormatForField(field)
 
@@ -154,10 +154,10 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
                     // bump the suffix
 
                     var suffix = suffixes[formatName]
-                    if (suffix == null) {
-                        suffix = 0
+                    suffix = if (suffix == null) {
+                        0
                     } else {
-                        suffix = suffix + 1
+                        suffix + 1
                     }
                     suffixes.put(formatName, suffix)
 
@@ -175,7 +175,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
 
                 groupBuilder.addField(field)
 
-                fieldInfo.putAttribute(PER_FIELD_FORMAT_KEY, formatName)
+                fieldInfo!!.putAttribute(PER_FIELD_FORMAT_KEY, formatName)
                 fieldInfo.putAttribute(PER_FIELD_SUFFIX_KEY, groupBuilder.suffix.toString())
             }
 
@@ -198,15 +198,15 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
 
     private class FieldsReader : FieldsProducer {
         private val fields: MutableMap<String, FieldsProducer> =
-            HashMap<String, FieldsProducer>() //	TreeMap not available in kotlin common as it is jvm only. Suitable when sorted key order is needed, such as for range queries
+            HashMap() //	TreeMap not available in kotlin common as it is jvm only. Suitable when sorted key order is needed, such as for range queries
         private val formats: MutableMap<String, FieldsProducer> =
-            HashMap<String, FieldsProducer>() //	Efficient for quick lookups without ordering requirements
+            HashMap() //	Efficient for quick lookups without ordering requirements
         private val segment: String
 
         // clone for merge
         constructor(other: FieldsReader) {
             val oldToNew: MutableMap<FieldsProducer, FieldsProducer> =
-                HashMap<FieldsProducer, FieldsProducer>()
+                HashMap()
             // First clone all formats
             for (ent in other.formats.entries) {
                 val values: FieldsProducer = ent.value.mergeInstance

@@ -85,7 +85,7 @@ class BytesRefBuilder {
      * Replace the content of this builder with the provided bytes. Equivalent to calling [ ][.clear] and then [.append].
      */
     fun copyBytes(b: ByteArray, off: Int, len: Int) {
-        require(0 === ref.offset)
+        require(0 == ref.offset)
         ref.length = len
         growNoCopy(len)
         b.copyInto(ref.bytes, 0, off, off + len)

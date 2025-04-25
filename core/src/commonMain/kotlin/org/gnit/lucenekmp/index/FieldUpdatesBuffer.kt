@@ -62,7 +62,7 @@ class FieldUpdatesBuffer private constructor(
         fields = arrayOf<String?>(initialValue.term.field)
         bytesUsed.addAndGet(sizeOfString(initialValue.term.field))
         docsUpTo = intArrayOf(docUpTo)
-        if (initialValue.hasValue == false) {
+        if (!initialValue.hasValue) {
             hasValues = FixedBitSet(1)
             bytesUsed.addAndGet(hasValues!!.ramBytesUsed())
         }
@@ -114,8 +114,8 @@ class FieldUpdatesBuffer private constructor(
     }
 
     fun add(field: String, docUpTo: Int, ord: Int, hasValue: Boolean) {
-        require(finished == false) { "buffer was finished already" }
-        if (fields[0] == field == false || fields.size != 1) {
+        require(!finished) { "buffer was finished already" }
+        if (fields[0] != field || fields.size != 1) {
             if (fields.size <= ord) {
                 val array: Array<String?> = ArrayUtil.grow(fields, ord + 1)
                 if (fields.size == 1) {
@@ -144,7 +144,7 @@ class FieldUpdatesBuffer private constructor(
             docsUpTo[ord] = docUpTo
         }
 
-        if (hasValue == false || hasValues != null) {
+        if (!hasValue || hasValues != null) {
             if (hasValues == null) {
                 hasValues = FixedBitSet(ord + 1)
                 hasValues!!.set(0, ord)
@@ -187,7 +187,7 @@ class FieldUpdatesBuffer private constructor(
     }
 
     fun addUpdate(term: Term, value: BytesRef?, docUpTo: Int) {
-        require(isNumeric == false)
+        require(!isNumeric)
         val ord = append(term)
         byteValues!!.append(value!!)
         add(term.field, docUpTo, ord, true)
@@ -235,7 +235,7 @@ class FieldUpdatesBuffer private constructor(
     }
 
     fun iterator(): BufferedUpdateIterator {
-        check(finished != false) { "buffer is not finished yet" }
+        check(finished) { "buffer is not finished yet" }
         return BufferedUpdateIterator()
     }
 
@@ -250,7 +250,7 @@ class FieldUpdatesBuffer private constructor(
     }
 
     fun getNumericValue(idx: Int): Long {
-        if (hasValues != null && hasValues!!.get(idx) == false) {
+        if (hasValues != null && !hasValues!!.get(idx)) {
             return 0
         }
         return numericValues!![getArrayIndex(numericValues!!.size, idx)]
@@ -290,7 +290,7 @@ class FieldUpdatesBuffer private constructor(
     }
 
     /** An iterator that iterates over all updates in insertion order  */
-    internal inner class BufferedUpdateIterator {
+    inner class BufferedUpdateIterator {
         private val termValuesIterator: BytesRefArray.IndexedBytesRefIterator = termValues.iterator(termSortState)
         private val lookAheadTermIterator: BytesRefArray.IndexedBytesRefIterator? = if (termSortState != null) termValues.iterator(termSortState) else null
         private val byteValuesIterator: BytesRefIterator? = if (isNumeric) null else byteValues!!.iterator()

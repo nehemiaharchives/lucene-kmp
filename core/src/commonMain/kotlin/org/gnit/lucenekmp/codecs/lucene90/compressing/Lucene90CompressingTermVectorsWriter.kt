@@ -216,9 +216,9 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
 
     @Throws(IOException::class)
     override fun startField(
-        info: FieldInfo, numTerms: Int, positions: Boolean, offsets: Boolean, payloads: Boolean
+        info: FieldInfo?, numTerms: Int, positions: Boolean, offsets: Boolean, payloads: Boolean
     ) {
-        curField = curDoc!!.addField(info.number, numTerms, positions, offsets, payloads)
+        curField = curDoc!!.addField(info!!.number, numTerms, positions, offsets, payloads)
         lastTerm.length = 0
     }
 
@@ -228,7 +228,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
     }
 
     @Throws(IOException::class)
-    override fun startTerm(term: BytesRef, freq: Int) {
+    override fun startTerm(term: BytesRef?, freq: Int) {
         require(freq >= 1)
         val prefix: Int = if (lastTerm.length == 0) {
             // no previous term: no bytes to write
@@ -236,7 +236,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
         } else {
             StringHelper.bytesDifference(lastTerm, term)
         }
-        curField!!.addTerm(freq, prefix, term.length - prefix)
+        curField!!.addTerm(freq, prefix, term!!.length - prefix)
         termSuffixes.writeBytes(term.bytes, term.offset + prefix, term.length - prefix)
         // copy last term
         if (lastTerm.bytes.size < term.length) {
@@ -734,8 +734,8 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
             indexWriter =
                 FieldsIndexWriter(
                     directory,
-                    segment!!,
-                    segmentSuffix!!,
+                    segment,
+                    segmentSuffix,
                     VECTORS_INDEX_EXTENSION,
                     VECTORS_INDEX_CODEC_NAME,
                     si.getId(),

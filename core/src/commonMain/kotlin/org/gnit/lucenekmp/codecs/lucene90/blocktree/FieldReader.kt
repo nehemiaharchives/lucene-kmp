@@ -95,7 +95,7 @@ class FieldReader internal constructor(
      w.close();
      }
     */
-        val emptyOutput: BytesRef = metadata.getEmptyOutput()
+        val emptyOutput: BytesRef? = metadata.getEmptyOutput()
         if (rootCode != emptyOutput) {
             // TODO: this branch is never taken
             require(false)
@@ -124,12 +124,8 @@ class FieldReader internal constructor(
     @get:Throws(IOException::class)
     override val max: BytesRef?
         get() {
-            return if (maxTerm == null) {
-                // Older index that didn't store min/maxTerm
-                super.getMax()
-            } else {
-                maxTerm
-            }
+            return maxTerm ?: // Older index that didn't store min/maxTerm
+            super.getMax()
         }
 
     @get:Throws(IOException::class)

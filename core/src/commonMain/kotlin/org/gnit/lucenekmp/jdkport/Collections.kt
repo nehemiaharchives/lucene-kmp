@@ -93,7 +93,7 @@ object Collections {
         } else if (cmp is ReverseComparator2) {
             return (cmp as ReverseComparator2<T?>).cmp
         } else {
-            return ReverseComparator2<T?>(cmp)
+            return ReverseComparator2(cmp)
         }
     }
 
@@ -110,9 +110,9 @@ object Collections {
             return reverseOrder()
         }
 
-        fun <T : Comparable<T>> reversed(): Comparator<T> {
+        /*fun <T : Comparable<T>> reversed(): Comparator<T> {
             return naturalOrder()
-        }
+        }*/
 
         companion object {
             val REVERSE_ORDER: ReverseComparator<Any> = ReverseComparator<Any>()
@@ -149,7 +149,7 @@ object Collections {
             return cmp.hashCode() xor Int.Companion.MIN_VALUE
         }
 
-        fun reversed(): Comparator<T?> {
+        override fun reversed(): Comparator<T?> {
             return cmp
         }
     }

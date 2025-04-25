@@ -13,8 +13,8 @@ import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.experimental.and
 
-class SegmentTermsEnumFrame(private val ste: SegmentTermsEnum, // Our index in stack[]:
-                                     val ord: Int
+class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Our index in stack[]:
+                                                val ord: Int
 ) {
 
     var hasTerms: Boolean = false

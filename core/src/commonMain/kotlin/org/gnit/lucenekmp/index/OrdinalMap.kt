@@ -205,7 +205,7 @@ class OrdinalMap private constructor(
 
             // Advance past this term, recording the per-segment ord deltas:
             while (true) {
-                val segmentOrd: Long = top.termsEnum.ord()
+                val segmentOrd: Long = top.termsEnum!!.ord()
                 val delta = globalOrd - segmentOrd
                 val segmentIndex: Int = top.subIndex
                 // We compute the least segment where the term occurs. In case the

@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.util.compress.LowercaseAsciiCompression
 import kotlinx.io.IOException
 
 /** Compression algorithm used for suffixes of a block of terms.  */
-internal enum class CompressionAlgorithm(val code: Int) {
+enum class CompressionAlgorithm(val code: Int) {
     NO_COMPRESSION(0x00) {
         @Throws(IOException::class)
         override fun read(`in`: DataInput, out: ByteArray, len: Int) {

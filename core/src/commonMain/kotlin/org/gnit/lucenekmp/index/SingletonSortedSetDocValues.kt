@@ -68,7 +68,7 @@ internal class SingletonSortedSetDocValues(`in`: SortedDocValues) : SortedSetDoc
     }
 
     @Throws(IOException::class)
-    override fun lookupOrd(ord: Long): BytesRef {
+    override fun lookupOrd(ord: Long): BytesRef? {
         // cast is ok: single-valued cannot exceed Integer.MAX_VALUE
         return `in`.lookupOrd(ord.toInt())
     }

@@ -174,60 +174,60 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: Int) {
+    override fun writeField(info: FieldInfo?, value: Int) {
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or NUMERIC_INT.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or NUMERIC_INT.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         bufferedDocs.writeZInt(value)
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: Long) {
+    override fun writeField(info: FieldInfo?, value: Long) {
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or NUMERIC_LONG.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or NUMERIC_LONG.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         writeTLong(bufferedDocs, value)
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: Float) {
+    override fun writeField(info: FieldInfo?, value: Float) {
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or NUMERIC_FLOAT.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or NUMERIC_FLOAT.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         writeZFloat(bufferedDocs, value)
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: Double) {
+    override fun writeField(info: FieldInfo?, value: Double) {
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or NUMERIC_DOUBLE.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or NUMERIC_DOUBLE.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         writeZDouble(bufferedDocs, value)
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: BytesRef) {
+    override fun writeField(info: FieldInfo?, value: BytesRef) {
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or BYTE_ARR.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or BYTE_ARR.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         bufferedDocs.writeVInt(value.length)
         bufferedDocs.writeBytes(value.bytes, value.offset, value.length)
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: StoredFieldDataInput) {
+    override fun writeField(info: FieldInfo?, value: StoredFieldDataInput) {
         val length: Int = value.getLength()
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or BYTE_ARR.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or BYTE_ARR.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         bufferedDocs.writeVInt(length)
         bufferedDocs.copyBytes(value.getDataInput(), length.toLong())
     }
 
     @Throws(IOException::class)
-    override fun writeField(info: FieldInfo, value: String) {
+    override fun writeField(info: FieldInfo?, value: String) {
         ++numStoredFieldsInDoc
-        val infoAndBits = ((info.number.toLong()) shl TYPE_BITS) or STRING.toLong()
+        val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or STRING.toLong()
         bufferedDocs.writeVLong(infoAndBits)
         bufferedDocs.writeString(value)
     }
@@ -448,7 +448,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
             } else if (sub.mergeStrategy == MergeStrategy.VISITOR) {
                 checkNotNull(visitors[sub.readerIndex])
                 startDocument()
-                reader.document(sub.docID, visitors[sub.readerIndex])
+                reader.document(sub.docID, visitors[sub.readerIndex]!!)
                 finishDocument()
                 ++docCount
                 sub = docIDMerger.next()

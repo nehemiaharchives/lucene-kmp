@@ -76,7 +76,7 @@ object DocValues {
 
     /** An empty SortedDocValues which returns [BytesRef.EMPTY_BYTES] for every document  */
     fun emptySorted(): SortedDocValues {
-        val empty: BytesRef = BytesRef()
+        val empty = BytesRef()
         return object : SortedDocValues() {
             private var doc = -1
 
@@ -136,10 +136,10 @@ object DocValues {
      * [.singleton], or null.
      */
     fun unwrapSingleton(dv: SortedSetDocValues): SortedDocValues? {
-        if (dv is SingletonSortedSetDocValues) {
-            return (dv as SingletonSortedSetDocValues).sortedDocValues
+        return if (dv is SingletonSortedSetDocValues) {
+            dv.sortedDocValues
         } else {
-            return null
+            null
         }
     }
 
@@ -148,10 +148,10 @@ object DocValues {
      * [.singleton], or null.
      */
     fun unwrapSingleton(dv: SortedNumericDocValues): NumericDocValues? {
-        if (dv is SingletonSortedNumericDocValues) {
-            return (dv as SingletonSortedNumericDocValues).numericDocValues
+        return if (dv is SingletonSortedNumericDocValues) {
+            dv.numericDocValues
         } else {
-            return null
+            null
         }
     }
 
@@ -194,7 +194,7 @@ object DocValues {
      */
     @Throws(IOException::class)
     fun getNumeric(reader: LeafReader, field: String): NumericDocValues {
-        val dv: NumericDocValues = reader.getNumericDocValues(field)
+        val dv: NumericDocValues? = reader.getNumericDocValues(field)
         if (dv == null) {
             checkField(reader, field, DocValuesType.NUMERIC)
             return emptyNumeric()
@@ -214,7 +214,7 @@ object DocValues {
      */
     @Throws(IOException::class)
     fun getBinary(reader: LeafReader, field: String): BinaryDocValues {
-        val dv: BinaryDocValues = reader.getBinaryDocValues(field)
+        val dv: BinaryDocValues? = reader.getBinaryDocValues(field)
         if (dv == null) {
             checkField(reader, field, DocValuesType.BINARY)
             return emptyBinary()
@@ -233,7 +233,7 @@ object DocValues {
      */
     @Throws(IOException::class)
     fun getSorted(reader: LeafReader, field: String): SortedDocValues {
-        val dv: SortedDocValues = reader.getSortedDocValues(field)
+        val dv: SortedDocValues? = reader.getSortedDocValues(field)
         if (dv == null) {
             checkField(reader, field, DocValuesType.SORTED)
             return emptySorted()
@@ -253,9 +253,9 @@ object DocValues {
      */
     @Throws(IOException::class)
     fun getSortedNumeric(reader: LeafReader, field: String): SortedNumericDocValues {
-        val dv: SortedNumericDocValues = reader.getSortedNumericDocValues(field)
+        val dv: SortedNumericDocValues? = reader.getSortedNumericDocValues(field)
         if (dv == null) {
-            val single: NumericDocValues = reader.getNumericDocValues(field)
+            val single: NumericDocValues? = reader.getNumericDocValues(field)
             if (single == null) {
                 checkField(reader, field, DocValuesType.SORTED_NUMERIC, DocValuesType.NUMERIC)
                 return emptySortedNumeric()
@@ -276,9 +276,9 @@ object DocValues {
      */
     @Throws(IOException::class)
     fun getSortedSet(reader: LeafReader, field: String): SortedSetDocValues {
-        var dv: SortedSetDocValues = reader.getSortedSetDocValues(field)
+        var dv: SortedSetDocValues? = reader.getSortedSetDocValues(field)
         if (dv == null) {
-            val sorted: SortedDocValues = reader.getSortedDocValues(field)
+            val sorted: SortedDocValues? = reader.getSortedDocValues(field)
             if (sorted == null) {
                 checkField(reader, field, DocValuesType.SORTED, DocValuesType.SORTED_SET)
                 return emptySortedSet()

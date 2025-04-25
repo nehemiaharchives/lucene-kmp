@@ -53,13 +53,7 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
         register(state, ord, docFreq, totalTermFreq)
     }
 
-    private class PendingTermLookup(val termsEnum: TermsEnum, supplier: IOBooleanSupplier) {
-        val supplier: IOBooleanSupplier
-
-        init {
-            this.supplier = supplier
-        }
-    }
+    private class PendingTermLookup(val termsEnum: TermsEnum, val supplier: IOBooleanSupplier)
 
     /** Clears the [TermStates] internal state and removes all registered [TermState]s  */
     fun clear() {
@@ -118,14 +112,14 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
     fun get(ctx: LeafReaderContext): IOSupplier<TermState?>? {
         require(ctx.ord >= 0 && ctx.ord < states.size)
         if (term == null) {
-            if (states[ctx.ord] == null) {
-                return null
+            return if (states[ctx.ord] == null) {
+                null
             } else {
-                return IOSupplier { states[ctx.ord] }
+                IOSupplier { states[ctx.ord] }
             }
         }
         if (states[ctx.ord] == null) {
-            val terms: Terms = ctx.reader().terms(term.field())
+            val terms: Terms? = ctx.reader().terms(term.field())
             if (terms == null) {
                 this.states[ctx.ord] = EMPTY_TERMSTATE
                 return null
@@ -194,7 +188,7 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
 
     companion object {
         private val EMPTY_TERMSTATE: TermState = object : TermState() {
-            public override fun copyFrom(other: TermState) {}
+            override fun copyFrom(other: TermState) {}
         }
 
         /**
