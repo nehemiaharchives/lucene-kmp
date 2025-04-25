@@ -44,23 +44,23 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Writes a stored int value.  */
     @Throws(IOException::class)
-    abstract fun writeField(info: FieldInfo, value: Int)
+    abstract fun writeField(info: FieldInfo?, value: Int)
 
     /** Writes a stored long value.  */
     @Throws(IOException::class)
-    abstract fun writeField(info: FieldInfo, value: Long)
+    abstract fun writeField(info: FieldInfo?, value: Long)
 
     /** Writes a stored float value.  */
     @Throws(IOException::class)
-    abstract fun writeField(info: FieldInfo, value: Float)
+    abstract fun writeField(info: FieldInfo?, value: Float)
 
     /** Writes a stored double value.  */
     @Throws(IOException::class)
-    abstract fun writeField(info: FieldInfo, value: Double)
+    abstract fun writeField(info: FieldInfo?, value: Double)
 
     /** Writes a stored binary value from a [StoredFieldDataInput].  */
     @Throws(IOException::class)
-    open fun writeField(info: FieldInfo, value: StoredFieldDataInput) {
+    open fun writeField(info: FieldInfo?, value: StoredFieldDataInput) {
         val length: Int = value.length
         val bytes = ByteArray(length)
         value.getDataInput().readBytes(bytes, 0, length)
@@ -69,11 +69,11 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Writes a stored binary value.  */
     @Throws(IOException::class)
-    abstract fun writeField(info: FieldInfo, value: BytesRef)
+    abstract fun writeField(info: FieldInfo?, value: BytesRef)
 
     /** Writes a stored String value.  */
     @Throws(IOException::class)
-    abstract fun writeField(info: FieldInfo, value: String)
+    abstract fun writeField(info: FieldInfo?, value: String)
 
     /**
      * Called before [.close], passing in the number of documents that were written. Note that
@@ -109,7 +109,7 @@ protected constructor() : AutoCloseable, Accountable {
      */
     @Throws(IOException::class)
     open fun merge(mergeState: MergeState): Int {
-        val subs: MutableList<StoredFieldsMergeSub> = ArrayList<StoredFieldsMergeSub>()
+        val subs: MutableList<StoredFieldsMergeSub> = ArrayList()
         for (i in 0..<mergeState.storedFieldsReaders.size) {
             val storedFieldsReader: StoredFieldsReader = mergeState.storedFieldsReaders[i]!!
             storedFieldsReader.checkIntegrity()
@@ -219,7 +219,7 @@ protected constructor() : AutoCloseable, Accountable {
             return Status.YES
         }
 
-        private fun remap(field: FieldInfo): FieldInfo {
+        private fun remap(field: FieldInfo): FieldInfo? {
             return if (remapper != null) {
                 // field numbers are not aligned, we need to remap to the new field number
                 remapper!!.fieldInfo(field.name)
