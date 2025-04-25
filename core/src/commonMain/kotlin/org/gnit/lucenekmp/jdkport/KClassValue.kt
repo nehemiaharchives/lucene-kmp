@@ -36,7 +36,7 @@ protected constructor() {
      *
      * @see .remove
      */
-    protected abstract fun computeValue(type: KClass<*>?): T
+    protected abstract fun computeValue(type: KClass<*>): T
 
     /**
      * Returns the value for the given class.

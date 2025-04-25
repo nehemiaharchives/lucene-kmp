@@ -431,20 +431,26 @@ open class AttributeSource {
 
     companion object {
 
-        fun getInterfaces(clazz: KClass<*>?): Array<KClass<*>> {
+        fun getInterfaces(clazz: KClass<*>): Array<KClass<*>> {
 
-            val array =
+            //val array =
 
             // TODO hardcode all mappings of class/interface names
 
-            return array
+            //return array
+
+            throw UnsupportedOperationException(
+                "getInterfaces() for ${clazz.qualifiedName} not implemented yet, please implement"
+            )
         }
 
-        fun getSuperclass(clazz: KClass<*>?): KClass<*>? {
+        fun getSuperclass(clazz: KClass<*>): KClass<*> {
 
             // TODO hardcode all mappings of class/superclass names
 
-            return clazz
+            throw UnsupportedOperationException(
+                "getSuperclass() for ${clazz.qualifiedName} not implemented yet, please implement"
+            )
         }
 
         /**
@@ -453,8 +459,8 @@ open class AttributeSource {
          */
         private val implInterfaces: KClassValue<Array<KClass<out Attribute>>> =
             object : KClassValue<Array<KClass<out Attribute>>>() {
-                override fun computeValue(clazz: KClass<*>?): Array<KClass<out Attribute>> {
-                    var clazz: KClass<*>? = clazz
+                override fun computeValue(clazz: KClass<*>): Array<KClass<out Attribute>> {
+                    var clazz: KClass<*> = clazz
                     val intfSet: MutableSet<KClass<out Attribute>> = mutableSetOf()
                     // find all interfaces that this attribute instance implements
                     // and that extend the Attribute interface
