@@ -347,7 +347,7 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
      */
     /** Creates `Lucene101PostingsFormat` with default settings.  */
     init {
-        require(!(version < VERSION_START || version > VERSION_CURRENT)) { "Version out of range: " + version }
+        require(!(version < VERSION_START || version > VERSION_CURRENT)) { "Version out of range: $version" }
         this.version = version
         Lucene90BlockTreeTermsWriter.validateSettings(minTermBlockSize, maxTermBlockSize)
         this.minTermBlockSize = minTermBlockSize
@@ -355,7 +355,7 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
     }
 
     @Throws(IOException::class)
-    public override fun fieldsConsumer(state: SegmentWriteState): FieldsConsumer {
+    override fun fieldsConsumer(state: SegmentWriteState): FieldsConsumer {
         val postingsWriter: PostingsWriterBase = Lucene101PostingsWriter(state, version)
         var success = false
         try {
@@ -373,7 +373,7 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
     }
 
     @Throws(IOException::class)
-    public override fun fieldsProducer(state: SegmentReadState): FieldsProducer {
+    override fun fieldsProducer(state: SegmentReadState): FieldsProducer {
         val postingsReader: PostingsReaderBase = Lucene101PostingsReader(state)
         var success = false
         try {
@@ -426,13 +426,13 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
             singletonDocID = -1
         }
 
-        public override fun clone(): IntBlockTermState {
+        override fun clone(): IntBlockTermState {
             val other = IntBlockTermState()
             other.copyFrom(this)
             return other
         }
 
-        public override fun copyFrom(_other: TermState) {
+        override fun copyFrom(_other: TermState) {
             super.copyFrom(_other)
             val other = _other as IntBlockTermState
             docStartFP = other.docStartFP
@@ -476,17 +476,17 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
         const val PAY_EXTENSION: String = "pay"
 
         /** Size of blocks.  */
-        val BLOCK_SIZE: Int = ForUtil.BLOCK_SIZE
+        const val BLOCK_SIZE: Int = ForUtil.BLOCK_SIZE
 
-        val BLOCK_MASK: Int = BLOCK_SIZE - 1
+        const val BLOCK_MASK: Int = BLOCK_SIZE - 1
 
         /** We insert skip data on every block and every SKIP_FACTOR=32 blocks.  */
         const val LEVEL1_FACTOR: Int = 32
 
         /** Total number of docs covered by level 1 skip data: 32 * 128 = 4,096  */
-        val LEVEL1_NUM_DOCS: Int = LEVEL1_FACTOR * BLOCK_SIZE
+        const val LEVEL1_NUM_DOCS: Int = LEVEL1_FACTOR * BLOCK_SIZE
 
-        val LEVEL1_MASK: Int = LEVEL1_NUM_DOCS - 1
+        const val LEVEL1_MASK: Int = LEVEL1_NUM_DOCS - 1
 
         val impactsEnumImpl: KClass<out ImpactsEnum>
             /**
@@ -512,6 +512,6 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
          */
         const val VERSION_DENSE_BLOCKS_AS_BITSETS: Int = 1
 
-        val VERSION_CURRENT: Int = VERSION_DENSE_BLOCKS_AS_BITSETS
+        const val VERSION_CURRENT: Int = VERSION_DENSE_BLOCKS_AS_BITSETS
     }
 }
