@@ -77,30 +77,29 @@ class CompetitiveImpactAccumulator {
         require(assertConsistent())
     }
 
-    val competitiveFreqNormPairs: MutableList<Impact>
-        /** Get the set of competitive freq and norm pairs, ordered by increasing freq and norm.  */
-        get() {
-            val impacts: MutableList<Impact> = ArrayList()
-            var maxFreqForLowerNorms = 0
-            for (i in maxFreqs.indices) {
-                val maxFreq = maxFreqs[i]
-                if (maxFreq > maxFreqForLowerNorms) {
-                    impacts.add(Impact(maxFreq, i.toLong()))
-                    maxFreqForLowerNorms = maxFreq
-                }
+    /** Get the set of competitive freq and norm pairs, ordered by increasing freq and norm.  */
+    fun getCompetitiveFreqNormPairs(): MutableList<Impact> {
+        val impacts: MutableList<Impact> = ArrayList()
+        var maxFreqForLowerNorms = 0
+        for (i in maxFreqs.indices) {
+            val maxFreq = maxFreqs[i]
+            if (maxFreq > maxFreqForLowerNorms) {
+                impacts.add(Impact(maxFreq, i.toLong()))
+                maxFreqForLowerNorms = maxFreq
             }
-
-            if (otherFreqNormPairs.isEmpty()) {
-                // Common case: all norms are bytes
-                return impacts
-            }
-
-            val freqNormPairs: TreeSet<Impact> = TreeSet<Impact>(this.otherFreqNormPairs)
-            for (impact in impacts) {
-                add(impact, freqNormPairs)
-            }
-            return freqNormPairs.toMutableList()
         }
+
+        if (otherFreqNormPairs.isEmpty()) {
+            // Common case: all norms are bytes
+            return impacts
+        }
+
+        val freqNormPairs: TreeSet<Impact> = TreeSet<Impact>(this.otherFreqNormPairs)
+        for (impact in impacts) {
+            add(impact, freqNormPairs)
+        }
+        return freqNormPairs.toMutableList()
+    }
 
     private fun add(newEntry: Impact, freqNormPairs: TreeSet<Impact>) {
         val next: Impact? = freqNormPairs.ceiling(newEntry)
@@ -130,7 +129,7 @@ class CompetitiveImpactAccumulator {
     }
 
     override fun toString(): String {
-        return ArrayList(this.competitiveFreqNormPairs).toString()
+        return ArrayList(this.getCompetitiveFreqNormPairs()).toString()
     }
 
     // Only called by assertions
