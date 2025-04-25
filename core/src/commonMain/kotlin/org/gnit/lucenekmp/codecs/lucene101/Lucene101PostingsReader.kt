@@ -242,7 +242,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
     @Throws(IOException::class)
     override fun postings(
-        fieldInfo: FieldInfo, termState: BlockTermState, reuse: PostingsEnum, flags: Int
+        fieldInfo: FieldInfo, termState: BlockTermState, reuse: PostingsEnum?, flags: Int
     ): PostingsEnum {
         return (if (reuse is BlockPostingsEnum
             && reuse.canReuse(docIn!!, fieldInfo, flags, false)
