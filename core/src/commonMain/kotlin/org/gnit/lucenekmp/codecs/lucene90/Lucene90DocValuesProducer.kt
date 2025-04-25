@@ -412,7 +412,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
     @Throws(IOException::class)
     override fun getNumeric(field: FieldInfo): NumericDocValues {
-        val entry: NumericEntry = numerics.get(field.number)!!
+        val entry: NumericEntry = numerics[field.number]!!
         return getNumeric(entry)
     }
 
@@ -498,7 +498,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                 }
             } else {
                 val slice: RandomAccessInput =
-                    data.randomAccessSlice(entry.valuesOffset, entry.valuesLength)!!
+                    data.randomAccessSlice(entry.valuesOffset, entry.valuesLength)
                 // Prefetch the first page of data. Following pages are expected to get prefetched through
                 // read-ahead.
                 if (slice.length() > 0) {
@@ -565,7 +565,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                 }
             } else {
                 val slice: RandomAccessInput =
-                    data.randomAccessSlice(entry.valuesOffset, entry.valuesLength)!!
+                    data.randomAccessSlice(entry.valuesOffset, entry.valuesLength)
                 // Prefetch the first page of data. Following pages are expected to get prefetched through
                 // read-ahead.
                 if (slice.length() > 0) {
@@ -625,7 +625,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             }
         } else {
             val slice: RandomAccessInput =
-                data.randomAccessSlice(entry.valuesOffset, entry.valuesLength)!!
+                data.randomAccessSlice(entry.valuesOffset, entry.valuesLength)
             // Prefetch the first page of data. Following pages are expected to get prefetched through
             // read-ahead.
             if (slice.length() > 0) {
@@ -734,13 +734,13 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
     @Throws(IOException::class)
     override fun getBinary(field: FieldInfo): BinaryDocValues {
-        val entry: BinaryEntry = binaries.get(field.number)!!
+        val entry: BinaryEntry = binaries[field.number]!!
 
         if (entry.docsWithFieldOffset == -2L) {
             return DocValues.emptyBinary()
         }
 
-        val bytesSlice: RandomAccessInput = data.randomAccessSlice(entry.dataOffset, entry.dataLength)!!
+        val bytesSlice: RandomAccessInput = data.randomAccessSlice(entry.dataOffset, entry.dataLength)
         // Prefetch the first page of data. Following pages are expected to get prefetched through
         // read-ahead.
         if (bytesSlice.length() > 0) {
@@ -764,7 +764,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             } else {
                 // variable length
                 val addressesData: RandomAccessInput =
-                    this.data.randomAccessSlice(entry.addressesOffset, entry.addressesLength)!!
+                    this.data.randomAccessSlice(entry.addressesOffset, entry.addressesLength)
                 // Prefetch the first page of data. Following pages are expected to get prefetched through
                 // read-ahead.
                 if (addressesData.length() > 0) {
@@ -810,7 +810,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             } else {
                 // variable length
                 val addressesData: RandomAccessInput =
-                    this.data.randomAccessSlice(entry.addressesOffset, entry.addressesLength)!!
+                    this.data.randomAccessSlice(entry.addressesOffset, entry.addressesLength)
                 // Prefetch the first page of data. Following pages are expected to get prefetched through
                 // read-ahead.
                 if (addressesData.length() > 0) {
@@ -836,7 +836,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
     @Throws(IOException::class)
     override fun getSorted(field: FieldInfo): SortedDocValues {
-        val entry: SortedEntry = sorted.get(field.number)!!
+        val entry: SortedEntry = sorted[field.number]!!
         return getSorted(entry)
     }
 
@@ -851,7 +851,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             check(!(ordsEntry.gcd != 1L || ordsEntry.minValue != 0L || ordsEntry.table != null)) { "Ordinals shouldn't use GCD, offset or table compression" }
 
             val slice: RandomAccessInput =
-                data.randomAccessSlice(ordsEntry.valuesOffset, ordsEntry.valuesLength)!!
+                data.randomAccessSlice(ordsEntry.valuesOffset, ordsEntry.valuesLength)
             // Prefetch the first page of data. Following pages are expected to get prefetched through
             // read-ahead.
             if (slice.length() > 0) {
@@ -983,7 +983,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             get() = Math.toIntExact(entry.termsDictEntry.termsDictSize)
 
         @Throws(IOException::class)
-        override fun lookupOrd(ord: Int): BytesRef {
+        override fun lookupOrd(ord: Int): BytesRef? {
             termsEnum.seekExact(ord.toLong())
             return termsEnum.term()
         }
@@ -1016,7 +1016,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             get() = entry.termsDictEntry.termsDictSize
 
         @Throws(IOException::class)
-        override fun lookupOrd(ord: Long): BytesRef {
+        override fun lookupOrd(ord: Long): BytesRef? {
             termsEnum.seekExact(ord)
             return termsEnum.term()
         }
@@ -1052,18 +1052,18 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
         init {
             val addressesSlice: RandomAccessInput =
-                data.randomAccessSlice(entry.termsAddressesOffset, entry.termsAddressesLength)!!
+                data.randomAccessSlice(entry.termsAddressesOffset, entry.termsAddressesLength)
             blockAddresses =
                 DirectMonotonicReader.getInstance(entry.termsAddressesMeta, addressesSlice, merging)
             bytes = data.slice("terms", entry.termsDataOffset, entry.termsDataLength)
             blockMask = (1L shl TERMS_DICT_BLOCK_LZ4_SHIFT) - 1
             val indexAddressesSlice: RandomAccessInput =
-                data.randomAccessSlice(entry.termsIndexAddressesOffset, entry.termsIndexAddressesLength)!!
+                data.randomAccessSlice(entry.termsIndexAddressesOffset, entry.termsIndexAddressesLength)
             indexAddresses =
                 DirectMonotonicReader.getInstance(
                     entry.termsIndexAddressesMeta, indexAddressesSlice, merging
                 )
-            indexBytes = data.randomAccessSlice(entry.termsIndexOffset, entry.termsIndexLength)!!
+            indexBytes = data.randomAccessSlice(entry.termsIndexOffset, entry.termsIndexLength)
             term = BytesRef(entry.maxTermLength)
 
             // add the max term length for the dictionary
@@ -1303,7 +1303,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
     @Throws(IOException::class)
     override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-        val entry: SortedNumericEntry = sortedNumerics.get(field.number)!!
+        val entry: SortedNumericEntry = sortedNumerics[field.number]!!
         return getSortedNumeric(entry)
     }
 
@@ -1314,7 +1314,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
         }
 
         val addressesInput: RandomAccessInput =
-            data.randomAccessSlice(entry.addressesOffset, entry.addressesLength)!!
+            data.randomAccessSlice(entry.addressesOffset, entry.addressesLength)
         // Prefetch the first page of data. Following pages are expected to get prefetched through
         // read-ahead.
         if (addressesInput.length() > 0) {
@@ -1430,7 +1430,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                 }
 
                 fun set() {
-                    if (set == false) {
+                    if (!set) {
                         val index = disi.index()
                         start = addresses.get(index.toLong())
                         end = addresses.get(index + 1L)
@@ -1444,7 +1444,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
     @Throws(IOException::class)
     override fun getSortedSet(field: FieldInfo): SortedSetDocValues {
-        val entry: SortedSetEntry = sortedSets.get(field.number)!!
+        val entry: SortedSetEntry = sortedSets[field.number]!!
         if (entry.singleValueEntry != null) {
             return DocValues.singleton(getSorted(entry.singleValueEntry))
         }
@@ -1455,7 +1455,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             check(!(ordsEntry.gcd != 1L || ordsEntry.minValue != 0L || ordsEntry.table != null)) { "Ordinals shouldn't use GCD, offset or table compression" }
 
             val addressesInput: RandomAccessInput =
-                data.randomAccessSlice(ordsEntry.addressesOffset, ordsEntry.addressesLength)!!
+                data.randomAccessSlice(ordsEntry.addressesOffset, ordsEntry.addressesLength)
             // Prefetch the first page of data. Following pages are expected to get prefetched through
             // read-ahead.
             if (addressesInput.length() > 0) {
@@ -1465,7 +1465,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                 DirectMonotonicReader.getInstance(ordsEntry.addressesMeta, addressesInput)
 
             val slice: RandomAccessInput =
-                data.randomAccessSlice(ordsEntry.valuesOffset, ordsEntry.valuesLength)!!
+                data.randomAccessSlice(ordsEntry.valuesOffset, ordsEntry.valuesLength)
             // Prefetch the first page of data. Following pages are expected to get prefetched through
             // read-ahead.
             if (slice.length() > 0) {
@@ -1576,7 +1576,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                     }
 
                     fun set() {
-                        if (set == false) {
+                        if (!set) {
                             val index = disi.index()
                             curr = addresses.get(index.toLong())
                             val end: Long = addresses.get(index + 1L)
@@ -1702,7 +1702,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
 
     @Throws(IOException::class)
     override fun getSkipper(field: FieldInfo): DocValuesSkipper {
-        val entry: DocValuesSkipperEntry = skippers.get(field.number)!!
+        val entry: DocValuesSkipperEntry = skippers[field.number]!!
 
         val input: IndexInput = data.slice("doc value skipper", entry.offset, entry.length)
         // Prefetch the first page of data. Following pages are expected to get prefetched through
