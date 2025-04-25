@@ -41,7 +41,7 @@ protected constructor() : DocValuesIterator() {
      * @see .nextOrd
      */
     @Throws(IOException::class)
-    abstract fun lookupOrd(ord: Long): BytesRef
+    abstract fun lookupOrd(ord: Long): BytesRef?
 
     /**
      * Returns the number of unique values.
@@ -63,7 +63,7 @@ protected constructor() : DocValuesIterator() {
 
         while (low <= high) {
             val mid = (low + high) ushr 1
-            val term: BytesRef = lookupOrd(mid)
+            val term: BytesRef = lookupOrd(mid)!!
             val cmp = term.compareTo(key)
 
             if (cmp < 0) {
