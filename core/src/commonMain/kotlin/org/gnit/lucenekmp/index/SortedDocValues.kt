@@ -5,7 +5,6 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton.AUTOMATON_TYPE
 
-
 /**
  * A per-document byte[] with presorted values. This is fundamentally an iterator over the int ord
  * values per document, with random access APIs to resolve an int ord to BytesRef.
@@ -35,7 +34,7 @@ protected constructor() : DocValuesIterator() {
      * @see .ordValue
      */
     @Throws(IOException::class)
-    abstract fun lookupOrd(ord: Int): BytesRef
+    abstract fun lookupOrd(ord: Int): BytesRef?
 
     /**
      * Returns the number of unique values.
@@ -57,7 +56,7 @@ protected constructor() : DocValuesIterator() {
 
         while (low <= high) {
             val mid = (low + high) ushr 1
-            val term: BytesRef = lookupOrd(mid)
+            val term: BytesRef = lookupOrd(mid)!!
             val cmp = term.compareTo(key)
 
             if (cmp < 0) {
