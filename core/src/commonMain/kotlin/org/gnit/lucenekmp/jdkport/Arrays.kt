@@ -199,6 +199,86 @@ object Arrays {
         return -1
     }
 
+
+    /**
+     * Finds and returns the relative index of the first mismatch between two
+     * {@code char} arrays over the specified ranges, otherwise return -1 if no
+     * mismatch is found.  The index will be in the range of 0 (inclusive) up to
+     * the length (inclusive) of the smaller range.
+     *
+     * <p>If the two arrays, over the specified ranges, share a common prefix
+     * then the returned relative index is the length of the common prefix and
+     * it follows that there is a mismatch between the two elements at that
+     * relative index within the respective arrays.
+     * If one array is a proper prefix of the other, over the specified ranges,
+     * then the returned relative index is the length of the smaller range and
+     * it follows that the relative index is only valid for the array with the
+     * larger range.
+     * Otherwise, there is no mismatch.
+     *
+     * <p>Two non-{@code null} arrays, {@code a} and {@code b} with specified
+     * ranges [{@code aFromIndex}, {@code aToIndex}) and
+     * [{@code bFromIndex}, {@code bToIndex}) respectively, share a common
+     * prefix of length {@code pl} if the following expression is true:
+     * <pre>{@code
+     *     pl >= 0 &&
+     *     pl < Math.min(aToIndex - aFromIndex, bToIndex - bFromIndex) &&
+     *     Arrays.equals(a, aFromIndex, aFromIndex + pl, b, bFromIndex, bFromIndex + pl) &&
+     *     a[aFromIndex + pl] != b[bFromIndex + pl]
+     * }</pre>
+     * Note that a common prefix length of {@code 0} indicates that the first
+     * elements from each array mismatch.
+     *
+     * <p>Two non-{@code null} arrays, {@code a} and {@code b} with specified
+     * ranges [{@code aFromIndex}, {@code aToIndex}) and
+     * [{@code bFromIndex}, {@code bToIndex}) respectively, share a proper
+     * prefix if the following expression is true:
+     * <pre>{@code
+     *     (aToIndex - aFromIndex) != (bToIndex - bFromIndex) &&
+     *     Arrays.equals(a, 0, Math.min(aToIndex - aFromIndex, bToIndex - bFromIndex),
+     *                   b, 0, Math.min(aToIndex - aFromIndex, bToIndex - bFromIndex))
+     * }</pre>
+     *
+     * @param a the first array to be tested for a mismatch
+     * @param aFromIndex the index (inclusive) of the first element in the
+     *                   first array to be tested
+     * @param aToIndex the index (exclusive) of the last element in the
+     *                 first array to be tested
+     * @param b the second array to be tested for a mismatch
+     * @param bFromIndex the index (inclusive) of the first element in the
+     *                   second array to be tested
+     * @param bToIndex the index (exclusive) of the last element in the
+     *                 second array to be tested
+     * @return the relative index of the first mismatch between the two arrays
+     *         over the specified ranges, otherwise {@code -1}.
+     * @throws IllegalArgumentException
+     *         if {@code aFromIndex > aToIndex} or
+     *         if {@code bFromIndex > bToIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *         if {@code aFromIndex < 0 or aToIndex > a.length} or
+     *         if {@code bFromIndex < 0 or bToIndex > b.length}
+     * @throws NullPointerException
+     *         if either array is {@code null}
+     * @since 9
+     */
+    fun mismatch(
+        a: CharArray, aFromIndex: Int, aToIndex: Int,
+        b: CharArray, bFromIndex: Int, bToIndex: Int
+    ): Int {
+        rangeCheck(a.size, aFromIndex, aToIndex)
+        rangeCheck(b.size, bFromIndex, bToIndex)
+
+        val aLength = aToIndex - aFromIndex
+        val bLength = bToIndex - bFromIndex
+        val length = min(aLength, bLength)
+        val i: Int = ArraysSupport.mismatch(
+            a, aFromIndex,
+            b, bFromIndex,
+            length
+        )
+        return if (i < 0 && aLength != bLength) length else i
+    }
+
     /**
      * Returns true if the two specified arrays of bytes, over the specified
      * ranges, are *equal* to one another.
@@ -271,6 +351,27 @@ object Arrays {
     ): Boolean {
         require(aFromIndex <= aToIndex) { "aFromIndex ($aFromIndex) > aToIndex ($aToIndex)" }
         require(bFromIndex <= bToIndex) { "bFromIndex ($bFromIndex) > bToIndex ($bToIndex)" }
+        if (aFromIndex < 0 || aToIndex > a.size)
+            throw IndexOutOfBoundsException("Range [$aFromIndex, $aToIndex) out of bounds for array of size ${a.size}")
+        if (bFromIndex < 0 || bToIndex > b.size)
+            throw IndexOutOfBoundsException("Range [$bFromIndex, $bToIndex) out of bounds for array of size ${b.size}")
+
+        val aLength = aToIndex - aFromIndex
+        val bLength = bToIndex - bFromIndex
+        if (aLength != bLength) return false
+
+        for (i in 0 until aLength) {
+            if (a[aFromIndex + i] != b[bFromIndex + i]) return false
+        }
+        return true
+    }
+
+    fun equals(
+        a: CharArray, aFromIndex: Int, aToIndex: Int,
+        b: CharArray, bFromIndex: Int, bToIndex: Int
+    ): Boolean {
+        if (aFromIndex > aToIndex) throw IllegalArgumentException("aFromIndex ($aFromIndex) > aToIndex ($aToIndex)")
+        if (bFromIndex > bToIndex) throw IllegalArgumentException("bFromIndex ($bFromIndex) > bToIndex ($bToIndex)")
         if (aFromIndex < 0 || aToIndex > a.size)
             throw IndexOutOfBoundsException("Range [$aFromIndex, $aToIndex) out of bounds for array of size ${a.size}")
         if (bFromIndex < 0 || bToIndex > b.size)
@@ -485,6 +586,26 @@ object Arrays {
         return aLength - bLength
     }
 
+    fun compare(
+        a: CharArray, aFromIndex: Int, aToIndex: Int,
+        b: CharArray, bFromIndex: Int, bToIndex: Int
+    ): Int {
+        rangeCheck(a.size, aFromIndex, aToIndex)
+        rangeCheck(b.size, bFromIndex, bToIndex)
+
+        val aLength = aToIndex - aFromIndex
+        val bLength = bToIndex - bFromIndex
+        val i: Int = ArraysSupport.mismatch(
+            a, aFromIndex,
+            b, bFromIndex,
+            min(aLength, bLength)
+        )
+        if (i >= 0) {
+            return Character.compare(a[aFromIndex + i], b[bFromIndex + i])
+        }
+
+        return aLength - bLength
+    }
 
     /**
      * Compares two `byte` arrays lexicographically over the specified
@@ -948,7 +1069,7 @@ object Arrays {
         }
     }
 
-    private fun dualPivotQuicksort(a: FloatArray, low: Int, high: Int){
+    private fun dualPivotQuicksort(a: FloatArray, low: Int, high: Int) {
         if (low < high) {
             // Choose two pivots: p from a[low] and q from a[high]
             if (a[low] > a[high]) swap(a, low, high)

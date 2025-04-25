@@ -245,5 +245,22 @@ class Character {
             return CharacterData.of(codePoint).toLowerCase(codePoint)
         }
 
+        /**
+         * Compares two `char` values numerically.
+         * The value returned is identical to what would be returned by:
+         * <pre>
+         * Character.valueOf(x).compareTo(Character.valueOf(y))
+        </pre> *
+         *
+         * @param  x the first `char` to compare
+         * @param  y the second `char` to compare
+         * @return the value `0` if `x == y`;
+         * a value less than `0` if `x < y`; and
+         * a value greater than `0` if `x > y`
+         * @since 1.7
+         */
+        fun compare(x: Char, y: Char): Int {
+            return x.code - y.code
+        }
     }
 }

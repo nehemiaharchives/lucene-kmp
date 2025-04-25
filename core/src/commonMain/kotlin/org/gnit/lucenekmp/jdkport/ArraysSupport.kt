@@ -60,6 +60,19 @@ object ArraysSupport {
         return -1
     }
 
+    fun mismatch(
+        a: CharArray, aFromIndex: Int,
+        b: CharArray, bFromIndex: Int,
+        length: Int
+    ): Int {
+        for (i in 0 until length) {
+            if (a[aFromIndex + i] != b[bFromIndex + i]) {
+                return i
+            }
+        }
+        return -1
+    }
+
     /**
      * Finds the relative index of a mismatch between two arrays starting from the given indexes.
      *
