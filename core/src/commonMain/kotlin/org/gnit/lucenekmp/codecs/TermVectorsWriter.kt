@@ -56,7 +56,7 @@ protected constructor() : AutoCloseable, Accountable {
      */
     @Throws(IOException::class)
     abstract fun startField(
-        info: FieldInfo, numTerms: Int, positions: Boolean, offsets: Boolean, payloads: Boolean
+        info: FieldInfo?, numTerms: Int, positions: Boolean, offsets: Boolean, payloads: Boolean
     )
 
     /** Called after a field and all its terms have been added.  */
@@ -70,7 +70,7 @@ protected constructor() : AutoCloseable, Accountable {
     ` *  times respectively.
      */
     @Throws(IOException::class)
-    abstract fun startTerm(term: BytesRef, freq: Int)
+    abstract fun startTerm(term: BytesRef?, freq: Int)
 
     /** Called after a term and all its positions have been added.  */
     @Throws(IOException::class)
@@ -180,7 +180,7 @@ protected constructor() : AutoCloseable, Accountable {
      */
     @Throws(IOException::class)
     open fun merge(mergeState: MergeState): Int {
-        val subs: MutableList<TermVectorsMergeSub> = ArrayList<TermVectorsMergeSub>()
+        val subs: MutableList<TermVectorsMergeSub> = ArrayList()
         for (i in 0..<mergeState.termVectorsReaders.size) {
             val reader: TermVectorsReader? = mergeState.termVectorsReaders[i]
             reader?.checkIntegrity()
@@ -236,7 +236,7 @@ protected constructor() : AutoCloseable, Accountable {
         var fieldCount = 0
         for (fieldName in vectors) {
             fieldCount++
-            val fieldInfo: FieldInfo = mergeState.mergeFieldInfos!!.fieldInfo(fieldName)
+            val fieldInfo: FieldInfo? = mergeState.mergeFieldInfos!!.fieldInfo(fieldName)
 
             require(
                 lastFieldName == null || fieldName > lastFieldName
