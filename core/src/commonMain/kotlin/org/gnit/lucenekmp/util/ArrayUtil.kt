@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Arrays.mismatch
-import org.gnit.lucenekmp.jdkport.ArraysSupport
 import kotlin.math.min
 import kotlin.reflect.KClass
 

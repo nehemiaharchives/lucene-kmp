@@ -83,13 +83,13 @@ import kotlin.jvm.Transient
  *
  * @since   1.2
 </E> */
-class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E>(), /*NavigableSet<E>,*/
+class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutableSet<E>(), NavigableSet<E>,
     Cloneable {
     /**
      * The backing map.
      */
     @Transient
-    private var m: TreeMap<E, Any> = m
+    private var m: NavigableMap<E, Any> = m
 
     /**
      * Constructs a new, empty tree set, sorted according to the
@@ -118,7 +118,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @param comparator the comparator that will be used to order this set.
      * If `null`, the [natural][Comparable] of the elements will be used.
      */
-    constructor(comparator: Comparator<in E>) : this(m = TreeMap<E, Any>(comparator))
+    constructor(comparator: Comparator<E>) : this(m = TreeMap<E, Any>(comparator))
 
     /**
      * Constructs a new tree set containing the elements in the specified
@@ -134,7 +134,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * not [Comparable], or are not mutually comparable
      * @throws NullPointerException if the specified collection is null
      */
-    constructor(c: MutableCollection<out E>) : this() {
+    constructor(c: MutableCollection<E>) : this() {
         addAll(c)
     }
 
@@ -145,18 +145,18 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @param s sorted set whose elements will comprise the new set
      * @throws NullPointerException if the specified sorted set is null
      */
-    /*constructor(s: SortedSet<E>) : this(s.comparator()) {
+    constructor(s: SortedSet<E>) : this(s.comparator() as Comparator<E>) {
         addAll(s)
-    }*/
+    }
 
     /**
      * Returns an iterator over the elements in this set in ascending order.
      *
      * @return an iterator over the elements in this set in ascending order
      */
-    /*override fun iterator(): MutableIterator<E> {
+    override fun iterator(): MutableIterator<E> {
         return m.navigableKeySet().iterator()
-    }*/
+    }
 
     /**
      * Returns an iterator over the elements in this set in descending order.
@@ -164,16 +164,16 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @return an iterator over the elements in this set in descending order
      * @since 1.6
      */
-    /*override fun descendingIterator(): MutableIterator<E> {
+    override fun descendingIterator(): MutableIterator<E> {
         return m.descendingKeySet().iterator()
-    }*/
+    }
 
     /**
      * @since 1.6
      */
-    /*override fun descendingSet(): NavigableSet<E> {
-        return TreeSet<E>(m.descendingMap())
-    }*/
+    override fun descendingSet(): NavigableSet<E> {
+        return TreeSet(m.descendingMap())
+    }
 
     /**
      * Returns the number of elements in this set (its cardinality).
@@ -212,10 +212,6 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
 
     override val size: Int
         get() = m.size
-
-    override fun iterator(): MutableIterator<E> {
-        return m.keys.iterator()
-    }
 
     /**
      * Adds the specified element to this set if it is not already present.
@@ -281,16 +277,16 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
     override fun addAll(elements: Collection<E>): Boolean {
         // Use linear-time version if applicable
         // TODO implement/port SortedSet
-        /*if (m.size == 0 && elements.size > 0 &&
+        if (m.isEmpty() && elements.isNotEmpty() &&
             elements is SortedSet &&
             m is TreeMap<E, Any>
         ) {
-            val set: SortedSet<out E> = elements as SortedSet<out E>
+            val set: SortedSet<E> = elements
             if (set.comparator() == m.comparator()) {
-                m.addAllForTreeSet(set, PRESENT)
+                (m as TreeMap<E, Any>).addAllForTreeSet(set, PRESENT)
                 return true
             }
-        }*/
+        }
         return super.addAll(elements)
     }
 
@@ -302,17 +298,17 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
      */
-    /*override fun subSet(
+    override fun subSet(
         fromElement: E, fromInclusive: Boolean,
         toElement: E, toInclusive: Boolean
     ): NavigableSet<E> {
-        return TreeSet<E>(
+        return TreeSet(
             m.subMap(
                 fromElement, fromInclusive,
                 toElement, toInclusive
-            )
+            ) as NavigableMap<E, Any>
         )
-    }*/
+    }
 
     /**
      * @throws ClassCastException {@inheritDoc}
@@ -322,9 +318,9 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
      */
-    /*override fun headSet(toElement: E, inclusive: Boolean): NavigableSet<E> {
-        return TreeSet<E>(m.headMap(toElement, inclusive))
-    }*/
+    override fun headSet(toElement: E, inclusive: Boolean): NavigableSet<E> {
+        return TreeSet(m.headMap(toElement, inclusive) as NavigableMap<E, Any>)
+    }
 
     /**
      * @throws ClassCastException {@inheritDoc}
@@ -334,9 +330,9 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
      */
-    /*override fun tailSet(fromElement: E, inclusive: Boolean): NavigableSet<E> {
-        return TreeSet<E>(m.tailMap(fromElement, inclusive))
-    }*/
+    override fun tailSet(fromElement: E, inclusive: Boolean): NavigableSet<E> {
+        return TreeSet(m.tailMap(fromElement, inclusive) as NavigableMap<E, Any>)
+    }
 
     /**
      * @throws ClassCastException {@inheritDoc}
@@ -345,9 +341,9 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * or its comparator does not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
      */
-    /*override fun subSet(fromElement: E, toElement: E): SortedSet<E> {
+    override fun subSet(fromElement: E, toElement: E): SortedSet<E> {
         return subSet(fromElement, true, toElement, false)
-    }*/
+    }
 
     /**
      * @throws ClassCastException {@inheritDoc}
@@ -356,9 +352,9 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
      */
-    /*override fun headSet(toElement: E): SortedSet<E> {
+    override fun headSet(toElement: E): SortedSet<E> {
         return headSet(toElement, false)
-    }*/
+    }
 
     /**
      * @throws ClassCastException {@inheritDoc}
@@ -367,25 +363,25 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
      */
-    /*override fun tailSet(fromElement: E): SortedSet<E> {
+    override fun tailSet(fromElement: E): SortedSet<E> {
         return tailSet(fromElement, true)
-    }*/
+    }
 
-    fun comparator(): Comparator<in E>? {
+    override fun comparator(): Comparator<E>? {
         return m.comparator()
     }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    fun first(): E {
+    override fun first(): E {
         return m.firstKey()
     }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    fun last(): E {
+    override fun last(): E {
         return m.lastKey()
     }
 
@@ -397,7 +393,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * does not permit null elements
      * @since 1.6
      */
-    fun lower(e: E): E? {
+    override fun lower(e: E): E? {
         return m.lowerKey(e)
     }
 
@@ -408,7 +404,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * does not permit null elements
      * @since 1.6
      */
-    fun floor(e: E): E? {
+    override fun floor(e: E): E? {
         return m.floorKey(e)
     }
 
@@ -419,7 +415,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * does not permit null elements
      * @since 1.6
      */
-    fun ceiling(e: E): E? {
+    override fun ceiling(e: E): E? {
         return m.ceilingKey(e)
     }
 
@@ -430,14 +426,14 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * does not permit null elements
      * @since 1.6
      */
-    fun higher(e: E): E? {
+    override fun higher(e: E): E? {
         return m.higherKey(e)
     }
 
     /**
      * @since 1.6
      */
-    fun pollFirst(): E? {
+    override fun pollFirst(): E? {
         val e = m.pollFirstEntry()
         return if (e == null) null else e.key
     }
@@ -445,7 +441,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
     /**
      * @since 1.6
      */
-    fun pollLast(): E? {
+    override fun pollLast(): E? {
         val e = m.pollLastEntry()
         return if (e == null) null else e.key
     }
@@ -458,7 +454,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @throws UnsupportedOperationException always
      * @since 21
      */
-    fun addFirst(e: E) {
+    override fun addFirst(e: E) {
         throw UnsupportedOperationException()
     }
 
@@ -470,7 +466,7 @@ class TreeSet<E> internal constructor(m: TreeMap<E, Any>) : AbstractMutableSet<E
      * @throws UnsupportedOperationException always
      * @since 21
      */
-    fun addLast(e: E) {
+    override fun addLast(e: E) {
         throw UnsupportedOperationException()
     }
 

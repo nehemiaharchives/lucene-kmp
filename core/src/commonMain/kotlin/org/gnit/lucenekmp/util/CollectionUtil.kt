@@ -162,5 +162,3 @@ object CollectionUtil {
     }
 }
 
-fun <T : Comparable<T>> naturalOrder(): Comparator<T> =
-    Comparator { a, b -> a.compareTo(b) }

@@ -1,5 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlinx.io.IOException
+import kotlin.jvm.Transient
+
+
 // Note: This is a complex port. While aiming for functional equivalence,
 // thorough testing against the original Lucene use cases is crucial.
 // Kotlin common does not have a direct NavigableMap equivalent, so relevant
@@ -7,7 +11,7 @@ package org.gnit.lucenekmp.jdkport
 
 /**
  * A Red-Black tree based implementation of the `MutableMap` interface,
- * striving for compatibility with the subset of `java.util.TreeMap` functionality
+ * striving for compatibility with the subset of `TreeMap` functionality
  * potentially used by Lucene.
  *
  * The map is sorted according to the natural ordering of its keys (if they
@@ -28,14 +32,14 @@ package org.gnit.lucenekmp.jdkport
  * @param V the type of mapped values
  */
 @Suppress("UNCHECKED_CAST", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class TreeMap<K, V> : AbstractMutableMap<K, V>,
-    MutableMap<K, V> /*, Cloneable // Consider if cloning is truly needed */ {
+class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
+/*, MutableMap<K, V> , Cloneable // Consider if cloning is truly needed */ { // End TreeMap class
 
     /**
      * The comparator used to maintain order in this tree map, or
      * null if it uses the natural ordering of its keys.
      */
-    private val comparator: Comparator<in K>?
+    private val comparator: Comparator<K>?
 
     private var root: Entry<K, V>? = null
 
@@ -70,7 +74,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @param comparator the comparator that will be used to order this map.
      * If `null`, the natural ordering of the keys will be used.
      */
-    constructor(comparator: Comparator<in K>?) {
+    constructor(comparator: Comparator<K>?) {
         this.comparator = comparator
     }
 
@@ -171,7 +175,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      *
      * @return the comparator used to order the keys, or `null` if natural ordering is used.
      */
-    fun comparator(): Comparator<in K>? {
+    override fun comparator(): Comparator<K>? {
         return comparator
     }
 
@@ -181,7 +185,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @return the first (lowest) key
      * @throws NoSuchElementException if this map is empty
      */
-    fun firstKey(): K {
+    override fun firstKey(): K {
         return key(getFirstEntry() ?: throw NoSuchElementException("Map is empty"))
     }
 
@@ -191,8 +195,44 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @return the last (highest) key
      * @throws NoSuchElementException if this map is empty
      */
-    fun lastKey(): K {
+    override fun lastKey(): K {
         return key(getLastEntry() ?: throw NoSuchElementException("Map is empty"))
+    }
+
+    override fun keySet(): MutableSet<K> {
+        return navigableKeySet()
+    }
+
+    override fun entrySet(): MutableSet<MutableMap.MutableEntry<K, V>?> {
+        return object : AbstractMutableSet<MutableMap.MutableEntry<K, V>?>() {
+            override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>?> =
+                EntryIterator(getFirstEntry())
+
+            override val size: Int
+                get() = this@TreeMap.size
+
+            override fun contains(element: MutableMap.MutableEntry<K, V>?): Boolean {
+                if (element == null) return false
+                val entry = getEntry(element.key)
+                return entry != null && entry.value == element.value
+            }
+
+            override fun remove(element: MutableMap.MutableEntry<K, V>?): Boolean {
+                if (element == null) return false
+                val entry = getEntry(element.key)
+                if (entry != null && entry.value == element.value) {
+                    deleteEntry(entry)
+                    return true
+                }
+                return false
+            }
+
+            override fun add(element: MutableMap.MutableEntry<K, V>?): Boolean {
+                throw UnsupportedOperationException("add is not supported by entrySet view of TreeMap")
+            }
+
+            override fun clear() = this@TreeMap.clear()
+        }
     }
 
     /**
@@ -200,7 +240,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * map's comparison method determines the position of mappings, so explicit positioning
      * is not supported.
      */
-    fun putFirst(k: K, v: V): V {
+    override fun putFirst(k: K, v: V): V {
         throw UnsupportedOperationException("putFirst is not supported by TreeMap")
     }
 
@@ -209,7 +249,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * map's comparison method determines the position of mappings, so explicit positioning
      * is not supported.
      */
-    fun putLast(k: K, v: V): V {
+    override fun putLast(k: K, v: V): V {
         throw UnsupportedOperationException("putLast is not supported by TreeMap")
     }
 
@@ -225,7 +265,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
     override fun putAll(from: Map<out K, V>) {
         val mapSize = from.size
         // Optimization check similar to Java's SortedMap check
-        if (size == 0 && mapSize != 0 && from is TreeMap<*, *> && this.comparator == from.comparator) {
+        if (isEmpty() && mapSize != 0 && from is TreeMap<*, *> && this.comparator == from.comparator) {
             modCount++
             try {
                 // Need to cast carefully here
@@ -303,16 +343,16 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @throws ClassCastException if `key` cannot be compared
      * @throws NullPointerException if `key` is null and nulls are not supported
      */
-    fun ceilingEntry(key: K): Map.Entry<K, V>? {
-        return getCeilingEntryInternal(key)
+    override fun ceilingEntry(key: K): Map.Entry<K, V>? {
+        return getCeilingEntry(key)
     }
 
     /**
      * Returns the least key greater than or equal to the given key, or `null` if
      * there is no such key.
      */
-    fun ceilingKey(key: K): K? {
-        return keyOrNull(getCeilingEntryInternal(key))
+    override fun ceilingKey(key: K): K? {
+        return keyOrNull(getCeilingEntry(key))
     }
 
     /**
@@ -325,16 +365,16 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @throws ClassCastException if `key` cannot be compared
      * @throws NullPointerException if `key` is null and nulls are not supported
      */
-    fun floorEntry(key: K): Map.Entry<K, V>? {
-        return getFloorEntryInternal(key)
+    override fun floorEntry(key: K): Map.Entry<K, V>? {
+        return getFloorEntry(key)
     }
 
     /**
      * Returns the greatest key less than or equal to the given key, or `null` if
      * there is no such key.
      */
-    fun floorKey(key: K): K? {
-        return keyOrNull(getFloorEntryInternal(key))
+    override fun floorKey(key: K): K? {
+        return keyOrNull(getFloorEntry(key))
     }
 
     /**
@@ -347,16 +387,16 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @throws ClassCastException if `key` cannot be compared
      * @throws NullPointerException if `key` is null and nulls are not supported
      */
-    fun higherEntry(key: K): Map.Entry<K, V>? {
-        return getHigherEntryInternal(key)
+    override fun higherEntry(key: K): Map.Entry<K, V>? {
+        return getHigherEntry(key)
     }
 
     /**
      * Returns the least key strictly greater than the given key, or `null` if
      * there is no such key.
      */
-    fun higherKey(key: K): K? {
-        return keyOrNull(getHigherEntryInternal(key))
+    override fun higherKey(key: K): K? {
+        return keyOrNull(getHigherEntry(key))
     }
 
     /**
@@ -369,16 +409,16 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      * @throws ClassCastException if `key` cannot be compared
      * @throws NullPointerException if `key` is null and nulls are not supported
      */
-    fun lowerEntry(key: K): Map.Entry<K, V>? {
-        return getLowerEntryInternal(key)
+    override fun lowerEntry(key: K): Map.Entry<K, V>? {
+        return getLowerEntry(key)
     }
 
     /**
      * Returns the greatest key strictly less than the given key, or `null` if
      * there is no such key.
      */
-    fun lowerKey(key: K): K? {
-        return keyOrNull(getLowerEntryInternal(key))
+    override fun lowerKey(key: K): K? {
+        return keyOrNull(getLowerEntry(key))
     }
 
     /**
@@ -386,7 +426,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      *
      * @return the first (lowest) entry, or `null` if the map is empty
      */
-    fun firstEntry(): Map.Entry<K, V>? {
+    override fun firstEntry(): Map.Entry<K, V>? {
         return exportEntry(getFirstEntry()) // Export immutable entry
     }
 
@@ -395,7 +435,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      *
      * @return the last (highest) entry, or `null` if the map is empty
      */
-    fun lastEntry(): Map.Entry<K, V>? {
+    override fun lastEntry(): Map.Entry<K, V>? {
         return exportEntry(getLastEntry()) // Export immutable entry
     }
 
@@ -405,7 +445,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      *
      * @return the removed first entry of this map, or `null` if the map is empty
      */
-    fun pollFirstEntry(): Map.Entry<K, V>? {
+    override fun pollFirstEntry(): Map.Entry<K, V>? {
         val p = getFirstEntry()
         val result = exportEntry(p) // Export before deletion
         if (p != null) {
@@ -420,13 +460,22 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      *
      * @return the removed last entry of this map, or `null` if the map is empty
      */
-    fun pollLastEntry(): Map.Entry<K, V>? {
+    override fun pollLastEntry(): Map.Entry<K, V>? {
         val p = getLastEntry()
         val result = exportEntry(p) // Export before deletion
         if (p != null) {
             deleteEntry(p)
         }
         return result
+    }
+
+    override fun descendingMap(): NavigableMap<K, V> {
+        val km: NavigableMap<K, V>? = descendingMap
+        return if (km != null) km else (DescendingSubMap(
+            this,
+            true, UNBOUNDED as K, true,
+            true, UNBOUNDED as K, true
+        ).also { descendingMap = it })
     }
 
     // --- Modification Operations ---
@@ -579,8 +628,46 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
     // They are backed by the map and reflect changes. Iterators are fail-fast.
 
     private var entrySetView: MutableSet<MutableMap.MutableEntry<K, V>>? = null
-    private var keySetView: MutableSet<K>? = null
+    private var navigableKeySet: KeySet<K>? = null
     private var valuesView: MutableCollection<V>? = null
+    private var descendingMap: NavigableMap<K, V>? = null
+
+    override fun navigableKeySet(): NavigableSet<K> {
+        val nks: KeySet<K>? = navigableKeySet
+        return nks ?: KeySet(this).also { navigableKeySet = it }
+    }
+
+    override fun descendingKeySet(): NavigableSet<K> {
+        return descendingMap().navigableKeySet()
+    }
+
+    override fun subMap(
+        fromKey: K,
+        fromInclusive: Boolean,
+        toKey: K,
+        toInclusive: Boolean
+    ): SortedMap<K, V> {
+        return AscendingSubMap(
+            this,
+            false, fromKey, fromInclusive,
+            false, toKey, toInclusive
+        )
+    }
+
+    /*
+     * Unlike Values and EntrySet, the KeySet class is static,
+     * delegating to a NavigableMap to allow use by SubMaps, which
+     * outweighs the ugliness of needing type-tests for the following
+     * Iterator methods that are defined appropriately in main versus
+     * submap classes.
+     */
+    fun keyIterator(): MutableIterator<K> {
+        return KeyIterator(getFirstEntry())
+    }
+
+    fun descendingKeyIterator(): MutableIterator<K> {
+        return DescendingKeyIterator(getLastEntry())
+    }
 
 
     /**
@@ -598,59 +685,40 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
      */
     override val keys: MutableSet<K>
         get() {
-            if (keySetView == null) {
-                keySetView = object : AbstractMutableSet<K>() {
-                    override fun iterator(): MutableIterator<K> = KeyIterator(getFirstEntry())
-                    override fun add(element: K): Boolean {
-                        throw UnsupportedOperationException("add is not supported by TreeMap")
-                    }
-
-                    override val size: Int get() = this@TreeMap.size
-                    override fun contains(element: K): Boolean = this@TreeMap.containsKey(element)
-                    override fun remove(element: K): Boolean {
-                        val oldSize = size
-                        this@TreeMap.remove(element)
-                        return size != oldSize
-                    }
-
-                    override fun clear() = this@TreeMap.clear()
-                }
-            }
-            return keySetView!!
+            return navigableKeySet()
         }
 
     /**
-     * Returns a [MutableCollection] view of the values contained in this map.
-     * The collection's iterator returns the values in ascending order
-     * of the corresponding keys. The collection is backed by the map,
-     * so changes to the map are reflected in the collection, and vice-versa.
-     * If the map is modified while an iteration over the collection is
-     * in progress (except through the iterator's own `remove` operation),
-     * the results of the iteration are undefined. The collection supports
-     * element removal, which removes the corresponding mapping from the
-     * map, via the `Iterator.remove`, `Collection.remove`, `removeAll`,
-     * `retainAll` and `clear` operations. It does not support the
-     * `add` or `addAll` operations.
+     * Returns a {@link Collection} view of the values contained in this map.
+     *
+     * <p>The collection's iterator returns the values in ascending order
+     * of the corresponding keys. The collection's spliterator is
+     * <em><a href="Spliterator.html#binding">late-binding</a></em>,
+     * <em>fail-fast</em>, and additionally reports {@link Spliterator#ORDERED}
+     * with an encounter order that is ascending order of the corresponding
+     * keys.
+     *
+     * <p>The collection is backed by the map, so changes to the map are
+     * reflected in the collection, and vice-versa.  If the map is
+     * modified while an iteration over the collection is in progress
+     * (except through the iterator's own {@code remove} operation),
+     * the results of the iteration are undefined.  The collection
+     * supports element removal, which removes the corresponding
+     * mapping from the map, via the {@code Iterator.remove},
+     * {@code Collection.remove}, {@code removeAll},
+     * {@code retainAll} and {@code clear} operations.  It does not
+     * support the {@code add} or {@code addAll} operations.
      */
-    override val values: MutableCollection<V>
-        get() {
-            if (valuesView == null) {
-                valuesView = object : AbstractMutableCollection<V>() {
-                    override fun iterator(): MutableIterator<V> = ValueIterator(getFirstEntry())
-                    override fun add(element: V): Boolean {
-                        throw UnsupportedOperationException("add is not supported by TreeMap values view")
-                    }
-
-                    override val size: Int get() = this@TreeMap.size
-                    override fun contains(element: V): Boolean = this@TreeMap.containsValue(element)
-
-                    // Note: remove(element) in AbstractMutableCollection iterates and calls iterator.remove()
-                    // which is correctly implemented in ValueIterator.
-                    override fun clear() = this@TreeMap.clear()
-                }
-            }
-            return valuesView!!
+    override fun values(): MutableCollection<V> {
+        if (valuesView == null) {
+            valuesView = Values()
         }
+        return valuesView!!
+    }
+
+    override val values: MutableCollection<V>
+        get() = values()
+
 
     /**
      * Returns a [MutableSet] view of the mappings contained in this map.
@@ -684,7 +752,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
                         // Need to be careful with the type here. The input might be a simple Map.Entry.
                         // We check if the key exists and if the value matches.
                         if (element !is Map.Entry<*, *>) return false // Basic type check
-                        val key = element.key as? K ?: return false // Check if key type matches
+                        val key = element.key ?: return false // Check if key type matches
                         val value = element.value
                         val entry = getEntry(key)
                         return entry != null && entry.value == value // Kotlin equality
@@ -692,7 +760,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
 
                     override fun remove(element: MutableMap.MutableEntry<K, V>): Boolean {
                         if (element !is Map.Entry<*, *>) return false
-                        val key = element.key as? K ?: return false
+                        val key = element.key ?: return false
                         val value = element.value
                         val entry = getEntry(key)
                         if (entry != null && entry.value == value) {
@@ -857,7 +925,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
 
     // --- Internal Tree Structure & Balancing ---
 
-    internal class Entry<K, V>(
+    class Entry<K, V>(
         override var key: K,
         override var value: V, // Make value mutable for setValue in EntryIterator
         var parent: Entry<K, V>?
@@ -891,6 +959,8 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
     companion object {
         private const val RED = true
         private const val BLACK = false
+
+        val UNBOUNDED: Any = Any()
 
         /**
          * Returns the key corresponding to the specified Entry.
@@ -950,9 +1020,44 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
             }
         }
 
+        /**
+         * Test two values for equality.  Differs from o1.equals(o2) only in
+         * that it copes with `null` o1 properly.
+         */
+        fun valEquals(o1: Any?, o2: Any?): Boolean {
+            return (if (o1 == null) o2 == null else (o1 == o2))
+        }
+
         /** Make an immutable snapshot of an Entry */
         internal fun <K, V> exportEntry(e: Entry<K, V>?): Map.Entry<K, V>? {
             return e?.let { SimpleImmutableEntry(it.key, it.value) }
+        }
+
+        /**
+         * Currently, we support Spliterator-based versions only for the
+         * full map, in either plain of descending form, otherwise relying
+         * on defaults because size estimation for submaps would dominate
+         * costs. The type tests needed to check these for key views are
+         * not very nice but avoid disrupting existing class
+         * structures. Callers must use plain default spliterators if this
+         * returns null.
+         */
+        fun <K> keySpliteratorFor(m: NavigableMap<K, *>): Spliterator<K> {
+            if (m is TreeMap) {
+                val t: TreeMap<K, *> = m
+                return t.keySpliterator()
+            }
+            if (m is DescendingSubMap<*, *>) {
+                val dm: DescendingSubMap<K?, *> = m as DescendingSubMap<K?, *>
+                val tm: TreeMap<K?, *> = dm.m
+                if (dm === tm.descendingMap()) {
+                    val t: TreeMap<K, *> = tm as TreeMap<K, *>
+                    return t.descendingKeySpliterator()
+                }
+            }
+            val sm: NavigableSubMap<K, *> =
+                m as NavigableSubMap<K, *>
+            return sm.keySpliterator()
         }
 
         // Simple immutable entry class for exports
@@ -960,6 +1065,1277 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
             override val key: K,
             override val value: V
         ) : Map.Entry<K, V>
+
+
+        // SubMaps
+
+        class KeySet<E> internal constructor(map: NavigableMap<E, *>) : AbstractSet<E>(),
+            NavigableSet<E> {
+            private val m: NavigableMap<E, *> = map
+            override val size: Int
+                get() = size()
+
+            override fun iterator(): MutableIterator<E> {
+                return if (m is TreeMap<E, *>) m.keyIterator()
+                else (m as NavigableSubMap<E, *>).keyIterator()
+            }
+
+            override fun add(element: E): Boolean {
+                // not implementing for now. implement if needed
+                throw UnsupportedOperationException("Add operation is not supported")
+            }
+
+            override fun descendingIterator(): MutableIterator<E> {
+                return if (m is TreeMap<E, *>) m.descendingKeyIterator()
+                else (m as NavigableSubMap<E, *>).descendingKeyIterator()
+            }
+
+            fun size(): Int {
+                return m.size
+            }
+
+            val isEmpty: Boolean
+                get() = m.isEmpty()
+
+            override fun contains(o: E): Boolean {
+                return m.containsKey(o)
+            }
+
+            override fun clear() {
+                m.clear()
+            }
+
+            override fun lower(e: E): E? {
+                return m.lowerKey(e)
+            }
+
+            override fun floor(e: E): E? {
+                return m.floorKey(e)
+            }
+
+            override fun ceiling(e: E): E? {
+                return m.ceilingKey(e)
+            }
+
+            override fun higher(e: E): E? {
+                return m.higherKey(e)
+            }
+
+            override fun first(): E? {
+                return m.firstKey()
+            }
+
+            override fun last(): E? {
+                return m.lastKey()
+            }
+
+            override fun comparator(): Comparator<E>? {
+                return m.comparator()
+            }
+
+            override fun pollFirst(): E? {
+                val e: Map.Entry<E?, *>? = m.pollFirstEntry()
+                return e?.key
+            }
+
+            override fun pollLast(): E? {
+                val e: Map.Entry<E?, *>? = m.pollLastEntry()
+                return e?.key
+            }
+
+            override fun remove(o: E): Boolean {
+                val oldSize = size
+                m.remove(o)
+                return size != oldSize
+            }
+
+            override fun addAll(elements: Collection<E>): Boolean {
+                var modified = false
+                for (element in elements) {
+                    if (add(element)) {
+                        modified = true
+                    }
+                }
+                return modified
+            }
+
+            override fun removeAll(elements: Collection<E>): Boolean {
+                var modified = false
+                for (element in elements) {
+                    if (remove(element)) {
+                        modified = true
+                    }
+                }
+                return modified
+            }
+
+            override fun retainAll(elements: Collection<E>): Boolean {
+                val toRetain = elements.toSet()
+                val it = iterator()
+                var modified = false
+                while (it.hasNext()) {
+                    val e = it.next()
+                    if (!toRetain.contains(e)) {
+                        it.remove()
+                        modified = true
+                    }
+                }
+                return modified
+            }
+
+            override fun subSet(
+                fromElement: E, fromInclusive: Boolean,
+                toElement: E, toInclusive: Boolean
+            ): NavigableSet<E> {
+                return KeySet(
+                    m.subMap(
+                        fromElement, fromInclusive,
+                        toElement, toInclusive
+                    ) as NavigableMap<E, *>
+                )
+            }
+
+            override fun headSet(toElement: E, inclusive: Boolean): NavigableSet<E> {
+                return KeySet(m.headMap(toElement, inclusive) as NavigableMap<E, *>)
+            }
+
+            override fun tailSet(fromElement: E, inclusive: Boolean): NavigableSet<E> {
+                return KeySet(m.tailMap(fromElement, inclusive) as NavigableMap<E, *>)
+            }
+
+            override fun subSet(fromElement: E, toElement: E): SortedSet<E> {
+                return subSet(fromElement, true, toElement, false)
+            }
+
+            override fun headSet(toElement: E): SortedSet<E> {
+                return headSet(toElement, false)
+            }
+
+            override fun tailSet(fromElement: E): SortedSet<E> {
+                return tailSet(fromElement, true)
+            }
+
+            override fun descendingSet(): NavigableSet<E> {
+                return KeySet(m.descendingMap())
+            }
+
+            override fun spliterator(): Spliterator<E> {
+                return keySpliteratorFor(m)
+            }
+        }
+
+        abstract class NavigableSubMap<K, V> internal constructor(
+            m: TreeMap<K, V>,
+            fromStart: Boolean, lo: K, loInclusive: Boolean,
+            toEnd: Boolean, hi: K, hiInclusive: Boolean
+        ) : /*AbstractMap<K, V>(),*/ NavigableMap<K, V> {
+            /**
+             * The backing map.
+             */
+            val m: TreeMap<K, V>
+
+            override fun clear() {
+                m.clear()
+            }
+
+            override fun putAll(toPut: Map<out K, V>) {
+                m.putAll(toPut)
+            }
+
+            /**
+             * Endpoints are represented as triples (fromStart, lo,
+             * loInclusive) and (toEnd, hi, hiInclusive). If fromStart is
+             * true, then the low (absolute) bound is the start of the
+             * backing map, and the other values are ignored. Otherwise,
+             * if loInclusive is true, lo is the inclusive bound, else lo
+             * is the exclusive bound. Similarly for the upper bound.
+             */
+            // Conditionally serializable
+            val lo: K
+
+            // Conditionally serializable
+            val hi: K
+            val fromStart: Boolean
+            val toEnd: Boolean
+            val loInclusive: Boolean
+            val hiInclusive: Boolean
+
+            // internal utilities
+            fun tooLow(key: K): Boolean {
+                if (!fromStart) {
+                    val c: Int = m.compare(key, lo)
+                    if (c < 0 || (c == 0 && !loInclusive)) return true
+                }
+                return false
+            }
+
+            fun tooHigh(key: K): Boolean {
+                if (!toEnd) {
+                    val c: Int = m.compare(key, hi)
+                    if (c > 0 || (c == 0 && !hiInclusive)) return true
+                }
+                return false
+            }
+
+            fun inRange(key: K): Boolean {
+                return !tooLow(key) && !tooHigh(key)
+            }
+
+            fun inClosedRange(key: K): Boolean {
+                return (fromStart || m.compare(key, lo) >= 0)
+                        && (toEnd || m.compare(hi, key) >= 0)
+            }
+
+            fun inRange(key: K, inclusive: Boolean): Boolean {
+                return if (inclusive) inRange(key) else inClosedRange(key)
+            }
+
+            /*
+         * Absolute versions of relation operations.
+         * Subclasses map to these using like-named "sub"
+         * versions that invert senses for descending maps
+         */
+            fun absLowest(): Entry<K, V>? {
+                val e: Entry<K, V>? =
+                    (if (fromStart) m.getFirstEntry() else (if (loInclusive) m.getCeilingEntry(lo) else m.getHigherEntry(
+                        lo
+                    )))
+                return if (e == null || tooHigh(e.key)) null else e
+            }
+
+            fun absHighest(): Entry<K, V>? {
+                val e: Entry<K, V>? =
+                    (if (toEnd) m.getLastEntry() else (if (hiInclusive) m.getFloorEntry(hi) else m.getLowerEntry(hi)))
+                return if (e == null || tooLow(e.key)) null else e
+            }
+
+            fun absCeiling(key: K?): Entry<K, V>? {
+                if (tooLow(key!!)) return absLowest()
+                val e: Entry<K, V>? = m.getCeilingEntry(key)
+                return if (e == null || tooHigh(e.key)) null else e
+            }
+
+            fun absHigher(key: K?): Entry<K, V>? {
+                if (tooLow(key!!)) return absLowest()
+                val e: Entry<K, V>? = m.getHigherEntry(key)
+                return if (e == null || tooHigh(e.key)) null else e
+            }
+
+            fun absFloor(key: K?): Entry<K, V>? {
+                if (tooHigh(key!!)) return absHighest()
+                val e: Entry<K, V>? = m.getFloorEntry(key)
+                return if (e == null || tooLow(e.key)) null else e
+            }
+
+            fun absLower(key: K?): Entry<K, V>? {
+                if (tooHigh(key!!)) return absHighest()
+                val e: Entry<K, V>? = m.getLowerEntry(key)
+                return if (e == null || tooLow(e.key)) null else e
+            }
+
+            fun absHighFence(): Entry<K, V>? {
+                return (if (toEnd) null else (if (hiInclusive) m.getHigherEntry(hi) else m.getCeilingEntry(hi)))
+            }
+
+            fun absLowFence(): Entry<K, V>? {
+                return (if (fromStart) null else (if (loInclusive) m.getLowerEntry(lo) else m.getFloorEntry(lo)))
+            }
+
+            // Abstract methods defined in ascending vs descending classes
+            // These relay to the appropriate absolute versions
+            abstract fun subLowest(): Entry<K, V>?
+            abstract fun subHighest(): Entry<K, V>?
+            abstract fun subCeiling(key: K?): Entry<K, V>?
+            abstract fun subHigher(key: K?): Entry<K, V>?
+            abstract fun subFloor(key: K?): Entry<K, V>?
+            abstract fun subLower(key: K?): Entry<K, V>?
+
+            /** Returns ascending iterator from the perspective of this submap  */
+            abstract fun keyIterator(): MutableIterator<K>
+
+            abstract fun keySpliterator(): Spliterator<K>
+
+            /** Returns descending iterator from the perspective of this submap  */
+            abstract fun descendingKeyIterator(): MutableIterator<K>
+
+            val isEmpty: Boolean
+                // public methods
+                get() = if (fromStart && toEnd) m.isEmpty() else entries.isEmpty()
+
+            override fun isEmpty() = isEmpty
+
+            fun size(): Int {
+                return if (fromStart && toEnd) m.size else entries.size
+            }
+
+            override val size = size()
+
+            override fun containsKey(key: K): Boolean {
+                return inRange(key) && m.containsKey(key)
+            }
+
+            override fun containsValue(value: V): Boolean {
+                return if (value == null) false else values.contains(value)
+            }
+
+            override fun put(key: K, value: V): V? {
+                require(inRange(key!!)) { "key out of range" }
+                return m.put(key, value)
+            }
+
+            fun putIfAbsent(key: K, value: V): V? {
+                require(inRange(key!!)) { "key out of range" }
+                return m.putIfAbsent(key, value)
+            }
+
+            fun merge(key: K, value: V, remappingFunction: (V?, V?) -> V? /*BiFunction<in V?, in V?, out V?>?*/): V? {
+                require(inRange(key!!)) { "key out of range" }
+                return m.merge(key, value, remappingFunction)
+            }
+
+            fun computeIfAbsent(
+                key: K,
+                mappingFunction: (K) -> V /*function.Function<in K?, out V?>*/
+            ): V? {
+                if (!inRange(key!!)) {
+                    // Do not throw if mapping function returns null
+                    // to preserve compatibility with default computeIfAbsent implementation
+                    if (mappingFunction(key) == null) return null
+                    throw IllegalArgumentException("key out of range")
+                }
+                return m.computeIfAbsent(key, mappingFunction)
+            }
+
+            fun compute(key: K, remappingFunction: (K, V?) -> V? /*BiFunction<in K?, in V?, out V?>*/): V? {
+                if (!inRange(key!!)) {
+                    // Do not throw if remapping function returns null
+                    // to preserve compatibility with default computeIfAbsent implementation
+                    if (remappingFunction(key, null) == null) return null
+                    throw IllegalArgumentException("key out of range")
+                }
+                return m.compute(key, remappingFunction)
+            }
+
+            fun computeIfPresent(key: K, remappingFunction: (K, V) -> V? /*BiFunction<in K?, in V?, out V?>?*/): V? {
+                return if (!inRange(key)) null else m.computeIfPresent(key, remappingFunction)
+            }
+
+            override fun get(key: K): V? {
+                return if (!inRange(key)) null else m[key]
+            }
+
+            override fun remove(key: K): V? {
+                return if (!inRange(key)) null else m.remove(key)
+            }
+
+            override fun ceilingEntry(key: K) = exportEntry(subCeiling(key))
+
+            override fun ceilingKey(key: K): K? {
+                return keyOrNull(subCeiling(key))
+            }
+
+            override fun higherEntry(key: K) = exportEntry(subHigher(key))
+
+            override fun higherKey(key: K): K? {
+                return keyOrNull(subHigher(key))
+            }
+
+            override fun floorEntry(key: K) = exportEntry(subFloor(key))
+
+            override fun floorKey(key: K): K? {
+                return keyOrNull(subFloor(key))
+            }
+
+            override fun lowerEntry(key: K) = exportEntry(subLower(key))
+
+            override fun lowerKey(key: K): K? {
+                return keyOrNull(subLower(key))
+            }
+
+            override fun firstKey() = key(subLowest()!!)
+
+            override fun lastKey() = key(subHighest()!!)
+
+            override fun firstEntry() = exportEntry(subLowest())
+
+            override fun lastEntry() = exportEntry(subHighest())
+
+            override fun pollFirstEntry(): Map.Entry<K, V>? {
+                val e: Entry<K, V>? = subLowest()
+                val result: Map.Entry<K, V>? = exportEntry(e)
+                if (e != null) m.deleteEntry(e)
+                return result
+            }
+
+            override fun pollLastEntry(): Map.Entry<K, V>? {
+                val e: Entry<K, V>? = subHighest()
+                val result: Map.Entry<K, V>? = exportEntry(e)
+                if (e != null) m.deleteEntry(e)
+                return result
+            }
+
+            // Views
+            @Transient
+            var descendingMapView: NavigableMap<K, V>? = null
+
+            @Transient
+            var entrySetView: NavigableSubMap<K, V>.EntrySetView? = null
+
+            @Transient
+            var navigableKeySetView: KeySet<K>? = null
+
+            init {
+                if (!fromStart && !toEnd) {
+                    require(m.compare(lo, hi) <= 0) { "fromKey > toKey" }
+                } else {
+                    if (!fromStart)  // type check
+                        m.compare(lo, lo)
+                    if (!toEnd) m.compare(hi, hi)
+                }
+
+                this.m = m
+                this.fromStart = fromStart
+                this.lo = lo
+                this.loInclusive = loInclusive
+                this.toEnd = toEnd
+                this.hi = hi
+                this.hiInclusive = hiInclusive
+            }
+
+            override fun navigableKeySet(): NavigableSet<K> {
+                val nksv: KeySet<K>? = navigableKeySetView
+                return (nksv ?: KeySet(this)
+                    .also { navigableKeySetView = it as KeySet<K>? }) as NavigableSet<K>
+            }
+
+            override fun keySet(): MutableSet<K> {
+                return navigableKeySet()
+            }
+
+            override fun descendingKeySet(): NavigableSet<K> {
+                return descendingMap().navigableKeySet()
+            }
+
+            override fun subMap(fromKey: K, toKey: K): SortedMap<K, V> {
+                return subMap(fromKey, true, toKey, false)
+            }
+
+            override fun headMap(toKey: K): SortedMap<K, V> {
+                return headMap(toKey, false)
+            }
+
+            override fun tailMap(fromKey: K): SortedMap<K, V> {
+                return tailMap(fromKey, true)
+            }
+
+            // View classes
+            abstract inner class EntrySetView : AbstractSet<MutableMap.MutableEntry<K, V>?>() {
+                @Transient
+                override var size = -1
+
+                @Transient
+                private var sizeModCount = 0
+
+                fun size(): Int {
+                    if (fromStart && toEnd) return m.size
+                    if (size == -1 || sizeModCount != m.modCount) {
+                        sizeModCount = m.modCount
+                        size = 0
+                        val i: Iterator<*> = iterator()
+                        while (i.hasNext()) {
+                            size++
+                            i.next()
+                        }
+                    }
+                    return size
+                }
+
+                val isEmpty: Boolean
+                    get() {
+                        val n: Entry<K, V>? = absLowest()
+                        return n == null || tooHigh(n.key)
+                    }
+
+                override fun contains(o: MutableMap.MutableEntry<K, V>?): Boolean {
+                    if (o !is MutableMap.MutableEntry<K, V>) return false
+                    val key: K = o.key!!
+                    if (!inRange(key)) return false
+                    val node: Entry<K, V>? = m.getEntry(key)
+                    return node != null &&
+                            valEquals(node.value, o.value)
+                }
+
+                fun remove(o: MutableMap.MutableEntry<K, V>?): Boolean {
+                    if (o !is MutableMap.MutableEntry<K, V>) return false
+                    val key: K = o.key!!
+                    if (!inRange(key)) return false
+                    val node: Entry<K, V>? = m.getEntry(key)
+                    if (node != null && valEquals(
+                            node.value,
+                            o.value
+                        )
+                    ) {
+                        m.deleteEntry(node)
+                        return true
+                    }
+                    return false
+                }
+            }
+
+            /**
+             * Iterators for SubMaps
+             */
+            internal abstract inner class SubMapIterator<T>(
+                first: Entry<K, V>?,
+                fence: Entry<K, V>?
+            ) : MutableIterator<T?> {
+                var lastReturned: Entry<K, V>? = null
+                var next: Entry<K, V>?
+                val fenceKey: Any?
+                var expectedModCount: Int
+
+                init {
+                    expectedModCount = m.modCount
+                    next = first
+                    fenceKey = if (fence == null) UNBOUNDED else fence.key
+                }
+
+                override fun hasNext(): Boolean {
+                    return next != null && next!!.key !== fenceKey
+                }
+
+                fun nextEntry(): Entry<K, V> {
+                    val e: Entry<K, V>? = next
+                    if (e == null || e.key === fenceKey) throw NoSuchElementException()
+                    if (m.modCount != expectedModCount) throw ConcurrentModificationException()
+                    next = successor(e)
+                    lastReturned = e
+                    return e
+                }
+
+                fun prevEntry(): Entry<K, V> {
+                    val e: Entry<K, V>? = next
+                    if (e == null || e.key === fenceKey) throw NoSuchElementException()
+                    if (m.modCount != expectedModCount) throw ConcurrentModificationException()
+                    next = predecessor(e)
+                    lastReturned = e
+                    return e
+                }
+
+                fun removeAscending() {
+                    checkNotNull(lastReturned)
+                    if (m.modCount != expectedModCount) throw ConcurrentModificationException()
+                    // deleted entries are replaced by their successors
+                    if (lastReturned!!.left != null && lastReturned!!.right != null) next = lastReturned
+                    m.deleteEntry(lastReturned!!)
+                    lastReturned = null
+                    expectedModCount = m.modCount
+                }
+
+                fun removeDescending() {
+                    checkNotNull(lastReturned)
+                    if (m.modCount != expectedModCount) throw ConcurrentModificationException()
+                    m.deleteEntry(lastReturned!!)
+                    lastReturned = null
+                    expectedModCount = m.modCount
+                }
+            }
+
+            internal inner class SubMapEntryIterator(
+                first: Entry<K, V>?,
+                fence: Entry<K, V>?
+            ) : SubMapIterator<MutableMap.MutableEntry<K, V>?>(first, fence) {
+                override fun next(): MutableMap.MutableEntry<K, V> {
+                    return nextEntry()
+                }
+
+                override fun remove() {
+                    removeAscending()
+                }
+            }
+
+            internal inner class DescendingSubMapEntryIterator(
+                last: Entry<K, V>?,
+                fence: Entry<K, V>?
+            ) : SubMapIterator<MutableMap.MutableEntry<K, V>?>(last, fence) {
+                override fun next(): MutableMap.MutableEntry<K, V> {
+                    return prevEntry()
+                }
+
+                override fun remove() {
+                    removeDescending()
+                }
+            }
+
+            // Implement minimal Spliterator as KeySpliterator backup
+            internal inner class SubMapKeyIterator(
+                first: Entry<K, V>?,
+                fence: Entry<K, V>?
+            ) : SubMapIterator<K>(first, fence), Spliterator<K> {
+                override fun next(): K {
+                    return nextEntry().key
+                }
+
+                override fun remove() {
+                    removeAscending()
+                }
+
+                override fun trySplit(): Spliterator<K>? {
+                    return null
+                }
+
+                override fun forEachRemaining(action: (K) -> Unit /* (K*->Unitfunction.Consumer<in K?>*/) {
+                    while (hasNext()) action(next())
+                }
+
+                override fun tryAdvance(action: (K) -> Unit /* (K*->Unitfunction.Consumer<in K?>*/): Boolean {
+                    if (hasNext()) {
+                        action(next())
+                        return true
+                    }
+                    return false
+                }
+
+                override fun estimateSize(): Long {
+                    return Long.Companion.MAX_VALUE
+                }
+
+                override fun characteristics(): Int {
+                    return Spliterator.DISTINCT or Spliterator.ORDERED or
+                            Spliterator.SORTED
+                }
+
+                override fun getComparator(): Comparator<in K>? {
+                    return this@NavigableSubMap.comparator()
+                }
+            }
+
+            internal inner class DescendingSubMapKeyIterator(
+                last: Entry<K, V>?,
+                fence: Entry<K, V>?
+            ) : SubMapIterator<K>(last, fence), Spliterator<K> {
+                override fun next(): K {
+                    return prevEntry().key
+                }
+
+                override fun remove() {
+                    removeDescending()
+                }
+
+                override fun trySplit(): Spliterator<K>? {
+                    return null
+                }
+
+                override fun forEachRemaining(action: (K) -> Unit /* (K*->Unitfunction.Consumer<in K?>*/) {
+                    while (hasNext()) action(next())
+                }
+
+                override fun tryAdvance(action: (K) -> Unit /* (K*->Unitfunction.Consumer<in K?>*/): Boolean {
+                    if (hasNext()) {
+                        action(next())
+                        return true
+                    }
+                    return false
+                }
+
+                override fun estimateSize(): Long {
+                    return Long.Companion.MAX_VALUE
+                }
+
+                override fun characteristics(): Int {
+                    return Spliterator.DISTINCT or Spliterator.ORDERED
+                }
+            }
+
+        }
+
+
+        class AscendingSubMap<K, V> internal constructor(
+            m: TreeMap<K, V>,
+            fromStart: Boolean, lo: K, loInclusive: Boolean,
+            toEnd: Boolean, hi: K, hiInclusive: Boolean
+        ) : NavigableSubMap<K, V>(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive) {
+            override fun comparator(): Comparator<K>? {
+                return m.comparator()
+            }
+
+            override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+                get() = (entrySetView ?: object : EntrySetView() {
+                    override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>> =
+                        SubMapEntryIterator(
+                            absLowest(),
+                            absHighFence()
+                        ) as MutableIterator<MutableMap.MutableEntry<K, V>>
+                }.also { entrySetView = it }) as MutableSet<MutableMap.MutableEntry<K, V>>
+
+            override val keys = navigableKeySet()
+
+            override fun values(): MutableCollection<V> {
+                // Returns a collection view of the values in this submap.
+                return object : AbstractMutableCollection<V>() {
+                    override fun iterator(): MutableIterator<V> {
+                        val entryIterator = entrySet().iterator()
+                        return object : MutableIterator<V> {
+                            override fun hasNext() = entryIterator.hasNext()
+                            override fun next() = entryIterator.next()!!.value
+                            override fun remove() = entryIterator.remove()
+                        }
+                    }
+
+                    override fun add(element: V): Boolean {
+                        throw UnsupportedOperationException("add is not supported by values view of TreeMap or its submaps")
+                    }
+
+                    override val size: Int
+                        get() = this@AscendingSubMap.size()
+
+                    override fun contains(element: V): Boolean {
+                        for (v in this) {
+                            if (v == element) return true
+                        }
+                        return false
+                    }
+
+                    override fun clear() = this@AscendingSubMap.clear()
+                }
+            }
+
+            override val values = values()
+
+            override fun subMap(
+                fromKey: K, fromInclusive: Boolean,
+                toKey: K, toInclusive: Boolean
+            ): NavigableMap<K, V> {
+                require(inRange(fromKey, fromInclusive)) { "fromKey out of range" }
+                require(inRange(toKey, toInclusive)) { "toKey out of range" }
+                return AscendingSubMap(
+                    m,
+                    false, fromKey, fromInclusive,
+                    false, toKey, toInclusive
+                )
+            }
+
+            override fun headMap(toKey: K, inclusive: Boolean): NavigableMap<K, V> {
+                require(inRange(toKey, inclusive)) { "toKey out of range" }
+                return AscendingSubMap(
+                    m,
+                    fromStart, lo, loInclusive,
+                    false, toKey, inclusive
+                )
+            }
+
+            override fun tailMap(fromKey: K, inclusive: Boolean): NavigableMap<K, V> {
+                require(inRange(fromKey, inclusive)) { "fromKey out of range" }
+                return AscendingSubMap(
+                    m,
+                    false, fromKey, inclusive,
+                    toEnd, hi, hiInclusive
+                )
+            }
+
+            override fun descendingMap(): NavigableMap<K, V> {
+                val mv: NavigableMap<K, V>? = descendingMapView
+                return mv
+                    ?: DescendingSubMap(
+                        m,
+                        fromStart, lo, loInclusive,
+                        toEnd, hi, hiInclusive
+                    ).also { descendingMapView = it }
+            }
+
+            override fun keyIterator(): MutableIterator<K> {
+                return this.SubMapKeyIterator(absLowest(), absHighFence()) as MutableIterator<K>
+            }
+
+            override fun keySpliterator(): Spliterator<K> {
+                return this.SubMapKeyIterator(absLowest(), absHighFence())
+            }
+
+            override fun descendingKeyIterator(): MutableIterator<K> {
+                return DescendingSubMapKeyIterator(absHighest(), absLowFence()) as MutableIterator<K>
+            }
+
+            internal inner class AscendingEntrySetView : NavigableSubMap<K, V>.EntrySetView() {
+                override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>?> {
+                    return this@AscendingSubMap.SubMapEntryIterator(absLowest(), absHighFence())
+                }
+            }
+
+            override fun entrySet(): MutableSet<MutableMap.MutableEntry<K, V>?> {
+                val es: NavigableSubMap<K, V>.EntrySetView? = entrySetView
+                return (es ?: AscendingEntrySetView().also {
+                    entrySetView = it
+                }) as MutableSet<MutableMap.MutableEntry<K, V>?>
+            }
+
+            override fun subLowest(): Entry<K, V>? {
+                return absLowest()
+            }
+
+            override fun subHighest(): Entry<K, V>? {
+                return absHighest()
+            }
+
+            override fun subCeiling(key: K?): Entry<K, V>? {
+                return absCeiling(key)
+            }
+
+            override fun subHigher(key: K?): Entry<K, V>? {
+                return absHigher(key)
+            }
+
+            override fun subFloor(key: K?): Entry<K, V>? {
+                return absFloor(key)
+            }
+
+            override fun subLower(key: K?): Entry<K, V>? {
+                return absLower(key)
+            }
+        }
+
+        class DescendingSubMap<K, V> internal constructor(
+            m: TreeMap<K, V>,
+            fromStart: Boolean, lo: K, loInclusive: Boolean,
+            toEnd: Boolean, hi: K, hiInclusive: Boolean
+        ) : NavigableSubMap<K, V>(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive) {
+            // Conditionally serializable
+            private val reverseComparator: Comparator<K> =
+                Collections.reverseOrder(m.comparator)
+
+            override fun comparator(): Comparator<K> {
+                return reverseComparator
+            }
+
+            override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+                get() = (entrySetView ?: object : EntrySetView() {
+                    override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>> =
+                        DescendingSubMapEntryIterator(
+                            absHighest(),
+                            absLowFence()
+                        ) as MutableIterator<MutableMap.MutableEntry<K, V>>
+                }.also { entrySetView = it }) as MutableSet<MutableMap.MutableEntry<K, V>>
+
+            override val keys = navigableKeySet()
+
+            override fun values(): MutableCollection<V> {
+                return object : AbstractMutableCollection<V>() {
+                    override fun iterator(): MutableIterator<V> {
+                        val entryIterator = entrySet().iterator()
+                        return object : MutableIterator<V> {
+                            override fun hasNext() = entryIterator.hasNext()
+                            override fun next() = entryIterator.next()!!.value
+                            override fun remove() = entryIterator.remove()
+                        }
+                    }
+
+                    override fun add(element: V): Boolean {
+                        throw UnsupportedOperationException("add is not supported by values view of TreeMap or its submaps")
+                    }
+
+                    override val size: Int
+                        get() = this@DescendingSubMap.size()
+
+                    override fun contains(element: V): Boolean {
+                        for (v in this) {
+                            if (v == element) return true
+                        }
+                        return false
+                    }
+
+                    override fun clear() = this@DescendingSubMap.clear()
+                }
+            }
+
+            override val values = values()
+
+            override fun subMap(
+                fromKey: K, fromInclusive: Boolean,
+                toKey: K, toInclusive: Boolean
+            ): NavigableMap<K, V> {
+                require(inRange(fromKey, fromInclusive)) { "fromKey out of range" }
+                require(inRange(toKey, toInclusive)) { "toKey out of range" }
+                return DescendingSubMap(
+                    m,
+                    false, toKey, toInclusive,
+                    false, fromKey, fromInclusive
+                )
+            }
+
+            override fun headMap(toKey: K, inclusive: Boolean): NavigableMap<K, V> {
+                require(inRange(toKey, inclusive)) { "toKey out of range" }
+                return DescendingSubMap(
+                    m,
+                    false, toKey, inclusive,
+                    toEnd, hi, hiInclusive
+                )
+            }
+
+            override fun tailMap(fromKey: K, inclusive: Boolean): NavigableMap<K, V> {
+                require(inRange(fromKey, inclusive)) { "fromKey out of range" }
+                return DescendingSubMap(
+                    m,
+                    fromStart, lo, loInclusive,
+                    false, fromKey, inclusive
+                )
+            }
+
+            override fun descendingMap(): NavigableMap<K, V> {
+                val mv: NavigableMap<K, V>? = descendingMapView
+                return mv
+                    ?: AscendingSubMap(
+                        m,
+                        fromStart, lo, loInclusive,
+                        toEnd, hi, hiInclusive
+                    ).also { descendingMapView = it }
+            }
+
+            override fun keyIterator(): MutableIterator<K> {
+                return this.DescendingSubMapKeyIterator(absHighest(), absLowFence()) as MutableIterator<K>
+            }
+
+            override fun keySpliterator(): Spliterator<K> {
+                return this.DescendingSubMapKeyIterator(absHighest(), absLowFence())
+            }
+
+            override fun descendingKeyIterator(): MutableIterator<K> {
+                return this.SubMapKeyIterator(absLowest(), absHighFence()) as MutableIterator<K>
+            }
+
+            internal inner class DescendingEntrySetView : NavigableSubMap<K, V>.EntrySetView() {
+                override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>?> {
+                    return this@DescendingSubMap.DescendingSubMapEntryIterator(absHighest(), absLowFence())
+                }
+            }
+
+            override fun entrySet(): MutableSet<MutableMap.MutableEntry<K, V>?> {
+                val es = entrySetView
+                return (es ?: DescendingEntrySetView().also {
+                    entrySetView = it
+                }) as MutableSet<MutableMap.MutableEntry<K, V>?>
+            }
+
+            override fun subLowest(): Entry<K, V>? {
+                return absHighest()
+            }
+
+            override fun subHighest(): Entry<K, V>? {
+                return absLowest()
+            }
+
+            override fun subCeiling(key: K?): Entry<K, V>? {
+                return absFloor(key)
+            }
+
+            override fun subHigher(key: K?): Entry<K, V>? {
+                return absLower(key)
+            }
+
+            override fun subFloor(key: K?): Entry<K, V>? {
+                return absCeiling(key)
+            }
+
+            override fun subLower(key: K?): Entry<K, V>? {
+                return absHigher(key)
+            }
+
+        }
+
+        /**
+         * Base class for spliterators.  Iteration starts at a given
+         * origin and continues up to but not including a given fence (or
+         * null for end).  At top-level, for ascending cases, the first
+         * split uses the root as left-fence/right-origin. From there,
+         * right-hand splits replace the current fence with its left
+         * child, also serving as origin for the split-off spliterator.
+         * Left-hands are symmetric. Descending versions place the origin
+         * at the end and invert ascending split rules.  This base class
+         * is non-committal about directionality, or whether the top-level
+         * spliterator covers the whole tree. This means that the actual
+         * split mechanics are located in subclasses. Some of the subclass
+         * trySplit methods are identical (except for return types), but
+         * not nicely factorable.
+         *
+         * Currently, subclass versions exist only for the full map
+         * (including descending keys via its descendingMap).  Others are
+         * possible but currently not worthwhile because submaps require
+         * O(n) computations to determine size, which substantially limits
+         * potential speed-ups of using custom Spliterators versus default
+         * mechanics.
+         *
+         * To bootstrap initialization, external constructors use
+         * negative size estimates: -1 for ascend, -2 for descend.
+         */
+        open class TreeMapSpliterator<K, V> internal constructor(
+            val tree: TreeMap<K, V>,
+            origin: Entry<K, V>?,
+            fence: Entry<K, V>?,
+            side: Int,
+            est: Int,
+            expectedModCount: Int
+        ) {
+            var current: Entry<K, V>? // traverser; initially first node in range
+            var fence: Entry<K, V>? // one past last, or null
+            var side: Int // 0: top, -1: is a left split, +1: right
+            var est: Int // size estimate (exact only for top-level)
+            var expectedModCount: Int // for CME checks
+
+            init {
+                this.current = origin
+                this.fence = fence
+                this.side = side
+                this.est = est
+                this.expectedModCount = expectedModCount
+            }
+
+            fun getEstimate(): Int {
+                // force initialization
+                var s: Int
+                val t: TreeMap<K, V>
+                if ((est.also { s = it }) < 0) {
+                    if ((tree.also { t = it }) != null) {
+                        current = if (s == -1) t.getFirstEntry() else t.getLastEntry()
+                        est = t.size
+                        s = est
+                        expectedModCount = t.modCount
+                    } else {
+                        est = 0
+                        s = est
+                    }
+                }
+                return s
+            }
+
+            fun estimateSize(): Long {
+                return this.getEstimate().toLong()
+            }
+        }
+
+        class KeySpliterator<K, V> internal constructor(
+            tree: TreeMap<K, V>,
+            origin: Entry<K, V>?,
+            fence: Entry<K, V>?,
+            side: Int,
+            est: Int,
+            expectedModCount: Int
+        ) : TreeMapSpliterator<K, V>(tree, origin, fence, side, est, expectedModCount), Spliterator<K> {
+            override fun trySplit(): KeySpliterator<K, V>? {
+                if (est < 0) getEstimate() // force initialization
+
+                val d: Int = side
+                val e: Entry<K, V>? = current
+                val f: Entry<K, V>? = fence
+                val s: Entry<K, V>? = (if (e == null || e === f) null else  // empty
+                    if (d == 0) tree.root else  // was top
+                        if (d > 0) e.right else  // was right
+                            if (d < 0 && f != null) f.left else  // was left
+                                null)
+                if (s != null && s !== e && s !== f && tree.compare(
+                        e!!.key,
+                        s.key
+                    ) < 0
+                ) {        // e not already past s
+                    side = 1
+                    return KeySpliterator(
+                        tree,
+                        e,
+                        s.also { current = it },
+                        -1,
+                        1.let { est = est ushr it; est },
+                        expectedModCount
+                    )
+                }
+                return null
+            }
+
+            override fun forEachRemaining(action: (K) -> Unit /*function.Consumer<in K>*/) {
+                //if (action == null) throw java.lang.NullPointerException()
+                if (est < 0) getEstimate() // force initialization
+
+                val f: Entry<K, V>? = fence
+                var e: Entry<K, V>?
+                var p: Entry<K, V>?
+                var pl: Entry<K, V>?
+                if ((current.also { e = it }) != null && e !== f) {
+                    current = f // exhaust
+                    do {
+                        action(e!!.key)
+                        if ((e.right.also { p = it }) != null) {
+                            while ((p!!.left.also { pl = it }) != null) p = pl
+                        } else {
+                            while ((e!!.parent.also { p = it }) != null && e === p!!.right) e = p
+                        }
+                    } while ((p.also { e = it }) != null && e !== f)
+                    if (tree.modCount != expectedModCount) throw ConcurrentModificationException()
+                }
+            }
+
+            override fun tryAdvance(action: (K) -> Unit /*function.Consumer<in K>*/): Boolean {
+                val e: Entry<K, V>?
+                //if (action == null) throw java.lang.NullPointerException()
+                if (est < 0) getEstimate() // force initialization
+
+                if ((current.also { e = it }) == null || e === fence) return false
+                current = successor(e)
+                action(e!!.key)
+                if (tree.modCount != expectedModCount) throw ConcurrentModificationException()
+                return true
+            }
+
+            override fun characteristics(): Int {
+                return (if (side == 0) Spliterator.SIZED else 0) or
+                        Spliterator.DISTINCT or Spliterator.SORTED or Spliterator.ORDERED
+            }
+
+            override fun getComparator(): Comparator<in K>? {
+                return tree.comparator
+            }
+        }
+
+
+        class DescendingKeySpliterator<K, V> internal constructor(
+            tree: TreeMap<K, V>,
+            origin: Entry<K, V>?, fence: Entry<K, V>?,
+            side: Int, est: Int, expectedModCount: Int
+        ) : TreeMapSpliterator<K, V>(tree, origin, fence, side, est, expectedModCount),
+            Spliterator<K> {
+            override fun trySplit(): DescendingKeySpliterator<K, V>? {
+                if (est < 0) getEstimate() // force initialization
+
+                val d: Int = side
+                val e: Entry<K, V>? = current
+                val f: Entry<K, V>? = fence
+                val s: Entry<K, V>? = (if (e == null || e === f) null else  // empty
+                    if (d == 0) tree.root else  // was top
+                        if (d < 0) e.left else  // was left
+                            if (d > 0 && f != null) f.right else  // was right
+                                null)
+                if (s != null && s !== e && s !== f && tree.compare(e!!.key, s.key) > 0) {       // e not already past s
+                    side = 1
+                    return DescendingKeySpliterator(
+                        tree,
+                        e,
+                        s.also { current = it },
+                        -1,
+                        1.let { est = est ushr it; est },
+                        expectedModCount
+                    )
+                }
+                return null
+            }
+
+            override fun forEachRemaining(action: (K) -> Unit /*function.Consumer<in K?>*/) {
+                //if (action == null) throw java.lang.NullPointerException()
+                if (est < 0) getEstimate() // force initialization
+
+                val f: Entry<K, V>? = fence
+                var e: Entry<K, V>?
+                var p: Entry<K, V>?
+                var pr: Entry<K, V>?
+                if ((current.also { e = it }) != null && e !== f) {
+                    current = f // exhaust
+                    do {
+                        action(e!!.key)
+                        if ((e.left.also { p = it }) != null) {
+                            while ((p!!.right.also { pr = it }) != null) p = pr
+                        } else {
+                            while ((e!!.parent.also { p = it }) != null && e === p!!.left) e = p
+                        }
+                    } while ((p.also { e = it }) != null && e !== f)
+                    if (tree.modCount != expectedModCount) throw ConcurrentModificationException()
+                }
+            }
+
+            override fun tryAdvance(action: (K) -> Unit /*function.Consumer<in K?>*/): Boolean {
+                val e: Entry<K, V>?
+                //if (action == null) throw java.lang.NullPointerException()
+                if (est < 0) getEstimate() // force initialization
+
+                if ((current.also { e = it }) == null || e === fence) return false
+                current = predecessor(e)
+                action(e!!.key)
+                if (tree.modCount != expectedModCount) throw ConcurrentModificationException()
+                return true
+            }
+
+            override fun characteristics(): Int {
+                return (if (side == 0) Spliterator.SIZED else 0) or
+                        Spliterator.DISTINCT or Spliterator.ORDERED
+            }
+        }
+
+        class ValueSpliterator<K, V> internal constructor(
+            tree: TreeMap<K, V>,
+            origin: Entry<K, V>?, fence: Entry<K, V>?,
+            side: Int, est: Int, expectedModCount: Int
+        ) : TreeMapSpliterator<K, V>(tree, origin, fence, side, est, expectedModCount),
+            Spliterator<V> {
+            override fun trySplit(): ValueSpliterator<K, V>? {
+                if (est < 0) getEstimate() // force initialization
+
+                val d: Int = side
+                val e: Entry<K, V>? = current
+                val f: Entry<K, V>? = fence
+                val s: Entry<K, V>? = (if (e == null || e === f) null else  // empty
+                    if (d == 0) tree.root else  // was top
+                        if (d > 0) e.right else  // was right
+                            if (d < 0 && f != null) f.left else  // was left
+                                null)
+                if (s != null && s !== e && s !== f && tree.compare(
+                        e!!.key,
+                        s.key
+                    ) < 0
+                ) {        // e not already past s
+                    side = 1
+                    return ValueSpliterator(
+                        tree,
+                        e,
+                        s.also { current = it },
+                        -1,
+                        1.let { est = est ushr it; est },
+                        expectedModCount
+                    )
+                }
+                return null
+            }
+
+            override fun forEachRemaining(action: (V) -> Unit /*function.Consumer<in V?>*/) {
+                //if (action == null) throw java.lang.NullPointerException()
+                if (est < 0) getEstimate() // force initialization
+
+                val f: Entry<K, V>? = fence
+                var e: Entry<K, V>?
+                var p: Entry<K, V>?
+                var pl: Entry<K, V>?
+                if ((current.also { e = it }) != null && e !== f) {
+                    current = f // exhaust
+                    do {
+                        action(e!!.value)
+                        if ((e.right.also { p = it }) != null) {
+                            while ((p!!.left.also { pl = it }) != null) p = pl
+                        } else {
+                            while ((e!!.parent.also { p = it }) != null && e === p!!.right) e = p
+                        }
+                    } while ((p.also { e = it }) != null && e !== f)
+                    if (tree.modCount != expectedModCount) throw ConcurrentModificationException()
+                }
+            }
+
+            override fun tryAdvance(action: (V) -> Unit /*function.Consumer<in V?>*/): Boolean {
+                val e: Entry<K, V>?
+                //if (action == null) throw java.lang.NullPointerException()
+                if (est < 0) getEstimate() // force initialization
+
+                if ((current.also { e = it }) == null || e === fence) return false
+                current = successor(e)
+                action(e!!.value)
+                if (tree.modCount != expectedModCount) throw ConcurrentModificationException()
+                return true
+            }
+
+            override fun characteristics(): Int {
+                return (if (side == 0) Spliterator.SIZED else 0) or Spliterator.ORDERED
+            }
+        }
 
     } // End Companion Object
 
@@ -999,7 +2375,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
         return p
     }
 
-    internal fun getCeilingEntryInternal(key: K): Entry<K, V>? {
+    internal fun getCeilingEntry(key: K): Entry<K, V>? {
         var p = root
         var ceiling: Entry<K, V>? = null
         while (p != null) {
@@ -1020,7 +2396,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
         return ceiling
     }
 
-    internal fun getFloorEntryInternal(key: K): Entry<K, V>? {
+    internal fun getFloorEntry(key: K): Entry<K, V>? {
         var p = root
         var floor: Entry<K, V>? = null
         while (p != null) {
@@ -1041,7 +2417,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
         return floor
     }
 
-    internal fun getHigherEntryInternal(key: K): Entry<K, V>? {
+    internal fun getHigherEntry(key: K): Entry<K, V>? {
         var p = root
         var higher: Entry<K, V>? = null
         while (p != null) {
@@ -1056,7 +2432,7 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
         return higher
     }
 
-    internal fun getLowerEntryInternal(key: K): Entry<K, V>? {
+    internal fun getLowerEntry(key: K): Entry<K, V>? {
         var p = root
         var lower: Entry<K, V>? = null
         while (p != null) {
@@ -1383,6 +2759,140 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
     // --- Build From Sorted ---
     // Helper for constructor optimization
 
+    fun addAllForTreeSet(set: SortedSet<K>, defaultVal: V) {
+        try {
+            buildFromSorted(set.size, set.iterator(), /*null,*/ defaultVal)
+        } catch (cannotHappen: IOException) {
+            /*} catch (cannotHappen: ClassNotFoundException) {*/
+        }
+    }
+
+    /**
+     * Linear time tree building algorithm from sorted data.  Can accept keys
+     * and/or values from iterator or stream. This leads to too many
+     * parameters, but seems better than alternatives.  The four formats
+     * that this method accepts are:
+     *
+     * 1) An iterator of Map.Entries.  (it != null, defaultVal == null).
+     * 2) An iterator of keys.         (it != null, defaultVal != null).
+     * 3) A stream of alternating serialized keys and values.
+     * (it == null, defaultVal == null).
+     * 4) A stream of serialized keys. (it == null, defaultVal != null).
+     *
+     * It is assumed that the comparator of the TreeMap is already set prior
+     * to calling this method.
+     *
+     * @param size the number of keys (or key-value pairs) to be read from
+     * the iterator or stream
+     * @param it If non-null, new entries are created from entries
+     * or keys read from this iterator.
+     * @param str If non-null, new entries are created from keys and
+     * possibly values read from this stream in serialized form.
+     * Exactly one of it and str should be non-null.
+     * @param defaultVal if non-null, this default value is used for
+     * each value in the map.  If null, each value is read from
+     * iterator or stream, as described above.
+     * @throws java.io.IOException propagated from stream reads. This cannot
+     * occur if str is null.
+     * @throws ClassNotFoundException propagated from readObject.
+     * This cannot occur if str is null.
+     */
+    @Throws(IOException::class)
+    private fun buildFromSorted(
+        size: Int, it: MutableIterator<*>,
+        /*str: ObjectInputStream,*/
+        defaultVal: V?
+    ) {
+        this.size = size
+        root = buildFromSorted(
+            0, 0, size - 1, computeRedLevel(size),
+            it, /*str,*/ defaultVal
+        )
+    }
+
+    /**
+     * Recursive "helper method" that does the real work of the
+     * previous method.  Identically named parameters have
+     * identical definitions.  Additional parameters are documented below.
+     * It is assumed that the comparator and size fields of the TreeMap are
+     * already set prior to calling this method.  (It ignores both fields.)
+     *
+     * @param level the current level of tree. Initial call should be 0.
+     * @param lo the first element index of this subtree. Initial should be 0.
+     * @param hi the last element index of this subtree.  Initial should be
+     * size-1.
+     * @param redLevel the level at which nodes should be red.
+     * Must be equal to computeRedLevel for tree of this size.
+     */
+    @Throws(IOException::class/*, java.lang.ClassNotFoundException::class*/)
+    private fun buildFromSorted(
+        level: Int, lo: Int, hi: Int,
+        redLevel: Int,
+        it: MutableIterator<*>,
+        /*str: ObjectInputStream,*/
+        defaultVal: V?
+    ): TreeMap.Entry<K, V>? {
+        /*
+         * Strategy: The root is the middlemost element. To get to it, we
+         * have to first recursively construct the entire left subtree,
+         * so as to grab all of its elements. We can then proceed with right
+         * subtree.
+         *
+         * The lo and hi arguments are the minimum and maximum
+         * indices to pull out of the iterator or stream for current subtree.
+         * They are not actually indexed, we just proceed sequentially,
+         * ensuring that items are extracted in corresponding order.
+         */
+
+        if (hi < lo) return null
+
+        val mid = (lo + hi) ushr 1
+
+        var left: Entry<K, V>? = null
+        if (lo < mid) left = buildFromSorted(
+            level + 1, lo, mid - 1, redLevel,
+            it, /*str,*/ defaultVal
+        )
+
+        // extract key and/or value from iterator or stream
+        val key: K
+        val value: V
+        //if (it != null) {
+            if (defaultVal == null) {
+                val entry = it.next() as MutableMap.MutableEntry<*, *>
+                key = entry.key as K
+                value = entry.value as V
+            } else {
+                key = it.next() as K
+                value = defaultVal
+            }
+        //} else { // use stream
+            //key = str.readObject() as K?
+            //value = (if (defaultVal != null) defaultVal else str.readObject() as V?)
+        //}
+
+        val middle: Entry<K, V> = Entry<K, V>(key, value, null)
+
+        // color nodes in non-full bottommost level red
+        if (level == redLevel) middle.color = RED
+
+        if (left != null) {
+            middle.left = left
+            left.parent = middle
+        }
+
+        if (mid < hi) {
+            val right: Entry<K, V>? = buildFromSorted(
+                level + 1, mid + 1, hi, redLevel,
+                it, /*str,*/ defaultVal
+            )
+            middle.right = right
+            right!!.parent = middle
+        }
+
+        return middle
+    }
+
     /**
      * Builds the tree from a sorted source, typically an iterator from another sorted map.
      * Runs in O(n) time.
@@ -1459,6 +2969,47 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
             redLevel++
         }
         return redLevel - 1 // 0-indexed level
+    }
+
+    // --- View class support ---
+    inner class Values : AbstractMutableCollection<V>() {
+        override fun iterator(): MutableIterator<V> {
+            return ValueIterator(getFirstEntry()) as MutableIterator<V>
+        }
+
+        override fun add(element: V): Boolean {
+            // not implementing for now. implement if needed
+            throw UnsupportedOperationException("Add operation is not supported")
+        }
+
+        override val size: Int
+            get() {
+                return this@TreeMap.size
+            }
+
+        override fun contains(o: V): Boolean {
+            return this@TreeMap.containsValue(o)
+        }
+
+        override fun remove(o: V): Boolean {
+            var e: Entry<K, V>? = getFirstEntry()
+            while (e != null) {
+                if (valEquals(e.value, o)) {
+                    deleteEntry(e)
+                    return true
+                }
+                e = successor(e)
+            }
+            return false
+        }
+
+        override fun clear() {
+            this@TreeMap.clear()
+        }
+
+        fun spliterator(): Spliterator<V> {
+            return ValueSpliterator(this@TreeMap, null, null, 0, -1, 0)
+        }
     }
 
 
@@ -1556,6 +3107,68 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
         override fun next(): K = nextEntry().key
     }
 
+    internal inner class DescendingKeyIterator(first: Entry<K, V>?) :
+        PrivateEntryIterator<K>(first) {
+        override fun next(): K {
+            return prevEntry().key
+        }
+
+        override fun remove() {
+            checkNotNull(lastReturned)
+            if (modCount != expectedModCount) throw ConcurrentModificationException()
+            deleteEntry(lastReturned!!)
+            lastReturned = null
+            expectedModCount = modCount
+        }
+    }
+
+    // --- Additional Functions ---
+
+    /**
+     * @throws ClassCastException       {@inheritDoc}
+     * @throws NullPointerException if `toKey` is null
+     * and this map uses natural ordering, or its comparator
+     * does not permit null keys
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @since 1.6
+     */
+    override fun headMap(toKey: K, inclusive: Boolean): NavigableMap<K, V> {
+        return AscendingSubMap(
+            this,
+            true, UNBOUNDED as K, true,
+            false, toKey, inclusive
+        )
+    }
+
+    override fun tailMap(fromKey: K, inclusive: Boolean): SortedMap<K, V> {
+        return AscendingSubMap(
+            this,
+            false, fromKey, inclusive,
+            true, UNBOUNDED as K, true
+        )
+    }
+
+    override fun subMap(fromKey: K, toKey: K): SortedMap<K, V> {
+        return subMap(fromKey, true, toKey, false)
+    }
+
+    override fun headMap(toKey: K): SortedMap<K, V> {
+        return headMap(toKey, false)
+    }
+
+    override fun tailMap(fromKey: K): SortedMap<K, V> {
+        return tailMap(fromKey, true)
+    }
+
+    fun keySpliterator(): Spliterator<K> {
+        return KeySpliterator(this, null, null, 0, -1, 0)
+    }
+
+    fun descendingKeySpliterator(): Spliterator<K> {
+        return DescendingKeySpliterator(this, null, null, 0, -2, 0)
+    }
+
+
     // --- Cloning ---
     // Kotlin often prefers copy functions/constructors.
     // If strict Cloneable compatibility is needed, implement shallow or deep copy.
@@ -1585,4 +3198,4 @@ class TreeMap<K, V> : AbstractMutableMap<K, V>,
     // --- Serialization ---
     // Explicitly not implemented as per requirement (no Serializable)
 
-} // End TreeMap class
+}
