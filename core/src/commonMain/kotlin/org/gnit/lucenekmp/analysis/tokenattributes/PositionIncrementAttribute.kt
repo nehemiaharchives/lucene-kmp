@@ -33,6 +33,8 @@ interface PositionIncrementAttribute : Attribute {
      *
      * @see .setPositionIncrement
      */
+    fun getPositionIncrement(): Int
+
     /**
      * Set the position increment. The default value is one.
      *
@@ -40,5 +42,6 @@ interface PositionIncrementAttribute : Attribute {
      * @throws IllegalArgumentException if `positionIncrement` is negative.
      * @see .getPositionIncrement
      */
-    var positionIncrement: Int
+    fun setPositionIncrement(positionIncrement: Int)
+
 }
