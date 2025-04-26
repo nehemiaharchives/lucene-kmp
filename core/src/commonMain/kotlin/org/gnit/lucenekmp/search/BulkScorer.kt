@@ -60,7 +60,7 @@ abstract class BulkScorer {
      * @return an under-estimation of the next matching doc after max
      */
     @Throws(IOException::class)
-    abstract fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int
+    abstract fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int
 
     /** Same as [DocIdSetIterator.cost] for bulk scorers.  */
     abstract fun cost(): Long
