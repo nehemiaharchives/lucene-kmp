@@ -21,7 +21,7 @@ abstract class StopwordAnalyzerBase protected constructor(stopwords: CharArraySe
      */
     // analyzers should use char array set for stopwords!
     /** An immutable stopword set  */
-    val stopwordSet: CharArraySet? = if (stopwords == null)
+    val stopwords: CharArraySet = if (stopwords == null)
         CharArraySet.EMPTY_SET
     else
         CharArraySet.unmodifiableSet(CharArraySet.copy(stopwords))

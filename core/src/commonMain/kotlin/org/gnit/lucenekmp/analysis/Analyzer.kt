@@ -84,13 +84,13 @@ abstract class Analyzer
      * sink as a reader
      * @return the [TokenStreamComponents] for this analyzer.
      */
-    protected abstract fun createComponents(fieldName: String?): TokenStreamComponents
+    protected abstract fun createComponents(fieldName: String): TokenStreamComponents
 
     /**
      * Wrap the given [TokenStream] in order to apply normalization filters. The default
      * implementation returns the [TokenStream] as-is. This is used by [.normalize].
      */
-    protected fun normalize(fieldName: String?, `in`: TokenStream): TokenStream {
+    protected open fun normalize(fieldName: String, `in`: TokenStream): TokenStream {
         return `in`
     }
 
@@ -178,7 +178,7 @@ abstract class Analyzer
      * necessary character-level normalization and then [.normalize] in
      * order to apply the normalizing token filters.
      */
-    suspend fun normalize(fieldName: String?, text: String): BytesRef {
+    fun normalize(fieldName: String, text: String): BytesRef {
         try {
             // apply char filters
             var filteredText: String
@@ -206,7 +206,7 @@ abstract class Analyzer
             ).use { ts ->
                 val termAtt: TermToBytesRefAttribute = ts.addAttribute(TermToBytesRefAttribute::class)
                 ts.reset()
-                check(ts.incrementToken() !== false) {
+                check(ts.incrementToken()) {
                     ("The normalization token stream is "
                             + "expected to produce exactly 1 token, but got 0 for analyzer "
                             + this
@@ -366,7 +366,7 @@ abstract class Analyzer
          */
         abstract fun getReusableComponents(
             analyzer: Analyzer, fieldName: String
-        ): TokenStreamComponents
+        ): TokenStreamComponents?
 
         /**
          * Stores the given TokenStreamComponents as the reusable components for the field with the give
