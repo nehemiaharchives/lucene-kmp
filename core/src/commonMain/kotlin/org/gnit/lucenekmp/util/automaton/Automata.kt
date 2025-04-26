@@ -227,7 +227,7 @@ object Automata {
 
     private fun suffixIsZeros(br: BytesRef, len: Int): Boolean {
         for (i in len..<br.length) {
-            if (br.bytes[br.offset + i] !== 0) {
+            if (br.bytes[br.offset + i] != 0.toByte()) {
                 return false
             }
         }
