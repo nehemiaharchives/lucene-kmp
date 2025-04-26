@@ -55,7 +55,7 @@ abstract class StopwordAnalyzerBase protected constructor(stopwords: CharArraySe
          * @throws IOException if loading the stopwords throws an [IOException]
          */
         @Throws(IOException::class)
-        protected fun loadStopwordSet(stopwords: Reader): CharArraySet {
+        fun loadStopwordSet(stopwords: Reader): CharArraySet {
             try {
                 return WordlistLoader.getWordSet(stopwords)
             } finally {
