@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.search
 
+import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.PriorityQueue
@@ -11,7 +12,7 @@ internal object ScorerUtil {
     private val DEFAULT_IMPACTS_ENUM_CLASS: KClass<*> = Lucene101PostingsFormat.getImpactsEnumImpl()
     private val DEFAULT_ACCEPT_DOCS_CLASS: KClass<*> = FixedBitSet(1).asReadOnlyBits()::class
 
-    fun costWithMinShouldMatch(costs: java.util.stream.LongStream, numScorers: Int, minShouldMatch: Int): Long {
+    fun costWithMinShouldMatch(costs: Sequence<Long>, numScorers: Int, minShouldMatch: Int): Long {
         // the idea here is the following: a boolean query c1,c2,...cn with minShouldMatch=m
         // could be rewritten to:
         // (c1 AND (c2..cn|msm=m-1)) OR (!c1 AND (c2..cn|msm=m))
@@ -28,13 +29,12 @@ internal object ScorerUtil {
 
         val pq: PriorityQueue<Long> =
             object : PriorityQueue<Long>(numScorers - minShouldMatch + 1) {
-                protected override fun lessThan(a: Long, b: Long): Boolean {
+                override fun lessThan(a: Long, b: Long): Boolean {
                     return a > b
                 }
             }
         costs.forEach(pq::insertWithOverflow)
-        return java.util.stream.StreamSupport.stream<T>(pq.spliterator(), false)
-            .mapToLong { obj: Number -> obj!!.toLong() }.sum()
+        return pq.asSequence().sum()
     }
 
     /**
@@ -71,27 +71,22 @@ internal object ScorerUtil {
      * enable auto-vectorizing shifts and masks that are done in [FixedBitSet.get].
      */
     fun likelyLiveDocs(acceptDocs: Bits?): Bits? {
-        if (acceptDocs == null) {
-            return acceptDocs
+        return if (acceptDocs == null) {
+            acceptDocs
         } else if (acceptDocs::class == DEFAULT_ACCEPT_DOCS_CLASS) {
-            return acceptDocs
+            acceptDocs
         } else {
-            return FilterBits(acceptDocs)
+            FilterBits(acceptDocs)
         }
     }
 
-    private class FilterBits(`in`: Bits) : Bits {
-        private val `in`: Bits
+    private class FilterBits(private val `in`: Bits) : Bits {
 
-        init {
-            this.`in` = `in`
-        }
-
-        public override fun get(index: Int): Boolean {
+        override fun get(index: Int): Boolean {
             return `in`.get(index)
         }
 
-        public override fun length(): Int {
+        override fun length(): Int {
             return `in`.length()
         }
     }

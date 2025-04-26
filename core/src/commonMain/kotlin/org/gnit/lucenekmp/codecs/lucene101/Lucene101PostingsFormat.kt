@@ -488,14 +488,13 @@ class Lucene101PostingsFormat @JvmOverloads constructor(
 
         const val LEVEL1_MASK: Int = LEVEL1_NUM_DOCS - 1
 
-        val impactsEnumImpl: KClass<out ImpactsEnum>
-            /**
-             * Return the class that implements [ImpactsEnum] in this [PostingsFormat]. This is
-             * internally used to help the JVM make good inlining decisions.
-             *
-             * @lucene.internal
-             */
-            get() = Lucene101PostingsReader.BlockPostingsEnum::class
+        /**
+         * Return the class that implements [ImpactsEnum] in this [PostingsFormat]. This is
+         * internally used to help the JVM make good inlining decisions.
+         *
+         * @lucene.internal
+         */
+        fun getImpactsEnumImpl(): KClass<out ImpactsEnum> = Lucene101PostingsReader.BlockPostingsEnum::class
 
         const val TERMS_CODEC: String = "Lucene90PostingsWriterTerms"
         const val META_CODEC: String = "Lucene101PostingsWriterMeta"
