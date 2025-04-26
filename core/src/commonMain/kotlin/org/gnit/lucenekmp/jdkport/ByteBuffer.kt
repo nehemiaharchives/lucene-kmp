@@ -844,6 +844,67 @@ open class ByteBuffer private constructor(
         return floatBuffer
     }
 
+    /**
+     * Compacts this buffer&nbsp;&nbsp;*(optional operation)*.
+     *
+     *
+     *  The bytes between the buffer's current position and its limit,
+     * if any, are copied to the beginning of the buffer.  That is, the
+     * byte at index *p*&nbsp;=&nbsp;`position()` is copied
+     * to index zero, the byte at index *p*&nbsp;+&nbsp;1 is copied
+     * to index one, and so forth until the byte at index
+     * `limit()`&nbsp;-&nbsp;1 is copied to index
+     * *n*&nbsp;=&nbsp;`limit()`&nbsp;-&nbsp;`1`&nbsp;-&nbsp;*p*.
+     * The buffer's position is then set to *n+1* and its limit is set to
+     * its capacity.  The mark, if defined, is discarded.
+     *
+     *
+     *  The buffer's position is set to the number of bytes copied,
+     * rather than to zero, so that an invocation of this method can be
+     * followed immediately by an invocation of another relative *put*
+     * method.
+     *
+     *
+     *
+     *
+     *  Invoke this method after writing data from a buffer in case the
+     * write was incomplete.  The following loop, for example, copies bytes
+     * from one channel to another via the buffer `buf`:
+     *
+     * {@snippet lang=java :
+     * *     buf.clear();          // Prepare buffer for use
+     * *     while (in.read(buf) >= 0 || buf.position != 0) {
+     * *         buf.flip();
+     * *         out.write(buf);
+     * *         buf.compact();    // In case of partial write
+     * *     }
+     * * }
+     *
+     *
+     *
+     * @return  This buffer
+     *
+     * @throws  ReadOnlyBufferException
+     * If this buffer is read-only
+     */
+    fun compact(): ByteBuffer {
+        val rem = remaining()
+        if (rem > 0) {
+            // Move remaining bytes to the beginning
+            val temp = ByteArray(rem)
+            for (i in 0 until rem) {
+                temp[i] = get(position + i)
+            }
+            for (i in 0 until rem) {
+                buffer.setByteAt(i.toLong(), temp[i])
+            }
+        }
+        position = rem
+        limit = capacity
+        mark = -1
+        return this
+    }
+
     // --- Companion object with factory methods ---
     companion object {
         /**

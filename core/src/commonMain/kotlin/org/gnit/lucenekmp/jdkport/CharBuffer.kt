@@ -22,7 +22,6 @@ class CharBuffer private constructor(
 ) : CharSequence, Appendable {
 
     var position: Int = 0
-        private set
     var limit: Int = capacity
         private set
     var mark: Int = -1
@@ -87,10 +86,188 @@ class CharBuffer private constructor(
         return this
     }
 
+    // -- Bulk put operations --
+    /**
+     * Relative bulk *put* method&nbsp;&nbsp;*(optional operation)*.
+     *
+     *
+     *  This method transfers the chars remaining in the given source
+     * buffer into this buffer.  If there are more chars remaining in the
+     * source buffer than in this buffer, that is, if
+     * `src.remaining()`&nbsp;`>`&nbsp;`remaining()`,
+     * then no chars are transferred and a [ ] is thrown.
+     *
+     *
+     *  Otherwise, this method copies
+     * *n*&nbsp;=&nbsp;`src.remaining()` chars from the given
+     * buffer into this buffer, starting at each buffer's current position.
+     * The positions of both buffers are then incremented by *n*.
+     *
+     *
+     *  In other words, an invocation of this method of the form
+     * `dst.put(src)` has exactly the same effect as the loop
+     *
+     * {@snippet lang=java :
+     * *     while (src.hasRemaining())
+     * *         dst.put(src.get());
+     * * }
+     *
+     * except that it first checks that there is sufficient space in this
+     * buffer and it is potentially much more efficient.  If this buffer and
+     * the source buffer share the same backing array or memory, then the
+     * result will be as if the source elements were first copied to an
+     * intermediate location before being written into this buffer.
+     *
+     * @param  src
+     * The source buffer from which chars are to be read;
+     * must not be this buffer
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     * If there is insufficient space in this buffer
+     * for the remaining chars in the source buffer
+     *
+     * @throws  IllegalArgumentException
+     * If the source buffer is this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     * If this buffer is read-only
+     */
+    fun put(src: CharBuffer): CharBuffer {
+        if (src === this) throw Exception("createSameBuffer")
+        if (isReadOnly()) throw ReadOnlyBufferException()
+
+        val srcPos: Int = src.position()
+        val srcLim: Int = src.limit
+        val srcRem = (if (srcPos <= srcLim) srcLim - srcPos else 0)
+        val pos = position()
+        val lim: Int = limit
+        val rem = (if (pos <= lim) lim - pos else 0)
+
+        if (srcRem > rem) throw BufferOverflowException()
+
+        putBuffer(pos, src, srcPos, srcRem)
+
+        position = pos + srcRem
+
+        src.position = srcPos + srcRem
+
+        return this
+    }
+
+    fun putBuffer(pos: Int, src: CharBuffer, srcPos: Int, n: Int) {
+        for (i in 0 until n) {
+            this.putAbsolute(pos + i, src.getAbsolute(srcPos + i))
+        }
+    }
+
+    /**
+     * Relative bulk *put* method&nbsp;&nbsp;*(optional operation)*.
+     *
+     *
+     *  This method transfers the entire content of the given source string
+     * into this buffer.  An invocation of this method of the form
+     * `dst.put(s)` behaves in exactly the same way as the invocation
+     *
+     * {@snippet lang=java :
+     * *     dst.put(s, 0, s.length())
+     * * }
+     *
+     * @param   src
+     * The source string
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     * If there is insufficient space in this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     * If this buffer is read-only
+     */
+    fun put(src: String): CharBuffer {
+        return put(src, 0, src.length)
+    }
+
+    /**
+     * Relative bulk *put* method&nbsp;&nbsp;*(optional operation)*.
+     *
+     *
+     *  This method transfers chars from the given string into this
+     * buffer.  If there are more chars to be copied from the string than
+     * remain in this buffer, that is, if
+     * `end&nbsp;-&nbsp;start`&nbsp;`>`&nbsp;`remaining()`,
+     * then no chars are transferred and a [ ] is thrown.
+     *
+     *
+     *  Otherwise, this method copies
+     * *n*&nbsp;=&nbsp;`end`&nbsp;-&nbsp;`start` chars
+     * from the given string into this buffer, starting at the given
+     * `start` index and at the current position of this buffer.  The
+     * position of this buffer is then incremented by *n*.
+     *
+     *
+     *  In other words, an invocation of this method of the form
+     * `dst.put(src,&nbsp;start,&nbsp;end)` has exactly the same effect
+     * as the loop
+     *
+     * {@snippet lang=java :
+     * *     for (int i = start; i < end; i++)
+     * *         dst.put(src.charAt(i));
+     * * }
+     *
+     * except that it first checks that there is sufficient space in this
+     * buffer and it is potentially much more efficient.
+     *
+     * @param  src
+     * The string from which chars are to be read
+     *
+     * @param  start
+     * The offset within the string of the first char to be read;
+     * must be non-negative and no larger than
+     * `string.length()`
+     *
+     * @param  end
+     * The offset within the string of the last char to be read,
+     * plus one; must be non-negative and no larger than
+     * `string.length()`
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     * If there is insufficient space in this buffer
+     *
+     * @throws  IndexOutOfBoundsException
+     * If the preconditions on the `start` and `end`
+     * parameters do not hold
+     *
+     * @throws  ReadOnlyBufferException
+     * If this buffer is read-only
+     */
+    fun put(src: String, start: Int, end: Int): CharBuffer {
+        Objects.checkFromIndexSize(start, end - start, src.length)
+        if (isReadOnly()) throw ReadOnlyBufferException()
+        if (end - start > remaining()) throw BufferOverflowException()
+        for (i in start..<end) this.put(src[i])
+        return this
+    }
+
+
     // --- Buffer state methods ---
 
     /** Returns the number of characters between position and limit. */
     fun remaining(): Int = limit - position
+
+    /**
+     * Tells whether there are any elements between the current position and
+     * the limit.
+     *
+     * @return  `true` if, and only if, there is at least one element
+     * remaining in this buffer
+     */
+    fun hasRemaining(): Boolean {
+        return position < limit
+    }
 
     /** Clears the buffer: position ← 0, limit ← capacity, mark undefined. */
     fun clear(): CharBuffer {

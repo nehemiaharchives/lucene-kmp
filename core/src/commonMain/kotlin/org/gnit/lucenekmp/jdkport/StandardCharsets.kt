@@ -74,5 +74,12 @@ class StandardCharsets private constructor() {
          * @since 22
          */
         //val UTF_32: Charset = sun.nio.cs.UTF_32()
+
+        fun aliases_UTF_8(): Set<String> {
+            return setOf(
+                "UTF8",
+                "unicode-1-1-utf-8",
+            )
+        }
     }
 }

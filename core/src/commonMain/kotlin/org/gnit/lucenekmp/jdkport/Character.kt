@@ -408,7 +408,21 @@ class Character {
             return plane < ((MAX_CODE_POINT + 1) ushr 16)
         }
 
-
+        /**
+         * Determines whether the specified character (Unicode code point)
+         * is in the [supplementary character](#supplementary) range.
+         *
+         * @param  codePoint the character (Unicode code point) to be tested
+         * @return `true` if the specified code point is between
+         * [.MIN_SUPPLEMENTARY_CODE_POINT] and
+         * [.MAX_CODE_POINT] inclusive;
+         * `false` otherwise.
+         * @since  1.5
+         */
+        fun isSupplementaryCodePoint(codePoint: Int): Boolean {
+            return codePoint >= MIN_SUPPLEMENTARY_CODE_POINT
+                    && codePoint < MAX_CODE_POINT + 1
+        }
 
         // end of companion object
     }

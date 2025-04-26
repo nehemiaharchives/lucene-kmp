@@ -39,7 +39,7 @@ abstract class Charset protected constructor(
     /**
      * Constructs a new decoder for this charset.
      */
-    //abstract fun newDecoder(): CharsetDecoder
+    abstract fun newDecoder(): CharsetDecoder
 
     /**
      * Constructs a new encoder for this charset.
@@ -82,12 +82,7 @@ abstract class Charset protected constructor(
         /**
          * The only supported charset instance: UTF-8.
          */
-        val UTF_8: Charset = object : Charset("UTF-8", setOf("UTF8")) {
-            override fun contains(cs: Charset): Boolean {
-                // UTF-8 contains only itself.
-                return cs === this
-            }
-        }
+        val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8.INSTANCE
 
         val LATIN1: Charset = object : Charset("ISO-8859-1") {
             override fun contains(cs: Charset): Boolean {
@@ -109,6 +104,10 @@ abstract class Charset protected constructor(
                 }
 
                 return bytes
+            }
+
+            override fun newDecoder(): CharsetDecoder {
+                TODO("Not yet implemented")
             }
         }
 
@@ -138,7 +137,7 @@ abstract class Charset protected constructor(
         /**
          * Returns the default charset. Always UTF-8.
          */
-        //fun defaultCharset(): Charset = UTF_8
+        fun defaultCharset(): Charset = UTF_8
     }
 }
 
@@ -148,19 +147,6 @@ abstract class Charset protected constructor(
 class UnsupportedCharsetException(charsetName: String) :
     IllegalArgumentException("Unsupported charset: $charsetName")
 
-/**
- * A dummy port of java.nio.charset.CharsetDecoder.
- * This version only supports decoding bytes to String using UTF-8.
- */
-abstract class CharsetDecoder {
-
-    /**
-     * Decodes the given byte array into a String.
-     */
-    abstract fun decode(bytes: ByteArray): String
-
-
-}
 
 /**
  * A dummy port of java.nio.charset.CharsetEncoder.
@@ -171,18 +157,4 @@ abstract class CharsetEncoder {
      * Encodes the given String into a byte array.
      */
     abstract fun encode(str: String): ByteArray
-}
-
-/**
- * A dummy implementation of CharsetDecoder for UTF-8.
- */
-object UTF8Decoder : CharsetDecoder() {
-    override fun decode(bytes: ByteArray): String = bytes.decodeToString()
-}
-
-/**
- * A dummy implementation of CharsetEncoder for UTF-8.
- */
-object UTF8Encoder : CharsetEncoder() {
-    override fun encode(str: String): ByteArray = str.encodeToByteArray()
 }
