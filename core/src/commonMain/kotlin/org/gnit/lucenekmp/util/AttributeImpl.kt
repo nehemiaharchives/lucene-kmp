@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.Cloneable
 
 /**
  * Base class for Attributes that can be added to a [org.apache.lucene.util.AttributeSource].
@@ -42,10 +43,10 @@ abstract class AttributeImpl : Cloneable<AttributeImpl>, Attribute {
      * @see .reflectWith
      */
     fun reflectAsString(prependAttClass: Boolean): String {
-        val buffer: StringBuilder = StringBuilder()
+        val buffer = StringBuilder()
         reflectWith(
             AttributeReflector { attClass, key, value ->
-                if (buffer.length > 0) {
+                if (buffer.isNotEmpty()) {
                     buffer.append(',')
                 }
                 if (prependAttClass) {
