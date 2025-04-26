@@ -27,11 +27,13 @@ internal class ByteBlockPoolReverseBytesReader(private val buf: ByteBlockPool) :
         pos -= numBytes
     }
 
-    override var position: Long
-        get() = pos + posDelta
-        set(pos) {
-            this.pos = pos - posDelta
-        }
+    override fun getPosition(): Long {
+        return pos + posDelta
+    }
+
+    override fun setPosition(pos: Long) {
+        this.pos = pos - posDelta
+    }
 
     fun setPosDelta(posDelta: Long) {
         this.posDelta = posDelta
