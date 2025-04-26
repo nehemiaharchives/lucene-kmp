@@ -101,6 +101,8 @@ abstract class Reader: Readable, AutoCloseable {
      * @throws     IOException  If an I/O error occurs
      */
     @Throws(IOException::class)
-    abstract fun ready(): Boolean
+    open fun ready(): Boolean{
+        return false
+    }
 
 }
