@@ -244,4 +244,13 @@ object System {
             endIndex = srcPos + length
         )
     }
+
+    fun arraycopy(src: CharArray, srcPos: Int, dest: CharArray, destPos: Int, length: Int) {
+        src.copyInto(
+            destination = dest,
+            destinationOffset = destPos,
+            startIndex = srcPos,
+            endIndex = srcPos + length
+        )
+    }
 }

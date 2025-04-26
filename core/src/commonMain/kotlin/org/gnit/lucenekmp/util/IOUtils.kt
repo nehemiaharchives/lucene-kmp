@@ -9,6 +9,10 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.gnit.lucenekmp.jdkport.BufferedReader
 import org.gnit.lucenekmp.jdkport.Charset
+import org.gnit.lucenekmp.jdkport.CharsetDecoder
+import org.gnit.lucenekmp.jdkport.CodingErrorAction
+import org.gnit.lucenekmp.jdkport.InputStream
+import org.gnit.lucenekmp.jdkport.InputStreamReader
 import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.util.IOUtils.rethrowAlways
@@ -91,23 +95,26 @@ object IOUtils {
         // If no fatal Error, all exceptions are suppressed and we return normally (exception already logged as suppressed in firstThrowable if any)
     }
 
-    /** Wraps the given [Source] in a reader for the specified charset.&#8203;:contentReference[oaicite:2]{index=2}
-     * Unlike Java's default, this will report an error if the input bytes cannot be decoded in the expected [charSet].
-     * @param stream the source to wrap in a Reader
-     * @param charSet the expected character set
-     * @return a Reader that decodes the source */
-    @Throws(IOException::class)
-    fun getDecodingReader(stream: Source, charSet: Charset): Reader {
-        // Read all bytes from source
-        val bytes = stream.buffered().readByteArray()
-        // Decode bytes to string using the charset, replacing malformed sequences with '\uFFFD'
-        val text = bytes.decodeToString()
-        // If any malformed or unmappable characters were replaced, treat that as an error to mimic Java's strict decoder behavior
-        if ('\uFFFD' in text) {
-            throw IOException("Detected malformed or unmappable bytes for charset $charSet")
-        }
-        // Return a Reader over the decoded text (using provided custom Reader class)
-        return BufferedReader(source = stream) // Assuming a constructor or factory exists to create a Reader from a String
+    /**
+     * Wrapping the given [InputStream] in a reader using a [CharsetDecoder]. Unlike
+     * Java's defaults this reader will throw an exception if your it detects the read charset doesn't
+     * match the expected [Charset].
+     *
+     *
+     * Decoding readers are useful to load configuration files, stopword lists or synonym files to
+     * detect character set problems. However, it's not recommended to use as a common purpose reader.
+     *
+     * @param stream the stream to wrap in a reader
+     * @param charSet the expected charset
+     * @return a wrapping reader
+     */
+    fun getDecodingReader(stream: InputStream, charSet: Charset): Reader {
+        val charSetDecoder: CharsetDecoder =
+            charSet
+                .newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+        return BufferedReader(InputStreamReader(stream, charSetDecoder))
     }
 
     /**

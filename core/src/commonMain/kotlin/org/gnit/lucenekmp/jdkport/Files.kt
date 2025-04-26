@@ -27,7 +27,7 @@ object Files {
     fun newBufferedReader(path: Path, charset: Charset): Reader {
         val decoder = charset.newDecoder()
         val reader = InputStreamReader(newInputStream(path), decoder)
-        return /*BufferedReader(reader)*/ reader
+        return BufferedReader(reader)
     }
 }
 

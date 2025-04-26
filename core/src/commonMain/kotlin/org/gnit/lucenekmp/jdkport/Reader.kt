@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlinx.io.IOException
 
 /**
  * ported from java.io.Reader
@@ -26,6 +27,11 @@ abstract class Reader: Readable, AutoCloseable {
             }
             override fun close() {
                 closed = true
+            }
+
+            override fun ready(): Boolean {
+                ensureOpen()
+                return false
             }
         }
     }
@@ -84,4 +90,17 @@ abstract class Reader: Readable, AutoCloseable {
         }
         return nRead
     }
+
+    /**
+     * Tells whether this stream is ready to be read.
+     *
+     * @return True if the next read() is guaranteed not to block for input,
+     * false otherwise.  Note that returning false does not guarantee that the
+     * next read will block.
+     *
+     * @throws     IOException  If an I/O error occurs
+     */
+    @Throws(IOException::class)
+    abstract fun ready(): Boolean
+
 }
