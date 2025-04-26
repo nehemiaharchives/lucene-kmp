@@ -13,7 +13,7 @@ import kotlinx.io.IOException
  * using UTF-8. It supports marking a position in the input and
  * resetting back to that position, and is intended to behave like `java.io.BufferedReader`.
  */
-class BufferedReader(
+class KIOSourceBufferedReader(
     private val source: Source,
     private val bufferSize: Int = DEFAULT_BUFFER_SIZE
 ): Reader() {
@@ -165,7 +165,7 @@ class BufferedReader(
      * @return `true` if the next read is guaranteed not to block for input, `false` otherwise&#8203;:contentReference[oaicite:14]{index=14}.
      * @throws IOException if an I/O error occurs.
      */
-    fun ready(): Boolean {
+    override fun ready(): Boolean {
         ensureOpen()
         if (pos < end) {
             return true  // buffer has data ready
