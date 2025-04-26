@@ -10,8 +10,8 @@ package org.gnit.lucenekmp.search
  */
 class Multiset<T>
 /** Create an empty [Multiset].  */
-    : AbstractCollection<T>() {
-    private val map: MutableMap<T, Int> = HashMap<T, Int>()
+    : AbstractMutableCollection<T>() {
+    private val map: MutableMap<T, Int> = HashMap()
     override var size = 0
 
     override fun iterator(): MutableIterator<T> {
@@ -28,7 +28,7 @@ class Multiset<T>
                 if (remaining == 0) {
                     val next = mapIterator.next()
                     current = next.key
-                    remaining = next.value!!
+                    remaining = next.value
                 }
                 require(remaining > 0)
                 remaining -= 1
@@ -57,12 +57,12 @@ class Multiset<T>
         return size
     }
 
-    fun clear() {
+    override fun clear() {
         map.clear()
         size = 0
     }
 
-    fun add(e: T): Boolean {
+    override fun add(e: T): Boolean {
         val number = if (map.containsKey(e)) {
             map[e]!!
         } else {
@@ -74,7 +74,7 @@ class Multiset<T>
         return true
     }
 
-    fun addAll(c: Collection<T>): Boolean {
+    override fun addAll(c: Collection<T>): Boolean {
         var modified = false
         for (e in c) {
             modified = add(e) || modified
@@ -83,7 +83,7 @@ class Multiset<T>
     }
 
     fun remove(o: Any?): Boolean {
-        val count = map.get(o)
+        val count = map[o]
         if (count == null) {
             return false
         } else if (1 == count) {

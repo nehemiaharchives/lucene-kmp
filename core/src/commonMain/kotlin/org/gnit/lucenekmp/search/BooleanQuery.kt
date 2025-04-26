@@ -21,7 +21,8 @@ class BooleanQuery private constructor(
     /** Sole constructor.  */
     {
         private var minimumNumberShouldMatch = 0
-        private val clauses: MutableList<BooleanClause> = ArrayList<BooleanClause>()
+
+        private val clauses: MutableList<BooleanClause> = ArrayList()
 
         /**
          * Specifies a minimum number of the optional BooleanClauses which must be satisfied.
@@ -88,7 +89,7 @@ class BooleanQuery private constructor(
          * number
          */
         fun add(query: Query, occur: Occur): Builder {
-            return add(BooleanClause(query!!, occur))
+            return add(BooleanClause(query, occur))
         }
 
         /**
@@ -99,10 +100,10 @@ class BooleanQuery private constructor(
         }
     }
 
-    private val clauses: MutableList<BooleanClause> // used for toString() and getClauses()
+    private val clauses: MutableList<BooleanClause> = clauses.toMutableList() // used for toString() and getClauses()
 
     // WARNING: Do not let clauseSets escape from this class as it breaks immutability:
-    private val clauseSets: MutableMap<Occur, MutableCollection<Query>> // used for equals/hashCode
+    private val clauseSets: MutableMap<Occur, MutableCollection<Query>> = mutableMapOf() // used for equals/hashCode
 
     /** Return a list of the clauses of this [BooleanQuery].  */
     fun clauses(): MutableList<BooleanClause> {
@@ -115,6 +116,8 @@ class BooleanQuery private constructor(
         // equals/hashCode!
         return clauseSets[occur]!!.toMutableSet()
     }
+
+    fun getMinimumNumberShouldMatch() = minimumNumberShouldMatch
 
     val isPureDisjunction: Boolean
         /**
@@ -173,7 +176,7 @@ class BooleanQuery private constructor(
 
         val keepShould =
             this.minimumNumberShouldMatch > 0
-                    || (clauseSets.get(Occur.MUST)!!.size + clauseSets.get(Occur.FILTER)!!.size == 0)
+                    || (clauseSets[Occur.MUST]!!.size + clauseSets[Occur.FILTER]!!.size == 0)
 
         for (clause in clauses) {
             val query: Query = clause.query
@@ -191,7 +194,7 @@ class BooleanQuery private constructor(
                 rewritten = rewritten.rewriteNoScoring()
             }
             val occur: Occur = clause.occur
-            if (occur === Occur.SHOULD && keepShould == false) {
+            if (occur === Occur.SHOULD && !keepShould) {
                 // ignore clause
                 actuallyRewritten = true
             } else if (occur === Occur.MUST) {
@@ -206,7 +209,7 @@ class BooleanQuery private constructor(
             }
         }
 
-        if (actuallyRewritten == false) {
+        if (!actuallyRewritten) {
             return this
         }
 
@@ -214,34 +217,34 @@ class BooleanQuery private constructor(
     }
 
     @Throws(IOException::class)
-    public override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
+    override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return BooleanWeight(this, searcher, scoreMode, boost)
     }
 
     @Throws(IOException::class)
-    public override fun rewrite(indexSearcher: IndexSearcher): Query {
-        if (clauses.size == 0) {
+    override fun rewrite(indexSearcher: IndexSearcher): Query {
+        if (clauses.isEmpty()) {
             return MatchNoDocsQuery("empty BooleanQuery")
         }
 
         // Queries with no positive clauses have no matches
-        if (clauses.size == clauseSets.get(Occur.MUST_NOT)!!.size) {
+        if (clauses.size == clauseSets[Occur.MUST_NOT]!!.size) {
             return MatchNoDocsQuery("pure negative BooleanQuery")
         }
 
         // optimize 1-clause queries
         if (clauses.size == 1) {
-            val c = clauses.get(0)
-            val query: Query = c.query()
-            if (minimumNumberShouldMatch == 1 && c.occur() === Occur.SHOULD) {
+            val c = clauses[0]
+            val query: Query = c.query
+            if (minimumNumberShouldMatch == 1 && c.occur === Occur.SHOULD) {
                 return query
             } else if (minimumNumberShouldMatch == 0) {
-                when (c.occur()) {
-                    SHOULD, MUST -> return query
-                    FILTER ->             // no scoring clauses, so return a score of 0
-                        return BoostQuery(ConstantScoreQuery(query!!), 0)
+                when (c.occur) {
+                    Occur.SHOULD, Occur.MUST -> return query
+                    Occur.FILTER ->             // no scoring clauses, so return a score of 0
+                        return BoostQuery(ConstantScoreQuery(query), 0f)
 
-                    MUST_NOT -> throw AssertionError()
+                    Occur.MUST_NOT -> throw AssertionError()
                     else -> throw AssertionError()
                 }
             }
@@ -253,25 +256,25 @@ class BooleanQuery private constructor(
             builder.setMinimumNumberShouldMatch(this.minimumNumberShouldMatch)
             var actuallyRewritten = false
             for (clause in this) {
-                val query: Query = clause.query()
-                val occur: Occur = clause.occur()
+                val query: Query = clause.query
+                val occur: Occur = clause.occur
                 var rewritten: Query
                 if (occur === Occur.FILTER || occur === Occur.MUST_NOT) {
                     // Clauses that are not involved in scoring can get some extra simplifications
-                    rewritten = ConstantScoreQuery(query).rewrite(indexSearcher!!)
+                    rewritten = ConstantScoreQuery(query).rewrite(indexSearcher)
                     if (rewritten is ConstantScoreQuery) {
                         rewritten = rewritten.query
                     }
                 } else {
-                    rewritten = query.rewrite(indexSearcher!!)
+                    rewritten = query.rewrite(indexSearcher)
                 }
                 if (rewritten !== query || query is MatchNoDocsQuery) {
                     // rewrite clause
                     actuallyRewritten = true
                     if (rewritten is MatchNoDocsQuery) {
                         when (occur) {
-                            SHOULD, MUST_NOT -> {}
-                            MUST, FILTER -> return rewritten
+                            Occur.SHOULD, Occur.MUST_NOT -> {}
+                            Occur.MUST, Occur.FILTER -> return rewritten
                         }
                     } else {
                         builder.add(rewritten, occur)
@@ -308,16 +311,10 @@ class BooleanQuery private constructor(
         }
 
         // Check whether some clauses are both required and excluded
-        val mustNotClauses: MutableCollection<Query> = clauseSets.get(Occur.MUST_NOT)!!
+        val mustNotClauses: MutableCollection<Query> = clauseSets[Occur.MUST_NOT]!!
         if (!mustNotClauses.isEmpty()) {
-            val p: java.util.function.Predicate<Query> = java.util.function.Predicate { o: Any ->
-                clauseSets.get(Occur.MUST)!!
-                    .contains(o)
-            }
-            if (mustNotClauses.stream().anyMatch(p.or(java.util.function.Predicate { o: Any ->
-                    clauseSets.get(Occur.FILTER)!!
-                        .contains(o)
-                }))) {
+            val mustOrFilter: List<Query> = clauseSets[Occur.MUST]!! + clauseSets[Occur.FILTER]!!
+            if (mustNotClauses.any { mustOrFilter.contains(it) }) {
                 return MatchNoDocsQuery("FILTER or MUST clause also in MUST_NOT")
             }
             if (mustNotClauses.contains(MatchAllDocsQuery())) {
@@ -326,18 +323,18 @@ class BooleanQuery private constructor(
         }
 
         // remove FILTER clauses that are also MUST clauses or that match all documents
-        if (clauseSets.get(Occur.FILTER)!!.size > 0) {
-            val filters: MutableSet<Query> = mutableSetOf<Query>(clauseSets.get(Occur.FILTER))
+        if (clauseSets[Occur.FILTER]!!.isNotEmpty()) {
+            val filters: MutableSet<Query> = clauseSets[Occur.FILTER]!!.toMutableSet()
             var modified = false
-            if (filters.size > 1 || clauseSets.get(Occur.MUST)!!.isEmpty() == false) {
+            if (filters.size > 1 || !clauseSets[Occur.MUST]!!.isEmpty()) {
                 modified = filters.remove(MatchAllDocsQuery())
             }
-            modified = modified or filters.removeAll(clauseSets.get(Occur.MUST)!!)
+            modified = modified or filters.removeAll(clauseSets[Occur.MUST]!!)
             if (modified) {
                 val builder = Builder()
                 builder.setMinimumNumberShouldMatch(this.minimumNumberShouldMatch)
                 for (clause in clauses) {
-                    if (clause.occur() !== Occur.FILTER) {
+                    if (clause.occur !== Occur.FILTER) {
                         builder.add(clause)
                     }
                 }
@@ -349,21 +346,21 @@ class BooleanQuery private constructor(
         }
 
         // convert FILTER clauses that are also SHOULD clauses to MUST clauses
-        if (clauseSets.get(Occur.SHOULD)!!.size > 0 && clauseSets.get(Occur.FILTER)!!.size > 0) {
-            val filters: MutableCollection<Query> = clauseSets.get(Occur.FILTER)!!
-            val shoulds: MutableCollection<Query> = clauseSets.get(Occur.SHOULD)!!
+        if (clauseSets[Occur.SHOULD]!!.isNotEmpty() && clauseSets[Occur.FILTER]!!.isNotEmpty()) {
+            val filters: MutableCollection<Query> = clauseSets[Occur.FILTER]!!
+            val shoulds: MutableCollection<Query> = clauseSets[Occur.SHOULD]!!
 
-            val intersection: MutableSet<Query> = mutableSetOf<Query>(filters)
+            val intersection: MutableSet<Query> = filters.toMutableSet()
             intersection.retainAll(shoulds)
 
-            if (intersection.isEmpty() == false) {
+            if (!intersection.isEmpty()) {
                 val builder = Builder()
                 var minShouldMatch = this.minimumNumberShouldMatch
 
                 for (clause in clauses) {
-                    if (intersection.contains(clause.query())) {
-                        if (clause.occur() === Occur.SHOULD) {
-                            builder.add(BooleanClause(clause.query(), Occur.MUST))
+                    if (intersection.contains(clause.query)) {
+                        if (clause.occur === Occur.SHOULD) {
+                            builder.add(BooleanClause(clause.query, Occur.MUST))
                             minShouldMatch--
                         }
                     } else {
@@ -377,9 +374,9 @@ class BooleanQuery private constructor(
         }
 
         // Deduplicate SHOULD clauses by summing up their boosts
-        if (clauseSets.get(Occur.SHOULD)!!.size > 0 && minimumNumberShouldMatch <= 1) {
+        if (clauseSets[Occur.SHOULD]!!.isNotEmpty() && minimumNumberShouldMatch <= 1) {
             val shouldClauses: MutableMap<Query, Double> = mutableMapOf()
-            for (query in clauseSets.get(Occur.SHOULD)!!) {
+            for (query in clauseSets[Occur.SHOULD]!!) {
                 var query: Query = query
                 var boost = 1.0
                 while (query is BoostQuery) {
@@ -387,21 +384,21 @@ class BooleanQuery private constructor(
                     boost *= bq.boost
                     query = bq.query
                 }
-                shouldClauses.put(query, shouldClauses.getOrDefault(query, 0.0) + boost)
+                shouldClauses.put(query, shouldClauses.getOrElse(query){0.0} + boost)
             }
-            if (shouldClauses.size != clauseSets.get(Occur.SHOULD)!!.size) {
+            if (shouldClauses.size != clauseSets[Occur.SHOULD]!!.size) {
                 val builder =
                     Builder().setMinimumNumberShouldMatch(minimumNumberShouldMatch)
                 for (entry in shouldClauses.entries) {
                     var query = entry.key
-                    val boost = entry.value!!.toFloat()
+                    val boost = entry.value.toFloat()
                     if (boost != 1f) {
-                        query = BoostQuery(query!!, boost)
+                        query = BoostQuery(query, boost)
                     }
                     builder.add(query, Occur.SHOULD)
                 }
                 for (clause in clauses) {
-                    if (clause.occur() !== Occur.SHOULD) {
+                    if (clause.occur !== Occur.SHOULD) {
                         builder.add(clause)
                     }
                 }
@@ -410,9 +407,9 @@ class BooleanQuery private constructor(
         }
 
         // Deduplicate MUST clauses by summing up their boosts
-        if (clauseSets.get(Occur.MUST)!!.size > 0) {
+        if (clauseSets[Occur.MUST]!!.isNotEmpty()) {
             val mustClauses: MutableMap<Query, Double> = mutableMapOf()
-            for (query in clauseSets.get(Occur.MUST)!!) {
+            for (query in clauseSets[Occur.MUST]!!) {
                 var query: Query = query
                 var boost = 1.0
                 while (query is BoostQuery) {
@@ -420,21 +417,21 @@ class BooleanQuery private constructor(
                     boost *= bq.boost
                     query = bq.query
                 }
-                mustClauses.put(query, mustClauses.getOrDefault(query, 0.0) + boost)
+                mustClauses.put(query, mustClauses.getOrElse(query ){0.0} + boost)
             }
-            if (mustClauses.size != clauseSets.get(Occur.MUST)!!.size) {
+            if (mustClauses.size != clauseSets[Occur.MUST]!!.size) {
                 val builder =
                     Builder().setMinimumNumberShouldMatch(minimumNumberShouldMatch)
                 for (entry in mustClauses.entries) {
                     var query = entry.key
-                    val boost = entry.value!!.toFloat()
+                    val boost = entry.value.toFloat()
                     if (boost != 1f) {
-                        query = BoostQuery(query!!, boost)
+                        query = BoostQuery(query, boost)
                     }
                     builder.add(query, Occur.MUST)
                 }
                 for (clause in clauses) {
-                    if (clause.occur() !== Occur.MUST) {
+                    if (clause.occur !== Occur.MUST) {
                         builder.add(clause)
                     }
                 }
@@ -445,23 +442,23 @@ class BooleanQuery private constructor(
         // Rewrite queries whose single scoring clause is a MUST clause on a
         // MatchAllDocsQuery to a ConstantScoreQuery
         run {
-            val musts: MutableCollection<Query> = clauseSets.get(Occur.MUST)!!
-            val filters: MutableCollection<Query> = clauseSets.get(Occur.FILTER)!!
-            if (musts.size == 1 && filters.size > 0) {
+            val musts: MutableCollection<Query> = clauseSets[Occur.MUST]!!
+            val filters: MutableCollection<Query> = clauseSets[Occur.FILTER]!!
+            if (musts.size == 1 && filters.isNotEmpty()) {
                 var must = musts.iterator().next()
                 var boost = 1f
                 if (must is BoostQuery) {
                     must = must.query
-                    boost = must.boost
+                    boost = (must as BoostQuery).boost
                 }
                 if (must is MatchAllDocsQuery) {
                     // our single scoring clause matches everything: rewrite to a CSQ on the filter
                     // ignore SHOULD clause for now
                     var builder = Builder()
                     for (clause in clauses) {
-                        when (clause.occur()) {
-                            FILTER, MUST_NOT -> builder.add(clause)
-                            MUST, SHOULD -> {}
+                        when (clause.occur) {
+                            Occur.FILTER, Occur.MUST_NOT -> builder.add(clause)
+                            Occur.MUST, Occur.SHOULD -> {}
                             else -> {}
                         }
                     }
@@ -476,7 +473,7 @@ class BooleanQuery private constructor(
                         Builder()
                             .setMinimumNumberShouldMatch(this.minimumNumberShouldMatch)
                             .add(rewritten, Occur.MUST)
-                    for (query in clauseSets.get(Occur.SHOULD)!!) {
+                    for (query in clauseSets[Occur.SHOULD]!!) {
                         builder.add(query, Occur.SHOULD)
                     }
                     rewritten = builder.build()
@@ -491,8 +488,9 @@ class BooleanQuery private constructor(
             builder.setMinimumNumberShouldMatch(minimumNumberShouldMatch)
             var actuallyRewritten = false
             for (clause in clauses) {
-                if (clause.occur() === Occur.SHOULD && clause.query() is BooleanQuery) {
-                    if (innerQuery.isPureDisjunction()) {
+                if (clause.occur === Occur.SHOULD && clause.query is BooleanQuery) {
+                    val innerQuery: BooleanQuery = clause.query
+                    if (innerQuery.isPureDisjunction) {
                         actuallyRewritten = true
                         for (innerClause in innerQuery.clauses()) {
                             builder.add(innerClause)
@@ -516,23 +514,24 @@ class BooleanQuery private constructor(
             builder.setMinimumNumberShouldMatch(minimumNumberShouldMatch)
             var actuallyRewritten = false
             for (outerClause in clauses) {
-                if (outerClause.isRequired() && outerClause.query() is BooleanQuery) {
+                if (outerClause.isRequired && outerClause.query is BooleanQuery) {
                     // Inlining prohibited clauses is not legal if the query is a pure negation, since pure
                     // negations have no matches. It works because the inner BooleanQuery would have first
                     // rewritten to a MatchNoDocsQuery if it only had prohibited clauses.
-                    assert(innerQuery.getClauses(Occur.MUST_NOT).size != innerQuery.clauses().size)
+                    val innerQuery: BooleanQuery = outerClause.query
+                    require(innerQuery.getClauses(Occur.MUST_NOT).size != innerQuery.clauses().size)
                     if (innerQuery.getMinimumNumberShouldMatch() == 0
                         && innerQuery.getClauses(Occur.SHOULD).isEmpty()
                     ) {
                         actuallyRewritten = true
                         for (innerClause in innerQuery) {
-                            val innerOccur: Occur = innerClause.occur()
-                            if (innerOccur === Occur.FILTER || innerOccur === Occur.MUST_NOT || outerClause.occur() === Occur.MUST) {
+                            val innerOccur: Occur = innerClause.occur
+                            if (innerOccur === Occur.FILTER || innerOccur === Occur.MUST_NOT || outerClause.occur === Occur.MUST) {
                                 builder.add(innerClause)
                             } else {
-                                assert(outerClause.occur() === Occur.FILTER && innerOccur === Occur.MUST)
+                                require(outerClause.occur === Occur.FILTER && innerOccur === Occur.MUST)
                                 // In this case we need to change the occur of the inner query from MUST to FILTER.
-                                builder.add(innerClause.query(), Occur.FILTER)
+                                builder.add(innerClause.query, Occur.FILTER)
                             }
                         }
                     } else {
@@ -550,15 +549,15 @@ class BooleanQuery private constructor(
         // SHOULD clause count less than or equal to minimumNumberShouldMatch
         // Important(this can only be processed after nested clauses have been flattened)
         run {
-            val shoulds: MutableCollection<Query> = clauseSets.get(Occur.SHOULD)!!
+            val shoulds: MutableCollection<Query> = clauseSets[Occur.SHOULD]!!
             if (shoulds.size < minimumNumberShouldMatch) {
                 return MatchNoDocsQuery("SHOULD clause count less than minimumNumberShouldMatch")
             }
-            if (shoulds.size > 0 && shoulds.size == minimumNumberShouldMatch) {
+            if (shoulds.isNotEmpty() && shoulds.size == minimumNumberShouldMatch) {
                 val builder = Builder()
                 for (clause in clauses) {
-                    if (clause.occur() === Occur.SHOULD) {
-                        builder.add(clause.query(), Occur.MUST)
+                    if (clause.occur === Occur.SHOULD) {
+                        builder.add(clause.query, Occur.MUST)
                     } else {
                         builder.add(clause)
                     }
@@ -570,14 +569,15 @@ class BooleanQuery private constructor(
 
         // Inline SHOULD clauses from the only MUST clause
         run {
-            if (clauseSets.get(Occur.SHOULD)!!.isEmpty()
-                && clauseSets.get(Occur.MUST)!!.size == 1 && clauseSets.get(Occur.MUST)!!.iterator()
-                    .next() is BooleanQuery
-                && inner.clauses.size == inner.clauseSets.get(Occur.SHOULD).size
+            val inner = clauseSets[Occur.MUST]!!.iterator().next()
+
+            if (clauseSets[Occur.SHOULD]!!.isEmpty()
+                && clauseSets[Occur.MUST]!!.size == 1 && inner is BooleanQuery
+                && inner.clauses.size == inner.clauseSets[Occur.SHOULD]!!.size
             ) {
                 val rewritten = Builder()
                 for (clause in clauses) {
-                    if (clause.occur() !== Occur.MUST) {
+                    if (clause.occur !== Occur.MUST) {
                         rewritten.add(clause)
                     }
                 }
@@ -589,21 +589,21 @@ class BooleanQuery private constructor(
             }
         }
 
-        return super.rewrite(indexSearcher!!)
+        return super.rewrite(indexSearcher)
     }
 
-    public override fun visit(visitor: QueryVisitor) {
+    override fun visit(visitor: QueryVisitor) {
         val sub = visitor.getSubVisitor(Occur.MUST, this)
         for (occur in clauseSets.keys) {
-            if (clauseSets.get(occur)!!.size > 0) {
+            if (clauseSets[occur]!!.isNotEmpty()) {
                 if (occur === Occur.MUST) {
-                    for (q in clauseSets.get(occur)!!) {
+                    for (q in clauseSets[occur]!!) {
                         q.visit(sub)
                     }
                 } else {
                     val v: QueryVisitor = sub.getSubVisitor(occur, this)
-                    for (q in clauseSets.get(occur)!!) {
-                        q.visit(v!!)
+                    for (q in clauseSets[occur]!!) {
+                        q.visit(v)
                     }
                 }
             }
@@ -611,7 +611,7 @@ class BooleanQuery private constructor(
     }
 
     /** Prints a user-readable version of this query.  */
-    public override fun toString(field: String): String {
+    override fun toString(field: String?): String {
         val buffer = StringBuilder()
         val needParens = this.minimumNumberShouldMatch > 0
         if (needParens) {
@@ -620,9 +620,9 @@ class BooleanQuery private constructor(
 
         var i = 0
         for (c in this) {
-            buffer.append(c.occur().toString())
+            buffer.append(c.occur.toString())
 
-            val subQuery: Query = c.query()
+            val subQuery: Query = c.query
             if (subQuery is BooleanQuery) { // wrap sub-bools in parens
                 buffer.append("(")
                 buffer.append(subQuery.toString(field))
@@ -685,17 +685,14 @@ class BooleanQuery private constructor(
     private var hashCode = 0
 
     init {
-        this.clauses =
-            java.util.Collections.unmodifiableList<BooleanClause>(java.util.Arrays.asList<BooleanClause>(*clauses))
-        clauseSets = java.util.EnumMap(Occur::class.java)
         // duplicates matter for SHOULD and MUST
         clauseSets.put(Occur.SHOULD, Multiset())
         clauseSets.put(Occur.MUST, Multiset())
         // but not for FILTER and MUST_NOT
-        clauseSets.put(Occur.FILTER, java.util.HashSet<Query>())
-        clauseSets.put(Occur.MUST_NOT, java.util.HashSet<Query>())
+        clauseSets.put(Occur.FILTER, HashSet<Query>())
+        clauseSets.put(Occur.MUST_NOT, HashSet<Query>())
         for (clause in clauses) {
-            clauseSets.get(clause.occur())!!.add(clause.query())
+            clauseSets[clause.occur]!!.add(clause.query)
         }
     }
 
@@ -703,9 +700,9 @@ class BooleanQuery private constructor(
         // no need for synchronization, in the worst case we would just compute the hash several times.
         if (hashCode == 0) {
             hashCode = computeHashCode()
-            assert(hashCode != 0)
+            require(hashCode != 0)
         }
-        assert(hashCode == computeHashCode())
+        require(hashCode == computeHashCode())
         return hashCode
     }
 }
