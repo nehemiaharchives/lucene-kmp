@@ -24,7 +24,7 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
     private var startOffset: Int = 0
     private var endOffset: Int = 0
     private var type: String = DEFAULT_TYPE
-    override var positionIncrement: Int = 1
+    var positionIncrement: Int = 1
     override var positionLength: Int = 1
     override var termFrequency: Int = 1
 
@@ -33,8 +33,8 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
      *
      * @see PositionIncrementAttribute
      */
-    fun setPositionIncrement(positionIncrement: Int) {
-        kotlin.require(positionIncrement >= 0) {"Increment must be zero or greater: " + positionIncrement}
+    override fun setPositionIncrement(positionIncrement: Int) {
+        require(positionIncrement >= 0) { "Increment must be zero or greater: $positionIncrement" }
         /*~~kzcczk~~*/this.positionIncrement = positionIncrement
     }
 
@@ -43,7 +43,7 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
      *
      * @see PositionIncrementAttribute
      */
-    fun getPositionIncrement(): Int {
+    override fun getPositionIncrement(): Int {
         return positionIncrement
     }
 
@@ -53,7 +53,7 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
      * @see PositionLengthAttribute
      */
     fun setPositionLength(positionLength: Int) {
-        require(positionLength >= 1) {"Position length must be 1 or greater: got " + positionLength}
+        require(positionLength >= 1) { "Position length must be 1 or greater: got $positionLength" }
         this.positionLength = positionLength
     }
 
@@ -118,7 +118,7 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
     }
 
     fun setTermFrequency(termFrequency: Int) {
-        require(termFrequency >= 1) {"Term frequency must be 1 or greater; got " + termFrequency}
+        require(termFrequency >= 1) { "Term frequency must be 1 or greater; got $termFrequency" }
         this.termFrequency = termFrequency
     }
 
@@ -148,14 +148,14 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
         return super.clone() as PackedTokenAttributeImpl
     }
 
-    override fun equals(obj: kotlin.Any?): kotlin.Boolean {
+    override fun equals(obj: Any?): Boolean {
         if (obj === /*~~wrdocy~~*/this) return true
 
-        if (obj is PackedTokenAttributeImpl) {
-            return (startOffset == obj.startOffset && endOffset == obj.endOffset && positionIncrement == obj.positionIncrement && positionLength == obj.positionLength && type == obj.type
+        return if (obj is PackedTokenAttributeImpl) {
+            (startOffset == obj.startOffset && endOffset == obj.endOffset && positionIncrement == obj.positionIncrement && positionLength == obj.positionLength && type == obj.type
                     && termFrequency == obj.termFrequency && super.equals(obj))
         } else {
-            return false
+            false
         }
     }
 
@@ -182,7 +182,7 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
         } else {
             super.copyTo(target)
             (target as OffsetAttribute).setOffset(startOffset, endOffset)
-            (target as PositionIncrementAttribute).positionIncrement = positionIncrement
+            (target as PositionIncrementAttribute).setPositionIncrement(positionIncrement)
             (target as PositionLengthAttribute).positionLength = positionLength
             (target as TypeAttribute).setType(type)
             (target as TermFrequencyAttribute).termFrequency = termFrequency
