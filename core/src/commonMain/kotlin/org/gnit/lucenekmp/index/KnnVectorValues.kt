@@ -45,10 +45,6 @@ abstract class KnnVectorValues {
     /** The vector encoding of these values.  */
     abstract val encoding: VectorEncoding
 
-    fun getEncoding(): VectorEncoding {
-        return encoding
-    }
-
     /** Returns a Bits accepting docs accepted by the argument and having a vector value  */
     open fun getAcceptOrds(acceptDocs: Bits?): Bits? {
         // FIXME: change default to return acceptDocs and provide this impl

@@ -7,6 +7,7 @@ import org.gnit.lucenekmp.jdkport.longBitsToDouble
 import org.gnit.lucenekmp.search.LeafFieldComparator
 import org.gnit.lucenekmp.search.Pruning
 import org.gnit.lucenekmp.util.NumericUtils
+import kotlin.jvm.JvmName
 
 
 /**
@@ -29,6 +30,8 @@ class DoubleComparator(numHits: Int, field: String, missingValue: Double, revers
         return Double.compare(values[slot1], values[slot2])
     }
 
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("setTopValueKt")
     override fun setTopValue(value: Double) {
         super.setTopValue(value)
         topValue = value

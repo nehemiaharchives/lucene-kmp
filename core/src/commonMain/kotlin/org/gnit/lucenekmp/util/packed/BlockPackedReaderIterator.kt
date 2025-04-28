@@ -109,7 +109,7 @@ class BlockPackedReaderIterator(`in`: DataInput, packedIntsVersion: Int, blockSi
     @Throws(IOException::class)
     private fun skipBytes(count: Long) {
         if (`in` is IndexInput) {
-            (`in` as IndexInput).seek((`in` as IndexInput).getFilePointer() + count)
+            (`in` as IndexInput).seek((`in` as IndexInput).filePointer + count)
         } else {
             if (blocks == null) {
                 blocks = ByteArray(blockSize)

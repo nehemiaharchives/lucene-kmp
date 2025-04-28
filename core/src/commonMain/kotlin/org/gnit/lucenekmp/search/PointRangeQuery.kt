@@ -46,8 +46,11 @@ abstract class PointRangeQuery protected constructor(
     val field: String
     val numDims: Int
     val bytesPerDim: Int
-    val lowerPoint: ByteArray
-    val upperPoint: ByteArray
+    var lowerPoint: ByteArray
+        get() = lowerPoint.clone()
+
+    var upperPoint: ByteArray
+        get() = upperPoint.clone()
 
     /**
      * Expert: create a multidimensional range query for point values.
@@ -198,14 +201,14 @@ abstract class PointRangeQuery protected constructor(
                     }
 
                     override fun visit(docID: Int, packedValue: ByteArray) {
-                        if (matches(packedValue) == false) {
+                        if (!matches(packedValue)) {
                             visit(docID)
                         }
                     }
 
                     @Throws(IOException::class)
                     override fun visit(iterator: DocIdSetIterator, packedValue: ByteArray) {
-                        if (matches(packedValue) == false) {
+                        if (!matches(packedValue)) {
                             visit(iterator)
                         }
                     }
@@ -255,10 +258,12 @@ abstract class PointRangeQuery protected constructor(
             override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
                 val reader: LeafReader = context.reader()
 
-                val values: PointValues = reader.getPointValues(field)
-                if (checkValidPointValues(values) == false) {
+                val valuesToCheck: PointValues? = reader.getPointValues(field)
+                if (!checkValidPointValues(valuesToCheck)) {
                     return null
                 }
+
+                val values = valuesToCheck!!
 
                 if (values.docCount == 0) {
                     return null
@@ -339,12 +344,12 @@ abstract class PointRangeQuery protected constructor(
             override fun count(context: LeafReaderContext): Int {
                 val reader: LeafReader = context.reader()
 
-                val values: PointValues = reader.getPointValues(field)
-                if (checkValidPointValues(values) == false) {
+                val values: PointValues? = reader.getPointValues(field)
+                if (!checkValidPointValues(values)) {
                     return 0
                 }
 
-                if (reader.hasDeletions() == false) {
+                if (values != null && !reader.hasDeletions()) {
                     if (relate(values.minPackedValue, values.maxPackedValue)
                         === CELL_INSIDE_QUERY
                     ) {
@@ -458,14 +463,6 @@ abstract class PointRangeQuery protected constructor(
         }
     }
 
-    fun getLowerPoint(): ByteArray {
-        return lowerPoint.clone()
-    }
-
-    fun getUpperPoint(): ByteArray {
-        return upperPoint.clone()
-    }
-
     override fun hashCode(): Int {
         var hash = classHash()
         hash = 31 * hash + field.hashCode()
@@ -489,7 +486,7 @@ abstract class PointRangeQuery protected constructor(
 
     override fun toString(field: String?): String {
         val sb = StringBuilder()
-        if (this.field == field == false) {
+        if (this.field != field) {
             sb.append(this.field)
             sb.append(':')
         }

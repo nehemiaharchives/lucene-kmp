@@ -75,7 +75,7 @@ class BlendedTermQuery private constructor(
          * already have a [TermStates] object constructed for the given term.
          */
         fun add(term: Term, boost: Float, context: TermStates?): Builder {
-            if (numTerms >= IndexSearcher.getMaxClauseCount()) {
+            if (numTerms >= IndexSearcher.maxClauseCount) {
                 throw TooManyClauses()
             }
             terms = ArrayUtil.grow(terms, numTerms + 1)

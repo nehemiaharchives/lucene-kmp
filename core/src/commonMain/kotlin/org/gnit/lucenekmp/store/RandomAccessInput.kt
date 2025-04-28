@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.store
 
 import kotlinx.io.IOException
-import org.gnit.lucenekmp.util.Optional
+import org.gnit.lucenekmp.jdkport.Optional
 
 
 /**

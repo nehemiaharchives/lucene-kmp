@@ -302,13 +302,13 @@ abstract class Analyzer
      */
     class TokenStreamComponents(source: Consumer<Reader>, result: TokenStream) {
         /** Original source of the tokens.  */
-        protected val source: Consumer<Reader> = source
+        private val source: Consumer<Reader> = source
 
         /**
          * Sink tokenstream, such as the outer tokenfilter decorating the chain. This can be the source
          * if there are no filters.
          */
-        protected val sink: TokenStream = result
+        private val sink: TokenStream = result
 
         /** Internal cache only used by [Analyzer.tokenStream].  */
         @Transient

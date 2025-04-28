@@ -1,8 +1,10 @@
 package org.gnit.lucenekmp.util
 
 import kotlinx.io.IOException
+import org.gnit.lucenekmp.jdkport.bitCount
+import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
+import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
 import org.gnit.lucenekmp.search.DocIdSetIterator
-import org.gnit.lucenekmp.util.numberOfTrailingZeros
 import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.round
@@ -108,7 +110,7 @@ class SparseFixedBitSet(length: Int) : BitSet() {
         return (bits and (1L shl i)) != 0L
     }
 
-    public override fun getAndSet(i: Int): Boolean {
+    override fun getAndSet(i: Int): Boolean {
         require(consistent(i))
         val i4096 = i ushr 12
         val index = indices[i4096]
@@ -138,7 +140,7 @@ class SparseFixedBitSet(length: Int) : BitSet() {
     }
 
     /** Set the bit at index `i`.  */
-    public override fun set(i: Int) {
+    override fun set(i: Int) {
         require(consistent(i))
         val i4096 = i ushr 12
         val index = indices[i4096]
@@ -214,7 +216,7 @@ class SparseFixedBitSet(length: Int) : BitSet() {
     }
 
     /** Clear the bit at index `i`.  */
-    public override fun clear(i: Int) {
+    override fun clear(i: Int) {
         require(consistent(i))
         val i4096 = i ushr 12
         val i64 = i ushr 6
@@ -300,7 +302,7 @@ class SparseFixedBitSet(length: Int) : BitSet() {
         require(
             i4096upper <= indices.size
         ) { "i4096upper=" + i4096 + ", indices.length=" + indices.size }
-        var index: Long = 0
+        var index: Long
         while (i4096 < i4096upper) {
             index = indices[i4096]
             if (index != 0L) {
@@ -376,7 +378,7 @@ class SparseFixedBitSet(length: Int) : BitSet() {
         return -1
     }
 
-    public override fun prevSetBit(i: Int): Int {
+    override fun prevSetBit(i: Int): Int {
         require(i >= 0)
         val i4096 = i ushr 12
         val index = indices[i4096]
@@ -405,10 +407,10 @@ class SparseFixedBitSet(length: Int) : BitSet() {
 
     /** Return the long bits at the given `i64` index.  */
     private fun longBits(index: Long, bits: LongArray, i64: Int): Long {
-        if ((index and (1L shl i64)) == 0L) {
-            return 0L
+        return if ((index and (1L shl i64)) == 0L) {
+            0L
         } else {
-            return bits[Long.bitCount(index and ((1L shl i64) - 1))]
+            bits[Long.bitCount(index and ((1L shl i64) - 1))]
         }
     }
 
@@ -554,7 +556,7 @@ class SparseFixedBitSet(length: Int) : BitSet() {
     companion object {
         private val BASE_RAM_BYTES_USED = RamUsageEstimator.shallowSizeOfInstance(SparseFixedBitSet::class)
         private val SINGLE_ELEMENT_ARRAY_BYTES_USED = RamUsageEstimator.sizeOf(LongArray(1))
-        private val MASK_4096 = (1 shl 12) - 1
+        private const val MASK_4096 = (1 shl 12) - 1
 
         private fun blockCount(length: Int): Int {
             var blockCount = length ushr 12

@@ -32,7 +32,10 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
         private val terms: BytesRefIterator
         private val te: TermsEnum
         private val doc: Int
-        override val query: Query
+        override var query: Query
+            get(): Query {
+                return it!!.query
+            }
 
         private var it: MatchesIterator? = null
 
@@ -95,9 +98,6 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
         override val subMatches: MatchesIterator?
             get() = it!!.subMatches
 
-        fun getQuery(): Query {
-            return it!!.query
-        }
     }
 
     private val queue: PriorityQueue<MatchesIterator>
@@ -167,7 +167,6 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
 
     override val query: Query
         get() = queue.top().query
-
 
 
     companion object {

@@ -286,9 +286,8 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
         throw UnsupportedOperationException()
     }
 
-    fun size(): Int {
-        return count
-    }
+    override val size: Int
+        get()= count
 
     override fun toString(): String {
         val sb = StringBuilder("{")
@@ -300,7 +299,6 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
     }
 
     private var entrySet: EntrySet? = null
-    private var keySet: CharArraySet? = null
 
     open fun createEntrySet(): EntrySet {
         return this@CharArrayMap.EntrySet(true)
@@ -321,7 +319,8 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
     /**
      * Returns an [CharArraySet] view on the map's keys. The set will use the same `matchVersion` as this map.
      */
-    fun keySet(): CharArraySet {
+    var keySet: CharArraySet?
+        get() {
         if (keySet == null) {
             // prevent adding of entries
             keySet =
@@ -343,7 +342,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
                     }
                 }
         }
-        return keySet!!
+        return keySet
     }
 
     /** public iterator class so efficient methods are exposed to users  */
@@ -429,9 +428,6 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
     inner class EntrySet(private val allowModify: Boolean) :
         AbstractMutableSet<MutableMap.MutableEntry<Any, V>>() {
 
-        override val size: Int
-            get() = size()
-
         override fun iterator(): EntryIterator {
             return this@CharArrayMap.EntryIterator(allowModify)
         }
@@ -453,9 +449,9 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
             throw UnsupportedOperationException()
         }
 
-        fun size(): Int {
-            return count
-        }
+        override val size: Int
+            get() = count
+
 
         override fun clear() {
             if (!allowModify) throw UnsupportedOperationException()

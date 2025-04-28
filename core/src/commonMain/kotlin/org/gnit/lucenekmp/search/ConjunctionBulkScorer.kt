@@ -18,7 +18,7 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
     init {
         val numClauses = requiredScoring.size + requiredNoScoring.size
         require(numClauses > 1) { "Expected 2 or more clauses, got $numClauses" }
-        val allScorers: MutableList<Scorer> = ArrayList<Scorer>()
+        val allScorers: MutableList<Scorer> = ArrayList()
         allScorers.addAll(requiredScoring)
         allScorers.addAll(requiredNoScoring)
 
@@ -43,9 +43,9 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
                     return score.toFloat()
                 }
 
-                @Throws(IOException::class)
-                fun getChildren(): MutableCollection<ChildScorable> {
-                    val children: ArrayList<ChildScorable> = ArrayList<ChildScorable>()
+                @get:Throws(IOException::class)
+                override val children: MutableCollection<ChildScorable> get(){
+                    val children: ArrayList<ChildScorable> = ArrayList()
                     for (scorer in allScorers) {
                         children.add(ChildScorable(scorer, "MUST"))
                     }
@@ -71,7 +71,7 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
         var otherIterators = this.others
         val collectorIterator = collector.competitiveIterator()
         if (collectorIterator != null) {
-            otherIterators = ArrayList<DocIdSetIterator>(otherIterators)
+            otherIterators = ArrayList(otherIterators)
             otherIterators.add(collectorIterator)
         }
 

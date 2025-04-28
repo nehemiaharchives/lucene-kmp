@@ -379,7 +379,7 @@ class MultiTermsEnum(slices: Array<ReaderSlice>) : BaseTermsEnum() {
         }
 
         fun get(i: Int): TermsEnumWithSlice {
-            return getHeapArray()[i] as TermsEnumWithSlice
+            return heapArray[i] as TermsEnumWithSlice
         }
     }
 

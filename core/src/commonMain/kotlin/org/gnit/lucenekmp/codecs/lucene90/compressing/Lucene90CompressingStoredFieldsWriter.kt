@@ -140,7 +140,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
             numDirtyChunks++ // incomplete: we had to force this flush
             numDirtyDocs += numBufferedDocs.toLong()
         }
-        indexWriter!!.writeIndex(numBufferedDocs, fieldsStream!!.getFilePointer())
+        indexWriter!!.writeIndex(numBufferedDocs, fieldsStream!!.filePointer)
 
         // transform end offsets into lengths
         val lengths = endOffsets
@@ -216,7 +216,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
 
     @Throws(IOException::class)
     override fun writeField(info: FieldInfo?, value: StoredFieldDataInput) {
-        val length: Int = value.getLength()
+        val length: Int = value.length
         ++numStoredFieldsInDoc
         val infoAndBits = ((info!!.number.toLong()) shl TYPE_BITS) or BYTE_ARR.toLong()
         bufferedDocs.writeVLong(infoAndBits)
@@ -244,7 +244,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
                 "Wrote $docBase docs, finish called with numDocs=$numDocs"
             )
         }
-        indexWriter!!.finish(numDocs, fieldsStream!!.getFilePointer(), metaStream!!)
+        indexWriter!!.finish(numDocs, fieldsStream!!.filePointer, metaStream!!)
         metaStream!!.writeVLong(numChunks)
         metaStream!!.writeVLong(numDirtyChunks)
         metaStream!!.writeVLong(numDirtyDocs)
@@ -278,7 +278,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
             )
             require(
                 CodecUtil.indexHeaderLength(INDEX_CODEC_NAME + "Meta", segmentSuffix).toLong()
-                        == metaStream!!.getFilePointer()
+                        == metaStream!!.filePointer
             )
 
             fieldsStream =
@@ -290,7 +290,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
             )
             require(
                 CodecUtil.indexHeaderLength(formatName, segmentSuffix).toLong()
-                        == fieldsStream!!.getFilePointer()
+                        == fieldsStream!!.filePointer
             )
 
             indexWriter =
@@ -317,7 +317,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
 
     @Throws(IOException::class)
     private fun copyOneDoc(reader: Lucene90CompressingStoredFieldsReader, docID: Int) {
-        require(reader.getVersion() == VERSION_CURRENT)
+        require(reader.version == VERSION_CURRENT)
         val doc: SerializedDocument = reader.serializedDocument(docID)
         startDocument()
         bufferedDocs.copyBytes(doc.`in`, doc.length.toLong())
@@ -334,8 +334,8 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
     ) {
         val reader: Lucene90CompressingStoredFieldsReader =
             mergeState.storedFieldsReaders[sub.readerIndex] as Lucene90CompressingStoredFieldsReader
-        require(reader.getVersion() == VERSION_CURRENT)
-        require(reader.getChunkSize() == chunkSize)
+        require(reader.version == VERSION_CURRENT)
+        require(reader.chunkSize == chunkSize)
         require(reader.getCompressionMode() === compressionMode)
         require(!tooDirty(reader))
         require(mergeState.liveDocs[sub.readerIndex] == null)
@@ -353,7 +353,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
         // copy chunks
         var fromPointer: Long = index.getStartPointer(docID)
         val toPointer: Long =
-            if (toDocID == sub.maxDoc) reader.getMaxPointer() else index.getStartPointer(toDocID)
+            if (toDocID == sub.maxDoc) reader.maxPointer else index.getStartPointer(toDocID)
         if (fromPointer < toPointer) {
             if (numBufferedDocs > 0) {
                 flush(true)
@@ -370,7 +370,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
                     )
                 }
                 // write a new index entry and new header for this chunk.
-                indexWriter!!.writeIndex(bufferedDocs, fieldsStream!!.getFilePointer())
+                indexWriter!!.writeIndex(bufferedDocs, fieldsStream!!.filePointer)
                 fieldsStream!!.writeVInt(docBase) // rebase
                 fieldsStream!!.writeVInt(code)
                 docID += bufferedDocs
@@ -385,11 +385,11 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
                 // using the stored fields index for this isn't the most efficient, but fast enough
                 // and is a source of redundancy for detecting bad things.
                 val endChunkPointer: Long = if (docID == sub.maxDoc) {
-                    reader.getMaxPointer()
+                    reader.maxPointer
                 } else {
                     index.getStartPointer(docID)
                 }
-                fieldsStream!!.copyBytes(rawDocs, endChunkPointer - rawDocs.getFilePointer())
+                fieldsStream!!.copyBytes(rawDocs, endChunkPointer - rawDocs.filePointer)
                 ++numChunks
                 val dirtyChunk = (code and 2) != 0
                 if (dirtyChunk) {
@@ -491,13 +491,13 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
         mergeState: MergeState, matchingReaders: MatchingReaders, readerIndex: Int
     ): MergeStrategy {
         val candidate: StoredFieldsReader = mergeState.storedFieldsReaders[readerIndex]!!
-        if (!matchingReaders.matchingReaders[readerIndex] || candidate !is Lucene90CompressingStoredFieldsReader || candidate.getVersion() != VERSION_CURRENT) {
+        if (!matchingReaders.matchingReaders[readerIndex] || candidate !is Lucene90CompressingStoredFieldsReader || candidate.version != VERSION_CURRENT) {
             return MergeStrategy.VISITOR
         }
         val reader: Lucene90CompressingStoredFieldsReader =
             candidate
         return if (BULK_MERGE_ENABLED
-            && reader.getCompressionMode() === compressionMode && reader.getChunkSize() == chunkSize // its not worth fine-graining this if there are deletions.
+            && reader.getCompressionMode() === compressionMode && reader.chunkSize == chunkSize // its not worth fine-graining this if there are deletions.
             && mergeState.liveDocs[readerIndex] == null && !tooDirty(reader)
         ) {
             MergeStrategy.BULK

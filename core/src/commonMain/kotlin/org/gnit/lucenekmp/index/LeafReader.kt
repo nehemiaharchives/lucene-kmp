@@ -89,7 +89,7 @@ protected constructor() : IndexReader() {
         if (terms == null) {
             return 0
         }
-        return terms.getSumDocFreq()
+        return terms.sumDocFreq
     }
 
     @Throws(IOException::class)
@@ -98,7 +98,7 @@ protected constructor() : IndexReader() {
         if (terms == null) {
             return 0
         }
-        return terms.getDocCount()
+        return terms.docCount
     }
 
     @Throws(IOException::class)
@@ -107,7 +107,7 @@ protected constructor() : IndexReader() {
         if (terms == null) {
             return 0
         }
-        return terms.getSumTotalTermFreq()
+        return terms.sumTotalTermFreq
     }
 
     /** Returns the [Terms] index for this field, or null if it has none.  */

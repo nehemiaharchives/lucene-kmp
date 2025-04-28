@@ -18,9 +18,10 @@ interface Accountable {
      *
      * @see Accountables
      */
-    fun getChildResources(): MutableCollection<Accountable> {
-        return mutableListOf()
-    }
+    val childResources: MutableCollection<Accountable>
+        get() {
+            return mutableListOf()
+        }
 
     companion object {
         /** An accountable that always returns 0 */

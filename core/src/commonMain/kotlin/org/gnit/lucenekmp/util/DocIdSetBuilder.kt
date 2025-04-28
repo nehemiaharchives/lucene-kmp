@@ -116,7 +116,7 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
      * Create a [DocIdSetBuilder] instance that is optimized for accumulating docs that match
      * the given [Terms].
      */
-    constructor(maxDoc: Int, terms: Terms) : this(maxDoc, terms.getDocCount(), terms.getSumDocFreq())
+    constructor(maxDoc: Int, terms: Terms) : this(maxDoc, terms.docCount, terms.sumDocFreq)
 
     /**
      * Create a [DocIdSetBuilder] instance that is optimized for accumulating docs that match

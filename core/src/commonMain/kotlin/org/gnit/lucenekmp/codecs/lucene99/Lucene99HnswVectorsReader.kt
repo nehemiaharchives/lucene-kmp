@@ -106,7 +106,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
     }
 
     override val mergeInstance: KnnVectorsReader
-        get() = Lucene99HnswVectorsReader(this, this.flatVectorsReader.getMergeInstance())
+        get() = Lucene99HnswVectorsReader(this, this.flatVectorsReader.mergeInstance)
 
     @Throws(IOException::class)
     override fun finishMerge() {
@@ -129,7 +129,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
     }
 
     private fun validateFieldEntry(info: FieldInfo, fieldEntry: FieldEntry) {
-        val dimension: Int = info.getVectorDimension()
+        val dimension: Int = info.vectorDimension
         check(dimension == fieldEntry.dimension) {
             ("Inconsistent vector dimension for field=\""
                     + info.name
@@ -144,15 +144,15 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
     private fun readField(input: IndexInput, info: FieldInfo): FieldEntry {
         val vectorEncoding: VectorEncoding = readVectorEncoding(input)
         val similarityFunction: VectorSimilarityFunction = readSimilarityFunction(input)
-        check(similarityFunction === info.getVectorSimilarityFunction()) {
+        check(similarityFunction === info.vectorSimilarityFunction) {
             ("Inconsistent vector similarity function for field=\""
                     + info.name
                     + "\"; "
                     + similarityFunction
                     + " != "
-                    + info.getVectorSimilarityFunction())
+                    + info.vectorSimilarityFunction)
         }
-        return FieldEntry.Companion.create(input, vectorEncoding, info.getVectorSimilarityFunction())
+        return FieldEntry.Companion.create(input, vectorEncoding, info.vectorSimilarityFunction)
     }
 
     override fun ramBytesUsed(): Long {

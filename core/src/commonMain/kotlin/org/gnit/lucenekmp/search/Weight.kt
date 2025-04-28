@@ -236,7 +236,7 @@ abstract class Weight
         }
 
         @Throws(IOException::class)
-        override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+        override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
             var min = min
             collector.setScorer(scorer)
             val competitiveIterator: DocIdSetIterator? = collector.competitiveIterator()
@@ -264,13 +264,13 @@ abstract class Weight
             // iterator implementations.
             if (twoPhase == null && competitiveIterator == null) {
                 // Optimize simple iterators with collectors that can't skip
-                Companion.scoreIterator(collector, acceptDocs, iterator, max)
+                scoreIterator(collector, acceptDocs, iterator, max)
             } else if (competitiveIterator == null) {
-                Companion.scoreTwoPhaseIterator(collector, acceptDocs, iterator, twoPhase!!, max)
+                scoreTwoPhaseIterator(collector, acceptDocs, iterator, twoPhase!!, max)
             } else if (twoPhase == null) {
-                Companion.scoreCompetitiveIterator(collector, acceptDocs, iterator, competitiveIterator, max)
+                scoreCompetitiveIterator(collector, acceptDocs, iterator, competitiveIterator, max)
             } else {
-                Companion.scoreTwoPhaseOrCompetitiveIterator(
+                scoreTwoPhaseOrCompetitiveIterator(
                     collector, acceptDocs, iterator, twoPhase, competitiveIterator, max
                 )
             }

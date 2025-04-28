@@ -79,10 +79,6 @@ open class CharTermAttributeImpl
     override val length: Int
         get() = termLength
 
-    fun charAt(index: Int): Char {
-        Objects.checkIndex(index, termLength)
-        return termBuffer[index]
-    }
 
     override operator fun get(index: Int): Char {
         Objects.checkIndex(index, termLength)

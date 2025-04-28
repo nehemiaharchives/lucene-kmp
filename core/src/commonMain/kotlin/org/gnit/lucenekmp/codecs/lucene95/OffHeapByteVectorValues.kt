@@ -53,10 +53,6 @@ abstract class OffHeapByteVectorValues internal constructor(
         return binaryValue
     }
 
-    override fun getSlice(): IndexInput? {
-        return slice
-    }
-
     @Throws(IOException::class)
     private fun readValue(targetOrd: Int) {
         slice!!.seek(targetOrd.toLong() * byteSize)

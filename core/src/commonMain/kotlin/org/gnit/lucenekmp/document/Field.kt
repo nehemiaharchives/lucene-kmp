@@ -384,7 +384,7 @@ open class Field : IndexableField {
                     // (attributes,...) if not needed
                     reuse = BinaryTokenStream()
                 }
-                reuse.setValue(binaryValue())
+                reuse.value = binaryValue()
                 return reuse
             } else {
                 throw IllegalArgumentException("Non-Tokenized Fields must have a String value")
@@ -400,7 +400,7 @@ open class Field : IndexableField {
         }
 
         throw IllegalArgumentException(
-            "Field must have either TokenStream, String, Reader or Number value; got " + this
+            "Field must have either TokenStream, String, Reader or Number value; got $this"
         )
     }
 
@@ -415,17 +415,13 @@ open class Field : IndexableField {
         : TokenStream() {
         private val bytesAtt: BytesTermAttribute = addAttribute(BytesTermAttribute::class)
         private var used = true
-        private var value: BytesRef?
+        var value: BytesRef?
             get() {
                 return value
             }
             set(value) {
                 this.value = value
             }
-
-        fun setValue(value: BytesRef?) {
-            this.value = value
-        }
 
         override fun incrementToken(): Boolean {
             if (used) {

@@ -144,7 +144,7 @@ internal class BooleanScorerSupplier(
     }
 
     @Throws(IOException::class)
-    override fun bulkScorer(): BulkScorer {
+    override fun bulkScorer(): BulkScorer? {
         val bulkScorer = booleanScorer()
         return if (bulkScorer != null) {
             // bulk scoring is applicable, use it
@@ -294,13 +294,13 @@ internal class BooleanScorerSupplier(
             // No required clauses at all.
             return null
         } else if (subs[Occur.MUST]!!.size + subs[Occur.FILTER]!!.size == 1) {
-            var scorer: BulkScorer
+            var scorer: BulkScorer?
             if (!subs[Occur.MUST]!!.isEmpty()) {
                 scorer = subs[Occur.MUST]!!.iterator().next().bulkScorer()
             } else {
                 scorer = subs[Occur.FILTER]!!.iterator().next().bulkScorer()
                 if (scoreMode.needsScores()) {
-                    scorer = disableScoring(scorer)
+                    scorer = disableScoring(scorer!!)
                 }
             }
             return scorer

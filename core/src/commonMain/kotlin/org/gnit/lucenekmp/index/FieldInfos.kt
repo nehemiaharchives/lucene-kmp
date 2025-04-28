@@ -90,7 +90,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
             hasOffsets = hasOffsets or
                     (info.indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
             hasNorms = hasNorms or info.hasNorms()
-            hasDocValues = hasDocValues or (info.getDocValuesType() !== DocValuesType.NONE)
+            hasDocValues = hasDocValues or (info.docValuesType !== DocValuesType.NONE)
             hasPayloads = hasPayloads or info.hasPayloads()
             hasPointValues = hasPointValues or (info.pointDimensionCount != 0)
             hasVectorValues = hasVectorValues or (info.vectorDimension != 0)
@@ -345,7 +345,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                             IndexOptionsProperties(fi.hasTermVectors(), fi.omitsNorms())
                         else
                             null,
-                        fi.getDocValuesType(),
+                        fi.docValuesType,
                         fi.docValuesSkipIndexType(),
                         FieldDimensions(
                             fi.pointDimensionCount,
@@ -422,7 +422,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
             }
 
             val currentDVType = fieldProperties.docValuesType
-            verifySameDocValuesType(fieldName, currentDVType, fi.getDocValuesType())
+            verifySameDocValuesType(fieldName, currentDVType, fi.docValuesType)
             val currentDocValuesSkipIndex = fieldProperties.docValuesSkipIndex
             verifySameDocValuesSkipIndex(
                 fieldName, currentDocValuesSkipIndex, fi.docValuesSkipIndexType()
@@ -699,7 +699,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                     fi.omitsNorms(),
                     fi.hasPayloads(),
                     fi.indexOptions,
-                    fi.getDocValuesType(),
+                    fi.docValuesType,
                     fi.docValuesSkipIndexType(),
                     dvGen,  // original attributes is UnmodifiableMap
                     attributes,

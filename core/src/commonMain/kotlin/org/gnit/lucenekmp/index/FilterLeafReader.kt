@@ -89,20 +89,17 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
             return `in`.size()
         }
 
-        @Throws(IOException::class)
-        override fun getSumTotalTermFreq(): Long {
-            return `in`.getSumTotalTermFreq()
-        }
+        @get:Throws(IOException::class)
+        override val sumDocFreq: Long
+            get() {
+                return `in`.sumDocFreq
+            }
 
-        @Throws(IOException::class)
-        override fun getSumDocFreq(): Long {
-            return `in`.getSumDocFreq()
-        }
-
-        @Throws(IOException::class)
-        override fun getDocCount(): Int {
-            return `in`.getDocCount()
-        }
+        @get:Throws(IOException::class)
+        override val docCount: Int
+            get() {
+                return `in`.docCount
+            }
 
         override fun hasFreqs(): Boolean {
             return `in`.hasFreqs()
@@ -121,7 +118,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
         }
 
         @Throws(IOException::class)
-        override fun getStats(): Any{
+        override fun getStats(): Any {
             return `in`.getStats()
         }
     }

@@ -265,15 +265,15 @@ class IndexedDISI internal constructor(
         nextBlockIndex = index + numValues
         if (numValues <= MAX_ARRAY_LENGTH) {
             method = Method.SPARSE
-            blockEnd = slice.getFilePointer() + (numValues shl 1)
+            blockEnd = slice.filePointer + (numValues shl 1)
             nextExistDocInBlock = -1
         } else if (numValues == BLOCK_SIZE) {
             method = Method.ALL
-            blockEnd = slice.getFilePointer()
+            blockEnd = slice.filePointer
             gap = block - index - 1
         } else {
             method = Method.DENSE
-            denseBitmapOffset = slice.getFilePointer() + (denseRankTable?.size ?: 0)
+            denseBitmapOffset = slice.filePointer + (denseRankTable?.size ?: 0)
             blockEnd = denseBitmapOffset + (1 shl 13)
             // Performance consideration: All rank (default 128 * 16 bits) are loaded up front. This
             // should be fast with the
@@ -345,7 +345,7 @@ class IndexedDISI internal constructor(
                         disi.nextExistDocInBlock = doc
                         if (doc != targetInBlock) {
                             disi.index--
-                            disi.slice.seek(disi.slice.getFilePointer() - Short.SIZE_BYTES)
+                            disi.slice.seek(disi.slice.filePointer - Short.SIZE_BYTES)
                             break
                         }
                         disi.exists = true

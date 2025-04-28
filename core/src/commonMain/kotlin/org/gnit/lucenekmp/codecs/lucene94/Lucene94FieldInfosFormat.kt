@@ -266,21 +266,21 @@ class Lucene94FieldInfosFormat
                 if (fi.isParentField) bits = bits or PARENT_FIELD_FIELD
                 output.writeByte(bits)
 
-                output.writeByte(indexOptionsByte(fi.getIndexOptions()))
+                output.writeByte(indexOptionsByte(fi.indexOptions))
 
                 // pack the DV type and hasNorms in one byte
-                output.writeByte(docValuesByte(fi.getDocValuesType()))
+                output.writeByte(docValuesByte(fi.docValuesType))
                 output.writeByte(docValuesSkipIndexByte(fi.docValuesSkipIndexType()))
-                output.writeLong(fi.getDocValuesGen())
+                output.writeLong(fi.docValuesGen)
                 output.writeMapOfStrings(fi.attributes())
-                output.writeVInt(fi.getPointDimensionCount())
-                if (fi.getPointDimensionCount() != 0) {
-                    output.writeVInt(fi.getPointIndexDimensionCount())
-                    output.writeVInt(fi.getPointNumBytes())
+                output.writeVInt(fi.pointDimensionCount)
+                if (fi.pointDimensionCount != 0) {
+                    output.writeVInt(fi.pointIndexDimensionCount)
+                    output.writeVInt(fi.pointNumBytes)
                 }
-                output.writeVInt(fi.getVectorDimension())
-                output.writeByte(fi.getVectorEncoding().ordinal.toByte())
-                output.writeByte(distFuncToOrd(fi.getVectorSimilarityFunction()))
+                output.writeVInt(fi.vectorDimension)
+                output.writeByte(fi.vectorEncoding.ordinal.toByte())
+                output.writeByte(distFuncToOrd(fi.vectorSimilarityFunction))
             }
             CodecUtil.writeFooter(output)
         }

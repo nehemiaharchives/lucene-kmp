@@ -53,7 +53,7 @@ internal class DisjunctionMaxBulkScorer(scorers: MutableList<BulkScorer>) : Bulk
                             override fun setScorer(scorer: Scorable) {
                                 this.scorer = scorer
                                 if (topLevelScorable.minCompetitiveScore != 0f) {
-                                    scorer.setMinCompetitiveScore(topLevelScorable.minCompetitiveScore)
+                                    scorer.minCompetitiveScore = topLevelScorable.minCompetitiveScore
                                 }
                             }
 

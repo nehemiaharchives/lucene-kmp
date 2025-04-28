@@ -43,7 +43,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      *
      * @see .seek
      */
-    abstract fun getFilePointer(): Long
+    abstract val filePointer: Long
 
     /**
      * Sets current position in this file, where the next read will occur. If this is beyond the end
@@ -67,7 +67,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
     @Throws(IOException::class)
     override fun skipBytes(numBytes: Long) {
         require(numBytes >= 0) { "numBytes must be >= 0, got $numBytes" }
-        val skipTo = this.getFilePointer() + numBytes
+        val skipTo = this.filePointer + numBytes
         seek(skipTo)
     }
 
@@ -125,11 +125,11 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * Subclasses call this to get the String for resourceDescription of a slice of this `IndexInput`.
      */
     protected fun getFullSliceDescription(sliceDescription: String?): String {
-        if (sliceDescription == null) {
+        return if (sliceDescription == null) {
             // Clones pass null sliceDescription:
-            return toString()
+            toString()
         } else {
-            return toString() + " [slice=" + sliceDescription + "]"
+            toString() + " [slice=" + sliceDescription + "]"
         }
     }
 
@@ -163,7 +163,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
                 @Throws(IOException::class)
                 override fun readBytes(pos: Long, bytes: ByteArray, offset: Int, length: Int) {
                     slice.seek(pos)
-                    slice.readBytes(bytes!!, offset, length)
+                    slice.readBytes(bytes, offset, length)
                 }
 
                 @Throws(IOException::class)

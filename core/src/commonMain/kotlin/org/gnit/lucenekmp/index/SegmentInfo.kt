@@ -43,10 +43,6 @@ class SegmentInfo(
      */
     var useCompoundFile: Boolean
 
-    fun getUseCompoundFile(): Boolean {
-        return useCompoundFile
-    }
-
     /** Id that uniquely identifies this segment.  */
     private val id: ByteArray
 
@@ -75,6 +71,10 @@ class SegmentInfo(
     // flush segments, that is the version that wrote it. For merged segments,
     // this is the minimum minVersion of all the segments that have been merged
     // into this segment
+    /**
+     * Return the minimum Lucene version that contributed documents to this segment, or `null`
+     * if it is unknown.
+     */
     var minVersion: Version?
 
     /**
@@ -84,10 +84,6 @@ class SegmentInfo(
      */
     var hasBlocks: Boolean
         private set
-
-    fun getHasBlocks(): Boolean {
-        return hasBlocks
-    }
 
     fun setDiagnostics(diagnostics: MutableMap<String, String>) {
         this.diagnostics = HashMap(diagnostics)
@@ -112,10 +108,6 @@ class SegmentInfo(
     /** Returns diagnostics saved into the segment when it was written. The map is immutable.  */
     fun getDiagnostics(): MutableMap<String, String> {
         return diagnostics
-    }
-
-    fun getAttributes(): MutableMap<String, String> {
-        return attributes
     }
 
     /** Sets the hasBlocks property to true. This setting is viral and can't be unset.  */
@@ -218,14 +210,6 @@ class SegmentInfo(
     /** Returns the version of the code which wrote the segment.  */
     fun getVersion(): Version {
         return version
-    }
-
-    /**
-     * Return the minimum Lucene version that contributed documents to this segment, or `null`
-     * if it is unknown.
-     */
-    fun getMinVersion(): Version? {
-        return minVersion
     }
 
     /** Return the id that uniquely identifies this segment.  */

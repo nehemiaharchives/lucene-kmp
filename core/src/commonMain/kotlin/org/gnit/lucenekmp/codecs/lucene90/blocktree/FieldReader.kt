@@ -37,23 +37,11 @@ class FieldReader internal constructor(
     // private final boolean DEBUG = BlockTreeTermsWriter.DEBUG;
     val numTerms: Long
     val fieldInfo: FieldInfo
-    val sumTotalTermFreq: Long
+    override val sumTotalTermFreq: Long
 
-    override fun getSumTotalTermFreq(): Long {
-        return sumTotalTermFreq
-    }
+    override val sumDocFreq: Long
 
-    val sumDocFreq: Long
-
-    override fun getSumDocFreq(): Long {
-        return sumDocFreq
-    }
-
-    val docCount: Int
-
-    override fun getDocCount(): Int {
-        return docCount
-    }
+    override val docCount: Int
 
     val rootBlockFP: Long
     val rootCode: BytesRef
@@ -118,14 +106,14 @@ class FieldReader internal constructor(
     override val min: BytesRef?
         get() {
             return minTerm ?: // Older index that didn't store min/maxTerm
-            super.getMin()
+            super.min
         }
 
     @get:Throws(IOException::class)
     override val max: BytesRef?
         get() {
             return maxTerm ?: // Older index that didn't store min/maxTerm
-            super.getMax()
+            super.max
         }
 
     @get:Throws(IOException::class)
@@ -134,16 +122,16 @@ class FieldReader internal constructor(
         get() = SegmentTermsEnum(this).computeBlockStats()
 
     override fun hasFreqs(): Boolean {
-        return fieldInfo.getIndexOptions() >= IndexOptions.DOCS_AND_FREQS
+        return fieldInfo.indexOptions >= IndexOptions.DOCS_AND_FREQS
     }
 
     override fun hasOffsets(): Boolean {
         return (fieldInfo
-            .getIndexOptions() >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
+            .indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
     }
 
     override fun hasPositions(): Boolean {
-        return fieldInfo.getIndexOptions() >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS
+        return fieldInfo.indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS
     }
 
     override fun hasPayloads(): Boolean {

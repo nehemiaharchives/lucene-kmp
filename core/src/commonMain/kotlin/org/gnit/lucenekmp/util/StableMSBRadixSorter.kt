@@ -35,7 +35,7 @@ abstract class StableMSBRadixSorter(maxLength: Int) : MSBRadixSorter(maxLength) 
                     val b2 = byteAt(j, o)
                     if (b1 != b2) {
                         return b1 - b2
-                    } else if (b1 == -1) {
+                    } else if (b1 == (-1).toByte()) {
                         break
                     }
                 }

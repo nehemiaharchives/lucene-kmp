@@ -26,7 +26,7 @@ abstract class ScorerSupplier {
      * for matching all hits.
      */
     @Throws(IOException::class)
-    open fun bulkScorer(): BulkScorer {
+    open fun bulkScorer(): BulkScorer? {
         return DefaultBulkScorer(get(Long.Companion.MAX_VALUE))
     }
 

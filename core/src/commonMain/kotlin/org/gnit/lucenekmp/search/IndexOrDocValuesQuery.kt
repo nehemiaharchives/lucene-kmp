@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.search
 
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.document.LongPoint
-import org.gnit.lucenekmp.document.SortedNumericDocValuesField // javadocs
 import org.gnit.lucenekmp.index.LeafReaderContext
 
 /**
@@ -62,7 +61,7 @@ class IndexOrDocValuesQuery
     }
 
     override fun equals(obj: Any?): Boolean {
-        if (sameClassAs(obj) == false) {
+        if (!sameClassAs(obj)) {
             return false
         }
         val that = obj as IndexOrDocValuesQuery
@@ -144,7 +143,7 @@ class IndexOrDocValuesQuery
                     }
 
                     @Throws(IOException::class)
-                    override fun bulkScorer(): BulkScorer {
+                    override fun bulkScorer(): BulkScorer? {
                         // Bulk scorers need to consume the entire set of docs, so using an
                         // index structure should perform better
                         return indexScorerSupplier.bulkScorer()

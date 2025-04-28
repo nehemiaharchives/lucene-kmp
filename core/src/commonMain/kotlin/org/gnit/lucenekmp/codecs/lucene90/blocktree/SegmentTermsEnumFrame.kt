@@ -83,12 +83,12 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
 
     fun setFloorData(outputAccumulator: SegmentTermsEnum.OutputAccumulator) {
         outputAccumulator.setFloorData(floorDataReader)
-        rewindPos = floorDataReader.getPosition()
+        rewindPos = floorDataReader.position
         numFollowFloorBlocks = floorDataReader.readVInt()
         nextFloorLabel = (floorDataReader.readByte() and 0xff.toByte()).toInt()
         // if (DEBUG) {
         // System.out.println("    setFloorData fpOrig=" + fpOrig + " bytes=" + new
-        // BytesRef(source.bytes, source.offset + in.getPosition(), numBytes) + " numFollowFloorBlocks="
+        // BytesRef(source.bytes, source.offset + in.position, numBytes) + " numFollowFloorBlocks="
         // + numFollowFloorBlocks + " nextFloorLabel=" + toHex(nextFloorLabel));
         // }
     }
@@ -159,7 +159,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
         // array structure, then we could do binary search
         // instead of linear scan to find target term; eg
         // we could have simple array of offsets
-        val startSuffixFP: Long = ste.`in`!!.getFilePointer()
+        val startSuffixFP: Long = ste.`in`!!.filePointer
         // term suffixes:
         val codeL: Long = ste.`in`!!.readVLong()
         isLeafBlock = (codeL and 0x04L) != 0L
@@ -187,7 +187,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
             ste.`in`!!.readBytes(suffixLengthBytes, 0, numSuffixLengthBytes)
         }
         suffixLengthsReader.reset(suffixLengthBytes, 0, numSuffixLengthBytes)
-        totalSuffixBytes = ste.`in`!!.getFilePointer() - startSuffixFP
+        totalSuffixBytes = ste.`in`!!.filePointer - startSuffixFP
 
         /*if (DEBUG) {
     if (arc == null) {
@@ -223,7 +223,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
 
         // Sub-blocks of a single floor block are always
         // written one after another -- tail recurse:
-        fpEnd = ste.`in`!!.getFilePointer()
+        fpEnd = ste.`in`!!.filePointer
         // if (DEBUG) {
         //   System.out.println("      fpEnd=" + fpEnd);
         // }
@@ -236,7 +236,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
         nextEnt = -1
         hasTerms = hasTermsOrig
         if (isFloor) {
-            floorDataReader.setPosition(rewindPos)
+            floorDataReader.position = (rewindPos)
             numFollowFloorBlocks = floorDataReader.readVInt()
             require(numFollowFloorBlocks > 0)
             nextFloorLabel = (floorDataReader.readByte() and 0xff.toByte()).toInt()
@@ -296,7 +296,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
         ) { "nextEnt=$nextEnt entCount=$entCount fp=$fp" }
         nextEnt++
         suffixLength = suffixLengthsReader.readVInt()
-        startBytePos = suffixesReader.getPosition()
+        startBytePos = suffixesReader.position
         ste.term.setLength(prefixLength + suffixLength)
         ste.term.grow(ste.term.length())
         suffixesReader.readBytes(ste.term.bytes(), prefixLength, suffixLength)
@@ -306,7 +306,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
     @Throws(IOException::class)
     fun nextNonLeaf(): Boolean {
         // if (DEBUG) System.out.println("  stef.next ord=" + ord + " nextEnt=" + nextEnt + " entCount="
-        // + entCount + " fp=" + suffixesReader.getPosition());
+        // + entCount + " fp=" + suffixesReader.position);
         while (true) {
             if (nextEnt == entCount) {
                 require(
@@ -327,7 +327,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
             nextEnt++
             val code: Int = suffixLengthsReader.readVInt()
             suffixLength = code ushr 1
-            startBytePos = suffixesReader.getPosition()
+            startBytePos = suffixesReader.position
             ste.term.setLength(prefixLength + suffixLength)
             ste.term.grow(ste.term.length())
             suffixesReader.readBytes(ste.term.bytes(), prefixLength, suffixLength)
@@ -457,7 +457,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
                     statsSingletonRunLength = token ushr 1
                 } else {
                     state.docFreq = token ushr 1
-                    if (ste.fr.fieldInfo.getIndexOptions() === IndexOptions.DOCS) {
+                    if (ste.fr.fieldInfo.indexOptions === IndexOptions.DOCS) {
                         state.totalTermFreq = state.docFreq.toLong()
                     } else {
                         state.totalTermFreq = state.docFreq + statsReader.readVLong()
@@ -575,12 +575,12 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
             // if (DEBUG) {
             //   BytesRef suffixBytesRef = new BytesRef();
             //   suffixBytesRef.bytes = suffixBytes;
-            //   suffixBytesRef.offset = suffixesReader.getPosition();
+            //   suffixBytesRef.offset = suffixesReader.position;
             //   suffixBytesRef.length = suffix;
             //   System.out.println("      cycle: term " + (nextEnt-1) + " (of " + entCount + ") suffix="
             // + ToStringUtils.bytesRefToString(suffixBytesRef));
             // }
-            startBytePos = suffixesReader.getPosition()
+            startBytePos = suffixesReader.position
             suffixesReader.skipBytes(suffixLength.toLong())
 
             // Compare suffix and target.
@@ -689,7 +689,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
                 end = mid - 1
             } else {
                 // Exact match!
-                suffixesReader.setPosition(startBytePos + suffixLength)
+                suffixesReader.position = (startBytePos + suffixLength)
                 fillTerm()
                 // if (DEBUG) System.out.println("        found!");
                 return SeekStatus.FOUND
@@ -715,11 +715,11 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
                 startBytePos += suffixLength
                 nextEnt++
             }
-            suffixesReader.setPosition(startBytePos + suffixLength)
+            suffixesReader.position = (startBytePos + suffixLength)
             fillTerm()
         } else {
             seekStatus = SeekStatus.END
-            suffixesReader.setPosition(startBytePos + suffixLength)
+            suffixesReader.position = (startBytePos + suffixLength)
             if (exactOnly) {
                 fillTerm()
             }
@@ -761,13 +761,13 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
             // if (DEBUG) {
             //  BytesRef suffixBytesRef = new BytesRef();
             //  suffixBytesRef.bytes = suffixBytes;
-            //  suffixBytesRef.offset = suffixesReader.getPosition();
+            //  suffixBytesRef.offset = suffixesReader.position;
             //  suffixBytesRef.length = suffix;
             //  System.out.println("      cycle: " + ((code&1)==1  "sub-block" : "term") + " " +
             // (nextEnt-1) + " (of " + entCount + ") suffix=" +
             // ToStringUtils.bytesRefToString(suffixBytesRef));
             // }
-            startBytePos = suffixesReader.getPosition()
+            startBytePos = suffixesReader.position
             suffixesReader.skipBytes(suffixLength.toLong())
             ste.termExists = (code and 1) == 0
             if (ste.termExists) {

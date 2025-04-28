@@ -7,7 +7,7 @@ object Comparators {
      *
      * @see Comparable
      */
-    enum class NaturalOrderComparator : Comparator<Comparable<Any?>?> {
+    /*enum class NaturalOrderComparator : Comparator<Comparable<Any?>?> {
         INSTANCE;
 
         override fun compare(c1: Comparable<Any?>?, c2: Comparable<Any?>?): Int {
@@ -22,10 +22,10 @@ object Comparators {
             return c1.compareTo(c2)
         }
 
-        fun reversed(): Comparator<Comparable<Any?>?> {
+        *//*fun reversed(): Comparator<Comparable<Any?>?> {
             return reverseOrder<Comparable<Any?>?>()
-        }
-    }
+        }*//*
+    }*/
 }
 
 /**

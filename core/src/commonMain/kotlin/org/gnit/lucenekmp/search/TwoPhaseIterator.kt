@@ -10,22 +10,11 @@ import kotlinx.io.IOException
  *
  * @lucene.experimental
  */
-abstract class TwoPhaseIterator protected constructor(approximation: DocIdSetIterator) {
-    open val approximation: DocIdSetIterator
+abstract class TwoPhaseIterator protected constructor(open val approximation: DocIdSetIterator) {
 
-    /** Takes the approximation to be returned by [.approximation]. Not null.  */
-    init {
-        this.approximation = requireNotNull<DocIdSetIterator>(approximation)
-    }
 
-    private class TwoPhaseIteratorAsDocIdSetIterator(twoPhaseIterator: TwoPhaseIterator) : DocIdSetIterator() {
-        val twoPhaseIterator: TwoPhaseIterator
-        val approximation: DocIdSetIterator
-
-        init {
-            this.twoPhaseIterator = twoPhaseIterator
-            this.approximation = twoPhaseIterator.approximation
-        }
+    private class TwoPhaseIteratorAsDocIdSetIterator(val twoPhaseIterator: TwoPhaseIterator) : DocIdSetIterator() {
+        val approximation: DocIdSetIterator = twoPhaseIterator.approximation
 
         override fun docID(): Int {
             return approximation.docID()
@@ -95,10 +84,10 @@ abstract class TwoPhaseIterator protected constructor(approximation: DocIdSetIte
          * this will return the wrapped [TwoPhaseIterator]. Otherwise this returns `null`.
          */
         fun unwrap(iterator: DocIdSetIterator): TwoPhaseIterator? {
-            if (iterator is TwoPhaseIteratorAsDocIdSetIterator) {
-                return iterator.twoPhaseIterator
+            return if (iterator is TwoPhaseIteratorAsDocIdSetIterator) {
+                iterator.twoPhaseIterator
             } else {
-                return null
+                null
             }
         }
     }

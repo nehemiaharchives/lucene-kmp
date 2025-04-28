@@ -35,10 +35,6 @@ abstract class OffHeapFloatVectorValues internal constructor(
         return size
     }
 
-    override fun getSlice(): IndexInput? {
-        return slice
-    }
-
     @Throws(IOException::class)
     override fun vectorValue(targetOrd: Int): FloatArray {
         if (lastOrd == targetOrd) {

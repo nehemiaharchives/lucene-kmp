@@ -52,7 +52,7 @@ open class IncrementalHnswGraphMerger(
             return this
         }
         var candidateVectorCount: Int
-        when (fieldInfo.getVectorEncoding()) {
+        when (fieldInfo.vectorEncoding) {
             VectorEncoding.BYTE -> {
                 val byteVectorValues: ByteVectorValues? = reader.getByteVectorValues(fieldInfo.name)
                 if (byteVectorValues == null) {
@@ -137,7 +137,7 @@ open class IncrementalHnswGraphMerger(
         mergedVectorValues: KnnVectorValues, initializedNodes: BitSet
     ): IntArray {
 
-        val initializerIterator = when (fieldInfo.getVectorEncoding()) {
+        val initializerIterator = when (fieldInfo.vectorEncoding) {
             VectorEncoding.BYTE -> initReader!!.getByteVectorValues(fieldInfo.name)!!.iterator()
             VectorEncoding.FLOAT32 -> initReader!!.getFloatVectorValues(fieldInfo.name)!!.iterator()
         }

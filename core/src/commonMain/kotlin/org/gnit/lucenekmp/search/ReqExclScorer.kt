@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import kotlinx.io.IOException
+import kotlin.jvm.JvmName
 import kotlin.math.min
 
 
@@ -39,10 +40,11 @@ internal class ReqExclScorer(private val reqScorer: Scorer, exclScorer: Scorer) 
         return reqScorer.getMaxScore(upTo)
     }
 
+    @JvmName("setMinCompetitiveScoreKt")
     @Throws(IOException::class)
-    override fun setMinCompetitiveScore(score: Float) {
+    fun setMinCompetitiveScore(score: Float) {
         // The score of this scorer is the same as the score of 'reqScorer'.
-        reqScorer.setMinCompetitiveScore(score)
+        reqScorer.minCompetitiveScore = score
     }
 
     override val children: MutableCollection<ChildScorable>

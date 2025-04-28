@@ -131,7 +131,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
     private fun writeField(fieldData: FieldWriter<*>, maxDoc: Int) {
         // write vector values
         val vectorDataOffset: Long = vectorData!!.alignFilePointer(Float.SIZE_BYTES)
-        when (fieldData.fieldInfo.getVectorEncoding()) {
+        when (fieldData.fieldInfo.vectorEncoding) {
             BYTE -> writeByteVectors(fieldData)
             FLOAT32 -> writeFloat32Vectors(fieldData)
         }
@@ -169,7 +169,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
 
         // write vector values
         val vectorDataOffset =
-            when (fieldData.fieldInfo.getVectorEncoding()) {
+            when (fieldData.fieldInfo.vectorEncoding) {
                 BYTE -> writeSortedByteVectors(fieldData, ordMap)
                 FLOAT32 -> writeSortedFloat32Vectors(fieldData, ordMap)
             }
@@ -208,7 +208,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
         val vectorDataOffset: Long = vectorData!!.alignFilePointer(Float.SIZE_BYTES)
         // No need to use temporary file as we don't have to re-open for reading
         val docsWithField: DocsWithFieldSet =
-            when (fieldInfo.getVectorEncoding()) {
+            when (fieldInfo.vectorEncoding) {
                 BYTE -> writeByteVectorData(
                     vectorData,
                     MergedVectorValues.mergeByteVectorValues(fieldInfo, mergeState)
@@ -245,7 +245,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
         try {
             // write the vector data to a temporary file
             val docsWithField: DocsWithFieldSet =
-                when (fieldInfo.getVectorEncoding()) {
+                when (fieldInfo.vectorEncoding) {
                     BYTE -> writeByteVectorData(
                         tempVectorData,
                         MergedVectorValues.mergeByteVectorValues(
@@ -284,28 +284,28 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             success = true
             val finalVectorDataInput: IndexInput = vectorDataInput
             val randomVectorScorerSupplier: RandomVectorScorerSupplier =
-                when (fieldInfo.getVectorEncoding()) {
+                when (fieldInfo.vectorEncoding) {
                     BYTE -> this.vectorScorer.getRandomVectorScorerSupplier(
-                        fieldInfo.getVectorSimilarityFunction(),
+                        fieldInfo.vectorSimilarityFunction,
                         DenseOffHeapVectorValues(
-                            fieldInfo.getVectorDimension(),
+                            fieldInfo.vectorDimension,
                             docsWithField.cardinality(),
                             finalVectorDataInput,
-                            fieldInfo.getVectorDimension() * Byte.SIZE_BYTES,
+                            fieldInfo.vectorDimension * Byte.SIZE_BYTES,
                             this.vectorScorer,
-                            fieldInfo.getVectorSimilarityFunction()
+                            fieldInfo.vectorSimilarityFunction
                         )
                     )
 
                     FLOAT32 -> this.vectorScorer.getRandomVectorScorerSupplier(
-                        fieldInfo.getVectorSimilarityFunction(),
+                        fieldInfo.vectorSimilarityFunction,
                         DenseOffHeapVectorValues(
-                            fieldInfo.getVectorDimension(),
+                            fieldInfo.vectorDimension,
                             docsWithField.cardinality(),
                             finalVectorDataInput,
-                            fieldInfo.getVectorDimension() * Float.SIZE_BYTES,
+                            fieldInfo.vectorDimension * Float.SIZE_BYTES,
                             this.vectorScorer,
-                            fieldInfo.getVectorSimilarityFunction()
+                            fieldInfo.vectorSimilarityFunction
                         )
                     )
                 }
@@ -336,11 +336,11 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
         docsWithField: DocsWithFieldSet
     ) {
         meta!!.writeInt(field.number)
-        meta.writeInt(field.getVectorEncoding().ordinal)
-        meta.writeInt(field.getVectorSimilarityFunction().ordinal)
+        meta.writeInt(field.vectorEncoding.ordinal)
+        meta.writeInt(field.vectorSimilarityFunction.ordinal)
         meta.writeVLong(vectorDataOffset)
         meta.writeVLong(vectorDataLength)
-        meta.writeVInt(field.getVectorDimension())
+        meta.writeVInt(field.vectorDimension)
 
         // write docIDs
         val count: Int = docsWithField.cardinality()
@@ -356,7 +356,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
     }
 
     private abstract class FieldWriter<T>(val fieldInfo: FieldInfo) : FlatFieldVectorsWriter<T>() {
-        val dim: Int = fieldInfo.getVectorDimension()
+        val dim: Int = fieldInfo.vectorDimension
         val docsWithField: DocsWithFieldSet = DocsWithFieldSet()
         override val vectors: MutableList<T> = ArrayList()
         final override var isFinished: Boolean = false
@@ -384,8 +384,8 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             if (vectors.isEmpty()) return size
             return (size
                     + docsWithField.ramBytesUsed()
-                    + vectors.size.toLong() * (RamUsageEstimator.NUM_BYTES_OBJECT_REF + RamUsageEstimator.NUM_BYTES_ARRAY_HEADER) + (vectors.size.toLong() * fieldInfo.getVectorDimension()
-                    * fieldInfo.getVectorEncoding().byteSize))
+                    + vectors.size.toLong() * (RamUsageEstimator.NUM_BYTES_OBJECT_REF + RamUsageEstimator.NUM_BYTES_ARRAY_HEADER) + (vectors.size.toLong() * fieldInfo.vectorDimension
+                    * fieldInfo.vectorEncoding.byteSize))
         }
 
         override val docsWithFieldSet: DocsWithFieldSet
@@ -402,8 +402,8 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
         companion object {
             private val SHALLOW_RAM_BYTES_USED: Long = RamUsageEstimator.shallowSizeOfInstance(FieldWriter::class)
             fun create(fieldInfo: FieldInfo): FieldWriter<*> {
-                val dim: Int = fieldInfo.getVectorDimension()
-                return when (fieldInfo.getVectorEncoding()) {
+                val dim: Int = fieldInfo.vectorDimension
+                return when (fieldInfo.vectorEncoding) {
                     BYTE -> object : FieldWriter<ByteArray>(fieldInfo) {
                         override fun copyValue(value: ByteArray): ByteArray {
                             return ArrayUtil.copyOfSubArray(value, 0, dim)

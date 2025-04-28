@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.search
 
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.util.MathUtil
+import kotlin.jvm.JvmName
 
 
 /**
@@ -90,15 +91,16 @@ internal class DisjunctionMaxScorer(/* Multiplier applied to non-maximum-scoring
         }
     }
 
+    @JvmName("setMinCompetitiveScoreKt")
     @Throws(IOException::class)
-    override fun setMinCompetitiveScore(minScore: Float) {
+    fun setMinCompetitiveScore(minScore: Float) {
         if (disjunctionBlockPropagator != null) {
             disjunctionBlockPropagator!!.setMinCompetitiveScore(minScore)
         }
         if (tieBreakerMultiplier == 0f) {
             // TODO: we could even remove some scorers from the priority queue?
             for (scorer in subScorers) {
-                scorer.setMinCompetitiveScore(minScore)
+                scorer.minCompetitiveScore = minScore
             }
         }
     }

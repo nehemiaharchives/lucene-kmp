@@ -109,7 +109,7 @@ class Lucene90CompoundFormat
                 CodecUtil.verifyAndCopyIndexHeader(`in`, data, si.getId())
 
                 // copy all bytes except the footer
-                val numBytesToCopy: Long = `in`.length() - CodecUtil.footerLength() - `in`.getFilePointer()
+                val numBytesToCopy: Long = `in`.length() - CodecUtil.footerLength() - `in`.filePointer
                 data.copyBytes(`in`, numBytesToCopy)
 
                 // verify footer (checksum) matches for the incoming file we are copying

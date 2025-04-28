@@ -39,8 +39,6 @@ protected constructor() : DocIdSetIterator() {
     @get:Throws(IOException::class)
     abstract val payload: BytesRef?
 
-    open fun getPayload() = payload
-
     companion object {
         /**
          * Flag to pass to [TermsEnum.postings] if you don't require per-document

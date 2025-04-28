@@ -83,7 +83,7 @@ object Collections {
      * specified comparator.
      * @since 1.5
     </T> */
-    fun <T> reverseOrder(cmp: Comparator<T?>?): Comparator<T?> {
+    /*fun <T> reverseOrder(cmp: Comparator<T?>?): Comparator<T?> {
         if (cmp == null) {
             return ReverseComparator.REVERSE_ORDER as Comparator<T?>
         } else if (cmp === ReverseComparator.REVERSE_ORDER) {
@@ -95,7 +95,7 @@ object Collections {
         } else {
             return ReverseComparator2(cmp)
         }
-    }
+    }*/
 
     fun <T> reverseOrder(cmp: Comparator<T>?): Comparator<T> {
         return reverseOrder(cmp)

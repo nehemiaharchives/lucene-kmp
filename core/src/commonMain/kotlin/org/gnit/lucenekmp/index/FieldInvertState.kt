@@ -64,7 +64,35 @@ class FieldInvertState
     // we must track these across field instances (multi-valued case)
     var lastStartOffset: Int = 0
     var lastPosition: Int = 0
-    var attributeSource: AttributeSource? = null
+
+    var attributeSource: AttributeSource?
+    // TODO: better name?
+        /** Sets attributeSource to a new instance.  */
+        set(attributeSource: AttributeSource?) {
+            if (this.attributeSource !== attributeSource) {
+                this.attributeSource = attributeSource
+                if (attributeSource == null) {
+                    termAttribute = null
+                    termFreqAttribute = null
+                    posIncrAttribute = null
+                    offsetAttribute = null
+                    payloadAttribute = null
+                } else {
+                    termAttribute = attributeSource.getAttribute(TermToBytesRefAttribute::class)
+                    termFreqAttribute = attributeSource.addAttribute(TermFrequencyAttribute::class)
+                    posIncrAttribute = attributeSource.addAttribute(PositionIncrementAttribute::class)
+                    offsetAttribute = attributeSource.addAttribute(OffsetAttribute::class)
+                    payloadAttribute = attributeSource.getAttribute(PayloadAttribute::class)
+                }
+            }
+        }
+        /**
+         * Returns the [AttributeSource] from the [TokenStream] that provided the indexed
+         * tokens for this field.
+         */
+        get(): AttributeSource? {
+            return attributeSource
+        }
 
     var offsetAttribute: OffsetAttribute? = null
     var posIncrAttribute: PositionIncrementAttribute? = null
@@ -104,32 +132,4 @@ class FieldInvertState
         lastPosition = 0
     }
 
-    // TODO: better name?
-    /** Sets attributeSource to a new instance.  */
-    fun setAttributeSource(attributeSource: AttributeSource?) {
-        if (this.attributeSource !== attributeSource) {
-            this.attributeSource = attributeSource
-            if (attributeSource == null) {
-                termAttribute = null
-                termFreqAttribute = null
-                posIncrAttribute = null
-                offsetAttribute = null
-                payloadAttribute = null
-            } else {
-                termAttribute = attributeSource.getAttribute(TermToBytesRefAttribute::class)
-                termFreqAttribute = attributeSource.addAttribute(TermFrequencyAttribute::class)
-                posIncrAttribute = attributeSource.addAttribute(PositionIncrementAttribute::class)
-                offsetAttribute = attributeSource.addAttribute(OffsetAttribute::class)
-                payloadAttribute = attributeSource.getAttribute(PayloadAttribute::class)
-            }
-        }
-    }
-
-    /**
-     * Returns the [AttributeSource] from the [TokenStream] that provided the indexed
-     * tokens for this field.
-     */
-    fun getAttributeSource(): AttributeSource? {
-        return attributeSource
-    }
 }

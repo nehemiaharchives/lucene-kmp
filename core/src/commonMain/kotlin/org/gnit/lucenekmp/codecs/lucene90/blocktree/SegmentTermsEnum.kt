@@ -301,7 +301,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
     private fun prepareSeekExact(target: BytesRef, prefetch: Boolean): IOBooleanSupplier? {
         checkNotNull(fr.index) { "terms index was not loaded" }
 
-        if (fr.size() > 0 && (target < fr.getMin()!! || target > fr.getMax()!!)) {
+        if (fr.size() > 0 && (target < fr.min!! || target > fr.max!!)) {
             return null
         }
 

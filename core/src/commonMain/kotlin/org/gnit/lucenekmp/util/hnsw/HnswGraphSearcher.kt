@@ -289,7 +289,7 @@ open class HnswGraphSearcher(
         ) {
             require(filteredDocCount >= 0 && filteredDocCount <= graph.size())
             val hnswStrategy: Hnsw
-            val searchStrategy = knnCollector.getSearchStrategy()
+            val searchStrategy = knnCollector.searchStrategy
             hnswStrategy = if (searchStrategy is Hnsw) {
                 searchStrategy
             } else if (searchStrategy is Seeded) {

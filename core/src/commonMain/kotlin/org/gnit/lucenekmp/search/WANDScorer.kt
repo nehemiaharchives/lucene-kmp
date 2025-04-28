@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.isFinite
 import org.gnit.lucenekmp.jdkport.isInfinite
 import org.gnit.lucenekmp.jdkport.isNaN
+import kotlin.jvm.JvmName
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -49,7 +50,7 @@ internal class WANDScorer(
     private val scalingFactor: Int
 
     // scaled min competitive score
-    private var minCompetitiveScore: Long
+    override var minCompetitiveScore: Float
 
     private val allScorers: Array<Scorer>
 
@@ -84,7 +85,7 @@ internal class WANDScorer(
         require(minShouldMatch < scorers.size) { "minShouldMatch should be < the number of scorers" }
 
         allScorers = scorers.toTypedArray()
-        this.minCompetitiveScore = 0
+        this.minCompetitiveScore = 0f
 
         require(minShouldMatch >= 0) { "minShouldMatch should not be negative, but got $minShouldMatch" }
         this.minShouldMatch = minShouldMatch
@@ -165,7 +166,7 @@ internal class WANDScorer(
             }
             require(recomputedLeadScore == leadScore)
 
-            require(minCompetitiveScore == 0L || tailMaxScore < minCompetitiveScore || tailSize < minShouldMatch)
+            require(minCompetitiveScore == 0.0f || tailMaxScore < minCompetitiveScore || tailSize < minShouldMatch)
             require(doc <= upTo)
         }
 
@@ -180,8 +181,9 @@ internal class WANDScorer(
         return true
     }
 
+    @JvmName("setMinCompetitiveScoreKt")
     @Throws(IOException::class)
-    override fun setMinCompetitiveScore(minScore: Float) {
+    fun setMinCompetitiveScore(minScore: Float) {
         // Let this disjunction know about the new min score so that it can skip
         // over clauses that produce low scores.
         require(
@@ -190,7 +192,7 @@ internal class WANDScorer(
         require(minScore >= 0)
         val scaledMinScore = scaleMinScore(minScore, scalingFactor)
         require(scaledMinScore >= minCompetitiveScore)
-        minCompetitiveScore = scaledMinScore
+        minCompetitiveScore = scaledMinScore.toFloat()
     }
 
     @get:Throws(IOException::class)

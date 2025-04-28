@@ -105,8 +105,6 @@ internal class FieldsIndexReader : FieldsIndex {
         indexInput.close()
     }
 
-    fun getMaxPointer() = maxPointer
-
     override fun getBlockID(docID: Int): Long {
         Objects.checkIndex(docID, maxDoc)
         var blockIndex: Long = docs.binarySearch(0, numChunks.toLong(), docID.toLong())

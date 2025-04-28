@@ -145,7 +145,7 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
         @Throws(IOException::class)
         private fun collectTerms(fieldDocCount: Int, termsEnum: TermsEnum, terms: MutableList<TermAndState>): Boolean {
             val threshold: Int =
-                kotlin.math.min(BOOLEAN_REWRITE_TERM_COUNT_THRESHOLD, IndexSearcher.getMaxClauseCount())
+                kotlin.math.min(BOOLEAN_REWRITE_TERM_COUNT_THRESHOLD, IndexSearcher.maxClauseCount)
             for (i in 0..<threshold) {
                 val term: BytesRef? = termsEnum.next()
                 if (term == null) {
@@ -198,7 +198,7 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
 
             checkNotNull(terms)
 
-            val fieldDocCount: Int = terms.getDocCount()
+            val fieldDocCount: Int = terms.docCount
             val termsEnum: TermsEnum = checkNotNull(q.getTermsEnum(terms))
             val collectedTerms: MutableList<TermAndState> = mutableListOf<TermAndState>()
             val collectResult = collectTerms(fieldDocCount, termsEnum, collectedTerms)
@@ -318,9 +318,9 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
                 // See: LUCENE-10207
                 val cost: Long
                 if (queryTermsCount == -1L) {
-                    cost = terms.getSumDocFreq()
+                    cost = terms.sumDocFreq
                 } else {
-                    var potentialExtraCost: Long = terms.getSumDocFreq()
+                    var potentialExtraCost: Long = terms.sumDocFreq
                     val indexedTermCount: Long = terms.size()
                     if (indexedTermCount != -1L) {
                         potentialExtraCost -= indexedTermCount

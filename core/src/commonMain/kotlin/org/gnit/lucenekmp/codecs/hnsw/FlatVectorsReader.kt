@@ -64,15 +64,12 @@ abstract class FlatVectorsReader
     @Throws(IOException::class)
     abstract fun getRandomVectorScorer(field: String, target: ByteArray): RandomVectorScorer
 
-    override val mergeInstance: FlatVectorsReader
-        /**
-         * Returns an instance optimized for merging. This instance may only be consumed in the thread
-         * that called [.getMergeInstance].
-         *
-         *
-         * The default implementation returns `this`
-         */
-        get() = this
-
-    fun getMergeInstance() = mergeInstance
+    /**
+     * Returns an instance optimized for merging. This instance may only be consumed in the thread
+     * that called [.getMergeInstance].
+     *
+     *
+     * The default implementation returns `this`
+     */
+    override val mergeInstance: FlatVectorsReader = this
 }

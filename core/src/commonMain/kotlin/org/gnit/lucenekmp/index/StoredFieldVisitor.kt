@@ -29,9 +29,9 @@ protected constructor() {
      */
     @Throws(IOException::class)
     open fun binaryField(fieldInfo: FieldInfo, value: StoredFieldDataInput) {
-        val length: Int = value.getLength()
+        val length: Int = value.length
         val data = ByteArray(length)
-        value.getDataInput().readBytes(data, 0, value.getLength())
+        value.getDataInput().readBytes(data, 0, value.length)
         binaryField(fieldInfo, data)
     }
 

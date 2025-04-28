@@ -314,7 +314,7 @@ object CodecUtil {
         }
         val codec: String = `in`.readString()
         readBEInt(`in`)
-        `in`.seek(`in`.getFilePointer() + StringHelper.ID_LENGTH)
+        `in`.seek(`in`.filePointer + StringHelper.ID_LENGTH)
         val suffixLength: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
         val bytes = ByteArray(headerLength(codec) + StringHelper.ID_LENGTH + 1 + suffixLength)
         `in`.seek(0)
@@ -471,7 +471,7 @@ object CodecUtil {
                 // main exception and the prior exception gets suppressed. Otherwise we
                 // return the prior exception with a suppressed exception that notifies
                 // the user that checksums matched.
-                val remaining: Long = `in`.length() - `in`.getFilePointer()
+                val remaining: Long = `in`.length() - `in`.filePointer
                 if (remaining < footerLength()) {
                     // corruption caused us to read into the checksum footer already: we can't proceed
                     throw CorruptIndexException(
@@ -561,7 +561,7 @@ object CodecUtil {
 
     @Throws(IOException::class)
     private fun validateFooter(`in`: IndexInput) {
-        val remaining: Long = `in`.length() - `in`.getFilePointer()
+        val remaining: Long = `in`.length() - `in`.filePointer
         val expected = footerLength().toLong()
         if (remaining < expected) {
             throw CorruptIndexException(
@@ -570,7 +570,7 @@ object CodecUtil {
                         + ", expected="
                         + expected
                         + ", fp="
-                        + `in`.getFilePointer()),
+                        + `in`.filePointer),
                 `in`
             )
         } else if (remaining > expected) {
@@ -580,7 +580,7 @@ object CodecUtil {
                         + ", expected="
                         + expected
                         + ", fp="
-                        + `in`.getFilePointer()),
+                        + `in`.filePointer),
                 `in`
             )
         }
@@ -616,7 +616,7 @@ object CodecUtil {
         val clone: IndexInput = input.clone()
         clone.seek(0)
         val `in`: ChecksumIndexInput = BufferedChecksumIndexInput(clone)
-        require(`in`.getFilePointer() == 0L)
+        require(`in`.filePointer == 0L)
         if (`in`.length() < footerLength()) {
             throw CorruptIndexException(
                 ("misplaced codec footer (file truncated?): length="

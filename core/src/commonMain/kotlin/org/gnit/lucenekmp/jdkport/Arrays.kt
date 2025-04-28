@@ -1167,14 +1167,6 @@ object Arrays {
         )
     }
 
-    fun <T> fill(a: Array<T>, fromIndex: Int, toIndex: Int, value: T) {
-        a.fill(
-            element = value,
-            fromIndex = fromIndex,
-            toIndex = toIndex
-        )
-    }
-
     fun <T> fill(a: Array<T?>, fromIndex: Int, toIndex: Int, value: T?) {
         a.fill(
             element = value,

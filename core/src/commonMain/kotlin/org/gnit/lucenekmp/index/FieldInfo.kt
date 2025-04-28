@@ -42,7 +42,28 @@ class FieldInfo(
     /** Internal field number  */
     val number: Int
 
-    private var docValuesType = DocValuesType.NONE
+    /**
+     * Returns [DocValuesType] of the docValues; this is `DocValuesType.NONE` if the field
+     * has no docvalues.
+     */
+    var docValuesType = DocValuesType.NONE
+        /** Record that this field is indexed with docvalues, with the specified type  */
+        set(type) {
+            if (type == null) {
+                throw NullPointerException("DocValuesType must not be null (field: \"$name\")")
+            }
+            require(!(docValuesType !== DocValuesType.NONE && type !== DocValuesType.NONE && docValuesType !== type)) {
+                ("cannot change DocValues type from "
+                        + docValuesType
+                        + " to "
+                        + type
+                        + " for field \""
+                        + name
+                        + "\"")
+            }
+            docValuesType = type
+            this.checkConsistency()
+        }
 
     private val docValuesSkipIndex: DocValuesSkipIndexType
 
@@ -107,12 +128,12 @@ class FieldInfo(
         this.docValuesType =
             requireNotNull<DocValuesType>(
                 docValues
-            ){ "DocValuesType must not be null (field: \"$name\")" }
+            ) { "DocValuesType must not be null (field: \"$name\")" }
         this.docValuesSkipIndex = docValuesSkipIndex
         this.indexOptions =
             requireNotNull<IndexOptions>(
                 indexOptions
-            ){ "IndexOptions must not be null (field: \"$name\")" }
+            ) { "IndexOptions must not be null (field: \"$name\")" }
         if (indexOptions !== IndexOptions.NONE) {
             this.storeTermVector = storeTermVector
             this.storePayloads = storePayloads
@@ -144,7 +165,7 @@ class FieldInfo(
         requireNotNull(indexOptions) { "IndexOptions must not be null (field: '$name')" }
         if (indexOptions !== IndexOptions.NONE) {
             // Cannot store payloads unless positions are indexed:
-            require(!(indexOptions.compareTo(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) < 0 && storePayloads)) { "indexed field '$name' cannot have payloads without positions" }
+            require(!(indexOptions < IndexOptions.DOCS_AND_FREQS_AND_POSITIONS && storePayloads)) { "indexed field '$name' cannot have payloads without positions" }
         } else {
             require(!storeTermVector) { "non-indexed field '$name' cannot store term vectors" }
             require(!storePayloads) { "non-indexed field '$name' cannot store payloads" }
@@ -152,7 +173,7 @@ class FieldInfo(
         }
 
         requireNotNull(docValuesType) { "DocValuesType must not be null (field: '$name')" }
-        require(docValuesSkipIndex.isCompatibleWith(docValuesType) != false) {
+        require(docValuesSkipIndex.isCompatibleWith(docValuesType)) {
             ("field '"
                     + name
                     + "' cannot have docValuesSkipIndexType="
@@ -323,63 +344,6 @@ class FieldInfo(
         this.checkConsistency()
     }
 
-    /** Record that this field is indexed with docvalues, with the specified type  */
-    fun setDocValuesType(type: DocValuesType) {
-        if (type == null) {
-            throw NullPointerException("DocValuesType must not be null (field: \"$name\")")
-        }
-        require(!(docValuesType !== DocValuesType.NONE && type !== DocValuesType.NONE && docValuesType !== type)) {
-            ("cannot change DocValues type from "
-                    + docValuesType
-                    + " to "
-                    + type
-                    + " for field \""
-                    + name
-                    + "\"")
-        }
-        docValuesType = type
-        this.checkConsistency()
-    }
-
-    fun getIndexOptions(): IndexOptions {
-        return indexOptions
-    }
-
-    fun getDocValuesGen(): Long {
-        return dvGen
-    }
-
-    fun getPointDimensionCount(): Int {
-        return pointDimensionCount
-    }
-
-    fun getPointIndexDimensionCount(): Int {
-        return pointIndexDimensionCount
-    }
-
-    fun getPointNumBytes(): Int {
-        return pointNumBytes
-    }
-
-    fun getVectorDimension(): Int {
-        return vectorDimension
-    }
-
-    fun getVectorEncoding(): VectorEncoding {
-        return vectorEncoding
-    }
-
-    fun getVectorSimilarityFunction(): VectorSimilarityFunction {
-        return vectorSimilarityFunction
-    }
-
-    /**
-     * Returns [DocValuesType] of the docValues; this is `DocValuesType.NONE` if the field
-     * has no docvalues.
-     */
-    fun getDocValuesType(): DocValuesType {
-        return docValuesType
-    }
 
     /** Returns true if, and only if, this field has a skip index.  */
     fun docValuesSkipIndexType(): DocValuesSkipIndexType {
@@ -401,7 +365,7 @@ class FieldInfo(
     }
 
     fun setStorePayloads() {
-        if (indexOptions.compareTo(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) >= 0) {
+        if (indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) {
             storePayloads = true
         }
         this.checkConsistency()
@@ -421,7 +385,7 @@ class FieldInfo(
 
     /** Returns true if this field actually has any norms.  */
     fun hasNorms(): Boolean {
-        return indexOptions !== IndexOptions.NONE && omitNorms == false
+        return indexOptions !== IndexOptions.NONE && !omitNorms
     }
 
     /** Returns true if any payloads exist for this field.  */

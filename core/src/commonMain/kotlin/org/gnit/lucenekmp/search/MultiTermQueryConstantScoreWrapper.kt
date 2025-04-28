@@ -13,7 +13,7 @@ import org.gnit.lucenekmp.util.DocIdSetBuilder
 internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
     (query: Q) : AbstractMultiTermQueryConstantScoreWrapper<Q>(query) {
     @Throws(IOException::class)
-    public override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
+    override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
 
         val multiTermQueryConstantScoreWrapperQuery = query
 
@@ -31,7 +31,7 @@ internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
                 var docs: PostingsEnum? = null
 
                 // Handle the already-collected terms:
-                if (collectedTerms.isEmpty() == false) {
+                if (!collectedTerms.isEmpty()) {
                     val termsEnum2 = terms.iterator()
                     for (t in collectedTerms) {
                         termsEnum2.seekExact(t.term, t.state)
@@ -47,13 +47,13 @@ internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
                     // other terms and just use the dense term's postings:
                     val docFreq = termsEnum.docFreq()
                     if (fieldDocCount == docFreq) {
-                        val termStates = TermStates(searcher.topReaderContext)
+                        val termStates = TermStates(searcher.getTopReaderContext())
                         termStates.register(
                             termsEnum.termState(), context.ord, docFreq, termsEnum.totalTermFreq()
                         )
                         val q: Query =
                             ConstantScoreQuery(
-                                TermQuery(Term(multiTermQueryConstantScoreWrapperQuery.field, termsEnum.term()), termStates)
+                                TermQuery(Term(multiTermQueryConstantScoreWrapperQuery.field, termsEnum.term()!!), termStates)
                             )
                         val weight: Weight? = searcher.rewrite(q).createWeight(searcher, scoreMode, score())
                         return WeightOrDocIdSetIterator(weight!!)

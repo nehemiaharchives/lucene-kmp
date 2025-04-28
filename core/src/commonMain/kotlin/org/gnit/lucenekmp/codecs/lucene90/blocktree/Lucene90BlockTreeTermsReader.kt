@@ -142,7 +142,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
                         // when frequencies are omitted, sumDocFreq=sumTotalTermFreq and only one value is
                         // written.
                         val sumDocFreq =
-                            if (fieldInfo.getIndexOptions() === IndexOptions.DOCS)
+                            if (fieldInfo.indexOptions === IndexOptions.DOCS)
                                 sumTotalTermFreq
                             else
                                 metaIn.readVLong()

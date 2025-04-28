@@ -85,21 +85,22 @@ class DocValuesRewriteMethod : MultiTermQuery.RewriteMethod() {
                                 return values.termsEnum()
                             }
 
-                            override fun getSumTotalTermFreq(): Long {
-                                throw UnsupportedOperationException()
-                            }
+                            override val sumDocFreq: Long
+                                get() {
+                                    throw UnsupportedOperationException()
+                                }
 
-                            override fun getSumDocFreq(): Long {
-                                throw UnsupportedOperationException()
-                            }
-
-                            override fun getDocCount(): Int {
-                                throw UnsupportedOperationException()
-                            }
+                            override val docCount: Int
+                                get() {
+                                    throw UnsupportedOperationException()
+                                }
 
                             override fun size(): Long {
                                 return -1
                             }
+
+                            override val sumTotalTermFreq: Long
+                                get() = throw UnsupportedOperationException()
 
                             override fun hasFreqs(): Boolean {
                                 return false
@@ -123,7 +124,7 @@ class DocValuesRewriteMethod : MultiTermQuery.RewriteMethod() {
                 override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
                     val values: SortedSetDocValues =
                         DocValues.getSortedSet(context.reader(), multiTermQueryDocValuesWrapperQuery.field)
-                    if (values.valueCount == 0) {
+                    if (values.valueCount == 0L) {
                         return null // no values/docs so nothing can match
                     }
 

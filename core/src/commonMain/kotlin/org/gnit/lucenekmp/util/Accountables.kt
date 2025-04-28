@@ -37,7 +37,7 @@ object Accountables {
         dest.append(RamUsageEstimator.humanReadableUnits(a.ramBytesUsed()))
         dest.appendLine()
 
-        for (child in a.getChildResources()) {
+        for (child in a.childResources) {
             toString(dest, child, depth + 1)
         }
 
@@ -56,7 +56,7 @@ object Accountables {
      */
     fun namedAccountable(description: String, `in`: Accountable): Accountable {
         return Accountables.namedAccountable(
-            "$description [$`in`]", `in`.getChildResources(), `in`.ramBytesUsed()
+            "$description [$`in`]", `in`.childResources, `in`.ramBytesUsed()
         )
     }
 
@@ -107,9 +107,10 @@ object Accountables {
                 return bytes
             }
 
-            override fun getChildResources(): MutableCollection<Accountable> {
-                return children
-            }
+            override val childResources
+                get(): MutableCollection<Accountable> {
+                    return children
+                }
 
             override fun toString(): String {
                 return description

@@ -73,7 +73,7 @@ protected constructor() : PostingsWriterBase() {
      */
     override fun setField(fieldInfo: FieldInfo) {
         this.fieldInfo = fieldInfo
-        indexOptions = fieldInfo.getIndexOptions()
+        indexOptions = fieldInfo.indexOptions
 
         writeFreqs = indexOptions!! >= IndexOptions.DOCS_AND_FREQS
         writePositions = indexOptions!! >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS
@@ -134,7 +134,7 @@ protected constructor() : PostingsWriterBase() {
             if (writePositions) {
                 for (i in 0..<freq) {
                     val pos: Int = postingsEnum!!.nextPosition()
-                    val payload: BytesRef? = if (writePayloads) postingsEnum!!.getPayload() else null
+                    val payload: BytesRef? = if (writePayloads) postingsEnum!!.payload else null
                     val startOffset: Int
                     val endOffset: Int
                     if (writeOffsets) {

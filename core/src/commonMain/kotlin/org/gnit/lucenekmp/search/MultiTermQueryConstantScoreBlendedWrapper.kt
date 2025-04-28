@@ -28,7 +28,7 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
                 collectedTerms: MutableList<TermAndState>,
                 leadCost: Long
             ): WeightOrDocIdSetIterator {
-                val otherTerms: DocIdSetBuilder = DocIdSetBuilder(context.reader().maxDoc(), terms)
+                val otherTerms = DocIdSetBuilder(context.reader().maxDoc(), terms)
                 val highFrequencyTerms: PriorityQueue<PostingsEnum> =
                     object : PriorityQueue<PostingsEnum>(collectedTerms.size) {
                         override fun lessThan(a: PostingsEnum, b: PostingsEnum): Boolean {
@@ -59,13 +59,13 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
                     // other terms and just use the dense term's postings:
                     val docFreq: Int = termsEnum.docFreq()
                     if (fieldDocCount == docFreq) {
-                        val termStates: TermStates = TermStates(searcher.topReaderContext)
+                        val termStates = TermStates(searcher.getTopReaderContext())
                         termStates.register(
                             termsEnum.termState(), context.ord, docFreq, termsEnum.totalTermFreq()
                         )
                         val q: Query =
                             ConstantScoreQuery(
-                                TermQuery(Term((query as MultiTermQuery).field, termsEnum.term()), termStates)
+                                TermQuery(Term((query as MultiTermQuery).field, termsEnum.term()!!), termStates)
                             )
                         val weight: Weight? = searcher.rewrite(q).createWeight(searcher, scoreMode, score())
                         return WeightOrDocIdSetIterator(weight!!)
@@ -87,7 +87,7 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
 
                 val subs: MutableList<DisiWrapper> = mutableListOf<DisiWrapper>(/*highFrequencyTerms.size() + 1*/)
                 for (disi in highFrequencyTerms) {
-                    val s = MultiTermQueryConstantScoreBlendedWrapper.wrapWithDummyScorer(this, disi)
+                    val s = wrapWithDummyScorer(this, disi)
                     subs.add(DisiWrapper(s, false))
                 }
                 val s = wrapWithDummyScorer(this, otherTerms.build().iterator())

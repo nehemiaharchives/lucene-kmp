@@ -17,16 +17,27 @@ import org.gnit.lucenekmp.util.AttributeReflector
  *  * [TermFrequencyAttribute]
  *
  */
-class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
+class PackedTokenAttributeImpl
+/** Constructs the attribute implementation.  */
     : CharTermAttributeImpl(), TypeAttribute, PositionIncrementAttribute, PositionLengthAttribute, OffsetAttribute,
     TermFrequencyAttribute {
 
     private var startOffset: Int = 0
     private var endOffset: Int = 0
     private var type: String = DEFAULT_TYPE
-    var positionIncrement: Int = 1
+    private var positionIncrement: Int = 1
     override var positionLength: Int = 1
+        set(positionLength) {
+            require(positionLength >= 1) { "Position length must be 1 or greater: got $positionLength" }
+            this.positionLength = positionLength
+        }
+
     override var termFrequency: Int = 1
+        set(termFrequency) {
+            require(termFrequency >= 1) { "Term frequency must be 1 or greater; got $termFrequency" }
+            this.termFrequency = termFrequency
+
+        }
 
     /**
      * {@inheritDoc}
@@ -45,25 +56,6 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
      */
     override fun getPositionIncrement(): Int {
         return positionIncrement
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see PositionLengthAttribute
-     */
-    fun setPositionLength(positionLength: Int) {
-        require(positionLength >= 1) { "Position length must be 1 or greater: got $positionLength" }
-        this.positionLength = positionLength
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see PositionLengthAttribute
-     */
-    fun getPositionLength(): Int {
-        return positionLength
     }
 
     /**
@@ -90,11 +82,13 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
      * @see OffsetAttribute
      */
     override fun setOffset(startOffset: Int, endOffset: Int) {
-        require(!(startOffset < 0 || endOffset < startOffset)) {("startOffset must be non-negative, and endOffset must be >= startOffset; got "
-                + "startOffset="
-                + startOffset
-                + ",endOffset="
-                + endOffset)}
+        require(!(startOffset < 0 || endOffset < startOffset)) {
+            ("startOffset must be non-negative, and endOffset must be >= startOffset; got "
+                    + "startOffset="
+                    + startOffset
+                    + ",endOffset="
+                    + endOffset)
+        }
         this.startOffset = startOffset
         this.endOffset = endOffset
     }
@@ -114,16 +108,7 @@ class PackedTokenAttributeImpl  /** Constructs the attribute implementation.  */
      * @see TypeAttribute
      */
     override fun setType(type: String) {
-       this.type = type
-    }
-
-    fun setTermFrequency(termFrequency: Int) {
-        require(termFrequency >= 1) { "Term frequency must be 1 or greater; got $termFrequency" }
-        this.termFrequency = termFrequency
-    }
-
-    fun getTermFrequency(): Int {
-        return termFrequency
+        this.type = type
     }
 
     /** Resets the attributes  */

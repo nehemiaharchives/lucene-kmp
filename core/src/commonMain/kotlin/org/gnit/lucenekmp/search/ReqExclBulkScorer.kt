@@ -32,7 +32,7 @@ internal class ReqExclBulkScorer : BulkScorer {
     }
 
     @Throws(IOException::class)
-    override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+    override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
         var upTo = min
         var exclDoc = exclApproximation.docID()
 

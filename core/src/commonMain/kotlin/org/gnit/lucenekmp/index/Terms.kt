@@ -73,14 +73,14 @@ protected constructor() {
     @Throws(IOException::class)
     abstract fun size(): Long
 
-    @Throws(IOException::class)
-    abstract fun getSumTotalTermFreq(): Long
+    @get:Throws(IOException::class)
+    abstract val sumTotalTermFreq: Long
 
-    @Throws(IOException::class)
-    abstract fun getSumDocFreq(): Long
+    @get:Throws(IOException::class)
+    abstract val sumDocFreq: Long
 
-    @Throws(IOException::class)
-    abstract fun getDocCount(): Int
+    @get:Throws(IOException::class)
+    abstract val docCount: Int
 
     /**
      * Returns true if documents in this field store per-document term frequency ([ ][PostingsEnum.freq]).
@@ -104,8 +104,6 @@ protected constructor() {
          * when there are no terms.
          */
         get() = iterator().next()!!
-
-    fun getMin() = min
 
     @get:Throws(IOException::class)
     open val max: BytesRef?
@@ -175,17 +173,15 @@ protected constructor() {
             }
         }
 
-    fun getMax() = max
-
     /** Expert: returns additional information about this Terms instance for debugging purposes.  */
     open fun getStats(): Any
          {
             val sb = StringBuilder()
             sb.append("impl=").append(this::class.simpleName)
             sb.append(",size=").append(size())
-            sb.append(",docCount=").append(this.getDocCount())
-            sb.append(",sumTotalTermFreq=").append(this.getSumTotalTermFreq())
-            sb.append(",sumDocFreq=").append(this.getSumDocFreq())
+            sb.append(",docCount=").append(this.docCount)
+            sb.append(",sumTotalTermFreq=").append(this.sumTotalTermFreq)
+            sb.append(",sumDocFreq=").append(this.sumDocFreq)
             return sb.toString()
         }
 
@@ -220,20 +216,11 @@ protected constructor() {
                 return 0
             }
 
-            @Throws(IOException::class)
-            override fun getSumTotalTermFreq(): Long {
-                return 0
-            }
+            override val sumTotalTermFreq: Long = 0L
 
-            @Throws(IOException::class)
-            override fun getSumDocFreq(): Long {
-                return 0
-            }
+            override val sumDocFreq: Long = 0L
 
-            @Throws(IOException::class)
-            override fun getDocCount(): Int {
-                return 0
-            }
+            override val docCount: Int = 0
 
             override fun hasFreqs(): Boolean {
                 return false

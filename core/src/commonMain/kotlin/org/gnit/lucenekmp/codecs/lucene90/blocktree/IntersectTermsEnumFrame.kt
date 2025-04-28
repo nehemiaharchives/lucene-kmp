@@ -23,6 +23,23 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
     // private static boolean DEBUG = IntersectTermsEnum.DEBUG;
     // State in automaton
     var state: Int = 0
+        set(state) {
+            this.state = state
+            transitionIndex = 0
+            transitionCount = ite.automaton.getNumTransitions(state)
+            if (transitionCount != 0) {
+                ite.automaton.initTransition(state, transition)
+                ite.automaton.getNextTransition(transition)
+            } else {
+                // Must set min to -1 so the "label < min" check never falsely triggers:
+
+                transition.min = -1
+
+                // Must set max to -1 so we immediately realize we need to step to the next transition and
+                // then pop this frame:
+                transition.max = -1
+            }
+        }
 
     // State just before the last label
     var lastState: Int = 0
@@ -99,24 +116,6 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
         } while (numFollowFloorBlocks != 0 && nextFloorLabel <= transition.min)
 
         load(blockCode = null)
-    }
-
-    fun setState(state: Int) {
-        this.state = state
-        transitionIndex = 0
-        transitionCount = ite.automaton.getNumTransitions(state)
-        if (transitionCount != 0) {
-            ite.automaton.initTransition(state, transition)
-            ite.automaton.getNextTransition(transition)
-        } else {
-            // Must set min to -1 so the "label < min" check never falsely triggers:
-
-            transition.min = -1
-
-            // Must set max to -1 so we immediately realize we need to step to the next transition and
-            // then pop this frame:
-            transition.max = -1
-        }
     }
 
     @Throws(IOException::class)
@@ -220,7 +219,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
         if (!isLastInFloor) {
             // Sub-blocks of a single floor block are always
             // written one after another -- tail recurse:
-            fpEnd = ite.`in`.getFilePointer()
+            fpEnd = ite.`in`.filePointer
         }
     }
 
@@ -241,7 +240,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
         ) { "nextEnt=$nextEnt entCount=$entCount fp=$fp" }
         nextEnt++
         suffix = suffixLengthsReader.readVInt()
-        startBytePos = suffixesReader.getPosition()
+        startBytePos = suffixesReader.position
         suffixesReader.skipBytes(suffix.toLong())
     }
 
@@ -252,7 +251,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
         nextEnt++
         val code: Int = suffixLengthsReader.readVInt()
         suffix = code ushr 1
-        startBytePos = suffixesReader.getPosition()
+        startBytePos = suffixesReader.position
         suffixesReader.skipBytes(suffix.toLong())
         if ((code and 1) == 0) {
             // A normal term
@@ -301,7 +300,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
                     statsSingletonRunLength = token ushr 1
                 } else {
                     termState.docFreq = token ushr 1
-                    if (ite.fr.fieldInfo.getIndexOptions() === IndexOptions.DOCS) {
+                    if (ite.fr.fieldInfo.indexOptions === IndexOptions.DOCS) {
                         termState.totalTermFreq = termState.docFreq.toLong()
                     } else {
                         termState.totalTermFreq = termState.docFreq + statsReader.readVLong()

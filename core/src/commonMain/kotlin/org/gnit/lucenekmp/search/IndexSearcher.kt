@@ -4,6 +4,8 @@ import kotlinx.io.IOException
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.IndexReaderContext
 import org.gnit.lucenekmp.index.QueryTimeout
+import org.gnit.lucenekmp.index.Term
+import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.search.similarities.Similarity
 import kotlin.jvm.JvmOverloads
 
@@ -99,13 +101,33 @@ class IndexSearcher {
         return similarity
     }
 
+    @Throws(IOException::class)
+    fun collectionStatistics(field: String): CollectionStatistics? {
+        checkNotNull(field)
+        var docCount: Long = 0
+        var sumTotalTermFreq: Long = 0
+        var sumDocFreq: Long = 0
+        for (leaf in reader!!.leaves()) {
+            val terms: Terms = Terms.getTerms(leaf.reader(), field)
+            docCount += terms.docCount
+            sumTotalTermFreq += terms.sumTotalTermFreq
+            sumDocFreq += terms.sumDocFreq
+        }
+        if (docCount == 0L) {
+            return null
+        }
+        return CollectionStatistics(field, reader.maxDoc().toLong(), docCount, sumTotalTermFreq, sumDocFreq)
+    }
+
+    @Throws(IOException::class)
+    fun termStatistics(term: Term, docFreq: Int, totalTermFreq: Long): TermStatistics? {
+        // This constructor will throw an exception if docFreq <= 0.
+        return TermStatistics(term.bytes(), docFreq.toLong(), totalTermFreq)
+    }
+
     companion object{
 
         var maxClauseCount: Int = 1024
-
-        fun getMaxClauseCount(): Int {
-            return maxClauseCount
-        }
 
         val defaultSimilarity: Similarity = /*BM25Similarity()*/ object : Similarity(){
             override fun scorer(
@@ -115,7 +137,6 @@ class IndexSearcher {
             ): SimScorer {
                 TODO("Not yet implemented")
             }
-
         }
     }
 
@@ -124,14 +145,14 @@ class IndexSearcher {
      * typically happens if a PrefixQuery, FuzzyQuery, WildcardQuery, or TermRangeQuery is expanded to
      * many terms during search.
      */
-    class TooManyClauses @JvmOverloads constructor(msg: String? = "maxClauseCount is set to " + getMaxClauseCount()) :
+    class TooManyClauses @JvmOverloads constructor(msg: String? = "maxClauseCount is set to $maxClauseCount") :
         RuntimeException(msg) {
         /** The value of [IndexSearcher.getMaxClauseCount] when this Exception was created  */
         val maxClauseCount: Int
 
 
         init {
-            this.maxClauseCount = getMaxClauseCount()
+            this.maxClauseCount = IndexSearcher.maxClauseCount
         }
     }
 }

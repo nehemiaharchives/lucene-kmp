@@ -66,7 +66,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
     val vectorsStream: IndexInput
     val version: Int
     val packedIntsVersion: Int
-    private val compressionMode: CompressionMode
+    val compressionMode: CompressionMode
     private val decompressor: Decompressor
     val chunkSize: Int
     val numDocs: Int
@@ -134,7 +134,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                 )
             require(
                 CodecUtil.indexHeaderLength(formatName, segmentSuffix).toLong()
-                        == vectorsStream.getFilePointer()
+                        == vectorsStream.filePointer
             )
 
             val metaStreamFN: String =
@@ -171,7 +171,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                 )
 
             this.indexReader = fieldsIndexReader
-            this.maxPointer = fieldsIndexReader.getMaxPointer()
+            this.maxPointer = fieldsIndexReader.maxPointer
 
             numChunks = metaIn.readVLong()
             numDirtyChunks = metaIn.readVLong()
@@ -228,24 +228,6 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                 IOUtils.closeWhileHandlingException(this, metaIn!!)
             }
         }
-    }
-
-    fun getVersion() = version
-
-    fun getChunkSize() = chunkSize
-
-    fun getIndexReader() = indexReader
-
-    fun getMaxPointer() = maxPointer
-
-    fun getPackedIntsVersion() = packedIntsVersion
-
-    fun getCompressionMode(): CompressionMode {
-        return compressionMode
-    }
-
-    fun getVectorsStream(): IndexInput {
-        return vectorsStream
     }
 
     fun getNumDirtyDocs(): Long {
@@ -931,7 +913,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         termBytes: BytesRef
     ) : Terms() {
         @get:Throws(IOException::class)
-        val sumTotalTermFreq: Long
+        override val sumTotalTermFreq: Long
         private val termBytes: BytesRef
         private val payloadBytes: BytesRef
 
@@ -970,25 +952,10 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             return numTerms.toLong()
         }
 
-        override fun getSumTotalTermFreq(): Long {
-            return sumTotalTermFreq
-        }
-
-        override fun getSumDocFreq(): Long {
-            return sumDocFreq
-        }
-
-        override fun getDocCount(): Int {
-            return docCount
-        }
-
         @get:Throws(IOException::class)
-        val sumDocFreq: Long
-            get() = numTerms.toLong()
+        override val sumDocFreq: Long = numTerms.toLong()
 
-        @get:Throws(IOException::class)
-        val docCount: Int
-            get() = 1
+        override val docCount: Int = 1
 
         override fun hasFreqs(): Boolean {
             return true
@@ -1048,13 +1015,13 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             this.payloadIndex = payloadIndex
             this.payloads = payloads
             this.`in` = `in`
-            startPos = `in`.getPosition()
+            startPos = `in`.position
             reset()
         }
 
         fun reset() {
             term.length = 0
-            `in`!!.setPosition(startPos)
+            `in`!!.position = (startPos)
             ord = -1
         }
 
@@ -1162,7 +1129,18 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         private lateinit var positions: IntArray
         private lateinit var startOffsets: IntArray
         private lateinit var lengths: IntArray
-        override val payload: BytesRef = BytesRef()
+
+        @get:Throws(IOException::class)
+        override val payload: BytesRef?
+         get() {
+            checkPosition()
+            return if (payload!!.length == 0) {
+                null
+            } else {
+                payload
+            }
+        }
+
         private lateinit var payloadIndex: IntArray
         private var basePayloadOffset = 0
         private var i = 0
@@ -1182,9 +1160,9 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             this.startOffsets = startOffsets
             this.lengths = lengths
             this.basePayloadOffset = payloads.offset
-            this.payload.bytes = payloads.bytes
-            payload.length = 0
-            payload.offset = payload.length
+            this.payload!!.bytes = payloads.bytes
+            payload!!.length = 0
+            payload!!.offset = payload!!.length
             this.payloadIndex = payloadIndex
 
             i = -1
@@ -1210,8 +1188,8 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             ++i
 
             if (payloadIndex != null) {
-                payload.offset = basePayloadOffset + payloadIndex[positionIndex + i]
-                payload.length = payloadIndex[positionIndex + i + 1] - payloadIndex[positionIndex + i]
+                payload!!.offset = basePayloadOffset + payloadIndex[positionIndex + i]
+                payload!!.length = payloadIndex[positionIndex + i + 1] - payloadIndex[positionIndex + i]
             }
 
             if (positions == null) {
@@ -1238,16 +1216,6 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                 return -1
             } else {
                 return startOffsets[positionIndex + i] + lengths[positionIndex + i]
-            }
-        }
-
-        @Throws(IOException::class)
-        override fun getPayload(): BytesRef? {
-            checkPosition()
-            if (payloadIndex == null || payload.length === 0) {
-                return null
-            } else {
-                return payload
             }
         }
 

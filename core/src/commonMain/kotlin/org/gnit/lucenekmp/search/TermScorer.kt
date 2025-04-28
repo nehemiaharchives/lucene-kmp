@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.index.NumericDocValues
 import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.SlowImpactsEnum
 import org.gnit.lucenekmp.search.similarities.Similarity.SimScorer
+import kotlin.jvm.JvmName
 
 
 /**
@@ -100,7 +101,8 @@ class TermScorer : Scorer {
         return maxScoreCache.getMaxScore(upTo)
     }
 
-    override fun setMinCompetitiveScore(minScore: Float) {
+    @JvmName("setMinCompetitiveScoreKt")
+    fun setMinCompetitiveScore(minScore: Float) {
         if (impactsDisi != null) {
             impactsDisi.setMinCompetitiveScore(minScore)
         }

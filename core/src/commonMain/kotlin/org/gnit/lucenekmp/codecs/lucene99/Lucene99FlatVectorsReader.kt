@@ -236,15 +236,15 @@ class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScor
     ) {
 
         init {
-            check(similarityFunction === info.getVectorSimilarityFunction()) {
+            check(similarityFunction === info.vectorSimilarityFunction) {
                 ("Inconsistent vector similarity function for field=\""
                         + info.name
                         + "\"; "
                         + similarityFunction
                         + " != "
-                        + info.getVectorSimilarityFunction())
+                        + info.vectorSimilarityFunction)
             }
-            val infoVectorDimension: Int = info.getVectorDimension()
+            val infoVectorDimension: Int = info.vectorDimension
             check(infoVectorDimension == dimension) {
                 ("Inconsistent vector dimension for field=\""
                         + info.name
@@ -255,7 +255,7 @@ class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScor
             }
 
             val byteSize: Int =
-                when (info.getVectorEncoding()) {
+                when (info.vectorEncoding) {
                     BYTE -> Byte.SIZE_BYTES
                     FLOAT32 -> Float.SIZE_BYTES
                 }

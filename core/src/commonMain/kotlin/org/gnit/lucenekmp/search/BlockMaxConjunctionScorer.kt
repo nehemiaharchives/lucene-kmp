@@ -220,10 +220,12 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
         return sum.toFloat()
     }
 
-    @Throws(IOException::class)
-    override fun setMinCompetitiveScore(score: Float) {
-        minScore = score
-    }
+    @get:Throws(IOException::class)
+    override var minCompetitiveScore: Float
+        get() = minScore
+        set(minScore) {
+            this.minScore = minScore
+        }
 
     override val children: MutableCollection<ChildScorable>
         get() {

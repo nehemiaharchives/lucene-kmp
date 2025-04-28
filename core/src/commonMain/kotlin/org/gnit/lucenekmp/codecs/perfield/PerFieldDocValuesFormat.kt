@@ -91,7 +91,7 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
 
             // Group each consumer by the fields it handles
             for (fi in mergeState.mergeFieldInfos!!) {
-                if (fi.getDocValuesType() === DocValuesType.NONE) {
+                if (fi.docValuesType === DocValuesType.NONE) {
                     continue
                 }
                 // merge should ignore current format for the fields being merged
@@ -231,7 +231,7 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
             try {
                 // Read field name -> format name
                 for (fi in readState.fieldInfos) {
-                    if (fi.getDocValuesType() !== DocValuesType.NONE) {
+                    if (fi.docValuesType !== DocValuesType.NONE) {
                         val fieldName: String = fi.name
                         val formatName: String? = fi.getAttribute(PER_FIELD_FORMAT_KEY)
                         if (formatName != null) {

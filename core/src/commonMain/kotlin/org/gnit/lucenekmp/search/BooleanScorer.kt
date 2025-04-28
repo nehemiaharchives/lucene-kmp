@@ -35,7 +35,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
 
         fun get(i: Int): DisiWrapper {
             Objects.checkIndex(i, size())
-            return getHeapArray()[1 + i] as DisiWrapper
+            return heapArray[1 + i] as DisiWrapper
         }
     }
 

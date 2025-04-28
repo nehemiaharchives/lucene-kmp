@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
+import kotlin.jvm.JvmName
 import kotlin.math.max
 import kotlin.math.min
 
@@ -65,7 +66,7 @@ internal class MaxScoreBulkScorer(private val maxDoc: Int, scorers: MutableList<
     }
 
     @Throws(IOException::class)
-    override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+    override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
         collector.setScorer(scorable)
 
         // This scorer computes outer windows based on impacts that are stored in the index. These outer
@@ -517,8 +518,9 @@ internal class MaxScoreBulkScorer(private val maxDoc: Int, scorers: MutableList<
             return score
         }
 
+        @JvmName("setMinCompetitiveScoreKt")
         @Throws(IOException::class)
-        override fun setMinCompetitiveScore(minScore: Float) {
+        fun setMinCompetitiveScore(minScore: Float) {
             this@MaxScoreBulkScorer.minCompetitiveScore = minScore
         }
     }

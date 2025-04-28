@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.tests.util
 
-import org.apache.lucene.util.BytesRef
+import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import kotlin.random.Random

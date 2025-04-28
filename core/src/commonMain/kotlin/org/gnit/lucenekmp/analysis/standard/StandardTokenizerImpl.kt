@@ -331,149 +331,143 @@ class StandardTokenizerImpl(`in`: Reader) {
         zzMarkedPos -= number
     }
 
+    /**
+     * Resumes scanning until the next regular expression is matched, the end of input is encountered
+     * or an I/O-Error occurs.
+     *
+     * @return the next token.
+     * @exception java.io.IOException if any I/O-Error occurs.
+     */
+    fun getNextToken(): Int {
+        var zzInput = 0 // not sure if 0 is ok here
+        var zzAction: Int
 
-    @get:Throws(IOException::class)
-    val nextToken: Int
-        /**
-         * Resumes scanning until the next regular expression is matched, the end of input is encountered
-         * or an I/O-Error occurs.
-         *
-         * @return the next token.
-         * @exception java.io.IOException if any I/O-Error occurs.
-         */
-        get() {
-            var zzInput = 0 // not sure if 0 is ok here
-            var zzAction: Int
+        // cached fields:
+        var zzCurrentPosL: Int
+        var zzMarkedPosL: Int
+        var zzEndReadL = zzEndRead
+        var zzBufferL: CharArray = zzBuffer
 
-            // cached fields:
-            var zzCurrentPosL: Int
-            var zzMarkedPosL: Int
-            var zzEndReadL = zzEndRead
-            var zzBufferL: CharArray = zzBuffer
+        val zzTransL = ZZ_TRANS
+        val zzRowMapL = ZZ_ROWMAP
+        val zzAttrL = ZZ_ATTRIBUTE
 
-            val zzTransL = ZZ_TRANS
-            val zzRowMapL = ZZ_ROWMAP
-            val zzAttrL = ZZ_ATTRIBUTE
+        while (true) {
+            zzMarkedPosL = zzMarkedPos
 
-            while (true) {
-                zzMarkedPosL = zzMarkedPos
+            yychar += (zzMarkedPosL - zzStartRead).toLong()
 
-                yychar += (zzMarkedPosL - zzStartRead).toLong()
+            zzAction = -1
 
-                zzAction = -1
+            zzStartRead = zzMarkedPosL
+            zzCurrentPos = zzStartRead
+            zzCurrentPosL = zzCurrentPos
 
-                zzStartRead = zzMarkedPosL
-                zzCurrentPos = zzStartRead
-                zzCurrentPosL = zzCurrentPos
+            zzState = ZZ_LEXSTATE!![zzLexicalState]
 
-                zzState = ZZ_LEXSTATE!![zzLexicalState]
-
-                // set up zzAction for empty match case:
-                var zzAttributes = zzAttrL[zzState]
-                if ((zzAttributes and 1) == 1) {
-                    zzAction = zzState
-                }
+            // set up zzAction for empty match case:
+            var zzAttributes = zzAttrL[zzState]
+            if ((zzAttributes and 1) == 1) {
+                zzAction = zzState
+            }
 
 
-                zzForAction@{
-                    zzForAction@ while (true) {
-                        if (zzCurrentPosL < zzEndReadL) {
-                            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
-                            zzCurrentPosL += Character.charCount(zzInput)
-                        } else if (zzAtEOF) {
+            zzForAction@{
+                zzForAction@ while (true) {
+                    if (zzCurrentPosL < zzEndReadL) {
+                        zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
+                        zzCurrentPosL += Character.charCount(zzInput)
+                    } else if (zzAtEOF) {
+                        zzInput = YYEOF
+                        break@zzForAction
+                    } else {
+                        // store back cached positions
+                        zzCurrentPos = zzCurrentPosL
+                        zzMarkedPos = zzMarkedPosL
+                        val eof = zzRefill()
+                        // get translated positions and possibly new buffer
+                        zzCurrentPosL = zzCurrentPos
+                        zzMarkedPosL = zzMarkedPos
+                        zzBufferL = zzBuffer
+                        zzEndReadL = zzEndRead
+                        if (eof) {
                             zzInput = YYEOF
                             break@zzForAction
                         } else {
-                            // store back cached positions
-                            zzCurrentPos = zzCurrentPosL
-                            zzMarkedPos = zzMarkedPosL
-                            val eof = zzRefill()
-                            // get translated positions and possibly new buffer
-                            zzCurrentPosL = zzCurrentPos
-                            zzMarkedPosL = zzMarkedPos
-                            zzBufferL = zzBuffer
-                            zzEndReadL = zzEndRead
-                            if (eof) {
-                                zzInput = YYEOF
-                                break@zzForAction
-                            } else {
-                                zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
-                                zzCurrentPosL += Character.charCount(zzInput)
-                            }
-                        }
-                        val zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput)]
-                        if (zzNext == -1) break@zzForAction
-                        zzState = zzNext
-
-                        zzAttributes = zzAttrL[zzState]
-                        if ((zzAttributes and 1) == 1) {
-                            zzAction = zzState
-                            zzMarkedPosL = zzCurrentPosL
-                            if ((zzAttributes and 8) == 8) break@zzForAction
+                            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
+                            zzCurrentPosL += Character.charCount(zzInput)
                         }
                     }
-                }
+                    val zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput)]
+                    if (zzNext == -1) break@zzForAction
+                    zzState = zzNext
 
-                // store back cached position
-                zzMarkedPos = zzMarkedPosL
-
-                if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
-                    zzAtEOF = true
-                    run {
-                        return YYEOF
-                    }
-                } else {
-                    when (if (zzAction < 0) zzAction else ZZ_ACTION[zzAction]) {
-                        1 -> {}
-                        10 -> {}
-                        2 -> {
-                            return NUMERIC_TYPE
-                        }
-
-                        11 -> {}
-                        3 -> {
-                            return WORD_TYPE
-                        }
-
-                        12 -> {}
-                        4 -> {
-                            return EMOJI_TYPE
-                        }
-
-                        13 -> {}
-                        5 -> {
-                            return SOUTH_EAST_ASIAN_TYPE
-                        }
-
-                        14 -> {}
-                        6 -> {
-                            return HANGUL_TYPE
-                        }
-
-                        15 -> {}
-                        7 -> {
-                            return IDEOGRAPHIC_TYPE
-                        }
-
-                        16 -> {}
-                        8 -> {
-                            return KATAKANA_TYPE
-                        }
-
-                        17 -> {}
-                        9 -> {
-                            return HIRAGANA_TYPE
-                        }
-
-                        18 -> {}
-                        else -> zzScanError(ZZ_NO_MATCH)
+                    zzAttributes = zzAttrL[zzState]
+                    if ((zzAttributes and 1) == 1) {
+                        zzAction = zzState
+                        zzMarkedPosL = zzCurrentPosL
+                        if ((zzAttributes and 8) == 8) break@zzForAction
                     }
                 }
             }
+
+            // store back cached position
+            zzMarkedPos = zzMarkedPosL
+
+            if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
+                zzAtEOF = true
+                run {
+                    return YYEOF
+                }
+            } else {
+                when (if (zzAction < 0) zzAction else ZZ_ACTION[zzAction]) {
+                    1 -> {}
+                    10 -> {}
+                    2 -> {
+                        return NUMERIC_TYPE
+                    }
+
+                    11 -> {}
+                    3 -> {
+                        return WORD_TYPE
+                    }
+
+                    12 -> {}
+                    4 -> {
+                        return EMOJI_TYPE
+                    }
+
+                    13 -> {}
+                    5 -> {
+                        return SOUTH_EAST_ASIAN_TYPE
+                    }
+
+                    14 -> {}
+                    6 -> {
+                        return HANGUL_TYPE
+                    }
+
+                    15 -> {}
+                    7 -> {
+                        return IDEOGRAPHIC_TYPE
+                    }
+
+                    16 -> {}
+                    8 -> {
+                        return KATAKANA_TYPE
+                    }
+
+                    17 -> {}
+                    9 -> {
+                        return HIRAGANA_TYPE
+                    }
+
+                    18 -> {}
+                    else -> zzScanError(ZZ_NO_MATCH)
+                }
+            }
         }
-
-    fun getNextToken() = nextToken
-
+    }
 
     companion object {
         /** This character denotes the end of file.  */

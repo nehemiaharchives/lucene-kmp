@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import kotlinx.io.IOException
+import kotlin.jvm.JvmName
 import kotlin.math.min
 
 /**
@@ -259,8 +260,9 @@ internal class ReqOptSumScorer(reqScorer: Scorer, optScorer: Scorer, scoreMode: 
         return maxScore
     }
 
+    @JvmName("setMinCompetitiveScoreKt")
     @Throws(IOException::class)
-    override fun setMinCompetitiveScore(minScore: Float) {
+    fun setMinCompetitiveScore(minScore: Float) {
         this.minScore = minScore
         // Potentially move to a conjunction
         if (reqMaxScore < minScore) {
@@ -272,7 +274,7 @@ internal class ReqOptSumScorer(reqScorer: Scorer, optScorer: Scorer, scoreMode: 
                 // In theory we could generalize this and set minScore - reqMaxScore as a minimum
                 // competitive score, but it's unlikely to help in practice unless reqMaxScore is much
                 // smaller than typical scores of the optional clause.
-                optScorer.setMinCompetitiveScore(minScore)
+                optScorer.minCompetitiveScore = minScore
             }
         }
     }

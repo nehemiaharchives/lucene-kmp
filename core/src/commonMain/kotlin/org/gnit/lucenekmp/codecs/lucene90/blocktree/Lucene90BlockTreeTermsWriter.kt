@@ -693,7 +693,7 @@ class Lucene90BlockTreeTermsWriter(
                 // Block contains only ordinary terms:
                 subIndices = null
                 val statsWriter =
-                    StatsWriter(this.statsWriter, fieldInfo.getIndexOptions() !== IndexOptions.DOCS)
+                    StatsWriter(this.statsWriter, fieldInfo.indexOptions !== IndexOptions.DOCS)
                 for (i in start..<end) {
                     val ent = pending[i]
                     require(ent.isTerm) { "i=$i" }
@@ -729,7 +729,7 @@ class Lucene90BlockTreeTermsWriter(
                 // Block has at least one prefix term or a sub block:
                 subIndices = ArrayList()
                 val statsWriter =
-                    StatsWriter(this.statsWriter, fieldInfo.getIndexOptions() !== IndexOptions.DOCS)
+                    StatsWriter(this.statsWriter, fieldInfo.indexOptions !== IndexOptions.DOCS)
                 for (i in start..<end) {
                     val ent = pending[i]
                     if (ent.isTerm) {
@@ -927,7 +927,7 @@ class Lucene90BlockTreeTermsWriter(
             if (state != null) {
                 require(state.docFreq != 0)
                 require(
-                    fieldInfo.getIndexOptions() === IndexOptions.DOCS
+                    fieldInfo.indexOptions === IndexOptions.DOCS
                             || state.totalTermFreq >= state.docFreq
                 ) { "postingsWriter=$postingsWriter" }
                 pushTerm(text)
@@ -1025,8 +1025,8 @@ class Lucene90BlockTreeTermsWriter(
                 metaOut.writeVLong(numTerms)
                 metaOut.writeVInt(rootCode.length)
                 metaOut.writeBytes(rootCode.bytes, rootCode.offset, rootCode.length)
-                require(fieldInfo.getIndexOptions() !== IndexOptions.NONE)
-                if (fieldInfo.getIndexOptions() !== IndexOptions.DOCS) {
+                require(fieldInfo.indexOptions !== IndexOptions.NONE)
+                if (fieldInfo.indexOptions !== IndexOptions.DOCS) {
                     metaOut.writeVLong(sumTotalTermFreq)
                 }
                 metaOut.writeVLong(sumDocFreq)
@@ -1051,7 +1051,7 @@ class Lucene90BlockTreeTermsWriter(
             } else {
                 require(
                     sumTotalTermFreq == 0L
-                            || fieldInfo.getIndexOptions() === IndexOptions.DOCS && sumTotalTermFreq == -1L
+                            || fieldInfo.indexOptions === IndexOptions.DOCS && sumTotalTermFreq == -1L
                 )
                 require(sumDocFreq == 0L)
                 require(docsSeen.cardinality() == 0)
@@ -1067,7 +1067,7 @@ class Lucene90BlockTreeTermsWriter(
         private var compressionHashTable: HighCompressionHashTable? = null
 
         init {
-            require(fieldInfo.getIndexOptions() !== IndexOptions.NONE)
+            require(fieldInfo.indexOptions !== IndexOptions.NONE)
             docsSeen = FixedBitSet(maxDoc)
             postingsWriter.setField(fieldInfo)
         }

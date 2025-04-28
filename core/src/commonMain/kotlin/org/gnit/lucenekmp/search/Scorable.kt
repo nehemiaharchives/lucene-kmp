@@ -35,10 +35,7 @@ abstract class Scorable {
      * This method may only be called from collectors that use [ScoreMode.TOP_SCORES], and
      * successive calls may only set increasing values of `minScore`.
      */
-    @Throws(IOException::class)
-    open fun setMinCompetitiveScore(minScore: Float) {
-        // no-op by default
-    }
+    open var minCompetitiveScore: Float = 0F
 
     @get:Throws(IOException::class)
     open val children: MutableCollection<ChildScorable>

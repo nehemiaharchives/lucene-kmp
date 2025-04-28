@@ -114,33 +114,36 @@ class MultiTerms(
         return -1
     }
 
-    @Throws(IOException::class)
-    override fun getSumTotalTermFreq(): Long {
-        var sum: Long = 0
-        for (terms in this.subTerms) {
-            val v = terms.getSumTotalTermFreq()
-            require(v != -1L)
-            sum += v
+    @get:Throws(IOException::class)
+    override val sumTotalTermFreq: Long
+        get() {
+            var sum: Long = 0
+            for (terms in this.subTerms) {
+                val v = terms.sumTotalTermFreq
+                require(v != -1L)
+                sum += v
+            }
+            return sum
         }
-        return sum
-    }
 
-    @Throws(IOException::class)
-    override fun getSumDocFreq(): Long {
-        var sum: Long = 0
-        for (terms in this.subTerms) {
-            val v = terms.getSumDocFreq()
-            require(v != -1L)
-            sum += v
+    @get:Throws(IOException::class)
+    override val sumDocFreq: Long
+        get() {
+            var sum: Long = 0
+            for (terms in this.subTerms) {
+                val v = terms.sumDocFreq
+                require(v != -1L)
+                sum += v
+            }
+            return sum
         }
-        return sum
-    }
 
-    @Throws(IOException::class)
-    override fun getDocCount(): Int {
+    @get:Throws(IOException::class)
+    override val docCount: Int
+        get(){
         var sum = 0
         for (terms in this.subTerms) {
-            val v = terms.getDocCount()
+            val v = terms.docCount
             require(v != -1)
             sum += v
         }

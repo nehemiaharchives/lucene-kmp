@@ -1240,7 +1240,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             // look up the first term when doing seek block.
             term.length = bytes.readVInt()
             bytes.readBytes(term.bytes, 0, term.length)
-            val offset: Long = bytes.getFilePointer()
+            val offset: Long = bytes.filePointer
             if (offset < entry.termsDataLength - 1) {
                 // Avoid decompress again if we are reading a same block.
                 if (currentCompressedBlockStart != offset) {
@@ -1256,7 +1256,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                     )
                     LZ4.decompress(bytes, blockBuffer.length, blockBuffer.bytes, blockBuffer.offset)
                     currentCompressedBlockStart = offset
-                    currentCompressedBlockEnd = bytes.getFilePointer()
+                    currentCompressedBlockEnd = bytes.filePointer
                 } else {
                     // Skip decompression but need to re-seek to block end.
                     bytes.seek(currentCompressedBlockEnd)

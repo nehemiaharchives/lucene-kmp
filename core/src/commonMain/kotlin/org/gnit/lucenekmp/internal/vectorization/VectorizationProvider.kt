@@ -12,10 +12,10 @@ abstract class VectorizationProvider {
     /**
      * Returns a singleton (stateless) [VectorUtilSupport] to support SIMD usage in [ ].
      */
-    abstract fun getVectorUtilSupport(): VectorUtilSupport
+    abstract val vectorUtilSupport: VectorUtilSupport
 
     /** Returns a FlatVectorsScorer that supports the Lucene99 format.  */
-    abstract fun getLucene99FlatVectorsScorer(): FlatVectorsScorer
+    abstract val lucene99FlatVectorsScorer: FlatVectorsScorer
 
     /** Create a new [PostingDecodingUtil] for the given [IndexInput].  */
     @Throws(IOException::class)

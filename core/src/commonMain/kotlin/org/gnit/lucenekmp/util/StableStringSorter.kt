@@ -23,9 +23,9 @@ internal abstract class StableStringSorter(cmp: Comparator<BytesRef>) : StringSo
                 this@StableStringSorter.swap(i, j)
             }
 
-            override fun byteAt(i: Int, k: Int): Int {
+            override fun byteAt(i: Int, k: Int): Byte {
                 get(scratch1, scratchBytes1, i)
-                return cmp.byteAt(scratchBytes1, k)
+                return cmp.byteAt(scratchBytes1, k).toByte()
             }
 
             override fun getFallbackSorter(k: Int): Sorter {

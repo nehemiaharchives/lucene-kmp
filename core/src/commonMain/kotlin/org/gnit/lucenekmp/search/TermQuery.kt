@@ -41,7 +41,7 @@ class TermQuery : Query {
             val collectionStats: CollectionStatistics
             val termStats: TermStatistics?
             if (scoreMode.needsScores()) {
-                collectionStats = searcher.collectionStatistics(term.field())
+                collectionStats = searcher.collectionStatistics(term.field())!!
                 termStats =
                     if (termStates!!.docFreq() > 0)
                         searcher.termStatistics(term, termStates.docFreq(), termStates.totalTermFreq())
@@ -141,8 +141,8 @@ class TermQuery : Query {
                     }
                 }
 
-                @Throws(IOException::class) override fun bulkScorer(): BulkScorer {
-                    if (scoreMode.needsScores() == false) {
+                @Throws(IOException::class) override fun bulkScorer(): BulkScorer? {
+                    if (!scoreMode.needsScores()) {
                         val iterator: DocIdSetIterator = get(Long.Companion.MAX_VALUE).iterator()
                         val maxDoc: Int = context.reader().maxDoc()
                         return ConstantScoreScorerSupplier.fromIterator(iterator, 0f, scoreMode, maxDoc)
@@ -230,17 +230,13 @@ class TermQuery : Query {
         }
 
         @Throws(IOException::class) override fun count(context: LeafReaderContext): Int {
-            if (context.reader().hasDeletions() == false) {
+            return if (!context.reader().hasDeletions()) {
                 val termsEnum: TermsEnum? = getTermsEnum(context)
                 // termsEnum is not null if term state is available
-                if (termsEnum != null) {
-                    return termsEnum.docFreq()
-                } else {
-                    // the term cannot be found in the dictionary so the count is 0
-                    return 0
-                }
+                termsEnum?.docFreq() ?: // the term cannot be found in the dictionary so the count is 0
+                0
             } else {
-                return super.count(context)
+                super.count(context)
             }
         }
     }
@@ -267,13 +263,12 @@ class TermQuery : Query {
     }
 
     @Throws(IOException::class) override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
-        val context: IndexReaderContext = searcher.topReaderContext
-        val termState: TermStates
-        if (perReaderTermState == null || perReaderTermState.wasBuiltFor(context) == false) {
-            termState = TermStates.build(searcher, term, scoreMode.needsScores())
+        val context: IndexReaderContext = searcher.getTopReaderContext()
+        val termState: TermStates = if (perReaderTermState == null || !perReaderTermState.wasBuiltFor(context)) {
+            TermStates.build(searcher, term, scoreMode.needsScores())
         } else {
             // PRTS was pre-build for this IS
-            termState = this.perReaderTermState
+            this.perReaderTermState
         }
 
         return this.TermWeight(searcher, scoreMode, boost, termState)

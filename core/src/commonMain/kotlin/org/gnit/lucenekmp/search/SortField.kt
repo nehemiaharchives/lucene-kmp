@@ -25,6 +25,7 @@ import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.NumericUtils
+import kotlin.jvm.JvmName
 
 
 /**
@@ -132,6 +133,10 @@ class SortField {
     private var comparatorSource: FieldComparatorSource? = null
 
     // Used for 'sortMissingFirst/Last'
+    /**
+     * Return the value to use for documents that don't have a value. A value of `null`
+     * indicates that default should be used.
+     */
     protected var missingValue: Any? = null
 
     /**
@@ -270,15 +275,8 @@ class SortField {
         }
     }
 
-    /**
-     * Return the value to use for documents that don't have a value. A value of `null`
-     * indicates that default should be used.
-     */
-    fun getMissingValue(): Any? {
-        return missingValue
-    }
-
     /** Set the value to use for documents that don't have a value.  */
+    @JvmName("setMissingValueKt")
     fun setMissingValue(missingValue: Any) {
         if (type == Type.STRING || type == Type.STRING_VAL) {
             require(!(missingValue !== STRING_FIRST && missingValue !== STRING_LAST)) { "For STRING type, missing value must be either STRING_FIRST or STRING_LAST" }

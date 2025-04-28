@@ -39,15 +39,15 @@ abstract class TopTermsRewrite<B>
     @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher, query: MultiTermQuery): Query {
         val maxSize = min(size, this.maxSize)
-        val stQueue: PriorityQueue<ScoreTerm> = PriorityQueue<ScoreTerm>()
+        val stQueue: PriorityQueue<ScoreTerm> = PriorityQueue()
         collectTerms(
-            indexSearcher.indexReader,
+            indexSearcher.getIndexReader(),
             query,
             object : TermCollector() {
                 private val maxBoostAtt: MaxNonCompetitiveBoostAttribute =
                     attributes.addAttribute(MaxNonCompetitiveBoostAttribute::class)
 
-                private val visitedTerms: MutableMap<BytesRef, ScoreTerm> = mutableMapOf<BytesRef, ScoreTerm>()
+                private val visitedTerms: MutableMap<BytesRef, ScoreTerm> = mutableMapOf()
 
                 private var termsEnum: TermsEnum? = null
                 private var boostAtt: BoostAttribute? = null
@@ -73,7 +73,7 @@ abstract class TopTermsRewrite<B>
                     } else if (t == null) {
                         lastTerm = null
                     } else {
-                        require(lastTerm!!.get().compareTo(t) < 0) { "lastTerm=$lastTerm t=$t" }
+                        require(lastTerm!!.get() < t) { "lastTerm=$lastTerm t=$t" }
                         lastTerm!!.copyBytes(t)
                     }
                     return true
@@ -136,10 +136,10 @@ abstract class TopTermsRewrite<B>
 
         val b: B = topLevelBuilder
         val scoreTerms: Array<ScoreTerm> = stQueue.toTypedArray()
-        ArrayUtil.timSort(scoreTerms, { st1, st2 -> st1.bytes.get().compareTo(st2.bytes.get()) })
+        ArrayUtil.timSort(scoreTerms) { st1, st2 -> st1.bytes.get().compareTo(st2.bytes.get()) }
 
         for (st in scoreTerms) {
-            val term: Term = Term(query.field, st.bytes.toBytesRef())
+            val term = Term(query.field, st.bytes.toBytesRef())
             // We allow negative term scores (fuzzy query does this, for example) while collecting the
             // terms,
             // but truncate such boosts to 0.0f when building the query:
@@ -159,22 +159,16 @@ abstract class TopTermsRewrite<B>
         if (obj == null) return false
         if (this::class != obj::class) return false
         val other = obj as TopTermsRewrite<*>
-        if (size != other.size) return false
-        return true
+        return size == other.size
     }
 
-    internal class ScoreTerm(termState: TermStates) : Comparable<ScoreTerm> {
+    internal class ScoreTerm(val termState: TermStates) : Comparable<ScoreTerm> {
         val bytes: BytesRefBuilder = BytesRefBuilder()
         var boost: Float = 0f
-        val termState: TermStates
-
-        init {
-            this.termState = termState
-        }
 
         override fun compareTo(other: ScoreTerm): Int {
-            if (this.boost == other.boost) return other.bytes.get().compareTo(this.bytes.get())
-            else return Float.compare(this.boost, other.boost)
+            return if (this.boost == other.boost) other.bytes.get().compareTo(this.bytes.get())
+            else Float.compare(this.boost, other.boost)
         }
     }
 }

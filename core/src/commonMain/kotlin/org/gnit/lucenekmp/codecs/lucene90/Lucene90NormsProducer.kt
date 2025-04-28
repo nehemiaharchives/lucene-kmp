@@ -263,7 +263,7 @@ internal class Lucene90NormsProducer(
         // doesn't need this feature but CheckIndex might, plus we need merge
         // instances to behave well and not be trappy.
         return object : IndexInput("docs") {
-            var filePointer: Long = 0
+            override var filePointer: Long = 0
 
             @Throws(IOException::class)
             override fun readBytes(b: ByteArray, off: Int, len: Int) {
@@ -308,10 +308,6 @@ internal class Lucene90NormsProducer(
             @Throws(IOException::class)
             override fun close() {
                 throw UnsupportedOperationException("Unused by IndexedDISI")
-            }
-
-            override fun getFilePointer(): Long {
-                return filePointer
             }
 
             @Throws(IOException::class)

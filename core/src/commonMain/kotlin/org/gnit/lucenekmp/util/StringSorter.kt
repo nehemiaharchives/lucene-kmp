@@ -7,18 +7,13 @@ package org.gnit.lucenekmp.util
  *
  * @lucene.internal
  */
-abstract class StringSorter protected constructor(cmp: Comparator<BytesRef>) : Sorter() {
-    private val cmp: Comparator<BytesRef>
+abstract class StringSorter protected constructor(private val cmp: Comparator<BytesRef>) : Sorter() {
     protected val scratch1: BytesRefBuilder = BytesRefBuilder()
     protected val scratch2: BytesRefBuilder = BytesRefBuilder()
     protected val pivotBuilder: BytesRefBuilder = BytesRefBuilder()
     protected val scratchBytes1: BytesRef = BytesRef()
     protected val scratchBytes2: BytesRef = BytesRef()
     protected val pivot: BytesRef = BytesRef()
-
-    init {
-        this.cmp = cmp
-    }
 
     protected abstract fun get(builder: BytesRefBuilder, result: BytesRef, i: Int)
 
@@ -30,9 +25,9 @@ abstract class StringSorter protected constructor(cmp: Comparator<BytesRef>) : S
 
     override fun sort(from: Int, to: Int) {
         if (cmp is BytesRefComparator) {
-            radixSorter(cmp)!!.sort(from, to)
+            radixSorter(cmp).sort(from, to)
         } else {
-            fallbackSorter(cmp)!!.sort(from, to)
+            fallbackSorter(cmp).sort(from, to)
         }
     }
 
@@ -41,17 +36,17 @@ abstract class StringSorter protected constructor(cmp: Comparator<BytesRef>) : S
         MSBRadixSorter(
             cmp.comparedBytesCount
         ) {
-        protected override fun swap(i: Int, j: Int) {
+        override fun swap(i: Int, j: Int) {
             this@StringSorter.swap(i, j)
         }
 
-        protected override fun byteAt(i: Int, k: Int): Int {
+        override fun byteAt(i: Int, k: Int): Byte {
             get(scratch1, scratchBytes1, i)
-            return cmp.byteAt(scratchBytes1, k)
+            return cmp.byteAt(scratchBytes1, k).toByte()
         }
 
-        protected override fun getFallbackSorter(k: Int): Sorter {
-            return fallbackSorter(Comparator { o1: BytesRef, o2: BytesRef -> cmp.compare(o1, o2, k) })
+        override fun getFallbackSorter(k: Int): Sorter {
+            return fallbackSorter { o1: BytesRef, o2: BytesRef -> cmp.compare(o1, o2, k) }
         }
     }
 

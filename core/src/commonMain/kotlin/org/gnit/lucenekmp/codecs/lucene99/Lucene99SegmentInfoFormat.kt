@@ -168,9 +168,9 @@ class Lucene99SegmentInfoFormat
         output.writeInt(version.bugfix)
 
         // Write the min Lucene version that contributed docs to the segment, since 7.0
-        if (si.getMinVersion() != null) {
+        if (si.minVersion != null) {
             output.writeByte(1.toByte())
-            val minVersion: Version = si.getMinVersion()!!
+            val minVersion: Version = si.minVersion!!
             output.writeInt(minVersion.major)
             output.writeInt(minVersion.minor)
             output.writeInt(minVersion.bugfix)
@@ -181,8 +181,8 @@ class Lucene99SegmentInfoFormat
         require(version.prerelease == 0)
         output.writeInt(si.maxDoc())
 
-        output.writeByte((if (si.getUseCompoundFile()) SegmentInfo.YES else SegmentInfo.NO).toByte())
-        output.writeByte((if (si.getHasBlocks()) SegmentInfo.YES else SegmentInfo.NO).toByte())
+        output.writeByte((if (si.useCompoundFile) SegmentInfo.YES else SegmentInfo.NO).toByte())
+        output.writeByte((if (si.hasBlocks) SegmentInfo.YES else SegmentInfo.NO).toByte())
         output.writeMapOfStrings(si.getDiagnostics())
         val files: MutableSet<String> = si.files()
         for (file in files) {
@@ -191,16 +191,16 @@ class Lucene99SegmentInfoFormat
             ) { "invalid files: expected segment=" + si.name + ", got=" + files }
         }
         output.writeSetOfStrings(files)
-        output.writeMapOfStrings(si.getAttributes())
+        output.writeMapOfStrings(si.attributes)
 
         val indexSort: Sort? = si.getIndexSort()
-        val numSortFields = indexSort?.getSort()?.size ?: 0
+        val numSortFields = indexSort?.sort?.size ?: 0
         output.writeVInt(numSortFields)
         for (i in 0..<numSortFields) {
-            val sortField: SortField = indexSort!!.getSort()[i]
+            val sortField: SortField = indexSort!!.sort[i]
             val sorter: IndexSorter? = sortField.getIndexSorter()
             requireNotNull(sorter) { "cannot serialize SortField $sortField" }
-            output.writeString(sorter.getProviderName())
+            output.writeString(sorter.providerName)
             SortFieldProvider.write(sortField, output)
         }
     }

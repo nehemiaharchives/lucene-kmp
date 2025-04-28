@@ -17,7 +17,7 @@ class MatchAllScorerSupplier
     }
 
     @Throws(IOException::class)
-    override fun bulkScorer(): BulkScorer {
+    override fun bulkScorer(): BulkScorer? {
         if (maxDoc >= DenseConjunctionBulkScorer.WINDOW_SIZE / 2) {
             return DenseConjunctionBulkScorer(mutableListOf(), maxDoc, score)
         } else {

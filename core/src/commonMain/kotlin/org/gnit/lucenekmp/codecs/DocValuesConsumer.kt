@@ -110,7 +110,7 @@ protected constructor() : AutoCloseable {
         }
 
         for (mergeFieldInfo in mergeState.mergeFieldInfos!!) {
-            val type: DocValuesType = mergeFieldInfo.getDocValuesType()
+            val type: DocValuesType = mergeFieldInfo.docValuesType
             if (type !== DocValuesType.NONE) {
                 if (type === DocValuesType.NUMERIC) {
                     mergeNumericField(mergeFieldInfo, mergeState)
@@ -166,7 +166,7 @@ protected constructor() : AutoCloseable {
                         if (docValuesProducer != null) {
                             val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
-                                && readerFieldInfo.getDocValuesType() === DocValuesType.NUMERIC
+                                && readerFieldInfo.docValuesType === DocValuesType.NUMERIC
                             ) {
                                 values = docValuesProducer.getNumeric(readerFieldInfo)
                             }
@@ -219,7 +219,7 @@ protected constructor() : AutoCloseable {
                         if (docValuesProducer != null) {
                             val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
-                                && readerFieldInfo.getDocValuesType() === DocValuesType.BINARY
+                                && readerFieldInfo.docValuesType === DocValuesType.BINARY
                             ) {
                                 values = docValuesProducer.getBinary(readerFieldInfo)
                             }
@@ -312,7 +312,7 @@ protected constructor() : AutoCloseable {
                         if (docValuesProducer != null) {
                             val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
-                                && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED_NUMERIC
+                                && readerFieldInfo.docValuesType === DocValuesType.SORTED_NUMERIC
                             ) {
                                 values = docValuesProducer.getSortedNumeric(readerFieldInfo)
                             }
@@ -495,7 +495,7 @@ protected constructor() : AutoCloseable {
             val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
             if (docValuesProducer != null) {
                 val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(fieldInfo.name)
-                if (readerFieldInfo != null && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED) {
+                if (readerFieldInfo != null && readerFieldInfo.docValuesType === DocValuesType.SORTED) {
                     values = docValuesProducer.getSorted(readerFieldInfo)
                 }
             }
@@ -552,7 +552,7 @@ protected constructor() : AutoCloseable {
                         if (docValuesProducer != null) {
                             val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(fieldInfo.name)
                             if (readerFieldInfo != null
-                                && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED
+                                && readerFieldInfo.docValuesType === DocValuesType.SORTED
                             ) {
                                 values = docValuesProducer.getSorted(readerFieldInfo)
                             }
@@ -602,7 +602,7 @@ protected constructor() : AutoCloseable {
             val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
             if (docValuesProducer != null) {
                 val fieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
-                if (fieldInfo != null && fieldInfo.getDocValuesType() === DocValuesType.SORTED_SET) {
+                if (fieldInfo != null && fieldInfo.docValuesType === DocValuesType.SORTED_SET) {
                     values = docValuesProducer.getSortedSet(fieldInfo)
                 }
             }
@@ -659,7 +659,7 @@ protected constructor() : AutoCloseable {
                         if (docValuesProducer != null) {
                             val readerFieldInfo: FieldInfo? = mergeState.fieldInfos[i]!!.fieldInfo(mergeFieldInfo.name)
                             if (readerFieldInfo != null
-                                && readerFieldInfo.getDocValuesType() === DocValuesType.SORTED_SET
+                                && readerFieldInfo.docValuesType === DocValuesType.SORTED_SET
                             ) {
                                 values = docValuesProducer.getSortedSet(readerFieldInfo)
                             }

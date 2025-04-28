@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 import dev.scottpierce.envvar.EnvVar
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.fst.FST.Arc
+import kotlin.jvm.JvmName
 
 
 /**
@@ -164,24 +165,7 @@ object System {
      * `dest` is `null`.
      */
 
-    fun arraycopy(src: Array<Any>, srcPos: Int, dest: Array<Any>, destPos: Int, length: Int) {
-        src.copyInto(
-            destination = dest,
-            destinationOffset = destPos,
-            startIndex = srcPos,
-            endIndex = srcPos + length
-        )
-    }
-
-    fun arraycopy(src: Array<Any?>, srcPos: Int, dest: Array<Any?>, destPos: Int, length: Int) {
-        src.copyInto(
-            destination = dest,
-            destinationOffset = destPos,
-            startIndex = srcPos,
-            endIndex = srcPos + length
-        )
-    }
-
+    @JvmName("arraycopyKtNullable")
     fun <T> arraycopy(src: Array<T?>, srcPos: Int, dest: Array<T?>, destPos: Int, length: Int) {
         src.copyInto(
             destination = dest,
@@ -191,6 +175,7 @@ object System {
         )
     }
 
+    @JvmName("arraycopyKt")
     fun <T> arraycopy(src: Array<T>, srcPos: Int, dest: Array<T>, destPos: Int, length: Int) {
         src.copyInto(
             destination = dest,

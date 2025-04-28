@@ -224,10 +224,10 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             termState.singletonDocID += BitUtil.zigZagDecode(l ushr 1).toInt()
         }
 
-        if (fieldInfo.getIndexOptions() >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) {
+        if (fieldInfo.indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) {
             termState.posStartFP += `in`.readVLong()
             if ((fieldInfo
-                    .getIndexOptions() >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
+                    .indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
                 || fieldInfo.hasPayloads()
             ) {
                 termState.payStartFP += `in`.readVLong()
@@ -338,8 +338,15 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         var payIn: IndexInput? = null
         var payInUtil: PostingDecodingUtil? = null
         override var payload: BytesRef? = null
+            get() {
+                return if (!needsPayloads || payloadLength == 0) {
+                    null
+                } else {
+                    payload
+                }
+            }
 
-        val options: IndexOptions = fieldInfo.getIndexOptions()
+        val options: IndexOptions = fieldInfo.indexOptions
         val indexHasFreq: Boolean = options >= IndexOptions.DOCS_AND_FREQS
         val indexHasPos: Boolean = options >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS
         val indexHasOffsets: Boolean = options >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS
@@ -391,7 +398,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         fun canReuse(
             docIn: IndexInput, fieldInfo: FieldInfo, flags: Int, needsImpacts: Boolean
         ): Boolean {
-            return docIn === this@Lucene101PostingsReader.docIn && options === fieldInfo.getIndexOptions() && indexHasPayloads == fieldInfo.hasPayloads() && this.flags == flags && this.needsImpacts == needsImpacts
+            return docIn === this@Lucene101PostingsReader.docIn && options === fieldInfo.indexOptions && indexHasPayloads == fieldInfo.hasPayloads() && this.flags == flags && this.needsImpacts == needsImpacts
         }
 
         @Throws(IOException::class)
@@ -523,7 +530,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             }
             if (indexHasFreq) {
                 if (needsFreq) {
-                    freqFP = docIn!!.getFilePointer()
+                    freqFP = docIn!!.filePointer
                 }
                 PForUtil.skip(docIn!!)
             }
@@ -592,10 +599,10 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
                 level1LastDocID += docIn!!.readVInt()
                 val delta: Long = docIn!!.readVLong()
-                level1DocEndFP = delta + docIn!!.getFilePointer()
+                level1DocEndFP = delta + docIn!!.filePointer
 
                 if (indexHasFreq) {
-                    val skip1EndFP: Long = docIn!!.readShort() + docIn!!.getFilePointer()
+                    val skip1EndFP: Long = docIn!!.readShort() + docIn!!.filePointer
                     val numImpactBytes: Int = docIn!!.readShort().toInt()
                     if (needsImpacts && level1LastDocID >= target) {
                         docIn!!.readBytes(level1SerializedImpacts!!.bytes, 0, numImpactBytes)
@@ -611,7 +618,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                             level1BlockPayUpto = docIn!!.readVInt()
                         }
                     }
-                    require(docIn!!.getFilePointer() == skip1EndFP)
+                    require(docIn!!.filePointer == skip1EndFP)
                 }
 
                 if (level1LastDocID >= target) {
@@ -624,11 +631,11 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         private fun doMoveToNextLevel0Block() {
             require(doc == level0LastDocID)
             if (posIn != null) {
-                if (level0PosEndFP >= posIn!!.getFilePointer()) {
+                if (level0PosEndFP >= posIn!!.filePointer) {
                     posIn!!.seek(level0PosEndFP)
                     posPendingCount = level0BlockPosUpto
                     if (payIn != null) {
-                        require(level0PayEndFP >= payIn!!.getFilePointer())
+                        require(level0PayEndFP >= payIn!!.filePointer)
                         payIn!!.seek(level0PayEndFP)
                         payloadByteUpto = level0BlockPayUpto
                     }
@@ -644,7 +651,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 val docDelta = readVInt15(docIn!!)
                 level0LastDocID += docDelta
                 val blockLength = readVLong15(docIn!!)
-                level0DocEndFP = docIn!!.getFilePointer() + blockLength
+                level0DocEndFP = docIn!!.filePointer + blockLength
                 if (indexHasFreq) {
                     val numImpactBytes: Int = docIn!!.readVInt()
                     if (needsImpacts) {
@@ -682,7 +689,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             if (needsDocsAndFreqsOnly && docCountLeft >= BLOCK_SIZE) {
                 // Optimize the common path for exhaustive evaluation
                 val level0NumBytes: Long = docIn!!.readVLong()
-                val level0End: Long = docIn!!.getFilePointer() + level0NumBytes
+                val level0End: Long = docIn!!.filePointer + level0NumBytes
                 level0LastDocID += readVInt15(docIn!!)
                 docIn!!.seek(level0End)
                 refillFullBlock()
@@ -707,11 +714,11 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             // the first docs of the next block are already decoded. In this case we just accumulate
             // frequencies into posPendingCount instead of seeking backwards and decoding the same pos
             // block again.
-            if (posFP >= posIn!!.getFilePointer()) {
+            if (posFP >= posIn!!.filePointer) {
                 posIn!!.seek(posFP)
                 posPendingCount = posUpto
                 if (payIn != null) { // needs payloads or offsets
-                    require(level0PayEndFP >= payIn!!.getFilePointer())
+                    require(level0PayEndFP >= payIn!!.filePointer)
                     payIn!!.seek(payFP)
                     payloadByteUpto = payUpto
                 }
@@ -738,12 +745,12 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
                 if (docCountLeft >= BLOCK_SIZE) {
                     val numSkipBytes: Long = docIn!!.readVLong()
-                    val skip0End: Long = docIn!!.getFilePointer() + numSkipBytes
+                    val skip0End: Long = docIn!!.filePointer + numSkipBytes
                     val docDelta = readVInt15(docIn!!)
                     level0LastDocID += docDelta
                     val found = target <= level0LastDocID
                     val blockLength = readVLong15(docIn!!)
-                    level0DocEndFP = docIn!!.getFilePointer() + blockLength
+                    level0DocEndFP = docIn!!.filePointer + blockLength
 
                     if (indexHasFreq) {
                         if (!found && !needsPos) {
@@ -820,6 +827,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                     require(next != NO_MORE_DOCS)
                     doc = docBitSetBase + next
                 }
+
                 else -> {
                     // This should never happen, but just in case.
                     throw IllegalStateException("Unknown encoding: $encoding")
@@ -867,6 +875,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                         docBufferUpto = 1
                     }
                 }
+
                 else -> {
                     // This should never happen, but just in case.
                     throw IllegalStateException("Unknown encoding: $encoding")
@@ -980,7 +989,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             } else {
                 toSkip -= leftInBlock
                 while (toSkip >= BLOCK_SIZE) {
-                    require(posIn!!.getFilePointer() != lastPosBlockFP)
+                    require(posIn!!.filePointer != lastPosBlockFP)
                     PForUtil.skip(posIn!!)
 
                     if (payIn != null) {
@@ -990,7 +999,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
                             // Skip payloadBytes block:
                             val numBytes: Int = payIn!!.readVInt()
-                            payIn!!.seek(payIn!!.getFilePointer() + numBytes)
+                            payIn!!.seek(payIn!!.filePointer + numBytes)
                         }
 
                         if (indexHasOffsets) {
@@ -1067,7 +1076,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                     // written
                     PForUtil.skip(payIn!!) // skip over lengths
                     val numBytes: Int = payIn!!.readVInt() // read length of payloadBytes
-                    payIn!!.seek(payIn!!.getFilePointer() + numBytes) // skip over payloadBytes
+                    payIn!!.seek(payIn!!.filePointer + numBytes) // skip over payloadBytes
                 }
                 payloadByteUpto = 0
             }
@@ -1087,7 +1096,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
         @Throws(IOException::class)
         private fun refillPositions() {
-            if (posIn!!.getFilePointer() == lastPosBlockFP) {
+            if (posIn!!.filePointer == lastPosBlockFP) {
                 refillLastPositionBlock()
                 return
             }
@@ -1169,14 +1178,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 return -1
             }
             return endOffset
-        }
-
-        override fun getPayload(): BytesRef? {
-            return if (!needsPayloads || payloadLength == 0) {
-                null
-            } else {
-                payload
-            }
         }
 
         override fun cost(): Long {
@@ -1374,7 +1375,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             require(
                 state.docFreq > 1 // Singletons are inlined in the terms dict, nothing to prefetch
             )
-            if (docIn.getFilePointer() != state.docStartFP) {
+            if (docIn.filePointer != state.docStartFP) {
                 // Don't prefetch if the input is already positioned at the right offset, which suggests that
                 // the caller is streaming the entire inverted index (e.g. for merging), let the read-ahead
                 // logic do its work instead. Note that this heuristic doesn't work for terms that have skip

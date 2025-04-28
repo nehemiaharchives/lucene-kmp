@@ -167,7 +167,7 @@ internal class SortedNumericDocValuesRangeQuery(
             return null
         }
         val indexSort: Sort? = reader.metaData.sort
-        if (indexSort == null || indexSort.sort.isEmpty() || indexSort.sort[0].field.equals(field) == false) {
+        if (indexSort == null || indexSort.sort.isEmpty() || !indexSort.sort[0].field.equals(field)) {
             return null
         }
 

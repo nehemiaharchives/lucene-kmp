@@ -76,7 +76,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
         Weight(this@DisjunctionMaxQuery) {
         /** The Weights for our subqueries, in 1-1 correspondence with disjuncts  */
         protected val weights: ArrayList<Weight> =
-            ArrayList<Weight>() // The Weight's for our subqueries, in 1-1 correspondence with disjuncts
+            ArrayList() // The Weight's for our subqueries, in 1-1 correspondence with disjuncts
 
         private val scoreMode: ScoreMode
 
@@ -86,14 +86,14 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
          */
         init {
             for (disjunctQuery in disjuncts) {
-                weights.add(searcher.createWeight(disjunctQuery, scoreMode!!, boost))
+                weights.add(searcher.createWeight(disjunctQuery, scoreMode, boost))
             }
             this.scoreMode = scoreMode
         }
 
         @Throws(IOException::class)
         override fun matches(context: LeafReaderContext, doc: Int): Matches {
-            val mis: MutableList<Matches> = ArrayList<Matches>()
+            val mis: MutableList<Matches> = ArrayList()
             for (weight in weights) {
                 val mi: Matches? = weight.matches(context, doc)
                 if (mi != null) {
@@ -105,7 +105,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
 
         @Throws(IOException::class)
         override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
-            val scorerSuppliers: MutableList<ScorerSupplier> = ArrayList<ScorerSupplier>()
+            val scorerSuppliers: MutableList<ScorerSupplier> = ArrayList()
             for (w in weights) {
                 val ss: ScorerSupplier? = w.scorerSupplier(context)
                 if (ss != null) {
@@ -116,14 +116,14 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
             if (scorerSuppliers.isEmpty()) {
                 return null
             } else if (scorerSuppliers.size == 1) {
-                return scorerSuppliers.get(0)
+                return scorerSuppliers[0]
             } else {
                 return object : ScorerSupplier() {
                     private var cost: Long = -1
 
                     @Throws(IOException::class)
                     override fun get(leadCost: Long): Scorer {
-                        val scorers: MutableList<Scorer> = ArrayList<Scorer>()
+                        val scorers: MutableList<Scorer> = ArrayList()
                         for (ss in scorerSuppliers) {
                             scorers.add(ss.get(leadCost))
                         }
@@ -131,11 +131,11 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
                     }
 
                     @Throws(IOException::class)
-                    override fun bulkScorer(): BulkScorer {
+                    override fun bulkScorer(): BulkScorer? {
                         if (tieBreakerMultiplier == 0f && scoreMode == ScoreMode.TOP_SCORES) {
-                            val scorers: MutableList<BulkScorer> = ArrayList<BulkScorer>()
+                            val scorers: MutableList<BulkScorer> = ArrayList()
                             for (ss in scorerSuppliers) {
-                                scorers.add(ss.bulkScorer())
+                                scorers.add(ss.bulkScorer()!!)
                             }
                             return DisjunctionMaxBulkScorer(scorers)
                         }
@@ -176,7 +176,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
                 return false
             }
             for (w in weights) {
-                if (w.isCacheable(ctx) == false) return false
+                if (!w.isCacheable(ctx)) return false
             }
             return true
         }
@@ -187,8 +187,8 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
             var match = false
             var max = 0.0
             var otherSum = 0.0
-            val subsOnMatch: MutableList<Explanation> = ArrayList<Explanation>()
-            val subsOnNoMatch: MutableList<Explanation> = ArrayList<Explanation>()
+            val subsOnMatch: MutableList<Explanation> = ArrayList()
+            val subsOnNoMatch: MutableList<Explanation> = ArrayList()
             for (wt in weights) {
                 val e: Explanation = wt.explain(context, doc)
                 if (e.isMatch) {
@@ -201,7 +201,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
                     } else {
                         otherSum += score
                     }
-                } else if (match == false) {
+                } else if (!match) {
                     subsOnNoMatch.add(e)
                 }
             }
@@ -222,7 +222,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
 
     /** Create the Weight used to score us  */
     @Throws(IOException::class)
-    public override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
+    override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return this.DisjunctionMaxWeight(searcher, scoreMode, boost)
     }
 
@@ -232,7 +232,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
      * @return an optimized copy of us (which may not be a copy if there is nothing to optimize)
      */
     @Throws(IOException::class)
-    public override fun rewrite(indexSearcher: IndexSearcher): Query {
+    override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (disjuncts.isEmpty()) {
             return MatchNoDocsQuery("empty DisjunctionMaxQuery")
         }
@@ -250,7 +250,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
         }
 
         var actuallyRewritten = false
-        val rewrittenDisjuncts: MutableList<Query> = ArrayList<Query>()
+        val rewrittenDisjuncts: MutableList<Query> = ArrayList()
         for (sub in disjuncts) {
             val rewrittenSub: Query = sub.rewrite(indexSearcher)
             actuallyRewritten = actuallyRewritten or (rewrittenSub != sub)
@@ -264,7 +264,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
         return super.rewrite(indexSearcher)
     }
 
-    public override fun visit(visitor: QueryVisitor) {
+    override fun visit(visitor: QueryVisitor) {
         val v: QueryVisitor = visitor.getSubVisitor(BooleanClause.Occur.SHOULD, this)
         for (q in disjuncts) {
             q.visit(v)

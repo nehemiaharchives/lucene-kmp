@@ -94,7 +94,7 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
             minLeafBlockFP = metaIn.readLong()
             indexStartPointer = metaIn.readLong()
         } else {
-            indexStartPointer = indexIn.getFilePointer()
+            indexStartPointer = indexIn.filePointer
             minLeafBlockFP = indexIn.readVLong()
             indexIn.seek(indexStartPointer)
         }
@@ -361,7 +361,7 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
         @Throws(IOException::class)
         fun resetNodeDataPosition() {
             // move position of the inner nodes index to visit the first child
-            require(readNodeDataPositions[level] <= innerNodes.getFilePointer())
+            require(readNodeDataPositions[level] <= innerNodes.filePointer)
             innerNodes.seek(readNodeDataPositions[level].toLong())
         }
 
@@ -433,8 +433,8 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
         fun pushRight() {
             val nodePosition = rightNodePositions[level]
             require(
-                nodePosition >= innerNodes.getFilePointer()
-            ) { "nodePosition = " + nodePosition + " < currentPosition=" + innerNodes.getFilePointer() }
+                nodePosition >= innerNodes.filePointer
+            ) { "nodePosition = " + nodePosition + " < currentPosition=" + innerNodes.filePointer }
             innerNodes.seek(nodePosition.toLong())
             nodeID = 2 * nodeID + 1
             level++
@@ -721,8 +721,8 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
                 } else {
                     0
                 }
-                rightNodePositions[level] = Math.toIntExact(innerNodes.getFilePointer()) + leftNumBytes
-                readNodeDataPositions[level] = Math.toIntExact(innerNodes.getFilePointer())
+                rightNodePositions[level] = Math.toIntExact(innerNodes.filePointer) + leftNumBytes
+                readNodeDataPositions[level] = Math.toIntExact(innerNodes.filePointer)
             }
         }
 

@@ -103,9 +103,9 @@ interface PrimitiveIterator<T, T_CONS> : MutableIterator<T> {
          * The action is adapted to an instance of the function type,
          * and then passed to [.forEachRemaining].
          */
-        fun forEachRemaining(action: (Any?) -> Unit) {
+        /*fun forEachRemaining(action: (Any?) -> Unit) {
             forEachRemaining { value: Int -> action(value) }
-        }
+        }*/
     }
 
     /**
@@ -130,9 +130,9 @@ interface PrimitiveIterator<T, T_CONS> : MutableIterator<T> {
          * action(nextLong());
         `</pre> *
          */
-        override fun forEachRemaining(action: (Long) -> Unit) {
+        /*override fun forEachRemaining(action: (Long) -> Unit) {
             while (hasNext()) action(nextLong())
-        }
+        }*/
 
         /**
          * {@inheritDoc}
@@ -177,9 +177,9 @@ interface PrimitiveIterator<T, T_CONS> : MutableIterator<T> {
          * action(nextDouble());
         `</pre> *
          */
-        override fun forEachRemaining(action: (Double) -> Unit) {
+        /*override fun forEachRemaining(action: (Double) -> Unit) {
             while (hasNext()) action(nextDouble())
-        }
+        }*/
 
         /**
          * {@inheritDoc}
@@ -197,8 +197,8 @@ interface PrimitiveIterator<T, T_CONS> : MutableIterator<T> {
          * The action is adapted to an instance of the function type,
          * and then passed to [.forEachRemaining].
          */
-        fun forEachRemaining(action: (Any?) -> Unit) {
+        /*fun forEachRemaining(action: (Any?) -> Unit) {
             forEachRemaining { value: Double -> action(value) }
-        }
+        }*/
     }
 }

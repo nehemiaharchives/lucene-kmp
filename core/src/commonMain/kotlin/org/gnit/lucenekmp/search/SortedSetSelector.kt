@@ -113,7 +113,7 @@ object SortedSetSelector {
         }
 
         @Throws(IOException::class)
-        override fun lookupOrd(ord: Int): BytesRef {
+        override fun lookupOrd(ord: Int): BytesRef? {
             return `in`.lookupOrd(ord.toLong())
         }
 
@@ -173,7 +173,7 @@ object SortedSetSelector {
         }
 
         @Throws(IOException::class)
-        override fun lookupOrd(ord: Int): BytesRef {
+        override fun lookupOrd(ord: Int): BytesRef? {
             return `in`.lookupOrd(ord.toLong())
         }
 
@@ -237,7 +237,7 @@ object SortedSetSelector {
         }
 
         @Throws(IOException::class)
-        override fun lookupOrd(ord: Int): BytesRef {
+        override fun lookupOrd(ord: Int): BytesRef? {
             return `in`.lookupOrd(ord.toLong())
         }
 
@@ -302,7 +302,7 @@ object SortedSetSelector {
         }
 
         @Throws(IOException::class)
-        override fun lookupOrd(ord: Int): BytesRef {
+        override fun lookupOrd(ord: Int): BytesRef? {
             return `in`.lookupOrd(ord.toLong())
         }
 

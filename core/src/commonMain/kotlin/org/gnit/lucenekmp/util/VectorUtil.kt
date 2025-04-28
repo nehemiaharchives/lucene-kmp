@@ -2,6 +2,8 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.internal.vectorization.VectorUtilSupport
 import org.gnit.lucenekmp.internal.vectorization.VectorizationProvider
+import org.gnit.lucenekmp.jdkport.bitCount
+import org.gnit.lucenekmp.jdkport.isFinite
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -38,7 +40,7 @@ import kotlin.math.sqrt
 object VectorUtil {
     private const val EPSILON = 1e-4f
 
-    private val IMPL: VectorUtilSupport = VectorizationProvider.getInstance().getVectorUtilSupport()
+    private val IMPL: VectorUtilSupport = VectorizationProvider.getInstance().vectorUtilSupport
 
     /**
      * Returns the vector dot product of the two vectors.

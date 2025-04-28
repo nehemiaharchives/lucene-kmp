@@ -59,10 +59,8 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
         main.close()
     }
 
-
-    override fun getFilePointer(): Long {
-        return main.getFilePointer()
-    }
+    override val filePointer: Long
+        get() = main.filePointer
 
     override fun length(): Long {
         return main.length()

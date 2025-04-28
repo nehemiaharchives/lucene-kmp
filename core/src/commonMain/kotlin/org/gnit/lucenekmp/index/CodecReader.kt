@@ -24,20 +24,12 @@ protected constructor() : LeafReader() {
      */
     abstract val fieldsReader: StoredFieldsReader
 
-    fun getFieldInfos(): FieldInfos {
-        return fieldInfos
-    }
-
     /**
      * Expert: retrieve underlying TermVectorsReader
      *
      * @lucene.internal
      */
     abstract val termVectorsReader: TermVectorsReader?
-
-    fun getTermVectorsReader(): TermVectorsReader? {
-        return termVectorsReader
-    }
 
     /**
      * Expert: retrieve underlying NormsProducer
@@ -46,20 +38,12 @@ protected constructor() : LeafReader() {
      */
     abstract val normsReader: NormsProducer
 
-    fun getNormsReader(): NormsProducer {
-        return normsReader
-    }
-
     /**
      * Expert: retrieve underlying DocValuesProducer
      *
      * @lucene.internal
      */
     abstract val docValuesReader: DocValuesProducer
-
-    fun getDocValuesReader(): DocValuesProducer {
-        return docValuesReader
-    }
 
     /**
      * Expert: retrieve underlying FieldsProducer
@@ -68,10 +52,6 @@ protected constructor() : LeafReader() {
      */
     abstract val postingsReader: FieldsProducer
 
-    fun getPostingsReader(): FieldsProducer {
-        return postingsReader
-    }
-
     /**
      * Expert: retrieve underlying PointsReader
      *
@@ -79,20 +59,12 @@ protected constructor() : LeafReader() {
      */
     abstract val pointsReader: PointsReader
 
-    fun getPointsReader(): PointsReader {
-        return pointsReader
-    }
-
     /**
      * Expert: retrieve underlying VectorReader
      *
      * @lucene.internal
      */
     abstract val vectorReader: KnnVectorsReader
-
-    fun getVectorReader(): KnnVectorsReader {
-        return vectorReader
-    }
 
     @Throws(IOException::class)
     override fun storedFields(): StoredFields {
@@ -144,11 +116,11 @@ protected constructor() : LeafReader() {
             // Field does not exist
             return null
         }
-        if (fi.getDocValuesType() === DocValuesType.NONE) {
+        if (fi.docValuesType === DocValuesType.NONE) {
             // Field was not indexed with doc values
             return null
         }
-        if (fi.getDocValuesType() !== type) {
+        if (fi.docValuesType !== type) {
             // Field DocValues are different than requested type
             return null
         }
@@ -233,7 +205,7 @@ protected constructor() : LeafReader() {
     override fun getPointValues(field: String): PointValues? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
-        if (fi == null || fi.getPointDimensionCount() == 0) {
+        if (fi == null || fi.pointDimensionCount == 0) {
             // Field does not exist or does not index points
             return null
         }

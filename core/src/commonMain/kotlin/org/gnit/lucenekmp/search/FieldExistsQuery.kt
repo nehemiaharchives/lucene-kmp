@@ -4,7 +4,6 @@ import kotlinx.io.IOException
 import org.gnit.lucenekmp.document.KnnFloatVectorField
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.DocValues
-import org.gnit.lucenekmp.index.DocValuesType
 import org.gnit.lucenekmp.index.DocValuesType.NONE
 import org.gnit.lucenekmp.index.DocValuesType.NUMERIC
 import org.gnit.lucenekmp.index.DocValuesType.SORTED
@@ -52,7 +51,7 @@ class FieldExistsQuery(val field: String) : Query() {
 
     @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
-        val reader: IndexReader = indexSearcher.indexReader
+        val reader: IndexReader = indexSearcher.getIndexReader()
         var allReadersRewritable = true
 
         for (context in reader.leaves()) {
@@ -75,8 +74,8 @@ class FieldExistsQuery(val field: String) : Query() {
                     allReadersRewritable = false
                     break
                 }
-            } else if (fieldInfo.getDocValuesType()
-                !== DocValuesType.NONE
+            } else if (fieldInfo.docValuesType
+                !== NONE
             ) { // the field indexes doc values or points
 
                 // This optimization is possible due to LUCENE-9334 enforcing a field to always uses the
@@ -89,7 +88,7 @@ class FieldExistsQuery(val field: String) : Query() {
                 val terms: Terms? = leaf.terms(field)
                 val pointValues: PointValues? = leaf.getPointValues(field)
 
-                if ((terms == null || terms.getDocCount() != leaf.maxDoc())
+                if ((terms == null || terms.docCount != leaf.maxDoc())
                     && (pointValues == null || pointValues.docCount != leaf.maxDoc())
                 ) {
                     allReadersRewritable = false
@@ -111,7 +110,7 @@ class FieldExistsQuery(val field: String) : Query() {
             override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
                 val fieldInfos: FieldInfos = context.reader().fieldInfos
                 val fieldInfo: FieldInfo? = fieldInfos.fieldInfo(field)
-                var iterator: DocIdSetIterator? = null
+                var iterator: DocIdSetIterator?
 
                 if (fieldInfo == null) {
                     return null
@@ -123,11 +122,11 @@ class FieldExistsQuery(val field: String) : Query() {
                     iterator =
                         when (fieldInfo.vectorEncoding) {
                             FLOAT32 -> context.reader().getFloatVectorValues(field)!!.iterator()
-                            BYTE -> context.reader().getByteVectorValues(field).iterator()
+                            BYTE -> context.reader().getByteVectorValues(field)!!.iterator()
                         }
-                } else if (fieldInfo.getDocValuesType() !== NONE
+                } else if (fieldInfo.docValuesType !== NONE
                 ) { // the field indexes doc values
-                    iterator = when (fieldInfo.getDocValuesType()) {
+                    iterator = when (fieldInfo.docValuesType) {
                         NUMERIC -> context.reader().getNumericDocValues(field)
                         BINARY -> context.reader().getBinaryDocValues(field)
                         SORTED -> context.reader().getSortedDocValues(field)
@@ -164,20 +163,20 @@ class FieldExistsQuery(val field: String) : Query() {
 
                     return super.count(context)
                 } else if (fieldInfo.hasVectorValues()) { // the field indexes vectors
-                    if (reader.hasDeletions() == false) {
+                    if (!reader.hasDeletions()) {
                         return getVectorValuesSize(fieldInfo, reader)
                     }
                     return super.count(context)
-                } else if (fieldInfo.getDocValuesType()
-                    !== DocValuesType.NONE
+                } else if (fieldInfo.docValuesType
+                    !== NONE
                 ) { // the field indexes doc values
-                    if (reader.hasDeletions() == false) {
+                    if (!reader.hasDeletions()) {
                         if (fieldInfo.pointDimensionCount > 0) {
                             val pointValues: PointValues? = reader.getPointValues(field)
                             return pointValues?.docCount ?: 0
                         } else if (fieldInfo.indexOptions !== IndexOptions.NONE) {
                             val terms: Terms? = reader.terms(field)
-                            return terms?.getDocCount() ?: 0
+                            return terms?.docCount ?: 0
                         }
                     }
 
@@ -191,7 +190,7 @@ class FieldExistsQuery(val field: String) : Query() {
                 val fieldInfos: FieldInfos = context.reader().fieldInfos
                 val fieldInfo: FieldInfo? = fieldInfos.fieldInfo(field)
 
-                if (fieldInfo != null && fieldInfo.getDocValuesType() !== DocValuesType.NONE) {
+                if (fieldInfo != null && fieldInfo.docValuesType !== NONE) {
                     return DocValues.isCacheable(context, field)
                 }
 
@@ -234,7 +233,7 @@ class FieldExistsQuery(val field: String) : Query() {
             val fieldInfo: FieldInfo? = reader.fieldInfos.fieldInfo(field)
             val iterator: DocIdSetIterator?
             if (fieldInfo != null) {
-                iterator = when (fieldInfo.getDocValuesType()) {
+                iterator = when (fieldInfo.docValuesType) {
                     NONE -> null
                     NUMERIC -> reader.getNumericDocValues(field)
                     BINARY -> reader.getBinaryDocValues(field)

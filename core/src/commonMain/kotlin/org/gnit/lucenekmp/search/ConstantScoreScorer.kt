@@ -95,8 +95,16 @@ class ConstantScoreScorer : Scorer {
         return score
     }
 
-    @Throws(IOException::class)
-    override fun setMinCompetitiveScore(minScore: Float) {
+    @get:Throws(IOException::class)
+    override var minCompetitiveScore: Float
+        get() {
+            return if (scoreMode === ScoreMode.TOP_SCORES) {
+                score
+            } else {
+                0f
+            }
+        }
+        set(minScore: Float) {
         if (scoreMode === ScoreMode.TOP_SCORES && minScore > score) {
             (approximation as DocIdSetIteratorWrapper).delegate = DocIdSetIterator.empty()
         }

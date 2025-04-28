@@ -19,6 +19,7 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.PriorityQueue
+import kotlin.jvm.JvmName
 import kotlin.math.max
 import kotlin.math.min
 
@@ -30,7 +31,7 @@ import kotlin.math.min
  * the ordinals. For medium to large results, this comparator will be much faster than [ ]. For very small result sets it may be
  * slower.
  */
-class TermOrdValComparator(
+open class TermOrdValComparator(
     numHits: Int,
     private val field: String,
     private val sortMissingLast: Boolean,
@@ -90,10 +91,10 @@ class TermOrdValComparator(
         values = kotlin.arrayOfNulls<BytesRef>(numHits)
         tempBRs = kotlin.arrayOfNulls<BytesRefBuilder>(numHits)
         readerGen = IntArray(numHits)
-        if (sortMissingLast) {
-            missingSortCmp = 1
+        missingSortCmp = if (sortMissingLast) {
+            1
         } else {
-            missingSortCmp = -1
+            -1
         }
     }
 
@@ -135,6 +136,8 @@ class TermOrdValComparator(
         return this.TermOrdValLeafComparator(context, getSortedDocValues(context, field))
     }
 
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @JvmName("setTopValueKt")
     override fun setTopValue(value: BytesRef) {
         // null is fine: it means the last doc of the prior
         // search was missing this value
@@ -161,7 +164,7 @@ class TermOrdValComparator(
     private inner class TermOrdValLeafComparator(context: LeafReaderContext, values: SortedDocValues) :
         LeafFieldComparator {
         /* Current reader's doc ord/values. */
-        val termsIndex: SortedDocValues
+        val termsIndex: SortedDocValues = values
 
         /* True if current bottom slot matches the current reader. */
         var bottomSameReader: Boolean = false
@@ -180,12 +183,11 @@ class TermOrdValComparator(
         private var dense = false
 
         init {
-            termsIndex = values
 
-            if (sortMissingLast) {
-                missingOrd = Int.Companion.MAX_VALUE
+            missingOrd = if (sortMissingLast) {
+                Int.Companion.MAX_VALUE
             } else {
-                missingOrd = -1
+                -1
             }
 
             if (topValue != null) {
@@ -211,7 +213,7 @@ class TermOrdValComparator(
             }
 
             val enableSkipping: Boolean
-            if (canSkipDocuments == false) {
+            if (!canSkipDocuments) {
                 dense = false
                 enableSkipping = false
             } else {
@@ -226,31 +228,31 @@ class TermOrdValComparator(
                     enableSkipping = false
                 } else {
                     val terms: Terms? = context.reader().terms(field)
-                    dense = terms != null && terms.getDocCount() == context.reader().maxDoc()
-                    if (dense || topValue != null) {
-                        enableSkipping = true
+                    dense = terms != null && terms.docCount == context.reader().maxDoc()
+                    enableSkipping = if (dense || topValue != null) {
+                        true
                     } else if (reverse == sortMissingLast) {
                         // Missing values are always competitive, we can never skip
-                        enableSkipping = false
+                        false
                     } else {
-                        enableSkipping = true
+                        true
                     }
                 }
             }
-            if (enableSkipping) {
-                competitiveIterator = CompetitiveIterator(context, field, dense, values.termsEnum()!!)
+            competitiveIterator = if (enableSkipping) {
+                CompetitiveIterator(context, field, dense, values.termsEnum()!!)
             } else {
-                competitiveIterator = null
+                null
             }
             updateCompetitiveIterator()
         }
 
         @Throws(IOException::class)
         fun getOrdForDoc(doc: Int): Int {
-            if (termsIndex.advanceExact(doc)) {
-                return termsIndex.ordValue()
+            return if (termsIndex.advanceExact(doc)) {
+                termsIndex.ordValue()
             } else {
-                return -1
+                -1
             }
         }
 
@@ -267,16 +269,16 @@ class TermOrdValComparator(
             if (docOrd == -1) {
                 docOrd = missingOrd
             }
-            if (bottomSameReader) {
+            return if (bottomSameReader) {
                 // ord is precisely comparable, even in the equal case
-                return bottomOrd - docOrd
+                bottomOrd - docOrd
             } else if (bottomOrd >= docOrd) {
                 // the equals case always means bottom is > doc
                 // (because we set bottomOrd to the lower bound in
                 // setBottom):
-                return 1
+                1
             } else {
-                return -1
+                -1
             }
         }
 
@@ -291,7 +293,7 @@ class TermOrdValComparator(
                 if (tempBRs[slot] == null) {
                     tempBRs[slot] = BytesRefBuilder()
                 }
-                tempBRs[slot]!!.copyBytes(termsIndex.lookupOrd(ord))
+                tempBRs[slot]!!.copyBytes(termsIndex.lookupOrd(ord)!!)
                 values[slot] = tempBRs[slot]!!.get()
             }
             ords[slot] = ord
@@ -338,16 +340,16 @@ class TermOrdValComparator(
                 ord = missingOrd
             }
 
-            if (topSameReader) {
+            return if (topSameReader) {
                 // ord is precisely comparable, even in the equal case
                 // System.out.println("compareTop doc=" + doc + " ord=" + ord + " ret=" + (topOrd-ord));
-                return topOrd - ord
+                topOrd - ord
             } else if (ord <= topOrd) {
                 // the equals case always means doc is < value
                 // (because we set topOrd to the lower bound)
-                return 1
+                1
             } else {
-                return -1
+                -1
             }
         }
 
@@ -355,68 +357,68 @@ class TermOrdValComparator(
 
         @Throws(IOException::class)
         fun updateCompetitiveIterator() {
-            if (competitiveIterator == null || hitsThresholdReached == false || bottomSlot == -1) {
+            if (competitiveIterator == null || !hitsThresholdReached || bottomSlot == -1) {
                 return
             }
             // This logic to figure out min and max ords is quite complex and verbose, can it be made
             // simpler
             val minOrd: Int
             val maxOrd: Int
-            if (reverse == false) {
-                if (topValue != null) {
+            if (!reverse) {
+                minOrd = if (topValue != null) {
                     if (topSameReader) {
-                        minOrd = topOrd
+                        topOrd
                     } else {
                         // In the case when the top value doesn't exist in the segment, topOrd is set as the
                         // previous ord, and we are only interested in values that compare strictly greater than
                         // this.
-                        minOrd = topOrd + 1
+                        topOrd + 1
                     }
                 } else if (sortMissingLast || dense) {
-                    minOrd = 0
+                    0
                 } else {
                     // Missing values are still competitive.
-                    minOrd = -1
+                    -1
                 }
 
-                if (bottomOrd == missingOrd) {
+                maxOrd = if (bottomOrd == missingOrd) {
                     // The queue still contains missing values.
                     if (singleSort) {
                         // If there is no tie breaker, we can start ignoring missing values from now on.
-                        maxOrd = termsIndex.valueCount - 1
+                        termsIndex.valueCount - 1
                     } else {
-                        maxOrd = Int.Companion.MAX_VALUE
+                        Int.Companion.MAX_VALUE
                     }
                 } else if (bottomSameReader) {
                     // If there is no tie breaker, we can start ignoring values that compare equal to the
                     // current top value too.
-                    maxOrd = if (singleSort) bottomOrd - 1 else bottomOrd
+                    if (singleSort) bottomOrd - 1 else bottomOrd
                 } else {
-                    maxOrd = bottomOrd
+                    bottomOrd
                 }
             } else {
-                if (bottomOrd == missingOrd) {
+                minOrd = if (bottomOrd == missingOrd) {
                     // The queue still contains missing values.
                     if (singleSort) {
                         // If there is no tie breaker, we can start ignoring missing values from now on.
-                        minOrd = 0
+                        0
                     } else {
-                        minOrd = -1
+                        -1
                     }
                 } else if (bottomSameReader) {
                     // If there is no tie breaker, we can start ignoring values that compare equal to the
                     // current top value too.
-                    minOrd = if (singleSort) bottomOrd + 1 else bottomOrd
+                    if (singleSort) bottomOrd + 1 else bottomOrd
                 } else {
-                    minOrd = bottomOrd + 1
+                    bottomOrd + 1
                 }
 
-                if (topValue != null) {
-                    maxOrd = topOrd
-                } else if (sortMissingLast == false || dense) {
-                    maxOrd = termsIndex.valueCount - 1
+                maxOrd = if (topValue != null) {
+                    topOrd
+                } else if (!sortMissingLast || dense) {
+                    termsIndex.valueCount - 1
                 } else {
-                    maxOrd = Int.Companion.MAX_VALUE
+                    Int.Companion.MAX_VALUE
                 }
             }
 
@@ -434,42 +436,22 @@ class TermOrdValComparator(
         }
     }
 
-    private class PostingsEnumAndOrd(postings: PostingsEnum, ord: Int) {
-        val postings: PostingsEnum
-        val ord: Int
-
-        init {
-            this.postings = postings
-            this.ord = ord
-        }
-    }
+    private class PostingsEnumAndOrd(val postings: PostingsEnum, val ord: Int)
 
     private inner class CompetitiveIterator(
-        context: LeafReaderContext,
-        field: String,
-        dense: Boolean,
-        docValuesTerms: TermsEnum
+        private val context: LeafReaderContext,
+        private val field: String,
+        private val dense: Boolean,
+        private val docValuesTerms: TermsEnum
     ) : DocIdSetIterator() {
 
         private val MAX_TERMS = 1024
 
-        private val context: LeafReaderContext
-        private val maxDoc: Int
-        private val field: String
-        private val dense: Boolean
-        private val docValuesTerms: TermsEnum
+        private val maxDoc: Int = context.reader().maxDoc()
         private var doc = -1
         private var postings: ArrayDeque<PostingsEnumAndOrd>? = null
         private var docsWithField: DocIdSetIterator? = null
         private var disjunction: PriorityQueue<PostingsEnumAndOrd>? = null
-
-        init {
-            this.context = context
-            this.maxDoc = context.reader().maxDoc()
-            this.field = field
-            this.dense = dense
-            this.docValuesTerms = docValuesTerms
-        }
 
         override fun docID(): Int {
             return doc
@@ -487,7 +469,7 @@ class TermOrdValComparator(
             } else if (disjunction == null) {
                 if (docsWithField != null) {
                     // The field is sparse and we're only interested in documents that have a value.
-                    require(dense == false)
+                    require(!dense)
                     return docsWithField!!.advance(target).also { doc = it }
                 } else {
                     // We haven't started skipping yet
@@ -539,10 +521,10 @@ class TermOrdValComparator(
          */
         @Throws(IOException::class)
         fun update(minOrd: Int, maxOrd: Int) {
-            val maxTerms: Int = kotlin.math.min(MAX_TERMS, IndexSearcher.getMaxClauseCount())
+            val maxTerms: Int = min(MAX_TERMS, IndexSearcher.maxClauseCount)
             val size = max(0, maxOrd - minOrd + 1)
             if (size > maxTerms) {
-                if (dense == false && docsWithField == null) {
+                if (!dense && docsWithField == null) {
                     docsWithField = getSortedDocValues(context, field)
                 }
             } else if (postings == null) {
@@ -550,11 +532,11 @@ class TermOrdValComparator(
             } else if (size < postings!!.size) {
                 // One or more ords got removed
                 require(postings!!.isEmpty() || postings!!.first().ord <= minOrd)
-                while (postings!!.isEmpty() == false && postings!!.first().ord < minOrd) {
+                while (!postings!!.isEmpty() && postings!!.first().ord < minOrd) {
                     postings!!.removeFirst()
                 }
                 require(postings!!.isEmpty() || postings!!.last().ord >= maxOrd)
-                while (postings!!.isEmpty() == false && postings!!.last().ord > maxOrd) {
+                while (!postings!!.isEmpty() && postings!!.last().ord > maxOrd) {
                     postings!!.removeLast()
                 }
                 disjunction!!.clear()
@@ -569,12 +551,12 @@ class TermOrdValComparator(
         @Throws(IOException::class)
         fun init(minOrd: Int, maxOrd: Int) {
             val size = max(0, maxOrd - minOrd + 1)
-            postings = ArrayDeque<PostingsEnumAndOrd>(size)
+            postings = ArrayDeque(size)
             if (size > 0) {
                 docValuesTerms.seekExact(minOrd.toLong())
-                val minTerm: BytesRef = docValuesTerms.term()
+                val minTerm: BytesRef = docValuesTerms.term()!!
                 val terms: TermsEnum = context.reader().terms(field)!!.iterator()
-                check(terms.seekExact(minTerm) != false) { "Term $minTerm exists in doc values but not in the terms index" }
+                check(terms.seekExact(minTerm)) { "Term $minTerm exists in doc values but not in the terms index" }
                 postings!!.add(PostingsEnumAndOrd(terms.postings(null, PostingsEnum.NONE.toInt()), minOrd))
                 for (ord in minOrd + 1..maxOrd) {
                     val next: BytesRef? = terms.next()

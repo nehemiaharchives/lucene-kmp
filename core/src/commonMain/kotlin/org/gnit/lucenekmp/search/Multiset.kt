@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.search
 
+import kotlin.jvm.JvmName
+
 
 /**
  * A [Multiset] is a set that allows for duplicate elements. Two [Multiset]s are equal
@@ -82,6 +84,7 @@ class Multiset<T>
         return modified
     }
 
+    @JvmName("removeKt")
     fun remove(o: Any?): Boolean {
         val count = map[o]
         if (count == null) {

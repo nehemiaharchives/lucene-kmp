@@ -184,13 +184,12 @@ class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutable
         return m.size
     }
 
-    val isEmpty: Boolean
-        /**
-         * Returns `true` if this set contains no elements.
-         *
-         * @return `true` if this set contains no elements
-         */
-        get() = m.isEmpty()
+    /**
+     * Returns `true` if this set contains no elements.
+     *
+     * @return `true` if this set contains no elements
+     */
+    override fun isEmpty(): Boolean = m.isEmpty()
 
     /**
      * Returns `true` if this set contains the specified element.
@@ -537,30 +536,6 @@ class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutable
         tm.readTreeSet(size, s, PRESENT)
     }*/
 
-    /**
-     * Creates a *[late-binding](Spliterator.html#binding)*
-     * and *fail-fast* [Spliterator] over the elements in this
-     * set.
-     *
-     *
-     * The `Spliterator` reports [Spliterator.SIZED],
-     * [Spliterator.DISTINCT], [Spliterator.SORTED], and
-     * [Spliterator.ORDERED].  Overriding implementations should document
-     * the reporting of additional characteristic values.
-     *
-     *
-     * The spliterator's comparator (see
-     * [java.util.Spliterator.getComparator]) is `null` if
-     * the tree set's comparator (see [.comparator]) is `null`.
-     * Otherwise, the spliterator's comparator is the same as or imposes the
-     * same total ordering as the tree set's comparator.
-     *
-     * @return a `Spliterator` over the elements in this set
-     * @since 1.8
-     */
-    /*override fun spliterator(): java.util.Spliterator<E> {
-        return TreeMap.keySpliteratorFor<E>(m)
-    }*/
 
     /**
      * Constructs a set backed by the specified navigable map.

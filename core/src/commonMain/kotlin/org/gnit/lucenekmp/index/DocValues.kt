@@ -166,7 +166,7 @@ object DocValues {
     private fun checkField(`in`: LeafReader, field: String, vararg expected: DocValuesType) {
         val fi: FieldInfo? = `in`.fieldInfos.fieldInfo(field)
         if (fi != null) {
-            val actual: DocValuesType = fi.getDocValuesType()
+            val actual: DocValuesType = fi.docValuesType
             throw IllegalStateException(
                 ("unexpected docvalues type "
                         + actual

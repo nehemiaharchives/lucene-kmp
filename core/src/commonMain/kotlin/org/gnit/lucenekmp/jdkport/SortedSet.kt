@@ -242,14 +242,14 @@ interface SortedSet<E> : MutableSet<E>, SequencedSet<E> {
      * @return a `Spliterator` over the elements in this sorted set
      * @since 1.8
      */
-    fun spliterator(): Spliterator<E> {
+    /*fun spliterator(): Spliterator<E> {
         return object : Spliterator.Companion.IteratorSpliterator<E>(
             this@SortedSet.iterator(), Spliterator.DISTINCT or Spliterator.SORTED or Spliterator.ORDERED
         ) {
             val comparator: Comparator<in E>?
                 get() = this@SortedSet.comparator()
         }
-    }
+    }*/
 
     // ========== SequencedCollection ==========
     /**

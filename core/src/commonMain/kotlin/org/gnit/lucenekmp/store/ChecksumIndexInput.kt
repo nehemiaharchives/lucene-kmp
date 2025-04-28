@@ -42,7 +42,7 @@ protected constructor(resourceDescription: String) : IndexInput(resourceDescript
      */
     @Throws(IOException::class)
     override fun seek(pos: Long) {
-        val curFP: Long = getFilePointer()
+        val curFP: Long = filePointer
         val skip = pos - curFP
         check(skip >= 0) { this::class.qualifiedName + " cannot seek backwards (pos=" + pos + " getFilePointer()=" + curFP + ")" }
         skipByReading(skip)

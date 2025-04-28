@@ -91,7 +91,7 @@ internal class IntersectTermsEnum(
         f.fpOrig = fr.rootBlockFP
         f.fp = f.fpOrig
         f.prefix = 0
-        f.setState(0)
+        f.state = 0
         f.arc = arc
         f.load(fr.rootCode)
 
@@ -161,7 +161,7 @@ internal class IntersectTermsEnum(
         f.fpOrig = currentFrame!!.lastSubFP
         f.fp = f.fpOrig
         f.prefix = currentFrame!!.prefix + currentFrame!!.suffix
-        f.setState(state)
+        f.state = state
 
         // Walk the arc through the index -- we only
         // "bother" with this so we can get the floor data
@@ -249,8 +249,8 @@ internal class IntersectTermsEnum(
         for (idx in 0..target.length) {
             while (true) {
                 val savNextEnt: Int = currentFrame!!.nextEnt
-                val savePos: Int = currentFrame!!.suffixesReader.getPosition()
-                val saveLengthPos: Int = currentFrame!!.suffixLengthsReader.getPosition()
+                val savePos: Int = currentFrame!!.suffixesReader.position
+                val saveLengthPos: Int = currentFrame!!.suffixLengthsReader.position
                 val saveStartBytePos: Int = currentFrame!!.startBytePos
                 val saveSuffix: Int = currentFrame!!.suffix
                 val saveLastSubFP: Long = currentFrame!!.lastSubFP
@@ -298,8 +298,8 @@ internal class IntersectTermsEnum(
                         currentFrame!!.lastSubFP = saveLastSubFP
                         currentFrame!!.startBytePos = saveStartBytePos
                         currentFrame!!.suffix = saveSuffix
-                        currentFrame!!.suffixesReader.setPosition(savePos)
-                        currentFrame!!.suffixLengthsReader.setPosition(saveLengthPos)
+                        currentFrame!!.suffixesReader.position = savePos
+                        currentFrame!!.suffixLengthsReader.position = saveLengthPos
                         currentFrame!!.termState.termBlockOrd = saveTermBlockOrd
                         System.arraycopy(
                             currentFrame!!.suffixBytes,

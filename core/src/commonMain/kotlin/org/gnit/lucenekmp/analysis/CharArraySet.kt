@@ -83,12 +83,8 @@ open class CharArraySet internal constructor(map: CharArrayMap<Any>) : AbstractM
         return map.putCharArray(text, PLACEHOLDER) == null
     }
 
-    fun size(): Int {
-        return map.size()
-    }
-
     override val size: Int
-        get() = size()
+        get() = map.size
 
     /** Returns an [Iterator] for `char[]` instances in this set.  */
     override fun iterator(): MutableIterator<Any> {

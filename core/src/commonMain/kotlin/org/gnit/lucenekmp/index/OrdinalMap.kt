@@ -340,7 +340,7 @@ class OrdinalMap private constructor(
         return ramBytesUsed
     }
 
-    val childResources: MutableCollection<Accountable>
+    override val childResources: MutableCollection<Accountable>
         get() {
             val resources: MutableList<Accountable> = mutableListOf<Accountable>()
             resources.add(Accountables.namedAccountable("segment map", segmentMap))

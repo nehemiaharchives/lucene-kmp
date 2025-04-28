@@ -62,11 +62,20 @@ internal class ConjunctionScorer(required: MutableCollection<Scorer>, scorers: M
         return super.advanceShallow(target)
     }
 
-    @Throws(IOException::class)
-    override fun setMinCompetitiveScore(minScore: Float) {
+    @get:Throws(IOException::class)
+    override var minCompetitiveScore: Float
+        get() {
+            // This scorer is only used for TOP_SCORES when there is a single scoring clause
+            return if (scorers.size == 1) {
+                scorers[0].minCompetitiveScore
+            } else {
+                0f
+            }
+        }
+        set(minScore: Float) {
         // This scorer is only used for TOP_SCORES when there is a single scoring clause
         if (scorers.size == 1) {
-            scorers[0].setMinCompetitiveScore(minScore)
+            scorers[0].minCompetitiveScore = minScore
         }
     }
 

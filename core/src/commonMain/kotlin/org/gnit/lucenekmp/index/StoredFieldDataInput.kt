@@ -18,9 +18,4 @@ class StoredFieldDataInput(val `in`: DataInput, val length: Int) {
     fun getDataInput(): DataInput{
         return `in`
     }
-    /** Returns the length of the data input  */
-    fun getLength(): Int {
-        return this.length
-    }
-
 }

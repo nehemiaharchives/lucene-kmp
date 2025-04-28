@@ -94,7 +94,7 @@ internal object PerFieldMergeState {
                     hasOffsets = hasOffsets or
                             (fi.indexOptions >= IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
                     hasNorms = hasNorms or fi.hasNorms()
-                    hasDocValues = hasDocValues or (fi.getDocValuesType() !== DocValuesType.NONE)
+                    hasDocValues = hasDocValues or (fi.docValuesType !== DocValuesType.NONE)
                     hasPayloads = hasPayloads or fi.hasPayloads()
                     hasPointValues = hasPointValues or (fi.pointDimensionCount != 0)
                 }

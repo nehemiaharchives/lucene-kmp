@@ -114,7 +114,7 @@ open class ConstantScoreQuery(val query: Query) : Query() {
                         }
 
                         @Throws(IOException::class)
-                        override fun bulkScorer(): BulkScorer {
+                        override fun bulkScorer(): BulkScorer? {
                             if (!scoreMode.isExhaustive()) {
                                 return super.bulkScorer()
                             }

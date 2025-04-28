@@ -644,7 +644,7 @@ class RegExp {
     private fun toCaseInsensitiveString(): Automaton {
         val list: MutableList<Automaton> = mutableListOf<Automaton>()
 
-        val iter: CharIterator = s.codePoints().iterator()
+        val iter: CharIterator = s.codePoints().iterator() as CharIterator
         while (iter.hasNext()) {
             val points = toCaseInsensitiveChar(iter.next().code)
             list.add(Automata.makeCharSet(points))

@@ -769,14 +769,14 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
     ) {
         val reader: Lucene90CompressingTermVectorsReader =
             mergeState.termVectorsReaders[sub.readerIndex] as Lucene90CompressingTermVectorsReader
-        require(reader.getVersion() == VERSION_CURRENT)
-        require(reader.getChunkSize() == chunkSize)
-        require(reader.getCompressionMode() === compressionMode)
+        require(reader.version == VERSION_CURRENT)
+        require(reader.chunkSize == chunkSize)
+        require(reader.compressionMode === compressionMode)
         require(!tooDirty(reader))
         require(mergeState.liveDocs[sub.readerIndex] == null)
 
         var docID = fromDocID
-        val index: FieldsIndex = reader.getIndexReader()
+        val index: FieldsIndex = reader.indexReader
 
         // copy docs that belong to the previous chunk
         while (docID < toDocID && reader.isLoaded(docID)) {
@@ -789,13 +789,13 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
         // copy chunks
         var fromPointer = index.getStartPointer(docID)
         val toPointer =
-            if (toDocID == sub.maxDoc) reader.getMaxPointer() else index.getStartPointer(toDocID)
+            if (toDocID == sub.maxDoc) reader.maxPointer else index.getStartPointer(toDocID)
         if (fromPointer < toPointer) {
             // flush any pending chunks
             if (!pendingDocs.isEmpty()) {
                 flush(true)
             }
-            val rawDocs: IndexInput = reader.getVectorsStream()
+            val rawDocs: IndexInput = reader.vectorsStream
             rawDocs.seek(fromPointer)
             do {
                 // iterate over each chunk. we use the vectors index to find chunk boundaries,
@@ -830,11 +830,11 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
                 // using the stored fields index for this isn't the most efficient, but fast enough
                 // and is a source of redundancy for detecting bad things.
                 val end: Long = if (docID == sub.maxDoc) {
-                    reader.getMaxPointer()
+                    reader.maxPointer
                 } else {
                     index.getStartPointer(docID)
                 }
-                vectorsStream!!.copyBytes(rawDocs, end - rawDocs.getFilePointer())
+                vectorsStream!!.copyBytes(rawDocs, end - rawDocs.filePointer)
                 ++numChunks
                 val dirtyChunk = (code and 1) != 0
                 if (dirtyChunk) {
@@ -917,7 +917,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
                 mergeState.termVectorsReaders[readerIndex] as Lucene90CompressingTermVectorsReader
             return BULK_MERGE_ENABLED
                     && matchingReaders.matchingReaders[readerIndex]
-                    && reader.getCompressionMode() === compressionMode && reader.getChunkSize() == chunkSize && reader.getVersion() == VERSION_CURRENT && reader.getPackedIntsVersion() == PackedInts.VERSION_CURRENT && mergeState.liveDocs[readerIndex] == null && !tooDirty(
+                    && reader.compressionMode === compressionMode && reader.chunkSize == chunkSize && reader.version == VERSION_CURRENT && reader.packedIntsVersion == PackedInts.VERSION_CURRENT && mergeState.liveDocs[readerIndex] == null && !tooDirty(
                 reader
             )
         }
@@ -950,7 +950,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
                 + scratchBuffer.ramBytesUsed())
     }
 
-    val childResources: MutableCollection<Accountable>
+    override val childResources: MutableCollection<Accountable>
         get() = mutableListOf(termSuffixes, payloadBytes)
 
     companion object {

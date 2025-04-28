@@ -117,8 +117,6 @@ class BooleanQuery private constructor(
         return clauseSets[occur]!!.toMutableSet()
     }
 
-    fun getMinimumNumberShouldMatch() = minimumNumberShouldMatch
-
     val isPureDisjunction: Boolean
         /**
          * Whether this query is a pure disjunction, ie. it only has SHOULD clauses and it is enough for a
@@ -520,7 +518,7 @@ class BooleanQuery private constructor(
                     // rewritten to a MatchNoDocsQuery if it only had prohibited clauses.
                     val innerQuery: BooleanQuery = outerClause.query
                     require(innerQuery.getClauses(Occur.MUST_NOT).size != innerQuery.clauses().size)
-                    if (innerQuery.getMinimumNumberShouldMatch() == 0
+                    if (innerQuery.minimumNumberShouldMatch == 0
                         && innerQuery.getClauses(Occur.SHOULD).isEmpty()
                     ) {
                         actuallyRewritten = true
@@ -584,7 +582,7 @@ class BooleanQuery private constructor(
                 for (innerClause in inner.clauses()) {
                     rewritten.add(innerClause)
                 }
-                rewritten.setMinimumNumberShouldMatch(max(1, inner.getMinimumNumberShouldMatch()))
+                rewritten.setMinimumNumberShouldMatch(max(1, inner.minimumNumberShouldMatch))
                 return rewritten.build()
             }
         }

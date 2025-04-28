@@ -20,7 +20,7 @@ class TopKnnCollectorManager(k: Int, indexSearcher: IndexSearcher) : KnnCollecto
     private val globalScoreQueue: BlockingFloatHeap?
 
     init {
-        val isMultiSegments = indexSearcher.indexReader.leaves().size > 1
+        val isMultiSegments = indexSearcher.getIndexReader().leaves().size > 1
         this.k = k
         this.globalScoreQueue = if (isMultiSegments) BlockingFloatHeap(k) else null
     }
@@ -35,10 +35,10 @@ class TopKnnCollectorManager(k: Int, indexSearcher: IndexSearcher) : KnnCollecto
     override fun newCollector(
         visitedLimit: Int, searchStrategy: KnnSearchStrategy, context: LeafReaderContext
     ): KnnCollector {
-        if (globalScoreQueue == null) {
-            return TopKnnCollector(k, visitedLimit, searchStrategy)
+        return if (globalScoreQueue == null) {
+            TopKnnCollector(k, visitedLimit, searchStrategy)
         } else {
-            return MultiLeafKnnCollector(
+            MultiLeafKnnCollector(
                 k, globalScoreQueue, TopKnnCollector(k, visitedLimit, searchStrategy)
             )
         }

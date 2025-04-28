@@ -77,10 +77,6 @@ interface IndexSorter {
      */
     val providerName: String
 
-    fun getProviderName(): String {
-        return providerName
-    }
-
     /** Provide a NumericDocValues instance for a LeafReader  */
     interface NumericDocValuesProvider {
         /** Returns the NumericDocValues instance for this LeafReader  */
@@ -155,10 +151,6 @@ interface IndexSorter {
                 }
             }
         }
-
-        override fun getProviderName(): String {
-            return providerName
-        }
     }
 
     /** Sorts documents based on long values from a NumericDocValues instance  */
@@ -218,10 +210,6 @@ interface IndexSorter {
                 }
             }
         }
-
-        override fun getProviderName(): String {
-            return providerName
-        }
     }
 
     /** Sorts documents based on float values from a NumericDocValues instance  */
@@ -278,10 +266,6 @@ interface IndexSorter {
                     )
                 }
             }
-        }
-
-        override fun getProviderName(): String {
-            return providerName
         }
     }
 
@@ -340,10 +324,6 @@ interface IndexSorter {
                     )
                 }
             }
-        }
-
-        override fun getProviderName(): String {
-            return providerName
         }
     }
 
@@ -415,10 +395,6 @@ interface IndexSorter {
                     )
                 }
             }
-        }
-
-        override fun getProviderName(): String {
-            return providerName
         }
     }
 }

@@ -25,7 +25,7 @@ class DefaultFlatVectorScorer : FlatVectorsScorer {
     override fun getRandomVectorScorerSupplier(
         similarityFunction: VectorSimilarityFunction, vectorValues: KnnVectorValues
     ): RandomVectorScorerSupplier {
-        return when (vectorValues.getEncoding()) {
+        return when (vectorValues.encoding) {
             FLOAT32 -> {
                 FloatScoringSupplier(vectorValues as FloatVectorValues, similarityFunction)
             }

@@ -134,7 +134,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 )
             require(
                 CodecUtil.indexHeaderLength(formatName, segmentSuffix).toLong()
-                        == fieldsStream.getFilePointer()
+                        == fieldsStream.filePointer
             )
 
             val metaStreamFN: String =
@@ -178,7 +178,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                     context
                 )
             indexReader = fieldsIndexReader
-            maxPointer = fieldsIndexReader.getMaxPointer()
+            maxPointer = fieldsIndexReader.maxPointer
 
             this.maxPointer = maxPointer
             this.indexReader = indexReader
@@ -232,12 +232,6 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
             }
         }
     }
-
-    fun getMaxPointer() = maxPointer
-
-    fun getVersion() = version
-
-    fun getChunkSize() = chunkSize
 
     /**
      * @throws AlreadyClosedException if this FieldsReader is closed
@@ -366,7 +360,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 }
             }
 
-            startPointer = fieldsStream.getFilePointer()
+            startPointer = fieldsStream.filePointer
 
             if (merging) {
                 val totalLength: Int = Math.toIntExact(offsets[chunkDocs])

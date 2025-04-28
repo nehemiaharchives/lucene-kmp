@@ -77,7 +77,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
          */
 
         override val maxSize: Int
-            get() = IndexSearcher.getMaxClauseCount()
+            get() = IndexSearcher.maxClauseCount
 
         override val topLevelBuilder: BooleanQuery.Builder
             get() = BooleanQuery.Builder()
@@ -114,7 +114,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
          */
 
         override val maxSize: Int
-            get() = IndexSearcher.getMaxClauseCount()
+            get() = IndexSearcher.maxClauseCount
 
         override val topLevelBuilder: BlendedTermQuery.Builder
             get() {
@@ -157,7 +157,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
      */
         (size: Int) : TopTermsRewrite<BooleanQuery.Builder>(size) {
         override val maxSize: Int
-            get() = IndexSearcher.getMaxClauseCount()
+            get() = IndexSearcher.maxClauseCount
 
         override val topLevelBuilder: BooleanQuery.Builder
             get() = BooleanQuery.Builder()

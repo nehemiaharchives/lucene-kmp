@@ -28,8 +28,6 @@ class StreamDecoder : Reader {
             return null
         }
 
-    fun getEncoding() = encoding
-
     @Throws(IOException::class)
     override fun read(): Int {
         // Return the leftover char, if there is one

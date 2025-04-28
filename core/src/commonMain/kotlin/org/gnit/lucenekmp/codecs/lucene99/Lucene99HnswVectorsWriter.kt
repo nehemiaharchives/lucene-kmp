@@ -355,7 +355,7 @@ class Lucene99HnswVectorsWriter(
                         )
                     }
                 }
-                val mergedVectorValues: KnnVectorValues = when (fieldInfo.getVectorEncoding()) {
+                val mergedVectorValues: KnnVectorValues = when (fieldInfo.vectorEncoding) {
                     VectorEncoding.BYTE -> MergedVectorValues.mergeByteVectorValues(fieldInfo, mergeState)
 
                     VectorEncoding.FLOAT32 -> MergedVectorValues.mergeFloatVectorValues(fieldInfo, mergeState)
@@ -446,11 +446,11 @@ class Lucene99HnswVectorsWriter(
         graphLevelNodeOffsets: Array<IntArray?>
     ) {
         meta!!.writeInt(field.number)
-        meta.writeInt(field.getVectorEncoding().ordinal)
-        meta.writeInt(distFuncToOrd(field.getVectorSimilarityFunction()))
+        meta.writeInt(field.vectorEncoding.ordinal)
+        meta.writeInt(distFuncToOrd(field.vectorSimilarityFunction))
         meta.writeVLong(vectorIndexOffset)
         meta.writeVLong(vectorIndexLength)
-        meta.writeVInt(field.getVectorDimension())
+        meta.writeVInt(field.vectorDimension)
         meta.writeInt(count)
         // write graph nodes on each level
         if (graph == null) {
@@ -544,20 +544,20 @@ class Lucene99HnswVectorsWriter(
 
         init {
             val scorerSupplier: RandomVectorScorerSupplier =
-                when (fieldInfo.getVectorEncoding()) {
+                when (fieldInfo.vectorEncoding) {
                     VectorEncoding.BYTE -> scorer.getRandomVectorScorerSupplier(
-                        fieldInfo.getVectorSimilarityFunction(),
+                        fieldInfo.vectorSimilarityFunction,
                         ByteVectorValues.fromBytes(
-                            flatFieldVectorsWriter.getVectors() as MutableList<ByteArray>,
-                            fieldInfo.getVectorDimension()
+                            flatFieldVectorsWriter.vectors as MutableList<ByteArray>,
+                            fieldInfo.vectorDimension
                         )
                     )
 
                     VectorEncoding.FLOAT32 -> scorer.getRandomVectorScorerSupplier(
-                        fieldInfo.getVectorSimilarityFunction(),
+                        fieldInfo.vectorSimilarityFunction,
                         FloatVectorValues.fromFloats(
-                            flatFieldVectorsWriter.getVectors() as MutableList<FloatArray>,
-                            fieldInfo.getVectorDimension()
+                            flatFieldVectorsWriter.vectors as MutableList<FloatArray>,
+                            fieldInfo.vectorDimension
                         )
                     )
                 }
@@ -583,7 +583,7 @@ class Lucene99HnswVectorsWriter(
         }
 
         val docsWithFieldSet: DocsWithFieldSet
-            get() = flatFieldVectorsWriter.getDocsWithFieldSet()
+            get() = flatFieldVectorsWriter.docsWithFieldSet
 
         override fun copyValue(vectorValue: T): T {
             throw UnsupportedOperationException()
@@ -618,7 +618,7 @@ class Lucene99HnswVectorsWriter(
                 beamWidth: Int,
                 infoStream: InfoStream
             ): FieldWriter<*> {
-                return when (fieldInfo.getVectorEncoding()) {
+                return when (fieldInfo.vectorEncoding) {
                     VectorEncoding.BYTE -> FieldWriter(
                         scorer,
                         flatFieldVectorsWriter as FlatFieldVectorsWriter<ByteArray>,

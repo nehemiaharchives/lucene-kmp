@@ -114,7 +114,7 @@ open class InputStreamReader : Reader {
          *
          * @see Charset
          */
-        get() = sd.getEncoding()
+        get() = sd.encoding
 
     @Throws(IOException::class)
     override fun read(target: CharBuffer): Int {

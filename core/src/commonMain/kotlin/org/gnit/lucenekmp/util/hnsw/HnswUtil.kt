@@ -222,7 +222,7 @@ object HnswUtil {
         for (ctx in reader.leaves()) {
             val codecReader: CodecReader = FilterLeafReader.unwrap(ctx.reader()) as CodecReader
             val vectorsReader: KnnVectorsReader? =
-                (codecReader.getVectorReader() as PerFieldKnnVectorsFormat.FieldsReader)
+                (codecReader.vectorReader as PerFieldKnnVectorsFormat.FieldsReader)
                     .getFieldReader(vectorField)
             if (vectorsReader is HnswGraphProvider) {
                 val graph: HnswGraph? = (vectorsReader as HnswGraphProvider).getGraph(vectorField)

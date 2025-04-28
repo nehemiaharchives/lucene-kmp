@@ -31,7 +31,7 @@ abstract class ScoringRewrite<B> : TermCollectingRewrite<B>() {
 
     @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher, query: MultiTermQuery): Query {
-        val reader: IndexReader = indexSearcher.indexReader
+        val reader: IndexReader = indexSearcher.getIndexReader()
         val builder: B = topLevelBuilder
         val col: ParallelArraysTermCollector = this.ParallelArraysTermCollector()
         collectTerms(reader, query, col)
@@ -102,7 +102,7 @@ abstract class ScoringRewrite<B> : TermCollectingRewrite<B>() {
             val ord: IntArray = super.init()
             boost = FloatArray(ArrayUtil.oversize(ord.size, Float.SIZE_BYTES))
             termState =
-                kotlin.arrayOfNulls<TermStates>(ArrayUtil.oversize(ord.size, RamUsageEstimator.NUM_BYTES_OBJECT_REF))
+                kotlin.arrayOfNulls(ArrayUtil.oversize(ord.size, RamUsageEstimator.NUM_BYTES_OBJECT_REF))
             require(termState!!.size >= ord.size && boost!!.size >= ord.size)
             return ord
         }
@@ -112,7 +112,7 @@ abstract class ScoringRewrite<B> : TermCollectingRewrite<B>() {
             boost = ArrayUtil.grow(boost!!, ord.size)
             if (termState!!.size < ord.size) {
                 val tmpTermState: Array<TermStates?> =
-                    kotlin.arrayOfNulls<TermStates>(
+                    kotlin.arrayOfNulls(
                         ArrayUtil.oversize(
                             ord.size,
                             RamUsageEstimator.NUM_BYTES_OBJECT_REF
@@ -170,7 +170,7 @@ abstract class ScoringRewrite<B> : TermCollectingRewrite<B>() {
                 }
 
                 override fun checkMaxClauseCount(count: Int) {
-                    if (count > IndexSearcher.getMaxClauseCount()) throw TooManyClauses()
+                    if (count > IndexSearcher.maxClauseCount) throw TooManyClauses()
                 }
             }
 

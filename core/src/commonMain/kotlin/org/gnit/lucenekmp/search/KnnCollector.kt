@@ -79,10 +79,6 @@ interface KnnCollector {
      */
     val searchStrategy: KnnSearchStrategy?
 
-    fun getSearchStrategy(): KnnSearchStrategy? {
-        return searchStrategy
-    }
-
     /**
      * KnnCollector.Decorator is the base class for decorators of KnnCollector objects, which extend
      * the object with new behaviors.
