@@ -202,7 +202,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
     @Throws(IOException::class)
     private fun scoreWindowMultipleScorers(
         collector: LeafCollector,
-        acceptDocs: Bits,
+        acceptDocs: Bits?,
         windowBase: Int,
         windowMin: Int,
         windowMax: Int,
@@ -276,7 +276,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
 
     @Throws(IOException::class)
     private fun scoreWindow(
-        top: DisiWrapper, collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int
+        top: DisiWrapper, collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int
     ): DisiWrapper {
         val windowBase = top.doc and MASK.inv() // find the window that the next match belongs to
         val windowMin = max(min, windowBase)
@@ -303,7 +303,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
     }
 
     @Throws(IOException::class)
-    override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+    override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
         collector.setScorer(score)
 
         var top = advance(min)
