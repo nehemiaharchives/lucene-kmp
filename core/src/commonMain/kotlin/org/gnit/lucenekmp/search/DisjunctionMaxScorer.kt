@@ -18,7 +18,7 @@ internal class DisjunctionMaxScorer(/* Multiplier applied to non-maximum-scoring
 ) : DisjunctionScorer(
     subScorers, scoreMode, leadCost
 ) {
-    private val disjunctionBlockPropagator: DisjunctionScoreBlockBoundaryPropagator? = null
+    private var disjunctionBlockPropagator: DisjunctionScoreBlockBoundaryPropagator? = null
 
     /**
      * Creates a new instance of DisjunctionMaxScorer
@@ -37,12 +37,12 @@ internal class DisjunctionMaxScorer(/* Multiplier applied to non-maximum-scoring
     }
 
     @Throws(IOException::class)
-    protected override fun score(topList: DisiWrapper?): Float {
+    override fun score(topList: DisiWrapper?): Float {
         var scoreMax = 0f
         var otherScoreSum = 0.0
         var w: DisiWrapper? = topList
         while (w != null) {
-            val subScore: Float = w.scorable.score()
+            val subScore: Float = w.scorable!!.score()
             if (subScore >= scoreMax) {
                 otherScoreSum += scoreMax.toDouble()
                 scoreMax = subScore
@@ -55,15 +55,15 @@ internal class DisjunctionMaxScorer(/* Multiplier applied to non-maximum-scoring
     }
 
     @Throws(IOException::class)
-    public override fun advanceShallow(target: Int): Int {
+    override fun advanceShallow(target: Int): Int {
         if (disjunctionBlockPropagator != null) {
-            return disjunctionBlockPropagator.advanceShallow(target)
+            return disjunctionBlockPropagator!!.advanceShallow(target)
         }
         return super.advanceShallow(target)
     }
 
     @Throws(IOException::class)
-    public override fun getMaxScore(upTo: Int): Float {
+    override fun getMaxScore(upTo: Int): Float {
         var scoreMax = 0f
         var otherScoreSum = 0.0
         for (scorer in subScorers) {
@@ -91,9 +91,9 @@ internal class DisjunctionMaxScorer(/* Multiplier applied to non-maximum-scoring
     }
 
     @Throws(IOException::class)
-    public override fun setMinCompetitiveScore(minScore: Float) {
+    override fun setMinCompetitiveScore(minScore: Float) {
         if (disjunctionBlockPropagator != null) {
-            disjunctionBlockPropagator.setMinCompetitiveScore(minScore)
+            disjunctionBlockPropagator!!.setMinCompetitiveScore(minScore)
         }
         if (tieBreakerMultiplier == 0f) {
             // TODO: we could even remove some scorers from the priority queue?
