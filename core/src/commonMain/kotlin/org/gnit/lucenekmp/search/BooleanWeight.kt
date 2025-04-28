@@ -12,15 +12,13 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         query
     ) {
     /** The Similarity implementation.  */
-    val similarity: Similarity
+    val similarity: Similarity = searcher.getSimilarity()
 
     internal class WeightedBooleanClause internal constructor(val clause: BooleanClause, val weight: Weight)
 
-    val weightedClauses: ArrayList<WeightedBooleanClause>
+    val weightedClauses: ArrayList<WeightedBooleanClause> = ArrayList<WeightedBooleanClause>()
 
     init {
-        this.similarity = searcher.getSimilarity()
-        weightedClauses = ArrayList<WeightedBooleanClause>()
         for (c in query) {
             val w =
                 searcher.createWeight(
@@ -31,9 +29,9 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
     }
 
     @Throws(IOException::class)
-    public override fun explain(context: LeafReaderContext, doc: Int): Explanation {
+    override fun explain(context: LeafReaderContext, doc: Int): Explanation {
         val minShouldMatch: Int = query.minimumNumberShouldMatch
-        val subs: MutableList<Explanation> = ArrayList<Explanation>()
+        val subs: MutableList<Explanation> = ArrayList()
         var fail = false
         var matchCount = 0
         var shouldMatchCount = 0
@@ -96,9 +94,9 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
     }
 
     @Throws(IOException::class)
-    public override fun matches(context: LeafReaderContext, doc: Int): Matches? {
+    override fun matches(context: LeafReaderContext, doc: Int): Matches? {
         val minShouldMatch: Int = query.minimumNumberShouldMatch
-        val matches: MutableList<Matches> = ArrayList<Matches>()
+        val matches: MutableList<Matches> = ArrayList()
         var shouldMatchCount = 0
         for (wc in weightedClauses) {
             val w: Weight = wc.weight
@@ -129,22 +127,19 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
     }
 
     @Throws(IOException::class)
-    public override fun count(context: LeafReaderContext): Int {
+    override fun count(context: LeafReaderContext): Int {
         val numDocs: Int = context.reader().numDocs()
-        val positiveCount: Int
         if (query.isPureDisjunction) {
             return optCount(context, Occur.SHOULD)
         }
-        if ((query.getClauses(Occur.FILTER).isEmpty() == false
-                    || query.getClauses(Occur.MUST).isEmpty() == false)
-            && query.minimumNumberShouldMatch == 0
+        val positiveCount: Int = if ((!query.getClauses(Occur.FILTER).isEmpty() || !query.getClauses(Occur.MUST).isEmpty()) && query.minimumNumberShouldMatch == 0
         ) {
-            positiveCount = reqCount(context)
+            reqCount(context)
         } else {
             // The query has a non-zero min-should match. We could handles some cases, e.g.
             // minShouldMatch=N and we can find N SHOULD clauses that match all docs, but are there
             // real-world queries that would benefit from Lucene handling this case
-            positiveCount = -1
+            -1
         }
 
         if (positiveCount == 0) {
@@ -152,16 +147,16 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         }
 
         val prohibitedCount = optCount(context, Occur.MUST_NOT)
-        if (prohibitedCount == -1) {
-            return -1
+        return if (prohibitedCount == -1) {
+            -1
         } else if (prohibitedCount == 0) {
-            return positiveCount
+            positiveCount
         } else if (prohibitedCount == numDocs) {
-            return 0
+            0
         } else if (positiveCount == numDocs) {
-            return numDocs - prohibitedCount
+            numDocs - prohibitedCount
         } else {
-            return -1
+            -1
         }
     }
 
@@ -174,7 +169,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         val numDocs: Int = context.reader().numDocs()
         var reqCount = numDocs
         for (weightedClause in weightedClauses) {
-            if (weightedClause.clause.isRequired == false) {
+            if (!weightedClause.clause.isRequired) {
                 continue
             }
             val count: Int = weightedClause.weight.count(context)
@@ -237,8 +232,8 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         return if (unknownCount) -1 else optCount
     }
 
-    public override fun isCacheable(ctx: LeafReaderContext): Boolean {
-        if (query.clauses().size()
+    override fun isCacheable(ctx: LeafReaderContext): Boolean {
+        if (query.clauses().size
             > AbstractMultiTermQueryConstantScoreWrapper.BOOLEAN_REWRITE_TERM_COUNT_THRESHOLD
         ) {
             // Disallow caching large boolean queries to not encourage users
@@ -248,13 +243,13 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         }
         for (wc in weightedClauses) {
             val w: Weight = wc.weight
-            if (w.isCacheable(ctx) == false) return false
+            if (!w.isCacheable(ctx)) return false
         }
         return true
     }
 
     @Throws(IOException::class)
-    public override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
+    override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
         var minShouldMatch: Int = query.minimumNumberShouldMatch
 
         val scorers: MutableMap<Occur, MutableCollection<ScorerSupplier>> = mutableMapOf<Occur, MutableCollection<ScorerSupplier>>().apply {
@@ -263,7 +258,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
             }
         }
         for (occur in Occur.entries) {
-            scorers.put(occur, ArrayList<ScorerSupplier>())
+            scorers.put(occur, ArrayList())
         }
 
         for (wc in weightedClauses) {
@@ -275,7 +270,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
                     return null
                 }
             } else {
-                scorers.get(c.occur)!!.add(subScorer)
+                scorers[c.occur]!!.add(subScorer)
             }
         }
 
@@ -300,7 +295,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
             return null
         }
 
-        if (scoreMode.needsScores() == false && minShouldMatch == 0 && scorers[Occur.MUST]!!.size + scorers[Occur.FILTER]!!.size > 0
+        if (!scoreMode.needsScores() && minShouldMatch == 0 && scorers[Occur.MUST]!!.size + scorers[Occur.FILTER]!!.size > 0
         ) {
             // Purely optional clauses are useless without scoring.
             scorers[Occur.SHOULD]!!.clear()
