@@ -149,8 +149,12 @@ object Collections {
             return cmp.hashCode() xor Int.Companion.MIN_VALUE
         }
 
-        override fun reversed(): Comparator<T?> {
+        fun reversed(): Comparator<T?> {
             return cmp
         }
+    }
+
+    fun <T> reverse(list: MutableList<T>) {
+        list.reverse()
     }
 }

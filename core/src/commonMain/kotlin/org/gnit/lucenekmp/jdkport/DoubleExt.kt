@@ -2,6 +2,25 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.pow
 
+/** Minimum unbiased exponent of a *normalised* binary-64 value (-1022). */
+val Double.Companion.MIN_EXPONENT: Int
+    get() = -1022
+
+/** Number of explicit significand bits in a binary-64 value (53). */
+val Double.Companion.PRECISION: Int
+    get() = 53
+
+
+/**
+ * Maximum exponent a finite `double` variable may have.
+ * It is equal to the value returned by
+ * `Math.getExponent(Double.MAX_VALUE)`.
+ *
+ * @since 1.6
+ */
+val Double.Companion.MAX_EXPONENT: Int  // 1023
+    get() = (1 shl (Double.SIZE_BITS - Double.PRECISION - 1)) - 1
+
 
 /**
  * Returns a representation of the specified double value according to the IEEE 754 "double format" bit layout,
