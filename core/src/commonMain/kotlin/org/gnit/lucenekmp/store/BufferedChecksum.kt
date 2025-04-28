@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import org.gnit.lucenekmp.util.Checksum
+import org.gnit.lucenekmp.jdkport.Checksum
 import org.gnit.lucenekmp.util.putIntLE
 import org.gnit.lucenekmp.util.putLongLE
 import org.gnit.lucenekmp.util.putShortLE
@@ -9,18 +9,12 @@ import kotlin.math.min
 
 
 /** Wraps another [Checksum] with an internal buffer to speed up checksum calculations.  */
-class BufferedChecksum @JvmOverloads constructor(`in`: Checksum, bufferSize: Int = DEFAULT_BUFFERSIZE) :
+class BufferedChecksum @JvmOverloads constructor(private val `in`: Checksum, bufferSize: Int = DEFAULT_BUFFERSIZE) :
     Checksum {
-    private val `in`: Checksum
-    private val buffer: ByteArray
+    private val buffer: ByteArray = ByteArray(bufferSize)
     private var upto = 0
 
     /** Create a new BufferedChecksum with the specified bufferSize  */
-    /** Create a new BufferedChecksum with [.DEFAULT_BUFFERSIZE]  */
-    init {
-        this.`in` = `in`
-        this.buffer = ByteArray(bufferSize)
-    }
 
     override fun update(b: Int) {
         if (upto == buffer.size) {

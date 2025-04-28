@@ -39,13 +39,13 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
     }
 
     @Throws(IOException::class)
-    override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+    override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
         var min = min
         var max = max
         collector.setScorer(scorable)
         var iterators = this.iterators
         if (collector.competitiveIterator() != null) {
-            iterators = ArrayList<DocIdSetIterator>(iterators)
+            iterators = ArrayList(iterators)
             iterators.add(collector.competitiveIterator()!!)
         }
 
@@ -56,7 +56,7 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
         max = min(max, maxDoc)
 
         var lead: DocIdSetIterator? = null
-        if (iterators.isEmpty() == false) {
+        if (!iterators.isEmpty()) {
             lead = iterators[0]
             if (lead.docID() < min) {
                 min = lead.advance(min)
@@ -73,20 +73,19 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
                 return DocIdSetIterator.NO_MORE_DOCS
             }
 
-            val windowBase = if (lead == null) windowMax else lead.docID()
+            val windowBase = lead?.docID() ?: windowMax
             windowMax = min(max, windowBase + WINDOW_SIZE)
             if (windowMax > windowBase) {
                 scoreWindowUsingBitSet(collector, acceptDocs, iterators, windowBase, windowMax)
             }
         } while (windowMax < max)
 
-        if (lead != null) {
-            return lead.docID()
-        } else if (windowMax >= maxDoc) {
-            return DocIdSetIterator.NO_MORE_DOCS
-        } else {
-            return windowMax
-        }
+        return lead?.docID()
+            ?: if (windowMax >= maxDoc) {
+                DocIdSetIterator.NO_MORE_DOCS
+            } else {
+                windowMax
+            }
     }
 
     @Throws(IOException::class)
@@ -109,7 +108,7 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
                 collector.collect(rangeDocIdStream)
                 return
             } else if (iterators.size == 1) {
-                singleIteratorDocIdStream.iterator = iterators.get(0)
+                singleIteratorDocIdStream.iterator = iterators[0]
                 singleIteratorDocIdStream.from = windowBase
                 singleIteratorDocIdStream.to = windowMax
                 collector.collect(singleIteratorDocIdStream)
@@ -120,20 +119,17 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
         if (iterators.isEmpty()) {
             windowMatches.set(0, windowMax - windowBase)
         } else {
-            val lead = iterators.get(0)
+            val lead = iterators[0]
             lead.intoBitSet(windowMax, windowMatches, windowBase)
         }
 
-        if (acceptDocs != null) {
-            // Apply live docs.
-            acceptDocs.applyMask(windowMatches, windowBase)
-        }
+        acceptDocs?.applyMask(windowMatches, windowBase)
 
         val windowSize = windowMax - windowBase
         val threshold = windowSize / DENSITY_THRESHOLD_INVERSE
         var upTo = 1 // the leading clause at index 0 is already applied
         while (upTo < iterators.size && windowMatches.cardinality() >= threshold) {
-            val other = iterators.get(upTo)
+            val other = iterators[upTo]
             if (other.docID() < windowBase) {
                 other.advance(windowBase)
             }
@@ -153,7 +149,7 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
             advanceHead@ while (windowMatch != DocIdSetIterator.NO_MORE_DOCS) {
                 val doc = windowBase + windowMatch
                 for (i in upTo..<iterators.size) {
-                    val other = iterators.get(i)
+                    val other = iterators[i]
                     var otherDoc = other.docID()
                     if (otherDoc < doc) {
                         otherDoc = other.advance(doc)
@@ -176,10 +172,10 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
         // If another clause is more advanced than the leading clause then advance the leading clause,
         // it's important to take advantage of large gaps in the postings lists of other clauses.
         if (iterators.size >= 2) {
-            val lead = iterators.get(0)
+            val lead = iterators[0]
             var maxOtherDocID = -1
             for (i in 1..<iterators.size) {
-                maxOtherDocID = kotlin.math.max(maxOtherDocID, iterators.get(i).docID())
+                maxOtherDocID = kotlin.math.max(maxOtherDocID, iterators[i].docID())
             }
             if (lead.docID() < maxOtherDocID) {
                 lead.advance(maxOtherDocID)
@@ -188,10 +184,10 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
     }
 
     override fun cost(): Long {
-        if (iterators.isEmpty()) {
-            return maxDoc.toLong()
+        return if (iterators.isEmpty()) {
+            maxDoc.toLong()
         } else {
-            return iterators.get(0).cost()
+            iterators[0].cost()
         }
     }
 
@@ -275,13 +271,13 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
         // Only use bit sets to compute the intersection if more than 1/32th of the docs are expected to
         // match. Experiments suggested that values that are a bit higher than this would work better, but
         // we're erring on the conservative side.
-        val DENSITY_THRESHOLD_INVERSE: Int = Long.SIZE_BITS / 2
+        const val DENSITY_THRESHOLD_INVERSE: Int = Long.SIZE_BITS / 2
 
         private fun advance(set: FixedBitSet, i: Int): Int {
-            if (i >= WINDOW_SIZE) {
-                return DocIdSetIterator.NO_MORE_DOCS
+            return if (i >= WINDOW_SIZE) {
+                DocIdSetIterator.NO_MORE_DOCS
             } else {
-                return set.nextSetBit(i)
+                set.nextSetBit(i)
             }
         }
     }

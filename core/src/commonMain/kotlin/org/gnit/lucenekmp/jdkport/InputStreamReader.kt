@@ -151,7 +151,7 @@ open class InputStreamReader : Reader {
      * @throws     IOException  If an I/O error occurs
      */
     @Throws(IOException::class)
-    fun ready(): Boolean {
+    override fun ready(): Boolean {
         return sd.ready()
     }
 

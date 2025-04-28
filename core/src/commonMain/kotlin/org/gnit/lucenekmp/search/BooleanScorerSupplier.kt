@@ -22,15 +22,13 @@ internal class BooleanScorerSupplier(
     private var topLevelScoringClause = false
 
     init {
-        require(minShouldMatch >= 0) { "minShouldMatch must be positive, but got: " + minShouldMatch }
-        require(!(minShouldMatch != 0 && minShouldMatch >= subs.get(Occur.SHOULD)!!.size)) { "minShouldMatch must be strictly less than the number of SHOULD clauses" }
+        require(minShouldMatch >= 0) { "minShouldMatch must be positive, but got: $minShouldMatch" }
+        require(!(minShouldMatch != 0 && minShouldMatch >= subs[Occur.SHOULD]!!.size)) { "minShouldMatch must be strictly less than the number of SHOULD clauses" }
         require(
-            !(scoreMode.needsScores() === false && minShouldMatch == 0 && subs.get(Occur.SHOULD)!!.size > 0 && subs.get(
-                Occur.MUST
-            )!!.size + subs.get(Occur.FILTER)!!.size > 0)
+            !(!scoreMode.needsScores() && minShouldMatch == 0 && subs[Occur.SHOULD]!!.isNotEmpty() && subs[Occur.MUST]!!.size + subs[Occur.FILTER]!!.size > 0)
         ) { "Cannot pass purely optional clauses if scores are not needed" }
         require(
-            subs.get(Occur.SHOULD)!!.size + subs.get(Occur.MUST)!!.size + subs.get(Occur.FILTER)!!.size
+            subs[Occur.SHOULD]!!.size + subs[Occur.MUST]!!.size + subs[Occur.FILTER]!!.size
                     != 0
         ) { "There should be at least one positive clause" }
         this.subs = subs
@@ -50,7 +48,7 @@ internal class BooleanScorerSupplier(
         } else {
             val optionalScorers = subs[Occur.SHOULD] ?: emptyList()
             val shouldCost = ScorerUtil.costWithMinShouldMatch(
-                optionalScorers.map { it.cost() },
+                optionalScorers.map { it.cost() }.asSequence(),
                 optionalScorers.size,
                 minShouldMatch
             )
@@ -60,12 +58,12 @@ internal class BooleanScorerSupplier(
 
     override fun setTopLevelScoringClause() {
         topLevelScoringClause = true
-        if (subs.get(Occur.SHOULD)!!.size + subs.get(Occur.MUST)!!.size == 1) {
+        if (subs[Occur.SHOULD]!!.size + subs[Occur.MUST]!!.size == 1) {
             // If there is a single scoring clause, propagate the call.
-            for (ss in subs.get(Occur.SHOULD)!!) {
+            for (ss in subs[Occur.SHOULD]!!) {
                 ss.setTopLevelScoringClause()
             }
-            for (ss in subs.get(Occur.MUST)!!) {
+            for (ss in subs[Occur.MUST]!!) {
                 ss.setTopLevelScoringClause()
             }
         }
@@ -136,7 +134,7 @@ internal class BooleanScorerSupplier(
             return ReqOptSumScorer(
                 excl(
                     req(subs[Occur.FILTER]!!, subs[Occur.MUST]!!, leadCost, false),
-                    subs.get(Occur.MUST_NOT)!!,
+                    subs[Occur.MUST_NOT]!!,
                     leadCost
                 ),
                 opt(subs[Occur.SHOULD]!!, minShouldMatch, scoreMode, leadCost, false),
@@ -148,30 +146,29 @@ internal class BooleanScorerSupplier(
     @Throws(IOException::class)
     override fun bulkScorer(): BulkScorer {
         val bulkScorer = booleanScorer()
-        if (bulkScorer != null) {
+        return if (bulkScorer != null) {
             // bulk scoring is applicable, use it
-            return bulkScorer
+            bulkScorer
         } else {
             // use a Scorer-based impl (BS2)
-            return super.bulkScorer()
+            super.bulkScorer()
         }
     }
 
     @Throws(IOException::class)
     fun booleanScorer(): BulkScorer? {
-        val numOptionalClauses = subs.get(Occur.SHOULD)!!.size
-        val numMustClauses = subs.get(Occur.MUST)!!.size
-        val numRequiredClauses = numMustClauses + subs.get(Occur.FILTER)!!.size
+        val numOptionalClauses = subs[Occur.SHOULD]!!.size
+        val numMustClauses = subs[Occur.MUST]!!.size
+        val numRequiredClauses = numMustClauses + subs[Occur.FILTER]!!.size
 
         val positiveScorer: BulkScorer?
         if (numRequiredClauses == 0) {
             // TODO: what is the right heuristic here
-            val costThreshold: Long
-            if (minShouldMatch <= 1) {
+            val costThreshold: Long = if (minShouldMatch <= 1) {
                 // when all clauses are optional, use BooleanScorer aggressively
                 // TODO: is there actually a threshold under which we should rather
                 // use the regular scorer
-                costThreshold = -1
+                -1
             } else {
                 // when a minimum number of clauses should match, BooleanScorer is
                 // going to score all windows that have at least minNrShouldMatch
@@ -179,7 +176,7 @@ internal class BooleanScorerSupplier(
                 // an intersection (all clauses might match a different doc ID and
                 // there will be no matches in the end) so we should only use
                 // BooleanScorer if matches are very dense
-                costThreshold = (maxDoc / 3).toLong()
+                (maxDoc / 3).toLong()
             }
 
             if (cost() < costThreshold) {
@@ -204,7 +201,7 @@ internal class BooleanScorerSupplier(
         val positiveScorerCost = positiveScorer.cost()
 
         val prohibited: MutableList<Scorer> = mutableListOf()
-        for (ss in subs.get(Occur.MUST_NOT)!!) {
+        for (ss in subs[Occur.MUST_NOT]!!) {
             prohibited.add(ss.get(positiveScorerCost))
         }
 
@@ -213,7 +210,7 @@ internal class BooleanScorerSupplier(
         } else {
             val prohibitedScorer =
                 if (prohibited.size == 1)
-                    prohibited.get(0)
+                    prohibited[0]
                 else
                     DisjunctionSumScorer(
                         prohibited, ScoreMode.COMPLETE_NO_SCORES, positiveScorerCost
@@ -227,15 +224,15 @@ internal class BooleanScorerSupplier(
     // pkg-private for forcing use of BooleanScorer in tests
     @Throws(IOException::class)
     fun optionalBulkScorer(): BulkScorer? {
-        if (subs.get(Occur.SHOULD)!!.isEmpty()) {
+        if (subs[Occur.SHOULD]!!.isEmpty()) {
             return null
-        } else if (subs.get(Occur.SHOULD)!!.size == 1 && minShouldMatch <= 1) {
-            return subs.get(Occur.SHOULD)!!.iterator().next().bulkScorer()
+        } else if (subs[Occur.SHOULD]!!.size == 1 && minShouldMatch <= 1) {
+            return subs[Occur.SHOULD]!!.iterator().next().bulkScorer()
         }
 
         if (scoreMode === ScoreMode.TOP_SCORES && minShouldMatch <= 1) {
             val optionalScorers: MutableList<Scorer> = mutableListOf()
-            for (ss in subs.get(Occur.SHOULD)!!) {
+            for (ss in subs[Occur.SHOULD]!!) {
                 optionalScorers.add(ss.get(Long.Companion.MAX_VALUE))
             }
 
@@ -243,7 +240,7 @@ internal class BooleanScorerSupplier(
         }
 
         val optional: MutableList<Scorer> = mutableListOf()
-        for (ss in subs.get(Occur.SHOULD)!!) {
+        for (ss in subs[Occur.SHOULD]!!) {
             optional.add(ss.get(Long.Companion.MAX_VALUE))
         }
 
@@ -252,25 +249,24 @@ internal class BooleanScorerSupplier(
 
     @Throws(IOException::class)
     fun filteredOptionalBulkScorer(): BulkScorer? {
-        if (!subs[Occur.MUST]!!.isEmpty() || subs[Occur.FILTER]!!.isEmpty() || (scoreMode.needsScores() && scoreMode !== ScoreMode.TOP_SCORES) || subs.get(Occur.SHOULD)!!.size <= 1 || minShouldMatch != 1
+        if (!subs[Occur.MUST]!!.isEmpty() || subs[Occur.FILTER]!!.isEmpty() || (scoreMode.needsScores() && scoreMode !== ScoreMode.TOP_SCORES) || subs[Occur.SHOULD]!!.size <= 1 || minShouldMatch != 1
         ) {
             return null
         }
         val cost = cost()
         val optionalScorers: MutableList<Scorer> = mutableListOf()
-        for (ss in subs.get(Occur.SHOULD)!!) {
+        for (ss in subs[Occur.SHOULD]!!) {
             optionalScorers.add(ss.get(cost))
         }
         val filters: MutableList<Scorer> = mutableListOf()
-        for (ss in subs.get(Occur.FILTER)!!) {
+        for (ss in subs[Occur.FILTER]!!) {
             filters.add(ss.get(cost))
         }
         if (scoreMode === ScoreMode.TOP_SCORES) {
-            val filterScorer: Scorer
-            if (filters.size == 1) {
-                filterScorer = filters.iterator().next()
+            val filterScorer: Scorer = if (filters.size == 1) {
+                filters.iterator().next()
             } else {
-                filterScorer = ConjunctionScorer(filters, mutableSetOf())
+                ConjunctionScorer(filters, mutableSetOf())
             }
             return MaxScoreBulkScorer(maxDoc, optionalScorers, filterScorer)
         } else {
@@ -294,15 +290,15 @@ internal class BooleanScorerSupplier(
     // Return a BulkScorer for the required clauses only
     @Throws(IOException::class)
     private fun requiredBulkScorer(): BulkScorer? {
-        if (subs.get(Occur.MUST)!!.size + subs.get(Occur.FILTER)!!.size == 0) {
+        if (subs[Occur.MUST]!!.size + subs[Occur.FILTER]!!.size == 0) {
             // No required clauses at all.
             return null
-        } else if (subs.get(Occur.MUST)!!.size + subs.get(Occur.FILTER)!!.size == 1) {
+        } else if (subs[Occur.MUST]!!.size + subs[Occur.FILTER]!!.size == 1) {
             var scorer: BulkScorer
-            if (!subs.get(Occur.MUST)!!.isEmpty()) {
-                scorer = subs.get(Occur.MUST)!!.iterator().next().bulkScorer()
+            if (!subs[Occur.MUST]!!.isEmpty()) {
+                scorer = subs[Occur.MUST]!!.iterator().next().bulkScorer()
             } else {
-                scorer = subs.get(Occur.FILTER)!!.iterator().next().bulkScorer()
+                scorer = subs[Occur.FILTER]!!.iterator().next().bulkScorer()
                 if (scoreMode.needsScores()) {
                     scorer = disableScoring(scorer)
                 }
@@ -314,11 +310,11 @@ internal class BooleanScorerSupplier(
         leadCost = minOf(leadCost, subs[Occur.FILTER]?.minOfOrNull { it.cost() } ?: leadCost)
 
         val requiredNoScoring: MutableList<Scorer> = mutableListOf()
-        for (ss in subs.get(Occur.FILTER)!!) {
+        for (ss in subs[Occur.FILTER]!!) {
             requiredNoScoring.add(ss.get(leadCost))
         }
         var requiredScoring: MutableList<Scorer> = mutableListOf()
-        val requiredScoringSupplier: MutableCollection<ScorerSupplier> = subs.get(Occur.MUST)!!
+        val requiredScoringSupplier: MutableCollection<ScorerSupplier> = subs[Occur.MUST]!!
         for (ss in requiredScoringSupplier) {
             if (requiredScoringSupplier.size == 1) {
                 ss.setTopLevelScoringClause()
@@ -340,25 +336,25 @@ internal class BooleanScorerSupplier(
             && requiredScoring.map(Scorer::twoPhaseIterator).all { obj: Any? -> obj == null }
             && requiredNoScoring.map(Scorer::twoPhaseIterator).all { obj: Any? -> obj == null }
         ) {
-            if (requiredScoring.isEmpty()
+            return if (requiredScoring.isEmpty()
                 && maxDoc >= DenseConjunctionBulkScorer.WINDOW_SIZE && leadCost >= maxDoc / DenseConjunctionBulkScorer.DENSITY_THRESHOLD_INVERSE
             ) {
-                return DenseConjunctionBulkScorer(
+                DenseConjunctionBulkScorer(
                     requiredNoScoring.map(Scorer::iterator).toMutableList(), maxDoc, 0f
                 )
             } else {
-                return ConjunctionBulkScorer(requiredScoring, requiredNoScoring)
+                ConjunctionBulkScorer(requiredScoring, requiredNoScoring)
             }
         }
         if (scoreMode === ScoreMode.TOP_SCORES && requiredScoring.size > 1) {
-            requiredScoring = mutableListOf<Scorer>(BlockMaxConjunctionScorer(requiredScoring))
+            requiredScoring = mutableListOf(BlockMaxConjunctionScorer(requiredScoring))
         }
         var conjunctionScorer: Scorer
         if (requiredNoScoring.size + requiredScoring.size == 1) {
             if (requiredScoring.size == 1) {
-                conjunctionScorer = requiredScoring.get(0)
+                conjunctionScorer = requiredScoring[0]
             } else {
-                conjunctionScorer = requiredNoScoring.get(0)
+                conjunctionScorer = requiredNoScoring[0]
                 if (scoreMode.needsScores()) {
                     val inner: Scorer = conjunctionScorer
                     conjunctionScorer =
@@ -397,12 +393,12 @@ internal class BooleanScorerSupplier(
     ): Scorer {
         if (requiredNoScoring.size + requiredScoring.size == 1) {
             val req: Scorer =
-                (if (requiredNoScoring.isEmpty()) requiredScoring else requiredNoScoring)
+                (requiredNoScoring.ifEmpty { requiredScoring })
                     .iterator()
                     .next()
                     .get(leadCost)
 
-            if (scoreMode.needsScores() === false) {
+            if (!scoreMode.needsScores()) {
                 return req
             }
 
@@ -432,14 +428,14 @@ internal class BooleanScorerSupplier(
             }
             for (s in requiredScoring) {
                 val scorer: Scorer = s.get(leadCost)
-                scoringScorers.add(scorer!!)
+                scoringScorers.add(scorer)
             }
             if (scoreMode === ScoreMode.TOP_SCORES && scoringScorers.size > 1 && topLevelScoringClause) {
                 val blockMaxScorer: Scorer = BlockMaxConjunctionScorer(scoringScorers)
                 if (requiredScorers.isEmpty()) {
                     return blockMaxScorer
                 }
-                scoringScorers = mutableListOf<Scorer>(blockMaxScorer)
+                scoringScorers = mutableListOf(blockMaxScorer)
             }
             requiredScorers.addAll(scoringScorers)
             return ConjunctionScorer(requiredScorers, scoringScorers)
@@ -448,10 +444,10 @@ internal class BooleanScorerSupplier(
 
     @Throws(IOException::class)
     private fun excl(main: Scorer, prohibited: MutableCollection<ScorerSupplier>, leadCost: Long): Scorer {
-        if (prohibited.isEmpty()) {
-            return main
+        return if (prohibited.isEmpty()) {
+            main
         } else {
-            return ReqExclScorer(
+            ReqExclScorer(
                 main, opt(prohibited, 1, ScoreMode.COMPLETE_NO_SCORES, leadCost, false)
             )
         }
@@ -480,10 +476,10 @@ internal class BooleanScorerSupplier(
             //
             // However, as WANDScorer uses more complex algorithm and data structure, we would like to
             // still use DisjunctionSumScorer to handle exhaustive pure disjunctions, which may be faster
-            if ((scoreMode === ScoreMode.TOP_SCORES && topLevelScoringClause) || minShouldMatch > 1) {
-                return WANDScorer(optionalScorers, minShouldMatch, scoreMode, leadCost)
+            return if ((scoreMode === ScoreMode.TOP_SCORES && topLevelScoringClause) || minShouldMatch > 1) {
+                WANDScorer(optionalScorers, minShouldMatch, scoreMode, leadCost)
             } else {
-                return DisjunctionSumScorer(optionalScorers, scoreMode, leadCost)
+                DisjunctionSumScorer(optionalScorers, scoreMode, leadCost)
             }
         }
     }
@@ -493,7 +489,7 @@ internal class BooleanScorerSupplier(
             //java.util.Objects.requireNonNull<Any>(scorer)
             return object : BulkScorer() {
                 @Throws(IOException::class)
-                override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+                override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
                     val noScoreCollector: LeafCollector =
                         object : LeafCollector {
                             var fake: Score = Score()
@@ -508,11 +504,11 @@ internal class BooleanScorerSupplier(
                                 collector.collect(doc)
                             }
                         }
-                    return scorer!!.score(noScoreCollector, acceptDocs, min, max)
+                    return scorer.score(noScoreCollector, acceptDocs, min, max)
                 }
 
                 override fun cost(): Long {
-                    return scorer!!.cost()
+                    return scorer.cost()
                 }
             }
         }

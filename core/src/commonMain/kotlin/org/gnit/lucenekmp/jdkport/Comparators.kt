@@ -22,7 +22,7 @@ object Comparators {
             return c1.compareTo(c2)
         }
 
-        override fun reversed(): Comparator<Comparable<Any?>?> {
+        fun reversed(): Comparator<Comparable<Any?>?> {
             return reverseOrder<Comparable<Any?>?>()
         }
     }

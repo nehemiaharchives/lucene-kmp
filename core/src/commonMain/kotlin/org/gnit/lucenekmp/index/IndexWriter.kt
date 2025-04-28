@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import kotlinx.io.IOException
 import org.gnit.lucenekmp.search.Sort
 import org.gnit.lucenekmp.search.SortField
 
@@ -103,6 +104,27 @@ import org.gnit.lucenekmp.search.SortField
  */
 
 class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.MergeContext*/{
+
+    /**
+     * If [DirectoryReader.open] has been called (ie, this writer is in near
+     * real-time mode), then after a merge completes, this class can be invoked to warm the reader on
+     * the newly merged segment, before the merge commits. This is not required for near real-time
+     * search, but will reduce search latency on opening a new near real-time reader after a merge
+     * completes.
+     *
+     * @lucene.experimental
+     *
+     * **NOTE**: [.warm] is called before any deletes have been carried
+     * over to the merged segment.
+     */
+    fun interface IndexReaderWarmer {
+        /**
+         * Invoked on the [LeafReader] for the newly merged segment, before that segment is made
+         * visible to near-real-time readers.
+         */
+        @Throws(IOException::class)
+        fun warm(reader: LeafReader?)
+    }
 
     companion object{
 

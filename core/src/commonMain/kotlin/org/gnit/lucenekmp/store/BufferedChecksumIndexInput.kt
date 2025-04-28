@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.store
 
 import kotlinx.io.IOException
-import org.gnit.lucenekmp.util.CRC32
+import org.gnit.lucenekmp.jdkport.CRC32
 
 
 /**

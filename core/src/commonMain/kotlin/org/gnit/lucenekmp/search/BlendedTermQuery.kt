@@ -216,7 +216,7 @@ class BlendedTermQuery private constructor(
         val contexts: Array<TermStates?> = ArrayUtil.copyArray(this.contexts)
         for (i in contexts.indices) {
             if (contexts[i] == null
-                || contexts[i]!!.wasBuiltFor(indexSearcher.topReaderContext) == false
+                || contexts[i]!!.wasBuiltFor(indexSearcher.getTopReaderContext()) == false
             ) {
                 contexts[i] = TermStates.build(indexSearcher, terms[i], true)
             }
@@ -233,7 +233,7 @@ class BlendedTermQuery private constructor(
         }
 
         for (i in contexts.indices) {
-            contexts[i] = adjustFrequencies(indexSearcher.topReaderContext, contexts[i]!!, df, ttf)
+            contexts[i] = adjustFrequencies(indexSearcher.getTopReaderContext(), contexts[i]!!, df, ttf)
         }
 
         val termQueries = kotlin.arrayOfNulls<Query>(terms.size)

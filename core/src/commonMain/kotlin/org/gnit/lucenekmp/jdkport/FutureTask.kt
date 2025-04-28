@@ -65,13 +65,6 @@ class RejectedExecutionException : Exception()
 class ExecutionException(cause: Throwable) : Exception(cause)
 
 /**
- * Exception to replace java.lang.InterruptedException
- */
-class InterruptedException(message: String? = null) : Exception(message)
-
-
-
-/**
  * A cancellable asynchronous computation. This class provides a base
  * implementation of [Future], with methods to start and cancel
  * a computation, query to see if the computation is complete, and

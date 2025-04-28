@@ -54,7 +54,7 @@ abstract class AbstractKnnVectorQuery(
 
     @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
-        val reader: IndexReader = indexSearcher.indexReader
+        val reader: IndexReader = indexSearcher.getIndexReader()
 
         val filterWeight: Weight?
         if (filter != null) {
@@ -71,7 +71,7 @@ abstract class AbstractKnnVectorQuery(
 
         val knnCollectorManager =
             TimeLimitingKnnCollectorManager(
-                getKnnCollectorManager(k, indexSearcher), indexSearcher.timeout
+                getKnnCollectorManager(k, indexSearcher), indexSearcher.getTimeout()
             )
         val taskExecutor: TaskExecutor = indexSearcher.getTaskExecutor()
         val leafReaderContexts: MutableList<LeafReaderContext> = reader.leaves()
@@ -87,7 +87,7 @@ abstract class AbstractKnnVectorQuery(
                 }
             })
         }
-        val perLeafResults: Array<TopDocs> = runBlocking { taskExecutor.invokeAll<TopDocs>(tasks) }.toTypedArray()
+        val perLeafResults: Array<TopDocs> = runBlocking { taskExecutor.invokeAll(tasks) }.toTypedArray()
 
         // Merge sort the results
         val topK = mergeLeafResults(perLeafResults)
@@ -320,7 +320,7 @@ abstract class AbstractKnnVectorQuery(
         @Throws(IOException::class)
         override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
             check(
-                searcher.indexReader.context.id() === contextIdentity
+                searcher.getIndexReader().context.id() === contextIdentity
             ) { "This DocAndScore query was created by a different reader" }
             return object : Weight(this) {
                 override fun explain(context: LeafReaderContext, doc: Int): Explanation {
@@ -418,7 +418,7 @@ abstract class AbstractKnnVectorQuery(
         }
 
         override fun equals(obj: Any?): Boolean {
-            if (sameClassAs(obj) == false) {
+            if (!sameClassAs(obj)) {
                 return false
             }
             return contextIdentity === (obj as DocAndScoreQuery).contextIdentity && docs.contentEquals(obj.docs) && scores.contentEquals(

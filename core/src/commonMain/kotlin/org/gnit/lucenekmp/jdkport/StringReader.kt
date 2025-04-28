@@ -112,7 +112,7 @@ class StringReader(s: String) : Reader() {
      * @throws     IOException  If the stream is closed
      */
     @Throws(IOException::class)
-    fun ready(): Boolean {
+    override fun ready(): Boolean {
         ensureOpen()
         return true
     }

@@ -35,7 +35,7 @@ internal class DisjunctionMaxBulkScorer(scorers: MutableList<BulkScorer>) : Bulk
     }
 
     @Throws(IOException::class)
-    override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+    override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
         var top: BulkScorerAndNext = scorers.top()
 
         while (top.next < max) {
@@ -90,7 +90,7 @@ internal class DisjunctionMaxBulkScorer(scorers: MutableList<BulkScorer>) : Bulk
         return top.next
     }
 
-    public override fun cost(): Long {
+    override fun cost(): Long {
         var cost: Long = 0
         for (scorer in scorers) {
             cost += scorer.scorer.cost()

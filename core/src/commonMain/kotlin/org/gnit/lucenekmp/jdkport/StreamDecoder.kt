@@ -101,7 +101,7 @@ class StreamDecoder : Reader {
     }
 
     @Throws(IOException::class)
-    fun ready(): Boolean {
+    override fun ready(): Boolean {
         ensureOpen()
         return haveLeftoverChar || implReady()
     }

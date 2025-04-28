@@ -204,7 +204,7 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
          */
         @Throws(IOException::class)
         fun build(indexSearcher: IndexSearcher, term: Term, needsStats: Boolean): TermStates {
-            val context: IndexReaderContext = checkNotNull(indexSearcher.topReaderContext)
+            val context: IndexReaderContext = checkNotNull(indexSearcher.getTopReaderContext())
             val perReaderTermState = TermStates(if (needsStats) null else term, context)
             if (needsStats) {
                 var pendingTermLookups = kotlin.arrayOfNulls<PendingTermLookup>(0)

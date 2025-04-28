@@ -4,10 +4,6 @@ import kotlinx.io.Buffer
 import kotlinx.io.IOException
 import kotlin.math.min
 
-// (If you do not have these exceptions in common code, you may define your own.)
-class BufferUnderflowException(message: String = "") : RuntimeException(message)
-class BufferOverflowException(message: String = "") : RuntimeException(message)
-
 // A simple re-implementation of java.nio.ByteBuffer using a kotlin-io Buffer as the backing store.
 open class ByteBuffer private constructor(
     private val buffer: Buffer,

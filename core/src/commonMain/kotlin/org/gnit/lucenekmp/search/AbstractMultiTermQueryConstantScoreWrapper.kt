@@ -133,7 +133,7 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
         ): WeightOrDocIdSetIterator {
             val bq: BooleanQuery.Builder = BooleanQuery.Builder()
             for (t in collectedTerms) {
-                val termStates = TermStates(searcher.topReaderContext)
+                val termStates = TermStates(searcher.getTopReaderContext())
                 termStates.register(t.state, context.ord, t.docFreq, t.totalTermFreq)
                 bq.add(TermQuery(Term(q.field, t.term), termStates), BooleanClause.Occur.SHOULD)
             }

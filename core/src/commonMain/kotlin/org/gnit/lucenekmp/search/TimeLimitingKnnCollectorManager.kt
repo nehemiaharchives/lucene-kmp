@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.search.knn.KnnSearchStrategy
 
 
 /** A [KnnCollectorManager] that collects results with a timeout.  */
-class TimeLimitingKnnCollectorManager(private val delegate: KnnCollectorManager, timeout: QueryTimeout) : KnnCollectorManager {
+class TimeLimitingKnnCollectorManager(private val delegate: KnnCollectorManager, timeout: QueryTimeout?) : KnnCollectorManager {
     private val queryTimeout: QueryTimeout? = timeout
 
     /** Get the configured [QueryTimeout] for terminating graph and exact searches.  */

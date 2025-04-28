@@ -57,7 +57,7 @@ open class ConstantScoreQuery(val query: Query) : Query() {
     protected class ConstantBulkScorer(val bulkScorer: BulkScorer, val weight: Weight, val theScore: Float) : BulkScorer() {
 
         @Throws(IOException::class)
-        override fun score(collector: LeafCollector, acceptDocs: Bits, min: Int, max: Int): Int {
+        override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
             return bulkScorer.score(wrapCollector(collector), acceptDocs, min, max)
         }
 
@@ -114,8 +114,8 @@ open class ConstantScoreQuery(val query: Query) : Query() {
                         }
 
                         @Throws(IOException::class)
-                        override fun bulkScorer(): BulkScorer? {
-                            if (scoreMode.isExhaustive() == false) {
+                        override fun bulkScorer(): BulkScorer {
+                            if (!scoreMode.isExhaustive()) {
                                 return super.bulkScorer()
                             }
                             val innerScorer: BulkScorer? = innerScorerSupplier.bulkScorer()

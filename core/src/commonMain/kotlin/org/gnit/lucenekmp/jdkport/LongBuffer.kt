@@ -3,13 +3,6 @@ package org.gnit.lucenekmp.jdkport
 import kotlinx.io.Buffer
 import kotlin.math.min
 
-
-/**
- * Exceptions for buffer underflow/overflow.
- */
-class BufferOverflowException(message: String = "") : RuntimeException(message)
-
-
 /**
  * A platform-agnostic LongBuffer built on top of a kotlin‑io Buffer.
  *
