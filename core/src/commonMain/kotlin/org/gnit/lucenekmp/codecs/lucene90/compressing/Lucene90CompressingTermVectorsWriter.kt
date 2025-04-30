@@ -273,7 +273,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
             numDirtyDocs += pendingDocs.size.toLong()
         }
         // write the index file
-        indexWriter!!.writeIndex(chunkDocs, vectorsStream!!.getFilePointer())
+        indexWriter!!.writeIndex(chunkDocs, vectorsStream!!.filePointer)
 
         val docBase = numDocs - chunkDocs
         vectorsStream!!.writeVInt(docBase)
@@ -618,7 +618,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
                 "Wrote " + this.numDocs + " docs, finish called with numDocs=" + numDocs
             )
         }
-        indexWriter!!.finish(numDocs, vectorsStream!!.getFilePointer(), metaStream!!)
+        indexWriter!!.finish(numDocs, vectorsStream!!.filePointer, metaStream!!)
         metaStream!!.writeVLong(numChunks)
         metaStream!!.writeVLong(numDirtyChunks)
         metaStream!!.writeVLong(numDirtyDocs)
@@ -716,7 +716,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
             )
             require(
                 CodecUtil.indexHeaderLength(VECTORS_INDEX_CODEC_NAME + "Meta", segmentSuffix).toLong()
-                        == metaStream!!.getFilePointer()
+                        == metaStream!!.filePointer
             )
 
             vectorsStream =
@@ -728,7 +728,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
             )
             require(
                 CodecUtil.indexHeaderLength(formatName, segmentSuffix).toLong()
-                        == vectorsStream!!.getFilePointer()
+                        == vectorsStream!!.filePointer
             )
 
             indexWriter =
@@ -814,7 +814,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
                 val bufferedDocs = code ushr 1
 
                 // write a new index entry and new header for this chunk.
-                indexWriter!!.writeIndex(bufferedDocs, vectorsStream!!.getFilePointer())
+                indexWriter!!.writeIndex(bufferedDocs, vectorsStream!!.filePointer)
                 vectorsStream!!.writeVInt(numDocs) // rebase
                 vectorsStream!!.writeVInt(code)
                 docID += bufferedDocs

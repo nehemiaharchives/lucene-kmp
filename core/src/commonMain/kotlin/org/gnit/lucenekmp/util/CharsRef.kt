@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.fromCharArray
+import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.math.min
 
@@ -99,10 +100,7 @@ class CharsRef : Comparable<CharsRef>, CharSequence, Cloneable {
         return String.fromCharArray(chars, offset, length)
     }
 
-    fun length(): Int {
-        return length
-    }
-
+    @JvmName("chatAtKt")
     fun charAt(index: Int): Char {
         // NOTE: must do a real check here to meet the specs of CharSequence
         Objects.checkIndex(index, length)

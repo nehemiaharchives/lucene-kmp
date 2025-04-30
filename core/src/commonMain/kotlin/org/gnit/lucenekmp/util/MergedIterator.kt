@@ -28,16 +28,17 @@ package org.gnit.lucenekmp.util
  */
 class MergedIterator<T : Comparable<T>>(
     private val removeDuplicates: Boolean,
-    vararg iterators: MutableIterator<T>
+    /*vararg iterators: MutableIterator<T>*/
+    iterators: Array<MutableIterator<T>>
 ) : MutableIterator<T>, Iterable<T> {
     private var current: T? = null
     private val queue: TermMergeQueue<T> = TermMergeQueue<T>(iterators.size)
     private val top: Array<SubIterator<T>?>
     private var numTop = 0
 
-    constructor(vararg iterators: MutableIterator<T>) : this(true, *iterators)
+    constructor(vararg iterators: MutableIterator<T>) : this(true, iterators as Array<MutableIterator<T>>)
 
-    constructor(removeDuplicates: Boolean, iteratorArray: Array<MutableIterator<T>>) : this(removeDuplicates, *iteratorArray)
+    //constructor(removeDuplicates: Boolean, iteratorArray: Array<MutableIterator<T>>) : this(removeDuplicates, *iteratorArray)
 
     init {
         top = kotlin.arrayOfNulls<SubIterator<T>>(iterators.size)

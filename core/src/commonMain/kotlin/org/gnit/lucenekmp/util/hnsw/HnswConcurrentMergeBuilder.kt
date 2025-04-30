@@ -31,7 +31,7 @@ class HnswConcurrentMergeBuilder(
 ) : HnswBuilder {
     private val workers: Array<ConcurrentMergeWorker?>
     private val hnswLock: HnswLock
-    private var infoStream: InfoStream = InfoStream.getDefault()
+    private var infoStream: InfoStream = InfoStream.default
     private var frozen = false
 
     init {
@@ -104,7 +104,7 @@ class HnswConcurrentMergeBuilder(
     }
 
     override val graph: OnHeapHnswGraph
-        get() = workers[0]!!.getGraph()
+        get() = workers[0]!!.graph
 
     /* test only for now */
     fun setBatchSize(newSize: Int) {

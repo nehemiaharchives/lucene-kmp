@@ -147,8 +147,8 @@ internal class FSTSuffixNodeCache<T>(fstCompiler: FSTCompiler<T>, ramLimitMB: Do
                     primaryTable.setNodeAddress(hashSlot, nodeAddress)
                     primaryTable.copyNodeBytes(
                         hashSlot,
-                        fstCompiler.scratchBytes.getBytes(),
-                        fstCompiler.scratchBytes.getPosition()
+                        fstCompiler.scratchBytes.bytes,
+                        fstCompiler.scratchBytes.position
                     )
 
                     // confirm frozen hash and unfrozen hash are the same
@@ -169,7 +169,7 @@ internal class FSTSuffixNodeCache<T>(fstCompiler: FSTCompiler<T>, ramLimitMB: Do
                 // each account for approximate hash table overhead halfway between 33.3% and 66.6%
                 // note that some of the copiedNodes are shared between fallback and primary tables so this
                 // computation is pessimistic
-                val copiedBytes: Long = primaryTable.copiedNodes.getPosition()
+                val copiedBytes: Long = primaryTable.copiedNodes.position
                 val ramBytesUsed: Long =
                     (primaryTable.count * 2 * PackedInts.bitsRequired(nodeAddress) / 8 + primaryTable.count * 2 * PackedInts.bitsRequired(
                         copiedBytes
@@ -315,7 +315,7 @@ internal class FSTSuffixNodeCache<T>(fstCompiler: FSTCompiler<T>, ramLimitMB: Do
             copiedNodes.append(bytes, 0, length)
             // write the offset, which points to the last byte of the node we copied since we later read
             // this node in reverse
-            copiedNodeAddress.set(hashSlot, copiedNodes.getPosition() - 1)
+            copiedNodeAddress.set(hashSlot, copiedNodes.position - 1)
         }
 
         /** promote the node bytes from the fallback table  */
@@ -331,7 +331,7 @@ internal class FSTSuffixNodeCache<T>(fstCompiler: FSTCompiler<T>, ramLimitMB: Do
             copiedNodes.append(fallbackTable.copiedNodes, fallbackStartAddress, nodeLength)
             // write the offset, which points to the last byte of the node we copied since we later read
             // this node in reverse
-            copiedNodeAddress.set(hashSlot, copiedNodes.getPosition() - 1)
+            copiedNodeAddress.set(hashSlot, copiedNodes.position - 1)
         }
 
         @Throws(IOException::class)
@@ -347,7 +347,7 @@ internal class FSTSuffixNodeCache<T>(fstCompiler: FSTCompiler<T>, ramLimitMB: Do
                 PagedGrowableWriter(
                     newSize,
                     BLOCK_SIZE_BYTES,
-                    PackedInts.bitsRequired(copiedNodes.getPosition()),
+                    PackedInts.bitsRequired(copiedNodes.position),
                     PackedInts.COMPACT
                 )
             val newFSTNodeAddress =
@@ -461,7 +461,7 @@ internal class FSTSuffixNodeCache<T>(fstCompiler: FSTCompiler<T>, ramLimitMB: Do
                 if (scratchArc.isLast) {
                     return if (arcUpto == node.numArcs - 1) {
                         // position is 1 index past the starting address, as we are reading in backward
-                        Math.toIntExact(address - `in`.getPosition())
+                        Math.toIntExact(address - `in`.position)
                     } else {
                         -1
                     }

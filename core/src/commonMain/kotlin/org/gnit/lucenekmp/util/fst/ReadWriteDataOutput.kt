@@ -45,48 +45,48 @@ internal class ReadWriteDataOutput(private val blockBits: Int) : DataOutput(), F
         require(byteBuffers!!.all { obj: ByteBuffer -> obj.hasArray() })
     }
 
-       override fun getReverseBytesReader(): BytesReader {
-            checkNotNull(byteBuffers) // freeze() must be called first
-            if (byteBuffers!!.size == 1) {
-                // use a faster implementation for single-block case
-                return ReverseBytesReader(byteBuffers!![0].array())
+    override fun getReverseBytesReader(): BytesReader {
+        checkNotNull(byteBuffers) // freeze() must be called first
+        if (byteBuffers!!.size == 1) {
+            // use a faster implementation for single-block case
+            return ReverseBytesReader(byteBuffers!![0].array())
+        }
+        return object : BytesReader() {
+            private var current: ByteArray = byteBuffers!![0].array()
+            private var nextBuffer = -1
+            private var nextRead = 0
+
+            override fun readByte(): Byte {
+                if (nextRead == -1) {
+                    current = byteBuffers!![nextBuffer--].array()
+                    nextRead = blockSize - 1
+                }
+                return current[nextRead--]
             }
-            return object : BytesReader() {
-                private var current: ByteArray = byteBuffers!![0].array()
-                private var nextBuffer = -1
-                private var nextRead = 0
 
-                override fun readByte(): Byte {
-                    if (nextRead == -1) {
-                        current = byteBuffers!![nextBuffer--].array()
-                        nextRead = blockSize - 1
-                    }
-                    return current[nextRead--]
+            override fun skipBytes(count: Long) {
+                position = position - count
+            }
+
+            override fun readBytes(b: ByteArray, offset: Int, len: Int) {
+                for (i in 0..<len) {
+                    b[offset + i] = readByte()
                 }
+            }
 
-                override fun skipBytes(count: Long) {
-                    setPosition(getPosition() - count)
-                }
-
-                override fun readBytes(b: ByteArray, offset: Int, len: Int) {
-                    for (i in 0..<len) {
-                        b[offset + i] = readByte()
-                    }
-                }
-
-                override fun getPosition() = (nextBuffer.toLong() + 1) * blockSize + nextRead
-
-                override fun setPosition(pos: Long) {
+            override var position: Long
+                get() = (nextBuffer.toLong() + 1) * blockSize + nextRead
+                set(pos: Long) {
                     val bufferIndex = (pos shr blockBits).toInt()
                     if (nextBuffer != bufferIndex - 1) {
                         nextBuffer = bufferIndex - 1
                         current = byteBuffers!![bufferIndex].array()
                     }
                     nextRead = (pos and blockMask.toLong()).toInt()
-                    require(getPosition() == pos) { "pos=$pos getPos()=${getPosition()}" }
+                    require(position == pos) { "pos=$pos getPos()=${position}" }
                 }
-            }
         }
+    }
 
     @Throws(IOException::class)
     override fun writeTo(out: DataOutput) {

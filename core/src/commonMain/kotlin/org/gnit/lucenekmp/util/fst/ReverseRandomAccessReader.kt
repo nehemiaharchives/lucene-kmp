@@ -1,21 +1,11 @@
 package org.gnit.lucenekmp.util.fst
 
-
-import org.gnit.lucenekmp.util.fst.FST.BytesReader
 import org.gnit.lucenekmp.store.RandomAccessInput
 import kotlinx.io.IOException
 
 /** Implements reverse read from a RandomAccessInput.  */
-internal class ReverseRandomAccessReader(private val `in`: RandomAccessInput) : BytesReader() {
-    var position: Long = 0
-
-    override fun getPosition(): Long {
-        return position
-    }
-
-    override fun setPosition(position: Long) {
-        this.position = position
-    }
+class ReverseRandomAccessReader(private val `in`: RandomAccessInput) : FST.BytesReader() {
+    override var position: Long = 0
 
     @Throws(IOException::class)
     override fun readByte(): Byte {

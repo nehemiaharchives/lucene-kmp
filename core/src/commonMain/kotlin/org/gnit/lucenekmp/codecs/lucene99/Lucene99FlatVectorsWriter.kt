@@ -135,7 +135,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             BYTE -> writeByteVectors(fieldData)
             FLOAT32 -> writeFloat32Vectors(fieldData)
         }
-        val vectorDataLength: Long = vectorData.getFilePointer() - vectorDataOffset
+        val vectorDataLength: Long = vectorData.filePointer - vectorDataOffset
 
         writeMeta(
             fieldData.fieldInfo, maxDoc, vectorDataOffset, vectorDataLength, fieldData.docsWithField
@@ -173,7 +173,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
                 BYTE -> writeSortedByteVectors(fieldData, ordMap)
                 FLOAT32 -> writeSortedFloat32Vectors(fieldData, ordMap)
             }
-        val vectorDataLength: Long = vectorData!!.getFilePointer() - vectorDataOffset
+        val vectorDataLength: Long = vectorData!!.filePointer - vectorDataOffset
 
         writeMeta(fieldData.fieldInfo, maxDoc, vectorDataOffset, vectorDataLength, newDocsWithField)
     }
@@ -221,7 +221,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
                     )
                 )
             }
-        val vectorDataLength: Long = vectorData.getFilePointer() - vectorDataOffset
+        val vectorDataLength: Long = vectorData.filePointer - vectorDataOffset
         writeMeta(
             fieldInfo,
             segmentWriteState.segmentInfo.maxDoc(),
@@ -238,7 +238,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
         val vectorDataOffset: Long = vectorData!!.alignFilePointer(Float.SIZE_BYTES)
         val tempVectorData: IndexOutput =
             segmentWriteState.directory.createTempOutput(
-                vectorData.getName(), "temp", segmentWriteState.context
+                vectorData.name, "temp", segmentWriteState.context
             )
         var vectorDataInput: IndexInput? = null
         var success = false
@@ -268,12 +268,12 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             // to perform random reads.
             vectorDataInput =
                 segmentWriteState.directory.openInput(
-                    tempVectorData.getName(), IOContext.DEFAULT.withReadAdvice(ReadAdvice.RANDOM)
+                    tempVectorData.name, IOContext.DEFAULT.withReadAdvice(ReadAdvice.RANDOM)
                 )
             // copy the temporary file vectors to the actual data file
             vectorData.copyBytes(vectorDataInput, vectorDataInput.length() - CodecUtil.footerLength())
             CodecUtil.retrieveChecksum(vectorDataInput)
-            val vectorDataLength: Long = vectorData.getFilePointer() - vectorDataOffset
+            val vectorDataLength: Long = vectorData.filePointer - vectorDataOffset
             writeMeta(
                 fieldInfo,
                 segmentWriteState.segmentInfo.maxDoc(),
@@ -312,7 +312,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             return FlatCloseableRandomVectorScorerSupplier(
                 AutoCloseable {
                     IOUtils.close(finalVectorDataInput)
-                    segmentWriteState.directory.deleteFile(tempVectorData.getName())
+                    segmentWriteState.directory.deleteFile(tempVectorData.name)
                 },
                 docsWithField.cardinality(),
                 randomVectorScorerSupplier
@@ -321,7 +321,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             if (!success) {
                 IOUtils.closeWhileHandlingException(vectorDataInput!!, tempVectorData)
                 IOUtils.deleteFilesIgnoringExceptions(
-                    segmentWriteState.directory, tempVectorData.getName()
+                    segmentWriteState.directory, tempVectorData.name
                 )
             }
         }

@@ -993,14 +993,6 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
         }
     }
 
-    fun getMinPackedValue(): ByteArray {
-        return minPackedValue.clone()
-    }
-
-    fun getMaxPackedValue(): ByteArray {
-        return maxPackedValue.clone()
-    }
-
     @get:Throws(IOException::class)
     override val numDimensions: Int
         get() = config.numDims

@@ -27,7 +27,7 @@ class GrowableWriter(startBitsPerValue: Int, valueCount: Int, private val accept
      */
     init {
         this.mutable = PackedInts.getMutable(valueCount, startBitsPerValue, this.acceptableOverheadRatio)
-        currentMask = mask(mutable.getBitsPerValue())
+        currentMask = mask(mutable.bitsPerValue)
     }
 
     override fun get(index: Int): Long {
@@ -39,24 +39,20 @@ class GrowableWriter(startBitsPerValue: Int, valueCount: Int, private val accept
     }
 
     override val bitsPerValue: Int
-        get() = mutable.getBitsPerValue()
-
-    override fun getBitsPerValue(): Int {
-        return bitsPerValue
-    }
+        get() = mutable.bitsPerValue
 
     private fun ensureCapacity(value: Long) {
         if ((value and currentMask) == value) {
             return
         }
         val bitsRequired = PackedInts.unsignedBitsRequired(value)
-        require(bitsRequired > mutable.getBitsPerValue())
+        require(bitsRequired > mutable.bitsPerValue)
         val valueCount = size()
         val next =
             PackedInts.getMutable(valueCount, bitsRequired, acceptableOverheadRatio)
         PackedInts.copy(this.mutable, 0, next, 0, valueCount, PackedInts.DEFAULT_BUFFER_SIZE)
         this.mutable = next
-        currentMask = mask(mutable.getBitsPerValue())
+        currentMask = mask(mutable.bitsPerValue)
     }
 
     override fun set(index: Int, value: Long) {
@@ -69,7 +65,7 @@ class GrowableWriter(startBitsPerValue: Int, valueCount: Int, private val accept
     }
 
     fun resize(newSize: Int): GrowableWriter {
-        val next = GrowableWriter(getBitsPerValue(), newSize, acceptableOverheadRatio)
+        val next = GrowableWriter(bitsPerValue, newSize, acceptableOverheadRatio)
         val limit = min(size(), newSize)
         PackedInts.copy(this.mutable, 0, next, 0, limit, PackedInts.DEFAULT_BUFFER_SIZE)
         return next

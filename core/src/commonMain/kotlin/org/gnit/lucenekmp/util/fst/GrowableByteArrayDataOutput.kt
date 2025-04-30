@@ -16,18 +16,6 @@ class GrowableByteArrayDataOutput : DataOutput(), Accountable {
     var bytes: ByteArray = ByteArray(INITIAL_SIZE)
         private set
 
-    fun getBytes(): ByteArray {
-        return bytes
-    }
-
-    fun getPosition(): Int {
-        return position
-    }
-
-    fun setPosition(newPosition: Int){
-        this.position = newPosition
-    }
-
     private var nextWrite = 0
 
     override fun writeByte(b: Byte) {

@@ -19,7 +19,7 @@ abstract class FSTEnum<T>(protected val fst: FST<T>) {
     // outputs are cumulative
     protected var output: Array<T> = kotlin.arrayOfNulls<Any>(10) as Array<T>
 
-    protected val NO_OUTPUT: T = fst.outputs.getNoOutput()
+    protected val NO_OUTPUT: T = fst.outputs.noOutput
     protected val fstReader: BytesReader = fst.getBytesReader()
 
     protected var upto: Int = 0

@@ -25,6 +25,7 @@ import kotlinx.io.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.experimental.or
+import kotlin.jvm.JvmName
 import kotlin.math.max
 
 /**
@@ -129,7 +130,7 @@ class FSTCompiler<T> private constructor(
         } else {
             null
         }
-        NO_OUTPUT = outputs.getNoOutput()
+        NO_OUTPUT = outputs.noOutput
 
         val f = kotlin.arrayOfNulls<UnCompiledNode<*>>(10) as Array<UnCompiledNode<T>>
         frontier = f
@@ -297,6 +298,7 @@ class FSTCompiler<T> private constructor(
         }
     }
 
+    @JvmName("getNodeCountKt")
     fun getNodeCount(): Long {
         // 1+ in order to count the -1 implicit final node
         return 1 + nodeCount
@@ -337,7 +339,7 @@ class FSTCompiler<T> private constructor(
     // of the current byte[]
     @Throws(IOException::class)
     fun addNode(nodeIn: UnCompiledNode<T>): Long {
-        // System.out.println("FST.addNode pos=" + bytes.getPosition() + " numArcs=" + nodeIn.numArcs);
+        // System.out.println("FST.addNode pos=" + bytes.position + " numArcs=" + nodeIn.numArcs);
         if (nodeIn.numArcs == 0) {
             return if (nodeIn.isFinal) {
                 FINAL_END_NODE
@@ -346,7 +348,7 @@ class FSTCompiler<T> private constructor(
             }
         }
         // reset the scratch writer to prepare for new write
-        scratchBytes.setPosition(0)
+        scratchBytes.position =0
 
         val doFixedLengthArcs = shouldExpandNodeWithFixedLengthArcs(nodeIn)
         if (doFixedLengthArcs) {
@@ -402,12 +404,12 @@ class FSTCompiler<T> private constructor(
             }
 
             scratchBytes.writeByte(flags.toByte())
-            val labelStart: Long = scratchBytes.getPosition().toLong()
+            val labelStart: Long = scratchBytes.position.toLong()
             writeLabel(scratchBytes, arc.label)
-            val numLabelBytes = (scratchBytes.getPosition() - labelStart).toInt()
+            val numLabelBytes = (scratchBytes.position - labelStart).toInt()
 
             // System.out.println("  write arc: label=" + (char) arc.label + " flags=" + flags + "
-            // target=" + target.node + " pos=" + bytes.getPosition() + " output=" +
+            // target=" + target.node + " pos=" + bytes.position + " output=" +
             // outputs.outputToString(arc.output));
             if (arc.output !== NO_OUTPUT) {
                 fst.outputs.write(arc.output!!, scratchBytes)
@@ -428,10 +430,10 @@ class FSTCompiler<T> private constructor(
             // just write the arcs "like normal" on first pass, but record how many bytes each one took
             // and max byte size:
             if (doFixedLengthArcs) {
-                val numArcBytes = (scratchBytes.getPosition() - lastArcStart).toInt()
+                val numArcBytes = (scratchBytes.position - lastArcStart).toInt()
                 numBytesPerArc[arcIdx] = numArcBytes
                 numLabelBytesPerArc[arcIdx] = numLabelBytes
-                lastArcStart = scratchBytes.getPosition().toLong()
+                lastArcStart = scratchBytes.position.toLong()
                 maxBytesPerArc = max(maxBytesPerArc, numArcBytes)
                 maxBytesPerArcWithoutLabel = max(maxBytesPerArcWithoutLabel, numArcBytes - numLabelBytes)
                 // System.out.println("    arcBytes=" + numArcBytes + " labelBytes=" + numLabelBytes);
@@ -489,7 +491,7 @@ class FSTCompiler<T> private constructor(
             writePaddingByte()
         }
         scratchBytes.writeTo(dataOutput)
-        numBytesWritten += scratchBytes.getPosition()
+        numBytesWritten += scratchBytes.position
 
         nodeCount++
         return numBytesWritten - 1
@@ -595,11 +597,11 @@ class FSTCompiler<T> private constructor(
         val headerLen = fixedLengthArcsBuffer.position
 
         // Expand the arcs in place, backwards.
-        var srcPos: Int = scratchBytes.getPosition()
+        var srcPos: Int = scratchBytes.position
         var destPos = headerLen + nodeIn.numArcs * maxBytesPerArc
         require(destPos >= srcPos)
         if (destPos > srcPos) {
-            scratchBytes.setPosition(destPos)
+            scratchBytes.position = destPos
             for (arcIdx in nodeIn.numArcs - 1 downTo 0) {
                 destPos -= maxBytesPerArc
                 val arcLen = numBytesPerArc[arcIdx]
@@ -623,7 +625,7 @@ class FSTCompiler<T> private constructor(
                     }
                     // copy the bytes from srcPos to destPos, essentially expanding the arc from variable
                     // length to fixed length
-                    writeScratchBytes(destPos, scratchBytes.getBytes(), srcPos, arcLen)
+                    writeScratchBytes(destPos, scratchBytes.bytes, srcPos, arcLen)
                 }
             }
         }
@@ -633,11 +635,11 @@ class FSTCompiler<T> private constructor(
     }
 
     /**
-     * Reverse the scratch bytes in place. This operation does not affect scratchBytes.getPosition().
+     * Reverse the scratch bytes in place. This operation does not affect scratchBytes.position.
      */
     private fun reverseScratchBytes() {
-        val pos: Int = scratchBytes.getPosition()
-        val bytes: ByteArray = scratchBytes.getBytes()
+        val pos: Int = scratchBytes.position
+        val bytes: ByteArray = scratchBytes.bytes
         val limit = pos / 2
         for (i in 0..<limit) {
             val b = bytes[i]
@@ -651,7 +653,7 @@ class FSTCompiler<T> private constructor(
      * was already written in the scratch bytes.
      *
      *
-     * This operation does not affect scratchBytes.getPosition().
+     * This operation does not affect scratchBytes.position.
      *
      * @param destPos the position in the scratch bytes
      * @param bytes the source byte[]
@@ -659,8 +661,8 @@ class FSTCompiler<T> private constructor(
      * @param length the number of bytes to write
      */
     private fun writeScratchBytes(destPos: Int, bytes: ByteArray, offset: Int, length: Int) {
-        require(destPos + length <= scratchBytes.getPosition())
-        System.arraycopy(bytes, offset, scratchBytes.getBytes(), destPos, length)
+        require(destPos + length <= scratchBytes.position)
+        System.arraycopy(bytes, offset, scratchBytes.bytes, destPos, length)
     }
 
     private fun writeNodeForDirectAddressingOrContinuous(
@@ -676,7 +678,7 @@ class FSTCompiler<T> private constructor(
         // the presence bits, and the first label. Keep the first label.
         val headerMaxLen = 11
         val numPresenceBytes = if (continuous) 0 else getNumPresenceBytes(labelRange)
-        var srcPos: Int = scratchBytes.getPosition()
+        var srcPos: Int = scratchBytes.position
         val totalArcBytes = numLabelBytesPerArc[0] + nodeIn.numArcs * maxBytesPerArcWithoutLabel
         var bufferOffset = headerMaxLen + numPresenceBytes + totalArcBytes
         val buffer = fixedLengthArcsBuffer.ensureCapacity(bufferOffset).bytes
@@ -714,18 +716,18 @@ class FSTCompiler<T> private constructor(
         val headerLen = fixedLengthArcsBuffer.position
 
         // Write the header.
-        scratchBytes.setPosition(0)
+        scratchBytes.position = 0
         scratchBytes.writeBytes(fixedLengthArcsBuffer.bytes, 0, headerLen)
 
         // Write the presence bits
         if (!continuous) {
             writePresenceBits(nodeIn)
-            require(scratchBytes.getPosition() == headerLen + numPresenceBytes)
+            require(scratchBytes.position == headerLen + numPresenceBytes)
         }
 
         // Write the first label and the arcs.
         scratchBytes.writeBytes(fixedLengthArcsBuffer.bytes, bufferOffset, totalArcBytes)
-        require(scratchBytes.getPosition() == headerLen + numPresenceBytes + totalArcBytes)
+        require(scratchBytes.position == headerLen + numPresenceBytes + totalArcBytes)
     }
 
     private fun writePresenceBits(nodeIn: UnCompiledNode<T>) {
@@ -1146,7 +1148,7 @@ class FSTCompiler<T> private constructor(
         }
 
         val position: Int
-            get() = bado.getPosition()
+            get() = bado.position
     }
 
     companion object {

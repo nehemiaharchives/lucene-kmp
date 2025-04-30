@@ -219,13 +219,13 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
     }
 
     override fun startTerm(norms: NumericDocValues) {
-        docStartFP = docOut!!.getFilePointer()
+        docStartFP = docOut!!.filePointer
         if (writePositions) {
-            posStartFP = posOut!!.getFilePointer()
+            posStartFP = posOut!!.filePointer
             level0LastPosFP = posStartFP
             level1LastPosFP = level0LastPosFP
             if (writePayloads || writeOffsets) {
-                payStartFP = payOut!!.getFilePointer()
+                payStartFP = payOut!!.filePointer
                 level0LastPayFP = payStartFP
                 level1LastPayFP = level0LastPayFP
             }
@@ -374,14 +374,14 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
                 scratchOutput.copyTo(level0Output)
                 scratchOutput.reset()
                 if (writePositions) {
-                    level0Output.writeVLong(posOut!!.getFilePointer() - level0LastPosFP)
+                    level0Output.writeVLong(posOut!!.filePointer - level0LastPosFP)
                     level0Output.writeByte(posBufferUpto.toByte())
-                    level0LastPosFP = posOut!!.getFilePointer()
+                    level0LastPosFP = posOut!!.filePointer
 
                     if (writeOffsets || writePayloads) {
-                        level0Output.writeVLong(payOut!!.getFilePointer() - level0LastPayFP)
+                        level0Output.writeVLong(payOut!!.filePointer - level0LastPayFP)
                         level0Output.writeVInt(payloadByteUpto)
-                        level0LastPayFP = payOut!!.getFilePointer()
+                        level0LastPayFP = payOut!!.filePointer
                     }
                 }
             }
@@ -416,7 +416,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
                 require(numBitSetLongs <= BLOCK_SIZE / 2)
                 level0Output.writeByte((-numBitSetLongs).toByte())
                 for (i in 0..<numBitSetLongs) {
-                    level0Output.writeLong(spareBitSet.getBits()[i])
+                    level0Output.writeLong(spareBitSet.bits[i])
                 }
             }
 
@@ -469,18 +469,18 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
                 maxImpactNumBytesAtLevel1 = Math.toIntExact(numImpactBytes)
             }
             if (writePositions) {
-                scratchOutput.writeVLong(posOut!!.getFilePointer() - level1LastPosFP)
+                scratchOutput.writeVLong(posOut!!.filePointer - level1LastPosFP)
                 scratchOutput.writeByte(posBufferUpto.toByte())
-                level1LastPosFP = posOut!!.getFilePointer()
+                level1LastPosFP = posOut!!.filePointer
                 if (writeOffsets || writePayloads) {
-                    scratchOutput.writeVLong(payOut!!.getFilePointer() - level1LastPayFP)
+                    scratchOutput.writeVLong(payOut!!.filePointer - level1LastPayFP)
                     scratchOutput.writeVInt(payloadByteUpto)
-                    level1LastPayFP = payOut!!.getFilePointer()
+                    level1LastPayFP = payOut!!.filePointer
                 }
             }
             val level1Len: Long = 2 * Short.SIZE_BYTES + scratchOutput.size() + level1Output.size()
             docOut!!.writeVLong(level1Len)
-            level1End = docOut!!.getFilePointer() + level1Len
+            level1End = docOut!!.filePointer + level1Len
             // There are at most 128 impacts, that require at most 2 bytes each
             require(numImpactBytes <= Short.Companion.MAX_VALUE)
             // Like impacts plus a few vlongs, still way under the max short value
@@ -491,11 +491,11 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
             scratchOutput.reset()
         } else {
             docOut!!.writeVLong(level1Output.size())
-            level1End = docOut!!.getFilePointer() + level1Output.size()
+            level1End = docOut!!.filePointer + level1Output.size()
         }
         level1Output.copyTo(docOut!!)
         level1Output.reset()
-        require(docOut!!.getFilePointer() == level1End) { "${docOut!!.getFilePointer()} $level1End" }
+        require(docOut!!.filePointer == level1End) { "${docOut!!.filePointer} $level1End" }
     }
 
     /** Called when we are done adding docs to this term  */
@@ -527,7 +527,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
             require(state.totalTermFreq != -1L)
             if (state.totalTermFreq > BLOCK_SIZE) {
                 // record file offset for last pos in last block
-                lastPosBlockOffset = posOut!!.getFilePointer() - posStartFP
+                lastPosBlockOffset = posOut!!.filePointer - posStartFP
             } else {
                 lastPosBlockOffset = -1
             }
@@ -655,11 +655,11 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
                 metaOut.writeInt(maxImpactNumBytesAtLevel0)
                 metaOut.writeInt(maxNumImpactsAtLevel1)
                 metaOut.writeInt(maxImpactNumBytesAtLevel1)
-                metaOut.writeLong(docOut!!.getFilePointer())
+                metaOut.writeLong(docOut!!.filePointer)
                 if (posOut != null) {
-                    metaOut.writeLong(posOut!!.getFilePointer())
+                    metaOut.writeLong(posOut!!.filePointer)
                     if (payOut != null) {
-                        metaOut.writeLong(payOut!!.getFilePointer())
+                        metaOut.writeLong(payOut!!.filePointer)
                     }
                 }
                 CodecUtil.writeFooter(metaOut)

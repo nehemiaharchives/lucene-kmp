@@ -32,7 +32,7 @@ object Util {
         val fstReader: BytesReader = fst.getBytesReader()
 
         // Accumulate output as we go
-        var output = fst.outputs.getNoOutput()
+        var output = fst.outputs.noOutput
         for (i in 0..<input.length) {
             if (fst.findTargetArc(input.ints[input.offset + i], arc, arc, fstReader) == null) {
                 return null
@@ -59,7 +59,7 @@ object Util {
         val arc = fst.getFirstArc(Arc())
 
         // Accumulate output as we go
-        var output = fst.outputs.getNoOutput()
+        var output = fst.outputs.noOutput
         for (i in 0..<input.length) {
             if (fst.findTargetArc((input.bytes[i + input.offset] and 0xFF.toByte()).toInt(), arc, arc, fstReader) == null) {
                 return null
@@ -159,7 +159,7 @@ object Util {
 
         emitDotState(out, "initial", "point", "white", "")
 
-        val NO_OUTPUT = fst.outputs.getNoOutput()
+        val NO_OUTPUT = fst.outputs.noOutput
         val r: BytesReader = fst.getBytesReader()
 
         // final FST.Arc<T> scratchArc = new FST.Arc<>();
@@ -535,7 +535,7 @@ object Util {
         var high = arc.numArcs() - 1
         while (low <= high) {
             mid = (low + high) ushr 1
-            `in`.setPosition(arc.posArcsStart())
+            `in`.position = arc.posArcsStart()
             `in`.skipBytes(arc.bytesPerArc().toLong() * mid + 1)
             val midLabel = fst.readLabel(`in`)
             val cmp = midLabel - targetLabel
@@ -705,8 +705,8 @@ object Util {
             // De-dup NO_OUTPUT since it must be a singleton:
 
             var startOutput = startOutput
-            if (startOutput == fst.outputs.getNoOutput()) {
-                startOutput = fst.outputs.getNoOutput()
+            if (startOutput == fst.outputs.noOutput) {
+                startOutput = fst.outputs.noOutput
             }
 
             val path = FSTPath(startOutput, node, input, boost, context, payload)
@@ -729,7 +729,7 @@ object Util {
             val results: MutableList<Result<T>> = ArrayList<Result<T>>()
 
             val fstReader: BytesReader = fst.getBytesReader()
-            val NO_OUTPUT = fst.outputs.getNoOutput()
+            val NO_OUTPUT = fst.outputs.noOutput
 
             // TODO: we could enable FST to sorting arcs by weight
             // as it freezes... can easily do this on first pass

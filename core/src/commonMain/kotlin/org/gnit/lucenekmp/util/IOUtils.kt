@@ -16,6 +16,7 @@ import org.gnit.lucenekmp.jdkport.InputStreamReader
 import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.util.IOUtils.rethrowAlways
+import kotlin.jvm.JvmName
 
 object IOUtils {
 
@@ -39,6 +40,7 @@ object IOUtils {
         close(objects.asList())
     }
 
+    @JvmName("closeNullable")
     @Throws(IOException::class)
     fun close(vararg objects: AutoCloseable?) {
         close(objects.asList().filterNotNull())
@@ -67,6 +69,7 @@ object IOUtils {
         closeWhileHandlingException(objects.asList())
     }
 
+    @JvmName("closeWhileHandlingExceptionNullable")
     fun closeWhileHandlingException(vararg objects: AutoCloseable?) {
         closeWhileHandlingException(objects.asList().filterNotNull())
     }

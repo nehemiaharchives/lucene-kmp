@@ -103,7 +103,7 @@ abstract class AbstractPagedMutable<T : AbstractPagedMutable<T>> internal constr
         val copyBuffer = LongArray(1024)
         for (i in copy.subMutables.indices) {
             val valueCount = if (i == copy.subMutables.size - 1) lastPageSize(newSize) else pageSize()
-            val bpv = if (i < numCommonPages) subMutables[i]!!.getBitsPerValue() else this.bitsPerValue
+            val bpv = if (i < numCommonPages) subMutables[i]!!.bitsPerValue else this.bitsPerValue
             copy.subMutables[i] = newMutable(valueCount, bpv)
             if (i < numCommonPages) {
                 val copyLength: Int = min(valueCount, subMutables[i]!!.size())

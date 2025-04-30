@@ -662,10 +662,6 @@ object PackedInts {
             return result
         }
 
-        fun getBitsPerValue(): Int {
-            return bitsPerValue
-        }
-
         override fun size(): Int {
             return valueCount
         }
@@ -683,10 +679,6 @@ object PackedInts {
          * non-space-optimal packing of bits.
          */
         abstract val bitsPerValue: Int
-
-        open fun getBitsPerValue(): Int {
-            return bitsPerValue
-        }
 
         /**
          * Set the value at the given index in the array.
@@ -755,10 +747,6 @@ object PackedInts {
 
         init {
             require(bitsPerValue > 0 && bitsPerValue <= 64) { "bitsPerValue=$bitsPerValue" }
-        }
-
-        override fun getBitsPerValue(): Int {
-            return bitsPerValue
         }
 
         override fun size(): Int {

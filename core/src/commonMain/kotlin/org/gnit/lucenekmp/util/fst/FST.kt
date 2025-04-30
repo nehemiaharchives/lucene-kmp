@@ -263,7 +263,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             @Throws(IOException::class)
             fun isBitSet(bitIndex: Int, arc: Arc<*>, `in`: BytesReader): Boolean {
                 require(arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING)
-                `in`.setPosition(arc.bitTableStart)
+                `in`.position = arc.bitTableStart
                 return BitTableUtil.isBitSet(bitIndex, `in`)
             }
 
@@ -274,7 +274,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             @Throws(IOException::class)
             fun countBits(arc: Arc<*>, `in`: BytesReader): Int {
                 require(arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING)
-                `in`.setPosition(arc.bitTableStart)
+                `in`.position = arc.bitTableStart
                 return BitTableUtil.countBits(getNumPresenceBytes(arc.numArcs()), `in`)
             }
 
@@ -282,7 +282,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             @Throws(IOException::class)
             fun countBitsUpTo(bitIndex: Int, arc: Arc<*>, `in`: BytesReader): Int {
                 require(arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING)
-                `in`.setPosition(arc.bitTableStart)
+                `in`.position = arc.bitTableStart
                 return BitTableUtil.countBitsUpTo(bitIndex, `in`)
             }
 
@@ -290,7 +290,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             @Throws(IOException::class)
             fun nextBitSet(bitIndex: Int, arc: Arc<*>, `in`: BytesReader): Int {
                 require(arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING)
-                `in`.setPosition(arc.bitTableStart)
+                `in`.position = arc.bitTableStart
                 return BitTableUtil.nextBitSet(bitIndex, getNumPresenceBytes(arc.numArcs()), `in`)
             }
 
@@ -298,7 +298,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             @Throws(IOException::class)
             fun previousBitSet(bitIndex: Int, arc: Arc<*>, `in`: BytesReader): Int {
                 require(arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING)
-                `in`.setPosition(arc.bitTableStart)
+                `in`.position = arc.bitTableStart
                 return BitTableUtil.previousBitSet(bitIndex, `in`)
             }
 
@@ -397,13 +397,13 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
     private fun readPresenceBytes(arc: Arc<T>, `in`: BytesReader) {
         require(arc.bytesPerArc() > 0)
         require(arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING)
-        arc.bitTableStart = `in`.getPosition()
+        arc.bitTableStart = `in`.position
         `in`.skipBytes(getNumPresenceBytes(arc.numArcs()).toLong())
     }
 
     /** Fills virtual 'start' arc, ie, an empty incoming arc to the FST's start node  */
     fun getFirstArc(arc: Arc<T>): Arc<T> {
-        val NO_OUTPUT: T = outputs.getNoOutput()
+        val NO_OUTPUT: T = outputs.noOutput
 
         if (metadata.emptyOutput != null) {
             arc.flags = (BIT_FINAL_ARC or BIT_LAST_ARC).toByte()
@@ -441,7 +441,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             arc.flags = BIT_LAST_ARC.toByte()
             arc.nodeFlags = arc.flags
         } else {
-            `in`.setPosition(follow.target())
+            `in`.position = follow.target()
             arc.nodeFlags = `in`.readByte()
             val flags = arc.nodeFlags
             if (flags == ARCS_FOR_BINARY_SEARCH || flags == ARCS_FOR_DIRECT_ADDRESSING || flags == ARCS_FOR_CONTINUOUS) {
@@ -453,15 +453,15 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 if (flags == ARCS_FOR_DIRECT_ADDRESSING) {
                     readPresenceBytes(arc, `in`)
                     arc.firstLabel = readLabel(`in`)
-                    arc.posArcsStart = `in`.getPosition()
+                    arc.posArcsStart = `in`.position
                     readLastArcByDirectAddressing(arc, `in`)
                 } else if (flags == ARCS_FOR_BINARY_SEARCH) {
                     arc.arcIdx = arc.numArcs() - 2
-                    arc.posArcsStart = `in`.getPosition()
+                    arc.posArcsStart = `in`.position
                     readNextRealArc(arc, `in`)
                 } else {
                     arc.firstLabel = readLabel(`in`)
-                    arc.posArcsStart = `in`.getPosition()
+                    arc.posArcsStart = `in`.position
                     readLastArcByContinuous(arc, `in`)
                 }
             } else {
@@ -487,7 +487,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 }
                 // Undo the byte flags we read:
                 `in`.skipBytes(-1)
-                arc.nextArc = `in`.getPosition()
+                arc.nextArc = `in`.position
                 readNextRealArc(arc, `in`)
             }
             require(arc.isLast)
@@ -534,7 +534,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
 
     @Throws(IOException::class)
     private fun readFirstArcInfo(nodeAddress: Long, arc: Arc<T>, `in`: BytesReader) {
-        `in`.setPosition(nodeAddress)
+        `in`.position = nodeAddress
 
         arc.nodeFlags = `in`.readByte()
         val flags = arc.nodeFlags
@@ -550,7 +550,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             } else if (flags == ARCS_FOR_CONTINUOUS) {
                 arc.firstLabel = readLabel(`in`)
             }
-            arc.posArcsStart = `in`.getPosition()
+            arc.posArcsStart = `in`.position
         } else {
             arc.nextArc = nodeAddress
             arc.bytesPerArc = 0
@@ -572,7 +572,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         if (!targetHasArcs(follow)) {
             return false
         } else {
-            `in`.setPosition(follow.target())
+            `in`.position = follow.target()
             val flags: Byte = `in`.readByte()
             return flags == ARCS_FOR_BINARY_SEARCH || flags == ARCS_FOR_DIRECT_ADDRESSING || flags == ARCS_FOR_CONTINUOUS
         }
@@ -600,7 +600,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             // Next arc is the first arc of a node.
             // Position to read the first arc label.
 
-            `in`.setPosition(arc.nextArc())
+            `in`.position = arc.nextArc()
             val flags: Byte = `in`.readByte()
             if (flags == ARCS_FOR_BINARY_SEARCH || flags == ARCS_FOR_DIRECT_ADDRESSING || flags == ARCS_FOR_CONTINUOUS) {
                 // System.out.println("    nextArc fixed length arc");
@@ -616,7 +616,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         } else {
             when (arc.nodeFlags()) {
                 ARCS_FOR_BINARY_SEARCH ->           // Point to next arc, -1 to skip arc flags.
-                    `in`.setPosition(arc.posArcsStart() - (1 + arc.arcIdx()) * arc.bytesPerArc().toLong() - 1)
+                    `in`.position = arc.posArcsStart() - (1 + arc.arcIdx()) * arc.bytesPerArc().toLong() - 1
 
                 ARCS_FOR_DIRECT_ADDRESSING -> {
                     // Direct addressing node. The label is not stored but rather inferred
@@ -635,7 +635,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                     // Arcs have variable length.
                     // System.out.println("    nextArc real list");
                     // Position to next arc, -1 to skip flags.
-                    `in`.setPosition(arc.nextArc() - 1)
+                    `in`.position = arc.nextArc() - 1
                 }
             }
         }
@@ -647,7 +647,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         require(arc.bytesPerArc() > 0)
         require(arc.nodeFlags() == ARCS_FOR_BINARY_SEARCH)
         require(idx >= 0 && idx < arc.numArcs())
-        `in`.setPosition(arc.posArcsStart() - idx * arc.bytesPerArc().toLong())
+        `in`.position = arc.posArcsStart() - idx * arc.bytesPerArc().toLong()
         arc.arcIdx = idx
         arc.flags = `in`.readByte()
         return readArc(arc, `in`)
@@ -661,7 +661,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
     @Throws(IOException::class)
     fun readArcByContinuous(arc: Arc<T>, `in`: BytesReader, rangeIndex: Int): Arc<T> {
         require(rangeIndex >= 0 && rangeIndex < arc.numArcs())
-        `in`.setPosition(arc.posArcsStart() - rangeIndex * arc.bytesPerArc().toLong())
+        `in`.position = arc.posArcsStart() - rangeIndex * arc.bytesPerArc().toLong()
         arc.arcIdx = rangeIndex
         arc.flags = `in`.readByte()
         return readArc(arc, `in`)
@@ -690,7 +690,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
     private fun readArcByDirectAddressing(
         arc: Arc<T>, `in`: BytesReader, rangeIndex: Int, presenceIndex: Int
     ): Arc<T> {
-        `in`.setPosition(arc.posArcsStart() - presenceIndex * arc.bytesPerArc().toLong())
+        `in`.position = arc.posArcsStart() - presenceIndex * arc.bytesPerArc().toLong()
         arc.arcIdx = rangeIndex
         arc.presenceIndex = presenceIndex
         arc.flags = `in`.readByte()
@@ -724,7 +724,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 require(arc.bytesPerArc() > 0)
                 arc.arcIdx++
                 require(arc.arcIdx() >= 0 && arc.arcIdx() < arc.numArcs())
-                `in`.setPosition(arc.posArcsStart() - arc.arcIdx() * arc.bytesPerArc().toLong())
+                `in`.position = arc.posArcsStart() - arc.arcIdx() * arc.bytesPerArc().toLong()
                 arc.flags = `in`.readByte()
             }
 
@@ -738,7 +738,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             else -> {
                 // Variable length arcs - linear search.
                 require(arc.bytesPerArc() == 0)
-                `in`.setPosition(arc.nextArc())
+                `in`.position = arc.nextArc()
                 arc.flags = `in`.readByte()
             }
         }
@@ -761,13 +761,13 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         if (arc.flag(BIT_ARC_HAS_OUTPUT)) {
             arc.output = outputs.read(`in`)
         } else {
-            arc.output = outputs.getNoOutput()
+            arc.output = outputs.noOutput
         }
 
         if (arc.flag(BIT_ARC_HAS_FINAL_OUTPUT)) {
             arc.nextFinalOutput = outputs.readFinalOutput(`in`)
         } else {
-            arc.nextFinalOutput = outputs.getNoOutput()
+            arc.nextFinalOutput = outputs.noOutput
         }
 
         if (arc.flag(BIT_STOP_NODE)) {
@@ -776,9 +776,9 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             } else {
                 arc.target = NON_FINAL_END_NODE
             }
-            arc.nextArc = `in`.getPosition() // Only useful for list.
+            arc.nextArc = `in`.position // Only useful for list.
         } else if (arc.flag(BIT_TARGET_NEXT)) {
-            arc.nextArc = `in`.getPosition() // Only useful for list.
+            arc.nextArc = `in`.position // Only useful for list.
             // TODO: would be nice to make this lazy -- maybe
             // caller doesn't need the target and is scanning arcs...
             if (!arc.flag(BIT_LAST_ARC)) {
@@ -791,13 +791,13 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                             BitTable.countBits(arc, `in`)
                         else
                             arc.numArcs()
-                    `in`.setPosition(arc.posArcsStart() - arc.bytesPerArc() * numArcs.toLong())
+                    `in`.position = arc.posArcsStart() - arc.bytesPerArc() * numArcs.toLong()
                 }
             }
-            arc.target = `in`.getPosition()
+            arc.target = `in`.position
         } else {
             arc.target = readUnpackedNodeTarget(`in`)
-            arc.nextArc = `in`.getPosition() // Only useful for list.
+            arc.nextArc = `in`.position // Only useful for list.
         }
         return arc
     }
@@ -832,7 +832,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             return null
         }
 
-        `in`.setPosition(follow.target())
+        `in`.position = follow.target()
 
         // System.out.println("fta label=" + (char) labelToMatch);
         arc.nodeFlags = `in`.readByte()
@@ -842,7 +842,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             arc.bytesPerArc = `in`.readVInt()
             readPresenceBytes(arc, `in`)
             arc.firstLabel = readLabel(`in`)
-            arc.posArcsStart = `in`.getPosition()
+            arc.posArcsStart = `in`.position
 
             val arcIndex = labelToMatch - arc.firstLabel()
             if (arcIndex < 0 || arcIndex >= arc.numArcs()) {
@@ -854,7 +854,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         } else if (flags == ARCS_FOR_BINARY_SEARCH) {
             arc.numArcs = `in`.readVInt()
             arc.bytesPerArc = `in`.readVInt()
-            arc.posArcsStart = `in`.getPosition()
+            arc.posArcsStart = `in`.position
 
             // Array is sparse; do binary search:
             var low = 0
@@ -863,7 +863,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 // System.out.println("    cycle");
                 val mid = (low + high) ushr 1
                 // +1 to skip over flags
-                `in`.setPosition(arc.posArcsStart() - (arc.bytesPerArc() * mid + 1))
+                `in`.position = arc.posArcsStart() - (arc.bytesPerArc() * mid + 1)
                 val midLabel = readLabel(`in`)
                 val cmp = midLabel - labelToMatch
                 if (cmp < 0) {
@@ -881,7 +881,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             arc.numArcs = `in`.readVInt()
             arc.bytesPerArc = `in`.readVInt()
             arc.firstLabel = readLabel(`in`)
-            arc.posArcsStart = `in`.getPosition()
+            arc.posArcsStart = `in`.position
             val arcIndex = labelToMatch - arc.firstLabel()
             if (arcIndex < 0 || arcIndex >= arc.numArcs()) {
                 return null // Before or after label range.
@@ -892,15 +892,15 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
 
         // Linear scan
         readFirstArcInfo(follow.target(), arc, `in`)
-        `in`.setPosition(arc.nextArc())
+        `in`.position = arc.nextArc()
         while (true) {
             require(arc.bytesPerArc() == 0)
             arc.flags = `in`.readByte()
             flags = arc.flags
-            val pos = `in`.getPosition()
+            val pos = `in`.position
             val label = readLabel(`in`)
             if (label == labelToMatch) {
-                `in`.setPosition(pos)
+                `in`.position = pos
                 return readArc(arc, `in`)
             } else if (label > labelToMatch) {
                 return null
@@ -951,10 +951,12 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
     /** Reads bytes stored in an FST.  */
     abstract class BytesReader : DataInput() {
         /** Get current read position.  */
-        abstract fun getPosition(): Long
+        //abstract fun getPosition(): Long
 
         /** Set current read position.  */
-        abstract fun setPosition(pos: Long)
+        //abstract fun setPosition(pos: Long)
+
+        abstract var position: Long
     }
 
     /**
@@ -987,10 +989,6 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             this.numBytes = numBytes
         }
 
-        fun getEmptyOutput(): T? {
-            return emptyOutput
-        }
-
         /**
          * Save the metadata to a DataOutput
          *
@@ -1006,7 +1004,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 metaOut.writeByte(1.toByte())
 
                 // Serialize empty-string output:
-                val ros: ByteBuffersDataOutput = ByteBuffersDataOutput()
+                val ros = ByteBuffersDataOutput()
                 outputs.writeFinalOutput(emptyOutput!!, ros)
                 val emptyOutputBytes: ByteArray = ros.toArrayCopy()
                 val emptyLen = emptyOutputBytes.size
@@ -1154,7 +1152,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 // so we have to check here else BytesStore gets
                 // angry:
                 if (numBytes > 0) {
-                    reader.setPosition((numBytes - 1).toLong())
+                    reader.position = (numBytes - 1).toLong()
                 }
                 emptyOutput = outputs.readFinalOutput(reader)
             } else {

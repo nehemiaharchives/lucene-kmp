@@ -30,10 +30,6 @@ abstract class IndexOutput protected constructor(resourceDescription: String, na
     /** Just the name part from `resourceDescription`  */
     val name: String
 
-    fun getName(): String {
-        return name
-    }
-
     /**
      * Sole constructor. resourceDescription should be non-null, opaque string describing this
      * resource; it's returned from [.toString].
@@ -50,10 +46,6 @@ abstract class IndexOutput protected constructor(resourceDescription: String, na
 
     /** Returns the current position in this file, where the next write will occur.  */
     abstract val filePointer: Long
-
-    fun getFilePointer(): Long {
-        return filePointer
-    }
 
     /** Returns the current checksum of bytes written so far */
     abstract fun getChecksum(): Long

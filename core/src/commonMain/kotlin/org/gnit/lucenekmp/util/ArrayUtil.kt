@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Arrays.mismatch
+import kotlin.jvm.JvmName
 import kotlin.math.min
 import kotlin.reflect.KClass
 
@@ -184,9 +185,9 @@ class ArrayUtil {
         fun <T> growExact(array: Array<T>, newLength: Int): Array<T> = array.copyOf(newLength) as Array<T>
 
         /** Returns a larger array, generally over-allocating exponentially  */
-        fun <T> grow(array: Array<T?>): Array<T?> {
+        /*fun <T> grow(array: Array<T?>): Array<T?> {
             return grow<T?>(array, 1 + array.size)
-        }
+        }*/
 
         fun <T> grow(array: Array<T>): Array<T> {
             return grow(array, 1 + array.size)
@@ -196,6 +197,7 @@ class ArrayUtil {
          * Returns an array whose size is at least `minSize`, generally over-allocating
          * exponentially
          */
+        @JvmName("growNullable")
         fun <T> grow(array: Array<T?>, minSize: Int): Array<T?> {
             if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
             if (array.size < minSize) {
@@ -759,6 +761,7 @@ class ArrayUtil {
             return copy
         }
 
+        @JvmName("copyOfSubArrayNullable")
         fun <T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
             val subLength = to - from
             val type: KClass<out Array<T?>> = array::class

@@ -201,7 +201,7 @@ internal class Packed64(valueCount: Int, bitsPerValue: Int) : MutableImpl(valueC
 
     override fun fill(fromIndex: Int, toIndex: Int, `val`: Long) {
         var fromIndex = fromIndex
-        require(PackedInts.unsignedBitsRequired(`val`) <= getBitsPerValue())
+        require(PackedInts.unsignedBitsRequired(`val`) <= bitsPerValue)
         require(fromIndex <= toIndex)
 
         // minimum number of values that use an exact number of full blocks

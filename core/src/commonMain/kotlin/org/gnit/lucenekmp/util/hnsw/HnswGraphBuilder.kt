@@ -40,7 +40,7 @@ open class HnswGraphBuilder protected constructor(
     protected val hnsw: OnHeapHnswGraph
     protected val hnswLock: HnswLock?
 
-    private var infoStream: InfoStream = InfoStream.getDefault()
+    private var infoStream: InfoStream = InfoStream.default
     private var frozen = false
 
     /**
@@ -125,12 +125,8 @@ open class HnswGraphBuilder protected constructor(
             return this.graph
         }
 
-    fun getCompletedGraph() = completedGraph
-
     override val graph: OnHeapHnswGraph
         get() = hnsw
-
-    fun getGraph() = hnsw
 
     /** add vectors in range [minOrd, maxOrd)  */
     @Throws(IOException::class)

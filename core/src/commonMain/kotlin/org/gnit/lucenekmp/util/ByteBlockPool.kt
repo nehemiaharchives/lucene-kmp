@@ -305,7 +305,7 @@ class ByteBlockPool(private val allocator: Allocator) : Accountable {
         return buffers[bufferIndex]!![pos]
     }
 
-    public override fun ramBytesUsed(): Long {
+    override fun ramBytesUsed(): Long {
         var size = BASE_RAM_BYTES
         size += RamUsageEstimator.shallowSizeOf(buffers)
         for (buf in buffers) {
@@ -317,8 +317,6 @@ class ByteBlockPool(private val allocator: Allocator) : Accountable {
     val position: Long
         /** the current position (in absolute value) of this byte pool  */
         get() = (bufferUpto * allocator.blockSize + byteUpto).toLong()
-
-    fun getPosition() = position
 
     /** Retrieve the buffer at the specified index from the buffer pool.  */
     fun getBuffer(bufferIndex: Int): ByteArray {
@@ -340,7 +338,7 @@ class ByteBlockPool(private val allocator: Allocator) : Accountable {
         const val BYTE_BLOCK_SHIFT: Int = 15
 
         /** The size of each buffer in the pool.  */
-        val BYTE_BLOCK_SIZE: Int = 1 shl BYTE_BLOCK_SHIFT
+        const val BYTE_BLOCK_SIZE: Int = 1 shl BYTE_BLOCK_SHIFT
 
         /**
          * Use this to find the position of a global offset in a particular buffer.
@@ -351,6 +349,6 @@ class ByteBlockPool(private val allocator: Allocator) : Accountable {
          *
          * positionInCurrentBuffer = globalOffset % BYTE_BLOCK_SIZE
          */
-        val BYTE_BLOCK_MASK: Int = BYTE_BLOCK_SIZE - 1
+        const val BYTE_BLOCK_MASK: Int = BYTE_BLOCK_SIZE - 1
     }
 }

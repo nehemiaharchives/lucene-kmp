@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.random.Random
@@ -142,7 +143,7 @@ class TestUnicodeUtil : LuceneTestCase() {
             val utf32Len = UnicodeUtil.UTF8toUTF32(newBytesRef(utf8, 0, utf8Len), utf32)
 
             val codePoints: IntArray = s.codePointsSeq().toList().toIntArray()
-            if (!ArrayUtil.equals(codePoints, 0, codePoints.size, utf32, 0, codePoints.size)) {
+            if (!Arrays.equals(codePoints, 0, codePoints.size, utf32, 0, codePoints.size)) {
                 println("FAILED")
                 for (j in 0..<s.length) {
                     println("  char[" + j + "]=" + s[j].code.toHexString())

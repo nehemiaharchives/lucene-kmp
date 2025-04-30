@@ -276,9 +276,9 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
     }
 
     companion object {
-        val FST_OUTPUTS: Outputs<BytesRef> = ByteSequenceOutputs.getSingleton()
+        val FST_OUTPUTS: Outputs<BytesRef> = ByteSequenceOutputs.singleton
 
-        val NO_OUTPUT: BytesRef = FST_OUTPUTS.getNoOutput()
+        val NO_OUTPUT: BytesRef = FST_OUTPUTS.noOutput
 
         const val OUTPUT_FLAGS_NUM_BITS: Int = 2
         const val OUTPUT_FLAGS_MASK: Int = 0x3

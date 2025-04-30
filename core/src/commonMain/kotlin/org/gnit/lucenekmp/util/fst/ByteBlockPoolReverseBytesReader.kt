@@ -1,12 +1,10 @@
 package org.gnit.lucenekmp.util.fst
 
-
-import org.gnit.lucenekmp.util.fst.FST.BytesReader
 import org.gnit.lucenekmp.util.ByteBlockPool
 import kotlinx.io.IOException
 
 /** Reads in reverse from a ByteBlockPool.  */
-internal class ByteBlockPoolReverseBytesReader(private val buf: ByteBlockPool) : BytesReader() {
+internal class ByteBlockPoolReverseBytesReader(private val buf: ByteBlockPool) : FST.BytesReader() {
 
     // the difference between the FST node address and the hash table copied node address
     private var posDelta: Long = 0
@@ -27,13 +25,11 @@ internal class ByteBlockPoolReverseBytesReader(private val buf: ByteBlockPool) :
         pos -= numBytes
     }
 
-    override fun getPosition(): Long {
-        return pos + posDelta
-    }
-
-    override fun setPosition(pos: Long) {
-        this.pos = pos - posDelta
-    }
+    override var position: Long
+        get() = pos + posDelta
+        set(pos) {
+            this.pos = pos - posDelta
+        }
 
     fun setPosDelta(posDelta: Long) {
         this.posDelta = posDelta

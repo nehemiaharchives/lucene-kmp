@@ -60,7 +60,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
             val matching: FixedBitSet = this@BooleanScorer.matching
             val buckets = this@BooleanScorer.buckets
             val base = this.base
-            val bitArray: LongArray = matching.getBits()
+            val bitArray: LongArray = matching.bits
             for (idx in bitArray.indices) {
                 var bits = bitArray[idx]
                 while (bits != 0L) {

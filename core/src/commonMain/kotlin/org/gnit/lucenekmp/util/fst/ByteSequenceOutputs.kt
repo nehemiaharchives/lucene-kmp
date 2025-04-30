@@ -138,10 +138,6 @@ class ByteSequenceOutputs private constructor() : Outputs<BytesRef>() {
         private val NO_OUTPUT: BytesRef = BytesRef()
         val singleton: ByteSequenceOutputs = ByteSequenceOutputs()
 
-        fun getSingleton(): ByteSequenceOutputs {
-            return singleton
-        }
-
         private val BASE_NUM_BYTES: Long = RamUsageEstimator.shallowSizeOf(NO_OUTPUT)
     }
 }

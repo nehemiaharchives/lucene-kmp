@@ -223,10 +223,6 @@ class FixedBitSet : BitSet {
         return -1
     }
 
-    fun getBits(): LongArray {
-        return bits
-    }
-
     @Throws(IOException::class)
     override fun or(iter: DocIdSetIterator) {
         checkUnpositioned(iter)

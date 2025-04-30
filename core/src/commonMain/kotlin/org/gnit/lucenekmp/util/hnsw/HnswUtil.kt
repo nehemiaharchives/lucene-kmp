@@ -186,7 +186,7 @@ object HnswUtil {
 
     private fun nextClearBit(bits: FixedBitSet, index: Int): Int {
         // Does not depend on the ghost bits being clear!
-        val barray: LongArray = bits.getBits()
+        val barray: LongArray = bits.bits
         require(index >= 0 && index < bits.length()) { "index=" + index + ", numBits=" + bits.length() }
         var i = index shr 6
         var word = (barray[i] shr index).inv() // skip all the bits to the right of index

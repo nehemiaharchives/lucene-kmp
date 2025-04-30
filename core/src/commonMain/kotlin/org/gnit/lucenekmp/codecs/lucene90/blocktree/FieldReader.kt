@@ -72,7 +72,7 @@ class FieldReader internal constructor(
                     ushr Lucene90BlockTreeTermsReader.OUTPUT_FLAGS_NUM_BITS)
         // Initialize FST always off-heap.
         val metadata: FST.FSTMetadata<BytesRef> /* TODO: class org.jetbrains.kotlin.nj2k.types.JKJavaNullPrimitiveType */ =
-            FST.readMetadata(metaIn, ByteSequenceOutputs.getSingleton())
+            FST.readMetadata(metaIn, ByteSequenceOutputs.singleton)
         index = FST.fromFSTReader(metadata, OffHeapFSTStore(indexIn, indexStartFP, metadata))!!
         /*
      if (false) {
@@ -83,7 +83,7 @@ class FieldReader internal constructor(
      w.close();
      }
     */
-        val emptyOutput: BytesRef? = metadata.getEmptyOutput()
+        val emptyOutput: BytesRef? = metadata.emptyOutput
         if (rootCode != emptyOutput) {
             // TODO: this branch is never taken
             require(false)

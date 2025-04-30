@@ -507,14 +507,14 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                     docBitSet.set(0, BLOCK_SIZE)
                 } else {
                     numLongs = -bitsPerValue
-                    docIn!!.readLongs(docBitSet.getBits(), 0, numLongs)
+                    docIn!!.readLongs(docBitSet.bits, 0, numLongs)
                 }
                 if (needsFreq) {
                     // Note: we know that BLOCK_SIZE bits are set, so no need to compute the cumulative pop
                     // count at the last index, it will be BLOCK_SIZE.
                     // Note: this for loop auto-vectorizes
                     for (i in 0..<numLongs - 1) {
-                        docCumulativeWordPopCounts[i] = Long.bitCount(docBitSet.getBits()[i])
+                        docCumulativeWordPopCounts[i] = Long.bitCount(docBitSet.bits[i])
                     }
                     for (i in 1..<numLongs - 1) {
                         docCumulativeWordPopCounts[i] += docCumulativeWordPopCounts[i - 1]
@@ -522,7 +522,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                     docCumulativeWordPopCounts[numLongs - 1] = BLOCK_SIZE
                     require(
                         docCumulativeWordPopCounts[numLongs - 2]
-                                + Long.bitCount(docBitSet.getBits()[numLongs - 1])
+                                + Long.bitCount(docBitSet.bits[numLongs - 1])
                                 == BLOCK_SIZE
                     )
                 }
@@ -866,7 +866,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                         docBufferUpto =
                             (1
                                     + docCumulativeWordPopCounts[wordIndex]
-                                    - Long.bitCount(docBitSet.getBits()[wordIndex] ushr next))
+                                    - Long.bitCount(docBitSet.bits[wordIndex] ushr next))
                     } else {
                         // When only docs needed and block is UNARY encoded, we do not need to maintain
                         // docBufferUpTo to record the iteration position in the block.

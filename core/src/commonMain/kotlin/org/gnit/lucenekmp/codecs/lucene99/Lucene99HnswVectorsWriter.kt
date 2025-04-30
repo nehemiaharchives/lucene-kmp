@@ -157,10 +157,10 @@ class Lucene99HnswVectorsWriter(
     @Throws(IOException::class)
     private fun writeField(fieldData: FieldWriter<*>) {
         // write graph
-        val vectorIndexOffset: Long = vectorIndex!!.getFilePointer()
+        val vectorIndexOffset: Long = vectorIndex!!.filePointer
         val graph: OnHeapHnswGraph = fieldData.graph!!
         val graphLevelNodeOffsets = writeGraph(graph)
-        val vectorIndexLength: Long = vectorIndex.getFilePointer() - vectorIndexOffset
+        val vectorIndexLength: Long = vectorIndex.filePointer - vectorIndexOffset
 
         writeMeta(
             fieldData.fieldInfo,
@@ -181,12 +181,12 @@ class Lucene99HnswVectorsWriter(
 
         mapOldOrdToNewOrd(fieldData.docsWithFieldSet, sortMap, oldOrdMap, ordMap, null)
         // write graph
-        val vectorIndexOffset: Long = vectorIndex!!.getFilePointer()
+        val vectorIndexOffset: Long = vectorIndex!!.filePointer
         val graph: OnHeapHnswGraph? = fieldData.graph
         val graphLevelNodeOffsets: Array<IntArray?> =
             if (graph == null) kotlin.arrayOfNulls(0) else kotlin.arrayOfNulls(graph.numLevels())
         val mockGraph: HnswGraph? = reconstructAndWriteGraph(graph!!, ordMap, oldOrdMap, graphLevelNodeOffsets)
-        val vectorIndexLength: Long = vectorIndex.getFilePointer() - vectorIndexOffset
+        val vectorIndexLength: Long = vectorIndex.filePointer - vectorIndexOffset
 
         writeMeta(
             fieldData.fieldInfo,
@@ -227,9 +227,9 @@ class Lucene99HnswVectorsWriter(
         while (nodesOnLevel0.hasNext()) {
             val node: Int = nodesOnLevel0.nextInt()
             val neighbors: NeighborArray = graph.getNeighbors(0, newToOldMap[node])
-            val offset: Long = vectorIndex!!.getFilePointer()
+            val offset: Long = vectorIndex!!.filePointer
             reconstructAndWriteNeighbours(neighbors, oldToNewMap, scratch, maxOrd)
-            levelNodeOffsets[0]!![node] = Math.toIntExact(vectorIndex.getFilePointer() - offset)
+            levelNodeOffsets[0]!![node] = Math.toIntExact(vectorIndex.filePointer - offset)
         }
 
         for (level in 1..<graph.numLevels()) {
@@ -246,10 +246,10 @@ class Lucene99HnswVectorsWriter(
             var nodeOffsetIndex = 0
             for (node in newNodes) {
                 val neighbors: NeighborArray = graph.getNeighbors(level, newToOldMap[node])
-                val offset: Long = vectorIndex!!.getFilePointer()
+                val offset: Long = vectorIndex!!.filePointer
                 reconstructAndWriteNeighbours(neighbors, oldToNewMap, scratch, maxOrd)
                 levelNodeOffsets[level]!![nodeOffsetIndex++] =
-                    Math.toIntExact(vectorIndex.getFilePointer() - offset)
+                    Math.toIntExact(vectorIndex.filePointer - offset)
             }
         }
         return object : HnswGraph() {
@@ -329,7 +329,7 @@ class Lucene99HnswVectorsWriter(
             flatVectorWriter.mergeOneFieldToIndex(fieldInfo, mergeState)
         var success = false
         try {
-            val vectorIndexOffset: Long = vectorIndex!!.getFilePointer()
+            val vectorIndexOffset: Long = vectorIndex!!.filePointer
             // build the graph using the temporary vector data
             // we use Lucene99HnswVectorsReader.DenseOffHeapVectorValues for the graph construction
             // doesn't need to know docIds
@@ -368,7 +368,7 @@ class Lucene99HnswVectorsWriter(
                     )
                 vectorIndexNodeOffsets = writeGraph(graph)
             }
-            val vectorIndexLength: Long = vectorIndex.getFilePointer() - vectorIndexOffset
+            val vectorIndexLength: Long = vectorIndex.filePointer - vectorIndexOffset
             writeMeta(
                 fieldInfo,
                 vectorIndexOffset,
@@ -407,7 +407,7 @@ class Lucene99HnswVectorsWriter(
                 val neighbors: NeighborArray = graph.getNeighbors(level, node)
                 val size: Int = neighbors.size()
                 // Write size in VInt as the neighbors list is typically small
-                val offsetStart: Long = vectorIndex!!.getFilePointer()
+                val offsetStart: Long = vectorIndex!!.filePointer
                 val nnodes: IntArray = neighbors.nodes()
                 Arrays.sort(nnodes, 0, size)
                 // Now that we have sorted, do delta encoding to minimize the required bits to store the
@@ -430,7 +430,7 @@ class Lucene99HnswVectorsWriter(
                     vectorIndex.writeVInt(scratch[i])
                 }
                 offsets[level]!![nodeOffsetId++] =
-                    Math.toIntExact(vectorIndex.getFilePointer() - offsetStart)
+                    Math.toIntExact(vectorIndex.filePointer - offsetStart)
             }
         }
         return offsets
@@ -480,7 +480,7 @@ class Lucene99HnswVectorsWriter(
                     require(nodesOnLevel.size() == count) { "Level 0 expects to have all nodes" }
                 }
             }
-            val start: Long = vectorIndex!!.getFilePointer()
+            val start: Long = vectorIndex!!.filePointer
             meta.writeLong(start)
             meta.writeVInt(DIRECT_MONOTONIC_BLOCK_SHIFT)
             val memoryOffsetsWriter: DirectMonotonicWriter =
@@ -495,7 +495,7 @@ class Lucene99HnswVectorsWriter(
                 }
             }
             memoryOffsetsWriter.finish()
-            meta.writeLong(vectorIndex.getFilePointer() - start)
+            meta.writeLong(vectorIndex.filePointer - start)
         }
     }
 
@@ -594,7 +594,7 @@ class Lucene99HnswVectorsWriter(
             get() {
                 require(flatFieldVectorsWriter.isFinished)
                 return if (node > 0) {
-                    hnswGraphBuilder.getCompletedGraph()
+                    hnswGraphBuilder.completedGraph
                 } else {
                     null
                 }
@@ -603,7 +603,7 @@ class Lucene99HnswVectorsWriter(
         override fun ramBytesUsed(): Long {
             return (SHALLOW_SIZE
                     + flatFieldVectorsWriter.ramBytesUsed()
-                    + hnswGraphBuilder.getGraph().ramBytesUsed())
+                    + hnswGraphBuilder.graph.ramBytesUsed())
         }
 
         companion object {

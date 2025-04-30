@@ -137,18 +137,18 @@ class OrdToDocDISIReaderConfiguration internal constructor(
                 outputMeta.writeShort(-1) // jumpTableEntryCount
                 outputMeta.writeByte(-1) // denseRankPower
             } else {
-                val offset: Long = vectorData.getFilePointer()
+                val offset: Long = vectorData.filePointer
                 outputMeta.writeLong(offset) // docsWithFieldOffset
                 val jumpTableEntryCount: Short =
                     IndexedDISI.writeBitSet(
                         docsWithField.iterator(), vectorData, IndexedDISI.DEFAULT_DENSE_RANK_POWER
                     )
-                outputMeta.writeLong(vectorData.getFilePointer() - offset) // docsWithFieldLength
+                outputMeta.writeLong(vectorData.filePointer - offset) // docsWithFieldLength
                 outputMeta.writeShort(jumpTableEntryCount)
                 outputMeta.writeByte(IndexedDISI.DEFAULT_DENSE_RANK_POWER)
 
                 // write ordToDoc mapping
-                val start: Long = vectorData.getFilePointer()
+                val start: Long = vectorData.filePointer
                 outputMeta.writeLong(start)
                 outputMeta.writeVInt(directMonotonicBlockShift)
                 // dense case and empty case do not need to store ordToMap mapping
@@ -164,7 +164,7 @@ class OrdToDocDISIReaderConfiguration internal constructor(
                     doc = iterator.nextDoc()
                 }
                 ordToDocWriter.finish()
-                outputMeta.writeLong(vectorData.getFilePointer() - start)
+                outputMeta.writeLong(vectorData.filePointer - start)
             }
         }
 

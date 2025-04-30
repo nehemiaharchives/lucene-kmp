@@ -368,7 +368,7 @@ class Lucene90BlockTreeTermsWriter(
             val estimateBitsRequired: Int = PackedInts.bitsRequired(estimateSize)
             val pageBits = min(15, max(6, estimateBitsRequired))
 
-            val outputs: ByteSequenceOutputs = ByteSequenceOutputs.getSingleton()
+            val outputs: ByteSequenceOutputs = ByteSequenceOutputs.singleton
             val fstVersion: Int = if (version >= Lucene90BlockTreeTermsReader.VERSION_CURRENT) {
                 FST.VERSION_CURRENT
             } else {
@@ -646,7 +646,7 @@ class Lucene90BlockTreeTermsWriter(
         ): PendingBlock {
             require(end > start)
 
-            val startFP: Long = termsOut.getFilePointer()
+            val startFP: Long = termsOut.filePointer
 
             val hasFloorLeadLabel = isFloor && floorLeadLabel != -1
 
@@ -1033,7 +1033,7 @@ class Lucene90BlockTreeTermsWriter(
                 metaOut.writeVInt(docsSeen.cardinality())
                 writeBytesRef(metaOut, BytesRef(firstPendingTerm!!.termBytes))
                 writeBytesRef(metaOut, BytesRef(lastPendingTerm!!.termBytes))
-                metaOut.writeVLong(indexOut.getFilePointer())
+                metaOut.writeVLong(indexOut.filePointer)
                 // Write FST to index
                 root.index!!.save(metaOut, indexOut)
 
@@ -1174,9 +1174,9 @@ class Lucene90BlockTreeTermsWriter(
                 fieldMeta.copyTo(metaOut)
             }
             CodecUtil.writeFooter(indexOut)
-            metaOut.writeLong(indexOut.getFilePointer())
+            metaOut.writeLong(indexOut.filePointer)
             CodecUtil.writeFooter(termsOut)
-            metaOut.writeLong(termsOut.getFilePointer())
+            metaOut.writeLong(termsOut.filePointer)
             CodecUtil.writeFooter(metaOut)
             success = true
         } finally {

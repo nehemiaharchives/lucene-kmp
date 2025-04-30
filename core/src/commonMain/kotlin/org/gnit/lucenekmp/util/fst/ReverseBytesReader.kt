@@ -21,11 +21,11 @@ internal class ReverseBytesReader(private val bytes: ByteArray) : BytesReader() 
         pos -= count.toInt()
     }
 
-    override fun getPosition(): Long {
-        return pos.toLong()
-    }
-
-    override fun setPosition(pos: Long) {
-        this.pos = pos.toInt()
-    }
+    override var position: Long
+        get() {
+            return pos.toLong()
+        }
+        set(pos) {
+            this.pos = pos.toInt()
+        }
 }

@@ -104,7 +104,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
 
             val indexedFieldNames: Iterable<String> = MergedIterator(
                 removeDuplicates = true,
-                iteratorArray = mutableIterators
+                iterators = mutableIterators
             )
 
             val formatToGroups: MutableMap<PostingsFormat, FieldsGroup> = buildFieldsGroupMapping(indexedFieldNames)
