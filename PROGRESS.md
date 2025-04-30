@@ -1,0 +1,249 @@
+# Lucene KMP Port Progress
+## Package statistics (priority‑1 deps)
+| Java package | KMP mapped | Classes | Ported | % | Done |
+| --- | --- | --- | --- | --- | --- |
+| org.apache.lucene |     org.gnit.lucenekmp | 722 | 538 | 74% | [ ] |
+|   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
+|     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
+|     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
+|   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 35 | 35 | 100% | [x] |
+|     org.apache.lucene.codecs.compressing |         org.gnit.lucenekmp.codecs.compressing | 4 | 4 | 100% | [x] |
+|     org.apache.lucene.codecs.hnsw |         org.gnit.lucenekmp.codecs.hnsw | 4 | 4 | 100% | [x] |
+|     org.apache.lucene.codecs.lucene101 |         org.gnit.lucenekmp.codecs.lucene101 | 7 | 7 | 100% | [x] |
+|       org.apache.lucene.codecs.lucene90.blocktree |           org.gnit.lucenekmp.codecs.lucene90.blocktree | 9 | 9 | 100% | [x] |
+|       org.apache.lucene.codecs.lucene90.compressing |           org.gnit.lucenekmp.codecs.lucene90.compressing | 10 | 10 | 100% | [x] |
+|     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 16 | 55% | [ ] |
+|   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 0 | 0% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 93 | 55% | [ ] |
+|     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 13 | 92% | [ ] |
+|     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 6 | 0 | 0% | [ ] |
+|     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 113 | 81% | [ ] |
+|     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
+|     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
+|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
+|   org.apache.lucene.store |       org.gnit.lucenekmp.store | 38 | 23 | 60% | [ ] |
+|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 89 | 74 | 83% | [ ] |
+|     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 20 | 20 | 100% | [x] |
+|     org.apache.lucene.util.bkd |         org.gnit.lucenekmp.util.bkd | 1 | 1 | 100% | [x] |
+|     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 2 | 2 | 100% | [x] |
+|     org.apache.lucene.util.fst |         org.gnit.lucenekmp.util.fst | 17 | 17 | 100% | [x] |
+|     org.apache.lucene.util.hnsw |         org.gnit.lucenekmp.util.hnsw | 7 | 7 | 100% | [x] |
+|     org.apache.lucene.util.packed |         org.gnit.lucenekmp.util.packed | 47 | 41 | 87% | [ ] |
+
+
+## Priority-1 API progress
+| Java class | Mapped class | Java Deps | KMP Deps Ported | KMP Deps To Port | % | Done |
+| --- | --- | --- | --- | --- | --- | --- |
+| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 80 | 48 | 32 | 60% | [ ] |
+| org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 8 | 7 | 53% | [ ] |
+| org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory | 8 | 4 | 4 | 50% | [ ] |
+| org.apache.lucene.analysis.Analyzer | org.gnit.lucenekmp.analysis.Analyzer | 10 | 10 | 0 | 100% | [x] |
+| org.apache.lucene.document.Document | org.gnit.lucenekmp.document.Document | 2 | 2 | 0 | 100% | [x] |
+| org.apache.lucene.document.Field | org.gnit.lucenekmp.document.Field | 12 | 12 | 0 | 100% | [x] |
+| org.apache.lucene.document.IntPoint | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
+| org.apache.lucene.document.StoredField | org.gnit.lucenekmp.document.StoredField | 3 | 3 | 0 | 100% | [x] |
+| org.apache.lucene.document.TextField | org.gnit.lucenekmp.document.TextField | 4 | 4 | 0 | 100% | [x] |
+| org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader | 6 | 4 | 2 | 66% | [ ] |
+| org.apache.lucene.index.StandardDirectoryReader | org.gnit.lucenekmp.index.StandardDirectoryReader | 13 | 11 | 2 | 84% | [ ] |
+| org.apache.lucene.queryparser.classic.QueryParser | org.gnit.lucenekmp.queryparser.classic.QueryParser | 0 | 0 | 0 | 100% | [ ] |
+| org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 31 | 11 | 73% | [ ] |
+| org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory | 4 | 2 | 2 | 50% | [ ] |
+| org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 3 | 2 | 60% | [ ] |
+| org.apache.lucene.document.IntPoint | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
+| org.apache.lucene.search.Query | org.gnit.lucenekmp.search.Query | 3 | 3 | 0 | 100% | [ ] |
+| org.apache.lucene.search.BooleanQuery | org.gnit.lucenekmp.search.BooleanQuery | 11 | 11 | 0 | 100% | [x] |
+| org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
+| org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
+| org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 17 | 2 | 89% | [x] |
+| TOTAL |  | 173 | 117 | 56 | 67% | [ ] |
+
+## KMP Deps To Port
+| Java FQN | Expected KMP FQN |
+| --- | --- |
+| org.apache.lucene.document.BinaryDocValuesField | org.gnit.lucenekmp.document.BinaryDocValuesField |
+| org.apache.lucene.document.BinaryPoint | org.gnit.lucenekmp.document.BinaryPoint |
+| org.apache.lucene.document.DoublePoint | org.gnit.lucenekmp.document.DoublePoint |
+| org.apache.lucene.document.FloatPoint | org.gnit.lucenekmp.document.FloatPoint |
+| org.apache.lucene.document.InetAddressPoint | org.gnit.lucenekmp.document.InetAddressPoint |
+| org.apache.lucene.document.KnnByteVectorField | org.gnit.lucenekmp.document.KnnByteVectorField |
+| org.apache.lucene.document.LatLonPoint | org.gnit.lucenekmp.document.LatLonPoint |
+| org.apache.lucene.document.LatLonPointDistanceFeatureQuery | org.gnit.lucenekmp.document.LatLonPointDistanceFeatureQuery |
+| org.apache.lucene.document.LatLonPointDistanceQuery | org.gnit.lucenekmp.document.LatLonPointDistanceQuery |
+| org.apache.lucene.document.LatLonPointQuery | org.gnit.lucenekmp.document.LatLonPointQuery |
+| org.apache.lucene.document.NearestNeighbor | org.gnit.lucenekmp.document.NearestNeighbor |
+| org.apache.lucene.document.ShapeField | org.gnit.lucenekmp.document.ShapeField |
+| org.apache.lucene.document.SpatialQuery | org.gnit.lucenekmp.document.SpatialQuery |
+| org.apache.lucene.geo.Circle | org.gnit.lucenekmp.geo.Circle |
+| org.apache.lucene.geo.Circle2D | org.gnit.lucenekmp.geo.Circle2D |
+| org.apache.lucene.geo.Component2D | org.gnit.lucenekmp.geo.Component2D |
+| org.apache.lucene.geo.ComponentTree | org.gnit.lucenekmp.geo.ComponentTree |
+| org.apache.lucene.geo.EdgeTree | org.gnit.lucenekmp.geo.EdgeTree |
+| org.apache.lucene.geo.GeoEncodingUtils | org.gnit.lucenekmp.geo.GeoEncodingUtils |
+| org.apache.lucene.geo.GeoUtils | org.gnit.lucenekmp.geo.GeoUtils |
+| org.apache.lucene.geo.Geometry | org.gnit.lucenekmp.geo.Geometry |
+| org.apache.lucene.geo.LatLonGeometry | org.gnit.lucenekmp.geo.LatLonGeometry |
+| org.apache.lucene.geo.Line | org.gnit.lucenekmp.geo.Line |
+| org.apache.lucene.geo.Line2D | org.gnit.lucenekmp.geo.Line2D |
+| org.apache.lucene.geo.Point | org.gnit.lucenekmp.geo.Point |
+| org.apache.lucene.geo.Point2D | org.gnit.lucenekmp.geo.Point2D |
+| org.apache.lucene.geo.Polygon | org.gnit.lucenekmp.geo.Polygon |
+| org.apache.lucene.geo.Polygon2D | org.gnit.lucenekmp.geo.Polygon2D |
+| org.apache.lucene.geo.Rectangle | org.gnit.lucenekmp.geo.Rectangle |
+| org.apache.lucene.geo.Rectangle2D | org.gnit.lucenekmp.geo.Rectangle2D |
+| org.apache.lucene.geo.SimpleGeoJSONPolygonParser | org.gnit.lucenekmp.geo.SimpleGeoJSONPolygonParser |
+| org.apache.lucene.geo.Tessellator | org.gnit.lucenekmp.geo.Tessellator |
+| org.apache.lucene.geo.XYCircle | org.gnit.lucenekmp.geo.XYCircle |
+| org.apache.lucene.geo.XYEncodingUtils | org.gnit.lucenekmp.geo.XYEncodingUtils |
+| org.apache.lucene.geo.XYGeometry | org.gnit.lucenekmp.geo.XYGeometry |
+| org.apache.lucene.geo.XYLine | org.gnit.lucenekmp.geo.XYLine |
+| org.apache.lucene.geo.XYPoint | org.gnit.lucenekmp.geo.XYPoint |
+| org.apache.lucene.geo.XYPolygon | org.gnit.lucenekmp.geo.XYPolygon |
+| org.apache.lucene.geo.XYRectangle | org.gnit.lucenekmp.geo.XYRectangle |
+| org.apache.lucene.index.ApproximatePriorityQueue | org.gnit.lucenekmp.index.ApproximatePriorityQueue |
+| org.apache.lucene.index.BaseCompositeReader | org.gnit.lucenekmp.index.BaseCompositeReader |
+| org.apache.lucene.index.BinaryDocValuesFieldUpdates | org.gnit.lucenekmp.index.BinaryDocValuesFieldUpdates |
+| org.apache.lucene.index.BinaryDocValuesWriter | org.gnit.lucenekmp.index.BinaryDocValuesWriter |
+| org.apache.lucene.index.BufferedUpdatesStream | org.gnit.lucenekmp.index.BufferedUpdatesStream |
+| org.apache.lucene.index.ByteSlicePool | org.gnit.lucenekmp.index.ByteSlicePool |
+| org.apache.lucene.index.ByteSliceReader | org.gnit.lucenekmp.index.ByteSliceReader |
+| org.apache.lucene.index.CachingMergeContext | org.gnit.lucenekmp.index.CachingMergeContext |
+| org.apache.lucene.index.CheckIndex | org.gnit.lucenekmp.index.CheckIndex |
+| org.apache.lucene.index.ConcurrentApproximatePriorityQueue | org.gnit.lucenekmp.index.ConcurrentApproximatePriorityQueue |
+| org.apache.lucene.index.ConcurrentMergeScheduler | org.gnit.lucenekmp.index.ConcurrentMergeScheduler |
+| org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader |
+| org.apache.lucene.index.DocValuesFieldUpdates | org.gnit.lucenekmp.index.DocValuesFieldUpdates |
+| org.apache.lucene.index.DocValuesLeafReader | org.gnit.lucenekmp.index.DocValuesLeafReader |
+| org.apache.lucene.index.DocValuesWriter | org.gnit.lucenekmp.index.DocValuesWriter |
+| org.apache.lucene.index.DocumentsWriter | org.gnit.lucenekmp.index.DocumentsWriter |
+| org.apache.lucene.index.DocumentsWriterDeleteQueue | org.gnit.lucenekmp.index.DocumentsWriterDeleteQueue |
+| org.apache.lucene.index.DocumentsWriterFlushControl | org.gnit.lucenekmp.index.DocumentsWriterFlushControl |
+| org.apache.lucene.index.DocumentsWriterFlushQueue | org.gnit.lucenekmp.index.DocumentsWriterFlushQueue |
+| org.apache.lucene.index.DocumentsWriterPerThread | org.gnit.lucenekmp.index.DocumentsWriterPerThread |
+| org.apache.lucene.index.DocumentsWriterPerThreadPool | org.gnit.lucenekmp.index.DocumentsWriterPerThreadPool |
+| org.apache.lucene.index.DocumentsWriterStallControl | org.gnit.lucenekmp.index.DocumentsWriterStallControl |
+| org.apache.lucene.index.FilterCodecReader | org.gnit.lucenekmp.index.FilterCodecReader |
+| org.apache.lucene.index.FilterMergePolicy | org.gnit.lucenekmp.index.FilterMergePolicy |
+| org.apache.lucene.index.FlushByRamOrCountsPolicy | org.gnit.lucenekmp.index.FlushByRamOrCountsPolicy |
+| org.apache.lucene.index.FlushPolicy | org.gnit.lucenekmp.index.FlushPolicy |
+| org.apache.lucene.index.FreqProxFields | org.gnit.lucenekmp.index.FreqProxFields |
+| org.apache.lucene.index.FreqProxTermsWriter | org.gnit.lucenekmp.index.FreqProxTermsWriter |
+| org.apache.lucene.index.FreqProxTermsWriterPerField | org.gnit.lucenekmp.index.FreqProxTermsWriterPerField |
+| org.apache.lucene.index.FrozenBufferedUpdates | org.gnit.lucenekmp.index.FrozenBufferedUpdates |
+| org.apache.lucene.index.IndexDeletionPolicy | org.gnit.lucenekmp.index.IndexDeletionPolicy |
+| org.apache.lucene.index.IndexFileDeleter | org.gnit.lucenekmp.index.IndexFileDeleter |
+| org.apache.lucene.index.IndexNotFoundException | org.gnit.lucenekmp.index.IndexNotFoundException |
+| org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig |
+| org.apache.lucene.index.IndexWriterEventListener | org.gnit.lucenekmp.index.IndexWriterEventListener |
+| org.apache.lucene.index.IndexingChain | org.gnit.lucenekmp.index.IndexingChain |
+| org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy | org.gnit.lucenekmp.index.KeepOnlyLastCommitDeletionPolicy |
+| org.apache.lucene.index.LiveIndexWriterConfig | org.gnit.lucenekmp.index.LiveIndexWriterConfig |
+| org.apache.lucene.index.LockableConcurrentApproximatePriorityQueue | org.gnit.lucenekmp.index.LockableConcurrentApproximatePriorityQueue |
+| org.apache.lucene.index.MergeRateLimiter | org.gnit.lucenekmp.index.MergeRateLimiter |
+| org.apache.lucene.index.MergeScheduler | org.gnit.lucenekmp.index.MergeScheduler |
+| org.apache.lucene.index.MergeTrigger | org.gnit.lucenekmp.index.MergeTrigger |
+| org.apache.lucene.index.MultiBits | org.gnit.lucenekmp.index.MultiBits |
+| org.apache.lucene.index.MultiDocValues | org.gnit.lucenekmp.index.MultiDocValues |
+| org.apache.lucene.index.MultiReader | org.gnit.lucenekmp.index.MultiReader |
+| org.apache.lucene.index.NormValuesWriter | org.gnit.lucenekmp.index.NormValuesWriter |
+| org.apache.lucene.index.NumericDocValuesFieldUpdates | org.gnit.lucenekmp.index.NumericDocValuesFieldUpdates |
+| org.apache.lucene.index.NumericDocValuesWriter | org.gnit.lucenekmp.index.NumericDocValuesWriter |
+| org.apache.lucene.index.OneMergeWrappingMergePolicy | org.gnit.lucenekmp.index.OneMergeWrappingMergePolicy |
+| org.apache.lucene.index.ParallelPostingsArray | org.gnit.lucenekmp.index.ParallelPostingsArray |
+| org.apache.lucene.index.PendingDeletes | org.gnit.lucenekmp.index.PendingDeletes |
+| org.apache.lucene.index.PendingSoftDeletes | org.gnit.lucenekmp.index.PendingSoftDeletes |
+| org.apache.lucene.index.PointValuesWriter | org.gnit.lucenekmp.index.PointValuesWriter |
+| org.apache.lucene.index.ReaderPool | org.gnit.lucenekmp.index.ReaderPool |
+| org.apache.lucene.index.ReadersAndUpdates | org.gnit.lucenekmp.index.ReadersAndUpdates |
+| org.apache.lucene.index.SegmentCoreReaders | org.gnit.lucenekmp.index.SegmentCoreReaders |
+| org.apache.lucene.index.SegmentDocValues | org.gnit.lucenekmp.index.SegmentDocValues |
+| org.apache.lucene.index.SegmentDocValuesProducer | org.gnit.lucenekmp.index.SegmentDocValuesProducer |
+| org.apache.lucene.index.SegmentInfos | org.gnit.lucenekmp.index.SegmentInfos |
+| org.apache.lucene.index.SegmentMerger | org.gnit.lucenekmp.index.SegmentMerger |
+| org.apache.lucene.index.SegmentReader | org.gnit.lucenekmp.index.SegmentReader |
+| org.apache.lucene.index.SlowCompositeCodecReaderWrapper | org.gnit.lucenekmp.index.SlowCompositeCodecReaderWrapper |
+| org.apache.lucene.index.SortedDocValuesWriter | org.gnit.lucenekmp.index.SortedDocValuesWriter |
+| org.apache.lucene.index.SortedNumericDocValuesWriter | org.gnit.lucenekmp.index.SortedNumericDocValuesWriter |
+| org.apache.lucene.index.SortedSetDocValuesWriter | org.gnit.lucenekmp.index.SortedSetDocValuesWriter |
+| org.apache.lucene.index.SortingCodecReader | org.gnit.lucenekmp.index.SortingCodecReader |
+| org.apache.lucene.index.SortingStoredFieldsConsumer | org.gnit.lucenekmp.index.SortingStoredFieldsConsumer |
+| org.apache.lucene.index.SortingTermVectorsConsumer | org.gnit.lucenekmp.index.SortingTermVectorsConsumer |
+| org.apache.lucene.index.StoredFieldsConsumer | org.gnit.lucenekmp.index.StoredFieldsConsumer |
+| org.apache.lucene.index.TermVectorsConsumer | org.gnit.lucenekmp.index.TermVectorsConsumer |
+| org.apache.lucene.index.TermVectorsConsumerPerField | org.gnit.lucenekmp.index.TermVectorsConsumerPerField |
+| org.apache.lucene.index.TermsHash | org.gnit.lucenekmp.index.TermsHash |
+| org.apache.lucene.index.TermsHashPerField | org.gnit.lucenekmp.index.TermsHashPerField |
+| org.apache.lucene.index.TieredMergePolicy | org.gnit.lucenekmp.index.TieredMergePolicy |
+| org.apache.lucene.index.TrackingTmpOutputDirectoryWrapper | org.gnit.lucenekmp.index.TrackingTmpOutputDirectoryWrapper |
+| org.apache.lucene.index.VectorValuesConsumer | org.gnit.lucenekmp.index.VectorValuesConsumer |
+| org.apache.lucene.internal.hppc.LongObjectHashMap | org.gnit.lucenekmp.internal.hppc.LongObjectHashMap |
+| org.apache.lucene.internal.tests.ConcurrentMergeSchedulerAccess | org.gnit.lucenekmp.internal.tests.ConcurrentMergeSchedulerAccess |
+| org.apache.lucene.internal.tests.FilterIndexInputAccess | org.gnit.lucenekmp.internal.tests.FilterIndexInputAccess |
+| org.apache.lucene.internal.tests.IndexPackageAccess | org.gnit.lucenekmp.internal.tests.IndexPackageAccess |
+| org.apache.lucene.internal.tests.IndexWriterAccess | org.gnit.lucenekmp.internal.tests.IndexWriterAccess |
+| org.apache.lucene.internal.tests.SegmentReaderAccess | org.gnit.lucenekmp.internal.tests.SegmentReaderAccess |
+| org.apache.lucene.internal.tests.TestSecrets | org.gnit.lucenekmp.internal.tests.TestSecrets |
+| org.apache.lucene.search.CollectionTerminatedException | org.gnit.lucenekmp.search.CollectionTerminatedException |
+| org.apache.lucene.search.CollectorManager | org.gnit.lucenekmp.search.CollectorManager |
+| org.apache.lucene.search.ExactPhraseMatcher | org.gnit.lucenekmp.search.ExactPhraseMatcher |
+| org.apache.lucene.search.FieldValueHitQueue | org.gnit.lucenekmp.search.FieldValueHitQueue |
+| org.apache.lucene.search.KnnByteVectorQuery | org.gnit.lucenekmp.search.KnnByteVectorQuery |
+| org.apache.lucene.search.LRUQueryCache | org.gnit.lucenekmp.search.LRUQueryCache |
+| org.apache.lucene.search.MaxScoreAccumulator | org.gnit.lucenekmp.search.MaxScoreAccumulator |
+| org.apache.lucene.search.MultiLeafFieldComparator | org.gnit.lucenekmp.search.MultiLeafFieldComparator |
+| org.apache.lucene.search.PhraseMatcher | org.gnit.lucenekmp.search.PhraseMatcher |
+| org.apache.lucene.search.PhrasePositions | org.gnit.lucenekmp.search.PhrasePositions |
+| org.apache.lucene.search.PhraseQuery | org.gnit.lucenekmp.search.PhraseQuery |
+| org.apache.lucene.search.PhraseQueue | org.gnit.lucenekmp.search.PhraseQueue |
+| org.apache.lucene.search.PhraseScorer | org.gnit.lucenekmp.search.PhraseScorer |
+| org.apache.lucene.search.PhraseWeight | org.gnit.lucenekmp.search.PhraseWeight |
+| org.apache.lucene.search.ScoreCachingWrappingScorer | org.gnit.lucenekmp.search.ScoreCachingWrappingScorer |
+| org.apache.lucene.search.SloppyPhraseMatcher | org.gnit.lucenekmp.search.SloppyPhraseMatcher |
+| org.apache.lucene.search.TermInSetQuery | org.gnit.lucenekmp.search.TermInSetQuery |
+| org.apache.lucene.search.TimeLimitingBulkScorer | org.gnit.lucenekmp.search.TimeLimitingBulkScorer |
+| org.apache.lucene.search.TopFieldCollector | org.gnit.lucenekmp.search.TopFieldCollector |
+| org.apache.lucene.search.TopFieldCollectorManager | org.gnit.lucenekmp.search.TopFieldCollectorManager |
+| org.apache.lucene.search.TopScoreDocCollector | org.gnit.lucenekmp.search.TopScoreDocCollector |
+| org.apache.lucene.search.TopScoreDocCollectorManager | org.gnit.lucenekmp.search.TopScoreDocCollectorManager |
+| org.apache.lucene.search.TotalHitCountCollector | org.gnit.lucenekmp.search.TotalHitCountCollector |
+| org.apache.lucene.search.TotalHitCountCollectorManager | org.gnit.lucenekmp.search.TotalHitCountCollectorManager |
+| org.apache.lucene.search.UsageTrackingQueryCachingPolicy | org.gnit.lucenekmp.search.UsageTrackingQueryCachingPolicy |
+| org.apache.lucene.search.similarities.BM25Similarity | org.gnit.lucenekmp.search.similarities.BM25Similarity |
+| org.apache.lucene.store.BaseDirectory | org.gnit.lucenekmp.store.BaseDirectory |
+| org.apache.lucene.store.BufferedIndexInput | org.gnit.lucenekmp.store.BufferedIndexInput |
+| org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory |
+| org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory |
+| org.apache.lucene.store.FilterIndexInput | org.gnit.lucenekmp.store.FilterIndexInput |
+| org.apache.lucene.store.FilterIndexOutput | org.gnit.lucenekmp.store.FilterIndexOutput |
+| org.apache.lucene.store.LockFactory | org.gnit.lucenekmp.store.LockFactory |
+| org.apache.lucene.store.LockObtainFailedException | org.gnit.lucenekmp.store.LockObtainFailedException |
+| org.apache.lucene.store.LockValidatingDirectoryWrapper | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper |
+| org.apache.lucene.store.MMapDirectory | org.gnit.lucenekmp.store.MMapDirectory |
+| org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory |
+| org.apache.lucene.store.NativeFSLockFactory | org.gnit.lucenekmp.store.NativeFSLockFactory |
+| org.apache.lucene.store.OutputStreamIndexOutput | org.gnit.lucenekmp.store.OutputStreamIndexOutput |
+| org.apache.lucene.store.RateLimitedIndexOutput | org.gnit.lucenekmp.store.RateLimitedIndexOutput |
+| org.apache.lucene.store.RateLimiter | org.gnit.lucenekmp.store.RateLimiter |
+| org.apache.lucene.util.CommandLineUtil | org.gnit.lucenekmp.util.CommandLineUtil |
+| org.apache.lucene.util.FileDeleter | org.gnit.lucenekmp.util.FileDeleter |
+| org.apache.lucene.util.FrequencyTrackingRingBuffer | org.gnit.lucenekmp.util.FrequencyTrackingRingBuffer |
+| org.apache.lucene.util.HotspotVMOptions | org.gnit.lucenekmp.util.HotspotVMOptions |
+| org.apache.lucene.util.IntBlockPool | org.gnit.lucenekmp.util.IntBlockPool |
+| org.apache.lucene.util.NamedThreadFactory | org.gnit.lucenekmp.util.NamedThreadFactory |
+| org.apache.lucene.util.NotDocIdSet | org.gnit.lucenekmp.util.NotDocIdSet |
+| org.apache.lucene.util.PagedBytes | org.gnit.lucenekmp.util.PagedBytes |
+| org.apache.lucene.util.PrintStreamInfoStream | org.gnit.lucenekmp.util.PrintStreamInfoStream |
+| org.apache.lucene.util.RefCount | org.gnit.lucenekmp.util.RefCount |
+| org.apache.lucene.util.RoaringDocIdSet | org.gnit.lucenekmp.util.RoaringDocIdSet |
+| org.apache.lucene.util.SameThreadExecutorService | org.gnit.lucenekmp.util.SameThreadExecutorService |
+| org.apache.lucene.util.SetOnce | org.gnit.lucenekmp.util.SetOnce |
+| org.apache.lucene.util.SloppyMath | org.gnit.lucenekmp.util.SloppyMath |
+| org.apache.lucene.util.SuppressForbidden | org.gnit.lucenekmp.util.SuppressForbidden |
+| org.apache.lucene.util.packed.BulkOperationPackedSingleBlock | org.gnit.lucenekmp.util.packed.BulkOperationPackedSingleBlock |
+| org.apache.lucene.util.packed.DeltaPackedLongValues | org.gnit.lucenekmp.util.packed.DeltaPackedLongValues |
+| org.apache.lucene.util.packed.MonotonicBlockPackedReader | org.gnit.lucenekmp.util.packed.MonotonicBlockPackedReader |
+| org.apache.lucene.util.packed.MonotonicLongValues | org.gnit.lucenekmp.util.packed.MonotonicLongValues |
+| org.apache.lucene.util.packed.Packed64SingleBlock | org.gnit.lucenekmp.util.packed.Packed64SingleBlock |
+| org.apache.lucene.util.packed.PagedMutable | org.gnit.lucenekmp.util.packed.PagedMutable |
+
