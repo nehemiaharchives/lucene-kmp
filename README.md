@@ -1,5 +1,7 @@
 # Lucene Kotlin Multiplatform
 
+[![CI](https://github.com/gnit-lucene-kmp/lucene-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/gnit-lucene-kmp/lucene-kmp/actions/workflows/ci.yml)
+
 ## What is it?
 
 This repository contains a lucene-kmp library project, a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [apache lucene](https://github.com/apache/lucene/) that is deployable to [Maven Central](https://central.sonatype.com/).
@@ -268,11 +270,11 @@ In the same file, add the following configuration. Customize all these values ap
 
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    
+
     signAllPublications()
-    
+
     coordinates(group.toString(), "fibonacci", version.toString())
-    
+
     pom { 
         name = "Fibonacci library"
         description = "A mathematics calculation library."
