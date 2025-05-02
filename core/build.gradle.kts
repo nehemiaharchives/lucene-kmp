@@ -24,7 +24,11 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    // linuxX64()
+
+    // build target only for developer convenience
+    // when you are in linux X64 machine,
+    // run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios and linux.
+    linuxX64()
 
     sourceSets {
         val commonMain by getting {
@@ -69,6 +73,7 @@ kotlin {
         iosX64Main.get().dependsOn(nativeMain)
         iosArm64Main.get().dependsOn(nativeMain)
         iosSimulatorArm64Main.get().dependsOn(nativeMain)
+        linuxX64Main.get().dependsOn(nativeMain)
 
         val nativeTest by creating {
             dependsOn(commonTest)
@@ -77,6 +82,7 @@ kotlin {
         iosX64Test.get().dependsOn(nativeTest)
         iosArm64Test.get().dependsOn(nativeTest)
         iosSimulatorArm64Test.get().dependsOn(nativeTest)
+        linuxX64Test.get().dependsOn(nativeTest)
     }
 }
 
