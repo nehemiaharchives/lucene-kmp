@@ -5,13 +5,13 @@ import org.gnit.lucenekmp.internal.hppc.IntArrayList
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.accumulateAndGet
 import org.gnit.lucenekmp.jdkport.get
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 //import java.util.concurrent.atomic.AtomicInteger
 //import java.util.concurrent.atomic.AtomicReference
 import kotlin.jvm.JvmRecord
@@ -147,13 +147,13 @@ class OnHeapHnswGraph internal constructor(M: Int, numNodes: Int) : HnswGraph(),
         if (graph!![node] == null) {
             graph!![node] =
                 kotlin.arrayOfNulls<NeighborArray?>(level + 1) as Array<NeighborArray>? // assumption: we always call this function from top level
-            size.incrementAndGet()
+            size.incrementAndFetch()
         }
         if (level == 0) {
             graph!![node]!![level] = NeighborArray(nsize0, true)
         } else {
             graph!![node]!![level] = NeighborArray(nsize, true)
-            nonZeroLevelSize.incrementAndGet()
+            nonZeroLevelSize.incrementAndFetch()
         }
         maxNodeId.accumulateAndGet(
             node

@@ -13,10 +13,10 @@ import org.gnit.lucenekmp.internal.hppc.HashContainers.minBufferSize
 import org.gnit.lucenekmp.internal.hppc.HashContainers.nextBufferSize
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.bitCount
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.cast
 
@@ -80,7 +80,7 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
      */
     init {
         this.loadFactor = verifyLoadFactor(loadFactor)
-        iterationSeed = ITERATION_SEED.incrementAndGet()
+        iterationSeed = ITERATION_SEED.incrementAndFetch()
         ensureCapacity(expectedElements)
     }
 
@@ -342,7 +342,7 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
             val cloned = super.clone() as LongHashSet
             cloned.keys = keys!!.clone()
             cloned.hasEmptyKey = hasEmptyKey
-            cloned.iterationSeed = ITERATION_SEED.incrementAndGet()
+            cloned.iterationSeed = ITERATION_SEED.incrementAndFetch()
             return cloned
         } catch (e: /*CloneNotSupported*/Exception) {
             throw RuntimeException(e)

@@ -1,10 +1,10 @@
 package org.gnit.lucenekmp.util.hnsw
 
-import org.gnit.lucenekmp.jdkport.decrementAndGet
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.jdkport.set
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.decrementAndFetch
+import kotlin.concurrent.atomics.incrementAndFetch
 
 /**
  * Platform-agnostic lock interface
@@ -38,10 +38,10 @@ class ReentrantReadWriteLock {
                 while (mutex.load() != 0) {
                     // Busy wait (not ideal but platform-agnostic)
                 }
-                readCount.incrementAndGet()
+                readCount.incrementAndFetch()
                 // If a writer appeared since we checked, retry
                 if (mutex.load() != 0) {
-                    readCount.decrementAndGet()
+                    readCount.decrementAndFetch()
                     continue
                 }
                 break
@@ -50,14 +50,14 @@ class ReentrantReadWriteLock {
 
         @OptIn(ExperimentalAtomicApi::class)
         override fun unlock() {
-            readCount.decrementAndGet()
+            readCount.decrementAndFetch()
         }
     }
 
     private inner class WriteLock : Lock {
         @OptIn(ExperimentalAtomicApi::class)
         override fun lock() {
-            writeWaiters.incrementAndGet()
+            writeWaiters.incrementAndFetch()
             while (true) {
                 // Try to acquire the write lock
                 if (mutex.compareAndSet(0, 1)) {
@@ -69,7 +69,7 @@ class ReentrantReadWriteLock {
                 }
                 // Busy wait
             }
-            writeWaiters.decrementAndGet()
+            writeWaiters.decrementAndFetch()
         }
 
         @OptIn(ExperimentalAtomicApi::class)
