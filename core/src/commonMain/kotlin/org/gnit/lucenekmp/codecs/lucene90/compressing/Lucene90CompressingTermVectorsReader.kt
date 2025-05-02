@@ -912,7 +912,6 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         payloadBytes: BytesRef,
         termBytes: BytesRef
     ) : Terms() {
-        @get:Throws(IOException::class)
         override val sumTotalTermFreq: Long
         private val termBytes: BytesRef
         private val payloadBytes: BytesRef
@@ -952,7 +951,6 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             return numTerms.toLong()
         }
 
-        @get:Throws(IOException::class)
         override val sumDocFreq: Long = numTerms.toLong()
 
         override val docCount: Int = 1
@@ -1130,16 +1128,15 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         private lateinit var startOffsets: IntArray
         private lateinit var lengths: IntArray
 
-        @get:Throws(IOException::class)
         override val payload: BytesRef?
-         get() {
-            checkPosition()
-            return if (payload!!.length == 0) {
-                null
-            } else {
-                payload
+            get() {
+                checkPosition()
+                return if (payload!!.length == 0) {
+                    null
+                } else {
+                    payload
+                }
             }
-        }
 
         private lateinit var payloadIndex: IntArray
         private var basePayloadOffset = 0

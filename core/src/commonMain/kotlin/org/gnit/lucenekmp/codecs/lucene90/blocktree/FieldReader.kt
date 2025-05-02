@@ -102,21 +102,19 @@ class FieldReader internal constructor(
         }
     }
 
-    @get:Throws(IOException::class)
+
     override val min: BytesRef?
         get() {
             return minTerm ?: // Older index that didn't store min/maxTerm
             super.min
         }
 
-    @get:Throws(IOException::class)
     override val max: BytesRef?
         get() {
             return maxTerm ?: // Older index that didn't store min/maxTerm
             super.max
         }
 
-    @get:Throws(IOException::class)
     val stats: Stats
         /** For debugging -- used by CheckIndex too  */
         get() = SegmentTermsEnum(this).computeBlockStats()

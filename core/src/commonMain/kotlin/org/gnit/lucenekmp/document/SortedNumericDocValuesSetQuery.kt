@@ -56,7 +56,6 @@ internal class SortedNumericDocValuesSetQuery(private val field: String, numbers
                 + RamUsageEstimator.sizeOfObject(numbers))
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (numbers.size() == 0) {
             return MatchNoDocsQuery()
@@ -64,7 +63,6 @@ internal class SortedNumericDocValuesSetQuery(private val field: String, numbers
         return super.rewrite(indexSearcher)
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return object : ConstantScoreWeight(this, boost) {
             override fun isCacheable(ctx: LeafReaderContext): Boolean {

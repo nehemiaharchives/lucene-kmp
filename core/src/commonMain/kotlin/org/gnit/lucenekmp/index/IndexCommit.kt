@@ -26,7 +26,6 @@ protected constructor() : Comparable<IndexCommit?> {
     /** Get the segments file (`segments_N`) associated with this commit point.  */
     abstract val segmentsFileName: String?
 
-    @get:Throws(IOException::class)
     abstract val fileNames: MutableCollection<String?>?
 
     /** Returns the [Directory] for the index.  */
@@ -71,7 +70,6 @@ protected constructor() : Comparable<IndexCommit?> {
     /** Returns the generation (the _N in segments_N) for this IndexCommit  */
     abstract val generation: Long
 
-    @get:Throws(IOException::class)
     abstract val userData: MutableMap<String?, String?>?
 
     override fun compareTo(commit: IndexCommit?): Int {

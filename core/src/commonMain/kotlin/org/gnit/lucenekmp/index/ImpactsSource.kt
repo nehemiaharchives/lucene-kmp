@@ -18,6 +18,5 @@ interface ImpactsSource {
     @Throws(IOException::class)
     fun advanceShallow(target: Int)
 
-    @get:Throws(IOException::class)
     val impacts: Impacts
 }

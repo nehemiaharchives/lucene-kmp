@@ -73,13 +73,10 @@ protected constructor() {
     @Throws(IOException::class)
     abstract fun size(): Long
 
-    @get:Throws(IOException::class)
     abstract val sumTotalTermFreq: Long
 
-    @get:Throws(IOException::class)
     abstract val sumDocFreq: Long
 
-    @get:Throws(IOException::class)
     abstract val docCount: Int
 
     /**
@@ -96,7 +93,6 @@ protected constructor() {
     /** Returns true if documents in this field store payloads.  */
     abstract fun hasPayloads(): Boolean
 
-    @get:Throws(IOException::class)
     open val min: BytesRef?
         /**
          * Returns the smallest term (in lexicographic order) in the field. Note that, just like other
@@ -105,7 +101,6 @@ protected constructor() {
          */
         get() = iterator().next()!!
 
-    @get:Throws(IOException::class)
     open val max: BytesRef?
         /**
          * Returns the largest term (in lexicographic order) in the field. Note that, just like other term

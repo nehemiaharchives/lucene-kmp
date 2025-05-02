@@ -186,7 +186,6 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
     private val maxDocsPerChunk: Int // hard limit on number of docs per chunk
     private val scratchBuffer: ByteBuffersDataOutput = ByteBuffersDataOutput.newResettableInstance()
 
-    @Throws(IOException::class)
     override fun close() {
         try {
             IOUtils.close(metaStream!!, vectorsStream!!, indexWriter!!)

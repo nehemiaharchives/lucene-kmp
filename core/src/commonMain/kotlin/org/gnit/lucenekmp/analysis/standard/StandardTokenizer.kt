@@ -125,16 +125,15 @@ class StandardTokenizer : Tokenizer {
         posIncrAtt.setPositionIncrement(posIncrAtt.getPositionIncrement() + skippedPositions)
     }
 
-    @Throws(IOException::class)
     override fun close() {
         super.close()
-        scanner!!.yyreset(input)
+        scanner.yyreset(input)
     }
 
     @Throws(IOException::class)
     override fun reset() {
         super.reset()
-        scanner!!.yyreset(input)
+        scanner.yyreset(input)
         skippedPositions = 0
     }
 

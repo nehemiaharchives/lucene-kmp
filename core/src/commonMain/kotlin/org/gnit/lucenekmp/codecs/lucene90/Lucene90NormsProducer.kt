@@ -17,16 +17,17 @@ import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.IOUtils
+import org.gnit.lucenekmp.jdkport.Cloneable
 import kotlinx.io.IOException
 
 /** Reader for [Lucene90NormsFormat]  */
 internal class Lucene90NormsProducer(
-    state: SegmentReadState,
-    dataCodec: String,
-    dataExtension: String,
-    metaCodec: String,
-    metaExtension: String
-) : NormsProducer(), Cloneable {
+    private val state: SegmentReadState,
+    private val dataCodec: String,
+    private val dataExtension: String,
+    private val metaCodec: String,
+    private val metaExtension: String
+) : NormsProducer(), Cloneable<Lucene90NormsProducer> {
     // metadata maps (just file pointers and minimal stuff)
     private val norms: IntObjectHashMap<NormsEntry> = IntObjectHashMap()
     private val maxDoc: Int = state.segmentInfo.maxDoc()
@@ -99,7 +100,7 @@ internal class Lucene90NormsProducer(
         get() {
             val clone: Lucene90NormsProducer
             try {
-                clone = super.clone() as Lucene90NormsProducer
+                clone = this.clone()
             } catch (e: /*CloneNotSupported*/Exception) {
                 // cannot happen
                 throw RuntimeException(e)
@@ -224,7 +225,7 @@ internal class Lucene90NormsProducer(
             }
             // Prefetch the first page of data. Following pages are expected to get prefetched through
             // read-ahead.
-            if (slice!!.length() > 0) {
+            if (slice.length() > 0) {
                 slice.prefetch(0, 1)
             }
         }
@@ -457,4 +458,49 @@ internal class Lucene90NormsProducer(
     override fun toString(): String {
         return this::class.simpleName + "(fields=" + norms.size() + ")"
     }
+
+override fun clone(): Lucene90NormsProducer {
+    val clone = Lucene90NormsProducer(
+        state,
+        dataCodec,
+        dataExtension,
+        metaCodec,
+        metaExtension
+    )
+
+    // Copy the norms map
+    norms.forEach { entry ->
+        clone.norms.put(entry.key, entry.value)
+    }
+
+    clone.data = data.clone()
+    clone.merging = merging
+
+    // Copy maps if they exist
+    if (disiInputs != null) {
+        clone.disiInputs = IntObjectHashMap<IndexInput>().apply {
+            disiInputs!!.forEach { entry ->
+                put(entry.key, entry.value)
+            }
+        }
+    }
+
+    if (disiJumpTables != null) {
+        clone.disiJumpTables = IntObjectHashMap<RandomAccessInput>().apply {
+            disiJumpTables!!.forEach { entry ->
+                put(entry.key, entry.value)
+            }
+        }
+    }
+
+    if (dataInputs != null) {
+        clone.dataInputs = IntObjectHashMap<RandomAccessInput>().apply {
+            dataInputs!!.forEach { entry ->
+                put(entry.key, entry.value)
+            }
+        }
+    }
+
+    return clone
+}
 }

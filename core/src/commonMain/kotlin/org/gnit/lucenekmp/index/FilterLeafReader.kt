@@ -89,13 +89,11 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
             return `in`.size()
         }
 
-        @get:Throws(IOException::class)
         override val sumDocFreq: Long
             get() {
                 return `in`.sumDocFreq
             }
 
-        @get:Throws(IOException::class)
         override val docCount: Int
             get() {
                 return `in`.docCount
@@ -117,7 +115,6 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
             return `in`.hasPayloads()
         }
 
-        @Throws(IOException::class)
         override fun getStats(): Any {
             return `in`.getStats()
         }
@@ -262,7 +259,6 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
             return `in`.endOffset()
         }
 
-        @get:Throws(IOException::class)
         override val payload: BytesRef?
             get() = `in`.payload
 

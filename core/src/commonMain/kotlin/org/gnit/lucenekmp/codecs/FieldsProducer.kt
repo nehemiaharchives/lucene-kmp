@@ -12,7 +12,6 @@ import org.gnit.lucenekmp.index.Fields
 abstract class FieldsProducer
 /** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
 protected constructor() : Fields(), AutoCloseable {
-    @Throws(IOException::class)
     abstract override fun close()
 
     /**

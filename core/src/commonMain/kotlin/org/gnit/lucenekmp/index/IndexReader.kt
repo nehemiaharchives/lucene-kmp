@@ -377,7 +377,6 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      *
      * @throws IOException if there is a low-level IO error
      */
-    @Throws(IOException::class)
     override fun close() {
         if (!closed) {
             decRef()

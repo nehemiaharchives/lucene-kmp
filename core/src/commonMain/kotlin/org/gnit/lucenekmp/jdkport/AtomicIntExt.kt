@@ -11,12 +11,6 @@ fun AtomicInt.get() = this.load()
 @OptIn(ExperimentalAtomicApi::class)
 fun AtomicInt.set(value: Int) = this.store(value)
 
-@OptIn(ExperimentalAtomicApi::class)
-fun AtomicInt.incrementAndGet() = this.incrementAndFetch()
-
-@OptIn(ExperimentalAtomicApi::class)
-fun AtomicInt.decrementAndGet() = this.decrementAndFetch()
-
 /**
  * Atomically updates (with memory effects as specified by [ ][VarHandle.compareAndSet]) the current value with the results of
  * applying the given function to the current and given values,

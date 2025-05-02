@@ -589,7 +589,6 @@ class Lucene99HnswVectorsWriter(
             throw UnsupportedOperationException()
         }
 
-        @get:Throws(IOException::class)
         val graph: OnHeapHnswGraph?
             get() {
                 require(flatFieldVectorsWriter.isFinished)

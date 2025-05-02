@@ -78,6 +78,5 @@ protected constructor() : AutoCloseable {
     }
 
     // NOTE: strange but necessary so javadocs linting is happy:
-    @Throws(IOException::class)
     abstract override fun close()
 }

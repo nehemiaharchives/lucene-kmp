@@ -1160,7 +1160,6 @@ class Lucene90BlockTreeTermsWriter(
         }
     }
 
-    @Throws(IOException::class)
     override fun close() {
         if (closed) {
             return

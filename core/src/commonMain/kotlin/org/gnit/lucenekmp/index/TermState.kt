@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.index
 
+import org.gnit.lucenekmp.jdkport.Cloneable
+
 /**
  * Encapsulates all required internal state to position the associated [TermsEnum] without
  * re-seeking.
@@ -9,7 +11,7 @@ package org.gnit.lucenekmp.index
  * @lucene.experimental
  */
 abstract class TermState
-/** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */() : Cloneable {
+/** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */() : Cloneable<TermState> {
     /**
      * Copies the content of the given [TermState] to this instance
      *
@@ -17,13 +19,8 @@ abstract class TermState
      */
     abstract fun copyFrom(other: TermState)
 
-    public override fun clone(): TermState {
-        try {
-            return super.clone() as TermState
-        } catch (cnse: /*CloneNotSupportedException*/ Exception) {
-            // should not happen
-            throw RuntimeException(cnse)
-        }
+    override fun clone(): TermState {
+        throw UnsupportedOperationException("TermState is abstract and cannot be cloned directly. Please use a concrete implementation of TermState.")
     }
 
     override fun toString(): String {

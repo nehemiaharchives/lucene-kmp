@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.codecs
 
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.index.StoredFields
-
+import org.gnit.lucenekmp.jdkport.Cloneable
 
 /**
  * Codec API for reading stored fields.
@@ -15,8 +15,8 @@ import org.gnit.lucenekmp.index.StoredFields
  */
 abstract class StoredFieldsReader
 /** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
-protected constructor() : StoredFields(), Cloneable, AutoCloseable {
-    public abstract override fun clone(): StoredFieldsReader
+protected constructor() : StoredFields(), Cloneable<StoredFieldsReader>, AutoCloseable {
+    abstract override fun clone(): StoredFieldsReader
 
     /**
      * Checks consistency of this reader.

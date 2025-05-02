@@ -355,6 +355,6 @@ class SegmentCommitInfo(
      * update.
      */
     fun getId(): ByteArray? {
-        return if (id == null) null else id!!.clone()
+        return if (id == null) null else id!!.copyOf() as ByteArray // this cast is needed for kotlin/native target compilation to pass
     }
 }

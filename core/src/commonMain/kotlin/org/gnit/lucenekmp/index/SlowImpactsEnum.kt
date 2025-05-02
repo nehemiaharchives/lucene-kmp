@@ -40,7 +40,6 @@ class SlowImpactsEnum(private val delegate: PostingsEnum) : ImpactsEnum() {
         return delegate.nextPosition()
     }
 
-    @get:Throws(IOException::class)
     override val payload: BytesRef?
         get() = delegate.payload
 

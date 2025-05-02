@@ -229,6 +229,5 @@ protected constructor() : AutoCloseable, Accountable {
         }
     }
 
-    @Throws(IOException::class)
     abstract override fun close()
 }

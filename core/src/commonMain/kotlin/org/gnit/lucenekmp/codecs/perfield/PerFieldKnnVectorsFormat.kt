@@ -318,7 +318,6 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
     }
 
     private class WriterAndSuffix(val writer: KnnVectorsWriter, val suffix: Int) : AutoCloseable {
-        @Throws(IOException::class)
         override fun close() {
             writer.close()
         }

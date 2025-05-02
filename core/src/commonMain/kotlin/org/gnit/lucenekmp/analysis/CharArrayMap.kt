@@ -405,7 +405,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
         override val key: Any
             get() =// we must clone here, as putAll to another CharArrayMap
                 // with other case sensitivity flag would corrupt the keys
-                keysArray[pos]!!.clone()
+                (keysArray[pos] as CharArray).copyOf()
 
         override val value: V
             get() = valuesArray[pos]!!

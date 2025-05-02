@@ -36,7 +36,6 @@ protected constructor() : DocIdSetIterator() {
     @Throws(IOException::class)
     abstract fun endOffset(): Int
 
-    @get:Throws(IOException::class)
     abstract val payload: BytesRef?
 
     companion object {

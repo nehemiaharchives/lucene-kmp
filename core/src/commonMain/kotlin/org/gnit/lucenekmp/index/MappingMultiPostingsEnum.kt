@@ -116,7 +116,6 @@ internal class MappingMultiPostingsEnum(val field: String?, mergeState: MergeSta
         return current!!.postings!!.endOffset()
     }
 
-    @get:Throws(IOException::class)
     override val payload: BytesRef?
         get() = current!!.postings!!.payload
 

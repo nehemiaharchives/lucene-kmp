@@ -45,7 +45,6 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
     }
 
     internal class ConsumerAndSuffix(val consumer: DocValuesConsumer, val suffix: Int) : AutoCloseable {
-        @Throws(IOException::class)
         override fun close() {
             consumer.close()
         }

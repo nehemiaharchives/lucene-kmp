@@ -70,7 +70,6 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
     private var numDirtyChunks: Long = 0 // number of incomplete compressed blocks written
     private var numDirtyDocs: Long = 0 // cumulative number of missing docs in incomplete chunks
 
-    @Throws(IOException::class)
     override fun close() {
         try {
             IOUtils.close(metaStream!!, fieldsStream!!, indexWriter!!, compressor!!)

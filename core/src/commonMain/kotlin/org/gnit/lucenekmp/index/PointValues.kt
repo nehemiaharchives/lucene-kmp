@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.ArrayUtil.Companion.ByteArrayComparator
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.bkd.BKDConfig
+import org.gnit.lucenekmp.jdkport.Cloneable
 import kotlin.math.pow
 
 
@@ -90,15 +91,14 @@ protected constructor() {
         CELL_CROSSES_QUERY
     }
 
-    @get:Throws(IOException::class)
-    abstract val pointTree: PointValues.PointTree
+    abstract val pointTree: PointTree
 
     /**
      * Basic operations to read the KD-tree.
      *
      * @lucene.experimental
      */
-    interface PointTree : Cloneable {
+    interface PointTree : Cloneable<PointTree> {
         /** Clone, the current node becomes the root of the new tree.  */
         public override fun clone(): PointTree
 
@@ -242,8 +242,6 @@ protected constructor() {
                     // Leaf node; scan and filter all points in this block:
                     pointTree.visitDocValues(visitor)
                 }
-
-            else -> throw IllegalArgumentException("Unreachable code")
         }
     }
 
@@ -290,19 +288,14 @@ protected constructor() {
         }
     }
 
-    @get:Throws(IOException::class)
     abstract val minPackedValue: ByteArray
 
-    @get:Throws(IOException::class)
     abstract val maxPackedValue: ByteArray
 
-    @get:Throws(IOException::class)
     abstract val numDimensions: Int
 
-    @get:Throws(IOException::class)
     abstract val numIndexDimensions: Int
 
-    @get:Throws(IOException::class)
     abstract val bytesPerDimension: Int
 
     /** Returns the total number of indexed points across all documents.  */
@@ -348,7 +341,7 @@ protected constructor() {
         fun getDocCount(reader: IndexReader, field: String): Int {
             var count = 0
             for (ctx in reader.leaves()) {
-                val values = ctx!!.reader().getPointValues(field)
+                val values = ctx.reader().getPointValues(field)
                 if (values != null) {
                     count += values.docCount
                 }
@@ -375,7 +368,7 @@ protected constructor() {
                     continue
                 }
                 if (minValue == null) {
-                    minValue = leafMinValue.clone()
+                    minValue = leafMinValue.copyOf() as ByteArray // this cast is needed for kotlin/native target compilation to pass
                 } else {
                     val numDimensions = values.numIndexDimensions
                     val numBytesPerDimension = values.bytesPerDimension
@@ -417,7 +410,7 @@ protected constructor() {
                     continue
                 }
                 if (maxValue == null) {
-                    maxValue = leafMaxValue.clone()
+                    maxValue = leafMaxValue.copyOf() as ByteArray // this cast is needed for kotlin/native target compilation to pass
                 } else {
                     val numDimensions = values.numIndexDimensions
                     val numBytesPerDimension = values.bytesPerDimension

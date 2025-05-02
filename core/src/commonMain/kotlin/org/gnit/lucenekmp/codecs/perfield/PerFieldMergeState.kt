@@ -216,7 +216,6 @@ internal object PerFieldMergeState {
             return filtered.size
         }
 
-        @Throws(IOException::class)
         override fun close() {
             `in`.close()
         }

@@ -190,7 +190,6 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
             return formatToGroups
         }
 
-        @Throws(IOException::class)
         override fun close() {
             IOUtils.close(toClose)
         }
@@ -273,7 +272,6 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
             return fields.size
         }
 
-        @Throws(IOException::class)
         override fun close() {
             IOUtils.close(formats.values)
         }

@@ -65,7 +65,6 @@ class MultiTerms(
         }
     }
 
-    @get:Throws(IOException::class)
     override val min: BytesRef?
         get() {
             var minTerm: BytesRef? = null
@@ -79,7 +78,6 @@ class MultiTerms(
             return minTerm
         }
 
-    @get:Throws(IOException::class)
     override val max: BytesRef?
         get() {
             var maxTerm: BytesRef? = null
@@ -114,7 +112,6 @@ class MultiTerms(
         return -1
     }
 
-    @get:Throws(IOException::class)
     override val sumTotalTermFreq: Long
         get() {
             var sum: Long = 0
@@ -126,7 +123,6 @@ class MultiTerms(
             return sum
         }
 
-    @get:Throws(IOException::class)
     override val sumDocFreq: Long
         get() {
             var sum: Long = 0
@@ -138,7 +134,6 @@ class MultiTerms(
             return sum
         }
 
-    @get:Throws(IOException::class)
     override val docCount: Int
         get(){
         var sum = 0

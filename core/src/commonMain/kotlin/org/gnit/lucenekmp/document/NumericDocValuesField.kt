@@ -116,7 +116,10 @@ class NumericDocValuesField private constructor(name: String, value: Long, field
          * @see DoubleField.newSetQuery
          */
         fun newSlowSetQuery(field: String, vararg values: Long): Query {
-            return SortedNumericDocValuesSetQuery(field, values.clone())
+            return SortedNumericDocValuesSetQuery(
+                field,
+                values.copyOf() as LongArray // this cast is needed for kotlin/native target compilation to pass
+            )
         }
 
         /**

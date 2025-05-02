@@ -137,7 +137,6 @@ class FieldsIndexWriter internal constructor(
         }
     }
 
-    @Throws(IOException::class)
     override fun close() {
         try {
             IOUtils.close(docsOut!!, filePointersOut!!)

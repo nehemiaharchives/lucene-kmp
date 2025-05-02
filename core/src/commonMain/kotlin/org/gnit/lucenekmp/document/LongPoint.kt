@@ -228,7 +228,7 @@ class LongPoint
         fun newSetQuery(field: String, vararg values: Long): Query {
             // Don't unexpectedly change the user's incoming values array:
 
-            val sortedValues = values.clone()
+            val sortedValues = values.copyOf() as LongArray // this cast is needed for kotlin/native target compilation to pass
             Arrays.sort(sortedValues)
 
             val encoded = BytesRef(ByteArray(Long.SIZE_BYTES))

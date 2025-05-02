@@ -214,7 +214,7 @@ class SegmentInfo(
 
     /** Return the id that uniquely identifies this segment.  */
     fun getId(): ByteArray {
-        return id.clone()
+        return id.copyOf() as ByteArray // this cast is needed for kotlin/native target compilation to pass
     }
 
     private var setFiles: MutableSet<String>? = null

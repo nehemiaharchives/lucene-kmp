@@ -51,19 +51,16 @@ class MappedMultiFields(mergeState: MergeState, multiFields: MultiFields) : Filt
             throw UnsupportedOperationException()
         }
 
-        @get:Throws(IOException::class)
         override val sumTotalTermFreq: Long
             get() {
                 throw UnsupportedOperationException()
             }
 
-        @get:Throws(IOException::class)
         override val sumDocFreq: Long
             get() {
                 throw UnsupportedOperationException()
             }
 
-        @get:Throws(IOException::class)
         override val docCount: Int
             get() {
                 throw UnsupportedOperationException()

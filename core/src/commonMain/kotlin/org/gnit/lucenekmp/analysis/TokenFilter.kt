@@ -35,7 +35,6 @@ abstract class TokenFilter
      * **NOTE:** The default implementation chains the call to the input TokenStream, so be sure
      * to call `super.close()` when overriding this method.
      */
-    @Throws(IOException::class)
     override fun close() {
         input.close()
     }

@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.codecs
 
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.index.TermVectors
-
+import org.gnit.lucenekmp.jdkport.Cloneable
 
 /**
  * Codec API for reading term vectors:
@@ -11,7 +11,7 @@ import org.gnit.lucenekmp.index.TermVectors
  */
 abstract class TermVectorsReader
 /** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
-protected constructor() : TermVectors(), Cloneable, AutoCloseable {
+protected constructor() : TermVectors(), Cloneable<TermVectorsReader>, AutoCloseable {
     /**
      * Checks consistency of this reader.
      *
@@ -25,7 +25,7 @@ protected constructor() : TermVectors(), Cloneable, AutoCloseable {
     abstract fun checkIntegrity()
 
     /** Create a clone that one caller at a time may use to read term vectors.  */
-    public abstract override fun clone(): TermVectorsReader
+    abstract override fun clone(): TermVectorsReader
 
     open val mergeInstance: TermVectorsReader
         /**

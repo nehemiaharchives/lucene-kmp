@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.internal.hppc
 
 import org.gnit.lucenekmp.internal.hppc.HashContainers.DEFAULT_EXPECTED_ELEMENTS
 import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
@@ -19,7 +20,7 @@ import kotlin.reflect.cast
  *
  * @lucene.internal
  */
-class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable, Accountable {
+class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<IntArrayList>, Accountable {
     /**
      * Internal array for storing the list. The array may be larger than the current size ([ ][.size]).
      */
@@ -326,14 +327,10 @@ class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable, Acco
      * Clone this object. The returned clone will reuse the same hash function and array resizing
      * strategy.
      */
-    public override fun clone(): IntArrayList {
-        try {
-            val cloned = super.clone() as IntArrayList
-            cloned.buffer = buffer.clone()
-            return cloned
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+    override fun clone(): IntArrayList {
+        val newInstance = IntArrayList(this.size())
+        newInstance.addAll(this)
+        return newInstance
     }
 
     override fun hashCode(): Int {

@@ -63,7 +63,6 @@ internal class SortedNumericDocValuesRangeQuery(
             .toString()
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (lowerValue == Long.Companion.MIN_VALUE && upperValue == Long.Companion.MAX_VALUE) {
             return FieldExistsQuery(field)
@@ -74,7 +73,6 @@ internal class SortedNumericDocValuesRangeQuery(
         return super.rewrite(indexSearcher)
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return object : ConstantScoreWeight(this, boost) {
             override fun isCacheable(ctx: LeafReaderContext): Boolean {

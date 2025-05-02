@@ -307,6 +307,5 @@ protected constructor() : AutoCloseable, Accountable {
         finishDocument()
     }
 
-    @Throws(IOException::class)
     abstract override fun close()
 }

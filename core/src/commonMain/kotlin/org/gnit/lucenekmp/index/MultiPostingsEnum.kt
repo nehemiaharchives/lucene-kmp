@@ -130,7 +130,6 @@ class MultiPostingsEnum(private val parent: MultiTermsEnum, subReaderCount: Int)
         return current!!.endOffset()
     }
 
-    @get:Throws(IOException::class)
     override val payload: BytesRef?
         get() = current!!.payload
 

@@ -3,7 +3,6 @@ package org.gnit.lucenekmp.index
 import org.gnit.lucenekmp.index.DocValuesUpdate.BinaryDocValuesUpdate
 import org.gnit.lucenekmp.index.DocValuesUpdate.NumericDocValuesUpdate
 import org.gnit.lucenekmp.jdkport.get
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.jdkport.set
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.util.Accountable
@@ -17,6 +16,7 @@ import org.gnit.lucenekmp.util.Counter
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 
 /**
  * Holds buffered deletes and updates, by docID, term or query for a single segment. This is used to
@@ -102,7 +102,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
         } else {
             buffer.addNoValue(update.term, docIDUpto)
         }
-        numFieldUpdates.incrementAndGet()
+        numFieldUpdates.incrementAndFetch()
     }
 
     @OptIn(ExperimentalAtomicApi::class)
@@ -116,7 +116,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
         } else {
             buffer.addNoValue(update.term, docIDUpto)
         }
-        numFieldUpdates.incrementAndGet()
+        numFieldUpdates.incrementAndFetch()
     }
 
     fun clearDeleteTerms() {

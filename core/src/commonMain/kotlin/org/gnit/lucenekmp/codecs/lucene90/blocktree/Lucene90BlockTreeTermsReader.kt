@@ -228,7 +228,6 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
     // private static String toHex(int v) {
     //   return "0x" + Integer.toHexString(v);
     // }
-    @Throws(IOException::class)
     override fun close() {
         try {
             IOUtils.close(indexIn, termsIn, postingsReader)

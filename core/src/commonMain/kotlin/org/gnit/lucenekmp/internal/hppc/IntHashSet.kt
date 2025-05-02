@@ -11,6 +11,7 @@ import org.gnit.lucenekmp.internal.hppc.HashContainers.iterationIncrement
 import org.gnit.lucenekmp.internal.hppc.HashContainers.minBufferSize
 import org.gnit.lucenekmp.internal.hppc.HashContainers.nextBufferSize
 import org.gnit.lucenekmp.jdkport.bitCount
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -32,7 +33,7 @@ import kotlin.reflect.cast
  */
 @OptIn(ExperimentalAtomicApi::class)
 class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
-    Iterable<IntCursor?>, Accountable, Cloneable {
+    Iterable<IntCursor?>, Accountable, Cloneable<IntHashSet> {
     /** The hash array holding keys.  */
     var keys: IntArray? = null
 
@@ -350,24 +351,23 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
         return true
     }
 
-    public override fun clone(): IntHashSet {
-        try {
-            /*  */
-            val cloned = super.clone() as IntHashSet
-            cloned.keys = keys!!.clone()
-            cloned.hasEmptyKey = hasEmptyKey
-            cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
-            return cloned
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+    override fun clone(): IntHashSet {
+        val cloned = IntHashSet()
+        cloned.keys = keys?.clone()
+        cloned.mask = mask
+        cloned.assigned = assigned
+        cloned.resizeAt = resizeAt
+        cloned.hasEmptyKey = hasEmptyKey
+        cloned.loadFactor = loadFactor
+        cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
+        return cloned
     }
 
     override fun iterator(): MutableIterator<IntCursor?> {
         return this.EntryIterator()
     }
 
-    public override fun ramBytesUsed(): Long {
+    override fun ramBytesUsed(): Long {
         return BASE_RAM_BYTES_USED + RamUsageEstimator.sizeOf(keys!!)
     }
 

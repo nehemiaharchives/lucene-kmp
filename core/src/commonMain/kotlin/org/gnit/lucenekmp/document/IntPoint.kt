@@ -207,7 +207,7 @@ class IntPoint
         fun newSetQuery(field: String, vararg values: Int): Query {
             // Don't unexpectedly change the user's incoming values array:
 
-            val sortedValues = values.clone()
+            val sortedValues = values.copyOf() as IntArray // this cast is needed for kotlin/native target compilation to pass
             Arrays.sort(sortedValues)
 
             val encoded = BytesRef(ByteArray(Int.SIZE_BYTES))

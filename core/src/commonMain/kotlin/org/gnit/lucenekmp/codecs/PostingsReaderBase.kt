@@ -70,6 +70,5 @@ protected constructor() : AutoCloseable {
     @Throws(IOException::class)
     abstract fun checkIntegrity()
 
-    @Throws(IOException::class)
     abstract override fun close()
 }

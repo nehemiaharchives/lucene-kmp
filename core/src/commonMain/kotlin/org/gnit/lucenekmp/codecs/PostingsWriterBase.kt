@@ -54,6 +54,5 @@ protected constructor() : AutoCloseable {
     /** Sets the current field for writing.  */
     abstract fun setField(fieldInfo: FieldInfo)
 
-    @Throws(IOException::class)
     abstract override fun close()
 }
