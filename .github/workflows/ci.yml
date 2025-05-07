@@ -113,7 +113,7 @@ jobs:
         uses: gradle/gradle-build-action@v3
 
       - name: Build iOS
-        run: ./gradlew iosX64Test iosArm64MainClasses iosSimulatorArm64MainClasses --no-daemon
+        run: ./gradlew iosX64Test iosX64MainKlibrary iosArm64MainKlibrary iosSimulatorArm64MainKlibrary --no-daemon
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
