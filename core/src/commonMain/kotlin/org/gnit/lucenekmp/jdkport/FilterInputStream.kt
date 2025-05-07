@@ -147,7 +147,6 @@ open class FilterInputStream protected constructor(`in`: InputStream) : InputStr
      * @throws     IOException  {@inheritDoc}
      * @see java.io.FilterInputStream in
      */
-    @Throws(IOException::class)
     override fun close() {
         `in`!!.close()
     }

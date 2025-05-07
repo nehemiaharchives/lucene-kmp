@@ -221,7 +221,6 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
 
 
     /** Create the Weight used to score us  */
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return this.DisjunctionMaxWeight(searcher, scoreMode, boost)
     }
@@ -231,7 +230,6 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
      *
      * @return an optimized copy of us (which may not be a copy if there is nothing to optimize)
      */
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (disjuncts.isEmpty()) {
             return MatchNoDocsQuery("empty DisjunctionMaxQuery")

@@ -12,7 +12,6 @@ import org.gnit.lucenekmp.util.DocIdSetBuilder
  */
 internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
     (query: Q) : AbstractMultiTermQueryConstantScoreWrapper<Q>(query) {
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
 
         val multiTermQueryConstantScoreWrapperQuery = query

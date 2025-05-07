@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.jdkport.Cloneable
 
 
 /**
@@ -9,7 +10,7 @@ import org.gnit.lucenekmp.jdkport.Arrays
  *
  * @lucene.internal
  */
-class IntsRef : Comparable<IntsRef>, Cloneable {
+class IntsRef : Comparable<IntsRef>, Cloneable<IntsRef> {
     /** The contents of the IntsRef. Should never be `null`.  */
     var ints: IntArray
 
@@ -46,7 +47,7 @@ class IntsRef : Comparable<IntsRef>, Cloneable {
      *
      * @see .deepCopyOf
      */
-    public override fun clone(): IntsRef {
+    override fun clone(): IntsRef {
         return IntsRef(ints, offset, length)
     }
 

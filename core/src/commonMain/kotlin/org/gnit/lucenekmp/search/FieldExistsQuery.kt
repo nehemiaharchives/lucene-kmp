@@ -49,7 +49,6 @@ class FieldExistsQuery(val field: String) : Query() {
         return hash
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         val reader: IndexReader = indexSearcher.getIndexReader()
         var allReadersRewritable = true

@@ -503,8 +503,8 @@ open class BKDWriter(
             0,
             Math.toIntExact(pointCount),
             dataOut,
-            minPackedValue.clone(),
-            maxPackedValue.clone(),
+            minPackedValue.copyOf(),
+            maxPackedValue.copyOf(),
             parentSplits,
             splitPackedValues,
             splitDimensionValues,
@@ -921,8 +921,8 @@ open class BKDWriter(
                 points,
                 dataOut,
                 radixSelector,
-                minPackedValue.clone(),
-                maxPackedValue.clone(),
+                minPackedValue.copyOf(),
+                maxPackedValue.copyOf(),
                 parentSplits,
                 splitPackedValues,
                 splitDimensionValues,
@@ -1124,7 +1124,7 @@ open class BKDWriter(
                 writeBuffer.writeBytes(splitValue.bytes, address + prefix + 1, suffix - 1)
             }
 
-            val cmp: ByteArray = lastSplitValues.clone()
+            val cmp: ByteArray = lastSplitValues.copyOf()
 
             System.arraycopy(
                 lastSplitValues, splitDim * config.bytesPerDim + prefix, savSplitValue, 0, suffix
@@ -1430,7 +1430,6 @@ open class BKDWriter(
         }
     }
 
-    @Throws(IOException::class)
     override fun close() {
         finished = true
         if (tempInput != null) {

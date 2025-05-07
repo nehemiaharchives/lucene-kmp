@@ -16,7 +16,6 @@ import org.gnit.lucenekmp.util.PriorityQueue
  * limited number of the most costly terms while rewriting the remaining terms into a filter bitset.
  */
 internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(query : Q) : AbstractMultiTermQueryConstantScoreWrapper<Q>(query = query) {
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return object : RewritingWeight(query, boost, scoreMode, searcher) {
             @Throws(IOException::class)

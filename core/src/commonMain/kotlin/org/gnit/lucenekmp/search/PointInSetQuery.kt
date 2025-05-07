@@ -104,7 +104,6 @@ abstract class PointInSetQuery protected constructor(
         }
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         // We don't use RandomAccessWeight here: it's no good to approximate with "match all docs".
         // This is an inverted structure and should be used in the first pass:

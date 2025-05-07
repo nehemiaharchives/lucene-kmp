@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.internal.hppc
 import org.gnit.lucenekmp.internal.hppc.HashContainers.DEFAULT_EXPECTED_ELEMENTS
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
@@ -19,7 +20,7 @@ import kotlin.reflect.cast
  *
  * @lucene.internal
  */
-open class LongArrayList(expectedElements: Int) : MutableIterable<LongCursor>, Cloneable, Accountable {
+open class LongArrayList(expectedElements: Int) : MutableIterable<LongCursor>, Cloneable<LongArrayList>, Accountable {
     /**
      * Internal array for storing the list. The array may be larger than the current size ([ ][.size]).
      */
@@ -300,13 +301,10 @@ open class LongArrayList(expectedElements: Int) : MutableIterable<LongCursor>, C
      * strategy.
      */
     override fun clone(): LongArrayList {
-        try {
-            val cloned = super.clone() as LongArrayList
-            cloned.buffer = buffer.clone()
-            return cloned
-        } catch (e: /*CloneNotSupported*/Exception) {
-            throw RuntimeException(e)
-        }
+        val cloned = LongArrayList()
+        cloned.buffer = buffer.copyOf()
+        cloned.elementsCount = size()
+        return cloned
     }
 
     override fun hashCode(): Int {
@@ -322,9 +320,9 @@ open class LongArrayList(expectedElements: Int) : MutableIterable<LongCursor>, C
      * Returns `true` only if the other object is an instance of the same class and with
      * the same elements.
      */
-    override fun equals(obj: Any?): Boolean {
-        return (this === obj)
-                || (obj != null && this::class == obj::class && equalElements(this::class.cast(obj)))
+    override fun equals(other: Any?): Boolean {
+        return (this === other)
+                || (other != null && this::class == other::class && equalElements(this::class.cast(other)))
     }
 
     /** Compare index-aligned elements against another [LongArrayList].  */

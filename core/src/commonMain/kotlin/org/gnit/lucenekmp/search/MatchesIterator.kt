@@ -64,7 +64,6 @@ interface MatchesIterator {
     @Throws(IOException::class)
     fun endOffset(): Int
 
-    @get:Throws(IOException::class)
     val subMatches: MatchesIterator?
 
     /**

@@ -26,6 +26,5 @@ interface HnswBuilder {
 
     val graph: OnHeapHnswGraph
 
-    @get:Throws(IOException::class)
     val completedGraph: OnHeapHnswGraph
 }

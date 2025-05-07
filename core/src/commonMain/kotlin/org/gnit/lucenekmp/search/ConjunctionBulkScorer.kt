@@ -43,7 +43,6 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
                     return score.toFloat()
                 }
 
-                @get:Throws(IOException::class)
                 override val children: MutableCollection<ChildScorable> get(){
                     val children: ArrayList<ChildScorable> = ArrayList()
                     for (scorer in allScorers) {

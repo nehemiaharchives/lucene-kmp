@@ -41,7 +41,6 @@ abstract class IndexOutput protected constructor(resourceDescription: String, na
     }
 
     /** Closes this stream to further operations.  */
-    @Throws(IOException::class)
     abstract override fun close()
 
     /** Returns the current position in this file, where the next write will occur.  */

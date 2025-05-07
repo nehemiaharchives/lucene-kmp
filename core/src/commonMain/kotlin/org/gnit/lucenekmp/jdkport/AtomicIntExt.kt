@@ -55,22 +55,5 @@ fun AtomicInt.weakCompareAndSetVolatile(expectedValue: Int, newValue: Int): Bool
     return this.compareAndSet(expectedValue, newValue)
 }
 
-/**
- * Atomically adds the given value to the current value.
- *
- * @param delta the value to add
- * @return the previous value
- */
-@OptIn(ExperimentalAtomicApi::class)
-fun AtomicInt.getAndAdd(delta: Int): Int {
-    var prev: Int
-    var next: Int
-    do {
-        prev = this.load()
-        next = prev + delta
-    } while (!this.compareAndSet(prev, next))
-    return prev
-}
-
 @OptIn(ExperimentalAtomicApi::class)
 typealias AtomicInteger = AtomicInt

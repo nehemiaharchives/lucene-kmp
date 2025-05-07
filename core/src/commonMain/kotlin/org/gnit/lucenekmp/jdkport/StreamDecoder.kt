@@ -28,7 +28,6 @@ class StreamDecoder : Reader {
             return null
         }
 
-    @Throws(IOException::class)
     override fun read(): Int {
         // Return the leftover char, if there is one
         if (haveLeftoverChar) {
@@ -55,7 +54,6 @@ class StreamDecoder : Reader {
         }
     }
 
-    @Throws(IOException::class)
     override fun read(cbuf: CharArray, offset: Int, length: Int): Int {
         var off = offset
         var len = length
@@ -104,7 +102,6 @@ class StreamDecoder : Reader {
         return haveLeftoverChar || implReady()
     }
 
-    @Throws(IOException::class)
     override fun close() {
         if (closed) return
         try {

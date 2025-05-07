@@ -12,7 +12,6 @@ import org.gnit.lucenekmp.jdkport.AtomicInteger
 import kotlinx.io.IOException
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.System
-import org.gnit.lucenekmp.jdkport.getAndAdd
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
 
@@ -87,7 +86,6 @@ class HnswConcurrentMergeBuilder(
         }
     }
 
-    @get:Throws(IOException::class)
     override val completedGraph: OnHeapHnswGraph
         get() {
             if (!frozen) {
@@ -158,7 +156,7 @@ class HnswConcurrentMergeBuilder(
 
         /** Reserve the work by atomically increment the [.workProgress]  */
         fun getStartPos(maxOrd: Int): Int {
-            val start: Int = workProgress.getAndAdd(batchSize)
+            val start: Int = workProgress.fetchAndAdd(batchSize)
             return if (start < maxOrd) {
                 start
             } else {

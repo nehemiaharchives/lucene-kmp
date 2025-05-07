@@ -17,7 +17,6 @@ class OutputStreamDataOutput(private val os: OutputStream) : DataOutput(), AutoC
         os.write(b, offset, length)
     }
 
-    @Throws(IOException::class)
     override fun close() {
         os.close()
     }

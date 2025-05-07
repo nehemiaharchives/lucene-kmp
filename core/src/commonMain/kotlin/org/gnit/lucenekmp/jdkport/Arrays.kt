@@ -708,7 +708,7 @@ object Arrays {
      */
     fun copyOfRange(original: ByteArray, from: Int, to: Int): ByteArray {
         if (from == 0 && to == original.size) {
-            return original.clone()
+            return original.copyOf()
         }
         val newLength = to - from
         require(newLength >= 0) { "$from > $to" }

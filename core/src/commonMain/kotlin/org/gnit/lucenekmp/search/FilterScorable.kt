@@ -21,7 +21,6 @@ open class FilterScorable
         return `in`.score()
     }
 
-    @get:Throws(IOException::class)
     override val children: MutableCollection<ChildScorable>
         get() = mutableListOf<ChildScorable>(ChildScorable(`in`, "FILTER"))
 }

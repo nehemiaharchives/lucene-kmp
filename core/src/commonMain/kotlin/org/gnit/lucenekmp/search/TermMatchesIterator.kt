@@ -45,7 +45,6 @@ internal class TermMatchesIterator(query: Query, pe: PostingsEnum) : MatchesIter
         return pe.endOffset()
     }
 
-    @get:Throws(IOException::class)
     override val subMatches: MatchesIterator?
         get() {
             return null

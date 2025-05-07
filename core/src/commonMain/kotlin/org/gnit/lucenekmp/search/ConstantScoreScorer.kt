@@ -95,7 +95,6 @@ class ConstantScoreScorer : Scorer {
         return score
     }
 
-    @get:Throws(IOException::class)
     override var minCompetitiveScore: Float
         get() {
             return if (scoreMode === ScoreMode.TOP_SCORES) {

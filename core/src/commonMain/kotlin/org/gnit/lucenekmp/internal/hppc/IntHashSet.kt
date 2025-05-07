@@ -353,12 +353,15 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
 
     override fun clone(): IntHashSet {
         val cloned = IntHashSet()
-        cloned.keys = keys?.clone()
+        // Deep copy of the keys array (if not null)
+        cloned.keys = keys?.copyOf()
+
         cloned.mask = mask
         cloned.assigned = assigned
         cloned.resizeAt = resizeAt
         cloned.hasEmptyKey = hasEmptyKey
         cloned.loadFactor = loadFactor
+        // Ensure a new distinct seed for the clone's iteration order
         cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
         return cloned
     }

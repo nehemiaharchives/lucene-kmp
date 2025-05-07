@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlin.Cloneable
 import kotlin.jvm.Transient
 
 
@@ -83,8 +82,8 @@ import kotlin.jvm.Transient
  *
  * @since   1.2
 </E> */
-class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutableSet<E>(), NavigableSet<E>,
-    Cloneable {
+class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutableSet<E>(), NavigableSet<E>/*,
+    Cloneable*/ { // implement Cloneable if really needed
     /**
      * The backing map.
      */
@@ -475,17 +474,11 @@ class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutable
      *
      * @return a shallow copy of this set
      */
-    public override fun clone(): Any {
-        val clone: TreeSet<E>
-        try {
-            clone = super.clone() as TreeSet<E>
-        } catch (e: /*java.lang.CloneNotSupported*/Exception) {
-            throw /*java.lang.Internal*/Error(e)
-        }
-
-        clone.m = TreeMap(m)
-        return clone
-    }
+    /*public override fun clone(): TreeSet<E> {
+        val clonedMap = (m as? TreeMap<E, Any>)?.clone() ?: throw UnsupportedOperationException("Backing map is not cloneable")
+        val clonedSet = TreeSet<E>(clonedMap as NavigableMap<E, Any>)
+        return clonedSet
+    }*/
 
     /**
      * Save the state of the `TreeSet` instance to a stream (that is,

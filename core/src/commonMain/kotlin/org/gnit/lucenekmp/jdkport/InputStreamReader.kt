@@ -116,7 +116,6 @@ open class InputStreamReader : Reader {
          */
         get() = sd.encoding
 
-    @Throws(IOException::class)
     override fun read(target: CharBuffer): Int {
         return sd.read(target)
     }
@@ -129,7 +128,6 @@ open class InputStreamReader : Reader {
      *
      * @throws     IOException  If an I/O error occurs
      */
-    @Throws(IOException::class)
     override fun read(): Int {
         return sd.read()
     }
@@ -138,7 +136,6 @@ open class InputStreamReader : Reader {
      * {@inheritDoc}
      * @throws     IndexOutOfBoundsException  {@inheritDoc}
      */
-    @Throws(IOException::class)
     override fun read(cbuf: CharArray, off: Int, len: Int): Int {
         return sd.read(cbuf, off, len)
     }
@@ -155,7 +152,6 @@ open class InputStreamReader : Reader {
         return sd.ready()
     }
 
-    @Throws(IOException::class)
     override fun close() {
         sd.close()
     }

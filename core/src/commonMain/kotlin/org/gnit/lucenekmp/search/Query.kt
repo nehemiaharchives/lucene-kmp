@@ -64,7 +64,7 @@ abstract class Query {
      * @see .sameClassAs
      * @see .classHash
      */
-    abstract override fun equals(obj: Any?): Boolean
+    abstract override fun equals(other: Any?): Boolean
 
     /**
      * Override and implement query hash code properly in a subclass. This is required so that [ ] works properly.

@@ -110,7 +110,7 @@ abstract class RunAutomaton protected constructor(a: Automaton, alphabetSize: In
          * Returns array of codepoint class interval start points. The array should not be modified by the
          * caller.
          */
-        get() = points.clone()
+        get() = points.copyOf()
 
     /** Gets character class of given codepoint  */
     fun getCharClass(c: Int): Int {

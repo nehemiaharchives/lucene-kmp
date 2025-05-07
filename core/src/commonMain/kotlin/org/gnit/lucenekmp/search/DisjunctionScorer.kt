@@ -44,7 +44,7 @@ internal abstract class DisjunctionScorer protected constructor(
         }
     }
 
-    public override fun iterator(): DocIdSetIterator {
+    override fun iterator(): DocIdSetIterator {
         if (twoPhase != null) {
             return TwoPhaseIterator.asDocIdSetIterator(twoPhase!!)
         } else {
@@ -52,7 +52,7 @@ internal abstract class DisjunctionScorer protected constructor(
         }
     }
 
-    public override fun twoPhaseIterator(): TwoPhaseIterator? {
+    override fun twoPhaseIterator(): TwoPhaseIterator? {
         return twoPhase
     }
 
@@ -69,7 +69,6 @@ internal abstract class DisjunctionScorer protected constructor(
             }
         }
 
-        @get:Throws(IOException::class)
         val subMatches: DisiWrapper?
             get() {
                 // iteration order does not matter
@@ -84,7 +83,7 @@ internal abstract class DisjunctionScorer protected constructor(
             }
 
         @Throws(IOException::class)
-        public override fun matches(): Boolean {
+        override fun matches(): Boolean {
             verifiedMatches = null
             unverifiedMatches.clear()
 
@@ -125,16 +124,15 @@ internal abstract class DisjunctionScorer protected constructor(
             return false
         }
 
-        public override fun matchCost(): Float {
+        override fun matchCost(): Float {
             return matchCost
         }
     }
 
-    public override fun docID(): Int {
+    override fun docID(): Int {
         return approximation.docID()
     }
 
-    @get:Throws(IOException::class)
     val subMatches: DisiWrapper?
         get() {
             if (twoPhase == null) {
@@ -145,7 +143,7 @@ internal abstract class DisjunctionScorer protected constructor(
         }
 
     @Throws(IOException::class)
-    public override fun score(): Float {
+    override fun score(): Float {
         return score(this.subMatches)
     }
 
@@ -153,7 +151,6 @@ internal abstract class DisjunctionScorer protected constructor(
     @Throws(IOException::class)
     protected abstract fun score(topList: DisiWrapper?): Float
 
-    @get:Throws(IOException::class)
     override val children: MutableCollection<ChildScorable>
         get() {
             val children: ArrayList<ChildScorable> = ArrayList<ChildScorable>()

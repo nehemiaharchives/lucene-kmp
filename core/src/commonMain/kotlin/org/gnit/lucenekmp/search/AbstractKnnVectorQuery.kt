@@ -52,7 +52,6 @@ abstract class AbstractKnnVectorQuery(
         require(k >= 1) { "k must be at least 1, got: $k" }
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         val reader: IndexReader = indexSearcher.getIndexReader()
 
@@ -317,7 +316,6 @@ abstract class AbstractKnnVectorQuery(
         private val segmentStarts: IntArray,
         private val contextIdentity: Any
     ) : Query() {
-        @Throws(IOException::class)
         override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
             check(
                 searcher.getIndexReader().context.id() === contextIdentity

@@ -10,7 +10,6 @@ class MatchNoDocsQuery
 /** Default constructor  */ @JvmOverloads constructor(private val reason: String = "") : Query() {
     /** Provides a reason explaining why this query was used  */
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return object : Weight(this) {
             @Throws(IOException::class)

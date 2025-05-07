@@ -98,7 +98,6 @@ class MaxScoreCache(impactsSource: ImpactsSource, scorer: SimScorer) {
         return -1
     }
 
-    @get:Throws(IOException::class)
     val maxScoreForLevelZero: Float
         get() = getMaxScoreForLevel(0)
 

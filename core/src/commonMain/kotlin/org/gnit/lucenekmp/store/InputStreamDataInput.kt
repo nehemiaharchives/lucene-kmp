@@ -30,7 +30,6 @@ class InputStreamDataInput(private val `is`: InputStream) : DataInput(), AutoClo
         }
     }
 
-    @Throws(IOException::class)
     override fun close() {
         `is`.close()
     }

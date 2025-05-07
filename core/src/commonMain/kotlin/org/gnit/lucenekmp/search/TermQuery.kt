@@ -262,7 +262,7 @@ class TermQuery : Query {
         return term
     }
 
-    @Throws(IOException::class) override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
+    override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         val context: IndexReaderContext = searcher.getTopReaderContext()
         val termState: TermStates = if (perReaderTermState == null || !perReaderTermState.wasBuiltFor(context)) {
             TermStates.build(searcher, term, scoreMode.needsScores())

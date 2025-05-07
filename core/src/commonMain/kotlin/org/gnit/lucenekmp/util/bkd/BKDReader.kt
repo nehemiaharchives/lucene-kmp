@@ -160,7 +160,6 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
         return count[0] != lastLeafNodePointCount
     }
 
-    @get:Throws(IOException::class)
     override val pointTree: PointTree
         get() = BKDPointTree(
             indexIn.slice("packedIndex", indexStartPointer, numIndexBytes.toLong()),
@@ -224,8 +223,8 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
         private val splitValuesStack: Array<ByteArray?>
 
         // holds the min / max value of the current node.
-        override val minPackedValue: ByteArray = minPackedValue.clone()
-        override val maxPackedValue: ByteArray = maxPackedValue.clone()
+        override val minPackedValue: ByteArray = minPackedValue.copyOf()
+        override val maxPackedValue: ByteArray = maxPackedValue.copyOf()
 
         // holds the previous value of the split dimension
         private val splitDimValueStack: Array<ByteArray?>
@@ -334,7 +333,7 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
                 // copy node data
                 index.rightNodePositions[index.level] = rightNodePositions[level]
                 index.readNodeDataPositions[index.level] = readNodeDataPositions[level]
-                index.splitValuesStack[index.level] = splitValuesStack[level]!!.clone()
+                index.splitValuesStack[index.level] = splitValuesStack[level]!!.copyOf()
                 System.arraycopy(
                     negativeDeltas,
                     level * config.numIndexDims,
@@ -684,7 +683,7 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
                     isLeft
 
                 if (splitValuesStack[level] == null) {
-                    splitValuesStack[level] = splitValuesStack[level - 1]!!.clone()
+                    splitValuesStack[level] = splitValuesStack[level - 1]!!.copyOf()
                 } else {
                     System.arraycopy(
                         splitValuesStack[level - 1]!!,
@@ -993,15 +992,12 @@ class BKDReader(metaIn: IndexInput, indexIn: IndexInput, dataIn: IndexInput) : P
         }
     }
 
-    @get:Throws(IOException::class)
     override val numDimensions: Int
         get() = config.numDims
 
-    @get:Throws(IOException::class)
     override val numIndexDimensions: Int
         get() = config.numIndexDims
 
-    @get:Throws(IOException::class)
     override val bytesPerDimension: Int
         get() = config.bytesPerDim
 

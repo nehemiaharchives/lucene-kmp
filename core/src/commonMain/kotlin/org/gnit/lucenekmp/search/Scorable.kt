@@ -37,7 +37,6 @@ abstract class Scorable {
      */
     open var minCompetitiveScore: Float = 0F
 
-    @get:Throws(IOException::class)
     open val children: MutableCollection<ChildScorable>
         /**
          * Returns child sub-scorers positioned on the current document

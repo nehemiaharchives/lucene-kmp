@@ -35,7 +35,6 @@ class ByteBuffersIndexOutput(
         this.onClose = onClose
     }
 
-    @Throws(IOException::class)
     override fun close() {
         // No special effort to be thread-safe here since IndexOutputs are not required to be
         // thread-safe.
@@ -52,7 +51,6 @@ class ByteBuffersIndexOutput(
             return delegate!!.size()
         }
 
-    @Throws(IOException::class)
     override fun getChecksum(): Long {
         ensureOpen()
 

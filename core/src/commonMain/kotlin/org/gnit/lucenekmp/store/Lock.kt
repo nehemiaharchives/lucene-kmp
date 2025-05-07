@@ -33,7 +33,6 @@ abstract class Lock : AutoCloseable {
      * @throws LockReleaseFailedException optional specific exception) if the lock could not be
      * properly released.
      */
-    @Throws(IOException::class)
     abstract override fun close()
 
     /**

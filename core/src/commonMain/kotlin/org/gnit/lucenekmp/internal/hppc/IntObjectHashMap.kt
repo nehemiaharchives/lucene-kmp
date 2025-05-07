@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.internal.hppc.HashContainers.iterationIncrement
 import org.gnit.lucenekmp.internal.hppc.HashContainers.minBufferSize
 import org.gnit.lucenekmp.internal.hppc.HashContainers.nextBufferSize
 import org.gnit.lucenekmp.jdkport.bitCount
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -34,7 +35,7 @@ import kotlin.reflect.cast
 @OptIn(ExperimentalAtomicApi::class)
 class IntObjectHashMap<VType>
 @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
-    Iterable<IntObjectHashMap.IntObjectCursor<VType?>>, Accountable, Cloneable {
+    Iterable<IntObjectHashMap.IntObjectCursor<VType?>>, Accountable, Cloneable<IntObjectHashMap<VType>> {
     /** The array holding keys.  */
     var keys: IntArray? = null
 
@@ -576,18 +577,20 @@ class IntObjectHashMap<VType>
         }
     }
 
-    public override fun clone(): IntObjectHashMap<VType?> {
-        try {
-            /*  */
-            val cloned = super.clone() as IntObjectHashMap<VType?>
-            cloned.keys = keys!!.clone()
-            cloned.values = values!!.clone()
-            cloned.hasEmptyKey = hasEmptyKey
-            cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
-            return cloned
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+    override fun clone(): IntObjectHashMap<VType> {
+        val cloned = IntObjectHashMap<VType>()
+        // Deep copy keys array
+        cloned.keys = keys?.copyOf()
+        // Shallow copy values array (elements themselves aren't cloned—if you need deep clone, handle accordingly)
+        cloned.values = values?.copyOf()
+
+        cloned.mask = mask
+        cloned.assigned = assigned
+        cloned.resizeAt = resizeAt
+        cloned.hasEmptyKey = hasEmptyKey
+        cloned.loadFactor = loadFactor
+        cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
+        return cloned
     }
 
     /** Convert the contents of this map to a human-friendly string.  */

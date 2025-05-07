@@ -130,7 +130,6 @@ open class FilterOutputStream(
      * @see java.io.FilterOutputStream.flush
      * @see java.io.FilterOutputStream.out
      */
-    @Throws(IOException::class)
     override fun close() {
         if (closed) {
             return

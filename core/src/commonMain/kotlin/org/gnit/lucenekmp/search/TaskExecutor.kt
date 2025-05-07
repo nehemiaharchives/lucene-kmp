@@ -61,7 +61,6 @@ class TaskExecutor(executor: Executor) {
      * @param <T> the return type of the task execution
     </T> */
     @OptIn(ExperimentalAtomicApi::class)
-    @Throws(IOException::class)
     suspend fun <T> invokeAll(callables: MutableCollection<Callable<T>>): MutableList<T> {
         val futures: MutableList<RunnableFuture<T>> =
             mutableListOf<RunnableFuture<T>>()
@@ -146,7 +145,6 @@ class TaskExecutor(executor: Executor) {
     }
 
     companion object {
-        @Throws(IOException::class)
         private suspend fun <T> collectResults(futures: MutableList<RunnableFuture<T>>): MutableList<T> {
             var exc: Throwable? = null
             val results: MutableList<T> = ArrayList<T>(futures.size)

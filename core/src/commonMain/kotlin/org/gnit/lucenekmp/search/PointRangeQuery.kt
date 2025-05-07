@@ -47,10 +47,10 @@ abstract class PointRangeQuery protected constructor(
     val numDims: Int
     val bytesPerDim: Int
     var lowerPoint: ByteArray
-        get() = lowerPoint.clone()
+        get() = lowerPoint.copyOf()
 
     var upperPoint: ByteArray
-        get() = upperPoint.clone()
+        get() = upperPoint.copyOf()
 
     /**
      * Expert: create a multidimensional range query for point values.
@@ -87,7 +87,6 @@ abstract class PointRangeQuery protected constructor(
         }
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         // We don't use RandomAccessWeight here: it's no good to approximate with "match all docs".
         // This is an inverted structure and should be used in the first pass:

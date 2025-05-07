@@ -121,7 +121,6 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
      */
     protected var marklimit: Int = 0
 
-    @get:Throws(IOException::class)
     private val inIfOpen: InputStream
         /**
          * Check to make sure that underlying input stream has not been
@@ -151,7 +150,6 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
         return buffer
     }
 
-    @get:Throws(IOException::class)
     private val bufIfOpen: ByteArray
         /**
          * Returns the internal buffer, allocating it if empty.
@@ -460,7 +458,6 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
      *
      * @throws     IOException  if an I/O error occurs.
      */
-    @Throws(IOException::class)
     override fun close() {
         var buffer: ByteArray
         while ((buf.also { buffer = it }) != null) {

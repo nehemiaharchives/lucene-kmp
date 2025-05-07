@@ -130,11 +130,11 @@ class BlendedTermQuery private constructor(
             return DisjunctionMaxQuery(subQueries.toMutableList(), tieBreakerMultiplier)
         }
 
-        override fun equals(obj: Any?): Boolean {
-            if (obj == null || this::class != obj::class) {
+        override fun equals(other: Any?): Boolean {
+            if (other == null || this::class != other::class) {
                 return false
             }
-            val that = obj as DisjunctionMaxRewrite
+            val that = other as DisjunctionMaxRewrite
             return tieBreakerMultiplier == that.tieBreakerMultiplier
         }
 
@@ -158,7 +158,7 @@ class BlendedTermQuery private constructor(
 
         // we sort terms so that equals/hashcode does not rely on the order
         object : InPlaceMergeSorter() {
-            protected override fun swap(i: Int, j: Int) {
+            override fun swap(i: Int, j: Int) {
                 val tmpTerm: Term = terms[i]
                 terms[i] = terms[j]
                 terms[j] = tmpTerm
@@ -172,7 +172,7 @@ class BlendedTermQuery private constructor(
                 boosts[j] = tmpBoost
             }
 
-            protected override fun compare(i: Int, j: Int): Int {
+            override fun compare(i: Int, j: Int): Int {
                 return terms[i].compareTo(terms[j])
             }
         }.sort(0, terms.size)
@@ -195,7 +195,7 @@ class BlendedTermQuery private constructor(
         return h
     }
 
-    public override fun toString(field: String?): String {
+    override fun toString(field: String?): String {
         val builder = StringBuilder("Blended(")
         for (i in terms.indices) {
             if (i != 0) {
@@ -211,12 +211,10 @@ class BlendedTermQuery private constructor(
         return builder.toString()
     }
 
-    @Throws(IOException::class)
-    public override fun rewrite(indexSearcher: IndexSearcher): Query {
+    override fun rewrite(indexSearcher: IndexSearcher): Query {
         val contexts: Array<TermStates?> = ArrayUtil.copyArray(this.contexts)
         for (i in contexts.indices) {
-            if (contexts[i] == null
-                || contexts[i]!!.wasBuiltFor(indexSearcher.getTopReaderContext()) == false
+            if (contexts[i] == null || !contexts[i]!!.wasBuiltFor(indexSearcher.getTopReaderContext())
             ) {
                 contexts[i] = TermStates.build(indexSearcher, terms[i], true)
             }
@@ -246,11 +244,11 @@ class BlendedTermQuery private constructor(
         return rewriteMethod.rewrite(termQueries as Array<Query>)
     }
 
-    public override fun visit(visitor: QueryVisitor) {
+    override fun visit(visitor: QueryVisitor) {
         val termsToVisit: Array<Term> =
             terms.filter { t: Term -> visitor.acceptField(t.field()) }
                 .toTypedArray()
-        if (termsToVisit.size > 0) {
+        if (termsToVisit.isNotEmpty()) {
             val v = visitor.getSubVisitor(Occur.SHOULD, this)
             v.consumeTerms(this, *termsToVisit)
         }
@@ -265,7 +263,7 @@ class BlendedTermQuery private constructor(
             override fun rewrite(subQueries: Array<Query>): Query {
                 val merged: BooleanQuery.Builder = BooleanQuery.Builder()
                 for (query in subQueries) {
-                    merged.add(query!!, Occur.SHOULD)
+                    merged.add(query, Occur.SHOULD)
                 }
                 return merged.build()
             }
@@ -279,7 +277,7 @@ class BlendedTermQuery private constructor(
             readerContext: IndexReaderContext, ctx: TermStates, artificialDf: Int, artificialTtf: Long
         ): TermStates {
             val leaves: MutableList<LeafReaderContext> = readerContext.leaves()
-            val newCtx: TermStates = TermStates(readerContext)
+            val newCtx = TermStates(readerContext)
             for (i in leaves.indices) {
                 val supplier: IOSupplier<TermState?>? = ctx.get(leaves.get(i))
                 if (supplier == null) {

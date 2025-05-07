@@ -14,7 +14,6 @@ import org.gnit.lucenekmp.util.BytesRef
 
 
 abstract class TermCollectingRewrite<B> : RewriteMethod() {
-    @get:Throws(IOException::class)
     protected abstract val topLevelBuilder: B
 
     /** Finalize the creation of the query from the builder.  */

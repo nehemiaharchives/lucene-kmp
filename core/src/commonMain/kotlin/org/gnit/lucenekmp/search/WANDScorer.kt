@@ -195,7 +195,6 @@ internal class WANDScorer(
         minCompetitiveScore = scaledMinScore.toFloat()
     }
 
-    @get:Throws(IOException::class)
     override val children: MutableCollection<ChildScorable>
         get() {
             val matchingChildren: MutableList<ChildScorable> = ArrayList()

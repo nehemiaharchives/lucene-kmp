@@ -29,7 +29,6 @@ protected constructor(resourceDescription: String) : IndexInput(resourceDescript
             skipBuffer = value
         }
 
-    @get:Throws(IOException::class)
     abstract val checksum: Long
 
     /**

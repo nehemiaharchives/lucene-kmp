@@ -75,7 +75,6 @@ class IndexOrDocValuesQuery
         return h
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         val indexRewrite = indexQuery.rewrite(indexSearcher)
         val dvRewrite = randomAccessQuery.rewrite(indexSearcher)
@@ -94,7 +93,6 @@ class IndexOrDocValuesQuery
         randomAccessQuery.visit(v)
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         val indexWeight = indexQuery.createWeight(searcher, scoreMode, boost)
         val dvWeight = randomAccessQuery.createWeight(searcher, scoreMode, boost)

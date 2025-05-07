@@ -53,7 +53,6 @@ class BoostQuery(query: Query, boost: Float) : Query() {
         return h
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         val rewritten = query.rewrite(indexSearcher)
 
@@ -97,7 +96,6 @@ class BoostQuery(query: Query, boost: Float) : Query() {
         return builder.toString()
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return query.createWeight(searcher, scoreMode, this@BoostQuery.boost * boost)
     }

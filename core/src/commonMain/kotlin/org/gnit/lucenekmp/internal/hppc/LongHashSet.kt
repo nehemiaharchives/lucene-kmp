@@ -13,6 +13,7 @@ import org.gnit.lucenekmp.internal.hppc.HashContainers.minBufferSize
 import org.gnit.lucenekmp.internal.hppc.HashContainers.nextBufferSize
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.bitCount
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -34,7 +35,7 @@ import kotlin.reflect.cast
  */
 @OptIn(ExperimentalAtomicApi::class)
 open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
-    Iterable<LongCursor>, Accountable, Cloneable {
+    Iterable<LongCursor>, Accountable, Cloneable<LongHashSet> {
     /** The hash array holding keys.  */
     var keys: LongArray? = null
 
@@ -316,9 +317,9 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
         return h
     }
 
-    override fun equals(obj: Any?): Boolean {
-        return (this === obj)
-                || (obj != null && this::class == obj::class && sameKeys(this::class.cast(obj)))
+    override fun equals(other: Any?): Boolean {
+        return (this === other)
+                || (other != null && this::class == other::class && sameKeys(this::class.cast(other)))
     }
 
     /** Return true if all keys of some other container exist in this container.  */
@@ -336,17 +337,13 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
         return true
     }
 
-    public override fun clone(): LongHashSet {
-        try {
-            /*  */
-            val cloned = super.clone() as LongHashSet
-            cloned.keys = keys!!.clone()
-            cloned.hasEmptyKey = hasEmptyKey
-            cloned.iterationSeed = ITERATION_SEED.incrementAndFetch()
-            return cloned
-        } catch (e: /*CloneNotSupported*/Exception) {
-            throw RuntimeException(e)
-        }
+    override fun clone(): LongHashSet {
+        val cloned = LongHashSet()
+        cloned.keys = keys?.copyOf()
+        cloned.hasEmptyKey = hasEmptyKey
+        cloned.iterationSeed = ITERATION_SEED.incrementAndFetch()
+        // Copy any additional relevant fields if needed
+        return cloned
     }
 
     override fun iterator(): Iterator<LongCursor> {

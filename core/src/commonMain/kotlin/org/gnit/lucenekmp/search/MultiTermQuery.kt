@@ -209,8 +209,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
     /**
      * To rewrite to a simpler form, instead return a simpler enum from [.getTermsEnum]. For example, to rewrite to a single term, return a [SingleTermsEnum]
      */
-    @Throws(IOException::class)
-    public override fun rewrite(indexSearcher: IndexSearcher): Query {
+    override fun rewrite(indexSearcher: IndexSearcher): Query {
         return rewriteMethod.rewrite(indexSearcher, this)
     }
 

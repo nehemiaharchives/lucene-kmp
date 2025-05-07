@@ -74,7 +74,6 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
                 + blocks.sumOf { buf -> buf.capacity.toLong() })
     }
 
-    @Throws(EOFException::class)
     override fun readByte(): Byte {
         try {
             val block: ByteBuffer = blocks[blockIndex(pos)]
@@ -132,7 +131,6 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
         }
     }
 
-    @Throws(EOFException::class)
     override fun readBytes(arr: ByteArray, off: Int, len: Int) {
         var off = off
         var len = len
@@ -215,7 +213,7 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
             GroupVIntUtil.readGroupVInt(
                 this,
                 (block.limit - blockOffset).toLong(),
-                GroupVIntUtil.IntReader { p -> block.getInt(p.toInt()) },
+                { p -> block.getInt(p.toInt()) },
                 blockOffset.toLong(),
                 dst,
                 offset
@@ -316,7 +314,6 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
         }
     }
 
-    @Throws(EOFException::class)
     override fun readFloats(arr: FloatArray, off: Int, len: Int) {
         var off = off
         var len = len
@@ -356,7 +353,6 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
         }
     }
 
-    @Throws(EOFException::class)
     override fun readLongs(arr: LongArray, off: Int, len: Int) {
         var off = off
         var len = len

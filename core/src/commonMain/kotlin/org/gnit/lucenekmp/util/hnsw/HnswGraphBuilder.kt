@@ -116,7 +116,6 @@ open class HnswGraphBuilder protected constructor(
         this.infoStream = infoStream
     }
 
-    @get:Throws(IOException::class)
     override val completedGraph: OnHeapHnswGraph
         get() {
             if (!frozen) {

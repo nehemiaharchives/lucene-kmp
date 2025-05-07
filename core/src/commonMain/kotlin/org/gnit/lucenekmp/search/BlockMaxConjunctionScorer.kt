@@ -220,7 +220,6 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
         return sum.toFloat()
     }
 
-    @get:Throws(IOException::class)
     override var minCompetitiveScore: Float
         get() = minScore
         set(minScore) {

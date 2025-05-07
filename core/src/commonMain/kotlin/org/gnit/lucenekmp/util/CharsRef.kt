@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Objects
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.fromCharArray
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
@@ -13,7 +14,7 @@ import kotlin.math.min
  *
  * @lucene.internal
  */
-class CharsRef : Comparable<CharsRef>, CharSequence, Cloneable {
+class CharsRef : Comparable<CharsRef>, CharSequence, Cloneable<CharsRef> {
     /** The contents of the CharsRef. Should never be `null`.  */
     var chars: CharArray
 
@@ -55,7 +56,7 @@ class CharsRef : Comparable<CharsRef>, CharSequence, Cloneable {
      *
      * @see .deepCopyOf
      */
-    public override fun clone(): CharsRef {
+    override fun clone(): CharsRef {
         return CharsRef(chars, offset, length)
     }
 

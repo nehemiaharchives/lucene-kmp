@@ -65,7 +65,6 @@ abstract class FilterDirectory
         return `in`.obtainLock(name)
     }
 
-    @Throws(IOException::class)
     override fun close() {
         `in`.close()
     }
@@ -74,7 +73,6 @@ abstract class FilterDirectory
         return this::class.simpleName + "(" + `in`.toString() + ")"
     }
 
-    @get:Throws(IOException::class)
     override val pendingDeletions: MutableSet<String>
         get() = `in`.pendingDeletions
 

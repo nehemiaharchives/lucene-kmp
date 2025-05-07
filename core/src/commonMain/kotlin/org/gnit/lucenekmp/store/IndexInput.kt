@@ -35,7 +35,6 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
     }
 
     /** Closes the stream to further operations.  */
-    @Throws(IOException::class)
     abstract override fun close()
 
     /**

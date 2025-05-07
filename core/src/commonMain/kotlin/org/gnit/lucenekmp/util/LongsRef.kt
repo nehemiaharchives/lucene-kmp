@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.toHexString
-
+import org.gnit.lucenekmp.jdkport.Cloneable
 
 /**
  * Represents long[], as a slice (offset + length) into an existing long[]. The [.longs]
@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.jdkport.toHexString
  *
  * @lucene.internal
  */
-class LongsRef : Comparable<LongsRef>, Cloneable {
+class LongsRef : Comparable<LongsRef>, Cloneable<LongsRef> {
     /** The contents of the LongsRef. Should never be `null`.  */
     var longs: LongArray
 
@@ -47,7 +47,7 @@ class LongsRef : Comparable<LongsRef>, Cloneable {
      *
      * @see .deepCopyOf
      */
-    public override fun clone(): LongsRef {
+    override fun clone(): LongsRef {
         return LongsRef(longs, offset, length)
     }
 

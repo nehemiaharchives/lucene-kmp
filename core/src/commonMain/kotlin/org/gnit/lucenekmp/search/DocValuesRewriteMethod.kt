@@ -49,7 +49,6 @@ class DocValuesRewriteMethod : MultiTermQuery.RewriteMethod() {
             }
         }
 
-        @Throws(IOException::class)
         override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
 
             val multiTermQueryDocValuesWrapperQuery: MultiTermQuery = query

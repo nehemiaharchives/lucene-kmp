@@ -168,7 +168,6 @@ abstract class Directory : AutoCloseable {
     abstract fun obtainLock(name: String): Lock
 
     /** Closes the directory.  */
-    @Throws(IOException::class)
     abstract override fun close()
 
     /**
@@ -205,7 +204,6 @@ abstract class Directory : AutoCloseable {
     open fun ensureOpen() {
     }
 
-    @get:Throws(IOException::class)
     abstract val pendingDeletions: MutableSet<String>
 
     companion object {

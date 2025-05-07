@@ -558,7 +558,6 @@ abstract class InputStream
      *
      * @throws     IOException  if an I/O error occurs.
      */
-    @Throws(IOException::class)
     override fun close() {
     }
 

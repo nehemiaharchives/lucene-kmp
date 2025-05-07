@@ -94,7 +94,6 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
             return it!!.endOffset()
         }
 
-        @get:Throws(IOException::class)
         override val subMatches: MatchesIterator?
             get() = it!!.subMatches
 
@@ -161,7 +160,6 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
         return queue.top().endOffset()
     }
 
-    @get:Throws(IOException::class)
     override val subMatches: MatchesIterator?
         get() = queue.top().subMatches
 

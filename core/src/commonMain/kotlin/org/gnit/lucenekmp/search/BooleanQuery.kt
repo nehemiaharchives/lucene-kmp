@@ -214,12 +214,10 @@ class BooleanQuery private constructor(
         return newQuery.build()
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return BooleanWeight(this, searcher, scoreMode, boost)
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (clauses.isEmpty()) {
             return MatchNoDocsQuery("empty BooleanQuery")

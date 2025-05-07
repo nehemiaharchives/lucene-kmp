@@ -188,7 +188,6 @@ abstract class Writer : Appendable, AutoCloseable, Flushable {
      *
      * @since  1.5
      */
-    @Throws(IOException::class)
     override fun append(csq: CharSequence?): Writer {
         write(csq.toString())
         return this
@@ -232,7 +231,6 @@ abstract class Writer : Appendable, AutoCloseable, Flushable {
      *
      * @since  1.5
      */
-    @Throws(IOException::class)
     override fun append(csq: CharSequence?, start: Int, end: Int): Writer {
         var csq = csq
         if (csq == null) csq = "null"
@@ -260,7 +258,6 @@ abstract class Writer : Appendable, AutoCloseable, Flushable {
      *
      * @since 1.5
      */
-    @Throws(IOException::class)
     override fun append(c: Char): Writer {
         write(c.code)
         return this
@@ -294,7 +291,6 @@ abstract class Writer : Appendable, AutoCloseable, Flushable {
      * @throws  IOException
      * If an I/O error occurs
      */
-    @Throws(IOException::class)
     abstract override fun close()
 
     companion object {

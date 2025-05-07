@@ -62,7 +62,6 @@ internal class ConjunctionScorer(required: MutableCollection<Scorer>, scorers: M
         return super.advanceShallow(target)
     }
 
-    @get:Throws(IOException::class)
     override var minCompetitiveScore: Float
         get() {
             // This scorer is only used for TOP_SCORES when there is a single scoring clause

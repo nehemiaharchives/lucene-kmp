@@ -12,7 +12,6 @@ import org.gnit.lucenekmp.util.Bits
 open class ConstantScoreQuery(val query: Query) : Query() {
     /** Returns the encapsulated query.  */
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         var rewritten = query.rewrite(indexSearcher)
 
@@ -81,7 +80,6 @@ open class ConstantScoreQuery(val query: Query) : Query() {
         }
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         // If the score mode is exhaustive then pass COMPLETE_NO_SCORES, otherwise pass TOP_DOCS to make
         // sure to not disable any of the dynamic pruning optimizations for queries sorted by field or

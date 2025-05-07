@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.internal.hppc.HashContainers.iterationIncrement
 import org.gnit.lucenekmp.internal.hppc.HashContainers.minBufferSize
 import org.gnit.lucenekmp.internal.hppc.HashContainers.nextBufferSize
 import org.gnit.lucenekmp.jdkport.bitCount
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -33,7 +34,7 @@ import kotlin.reflect.cast
  */
 @OptIn(ExperimentalAtomicApi::class)
 class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
-    Iterable<IntIntHashMap.IntIntCursor>, Accountable, Cloneable {
+    Iterable<IntIntHashMap.IntIntCursor>, Accountable, Cloneable<IntIntHashMap> {
     /** The array holding keys.  */
     var keys: IntArray? = null
 
@@ -126,7 +127,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
         }
     }
 
-    fun putAll(iterable: Iterable<out IntIntCursor>): Int {
+    fun putAll(iterable: Iterable<IntIntCursor>): Int {
         val count = size()
         for (c in iterable) {
             put(c.key, c.value)
@@ -389,14 +390,14 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
     override fun hashCode(): Int {
         var h = if (hasEmptyKey) -0x21524111 else 0
         for (c in this) {
-            h += BitMixer.mix(c!!.key) + BitMixer.mix(c.value)
+            h += BitMixer.mix(c.key) + BitMixer.mix(c.value)
         }
         return h
     }
 
-    override fun equals(obj: Any?): Boolean {
-        return (this === obj)
-                || (obj != null && this::class == obj::class && equalElements(this::class.cast(obj)))
+    override fun equals(other: Any?): Boolean {
+        return (this === other)
+                || (other != null && this::class == other::class && equalElements(this::class.cast(other)))
     }
 
     /** Return true if all keys of some other container exist in this container.  */
@@ -406,7 +407,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
         }
 
         for (c in other) {
-            val key = c!!.key
+            val key = c.key
             if (!containsKey(key) || (get(key)) != (c.value)) {
                 return false
             }
@@ -459,7 +460,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntIntCursor {
+        override fun fetch(): IntIntCursor {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -581,7 +582,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntCursor {
+        override fun fetch(): IntCursor {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 index++
@@ -603,19 +604,20 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
         }
     }
 
-    @OptIn(ExperimentalAtomicApi::class)
-    public override fun clone(): IntIntHashMap {
-        try {
-            /*  */
-            val cloned = super.clone() as IntIntHashMap
-            cloned.keys = keys!!.clone()
-            cloned.values = values!!.clone()
-            cloned.hasEmptyKey = hasEmptyKey
-            cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
-            return cloned
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+    override fun clone(): IntIntHashMap {
+        val cloned = IntIntHashMap()
+        // Deep copy of keys and values arrays (if not null)
+        cloned.keys = keys?.copyOf()
+        cloned.values = values?.copyOf()
+
+        // Copy relevant fields
+        cloned.mask = mask
+        cloned.assigned = assigned
+        cloned.resizeAt = resizeAt
+        cloned.hasEmptyKey = hasEmptyKey
+        cloned.loadFactor = loadFactor
+        cloned.iterationSeed = ITERATION_SEED.addAndFetch(1)
+        return cloned
     }
 
     /** Convert the contents of this map to a human-friendly string.  */
@@ -628,7 +630,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
             if (!first) {
                 buffer.append(", ")
             }
-            buffer.append(cursor!!.key)
+            buffer.append(cursor.key)
             buffer.append("=>")
             buffer.append(cursor.value)
             first = false

@@ -143,7 +143,6 @@ open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFA
      * end of the stream has been reached
      * @throws     IOException  If an I/O error occurs
      */
-    @Throws(IOException::class)
     override fun read(): Int {
         ensureOpen()
         while (true) {
@@ -244,7 +243,6 @@ open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFA
      * @throws     IndexOutOfBoundsException {@inheritDoc}
      * @throws     IOException  {@inheritDoc}
      */
-    @Throws(IOException::class)
     override fun read(cbuf: CharArray, off: Int, len: Int): Int {
         ensureOpen()
         Objects.checkFromIndexSize(off, len, cbuf.size)
@@ -466,7 +464,6 @@ open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFA
         skipLF = markedSkipLF
     }
 
-    @Throws(IOException::class)
     override fun close() {
         if (`in` == null) return
         try {
