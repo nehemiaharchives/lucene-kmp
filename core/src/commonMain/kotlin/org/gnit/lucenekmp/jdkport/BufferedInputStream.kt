@@ -351,23 +351,22 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
     @Throws(IOException::class)
     override fun skip(n: Long): Long {
         ensureOpen()
-        if (n <= 0) {
-            return 0
-        }
-        var avail = (count - pos).toLong()
+        if (n <= 0) return 0
 
-        if (avail <= 0) {
-            // If no mark position set then don't keep in buffer
-            if (markpos == -1) return this.inIfOpen.skip(n)
-
-            // Fill in buffer to save bytes for reset
-            fill()
-            avail = (count - pos).toLong()
-            if (avail <= 0) return 0
+        // 1) Skip whatever is left in the buffer
+        val availInBuf = (count - pos).toLong()
+        var skipped = if (availInBuf > 0) {
+            val toSkipFromBuf = minOf(availInBuf, n)
+            pos += toSkipFromBuf.toInt()
+            toSkipFromBuf
+        } else {
+            0L
         }
 
-        val skipped = if (avail < n) avail else n
-        pos += skipped.toInt()
+        // 2) If there’s still more to skip, delegate to the wrapped stream
+        if (skipped < n) {
+            skipped += inIfOpen.skip(n - skipped)
+        }
         return skipped
     }
 

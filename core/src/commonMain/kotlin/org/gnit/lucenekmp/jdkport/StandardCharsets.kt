@@ -1,8 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import org.gnit.lucenekmp.jdkport.UTF_8.Companion.INSTANCE
-
-
 /**
  * ported from java.nio.StandardCharsets
  *
@@ -38,7 +35,7 @@ class StandardCharsets private constructor() {
         /**
          * Eight-bit UCS Transformation Format.
          */
-        val UTF_8: Charset = INSTANCE
+        val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8()
 
         /**
          * Sixteen-bit UCS Transformation Format, big-endian byte order.

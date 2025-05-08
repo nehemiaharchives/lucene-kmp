@@ -524,7 +524,6 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
     }*/
 
     companion object {
-        val INSTANCE: UTF_8 = UTF_8()
 
         fun updatePositions(
             src: ByteBuffer, sp: Int,

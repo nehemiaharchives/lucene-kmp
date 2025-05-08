@@ -21,8 +21,8 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    iosX64()
     iosArm64()
+    iosX64()
     iosSimulatorArm64()
 
     // build target only for developer convenience
@@ -35,7 +35,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.io)
                 implementation(libs.kotlinenvvar)
-                implementation(libs.kmath)
+                implementation(libs.kotlinbignum)
                 implementation(libs.kotlinx.coroutines)
             }
         }
@@ -64,24 +64,25 @@ kotlin {
         jvmTest.get().dependsOn(jvmAndroidTest)
         androidUnitTest.get().dependsOn(jvmAndroidTest)
 
-
         // shared source for ios and linux
         val nativeMain by creating {
             dependsOn(commonMain)
             // dependencies which are used both by ios and linux will be here
         }
-        iosX64Main.get().dependsOn(nativeMain)
         iosArm64Main.get().dependsOn(nativeMain)
+        iosX64Main.get().dependsOn(nativeMain)
         iosSimulatorArm64Main.get().dependsOn(nativeMain)
+
         linuxX64Main.get().dependsOn(nativeMain)
 
         val nativeTest by creating {
             dependsOn(commonTest)
             // test dependencies which are used both by ios and linux will be here
         }
-        iosX64Test.get().dependsOn(nativeTest)
         iosArm64Test.get().dependsOn(nativeTest)
+        iosX64Test.get().dependsOn(nativeTest)
         iosSimulatorArm64Test.get().dependsOn(nativeTest)
+
         linuxX64Test.get().dependsOn(nativeTest)
     }
 }

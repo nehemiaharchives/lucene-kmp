@@ -82,7 +82,7 @@ abstract class Charset protected constructor(
         /**
          * The only supported charset instance: UTF-8.
          */
-        val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8.INSTANCE
+        val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8()
 
         val LATIN1: Charset = object : Charset("ISO-8859-1") {
             override fun contains(cs: Charset): Boolean {

@@ -18,9 +18,10 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    iosX64()
     iosArm64()
+    iosX64()
     iosSimulatorArm64()
+
     linuxX64()
 
     sourceSets {
@@ -29,7 +30,7 @@ kotlin {
                 implementation(project(":core"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinenvvar)
-                implementation(libs.kmath)
+                implementation(libs.kotlinbignum)
             }
         }
         val commonTest by getting {

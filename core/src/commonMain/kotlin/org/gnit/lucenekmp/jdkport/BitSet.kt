@@ -136,24 +136,28 @@ class BitSet : Cloneable<BitSet> {
      * of all the bits in this bit set
      * @since 1.7
      */
-    fun toByteArray(): ByteArray? {
-        val n = wordsInUse
-        if (n == 0) return ByteArray(0)
-        var len = 8 * (n - 1)
-        run {
-            var x = words[n - 1]
-            while (x != 0L) {
-                len++
-                x = x ushr 8
-            }
+    fun toByteArray(): ByteArray {
+        // Find actual highest set bit
+        var highest = wordsInUse - 1
+        if (highest < 0) return ByteArray(0)
+
+        // Find position of the highest non-zero bit
+        var lastWord = words[highest]
+        var lastByte = 8
+        while (lastByte > 0 && (lastWord ushr ((lastByte - 1) * 8) and 0xFFL) == 0L) {
+            lastByte--
         }
-        val bytes = ByteArray(len)
-        val bb: ByteBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-        for (i in 0..<n - 1) bb.putLong(words[i])
-        var x = words[n - 1]
-        while (x != 0L) {
-            bb.put((x and 0xffL).toByte())
-            x = x ushr 8
+        val byteLen = highest * 8 + lastByte
+        val bytes = ByteArray(byteLen)
+
+        var k = 0
+        for (i in 0..highest) {
+            var w = words[i]
+            for (j in 0 until 8) {
+                if (k == bytes.size) break
+                bytes[k++] = (w and 0xFF).toByte()
+                w = w ushr 8
+            }
         }
         return bytes
     }
@@ -1305,9 +1309,24 @@ class BitSet : Cloneable<BitSet> {
          * @since 1.7
          */
         fun valueOf(bytes: ByteArray): BitSet {
-            return Companion.valueOf(ByteBuffer.wrap(bytes))
-        }
+            // Trim trailing zeros for compatibility with Java BitSet
+            var n = bytes.size
+            while (n > 0 && bytes[n - 1] == 0.toByte()) n--
 
+            val words = LongArray((n + 7) / 8)
+
+            // Direct conversion from byteArray to long[] words
+            for (byteIndex in 0 until n) {
+                val byteValue = bytes[byteIndex].toInt() and 0xFF
+                val wordIndex = byteIndex / 8
+                val byteOffsetInWord = byteIndex % 8
+
+                // Convert the byte value to a long and shift it to the appropriate position in the word
+                words[wordIndex] = words[wordIndex] or ((byteValue.toLong() and 0xFFL) shl (byteOffsetInWord * 8))
+            }
+
+            return BitSet(words)
+        }
         /**
          * Returns a new bit set containing all the bits in the given byte
          * buffer between its position and limit.
@@ -1329,22 +1348,48 @@ class BitSet : Cloneable<BitSet> {
          * @since 1.7
          */
         fun valueOf(bb: ByteBuffer): BitSet {
-            var bb: ByteBuffer = bb
-            bb = bb.slice().order(ByteOrder.LITTLE_ENDIAN)
-            var n: Int = bb.remaining()
-            while (n > 0 && bb.get(n - 1).toInt() == 0) {
-                n--
+            val originalPos = bb.position
+            val originalLimit = bb.limit
+
+            // We'll manually scan between position and limit, find up-to what index the content is nonzero
+            var start = originalPos
+            var end = originalLimit - 1
+
+            // Trim trailing zeros
+            while (end >= start && (bb.get(end).toInt() and 0xFF) == 0) {
+                end--
             }
+
+            val n = if (end >= start) (end - start + 1) else 0
+
+            // Now, read bytes from bb between start and start + n
             val words = LongArray((n + 7) / 8)
-            bb.limit(n)
             var i = 0
-            while (bb.remaining() >= 8) words[i++] = bb.getLong()
-            val remaining: Int = bb.remaining()
-            var j = 0
-            while (j < remaining) {
-                words[i] = words[i] or ((bb.get().toLong() and 0xffL) shl (8 * j))
-                j++
+            var byteIdx = start
+
+            // Fill words with full 8-byte groups
+            while (byteIdx + 8 <= start + n) {
+                // Little-endian: least significant byte first
+                var word = 0L
+                for (b in 0 until 8) {
+                    word = word or ((bb.get(byteIdx + b).toLong() and 0xFF) shl (8 * b))
+                }
+                words[i++] = word
+                byteIdx += 8
             }
+
+            // Fill possibly remaining bytes
+            if (byteIdx < start + n) {
+                var word = 0L
+                var offset = 0
+                while (byteIdx < start + n) {
+                    word = word or ((bb.get(byteIdx).toLong() and 0xFF) shl (8 * offset))
+                    byteIdx++
+                    offset++
+                }
+                words[i] = word
+            }
+
             return BitSet(words)
         }
 

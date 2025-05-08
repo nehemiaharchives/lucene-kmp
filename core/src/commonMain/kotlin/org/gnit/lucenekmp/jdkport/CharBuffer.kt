@@ -1,9 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
-// Custom exceptions similar to the Java NIO ones.
-class ReadOnlyBufferException(message: String? = null) : RuntimeException(message)
-
 /**
+ * port of [java.nio.CharBuffer](https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/CharBuffer.html)
+ *
  * A very simple, mutable (or optionally read-only) character buffer.
  *
  * This class mimics basic behaviors of a CharBuffer:
@@ -19,11 +18,10 @@ class CharBuffer private constructor(
     private val arrayOffset: Int,
     val capacity: Int,
     private var readOnly: Boolean = false
-) : CharSequence, Appendable {
+) : CharSequence, Appendable, Comparable<CharBuffer> {
 
     var position: Int = 0
     var limit: Int = capacity
-        private set
     var mark: Int = -1
         private set
 
@@ -381,6 +379,65 @@ class CharBuffer private constructor(
     }
 
     fun position() = position
+
+    /**
+     * Sets the mark at the current position.
+     * After this call, calling reset() will return the position to here.
+     */
+    fun mark(): CharBuffer {
+        mark = position
+        return this
+    }
+
+    /**
+     * Resets the position to the last mark.
+     * Throws IllegalStateException if no mark has been set.
+     */
+    fun reset(): CharBuffer {
+        if (mark == -1) throw IllegalStateException("Mark has not been set")
+        position = mark
+        return this
+    }
+
+    /**
+     * Lexicographically compares the remaining characters of this buffer
+     * to another buffer's remaining characters.
+     *
+     * Returns negative if this < other, 0 if equal, positive if this > other.
+     */
+    override fun compareTo(other: CharBuffer): Int {
+        val n = minOf(this.remaining(), other.remaining())
+        for (i in 0 until n) {
+            val cmp = this.getAbsolute(this.position + i).compareTo(other.getAbsolute(other.position + i))
+            if (cmp != 0) {
+                return cmp
+            }
+        }
+        return this.remaining() - other.remaining()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CharBuffer) return false
+        if (this.remaining() != other.remaining()) return false
+
+        val n = this.remaining()
+        for (i in 0 until n) {
+            if (this.getAbsolute(this.position + i) != other.getAbsolute(other.position + i)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = 1
+        val rem = remaining()
+        for (i in 0 until rem) {
+            result = 31 * result + getAbsolute(position + i).hashCode()
+        }
+        return result
+    }
 
     companion object {
         /** Allocates a new buffer with the given capacity. */

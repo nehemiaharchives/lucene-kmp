@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.jdkport.CharacterDataLatin1.Companion.B
+
 
 /** The CharacterData class encapsulates the large tables found in
  * Java.lang.Character.  */
@@ -40,15 +42,51 @@ internal class CharacterDataLatin1 private constructor() // The A table has 256 
 
             The encoding of character properties is subject to change at any time.
          */
+
+    /* The character properties are currently encoded into 32 bits in the following manner:
+        1 bit   mirrored property
+        4 bits  directionality property
+        9 bits  signed offset used for converting case
+        1 bit   if 1, adding the signed offset converts the character to lowercase
+        1 bit   if 1, subtracting the signed offset converts the character to uppercase
+        1 bit   if 1, this character has a titlecase equivalent (possibly itself)
+        3 bits  0  may not be part of an identifier
+                1  ignorable control; may continue a Unicode identifier or Java identifier
+                2  may continue a Java identifier but not a Unicode identifier (unused)
+                3  may continue a Unicode identifier or Java identifier
+                4  is a Java whitespace character
+                5  may start or continue a Java identifier;
+                   may continue but not start a Unicode identifier (underscores)
+                6  may start or continue a Java identifier but not a Unicode identifier ($)
+                7  may start or continue a Unicode identifier or Java identifier
+                Thus:
+                   5, 6, 7 may start a Java identifier
+                   1, 2, 3, 5, 6, 7 may continue a Java identifier
+                   7 may start a Unicode identifier
+                   1, 3, 5, 7 may continue a Unicode identifier
+                   1 is ignorable within an identifier
+                   4 is Java whitespace
+        2 bits  0  this character has no numeric property
+                1  adding the digit offset to the character code and then
+                   masking with 0x1F will produce the desired numeric value
+                2  this character has a "strange" numeric value
+                3  a Java supradecimal digit: adding the digit offset to the
+                   character code, then masking with 0x1F, then adding 10
+                   will produce the desired numeric value
+        5 bits  digit offset
+        5 bits  character type
+
+        The encoding of character properties is subject to change at any time.
+     */
     override fun getProperties(ch: Int): Int {
         val offset = ch.toChar()
-        val props = A!![offset.code]
+        val props: Int = A[offset.code]
         return props
     }
 
     fun getPropertiesEx(ch: Int): Int {
         val offset = ch.toChar()
-        val props = B!![offset.code].code
+        val props = B[offset.code].code
         return props
     }
 
@@ -162,6 +200,27 @@ internal class CharacterDataLatin1 private constructor() // The A table has 256 
             return 0x39C // Greek Capital Letter Mu
         }
         return ch
+    }
+
+    /**
+     * Compares two latin1 code points, ignoring case considerations
+     *
+     * @param b1 byte representing a latin1 code point
+     * @param b2 another byte representing a latin1 code point
+     * @return true if the two bytes are considered equals ignoring case in latin1
+     */
+    fun equalsIgnoreCase(b1: Byte, b2: Byte): Boolean {
+        if (b1 == b2) {
+            return true
+        }
+        // ASCII and Latin-1 were designed to optimize case-twiddling operations
+        val upper = b1.toInt() and 0xDF
+        if (upper < 'A'.code) {
+            return false // Low ASCII
+        }
+        return (upper <= 'Z'.code // In range A-Z
+                || (upper >= 0xC0 && upper <= 0XDE && upper != 0xD7)) // ..or A-grave-Thorn, not multiplication
+                && upper == (b2.toInt() and 0xDF) // b2 has same uppercase
     }
 
     override fun toTitleCase(ch: Int): Int {
@@ -286,7 +345,9 @@ internal class CharacterDataLatin1 private constructor() // The A table has 256 
         var sharpsMap: CharArray = charArrayOf('S', 'S')
 
         val instance: CharacterDataLatin1 = CharacterDataLatin1()
-        val A: IntArray? = intArrayOf(
+
+        // The A table has 256 entries for a total of 1024 bytes.
+        val A: IntArray = intArrayOf(
             0x4800100F,  //   0   Cc, ignorable
             0x4800100F,  //   1   Cc, ignorable
             0x4800100F,  //   2   Cc, ignorable
@@ -322,29 +383,29 @@ internal class CharacterDataLatin1 private constructor() // The A table has 256 
             0x6000400C,  //  32   Zs, WS, whitespace
             0x68000018,  //  33   Po, ON
             0x68000018,  //  34   Po, ON
-            -0x28000018,  //  35   Mc, B, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xD7FFFFE8).toInt(),  //  35   Mc, B, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
             0x2800601A,  //  36   Sc, ET, currency
             0x28000018,  //  37   Po, ET
             0x68000018,  //  38   Po, ON
             0x68000018,  //  39   Po, ON
             -0x17FFFFEB,  //  40   No, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             -0x17FFFFEA,  //  41   Nl, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
-            -0x68000018,  //  42   Mc, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0x97FFFFE8).toInt(),  //  42   Mc, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
             0x20000019,  //  43   Sm, ES
             0x38000018,  //  44   Po, CS
             0x20000014,  //  45   Pd, ES
             0x38000018,  //  46   Po, CS
             0x38000018,  //  47   Po, CS
-            -0x18003609,  //  48   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  49   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  50   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  51   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  52   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  53   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  54   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  55   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  56   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
-            -0x18003609,  //  57   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  48   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  49   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  50   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  51   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  52   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  53   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  54   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  55   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  56   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
+            (-0xE7FFC9F7).toInt(),  //  57   Pc, WS, hasUpper (subtract 511), hasLower (add 511), hasTitle, whitespace, strange, IDContinue, emojiPresentation, emojiModifier, emojiModifierBase, extendedPictographic
             0x38000018,  //  58   Po, CS
             0x68000018,  //  59   Po, ON
             -0x17FFFFE7,  //  60   Me, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
@@ -352,64 +413,64 @@ internal class CharacterDataLatin1 private constructor() // The A table has 256 
             -0x17FFFFE7,  //  62   Me, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             0x68000018,  //  63   Po, ON
             0x68000018,  //  64   Po, ON
-            -0x827fe1,  //  65   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  66   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  67   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  68   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  69   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  70   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  71   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  72   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  73   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  74   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  75   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  76   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  77   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  78   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  79   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  80   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  81   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  82   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  83   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  84   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  85   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  86   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  87   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  88   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  89   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827fe1,  //  90   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  65   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  66   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  67   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  68   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  69   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  70   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  71   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  72   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  73   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  74   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  75   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  76   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  77   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  78   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  79   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  80   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  81   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  82   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  83   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  84   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  85   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  86   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  87   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  88   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  89   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D801F).toInt(),  //  90   , hasUpper (subtract 479), hasTitle, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             -0x17FFFFEB,  //  91   No, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             0x68000018,  //  92   Po, ON
             -0x17FFFFEA,  //  93   Nl, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             0x6800001B,  //  94   Sk, ON
-            -0x68005017,  //  95   Nd, hasUpper (subtract 511), hasLower (add 511), hasTitle, supradecimal 31, IDContinue, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0x97FFAFE9).toInt(),  //  95   Nd, hasUpper (subtract 511), hasLower (add 511), hasTitle, supradecimal 31, IDContinue, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             0x6800001B,  //  96   Sk, ON
-            -0x817fe2,  //  97   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  //  98   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  //  99   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 100   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 101   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 102   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 103   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 104   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 105   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 106   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 107   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 108   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 109   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 110   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 111   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 112   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 113   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 114   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 115   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 116   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 117   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 118   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 119   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 120   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 121   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817fe2,  // 122   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  //  97   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  //  98   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  //  99   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 100   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 101   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 102   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 103   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 104   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 105   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 106   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 107   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 108   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 109   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 110   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 111   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 112   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 113   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 114   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 115   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 116   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 117   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 118   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 119   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 120   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 121   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E801E).toInt(),  // 122   , hasLower (add 479), hasTitle, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             -0x17FFFFEB,  // 123   No, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             0x68000019,  // 124   Sm, ON
             -0x17FFFFEA,  // 125   Nl, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
@@ -456,97 +517,97 @@ internal class CharacterDataLatin1 private constructor() // The A table has 256 
             0x6800001C,  // 166   So, ON
             0x68000018,  // 167   Po, ON
             0x6800001B,  // 168   Sk, ON
-            -0x6800001c,  // 169   Lm, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent
-            -0x7005,  // 170   Sk, hasUpper (subtract 511), hasLower (add 511), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0x97FFFFE4).toInt(),  // 169   Lm, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent
+            (-0xFFFF8FFB).toInt(),  // 170   Sk, hasUpper (subtract 511), hasLower (add 511), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             -0x17FFFFE3,  // 171   Lt, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             0x68000019,  // 172   Sm, ON
             0x48001010,  // 173   Cf, ignorable
-            -0x6800001c,  // 174   Lm, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent
+            (-0x97FFFFE4).toInt(),  // 174   Lm, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent
             0x6800001B,  // 175   Sk, ON
             0x2800001C,  // 176   So, ET
             0x28000019,  // 177   Sm, ET
             0x1800060B,  // 178   No, EN, decimal 16
             0x1800060B,  // 179   No, EN, decimal 16
             0x6800001B,  // 180   Sk, ON
-            -0x7fd7002,  // 181   , hasLower (add 0), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xF8028FFE).toInt(),  // 181   , hasLower (add 0), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             0x68000018,  // 182   Po, ON
-            -0x68000018,  // 183   Mc, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, IDContinue, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0x97FFFFE8).toInt(),  // 183   Mc, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31, IDContinue, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             0x6800001B,  // 184   Sk, ON
             0x1800050B,  // 185   No, EN, decimal 8
-            -0x7005,  // 186   Sk, hasUpper (subtract 511), hasLower (add 511), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFFFF8FFB).toInt(),  // 186   Sk, hasUpper (subtract 511), hasLower (add 511), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             -0x17FFFFE2,  // 187   Ll, hasUpper (subtract 511), hasLower (add 511), hasTitle, identifier start, supradecimal 31
             0x6800080B,  // 188   No, ON, strange
             0x6800080B,  // 189   No, ON, strange
             0x6800080B,  // 190   No, ON, strange
             0x68000018,  // 191   Po, ON
-            -0x827001,  // 192   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 193   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 194   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 195   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 196   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 197   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 198   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 199   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 200   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 201   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 202   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 203   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 204   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 205   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 206   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 207   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 208   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 209   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 210   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 211   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 212   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 213   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 214   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 192   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 193   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 194   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 195   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 196   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 197   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 198   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 199   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 200   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 201   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 202   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 203   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 204   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 205   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 206   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 207   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 208   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 209   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 210   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 211   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 212   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 213   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 214   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             0x68000019,  // 215   Sm, ON
-            -0x827001,  // 216   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 217   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 218   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 219   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 220   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 221   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x827001,  // 222   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x7fd7002,  // 223   , hasLower (add 0), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 224   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 225   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 226   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 227   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 228   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 229   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 230   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 231   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 232   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 233   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 234   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 235   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 236   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 237   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 238   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 239   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 240   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 241   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 242   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 243   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 244   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 245   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 246   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 216   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 217   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 218   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 219   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 220   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 221   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7D8FFF).toInt(),  // 222   , hasUpper (subtract 479), hasTitle, supradecimal 31, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xF8028FFE).toInt(),  // 223   , hasLower (add 0), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 224   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 225   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 226   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 227   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 228   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 229   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 230   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 231   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 232   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 233   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 234   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 235   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 236   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 237   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 238   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 239   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 240   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 241   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 242   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 243   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 244   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 245   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 246   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
             0x68000019,  // 247   Sm, ON
-            -0x817002,  // 248   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 249   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 250   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 251   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 252   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 253   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x817002,  // 254   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
-            -0x61d7002 // 255   , hasLower (add 120), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 248   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 249   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 250   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 251   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 252   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 253   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xFF7E8FFE).toInt(),  // 254   , hasLower (add 479), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
+            (-0xF9E28FFE).toInt()   // 255   , hasLower (add 120), hasTitle, supradecimal 31, otherLowercase, otherUppercase, otherAlphabetic, ideographic, emoji, emojiPresentation, emojiModifier, emojiModifierBase, emojiComponent, extendedPictographic
         )
 
         // The B table has 256 entries for a total of 512 bytes.
-        val B: CharArray? = charArrayOf(
+        val B: CharArray = charArrayOf(
             0x0000.toChar(),  //   0   unassigned, L
             0x0000.toChar(),  //   1   unassigned, L
             0x0000.toChar(),  //   2   unassigned, L
