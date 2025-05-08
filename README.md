@@ -1,6 +1,6 @@
 # Lucene Kotlin Multiplatform
 
-[![CI](https://github.com/gnit-lucene-kmp/lucene-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/gnit-lucene-kmp/lucene-kmp/actions/workflows/ci.yml)
+[![CI](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml)
 
 ## What is it?
 
