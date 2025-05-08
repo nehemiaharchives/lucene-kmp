@@ -366,6 +366,63 @@ object Arrays {
         return true
     }
 
+    /**
+     * Returns true if the two specified arrays of floats, over the specified
+     * ranges, are *equal* to one another.
+     *
+     *
+     * Two arrays are considered equal if the number of elements covered by
+     * each range is the same, and all corresponding pairs of elements over the
+     * specified ranges in the two arrays are equal.  In other words, two arrays
+     * are equal if they contain, over the specified ranges, the same elements
+     * in the same order.
+     *
+     *
+     * Two floats `f1` and `f2` are considered equal if:
+     * <pre>    `Float.valueOf(f1).equals(Float.valueOf(f2))`</pre>
+     * (Unlike the `==` operator, this method considers
+     * `NaN` equal to itself, and 0.0f unequal to -0.0f.)
+     *
+     * @param a the first array to be tested for equality
+     * @param aFromIndex the index (inclusive) of the first element in the
+     * first array to be tested
+     * @param aToIndex the index (exclusive) of the last element in the
+     * first array to be tested
+     * @param b the second array to be tested for equality
+     * @param bFromIndex the index (inclusive) of the first element in the
+     * second array to be tested
+     * @param bToIndex the index (exclusive) of the last element in the
+     * second array to be tested
+     * @return `true` if the two arrays, over the specified ranges, are
+     * equal
+     * @throws IllegalArgumentException
+     * if `aFromIndex > aToIndex` or
+     * if `bFromIndex > bToIndex`
+     * @throws ArrayIndexOutOfBoundsException
+     * if `aFromIndex < 0 or aToIndex > a.length` or
+     * if `bFromIndex < 0 or bToIndex > b.length`
+     * @throws NullPointerException
+     * if either array is `null`
+     * @see Float.equals
+     * @since 9
+     */
+    fun equals(
+        a: FloatArray, aFromIndex: Int, aToIndex: Int,
+        b: FloatArray, bFromIndex: Int, bToIndex: Int
+    ): Boolean {
+        rangeCheck(a.size, aFromIndex, aToIndex)
+        rangeCheck(b.size, bFromIndex, bToIndex)
+
+        val aLength = aToIndex - aFromIndex
+        val bLength = bToIndex - bFromIndex
+        if (aLength != bLength) return false
+
+        return ArraysSupport.mismatch(
+            a, aFromIndex,
+            b, bFromIndex, aLength
+        ) < 0
+    }
+
     fun equals(
         a: CharArray, aFromIndex: Int, aToIndex: Int,
         b: CharArray, bFromIndex: Int, bToIndex: Int
@@ -722,10 +779,13 @@ object Arrays {
 
     /**
      * Throws an IndexOutOfBoundsException if the range [fromIndex, toIndex) is invalid
-     * for an array of the given length.
+     * for an array of the given length. Throws IllegalArgumentException if fromIndex > toIndex.
      */
     fun rangeCheck(length: Int, fromIndex: Int, toIndex: Int) {
-        if (fromIndex < 0 || toIndex > length || fromIndex > toIndex) {
+        if (fromIndex > toIndex) {
+            throw IllegalArgumentException("fromIndex($fromIndex) > toIndex($toIndex)")
+        }
+        if (fromIndex < 0 || toIndex > length) {
             throw IndexOutOfBoundsException("Range [$fromIndex, $toIndex) out of bounds for length $length")
         }
     }
@@ -900,7 +960,7 @@ object Arrays {
      * @param a the array to be sorted
      */
     fun sort(a: IntArray) {
-        dualPivotQuicksort(a, 0, a.size)
+        dualPivotQuicksort(a, 0, a.size - 1)
     }
 
     /**
@@ -914,11 +974,11 @@ object Arrays {
      * @param a the array to be sorted
      */
     fun sort(a: LongArray) {
-        dualPivotQuicksort(a, 0, a.size)
+        dualPivotQuicksort(a, 0, a.size - 1)
     }
 
     fun sort(a: FloatArray) {
-        dualPivotQuicksort(a, 0, a.size)
+        dualPivotQuicksort(a, 0, a.size - 1)
     }
 
     fun sort(a: IntArray, fromIndex: Int, toIndex: Int) {

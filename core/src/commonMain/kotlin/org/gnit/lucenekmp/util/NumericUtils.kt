@@ -1,13 +1,11 @@
 package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.doubleToLongBits
-import org.gnit.lucenekmp.jdkport.toByteArray
 import org.gnit.lucenekmp.jdkport.floatToIntBits
-import org.gnit.lucenekmp.jdkport.fromByteArray
 import org.gnit.lucenekmp.jdkport.intBitsToFloat
 import org.gnit.lucenekmp.jdkport.longBitsToDouble
-import space.kscience.kmath.operations.BigInt
-
+import com.ionspin.kotlin.bignum.integer.BigInteger
+import com.ionspin.kotlin.bignum.integer.Sign
 
 /**
  * Helper APIs to encode numeric values as sortable bytes and vice-versa.
@@ -170,7 +168,7 @@ object NumericUtils {
      * @see .sortableBytesToBigInt
      */
     fun bigIntToSortableBytes(
-        bigInt: BigInt, bigIntSize: Int, result: ByteArray, offset: Int
+        bigInt: BigInteger, bigIntSize: Int, result: ByteArray, offset: Int
     ) {
         val bigIntBytes: ByteArray = bigInt.toByteArray()
         val fullBigIntBytes: ByteArray
@@ -224,7 +222,7 @@ object NumericUtils {
      *
      * @see .bigIntToSortableBytes
      */
-    fun sortableBytesToBigInt(encoded: ByteArray, offset: Int, length: Int): BigInt {
+    fun sortableBytesToBigInt(encoded: ByteArray, offset: Int, length: Int): BigInteger {
         val bigIntBytes = ByteArray(length)
         /*java.lang.System.arraycopy(encoded, offset, bigIntBytes, 0, length)*/
         encoded.copyInto(
@@ -236,6 +234,15 @@ object NumericUtils {
         // Flip the sign bit back to the original
         bigIntBytes[0] = (bigIntBytes[0].toInt() xor 0x80.toInt()).toByte()
 
-        return BigInt.fromByteArray(bigIntBytes)
+        val sign = when {
+            bigIntBytes.all { it == 0.toByte() } -> Sign.ZERO
+            bigIntBytes[0] < 0 -> Sign.NEGATIVE
+            else -> Sign.POSITIVE
+        }
+
+        return BigInteger.fromByteArray(
+            source = bigIntBytes,
+            sign = sign
+        )
     }
 }

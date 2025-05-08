@@ -44,8 +44,8 @@ class ArraysSupportTest {
 
     @Test
     fun testNewLength() {
-        assertEquals(15, ArraysSupport.newLength(10, 5, 20))
-        assertEquals(30, ArraysSupport.newLength(10, 5, 30))
+        assertEquals(30, ArraysSupport.newLength(10, 5, 20)) // returns 10+20=30
+        assertEquals(40, ArraysSupport.newLength(10, 5, 30)) // returns 10+30=40
         assertFailsWith<Error> {
             ArraysSupport.newLength(Int.MAX_VALUE, 1, 1)
         }

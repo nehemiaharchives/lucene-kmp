@@ -1,9 +1,9 @@
 package org.gnit.lucenekmp.util
 
+import com.ionspin.kotlin.bignum.integer.BigInteger
+import com.ionspin.kotlin.bignum.integer.Sign
 import dev.scottpierce.envvar.EnvVar
 import org.gnit.lucenekmp.jdkport.*
-import space.kscience.kmath.operations.BigInt
-import space.kscience.kmath.operations.BigIntField.one
 import kotlin.time.Clock.System
 import kotlin.time.ExperimentalTime
 
@@ -581,18 +581,17 @@ object StringHelper {
     }
 
     // Holds 128 bit unsigned value:
-    private var nextId: BigInt? = null
+    private var nextId: BigInteger? = null
 
-    private var mask128: BigInt? = null
+    private var mask128: BigInteger? = null
     private val idLock = Any()
 
     init {
         // 128 bit unsigned mask
         val maskBytes128 = ByteArray(16)
-        /*java.util.Arrays.fill(maskBytes128, 0xff.toByte())*/
-        maskBytes128.fill(0xff.toByte())
+        Arrays.fill(maskBytes128, 0xff.toByte())
 
-        mask128 = (one shl 128) - one
+        mask128 = BigInteger.fromByteArray(maskBytes128, Sign.POSITIVE)
 
         var prop: String? = /*java.lang.System.getProperty("tests.seed")*/ EnvVar["tests.seed"]
 
@@ -654,14 +653,18 @@ object StringHelper {
 
         // 64-bit unsigned mask
         val maskBytes64 = ByteArray(8)
-        /*java.util.Arrays.fill(maskBytes64, 0xff.toByte())*/
-        maskBytes64.fill(0xff.toByte())
+        Arrays.fill(maskBytes64, 0xff.toByte())
 
-        val mask64: BigInt = (one shl 128) - one
+
+        //val mask64: BigInteger = (one shl 128) - one
+        val mask64: BigInteger = BigInteger.fromByteArray(
+            source = maskBytes64,
+            sign = Sign.POSITIVE,
+        )
 
         // First make unsigned versions of x0, x1:
-        val unsignedX0: BigInt = BigInt.valueOf(x0).and(mask64)
-        val unsignedX1: BigInt = BigInt.valueOf(x1).and(mask64)
+        val unsignedX0: BigInteger = BigInteger.valueOf(x0).and(mask64)
+        val unsignedX1: BigInteger = BigInteger.valueOf(x1).and(mask64)
 
         // Concatentate bits of x0 and x1, as unsigned 128 bit integer:
         /*nextId = unsignedX0.shiftLeft(64).or(unsignedX1)*/
@@ -720,7 +723,7 @@ object StringHelper {
             return "(null)"
         } else {
             val sb = StringBuilder()
-            sb.append(sb.append(BigInt.fromByteArray(id).toString()))
+            sb.append(sb.append(BigInteger.fromByteArray(id, Sign.POSITIVE).toString()))
             if (id.size != ID_LENGTH) {
                 sb.append(" (INVALID FORMAT)")
             }

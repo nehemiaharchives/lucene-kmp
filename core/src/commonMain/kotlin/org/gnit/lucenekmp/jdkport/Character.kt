@@ -2,6 +2,9 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.Char.Companion.MIN_LOW_SURROGATE
 
+/**
+ * port of [java.lang.Character](https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Character.html)
+ */
 class Character {
 
     companion object {
@@ -13,7 +16,154 @@ class Character {
         const val MIN_SUPPLEMENTARY_CODE_POINT: Int = 0x010000
         const val UNASSIGNED: Byte = 0
         const val ERROR: Int = -0x1
-        const val DIRECTIONALITY_UNDEFINED: Byte = -1
+
+
+        /**
+         * Undefined bidirectional character type. Undefined {@code char}
+         * values have undefined directionality in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_UNDEFINED: Byte = -1;
+
+        /**
+         * Strong bidirectional character type "L" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_LEFT_TO_RIGHT: Byte = 0;
+
+        /**
+         * Strong bidirectional character type "R" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_RIGHT_TO_LEFT: Byte = 1;
+
+        /**
+         * Strong bidirectional character type "AL" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC: Byte = 2;
+
+        /**
+         * Weak bidirectional character type "EN" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_EUROPEAN_NUMBER: Byte = 3;
+
+        /**
+         * Weak bidirectional character type "ES" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR: Byte = 4;
+
+        /**
+         * Weak bidirectional character type "ET" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR: Byte = 5;
+
+        /**
+         * Weak bidirectional character type "AN" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_ARABIC_NUMBER: Byte = 6;
+
+        /**
+         * Weak bidirectional character type "CS" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_COMMON_NUMBER_SEPARATOR: Byte = 7;
+
+        /**
+         * Weak bidirectional character type "NSM" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_NONSPACING_MARK: Byte = 8;
+
+        /**
+         * Weak bidirectional character type "BN" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_BOUNDARY_NEUTRAL: Byte = 9;
+
+        /**
+         * Neutral bidirectional character type "B" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_PARAGRAPH_SEPARATOR: Byte = 10;
+
+        /**
+         * Neutral bidirectional character type "S" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_SEGMENT_SEPARATOR: Byte = 11;
+
+        /**
+         * Neutral bidirectional character type "WS" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_WHITESPACE: Byte = 12;
+
+        /**
+         * Neutral bidirectional character type "ON" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_OTHER_NEUTRALS: Byte = 13;
+
+        /**
+         * Strong bidirectional character type "LRE" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING: Byte = 14;
+
+        /**
+         * Strong bidirectional character type "LRO" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE: Byte = 15;
+
+        /**
+         * Strong bidirectional character type "RLE" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING: Byte = 16;
+
+        /**
+         * Strong bidirectional character type "RLO" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE: Byte = 17;
+
+        /**
+         * Weak bidirectional character type "PDF" in the Unicode specification.
+         * @since 1.4
+         */
+        const val DIRECTIONALITY_POP_DIRECTIONAL_FORMAT: Byte = 18;
+
+        /**
+         * Weak bidirectional character type "LRI" in the Unicode specification.
+         * @since 9
+         */
+        const val DIRECTIONALITY_LEFT_TO_RIGHT_ISOLATE: Byte = 19;
+
+        /**
+         * Weak bidirectional character type "RLI" in the Unicode specification.
+         * @since 9
+         */
+        const val DIRECTIONALITY_RIGHT_TO_LEFT_ISOLATE: Byte = 20;
+
+        /**
+         * Weak bidirectional character type "FSI" in the Unicode specification.
+         * @since 9
+         */
+        const val DIRECTIONALITY_FIRST_STRONG_ISOLATE: Byte = 21;
+
+        /**
+         * Weak bidirectional character type "PDI" in the Unicode specification.
+         * @since 9
+         */
+        const val DIRECTIONALITY_POP_DIRECTIONAL_ISOLATE: Byte = 22;
+
+
         const val SIZE: Int = 16
 
         /**

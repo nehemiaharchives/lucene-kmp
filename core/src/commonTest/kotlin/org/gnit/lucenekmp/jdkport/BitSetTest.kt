@@ -12,10 +12,13 @@ class BitSetTest {
         val bitSet = BitSet()
         bitSet.set(0)
         bitSet.set(8)
-        val byteArray = bitSet.toByteArray()
-        assertEquals(2, byteArray?.size)
-        assertEquals(1, byteArray?.get(0))
-        assertEquals(1, byteArray?.get(1))
+
+        // Bit 0 and Bit 8 are set, expecting: [1, 1]
+        val byteArray = bitSet.toByteArray()!!
+
+        assertEquals(2, byteArray.size)
+        assertEquals(1, byteArray[0])
+        assertEquals(1, byteArray[1])
     }
 
     @Test
@@ -229,7 +232,15 @@ class BitSetTest {
         val longArray = longArrayOf(1L, 2L)
         val bitSet = BitSet.valueOf(longArray)
         assertTrue(bitSet.get(0))
-        assertTrue(bitSet.get(64))
+        assertTrue(bitSet.get(65))
+    }
+
+    @Test
+    fun testRawLongBitSet() {
+        val bs = BitSet.valueOf(longArrayOf(257L)) // 257 = 1 + (1 << 8)
+        assertTrue(bs.get(0))  // bit 0
+        assertTrue(bs.get(8))  // bit 8
+        assertFalse(bs.get(1))
     }
 
     @Test
@@ -237,6 +248,6 @@ class BitSetTest {
         val byteArray = byteArrayOf(1, 2)
         val bitSet = BitSet.valueOf(byteArray)
         assertTrue(bitSet.get(0))
-        assertTrue(bitSet.get(8))
+        assertTrue(bitSet.get(9))
     }
 }

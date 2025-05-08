@@ -67,9 +67,157 @@ class ArraysTest {
     }
 
     @Test
-    fun testSort() {
+    fun testSortIntArray() {
         val a = intArrayOf(5, 4, 3, 2, 1)
         Arrays.sort(a)
         assertTrue(Arrays.equals(a, 0, 5, intArrayOf(1, 2, 3, 4, 5), 0, 5))
+    }
+
+    @Test
+    fun testSortLongArray() {
+        val a = longArrayOf(50, 40, 10, 30, 20)
+        Arrays.sort(a)
+        assertTrue(Arrays.equals(a, 0, a.size, longArrayOf(10, 20, 30, 40, 50), 0, 5))
+    }
+
+    @Test
+    fun testSortFloatArray() {
+        val a = floatArrayOf(3.5f, 1.1f, 2.2f, -4.0f, 0f)
+        Arrays.sort(a)
+        assertTrue(Arrays.equals(a, 0, a.size, floatArrayOf(-4.0f, 0f, 1.1f, 2.2f, 3.5f), 0, 5))
+    }
+
+    @Test
+    fun testSortIntArrayRange() {
+        val a = intArrayOf(9, 7, 5, 3, 1)
+        Arrays.sort(a, 1, 4) // Should sort [7,5,3] to [3,5,7]: array becomes [9,3,5,7,1]
+        assertTrue(Arrays.equals(a, 0, a.size, intArrayOf(9, 3, 5, 7, 1), 0, 5))
+    }
+
+    @Test
+    fun testSortLongArrayRange() {
+        val a = longArrayOf(100, 80, 60, 40, 20)
+        Arrays.sort(a, 2, 5) // Should sort [60,40,20] to [20,40,60]: array becomes [100,80,20,40,60]
+        assertTrue(Arrays.equals(a, 0, a.size, longArrayOf(100, 80, 20, 40, 60), 0, 5))
+    }
+
+    @Test
+    fun testSortGenericArrayWithComparator() {
+        val a = arrayOf("banana", "apple", "pear")
+        Arrays.sort(a, Comparator { s1, s2 -> s1.length - s2.length })
+        // Sorted by length: ["pear","apple","banana"]
+        assertTrue(a contentEquals arrayOf("pear", "apple", "banana"))
+    }
+
+    @Test
+    fun testMismatchByteArrayWithRanges() {
+        val a = byteArrayOf(1, 2, 3, 4, 5)
+        val b = byteArrayOf(1, 2, 9, 4, 5)
+        // Mismatch at index 2 of the specified range
+        assertEquals(2, Arrays.mismatch(a, 0, 5, b, 0, 5))
+        // Equal over this range
+        assertEquals(1, Arrays.mismatch(a, 1, 3, b, 1, 3))
+        // a is a proper prefix of b in the specified range
+        assertEquals(2, Arrays.mismatch(a, 0, 2, b, 0, 4))
+        // b is a proper prefix of a
+        assertEquals(2, Arrays.mismatch(a, 0, 4, b, 0, 2))
+        // Empty range, should be equal
+        assertEquals(-1, Arrays.mismatch(a, 2, 2, b, 2, 2))
+    }
+
+    @Test
+    fun testMismatchIntArrayWithRanges() {
+        val a = intArrayOf(10, 20, 30, 40, 50)
+        val b = intArrayOf(10, 20, 99, 40, 50)
+        // Mismatch at index 2 of the range
+        assertEquals(2, Arrays.mismatch(a, 0, 5, b, 0, 5))
+        // Equal over this restricted range
+        assertEquals(1, Arrays.mismatch(a, 1, 3, b, 1, 3))
+        // a is a proper prefix of b
+        assertEquals(2, Arrays.mismatch(a, 0, 2, b, 0, 4))
+        // b is a proper prefix of a
+        assertEquals(2, Arrays.mismatch(a, 0, 4, b, 0, 2))
+        // Empty range
+        assertEquals(-1, Arrays.mismatch(a, 2, 2, b, 2, 2))
+    }
+
+    @Test
+    fun testMismatchByteArrayWithNullsAndBounds() {
+        val a = byteArrayOf(1, 2, 3)
+        val b = byteArrayOf(1, 2, 3)
+        // Null checks (should throw NPE)
+        try {
+            Arrays.mismatch(null as ByteArray, 0, 3, b, 0, 3)
+            kotlin.test.fail("Expected NullPointerException")
+        } catch (_: NullPointerException) { }
+        try {
+            Arrays.mismatch(a, 0, 3, null as ByteArray, 0, 3)
+            kotlin.test.fail("Expected NullPointerException")
+        } catch (_: NullPointerException) { }
+        // IllegalArgumentException checks
+        try {
+            Arrays.mismatch(a, 2, 1, b, 0, 3)
+            kotlin.test.fail("Expected IllegalArgumentException")
+        } catch (_: IllegalArgumentException) { }
+        try {
+            Arrays.mismatch(a, 0, 3, b, 2, 1)
+            kotlin.test.fail("Expected IllegalArgumentException")
+        } catch (_: IllegalArgumentException) { }
+        // Out of bounds
+        try {
+            Arrays.mismatch(a, 0, 4, b, 0, 3)
+            kotlin.test.fail("Expected IndexOutOfBoundsException")
+        } catch (_: IndexOutOfBoundsException) { }
+        try {
+            Arrays.mismatch(a, 0, 3, b, 0, 5)
+            kotlin.test.fail("Expected IndexOutOfBoundsException")
+        } catch (_: IndexOutOfBoundsException) { }
+    }
+
+    @Test
+    fun testMismatchIntArrayWithNullsAndBounds() {
+        val a = intArrayOf(5, 6, 7)
+        val b = intArrayOf(5, 6, 7)
+        // Null checks
+        try {
+            Arrays.mismatch(null as IntArray, 0, 3, b, 0, 3)
+            kotlin.test.fail("Expected NullPointerException")
+        } catch (_: NullPointerException) { }
+        try {
+            Arrays.mismatch(a, 0, 3, null as IntArray, 0, 3)
+            kotlin.test.fail("Expected NullPointerException")
+        } catch (_: NullPointerException) { }
+        // IllegalArgumentExceptions
+        try {
+            Arrays.mismatch(a, 2, 1, b, 0, 3)
+            kotlin.test.fail("Expected IllegalArgumentException")
+        } catch (_: IllegalArgumentException) { }
+        try {
+            Arrays.mismatch(a, 0, 3, b, 2, 1)
+            kotlin.test.fail("Expected IllegalArgumentException")
+        } catch (_: IllegalArgumentException) { }
+        // Out of bounds
+        try {
+            Arrays.mismatch(a, 0, 4, b, 0, 3)
+            kotlin.test.fail("Expected IndexOutOfBoundsException")
+        } catch (_: IndexOutOfBoundsException) { }
+        try {
+            Arrays.mismatch(a, 0, 3, b, 0, 5)
+            kotlin.test.fail("Expected IndexOutOfBoundsException")
+        } catch (_: IndexOutOfBoundsException) { }
+    }
+
+    @Test
+    fun testMismatchEdgeCases() {
+        // Both arrays empty, ranges empty
+        assertEquals(-1, Arrays.mismatch(byteArrayOf(), 0, 0, byteArrayOf(), 0, 0))
+        // a empty, b non-empty
+        assertEquals(0, Arrays.mismatch(byteArrayOf(), 0, 0, byteArrayOf(1), 0, 1))
+        // b empty, a non-empty
+        assertEquals(0, Arrays.mismatch(byteArrayOf(1), 0, 1, byteArrayOf(), 0, 0))
+        // Single element, mismatch
+        assertEquals(0, Arrays.mismatch(byteArrayOf(2), 0, 1, byteArrayOf(3), 0, 1))
+        // Single element, equal
+        assertEquals(-1, Arrays.mismatch(byteArrayOf(42), 0, 1, byteArrayOf(42), 0, 1))
     }
 }

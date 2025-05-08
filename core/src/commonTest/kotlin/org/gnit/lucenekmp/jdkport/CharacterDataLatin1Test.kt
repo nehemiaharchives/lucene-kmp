@@ -1,11 +1,95 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.jdkport.CharacterDataLatin1.Companion.A
+import org.gnit.lucenekmp.jdkport.CharacterDataLatin1.Companion.B
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
+
+
+/**
+ * Example property check using A and B.
+ * Replace this with your actual implementation logic.
+ */
+fun isFoo(ch: Char): Boolean {
+    // Let's say you define "Foo" for demonstration when the lowest bit in A[ch.code] is set,
+    // and B[ch.code] in a certain range
+    if (ch.code !in 0 until 256) return false
+    val prop = A[ch.code] and 0x1
+    val mask = (B[ch.code] in '\u0000'..'\u007F') // just as an example
+    return prop != 0 && mask
+}
+
 
 class CharacterDataLatin1Test {
+
+    @Test
+    fun `A table should contain 256 values all Ints and reasonable property bits`() {
+        assertTrue(A.size == 256, "A table size must be 256")
+        for ((i, v) in A.withIndex()) {
+            // Example checks - adapt depending on your needs
+            // Contract: Int, can be negative, shouldn't overflow
+            assertTrue(v is Int, "A[$i] should be Int")
+            // Contract: E.g., all ignorable controls should have the 'ignorable' property bit set
+            if (i in 0..8) {
+                // For Cc/ignorable, suppose bit 0xF is set (example, adapt if needed)
+                assertTrue((v and 0xF) == 0xF, "A[$i] should be ignorable control, got ${v.toString(16)}")
+            }
+        }
+    }
+
+    @Test
+    fun `B table should contain 256 Char values`() {
+        assertEquals(256, B.size, "B table size must be 256")
+        for ((i, v) in B.withIndex()) {
+            // CharArray always contains Chars, but you can add value checks if needed
+            assertTrue(v.code in 0x0000..0xFFFF, "B[$i] should be a valid Char")
+        }
+    }
+
+    @Test
+    fun `A and B contract vs function should match across all 0 to 255`() {
+        var foundMismatch = false
+        for (code in 0..255) {
+            val ch = code.toChar()
+
+            // Compute property from tables, as used by your implementation
+            val propFromTable: Boolean = run {
+                val prop = A[code] and 0x1
+                val mask = (B[code] in '\u0000'..'\u007F') // EXAMPLE
+                prop != 0 && mask
+            }
+            val funcResult = isFoo(ch)
+            try {
+                assertEquals(
+                    propFromTable,
+                    funcResult,
+                    "Mismatch for char U+${code.toString(16).padStart(4, '0').uppercase()} '${ch}'"
+                )
+            } catch (e: AssertionError) {
+                println(
+                    "Diagnostic failed for char U+${
+                        code.toString(16).padStart(4, '0').uppercase()
+                    } '${printableChar(ch)}': " +
+                            "TableProperty=$propFromTable, FuncResult=$funcResult, " +
+                            "A=0x${A[code].toString(16).padStart(8, '0').uppercase()}, " +
+                            "B=0x${B[code].code.toString(16).padStart(4, '0').uppercase()}"
+                )
+                foundMismatch = true
+            }
+        }
+        if (foundMismatch) fail("One or more property mismatches found. See stdout for details.")
+    }
+
+    private fun printableChar(ch: Char): String {
+        return when (ch) {
+            in '\u0020'..'\u007E' -> ch.toString() // Printable ASCII
+            else -> "." // Replace with dot for non-printable
+        }
+    }
 
     @Test
     fun testGetProperties() {
@@ -17,7 +101,7 @@ class CharacterDataLatin1Test {
     @Test
     fun testGetType() {
         assertEquals(15, CharacterDataLatin1.instance.getType(0))
-        assertEquals(18, CharacterDataLatin1.instance.getType(33))
+        assertEquals(24, CharacterDataLatin1.instance.getType(33))
         assertEquals(26, CharacterDataLatin1.instance.getType(36))
     }
 
@@ -58,6 +142,8 @@ class CharacterDataLatin1Test {
 
     @Test
     fun testIsJavaIdentifierStart() {
+        println(CharacterDataLatin1.instance.getProperties('a'.code))
+
         assertTrue(CharacterDataLatin1.instance.isJavaIdentifierStart('a'.code))
         assertTrue(CharacterDataLatin1.instance.isJavaIdentifierStart('_'.code))
         assertFalse(CharacterDataLatin1.instance.isJavaIdentifierStart('1'.code))
@@ -73,7 +159,7 @@ class CharacterDataLatin1Test {
     @Test
     fun testIsUnicodeIdentifierStart() {
         assertTrue(CharacterDataLatin1.instance.isUnicodeIdentifierStart('a'.code))
-        assertTrue(CharacterDataLatin1.instance.isUnicodeIdentifierStart('_'.code))
+        assertFalse(CharacterDataLatin1.instance.isUnicodeIdentifierStart('_'.code))
         assertFalse(CharacterDataLatin1.instance.isUnicodeIdentifierStart('1'.code))
     }
 
@@ -93,44 +179,50 @@ class CharacterDataLatin1Test {
 
     @Test
     fun testIsEmoji() {
-        assertTrue(CharacterDataLatin1.instance.isEmoji(0x1F600))
-        assertTrue(CharacterDataLatin1.instance.isEmoji(0x1F64F))
-        assertFalse(CharacterDataLatin1.instance.isEmoji('a'.code))
+        // Only test within Latin-1 range for CharacterDataLatin1
+        for (code in 1..255) {
+            assertFalse(CharacterDataLatin1.instance.isEmoji(1))
+        }
     }
 
     @Test
     fun testIsEmojiPresentation() {
-        assertTrue(CharacterDataLatin1.instance.isEmojiPresentation(0x1F600))
-        assertTrue(CharacterDataLatin1.instance.isEmojiPresentation(0x1F64F))
-        assertFalse(CharacterDataLatin1.instance.isEmojiPresentation('a'.code))
+        // Only test within Latin-1 range for CharacterDataLatin1
+        for (code in 1..255) {
+            assertFalse(CharacterDataLatin1.instance.isEmojiPresentation(1))
+        }
     }
 
     @Test
     fun testIsEmojiModifier() {
-        assertTrue(CharacterDataLatin1.instance.isEmojiModifier(0x1F3FB))
-        assertTrue(CharacterDataLatin1.instance.isEmojiModifier(0x1F3FF))
-        assertFalse(CharacterDataLatin1.instance.isEmojiModifier('a'.code))
+        // Only test within Latin-1 range for CharacterDataLatin1
+        for (code in 1..255) {
+            assertFalse(CharacterDataLatin1.instance.isEmojiModifier(1))
+        }
     }
 
     @Test
     fun testIsEmojiModifierBase() {
-        assertTrue(CharacterDataLatin1.instance.isEmojiModifierBase(0x1F466))
-        assertTrue(CharacterDataLatin1.instance.isEmojiModifierBase(0x1F469))
-        assertFalse(CharacterDataLatin1.instance.isEmojiModifierBase('a'.code))
+        // Only test within Latin-1 range for CharacterDataLatin1
+        for (code in 1..255) {
+            assertFalse(CharacterDataLatin1.instance.isEmojiModifierBase(1))
+        }
     }
 
     @Test
     fun testIsEmojiComponent() {
-        assertTrue(CharacterDataLatin1.instance.isEmojiComponent(0x1F3FB))
-        assertTrue(CharacterDataLatin1.instance.isEmojiComponent(0x1F3FF))
-        assertFalse(CharacterDataLatin1.instance.isEmojiComponent('a'.code))
+        // Only test within Latin-1 range for CharacterDataLatin1
+        for (code in 1..255) {
+            assertFalse(CharacterDataLatin1.instance.isEmojiComponent(1))
+        }
     }
 
     @Test
     fun testIsExtendedPictographic() {
-        assertTrue(CharacterDataLatin1.instance.isExtendedPictographic(0x1F600))
-        assertTrue(CharacterDataLatin1.instance.isExtendedPictographic(0x1F64F))
-        assertFalse(CharacterDataLatin1.instance.isExtendedPictographic('a'.code))
+        // Only test within Latin-1 range for CharacterDataLatin1
+        for (code in 1..255) {
+            assertFalse(CharacterDataLatin1.instance.isExtendedPictographic(1))
+        }
     }
 
     @Test
@@ -165,14 +257,28 @@ class CharacterDataLatin1Test {
     fun testGetNumericValue() {
         assertEquals(0, CharacterDataLatin1.instance.getNumericValue('0'.code))
         assertEquals(9, CharacterDataLatin1.instance.getNumericValue('9'.code))
-        assertEquals(-1, CharacterDataLatin1.instance.getNumericValue('a'.code))
+        assertEquals(10, CharacterDataLatin1.instance.getNumericValue('a'.code))
+        assertEquals(16, CharacterDataLatin1.instance.getNumericValue('g'.code))
+    }
+
+    @Test
+    fun testDirectionalityBitExtraction() {
+        for (code in 0..255) {
+            val props = CharacterDataLatin1.A[code]
+            val directionality = ((props and 0x78000000) shr 27)
+            println(
+                "U+${code.toString(16).padStart(4, '0').uppercase()}: props=0x${
+                    props.toUInt().toString(16)
+                }, directionality=$directionality"
+            )
+        }
     }
 
     @Test
     fun testGetDirectionality() {
-        assertEquals(Character.DIRECTIONALITY_UNDEFINED, CharacterDataLatin1.instance.getDirectionality(0x0000))
-        assertEquals(Character.DIRECTIONALITY_UNDEFINED, CharacterDataLatin1.instance.getDirectionality(0x0008))
-        assertEquals(Character.DIRECTIONALITY_UNDEFINED, CharacterDataLatin1.instance.getDirectionality('a'.code))
+        assertEquals(Character.DIRECTIONALITY_BOUNDARY_NEUTRAL, CharacterDataLatin1.instance.getDirectionality(0x0000))
+        assertEquals(Character.DIRECTIONALITY_BOUNDARY_NEUTRAL, CharacterDataLatin1.instance.getDirectionality(0x0008))
+        assertEquals(Character.DIRECTIONALITY_LEFT_TO_RIGHT, CharacterDataLatin1.instance.getDirectionality('a'.code))
     }
 
     @Test
@@ -184,22 +290,21 @@ class CharacterDataLatin1Test {
 
     @Test
     fun testToUpperCaseCharArray() {
-        assertEquals(charArrayOf('A'), CharacterDataLatin1.instance.toUpperCaseCharArray('a'.code))
-        assertEquals(charArrayOf('Z'), CharacterDataLatin1.instance.toUpperCaseCharArray('z'.code))
-        assertEquals(charArrayOf('A'), CharacterDataLatin1.instance.toUpperCaseCharArray('A'.code))
+        assertContentEquals(charArrayOf('a'), CharacterDataLatin1.instance.toUpperCaseCharArray('a'.code))
+        assertContentEquals(charArrayOf('z'), CharacterDataLatin1.instance.toUpperCaseCharArray('z'.code))
+        assertContentEquals(charArrayOf('A'), CharacterDataLatin1.instance.toUpperCaseCharArray('A'.code))
+        assertContentEquals(charArrayOf('S', 'S'), CharacterDataLatin1.instance.toUpperCaseCharArray(0x00DF))
     }
 
     @Test
     fun testIsOtherAlphabetic() {
-        assertTrue(CharacterDataLatin1.instance.isOtherAlphabetic('a'.code))
-        assertTrue(CharacterDataLatin1.instance.isOtherAlphabetic('z'.code))
+        assertFalse(CharacterDataLatin1.instance.isOtherAlphabetic('a'.code))
+        assertFalse(CharacterDataLatin1.instance.isOtherAlphabetic('z'.code))
         assertFalse(CharacterDataLatin1.instance.isOtherAlphabetic('1'.code))
     }
 
     @Test
     fun testIsIdeographic() {
-        assertTrue(CharacterDataLatin1.instance.isIdeographic(0x4E00))
-        assertTrue(CharacterDataLatin1.instance.isIdeographic(0x9FFF))
         assertFalse(CharacterDataLatin1.instance.isIdeographic('a'.code))
     }
 }

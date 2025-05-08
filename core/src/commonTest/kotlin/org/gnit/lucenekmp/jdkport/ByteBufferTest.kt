@@ -111,7 +111,7 @@ class ByteBufferTest {
     fun testIsReadOnly() {
         val buffer = ByteBuffer.allocate(10)
         val readOnlyBuffer = buffer.asReadOnlyBuffer()
-        assertFailsWith<UnsupportedOperationException> {
+        assertFailsWith<ReadOnlyBufferException> {
             readOnlyBuffer.put(1)
         }
     }
@@ -184,5 +184,44 @@ class ByteBufferTest {
     fun testToString() {
         val buffer = ByteBuffer.wrap(byteArrayOf(1, 2, 3))
         assertEquals("ByteBuffer[pos=0 lim=3 cap=3]", buffer.toString())
+    }
+
+    @Test
+    fun testBulkAbsoluteGet() {
+        val data = byteArrayOf(10, 20, 30, 40, 50)
+        val buffer = ByteBuffer.wrap(data)
+        val dst = ByteArray(3)
+        buffer.get(1, dst, 0, 3) // get 20,30,40 into dst
+        assertTrue(dst contentEquals byteArrayOf(20, 30, 40))
+    }
+
+    @Test
+    fun testGetIntAndGetShort() {
+        // little endian: bytes 0x01,0x00 -> short=1; 0x78,0x56,0x34,0x12 -> int
+        val data = byteArrayOf(0x01, 0x00, 0x78, 0x56, 0x34, 0x12)
+        val buffer = ByteBuffer.wrap(data)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals(1.toShort(), buffer.getShort(0))
+        assertEquals(0x12345678, buffer.getInt(2))
+    }
+
+    @Test
+    fun testHasArray() {
+        val buffer = ByteBuffer.allocate(4)
+        assertTrue(buffer.hasArray())
+    }
+
+    @Test
+    fun testBulkGetOutOfBounds() {
+        val buffer = ByteBuffer.allocate(5)
+        val dst = ByteArray(2)
+        // Should fail: index+length > limit
+        assertFailsWith<IndexOutOfBoundsException> {
+            buffer.get(4, dst, 0, 2)
+        }
+        // Should fail: offset+length > dst.size
+        assertFailsWith<IndexOutOfBoundsException> {
+            buffer.get(0, dst, 1, 2)
+        }
     }
 }

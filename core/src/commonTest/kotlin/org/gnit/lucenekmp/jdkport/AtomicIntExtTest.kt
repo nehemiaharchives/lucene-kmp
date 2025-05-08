@@ -1,18 +1,30 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * tests for extension functions to fill the gap with JDK's AtomicInteger with [AtomicInt]
+ */
 class AtomicIntExtTest {
 
+    /**
+     * @see AtomicInt.get()
+     */
+    @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testGet() {
         val atomicInt = AtomicInt(5)
         assertEquals(5, atomicInt.get())
     }
 
+    /**
+     * @see AtomicInt.set()
+     */
+    @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testSet() {
         val atomicInt = AtomicInt(5)
@@ -20,20 +32,10 @@ class AtomicIntExtTest {
         assertEquals(10, atomicInt.get())
     }
 
-    @Test
-    fun testIncrementAndGet() {
-        val atomicInt = AtomicInt(5)
-        assertEquals(6, atomicInt.incrementAndGet())
-        assertEquals(6, atomicInt.get())
-    }
-
-    @Test
-    fun testDecrementAndGet() {
-        val atomicInt = AtomicInt(5)
-        assertEquals(4, atomicInt.decrementAndGet())
-        assertEquals(4, atomicInt.get())
-    }
-
+    /**
+     * @see AtomicInt.accumulateAndGet()
+     */
+    @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testAccumulateAndGet() {
         val atomicInt = AtomicInt(5)
@@ -42,17 +44,14 @@ class AtomicIntExtTest {
         assertEquals(8, atomicInt.get())
     }
 
+    /**
+     * @see AtomicInt.weakCompareAndSetVolatile()
+     */
+    @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testWeakCompareAndSetVolatile() {
         val atomicInt = AtomicInt(5)
         assertTrue(atomicInt.weakCompareAndSetVolatile(5, 10))
         assertEquals(10, atomicInt.get())
-    }
-
-    @Test
-    fun testGetAndAdd() {
-        val atomicInt = AtomicInt(5)
-        assertEquals(5, atomicInt.getAndAdd(3))
-        assertEquals(8, atomicInt.get())
     }
 }

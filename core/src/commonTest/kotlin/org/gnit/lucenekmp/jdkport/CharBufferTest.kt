@@ -5,6 +5,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
+
+/**
+ * tests functions of [CharBuffer] if it behaves like [java.nio.CharBuffer](https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/nio/CharBuffer.html)
+ */
 class CharBufferTest {
 
     @Test
@@ -28,9 +32,9 @@ class CharBufferTest {
     @Test
     fun testGetPut() {
         val buffer = CharBuffer.allocate(10)
-        buffer.put(0, 'a')
-        buffer.put(1, 'b')
-        buffer.put(2, 'c')
+        buffer.put('a')
+        buffer.put('b')
+        buffer.put('c')
         assertEquals('a', buffer.getAbsolute(0))
         assertEquals('b', buffer.getAbsolute(1))
         assertEquals('c', buffer.getAbsolute(2))
@@ -76,11 +80,11 @@ class CharBufferTest {
     @Test
     fun testMarkReset() {
         val buffer = CharBuffer.allocate(10)
-        buffer.put('a')
-        buffer.put('b')
-        buffer.mark()
-        buffer.put('c')
-        buffer.reset()
+        buffer.put('a')        // position = 1
+        buffer.put('b')        // position = 2
+        buffer.mark()          // mark set at position 2
+        buffer.put('c')        // position = 3
+        buffer.reset()         // position restored to 2
         assertEquals(2, buffer.position)
     }
 
@@ -154,9 +158,11 @@ class CharBufferTest {
     }
 
     @Test
-    fun testCompareTo() {
-        val buffer1 = CharBuffer.wrap(charArrayOf('a', 'b', 'c'))
-        val buffer2 = CharBuffer.wrap(charArrayOf('a', 'b', 'd'))
+    fun testCharBufferCompareTo() {
+        val charsABC = charArrayOf('a', 'b', 'c')
+        val charsABD = charArrayOf('a', 'b', 'd')
+        val buffer1 = CharBuffer.wrap(charsABC)
+        val buffer2 = CharBuffer.wrap(charsABD)
         assertTrue(buffer1 < buffer2)
     }
 
@@ -176,6 +182,6 @@ class CharBufferTest {
     @Test
     fun testToString() {
         val buffer = CharBuffer.wrap(charArrayOf('a', 'b', 'c'))
-        assertEquals("CharBuffer[pos=0 lim=3 cap=3]", buffer.toString())
+        assertEquals("abc", buffer.toString())
     }
 }

@@ -26,6 +26,17 @@ object ArraysSupport {
         return -1
     }
 
+    fun mismatch(
+        a: FloatArray, aFromIndex: Int,
+        b: FloatArray, bFromIndex: Int,
+        length: Int
+    ): Int {
+        for (i in 0 until length) {
+            if (Float.floatToRawIntBits(a[aFromIndex + i]) != Float.floatToRawIntBits(b[bFromIndex + i]))
+                return i
+        }
+        return -1
+    }
 
     /**
      * Returns the relative index of the first mismatch between two subranges of the given arrays,

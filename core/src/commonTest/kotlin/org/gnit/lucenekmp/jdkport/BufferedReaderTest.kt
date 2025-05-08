@@ -15,7 +15,7 @@ class BufferedReaderTest {
         val reader = BufferedReader(StringReader(input))
         val result = CharArray(input.length)
         reader.read(result, 0, input.length)
-        assertEquals(input, String(result))
+        assertEquals(input, result.concatToString())
     }
 
     @Test
@@ -25,7 +25,7 @@ class BufferedReaderTest {
         reader.skip(7)
         val result = CharArray(6)
         reader.read(result, 0, 6)
-        assertEquals("World!", String(result))
+        assertEquals("World!", result.concatToString())
     }
 
     @Test
@@ -44,10 +44,10 @@ class BufferedReaderTest {
         reader.mark(5)
         val result = CharArray(5)
         reader.read(result, 0, 5)
-        assertEquals("Hello", String(result))
+        assertEquals("Hello", result.concatToString())
         reader.reset()
         reader.read(result, 0, 5)
-        assertEquals("Hello", String(result))
+        assertEquals("Hello", result.concatToString())
     }
 
     @Test

@@ -108,7 +108,7 @@ import kotlin.math.min
  *
  * @see CharsetEncoder
  */
-abstract class CharsetDecoder private constructor(
+abstract class CharsetDecoder(
     cs: Charset,
     averageCharsPerByte: Float,
     maxCharsPerByte: Float,

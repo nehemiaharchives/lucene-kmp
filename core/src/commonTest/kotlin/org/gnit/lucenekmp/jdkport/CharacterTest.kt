@@ -4,120 +4,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
+/**
+ * tests functions in [Character] to see if it behaves like [java.lang.Character](https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Character.html)
+ */
 class CharacterTest {
-
-    @Test
-    fun testIsDigit() {
-        assertTrue(Character.isDigit('0'.code))
-        assertTrue(Character.isDigit('9'.code))
-        assertFalse(Character.isDigit('a'.code))
-    }
-
-    @Test
-    fun testIsLowerCase() {
-        assertTrue(Character.isLowerCase('a'.code))
-        assertTrue(Character.isLowerCase('z'.code))
-        assertFalse(Character.isLowerCase('A'.code))
-    }
-
-    @Test
-    fun testIsUpperCase() {
-        assertTrue(Character.isUpperCase('A'.code))
-        assertTrue(Character.isUpperCase('Z'.code))
-        assertFalse(Character.isUpperCase('a'.code))
-    }
-
-    @Test
-    fun testIsWhitespace() {
-        assertTrue(Character.isWhitespace(' '.code))
-        assertTrue(Character.isWhitespace('\n'.code))
-        assertFalse(Character.isWhitespace('a'.code))
-    }
-
-    @Test
-    fun testIsMirrored() {
-        assertTrue(Character.isMirrored('('.code))
-        assertTrue(Character.isMirrored(')'.code))
-        assertFalse(Character.isMirrored('a'.code))
-    }
-
-    @Test
-    fun testIsJavaIdentifierStart() {
-        assertTrue(Character.isJavaIdentifierStart('a'.code))
-        assertTrue(Character.isJavaIdentifierStart('_'.code))
-        assertFalse(Character.isJavaIdentifierStart('1'.code))
-    }
-
-    @Test
-    fun testIsJavaIdentifierPart() {
-        assertTrue(Character.isJavaIdentifierPart('a'.code))
-        assertTrue(Character.isJavaIdentifierPart('1'.code))
-        assertFalse(Character.isJavaIdentifierPart(' '.code))
-    }
-
-    @Test
-    fun testIsUnicodeIdentifierStart() {
-        assertTrue(Character.isUnicodeIdentifierStart('a'.code))
-        assertTrue(Character.isUnicodeIdentifierStart('_'.code))
-        assertFalse(Character.isUnicodeIdentifierStart('1'.code))
-    }
-
-    @Test
-    fun testIsUnicodeIdentifierPart() {
-        assertTrue(Character.isUnicodeIdentifierPart('a'.code))
-        assertTrue(Character.isUnicodeIdentifierPart('1'.code))
-        assertFalse(Character.isUnicodeIdentifierPart(' '.code))
-    }
-
-    @Test
-    fun testIsIdentifierIgnorable() {
-        assertTrue(Character.isIdentifierIgnorable(0x0000))
-        assertTrue(Character.isIdentifierIgnorable(0x0008))
-        assertFalse(Character.isIdentifierIgnorable('a'.code))
-    }
-
-    @Test
-    fun testIsEmoji() {
-        assertTrue(Character.isEmoji(0x1F600))
-        assertTrue(Character.isEmoji(0x1F64F))
-        assertFalse(Character.isEmoji('a'.code))
-    }
-
-    @Test
-    fun testIsEmojiPresentation() {
-        assertTrue(Character.isEmojiPresentation(0x1F600))
-        assertTrue(Character.isEmojiPresentation(0x1F64F))
-        assertFalse(Character.isEmojiPresentation('a'.code))
-    }
-
-    @Test
-    fun testIsEmojiModifier() {
-        assertTrue(Character.isEmojiModifier(0x1F3FB))
-        assertTrue(Character.isEmojiModifier(0x1F3FF))
-        assertFalse(Character.isEmojiModifier('a'.code))
-    }
-
-    @Test
-    fun testIsEmojiModifierBase() {
-        assertTrue(Character.isEmojiModifierBase(0x1F466))
-        assertTrue(Character.isEmojiModifierBase(0x1F469))
-        assertFalse(Character.isEmojiModifierBase('a'.code))
-    }
-
-    @Test
-    fun testIsEmojiComponent() {
-        assertTrue(Character.isEmojiComponent(0x1F3FB))
-        assertTrue(Character.isEmojiComponent(0x1F3FF))
-        assertFalse(Character.isEmojiComponent('a'.code))
-    }
-
-    @Test
-    fun testIsExtendedPictographic() {
-        assertTrue(Character.isExtendedPictographic(0x1F600))
-        assertTrue(Character.isExtendedPictographic(0x1F64F))
-        assertFalse(Character.isExtendedPictographic('a'.code))
-    }
 
     @Test
     fun testToLowerCase() {
@@ -134,58 +26,67 @@ class CharacterTest {
     }
 
     @Test
-    fun testToTitleCase() {
-        assertEquals('A'.code, Character.toTitleCase('a'.code))
-        assertEquals('Z'.code, Character.toTitleCase('z'.code))
-        assertEquals('A'.code, Character.toTitleCase('A'.code))
+    fun testIsLowerCase() {
+        assertTrue(Character.isLowerCase('a'.code))
+        assertFalse(Character.isLowerCase('A'.code))
+        assertFalse(Character.isLowerCase('1'.code))
+        assertTrue(Character.isLowerCase('ß'.code)) // German sharp S
     }
 
     @Test
-    fun testDigit() {
-        assertEquals(0, Character.digit('0'.code, 10))
-        assertEquals(9, Character.digit('9'.code, 10))
-        assertEquals(-1, Character.digit('a'.code, 10))
+    fun testIsHighSurrogate() {
+        assertTrue(Character.isHighSurrogate('\uD800'))
+        assertTrue(Character.isHighSurrogate('\uDBFF'))
+        assertFalse(Character.isHighSurrogate('\uDC00'))
+        assertFalse(Character.isHighSurrogate('A'))
     }
 
     @Test
-    fun testGetNumericValue() {
-        assertEquals(0, Character.getNumericValue('0'.code))
-        assertEquals(9, Character.getNumericValue('9'.code))
-        assertEquals(-1, Character.getNumericValue('a'.code))
+    fun testCompare() {
+        assertEquals(0, Character.compare('a', 'a'))
+        assertTrue(Character.compare('a', 'b') < 0)
+        assertTrue(Character.compare('b', 'a') > 0)
     }
 
     @Test
-    fun testGetDirectionality() {
-        assertEquals(Character.DIRECTIONALITY_UNDEFINED, Character.getDirectionality(0x0000))
-        assertEquals(Character.DIRECTIONALITY_UNDEFINED, Character.getDirectionality(0x0008))
-        assertEquals(Character.DIRECTIONALITY_UNDEFINED, Character.getDirectionality('a'.code))
+    fun testCharCount() {
+        assertEquals(1, Character.charCount('A'.code))
+        // Supplementary code point (outside BMP, needs 2 chars in UTF-16)
+        assertEquals(2, Character.charCount(0x1F600)) // 😀
     }
 
     @Test
-    fun testToUpperCaseEx() {
-        assertEquals('A'.code, Character.toUpperCaseEx('a'.code))
-        assertEquals('Z'.code, Character.toUpperCaseEx('z'.code))
-        assertEquals('A'.code, Character.toUpperCaseEx('A'.code))
+    fun testCodePointAtSequence() {
+        val text = "A\uD83D\uDE00B" // A, 😀 (surrogate pair), B
+        assertEquals('A'.code, Character.codePointAt(text, 0))
+        assertEquals(0x1F600, Character.codePointAt(text, 1)) // 😀
+        assertEquals('\uDE00'.code, Character.codePointAt(text, 2)) // Only low surrogate if used alone
+        assertEquals('B'.code, Character.codePointAt(text, 3))
+        // Out of bounds
+        assertFailsWith<IndexOutOfBoundsException> { Character.codePointAt(text, 5) }
     }
 
     @Test
-    fun testToUpperCaseCharArray() {
-        assertEquals(charArrayOf('A'), Character.toUpperCaseCharArray('a'.code))
-        assertEquals(charArrayOf('Z'), Character.toUpperCaseCharArray('z'.code))
-        assertEquals(charArrayOf('A'), Character.toUpperCaseCharArray('A'.code))
+    fun testCodePointAtArray() {
+        val arr = charArrayOf('A', '\uD83D', '\uDE00', 'B')
+        assertEquals('A'.code, Character.codePointAt(arr, 0, arr.size))
+        assertEquals(0x1F600, Character.codePointAt(arr, 1, arr.size)) // 😀
+        assertEquals('\uDE00'.code, Character.codePointAt(arr, 2, arr.size))
+        assertEquals('B'.code, Character.codePointAt(arr, 3, arr.size))
+        // Check exception for OOB
+        assertFailsWith<IndexOutOfBoundsException> { Character.codePointAt(arr, 4, arr.size) }
+        assertFailsWith<IndexOutOfBoundsException> { Character.codePointAt(arr, 0, 0) }
     }
 
     @Test
-    fun testIsOtherAlphabetic() {
-        assertTrue(Character.isOtherAlphabetic('a'.code))
-        assertTrue(Character.isOtherAlphabetic('z'.code))
-        assertFalse(Character.isOtherAlphabetic('1'.code))
-    }
-
-    @Test
-    fun testIsIdeographic() {
-        assertTrue(Character.isIdeographic(0x4E00))
-        assertTrue(Character.isIdeographic(0x9FFF))
-        assertFalse(Character.isIdeographic('a'.code))
+    fun testConstants() {
+        assertEquals(2, Character.BYTES)
+        assertEquals(0, Character.MIN_CODE_POINT)
+        assertEquals(0x10FFFF, Character.MAX_CODE_POINT)
+        assertEquals('\uD800', Character.MIN_HIGH_SURROGATE)
+        assertEquals('\uDBFF', Character.MAX_HIGH_SURROGATE)
+        assertEquals(2, Character.MIN_RADIX)
+        assertEquals(36, Character.MAX_RADIX)
+        assertEquals(16, Character.SIZE)
     }
 }

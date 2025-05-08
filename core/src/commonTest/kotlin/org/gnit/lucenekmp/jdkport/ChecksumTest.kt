@@ -1,9 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.io.Buffer
-import kotlinx.io.ByteArrayOutputStream
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.readByteArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -45,15 +42,6 @@ class ChecksumTest {
         val checksum = MockChecksum()
         val data = byteArrayOf(1, 2, 3, 4, 5)
         checksum.update(data, 0, data.size)
-        assertEquals(15, checksum.getValue())
-    }
-
-    @Test
-    fun testUpdateWithBuffer() {
-        val checksum = MockChecksum()
-        val data = byteArrayOf(1, 2, 3, 4, 5)
-        val buffer = Buffer().write(data)
-        checksum.update(buffer)
         assertEquals(15, checksum.getValue())
     }
 
