@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "test": "./gradlew jvmTest --quiet",
+    "build": "./gradlew build"
+  }
+}
