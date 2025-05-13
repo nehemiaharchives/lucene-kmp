@@ -1,6 +1,72 @@
 package org.gnit.lucenekmp.jdkport
 
 /**
+ * ported from java.util.Map.putIfAbsent()
+ *
+ * If the specified key is not already associated with a value (or is mapped to
+ * null) associates it with the given value and returns null, else returns the
+ * current value.
+ *
+ * @param key key with which the specified value is to be associated
+ * @param value value to be associated with the specified key
+ * @return the previous value associated with the specified key, or
+ *         null if there was no mapping for the key.
+ *         (A null return can also indicate that the map previously
+ *         associated null with the key, if the implementation supports
+ *         null values.)
+ */
+fun <K, V> MutableMap<K, V>.putIfAbsent(key: K, value: V): V? {
+    val v = get(key)
+    if (v == null) {
+        put(key, value)
+        return null
+    }
+    return v
+}
+
+/**
+ * ported from java.util.Map.remove()
+ *
+ * Removes the entry for the specified key only if it is currently
+ * mapped to the specified value.
+ *
+ * @param key key with which the specified value is associated
+ * @param value value expected to be associated with the specified key
+ * @return true if the value was removed
+ */
+fun <K, V> MutableMap<K, V>.remove(key: K, value: V): Boolean {
+    val curValue = get(key)
+    if (curValue != null && curValue == value) {
+        remove(key)
+        return true
+    }
+    return false
+}
+
+/**
+ * ported from java.util.Map.replace()
+ *
+ * Replaces the entry for the specified key only if it is currently mapped to
+ * some value.
+ *
+ * @param key key with which the specified value is associated
+ * @param value value to be associated with the specified key
+ * @return the previous value associated with the specified key, or
+ *         null if there was no mapping for the key.
+ *         (A null return can also indicate that the map previously
+ *         associated null with the key, if the implementation supports
+ *         null values.)
+ */
+fun <K, V> MutableMap<K, V>.replace(key: K, value: V): V? {
+    val curValue = get(key)
+    if (curValue != null) {
+        put(key, value)
+        return curValue
+    }
+    return null
+}
+
+/**
  * ported from java.util.Map.computeIfAbsent()
  *
  * If the specified key is not already associated with a value (or is mapped

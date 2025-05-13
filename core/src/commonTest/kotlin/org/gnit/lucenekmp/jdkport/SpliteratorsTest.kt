@@ -10,7 +10,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliterator() {
         val array = arrayOf(1, 2, 3, 4, 5)
-        val spliterator = Spliterators.ArraySpliterator(array, Spliterator.ORDERED)
+        val spliterator = Spliterators.ArraySpliterator<Int>(array, Spliterator.ORDERED)
 
         val list = mutableListOf<Int>()
         while (spliterator.tryAdvance { list.add(it) }) {
@@ -22,7 +22,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliteratorUnknownSize() {
         val iterator = listOf(1, 2, 3, 4, 5).iterator()
-        val spliterator = Spliterators.IteratorSpliterator(iterator, Spliterator.ORDERED)
+        val spliterator = Spliterators.IteratorSpliterator<Int>(iterator, Spliterator.ORDERED)
 
         val list = mutableListOf<Int>()
         while (spliterator.tryAdvance { list.add(it) }) {
@@ -34,7 +34,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliteratorTrySplit() {
         val array = arrayOf(1, 2, 3, 4, 5)
-        val spliterator = Spliterators.ArraySpliterator(array, Spliterator.ORDERED)
+        val spliterator = Spliterators.ArraySpliterator<Int>(array, Spliterator.ORDERED)
 
         val split = spliterator.trySplit()
         assertTrue(split != null)
@@ -54,7 +54,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliteratorUnknownSizeTrySplit() {
         val iterator = listOf(1, 2, 3, 4, 5).iterator()
-        val spliterator = Spliterators.IteratorSpliterator(iterator, Spliterator.ORDERED)
+        val spliterator = Spliterators.IteratorSpliterator<Int>(iterator, Spliterator.ORDERED)
 
         val split = spliterator.trySplit()
         assertTrue(split != null)
@@ -74,7 +74,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliteratorCharacteristics() {
         val array = arrayOf(1, 2, 3, 4, 5)
-        val spliterator = Spliterators.ArraySpliterator(array, Spliterator.ORDERED or Spliterator.SIZED)
+        val spliterator = Spliterators.ArraySpliterator<Int>(array, Spliterator.ORDERED or Spliterator.SIZED)
 
         assertTrue(spliterator.hasCharacteristics(Spliterator.ORDERED))
         assertTrue(spliterator.hasCharacteristics(Spliterator.SIZED))
@@ -84,7 +84,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliteratorEstimateSize() {
         val array = arrayOf(1, 2, 3, 4, 5)
-        val spliterator = Spliterators.ArraySpliterator(array, Spliterator.ORDERED or Spliterator.SIZED)
+        val spliterator = Spliterators.ArraySpliterator<Int>(array, Spliterator.ORDERED or Spliterator.SIZED)
 
         assertEquals(5, spliterator.estimateSize())
     }
@@ -92,7 +92,7 @@ class SpliteratorsTest {
     @Test
     fun testSpliteratorUnknownSizeEstimateSize() {
         val iterator = listOf(1, 2, 3, 4, 5).iterator()
-        val spliterator = Spliterators.IteratorSpliterator(iterator, Spliterator.ORDERED)
+        val spliterator = Spliterators.IteratorSpliterator<Int>(iterator, Spliterator.ORDERED)
 
         assertEquals(Long.MAX_VALUE, spliterator.estimateSize())
     }

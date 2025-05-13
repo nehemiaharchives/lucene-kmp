@@ -1,32 +1,33 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.io.Buffer
-import kotlinx.io.Sink
-import kotlinx.io.buffer
-import kotlinx.io.sink
+import kotlinx.io.readByteArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class KIOSinkOutputStreamTest {
 
+    private fun createTestStream(): Pair<KIOSinkOutputStream, Buffer> {
+        val buffer = Buffer()
+        val outputStream = KIOSinkOutputStream(buffer)
+        return Pair(outputStream, buffer)
+    }
+
     @Test
     fun testWriteSingleByte() {
-        val buffer = Buffer()
-        val sink: Sink = buffer.sink()
-        val outputStream = KIOSinkOutputStream(sink)
+        val (outputStream, buffer) = createTestStream()
 
         outputStream.write(65) // Write ASCII 'A'
         outputStream.flush()
 
-        assertEquals("A", buffer.readUtf8())
+        val bytes = buffer.readByteArray(1)
+        assertEquals("A", bytes.decodeToString())
     }
 
     @Test
     fun testWriteMultipleBytes() {
-        val buffer = Buffer()
-        val sink: Sink = buffer.sink()
-        val outputStream = KIOSinkOutputStream(sink)
+        val (outputStream, buffer) = createTestStream()
 
         val data = "Hello, World!".encodeToByteArray()
         for (byte in data) {
@@ -34,14 +35,13 @@ class KIOSinkOutputStreamTest {
         }
         outputStream.flush()
 
-        assertEquals("Hello, World!", buffer.readUtf8())
+        val bytes = buffer.readByteArray(data.size)
+        assertEquals("Hello, World!", bytes.decodeToString())
     }
 
     @Test
     fun testWriteAfterClose() {
-        val buffer = Buffer()
-        val sink: Sink = buffer.sink()
-        val outputStream = KIOSinkOutputStream(sink)
+        val (outputStream, _) = createTestStream()
 
         outputStream.close()
         assertFailsWith<IllegalStateException> {

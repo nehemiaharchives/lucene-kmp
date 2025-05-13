@@ -40,17 +40,8 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
         fun allocate(capacity: Int): FloatBuffer {
             require(capacity >= 0) { "Capacity must be non-negative" }
             // Create a zero-filled ByteArray to back the Buffer.
-            // Use a temporary buffer to easily write zeros.
-            val buf = Buffer()
-            buf.write(ByteArray(capacity * BYTES_PER_FLOAT)) // Allocate space
-            buf.clear() // Reset buffer position/limit after writing zeros (important!)
-            // Re-read the zeroed bytes into the actual buffer we'll use
-            // This ensures the buffer size is correctly managed by kotlinx.io
-            val finalBuf = Buffer().apply { transferFrom(buf) }
-
-            // Alternatively, simpler approach if direct zero-filling is okay:
-            // val byteArray = ByteArray(capacity * BYTES_PER_FLOAT)
-            // val finalBuf = Buffer().apply { write(byteArray, 0, byteArray.size) }
+            val byteArray = ByteArray(capacity * BYTES_PER_FLOAT)
+            val finalBuf = Buffer().apply { write(byteArray, 0, byteArray.size) }
 
             return FloatBuffer(finalBuf, capacity).clear()
         }
@@ -64,9 +55,8 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
         fun wrap(array: FloatArray): FloatBuffer {
             val byteSize = array.size * BYTES_PER_FLOAT
             val buf = Buffer()
-            // Default to BIG_ENDIAN for the wrapping process as in LongBuffer.wrap
-            // The user can change the order later if needed.
-            val tempOrder = ByteOrder.BIG_ENDIAN
+            // Use native byte order for consistency with the default order of the buffer
+            val tempOrder = ByteOrder.nativeOrder()
 
             for (value in array) {
                 val bits = value.toBits() // Get IEEE 754 representation
@@ -86,10 +76,9 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
                     }
                 }
             }
-            // Ensure the wrapped buffer uses the system's native order by default
-            // or allow setting it explicitly. Here, we'll match LongBuffer's behavior.
+            // Create the FloatBuffer with the native byte order
             return FloatBuffer(buf, array.size).clear().apply {
-                order = ByteOrder.nativeOrder() // Set default order after creation
+                order = ByteOrder.nativeOrder()
             }
         }
     }
@@ -206,6 +195,15 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
      */
     fun position(newPosition: Int): FloatBuffer {
         this.position = newPosition
+        return this
+    }
+
+    /**
+     * Sets this buffer's limit. If the position is larger than the new limit then it is set to the new limit.
+     * If the mark is defined and larger than the new limit then it is discarded.
+     */
+    fun limit(newLimit: Int): FloatBuffer {
+        this.limit = newLimit
         return this
     }
 

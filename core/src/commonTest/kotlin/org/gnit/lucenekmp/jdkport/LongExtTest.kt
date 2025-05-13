@@ -71,8 +71,8 @@ class LongExtTest {
 
     @Test
     fun testReverseBytes() {
-        val value = 0x1234567890ABCDEFL
+        val value = 0x0102030405060708L
         val reversed = Long.reverseBytes(value)
-        assertEquals(0xEFCDAB9078563412L, reversed)
+        assertEquals(0x0807060504030201L, reversed)
     }
 }

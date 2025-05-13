@@ -118,6 +118,31 @@ fun Long.Companion.rotateLeft(i: Long, distance: Int): Long {
 }
 
 /**
+ * Returns the value obtained by rotating the two's complement binary
+ * representation of the specified `long` value right by the
+ * specified number of bits.  (Bits shifted out of the right hand, or
+ * low-order, side reenter on the left, or high-order.)
+ *
+ *
+ * Note that right rotation with a negative distance is equivalent to
+ * left rotation: `rotateRight(val, -distance) == rotateLeft(val,
+ * distance)`.  Note also that rotation by any multiple of 64 is a
+ * no-op, so all but the last six bits of the rotation distance can be
+ * ignored, even if the distance is negative: `rotateRight(val,
+ * distance) == rotateRight(val, distance & 0x3F)`.
+ *
+ * @param i the value whose bits are to be rotated right
+ * @param distance the number of bit positions to rotate right
+ * @return the value obtained by rotating the two's complement binary
+ * representation of the specified `long` value right by the
+ * specified number of bits.
+ * @since 1.5
+ */
+fun Long.Companion.rotateRight(i: Long, distance: Int): Long {
+    return (i ushr distance) or (i shl -distance)
+}
+
+/**
  * Compares two `long` values numerically treating the values
  * as unsigned.
  *
@@ -130,9 +155,55 @@ fun Long.Companion.rotateLeft(i: Long, distance: Int): Long {
  * @since 1.8
  */
 fun Long.Companion.compareUnsigned(x: Long, y: Long): Int {
-    return Long.compare(x + MIN_VALUE, y + MIN_VALUE)
+    return Long.compare(x + Long.MIN_VALUE, y + Long.MIN_VALUE)
 }
 
+
+/**
+ * Returns a string representation of the `long`
+ * argument as an unsigned integer in base&nbsp;2.
+ *
+ * The unsigned `long` value is the argument plus
+ * 2<sup>64</sup> if the argument is negative; otherwise, it is
+ * equal to the argument.  This value is converted to a string of
+ * ASCII digits in binary (base&nbsp;2) with no extra
+ * leading `0`s.
+ *
+ * @param   i   a `long` to be converted to a string.
+ * @return  the string representation of the unsigned `long`
+ *          value represented by the argument in binary (base&nbsp;2).
+ * @see     Long.parseUnsignedLong
+ * @since   1.0.2
+ */
+fun Long.Companion.toBinaryString(i: Long): String {
+    return Long.toUnsignedString0(i, 1)
+}
+
+/**
+ * Returns a string representation of the `long`
+ * argument as an unsigned integer in base&nbsp;10.
+ *
+ * The unsigned `long` value is the argument plus
+ * 2<sup>64</sup> if the argument is negative; otherwise, it is
+ * equal to the argument.  This value is converted to a string of
+ * ASCII digits in decimal (base&nbsp;10) with no extra
+ * leading `0`s.
+ *
+ * @param   i   a `long` to be converted to a string.
+ * @return  the string representation of the unsigned `long`
+ *          value represented by the argument in decimal (base&nbsp;10).
+ * @see     Long.parseUnsignedLong
+ * @since   1.8
+ */
+fun Long.Companion.toUnsignedString(i: Long): String {
+    if (i >= 0L) return i.toString()
+
+    val quotient = (i ushr 1) / 5 + (i ushr 1) % 5
+    val digit = i - quotient * 10
+
+    if (quotient == 0L) return digit.toString()
+    return quotient.toString() + digit.toString()
+}
 
 /**
  * Returns a string representation of the `long`
@@ -198,34 +269,28 @@ fun Long.Companion.toHexString(i: Long): String {
  */
 fun Long.Companion.toUnsignedString0(`val`: Long, shift: Int): String {
     // assert shift > 0 && shift <=5 : "Illegal shift value";
-    val mag: Int = Long.SIZE_BITS - Long.numberOfLeadingZeros(`val`)
+    val radix = 1 shl shift
+
+    if (`val` == 0L) return "0"
+
+    val mag: Int = SIZE_BITS - Long.numberOfLeadingZeros(`val`)
     val chars = max(((mag + (shift - 1)) / shift), 1)
 
-    val buf = ByteArray(chars)
-    Long.formatUnsignedLong0(`val`, shift, buf, 0, chars)
-    return String.fromByteArray(buf, Charset.LATIN1)
-}
+    val buf = StringBuilder(chars)
+    var value = `val`
 
-/**
- * Format a long (treated as unsigned) into a byte buffer (LATIN1 version). If
- * `len` exceeds the formatted ASCII representation of `val`,
- * `buf` will be padded with leading zeroes.
- *
- * @param val the unsigned long to format
- * @param shift the log2 of the base to format in (4 for hex, 3 for octal, 1 for binary)
- * @param buf the byte buffer to write to
- * @param offset the offset in the destination buffer to start at
- * @param len the number of characters to write
- */
-private fun Long.Companion.formatUnsignedLong0(`val`: Long, shift: Int, buf: ByteArray, offset: Int, len: Int) {
-    var `val` = `val`
-    var charPos = offset + len
-    val radix = 1 shl shift
-    val mask = radix - 1
-    do {
-        buf[--charPos] = Int.digits()[(`val`.toInt()) and mask].code.toByte()
-        `val` = `val` ushr shift
-    } while (charPos > offset)
+    while (value != 0L) {
+        val digit = (value and (radix - 1).toLong()).toInt()
+        buf.append(
+            when (digit) {
+                in 0..9 -> '0' + digit
+                else -> 'a' + (digit - 10)
+            }
+        )
+        value = value ushr shift
+    }
+
+    return buf.reverse().toString()
 }
 
 /**

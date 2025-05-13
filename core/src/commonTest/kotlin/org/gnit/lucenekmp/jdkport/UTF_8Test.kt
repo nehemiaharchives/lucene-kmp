@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.jdkport.UTF_8.Companion.JLA
+import org.gnit.lucenekmp.jdkport.UTF_8.Companion.updatePositions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -81,5 +83,55 @@ class UTF_8Test {
         assertFailsWith<UnsupportedOperationException> {
             utf8Decoder.detectedCharset()
         }
+    }
+
+    // Tests for companion object methods
+    @Test
+    fun testUpdatePositions() {
+        val srcArray = "abcdef".encodeToByteArray()
+        val dstArray = CharArray(6)
+        val src = ByteBuffer.wrap(srcArray)
+        val dst = CharBuffer.wrap(dstArray)
+        // Set initial positions
+        src.position = 2
+        dst.position = 3
+        // Call updatePositions to set positions to 1 and 2
+        updatePositions(src, 1, dst, 2)
+        assertEquals(1, src.position)
+        assertEquals(2, dst.position)
+    }
+
+    @Test
+    fun testDecodeASCII_AllAscii() {
+        val src = "HelloWorld".encodeToByteArray()
+        val dst = CharArray(10)
+        val decoded = JLA.decodeASCII(src, 0, dst, 0, src.size)
+        assertEquals(10, decoded)
+        assertEquals("HelloWorld", dst.concatToString())
+    }
+
+    @Test
+    fun testDecodeASCII_PartialAscii() {
+        val src = byteArrayOf(72, 101, 108, 108, 111, -1, 87, 111, 114, 108, 100) // "Hello" + non-ASCII + "World"
+        val dst = CharArray(11)
+        val decoded = JLA.decodeASCII(src, 0, dst, 0, src.size)
+        assertEquals(5, decoded)
+        assertEquals("Hello", dst.concatToString(0, 5))
+    }
+
+    @Test
+    fun testDecodeASCII_NullDst() {
+        val src = "abc".encodeToByteArray()
+        val decoded = JLA.decodeASCII(src, 0, null, 0, src.size)
+        assertEquals(0, decoded)
+    }
+
+    @Test
+    fun testDecodeASCII_OffsetAndLength() {
+        val src = "0123456789".encodeToByteArray()
+        val dst = CharArray(5)
+        val decoded = JLA.decodeASCII(src, 2, dst, 0, 5)
+        assertEquals(5, decoded)
+        assertEquals("23456", dst.concatToString())
     }
 }

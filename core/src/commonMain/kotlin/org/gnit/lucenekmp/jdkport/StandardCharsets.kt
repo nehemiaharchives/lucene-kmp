@@ -38,6 +38,11 @@ class StandardCharsets private constructor() {
         val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8()
 
         /**
+         * ISO Latin Alphabet No. 1, also known as ISO-LATIN-1.
+         */
+        val LATIN1: Charset = Charset.LATIN1
+
+        /**
          * Sixteen-bit UCS Transformation Format, big-endian byte order.
          */
         //val UTF_16BE: Charset = sun.nio.cs.UTF_16BE()

@@ -10,7 +10,7 @@ class CRC32Test {
         val crc32 = CRC32()
         val data = "Hello, World!".encodeToByteArray()
         crc32.update(data, 0, data.size)
-        assertEquals(0x1C291CA3, crc32.getValue())
+        assertEquals(0xEC4AC3D0, crc32.getValue())
     }
 
     @Test
@@ -18,7 +18,7 @@ class CRC32Test {
         val crc32 = CRC32()
         val data = "Hello, World!".encodeToByteArray()
         crc32.update(data, 0, data.size)
-        assertEquals(0x1C291CA3, crc32.getValue())
+        assertEquals(0xEC4AC3D0, crc32.getValue())
     }
 
     @Test

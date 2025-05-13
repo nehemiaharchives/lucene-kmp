@@ -2,6 +2,24 @@ package org.gnit.lucenekmp.jdkport
 
 
 /**
+ * Compares two `short` values numerically.
+ * The value returned is identical to what would be returned by:
+ * <pre>
+ * Short.valueOf(x).compareTo(Short.valueOf(y))
+ * </pre>
+ *
+ * @param  x the first `short` to compare
+ * @param  y the second `short` to compare
+ * @return the value `0` if `x == y`;
+ * a value less than `0` if `x < y`; and
+ * a value greater than `0` if `x > y`
+ * @since 1.7
+ */
+fun Short.Companion.compare(x: Short, y: Short): Int {
+    return if (x < y) -1 else (if (x == y) 0 else 1)
+}
+
+/**
  * Converts the argument to an `int` by an unsigned
  * conversion.  In an unsigned conversion to an `int`, the
  * high-order 16 bits of the `int` are zero and the

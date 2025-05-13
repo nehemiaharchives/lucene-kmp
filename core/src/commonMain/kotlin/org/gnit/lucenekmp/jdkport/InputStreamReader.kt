@@ -37,6 +37,10 @@ import kotlinx.io.IOException
  * @since       1.1
  */
 open class InputStreamReader : Reader {
+    private fun debug(message: () -> String) {
+        println("[DEBUG] ${message()}")
+    }
+
     private val sd: StreamDecoder
 
     /**
@@ -129,7 +133,10 @@ open class InputStreamReader : Reader {
      * @throws     IOException  If an I/O error occurs
      */
     override fun read(): Int {
-        return sd.read()
+        debug { "InputStreamReader.read() called" }
+        val result = sd.read()
+        debug { "InputStreamReader.read() returned $result" }
+        return result
     }
 
     /**
@@ -149,7 +156,16 @@ open class InputStreamReader : Reader {
      */
     @Throws(IOException::class)
     override fun ready(): Boolean {
-        return sd.ready()
+        return try {
+            sd.ready()
+        } catch (e: IOException) {
+            // If the stream is closed, return false instead of throwing an exception
+            if (e.message == "Stream closed") {
+                false
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun close() {

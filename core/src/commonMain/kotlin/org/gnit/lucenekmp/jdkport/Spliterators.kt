@@ -44,6 +44,15 @@ object Spliterators {
         }
 
         /**
+         * Creates a spliterator covering all of the given array.
+         * This is a convenience constructor for arrays of specific types.
+         * @param array the array, assumed to be unmodified during use.
+         * @param additionalCharacteristics Additional characteristics beyond SIZED/SUBSIZED.
+         */
+        constructor(array: Array<Int>, additionalCharacteristics: Int)
+                : this(array.map { it as Any? }.toTypedArray(), 0, array.size, additionalCharacteristics)
+
+        /**
          * Private constructor for use by trySplit, potentially without SIZED/SUBSIZED.
          * @param array the array.
          * @param origin the least index (inclusive).
@@ -118,6 +127,120 @@ object Spliterators {
         override fun getComparator(): Comparator<in T>? {
             if (hasCharacteristics(Spliterator.SORTED)) {
                 // ArraySpliterator itself doesn't know the sorting comparator
+                return null
+            }
+            throw IllegalStateException("Spliterator does not report SORTED characteristic")
+        }
+    }
+
+    /**
+     * A Spliterator that uses an Iterator for traversal.
+     * Mimics java.util.Spliterators.IteratorSpliterator.
+     */
+    class IteratorSpliterator<T> : Spliterator<T> {
+        private val it: Iterator<T> // The underlying iterator
+        private var est: Long // Estimated size, Long.MAX_VALUE if unknown, or the known size
+        private val characteristics: Int // Characteristics of this spliterator
+
+        // Batching fields for trySplit
+        private var batch: Int = 0 // Size of the current batch for trySplit
+
+        companion object {
+            // Constants for trySplit batching logic (from Java's Spliterators)
+            private const val BATCH_UNIT = 1024 // Minimum batch size increment
+            private const val MAX_BATCH = 1 shl 25 // Max batch size (approx 33.5M)
+        }
+
+        /** Constructor for unknown size. */
+        constructor(iterator: Iterator<T>, characteristics: Int) {
+            this.it = iterator
+            this.est = Long.MAX_VALUE
+            // Remove SIZED and SUBSIZED characteristics if present, as size is unknown
+            this.characteristics = characteristics and (Spliterator.SIZED or Spliterator.SUBSIZED).inv()
+        }
+
+        /** Constructor for known size. */
+        constructor(iterator: Iterator<T>, size: Long, characteristics: Int) {
+            this.it = iterator
+            this.est = size
+            // Ensure SIZED is reported if size >= 0
+            this.characteristics = if (size >= 0 && (characteristics and Spliterator.SIZED) != 0) {
+                characteristics
+            } else {
+                // If size is unknown (<0) or SIZED wasn't requested, remove SIZED and SUBSIZED
+                characteristics and (Spliterator.SIZED or Spliterator.SUBSIZED).inv()
+            }
+        }
+
+        override fun trySplit(): Spliterator<T>? {
+            /*
+             * Split into arrays using arithmetically increasing batch sizes.
+             */
+            val i = it // Use the instance iterator
+            val s = est
+            if (s > 1 && i.hasNext()) {
+                var n = batch + BATCH_UNIT
+                if (n > s) n = s.toInt() // Cast to Int safely as s <= Long.MAX_VALUE here
+                if (n > MAX_BATCH) n = MAX_BATCH
+
+                // Allocate array - using MutableList as intermediate for dynamic size
+                val buffer = ArrayList<T>(n) // Initial capacity
+                var j = 0
+                while (j < n && i.hasNext()) {
+                    buffer.add(i.next())
+                    j++
+                }
+                // Update batch size for next split attempt
+                batch = j
+
+                // Update estimate for this spliterator
+                if (est != Long.MAX_VALUE) {
+                    est -= j.toLong()
+                }
+
+                // Create ArraySpliterator for the split-off portion
+                // Convert the buffer to an array of Any? for the ArraySpliterator
+                val anyArray = Array<Any?>(j) { i -> buffer[i] as Any? }
+                return ArraySpliterator(
+                    anyArray,
+                    0,
+                    j,
+                    characteristics()
+                )
+            }
+            return null // Cannot split further
+        }
+
+        override fun forEachRemaining(action: (T) -> Unit) {
+            // Implement forEachRemaining using the iterator
+            while (it.hasNext()) {
+                action(it.next())
+            }
+        }
+
+        override fun tryAdvance(action: (T) -> Unit): Boolean {
+            if (it.hasNext()) {
+                action(it.next())
+                return true
+            }
+            return false
+        }
+
+        override fun estimateSize(): Long {
+            // Note: Unlike Java's version which might re-fetch from a collection,
+            // this implementation relies solely on the initial estimate and decrements
+            // during trySplit.
+            return est
+        }
+
+        override fun characteristics(): Int {
+            return characteristics
+        }
+
+        override fun getComparator(): Comparator<in T>? {
+            if (hasCharacteristics(Spliterator.SORTED)) {
+                // If SORTED is reported, but we only have an iterator,
+                // we cannot guarantee the comparator. Java's returns null here.
                 return null
             }
             throw IllegalStateException("Spliterator does not report SORTED characteristic")

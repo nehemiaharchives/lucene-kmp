@@ -85,7 +85,25 @@ object Objects {
      * @see String.valueOf
      */
     fun toString(o: Any?): String {
-        return o.toString()
+        return o?.toString() ?: "null"
+    }
+
+    /**
+     * Returns {@code true} if the arguments are equal to each other
+     * and {@code false} otherwise.
+     * Consequently, if both arguments are {@code null}, {@code true}
+     * is returned.  Otherwise, if the first argument is not {@code null},
+     * equality is determined by calling the {@code equals} method of
+     * the first argument with the second argument as a parameter.
+     *
+     * @param a an object
+     * @param b an object to be compared with {@code a} for equality
+     * @return {@code true} if the arguments are equal to each other
+     * and {@code false} otherwise
+     * @see Object.equals
+     */
+    fun equals(a: Any?, b: Any?): Boolean {
+        return a === b || (a != null && a.equals(b))
     }
 }
 
@@ -181,5 +199,3 @@ fun toCodePoint(high: Char, low: Char): Int =
  */
 fun Char.isHighSurrogate(): Boolean = this in '\uD800'..'\uDBFF'
 fun Char.isLowSurrogate(): Boolean = this in '\uDC00'..'\uDFFF'
-
-

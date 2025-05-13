@@ -64,6 +64,11 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
     fun remaining(): Int = limit - position
 
     /**
+     * Returns whether there are any elements remaining between position and limit.
+     */
+    fun hasRemaining(): Boolean = position < limit
+
+    /**
      * Clears this buffer. Sets position to 0 and limit to capacity.
      */
     fun clear(): LongBuffer {
@@ -141,6 +146,15 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
      */
     fun position(newPosition: Int): LongBuffer {
         this.position = newPosition
+        return this
+    }
+
+    /**
+     * Sets this buffer's limit. If the position is larger than the new limit then it is set to the new limit.
+     * If the mark is defined and larger than the new limit then it is discarded.
+     */
+    fun limit(newLimit: Int): LongBuffer {
+        this.limit = newLimit
         return this
     }
 
@@ -264,6 +278,31 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
             if (cmp != 0) return cmp
         }
         return remaining() - other.remaining()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is LongBuffer) return false
+
+        if (this.remaining() != other.remaining()) return false
+
+        val thisPos = this.position
+        val otherPos = other.position
+        for (i in 0 until remaining()) {
+            if (this.get(thisPos + i) != other.get(otherPos + i)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = 1
+        val pos = this.position
+        for (i in 0 until remaining()) {
+            result = 31 * result + get(pos + i).hashCode()
+        }
+        return result
     }
 
     override fun toString(): String {
