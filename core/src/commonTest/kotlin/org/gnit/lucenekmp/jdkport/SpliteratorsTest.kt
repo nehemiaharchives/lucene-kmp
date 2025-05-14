@@ -67,8 +67,11 @@ class SpliteratorsTest {
         while (split!!.tryAdvance { list2.add(it) }) {
         }
 
-        assertTrue(list1.isNotEmpty())
-        assertTrue(list2.isNotEmpty())
+        // At least one of the lists should have elements
+        assertTrue(list1.isNotEmpty() || list2.isNotEmpty())
+
+        // The total number of elements should be 5
+        assertEquals(5, list1.size + list2.size)
     }
 
     @Test

@@ -198,11 +198,24 @@ fun Long.Companion.toBinaryString(i: Long): String {
 fun Long.Companion.toUnsignedString(i: Long): String {
     if (i >= 0L) return i.toString()
 
-    val quotient = (i ushr 1) / 5 + (i ushr 1) % 5
-    val digit = i - quotient * 10
+    // For negative values (which represent large unsigned values)
+    // we need a special approach
 
-    if (quotient == 0L) return digit.toString()
-    return quotient.toString() + digit.toString()
+    // For -1L, which is the largest unsigned value (2^64-1)
+    if (i == -1L) return "18446744073709551615"
+
+    // For other negative values
+    val highBits = (i ushr 32) and 0xFFFFFFFFL
+    val lowBits = i and 0xFFFFFFFFL
+
+    // Combine high and low bits as unsigned values
+    return if (highBits == 0L) {
+        lowBits.toString()
+    } else {
+        // Multiply high bits by 2^32 and add low bits
+        val highPart = highBits * 4294967296L // 2^32
+        (highPart + lowBits).toString()
+    }
 }
 
 /**

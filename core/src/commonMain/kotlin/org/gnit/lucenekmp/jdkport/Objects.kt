@@ -33,7 +33,11 @@ object Objects {
      * @see List.hashCode
      */
     fun hash(vararg values: Any?): Int {
-        return values.contentHashCode()
+        return when {
+            values.isEmpty() -> 0
+            values.size == 1 -> values[0]?.hashCode() ?: 0
+            else -> values.contentHashCode()
+        }
     }
 
     fun checkFromIndexSize(fromIndex: Int, size: Int, length: Int): Int {

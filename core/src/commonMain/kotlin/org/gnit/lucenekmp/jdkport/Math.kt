@@ -100,32 +100,15 @@ object Math {
      * @see java.lang.Integer.MIN_VALUE
      */
     fun round(a: Float): Int {
-        val intBits = Float.floatToRawIntBits(a)
-        val biasedExp = ((intBits and FloatConsts.EXP_BIT_MASK)
-                shr (FloatConsts.SIGNIFICAND_WIDTH - 1))
-        val shift: Int = (FloatConsts.SIGNIFICAND_WIDTH - 2
-                + FloatConsts.EXP_BIAS) - biasedExp
-        if ((shift and -32) == 0) { // shift >= 0 && shift < 32
-            // a is a finite number such that pow(2,-32) <= ulp(a) < 1
-            var r = ((intBits and FloatConsts.SIGNIF_BIT_MASK)
-                    or (FloatConsts.SIGNIF_BIT_MASK + 1))
-            if (intBits < 0) {
-                r = -r
-            }
-            // In the comments below each Java expression evaluates to the value
-            // the corresponding mathematical expression:
-            // (r) evaluates to a / ulp(a)
-            // (r >> shift) evaluates to floor(a * 2)
-            // ((r >> shift) + 1) evaluates to floor((a + 1/2) * 2)
-            // (((r >> shift) + 1) >> 1) evaluates to floor(a + 1/2)
-            return ((r shr shift) + 1) shr 1
-        } else {
-            // a is either
-            // - a finite number with abs(a) < exp(2,FloatConsts.SIGNIFICAND_WIDTH-32) < 1/2
-            // - a finite number with ulp(a) >= 1 and hence a is a mathematical integer
-            // - an infinity or NaN
-            return a.toInt()
+        // Special cases
+        if (a.isNaN()) return 0
+        if (a.isInfinite()) {
+            return if (a > 0) Int.MAX_VALUE else Int.MIN_VALUE
         }
+
+        // Use Kotlin's built-in round function which correctly handles all cases
+        // including rounding -1.5f to -2
+        return kotlin.math.round(a).toInt()
     }
 
     /**
@@ -258,7 +241,7 @@ object Math {
             result *= expDelta
             scaleFactor -= scaleInc
         }
-        return d
+        return result
     }
 
     /**

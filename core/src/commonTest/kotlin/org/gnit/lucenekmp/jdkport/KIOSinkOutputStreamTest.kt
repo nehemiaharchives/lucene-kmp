@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.io.Buffer
+import kotlinx.io.IOException
 import kotlinx.io.readByteArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,7 +45,7 @@ class KIOSinkOutputStreamTest {
         val (outputStream, _) = createTestStream()
 
         outputStream.close()
-        assertFailsWith<IllegalStateException> {
+        assertFailsWith<IOException> {
             outputStream.write(65)
         }
     }

@@ -83,6 +83,15 @@ class KIOSourceBufferedReaderTest {
         val reader = KIOSourceBufferedReader(source)
 
         reader.close()
-        assertFalse(reader.ready())
+
+        // After closing, ready() should throw IOException
+        var exceptionThrown = false
+        try {
+            reader.ready()
+        } catch (e: Exception) {
+            exceptionThrown = true
+            assertTrue(e.message?.contains("Stream closed") == true)
+        }
+        assertTrue(exceptionThrown, "Expected IOException to be thrown when calling ready() on closed stream")
     }
 }

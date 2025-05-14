@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class StandardCharsetsTest {
 
@@ -31,13 +30,13 @@ class StandardCharsetsTest {
 
     @Test
     fun testLATIN1Charset() {
-        val charset = StandardCharsets.LATIN1
+        val charset = StandardCharsets.ISO_8859_1
         assertEquals("ISO-8859-1", charset.name())
     }
 
     @Test
     fun testLATIN1CharsetDecode() {
-        val charset = StandardCharsets.LATIN1
+        val charset = StandardCharsets.ISO_8859_1
         val input = byteArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F) // "Hello" in ISO-8859-1
         val output = charset.decode(input)
         assertEquals("Hello", output)
@@ -45,7 +44,7 @@ class StandardCharsetsTest {
 
     @Test
     fun testLATIN1CharsetEncode() {
-        val charset = StandardCharsets.LATIN1
+        val charset = StandardCharsets.ISO_8859_1
         val input = "Hello"
         val output = charset.encode(input)
         assertEquals(byteArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F).toList(), output.toList())

@@ -40,18 +40,32 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
         fun wrap(array: LongArray): LongBuffer {
             // Convert the long array to a ByteArray.
             val byteArray = ByteArray(array.size * 8)
+            val nativeOrder = ByteOrder.nativeOrder()
             for (i in array.indices) {
                 val offset = i * 8
                 val value = array[i]
-                // For simplicity, we assume BIG_ENDIAN here.
-                byteArray[offset]     = (value shr 56).toByte()
-                byteArray[offset + 1] = (value shr 48).toByte()
-                byteArray[offset + 2] = (value shr 40).toByte()
-                byteArray[offset + 3] = (value shr 32).toByte()
-                byteArray[offset + 4] = (value shr 24).toByte()
-                byteArray[offset + 5] = (value shr 16).toByte()
-                byteArray[offset + 6] = (value shr 8).toByte()
-                byteArray[offset + 7] = value.toByte()
+                when (nativeOrder) {
+                    ByteOrder.BIG_ENDIAN -> {
+                        byteArray[offset]     = (value shr 56).toByte()
+                        byteArray[offset + 1] = (value shr 48).toByte()
+                        byteArray[offset + 2] = (value shr 40).toByte()
+                        byteArray[offset + 3] = (value shr 32).toByte()
+                        byteArray[offset + 4] = (value shr 24).toByte()
+                        byteArray[offset + 5] = (value shr 16).toByte()
+                        byteArray[offset + 6] = (value shr 8).toByte()
+                        byteArray[offset + 7] = value.toByte()
+                    }
+                    ByteOrder.LITTLE_ENDIAN -> {
+                        byteArray[offset]     = value.toByte()
+                        byteArray[offset + 1] = (value shr 8).toByte()
+                        byteArray[offset + 2] = (value shr 16).toByte()
+                        byteArray[offset + 3] = (value shr 24).toByte()
+                        byteArray[offset + 4] = (value shr 32).toByte()
+                        byteArray[offset + 5] = (value shr 40).toByte()
+                        byteArray[offset + 6] = (value shr 48).toByte()
+                        byteArray[offset + 7] = (value shr 56).toByte()
+                    }
+                }
             }
             val buf = Buffer().apply { write(byteArray, 0, byteArray.size) }
             return LongBuffer(buf, array.size).clear()
@@ -124,7 +138,7 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
     fun get(index: Int): Long {
         if (index < 0 || index >= limit)
             throw IndexOutOfBoundsException("Index $index out of bounds (limit: $limit)")
-        val byteOffset = index.toLong() * 8L
+        val byteOffset = baseOffset + (index.toLong() * 8L)
         var result = 0L
         when (order) {
             ByteOrder.BIG_ENDIAN -> {
@@ -133,8 +147,8 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
                 }
             }
             ByteOrder.LITTLE_ENDIAN -> {
-                for (i in 7 downTo 0) {
-                    result = (result shl 8) or ((buffer.get(byteOffset + i).toInt() and 0xFF).toLong())
+                for (i in 0 until 8) {
+                    result = result or ((buffer.get(byteOffset + i).toInt() and 0xFF).toLong() shl (i * 8))
                 }
             }
         }
@@ -224,7 +238,7 @@ class LongBuffer(private val buffer: Buffer, val capacity: Int, private val base
     fun put(index: Int, value: Long): LongBuffer {
         if (index < 0 || index >= limit)
             throw IndexOutOfBoundsException("Index $index out of bounds (limit: $limit)")
-        val byteOffset = index.toLong() * 8L
+        val byteOffset = baseOffset + (index.toLong() * 8L)
         when (order) {
             ByteOrder.BIG_ENDIAN -> {
                 buffer.setByteAt(byteOffset,     (value shr 56).toByte())
