@@ -37,6 +37,7 @@ kotlin {
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
                 implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlin.logging)
             }
         }
         val commonTest by getting {
@@ -52,7 +53,9 @@ kotlin {
         val jvmAndroidMain by creating {
             dependsOn(commonMain)
             // dependencies which are used both by jvm and android will be here
-
+            dependencies {
+                implementation(libs.logback)
+            }
         }
         jvmMain.get().dependsOn(jvmAndroidMain)
         androidMain.get().dependsOn(jvmAndroidMain)

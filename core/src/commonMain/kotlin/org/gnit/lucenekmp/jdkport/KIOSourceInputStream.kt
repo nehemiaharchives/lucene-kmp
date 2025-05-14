@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.io.Buffer
 import kotlinx.io.EOFException
 import kotlinx.io.IOException
@@ -9,6 +10,8 @@ import kotlinx.io.Source
  * A InputStream implementation which use kotlinx.io.Source
  */
 class KIOSourceInputStream(val source: Source) : InputStream() {
+
+    val logger = KotlinLogging.logger {}
 
     /**
      * Reads the next byte of data from the input stream. The value byte is
@@ -23,12 +26,62 @@ class KIOSourceInputStream(val source: Source) : InputStream() {
      * @throws     kotlinx.io.IOException  if an I/O error occurs.
      */
     @Throws(IOException::class)
-    override fun read(): Int{
+    override fun read(): Int {
         return try {
             source.readByte().toInt()
-        }catch (e: EOFException) {
+        } catch (e: EOFException) {
             -1
         }
+    }
+
+    /**
+     * Reads up to `len` bytes of data from the input stream into
+     * an array of bytes. An attempt is made to read as many as
+     * `len` bytes, but a smaller number may be read.
+     * The number of bytes actually read is returned as an integer.
+     *
+     * @param      b     the buffer into which the data is read.
+     * @param      off   the start offset in array `b`
+     *                   at which the data is written.
+     * @param      len   the maximum number of bytes to read.
+     * @return     the total number of bytes read into the buffer, or
+     *             `-1` if there is no more data because the end of
+     *             the stream has been reached.
+     * @throws     IOException  If the first byte cannot be read for any reason
+     *             other than end of file, or if the input stream has been closed,
+     *             or if some other I/O error occurs.
+     */
+    @Throws(IOException::class)
+    override fun read(b: ByteArray, off: Int, len: Int): Int {
+        if (len == 0) return 0
+        logger.debug { "KIOSourceInputStream.read(byte[], $off, $len) called" }
+
+
+        val bytesRead = try {
+            val result = source.readAtMostTo(b, off, off + len)
+            logger.debug { "source.readAtMostTo returned $result" }
+            result
+        } catch (e: EOFException) {
+            logger.debug { "EOFException caught in readAtMostTo ${e.message}" }
+            -1
+        }
+
+        if (bytesRead > 0) {
+            logger.debug { "KIOSourceInputStream.read() filled bytes: " +
+                    b.slice(off until off + bytesRead)
+                        .joinToString(", ") { it.toUByte().toString() }
+            }
+
+            // Print byte values as integers for clarity
+            logger.debug { "Byte values as integers: " +
+                    b.slice(off until off + bytesRead)
+                        .joinToString(", ") { it.toInt().toString() }
+            }
+        }else{
+            logger.debug { "KIOSourceInputStream.read() returned $bytesRead (no bytes read)" }
+        }
+
+        return if (bytesRead <= 0) -1 else bytesRead
     }
 
     /**
@@ -42,4 +95,3 @@ class KIOSourceInputStream(val source: Source) : InputStream() {
     }
 
 }
-

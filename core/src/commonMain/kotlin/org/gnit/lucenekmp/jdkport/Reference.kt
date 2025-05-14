@@ -8,7 +8,7 @@ package org.gnit.lucenekmp.jdkport
  * operations like [get], [clear], and [enqueue]. It ignores the underlying GC, native methods,
  * and thread-handling logic.
  */
-open class Reference<T> protected constructor(
+open class Reference<T> constructor(
     protected var referent: T?,
     open var queue: ReferenceQueue<T>? = (ReferenceQueue.NULL as ReferenceQueue<T>?)
 ) {

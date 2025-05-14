@@ -533,7 +533,7 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
             dst.position = dp - dst.arrayOffset()
         }
 
-        private class JavaLangAccess {
+        class JavaLangAccess {
             /**
              * Decodes ASCII from the source byte array into the destination
              * char array.
@@ -558,6 +558,6 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
             }
         }
 
-        private val JLA: JavaLangAccess = /*SharedSecrets.getJavaLangAccess()*/ JavaLangAccess()
+        val JLA: JavaLangAccess = /*SharedSecrets.getJavaLangAccess()*/ JavaLangAccess()
     }
 }

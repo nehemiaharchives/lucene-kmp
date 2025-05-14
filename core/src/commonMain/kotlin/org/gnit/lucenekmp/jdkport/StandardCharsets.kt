@@ -30,7 +30,7 @@ class StandardCharsets private constructor() {
         /**
          * ISO Latin Alphabet No. 1, also known as ISO-LATIN-1.
          */
-        //val ISO_8859_1: Charset = sun.nio.cs.ISO_8859_1.INSTANCE
+        val ISO_8859_1: Charset = org.gnit.lucenekmp.jdkport.ISO_8859_1()
 
         /**
          * Eight-bit UCS Transformation Format.
@@ -71,6 +71,25 @@ class StandardCharsets private constructor() {
          * @since 22
          */
         //val UTF_32: Charset = sun.nio.cs.UTF_32()
+
+        fun aliases_ISO_8859_1(): Set<String> {
+            return setOf(
+                "iso-ir-100",
+                "ISO_8859-1",
+                "latin1",
+                "l1",
+                "IBM819",
+                "cp819",
+                "csISOLatin1",
+                "819",
+                "IBM-819",
+                "ISO8859_1",
+                "ISO_8859-1:1987",
+                "ISO_8859_1",
+                "8859_1",
+                "ISO8859-1",
+            )
+        }
 
         fun aliases_UTF_8(): Set<String> {
             return setOf(
