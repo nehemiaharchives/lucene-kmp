@@ -127,7 +127,7 @@ fun StringBuilder.setCharAt(index: Int, ch: Char) {
     if (index < 0 || index >= this.length) {
         throw IndexOutOfBoundsException("Index $index out of bounds for length ${this.length}")
     }
-    // Replace the character at the given index by replacing the range index until index+1
-    this.replaceRange(index, index + 1, ch.toString())
+    this.deleteAt(index)
+    this.insert(index, ch)
 }
 
