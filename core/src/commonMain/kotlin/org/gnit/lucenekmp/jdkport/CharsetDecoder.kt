@@ -565,8 +565,7 @@ abstract class CharsetDecoder(
      *  If this method completes successfully then it returns [ ][CoderResult.UNDERFLOW].  If there is insufficient room in the output
      * buffer then it returns [CoderResult.OVERFLOW].  If this happens
      * then this method must be invoked again, with an output buffer that has
-     * more room, in order to complete the current [decoding
- * operation](#steps).
+     * more room, in order to complete the current [decoding operation](#steps).
      *
      *
      *  If this decoder has already been flushed then invoking this method

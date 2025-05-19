@@ -40,7 +40,7 @@ class StandardCharsets private constructor() {
         /**
          * Sixteen-bit UCS Transformation Format, big-endian byte order.
          */
-        //val UTF_16BE: Charset = sun.nio.cs.UTF_16BE()
+        val UTF_16BE: Charset = org.gnit.lucenekmp.jdkport.UTF_16BE()
 
         /**
          * Sixteen-bit UCS Transformation Format, little-endian byte order.
@@ -95,6 +95,15 @@ class StandardCharsets private constructor() {
             return setOf(
                 "UTF8",
                 "unicode-1-1-utf-8",
+            )
+        }
+
+        fun aliases_UTF_16BE(): Set<String> {
+            return setOf(
+                "UTF_16BE",
+                "ISO-10646-UCS-2",
+                "X-UTF-16BE",
+                "UnicodeBigUnmarked",
             )
         }
     }
