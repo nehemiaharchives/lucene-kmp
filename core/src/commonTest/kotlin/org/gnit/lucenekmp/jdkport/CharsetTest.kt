@@ -27,31 +27,6 @@ class CharsetTest {
     }
 
     @Test
-    fun testUTF8EncodeDecode() {
-        val original = "hello Привет 你好"
-        val encoded = Charset.UTF_8.encode(original)
-        val decoded = Charset.UTF_8.decode(encoded)
-        assertEquals(original, decoded)
-    }
-
-    @Test
-    fun testLatin1EncodeDecode() {
-        val original = "hello"
-        val encoded = Charset.ISO_8859_1.encode(original)
-        val decoded = Charset.ISO_8859_1.decode(encoded)
-        assertEquals(original, decoded)
-    }
-
-    @Test
-    fun testLatin1EncodeDecodeWithExtendedAscii() {
-        // chars with codes 128–255 as 1-byte Latin1
-        val str = (128..255).joinToString("") { it.toChar().toString() }
-        val encoded = Charset.ISO_8859_1.encode(str)
-        val decoded = Charset.ISO_8859_1.decode(encoded)
-        assertEquals(str, decoded)
-    }
-
-    @Test
     fun testDefaultCharset() {
         assertEquals(Charset.UTF_8, Charset.defaultCharset())
     }

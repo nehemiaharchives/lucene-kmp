@@ -15,14 +15,14 @@ class ISO_8859_1Test {
     fun testDecode() {
         val iso = StandardCharsets.ISO_8859_1
         val bytes = byteArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F)
-        val decoded = iso.decode(bytes)
+        val decoded = iso.decode(ByteBuffer.wrap(bytes)).toString()
         assertEquals("Hello", decoded)
     }
 
     @Test
     fun testEncode() {
         val iso = StandardCharsets.ISO_8859_1
-        val encoded = iso.encode("Hello")
+        val encoded = iso.encode(CharBuffer.wrap("Hello")).array()
         assertContentEquals(byteArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F), encoded)
     }
 }

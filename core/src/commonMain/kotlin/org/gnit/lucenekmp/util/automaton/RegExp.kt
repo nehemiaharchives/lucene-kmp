@@ -4,7 +4,7 @@ import kotlinx.io.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.jdkport.codePointAt
-import org.gnit.lucenekmp.jdkport.codePoints
+import org.gnit.lucenekmp.jdkport.codePointSequence
 import kotlin.jvm.JvmOverloads
 
 
@@ -644,7 +644,7 @@ class RegExp {
     private fun toCaseInsensitiveString(): Automaton {
         val list: MutableList<Automaton> = mutableListOf<Automaton>()
 
-        val iter: CharIterator = s.codePoints().iterator() as CharIterator
+        val iter: CharIterator = s.codePointSequence().iterator() as CharIterator
         while (iter.hasNext()) {
             val points = toCaseInsensitiveChar(iter.next().code)
             list.add(Automata.makeCharSet(points))

@@ -61,7 +61,7 @@ import org.gnit.lucenekmp.jdkport.CoderResult.Cache.Companion.INSTANCE
  * @author JSR-51 Expert Group
  * @since 1.4
  */
-class CoderResult private constructor(private val type: Int, private val length: Int) {
+class CoderResult private constructor(private val type: Int, val length: Int) {
     /**
      * Returns a string describing this coder result.
      *
@@ -237,12 +237,12 @@ class CoderResult private constructor(private val type: Int, private val length:
          *
          * @return  The requested coder-result object
          */
-        fun unmappableForLength(length: Int): CoderResult? {
+        fun unmappableForLength(length: Int): CoderResult {
             require(length > 0) { "Non-positive length" }
             if (length <= 4) return unmappable4[length - 1]
             return INSTANCE.unmappable.computeIfAbsent(
                 length
-            ) { n: Int -> CoderResult(CR_UNMAPPABLE, n) }
+            ) { n: Int -> CoderResult(CR_UNMAPPABLE, n) }!!
         }
     }
 }

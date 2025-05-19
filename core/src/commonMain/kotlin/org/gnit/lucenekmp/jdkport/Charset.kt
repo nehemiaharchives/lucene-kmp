@@ -42,9 +42,9 @@ abstract class Charset protected constructor(
     abstract fun newDecoder(): CharsetDecoder
 
     /**
-     * Constructs a new encoder for this charset.
+     * Constructs a new encoder for this charset.]
      */
-    //abstract fun newEncoder(): CharsetEncoder
+    abstract fun newEncoder(): CharsetEncoder
 
     /**
      * Tells whether or not this charset supports encoding.
@@ -52,16 +52,70 @@ abstract class Charset protected constructor(
     //open fun canEncode(): Boolean = true
 
     /**
-     * Convenience method that decodes a byte array into a String.
-     * Dummy implementation using UTF-8 decoding.
+     * Convenience method that decodes bytes in this charset into Unicode
+     * characters.
+     *
+     *
+     *  An invocation of this method upon a charset `cs` returns the
+     * same result as the expression
+     *
+     * {@snippet lang=java :
+     * *     cs.newDecoder()
+     * *       .onMalformedInput(CodingErrorAction.REPLACE)
+     * *       .onUnmappableCharacter(CodingErrorAction.REPLACE)
+     * *       .decode(bb);
+     * * }
+     *
+     * except that it is potentially more efficient because it can cache
+     * decoders between successive invocations.
+     *
+     *
+     *  This method always replaces malformed-input and unmappable-character
+     * sequences with this charset's default replacement byte array.  In order
+     * to detect such sequences, use the [ ][CharsetDecoder.decode] method directly.
+     *
+     * @param  bb  The byte buffer to be decoded
+     *
+     * @return  A char buffer containing the decoded characters
      */
-    open fun decode(bytes: ByteArray): String = bytes.decodeToString()
+    fun decode(bb: ByteBuffer): CharBuffer {
+        return newDecoder().onMalformedInput(CodingErrorAction.REPLACE)
+            .onUnmappableCharacter(CodingErrorAction.REPLACE)
+            .decode(bb)
+    }
 
     /**
-     * Convenience method that encodes a String into a byte array.
-     * Dummy implementation using UTF-8 encoding.
+     * Convenience method that encodes Unicode characters into bytes in this
+     * charset.
+     *
+     *
+     *  An invocation of this method upon a charset `cs` returns the
+     * same result as the expression
+     *
+     * {@snippet lang=java :
+     * *     cs.newEncoder()
+     * *       .onMalformedInput(CodingErrorAction.REPLACE)
+     * *       .onUnmappableCharacter(CodingErrorAction.REPLACE)
+     * *       .encode(bb);
+     * * }
+     *
+     * except that it is potentially more efficient because it can cache
+     * encoders between successive invocations.
+     *
+     *
+     *  This method always replaces malformed-input and unmappable-character
+     * sequences with this charset's default replacement string.  In order to
+     * detect such sequences, use the [ ][CharsetEncoder.encode] method directly.
+     *
+     * @param  cb  The char buffer to be encoded
+     *
+     * @return  A byte buffer containing the encoded characters
      */
-    open fun encode(str: String): ByteArray = str.encodeToByteArray()
+    fun encode(cb: CharBuffer): ByteBuffer{
+        return newEncoder().onMalformedInput(CodingErrorAction.REPLACE)
+            .onUnmappableCharacter(CodingErrorAction.REPLACE)
+            .encode(cb)
+    }
 
     /**
      * Compares this charset to another by comparing their canonical names (ignoring case).
@@ -122,14 +176,3 @@ abstract class Charset protected constructor(
 class UnsupportedCharsetException(charsetName: String) :
     IllegalArgumentException("Unsupported charset: $charsetName")
 
-
-/**
- * A dummy port of java.nio.charset.CharsetEncoder.
- * This version only supports encoding String to bytes using UTF-8.
- */
-abstract class CharsetEncoder {
-    /**
-     * Encodes the given String into a byte array.
-     */
-    abstract fun encode(str: String): ByteArray
-}

@@ -31,9 +31,9 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
         return Decoder(this)
     }
 
-    /*override fun newEncoder(): CharsetEncoder {
+    override fun newEncoder(): CharsetEncoder {
         return Encoder(this)
-    }*/
+    }
 
     private class Decoder(cs: Charset) : CharsetDecoder(cs, 1.0f, 1.0f) {
         fun decodeArrayLoop(
@@ -375,10 +375,9 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
         }
     }
 
-    // TODO implement Encoder if needed for porting lucene later
-    /*private class Encoder(cs: Charset) : CharsetEncoder(cs, 1.1f, 3.0f) {
+    private class Encoder(cs: Charset) : CharsetEncoder(cs, 1.1f, 3.0f) {
         override fun canEncode(c: Char): Boolean {
-            return !Character.isSurrogate(c)
+            return !c.isSurrogate()
         }
 
         override fun isLegalReplacement(repl: ByteArray): Boolean {
@@ -386,26 +385,26 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
                     super.isLegalReplacement(repl))
         }
 
-        private var sgp: Surrogate.Parser = null
+        private var sgp: Surrogate.Parser? = null
         fun encodeArrayLoop(
             src: CharBuffer,
             dst: ByteBuffer
         ): CoderResult {
             val sa: CharArray = src.array()
             var sp: Int = src.arrayOffset() + src.position()
-            val sl: Int = src.arrayOffset() + src.limit()
+            val sl: Int = src.arrayOffset() + src.limit
 
             val da: ByteArray = dst.array()
-            var dp: Int = dst.arrayOffset() + dst.position()
-            val dl: Int = dst.arrayOffset() + dst.limit()
+            var dp: Int = dst.arrayOffset() + dst.position
+            val dl: Int = dst.arrayOffset() + dst.limit
 
             // Handle ASCII-only prefix
-            val n: Int = JLA.encodeASCII(sa, sp, da, dp, min(sl - sp, dl - dp))
+            val n: Int = JavaLangAccess.encodeASCII(sa, sp, da, dp, min(sl - sp, dl - dp))
             sp += n
             dp += n
 
             if (sp < sl) {
-                return encodeArrayLoopSlow(src, sa, sp, sl, dst, da, dp, dl)
+                return encodeArrayLoopSlow(src, sa, sp, sl, dst, da, dp, dl)!!
             } else {
                 updatePositions(src, sp, dst, dp)
                 return CoderResult.UNDERFLOW
@@ -415,7 +414,7 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
         fun encodeArrayLoopSlow(
             src: CharBuffer, sa: CharArray, sp: Int, sl: Int,
             dst: ByteBuffer, da: ByteArray, dp: Int, dl: Int
-        ): CoderResult {
+        ): CoderResult? {
             var sp = sp
             var dp = dp
             while (sp < sl) {
@@ -429,13 +428,13 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
                     if (dl - dp < 2) return overflow(src, sp, dst, dp)
                     da[dp++] = (0xc0 or (c.code shr 6)).toByte()
                     da[dp++] = (0x80 or (c.code and 0x3f)).toByte()
-                } else if (Character.isSurrogate(c)) {
+                } else if (c.isSurrogate()) {
                     // Have a surrogate pair
                     if (sgp == null) sgp = Surrogate.Parser()
-                    val uc: Int = sgp.parse(c, sa, sp, sl)
+                    val uc: Int = sgp!!.parse(c, sa, sp, sl)
                     if (uc < 0) {
                         updatePositions(src, sp, dst, dp)
-                        return sgp.error()
+                        return sgp!!.error()
                     }
                     if (dl - dp < 4) return overflow(src, sp, dst, dp)
                     da[dp++] = (0xf0 or ((uc shr 18))).toByte()
@@ -472,13 +471,13 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
                     if (dst.remaining() < 2) return overflow(src, mark)
                     dst.put((0xc0 or (c.code shr 6)).toByte())
                     dst.put((0x80 or (c.code and 0x3f)).toByte())
-                } else if (Character.isSurrogate(c)) {
+                } else if (c.isSurrogate()) {
                     // Have a surrogate pair
                     if (sgp == null) sgp = Surrogate.Parser()
-                    val uc: Int = sgp.parse(c, src)
+                    val uc: Int = sgp!!.parse(c, src)
                     if (uc < 0) {
-                        src.position(mark)
-                        return sgp.error()
+                        src.position = mark
+                        return sgp!!.error()!!
                     }
                     if (dst.remaining() < 4) return overflow(src, mark)
                     dst.put((0xf0 or ((uc shr 18))).toByte())
@@ -495,7 +494,7 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
                 }
                 mark++
             }
-            src.position(mark)
+            src.position = mark
             return CoderResult.UNDERFLOW
         }
 
@@ -517,11 +516,11 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
             }
 
             private fun overflow(src: CharBuffer, mark: Int): CoderResult {
-                src.position(mark)
+                src.position = mark
                 return CoderResult.OVERFLOW
             }
         }
-    }*/
+    }
 
     companion object {
 
@@ -533,31 +532,15 @@ class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
             dst.position = dp - dst.arrayOffset()
         }
 
-        class JavaLangAccess {
-            /**
-             * Decodes ASCII from the source byte array into the destination
-             * char array.
-             *
-             * @return the number of bytes successfully decoded, at most len
-             */
-            fun decodeASCII(src: ByteArray, srcOff: Int, dst: CharArray?, dstOff: Int, len: Int): Int {
-                if (dst == null) return 0
-                val max = minOf(len, src.size - srcOff, dst.size - dstOff)
-                for (i in 0 until max) {
-                    val b = src[srcOff + i]
-                    if (b < 0) break // Non-ASCII byte
-                    dst[dstOff + i] = b.toInt().toChar()
-                }
-                // Return the number of bytes successfully decoded as ASCII
-                var count = 0
-                for (i in 0 until max) {
-                    if (src[srcOff + i] < 0) break
-                    count++
-                }
-                return count
-            }
+        fun updatePositions(
+            src: CharBuffer, sp: Int,
+            dst: ByteBuffer, dp: Int
+        ) {
+            src.position = sp - src.arrayOffset()
+            dst.position = dp - dst.arrayOffset()
         }
 
-        val JLA: JavaLangAccess = /*SharedSecrets.getJavaLangAccess()*/ JavaLangAccess()
+        //val JLA: JavaLangAccess = /*SharedSecrets.getJavaLangAccess()*/ JavaLangAccess()
+        val JLA: JavaLangAccess = JavaLangAccess
     }
 }

@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlin.Char.Companion.MIN_LOW_SURROGATE
-
 /**
  * port of [java.lang.Character](https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Character.html)
  */
@@ -194,8 +192,68 @@ class Character {
          */
         const val MAX_HIGH_SURROGATE: Char = '\uDBFF'
 
+        /**
+         * The minimum value of a
+         * [Unicode low-surrogate code unit](http://www.unicode.org/glossary/#low_surrogate_code_unit)
+         * in the UTF-16 encoding, constant `'\u005CuDC00'`.
+         * A low-surrogate is also known as a *trailing-surrogate*.
+         *
+         * @since 1.5
+         */
+        const val MIN_LOW_SURROGATE: Char = '\uDC00'
+
+
+        /**
+         * The maximum value of a
+         * [Unicode low-surrogate code unit](http://www.unicode.org/glossary/#low_surrogate_code_unit)
+         * in the UTF-16 encoding, constant `'\u005CuDFFF'`.
+         * A low-surrogate is also known as a *trailing-surrogate*.
+         *
+         * @since 1.5
+         */
+        const val MAX_LOW_SURROGATE: Char = '\uDFFF'
+
+        /**
+         * The minimum value of a Unicode surrogate code unit in the
+         * UTF-16 encoding, constant `'\u005CuD800'`.
+         *
+         * @since 1.5
+         */
+        const val MIN_SURROGATE: Char = MIN_HIGH_SURROGATE
+
+        /**
+         * The maximum value of a Unicode surrogate code unit in the
+         * UTF-16 encoding, constant `'\u005CuDFFF'`.
+         *
+         * @since 1.5
+         */
+        const val MAX_SURROGATE: Char = MAX_LOW_SURROGATE
+
+
         fun charCount(codePoint: Int): Int {
             return if (codePoint >= MIN_SUPPLEMENTARY_CODE_POINT) 2 else 1
+        }
+
+
+        /**
+         * Converts the specified surrogate pair to its supplementary code
+         * point value. This method does not validate the specified
+         * surrogate pair. The caller must validate it using [ ][.isSurrogatePair] if necessary.
+         *
+         * @param  high the high-surrogate code unit
+         * @param  low the low-surrogate code unit
+         * @return the supplementary code point composed from the
+         * specified surrogate pair.
+         * @since  1.5
+         */
+        fun toCodePoint(high: Char, low: Char): Int {
+            // Optimized form of:
+            // return ((high - MIN_HIGH_SURROGATE) << 10)
+            //         + (low - MIN_LOW_SURROGATE)
+            //         + MIN_SUPPLEMENTARY_CODE_POINT;
+            return ((high.code shl 10) + low.code) + ((MIN_SUPPLEMENTARY_CODE_POINT
+                    - (MIN_HIGH_SURROGATE.code shl 10)
+                    - MIN_LOW_SURROGATE.code))
         }
 
         /**
