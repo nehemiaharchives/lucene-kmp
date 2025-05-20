@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlin.text.HexFormat
+
 /**
  * Returns the value obtained by rotating the two's complement binary
  * representation of the specified `int` value left by the
@@ -109,8 +111,15 @@ private fun formatUnsignedIntUTF16(value: Int, shift: Int, buf: CharArray, len: 
 }
 
 @OptIn(ExperimentalStdlibApi::class)
+private val NoLeadingZeroHexFormat = HexFormat {
+    number {
+        removeLeadingZeros = true
+    }
+}
+
+@OptIn(ExperimentalStdlibApi::class)
 fun Int.Companion.toHexString(i: Int): String {
-    return i.toHexString()
+    return i.toHexString(NoLeadingZeroHexFormat)
 }
 
 /**

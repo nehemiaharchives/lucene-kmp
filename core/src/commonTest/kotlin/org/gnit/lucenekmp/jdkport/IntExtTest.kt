@@ -68,4 +68,16 @@ class IntExtTest {
         val reversed = Int.reverseBytes(value)
         assertEquals(0x78563412, reversed)
     }
+
+    @Test
+    fun testToHexString() {
+        assertEquals("0", Int.toHexString(0))
+        assertEquals("a", Int.toHexString(10))
+        assertEquals("ff", Int.toHexString(255))
+        assertEquals("7fffffff", Int.toHexString(Int.MAX_VALUE))
+        assertEquals("80000000", Int.toHexString(Int.MIN_VALUE))
+        // Confirm no leading zeros
+        assertEquals("123", Int.toHexString(0x123))
+        assertEquals("100", Int.toHexString(0x100))
+    }
 }
