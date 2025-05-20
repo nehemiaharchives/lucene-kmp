@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.tests.util.TestGroup
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
@@ -85,6 +87,18 @@ class ArraysTest {
         val a = floatArrayOf(3.5f, 1.1f, 2.2f, -4.0f, 0f)
         Arrays.sort(a)
         assertTrue(Arrays.equals(a, 0, a.size, floatArrayOf(-4.0f, 0f, 1.1f, 2.2f, 3.5f), 0, 5))
+    }
+
+    @Test
+    fun testSortDoubleArray() {
+        val a = doubleArrayOf(3.5, 1.1, 2.2, -4.0, 0.0)
+        Arrays.sort(a)
+        //assertTrue(Arrays.equals(a, 0, a.size, doubleArrayOf(-4.0, 0.0, 1.1, 2.2, 3.5), 0, 5))
+        assertContentEquals(
+            doubleArrayOf(-4.0, 0.0, 1.1, 2.2, 3.5),
+            a,
+            "Double array sort failed"
+        )
     }
 
     @Test

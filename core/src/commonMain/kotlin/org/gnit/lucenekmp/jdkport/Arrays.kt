@@ -981,6 +981,10 @@ object Arrays {
         dualPivotQuicksort(a, 0, a.size - 1)
     }
 
+    fun sort(a: DoubleArray) {
+        dualPivotQuicksort(a, 0, a.size - 1)
+    }
+
     fun sort(a: IntArray, fromIndex: Int, toIndex: Int) {
         rangeCheck(a.size, fromIndex, toIndex)
         dualPivotQuicksort(a, fromIndex, toIndex - 1)
@@ -1173,6 +1177,50 @@ object Arrays {
         }
     }
 
+    private fun dualPivotQuicksort(a: DoubleArray, low: Int, high: Int) {
+        if (low < high) {
+            // Choose two pivots: p from a[low] and q from a[high]
+            if (a[low] > a[high]) swap(a, low, high)
+            val p = a[low]
+            val q = a[high]
+
+            var l = low + 1    // will track the boundary for elements < p
+            var g = high - 1   // will track the boundary for elements > q
+            var k = l
+
+            while (k <= g) {
+                when {
+                    a[k] < p -> {
+                        swap(a, k, l)
+                        l++
+                        k++
+                    }
+
+                    a[k] > q -> {
+                        swap(a, k, g)
+                        g--
+                        // Don't increment k here as we need to re-examine the swapped element
+                    }
+
+                    else -> {
+                        // Element is between p and q (inclusive)
+                        k++
+                    }
+                }
+            }
+
+            l--  // pivot p will go here
+            g++  // pivot q will go here
+            swap(a, low, l)
+            swap(a, high, g)
+
+            // Recursively sort three parts:
+            dualPivotQuicksort(a, low, l - 1)
+            dualPivotQuicksort(a, l + 1, g - 1)
+            dualPivotQuicksort(a, g + 1, high)
+        }
+    }
+
     private fun swap(a: IntArray, i: Int, j: Int) {
         val temp = a[i]
         a[i] = a[j]
@@ -1186,6 +1234,12 @@ object Arrays {
     }
 
     private fun swap(a: FloatArray, i: Int, j: Int) {
+        val temp = a[i]
+        a[i] = a[j]
+        a[j] = temp
+    }
+
+    private fun swap(a: DoubleArray, i: Int, j: Int) {
         val temp = a[i]
         a[i] = a[j]
         a[j] = temp

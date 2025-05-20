@@ -302,7 +302,7 @@ open class Field : IndexableField {
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
-    fun setDoubleValue(value: Double) {
+    open fun setDoubleValue(value: Double) {
         require(fieldsData is Double) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Double" }
         fieldsData = value
     }
