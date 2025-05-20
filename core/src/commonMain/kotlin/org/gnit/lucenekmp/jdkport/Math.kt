@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import org.gnit.lucenekmp.jdkport.DoubleConsts
-
 object Math {
     /**
      * ported from java.lang.Math.toIntExact
@@ -185,6 +183,47 @@ object Math {
         }
     }
 
+
+    /**
+     * Returns the floating-point value adjacent to `f` in
+     * the direction of negative infinity.  This method is
+     * semantically equivalent to `nextAfter(f,
+     * Float.NEGATIVE_INFINITY)`; however, a
+     * `nextDown` implementation may run faster than its
+     * equivalent `nextAfter` call.
+     *
+     *
+     * Special Cases:
+     *
+     *  *  If the argument is NaN, the result is NaN.
+     *
+     *  *  If the argument is negative infinity, the result is
+     * negative infinity.
+     *
+     *  *  If the argument is zero, the result is
+     * `-Float.MIN_VALUE`
+     *
+     *
+     *
+     * @apiNote This method corresponds to the nextDown
+     * operation defined in IEEE 754.
+     *
+     * @param f  starting floating-point value
+     * @return The adjacent floating-point value closer to negative
+     * infinity.
+     * @since 1.8
+     */
+    fun nextDown(f: Float): Float {
+        if (Float.isNaN(f) || f == Float.Companion.NEGATIVE_INFINITY) return f
+        else {
+            if (f == 0.0f) return -Float.Companion.MIN_VALUE
+            else return Float.intBitsToFloat(
+                Float.floatToRawIntBits(f) +
+                        (if (f > 0.0f) -1 else +1)
+            )
+        }
+    }
+
     /* ===== IEEE-754 / Double helpers that the Kotlin std-lib does NOT expose ===== */
 
     /**
@@ -199,9 +238,9 @@ object Math {
         /*  (exp = n + bias) << 52 | 0x0  – the fraction field is zero          */
         val exp = n + DoubleConsts.EXP_BIAS
         return when {
-            exp <= 0       -> 0.0                           // under-flow → sub-normal / 0
-            exp >= 0x7FF   -> Double.POSITIVE_INFINITY      // over-flow  → +∞
-            else           -> Double.fromBits(exp.toLong() shl 52)
+            exp <= 0 -> 0.0                           // under-flow → sub-normal / 0
+            exp >= 0x7FF -> Double.POSITIVE_INFINITY      // over-flow  → +∞
+            else -> Double.fromBits(exp.toLong() shl 52)
         }
     }
 
@@ -216,7 +255,7 @@ object Math {
      * * correct overflow to ±∞ and propagation of NaN / 0 signs;
      * * only one rounding step when scaling down, mirroring the JDK’s ordering
      *   constraints that avoid cascaded sub-normal rounding. */
-    fun scalb(d :Double, scaleFactorInput: Int): Double {
+    fun scalb(d: Double, scaleFactorInput: Int): Double {
         /* Fast-exit for NaN, ±∞, ±0 – Java does the same. */
         if (d.isNaN() || d.isInfinite() || d == 0.0) return d
 
@@ -229,7 +268,7 @@ object Math {
         /* Direction-dependent parameters (mirrors JDK ordering comments). */
         val (scaleInc, expDelta) =
             if (scaleFactor < 0) -512 to powerOfTwoD(-512)   // 2^-512
-            else             512 to powerOfTwoD(512)         // 2^+512
+            else 512 to powerOfTwoD(512)         // 2^+512
 
         /* expAdjust := scaleFactor mod 512   (guaranteed −511 … +511)           */
         val expAdjust = scaleFactor % 512

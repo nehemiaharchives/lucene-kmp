@@ -296,7 +296,7 @@ open class Field : IndexableField {
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
-    fun setFloatValue(value: Float) {
+    open fun setFloatValue(value: Float) {
         require(fieldsData is Float) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Float" }
         fieldsData = value
     }

@@ -70,6 +70,17 @@ class MathTest {
     }
 
     @Test
+    fun testNextDown() {
+        val f = 1.0f
+        val next = Math.nextDown(f)
+        assertTrue(next < f)
+        assertEquals(Float.NEGATIVE_INFINITY, Math.nextDown(Float.NEGATIVE_INFINITY))
+        assertEquals(Float.NaN, Math.nextDown(Float.NaN))
+        assertEquals(-Float.MIN_VALUE, Math.nextDown(0.0f))
+        assertEquals(-Float.MIN_VALUE, Math.nextDown(-0.0f))
+    }
+
+    @Test
     fun testScalb() {
         assertEquals(8.0, Math.scalb(1.0, 3))
         assertEquals(0.5, Math.scalb(1.0, -1))
