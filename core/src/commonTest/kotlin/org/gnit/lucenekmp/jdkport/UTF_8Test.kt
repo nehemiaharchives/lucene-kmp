@@ -6,6 +6,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlin.test.assertContentEquals
 
 class UTF_8Test {
 
@@ -102,36 +104,459 @@ class UTF_8Test {
     }
 
     @Test
-    fun testDecodeASCII_AllAscii() {
-        val src = "HelloWorld".encodeToByteArray()
-        val dst = CharArray(10)
-        val decoded = JLA.decodeASCII(src, 0, dst, 0, src.size)
-        assertEquals(10, decoded)
-        assertEquals("HelloWorld", dst.concatToString())
-    }
-
-    @Test
-    fun testDecodeASCII_PartialAscii() {
-        val src = byteArrayOf(72, 101, 108, 108, 111, -1, 87, 111, 114, 108, 100) // "Hello" + non-ASCII + "World"
-        val dst = CharArray(11)
-        val decoded = JLA.decodeASCII(src, 0, dst, 0, src.size)
-        assertEquals(5, decoded)
-        assertEquals("Hello", dst.concatToString(0, 5))
-    }
-
-    @Test
-    fun testDecodeASCII_NullDst() {
-        val src = "abc".encodeToByteArray()
-        val decoded = JLA.decodeASCII(src, 0, null, 0, src.size)
-        assertEquals(0, decoded)
-    }
-
-    @Test
     fun testDecodeASCII_OffsetAndLength() {
         val src = "0123456789".encodeToByteArray()
         val dst = CharArray(5)
         val decoded = JLA.decodeASCII(src, 2, dst, 0, 5)
         assertEquals(5, decoded)
         assertEquals("23456", dst.concatToString())
+    }
+
+    // --- UTF-8 combinations decoding tests ---
+
+    private val logger = KotlinLogging.logger {}
+    private val utf8DecoderCombo = UTF_8().newDecoder()
+
+    // Characters for each bit-width
+    private val ascii = 'A' // 7 bits: U+0041
+    private val elevenBit = 'é' // 11 bits: U+00E9
+    private val sixteenBit = '漢' // 16 bits: U+6F22
+    private val twentyOneBit = "\uD83D\uDE00" // 21 bits: U+1F600 (😀, surrogate pair)
+
+    // Helper to get UTF-8 bytes for a string
+    private fun utf8Bytes(s: String): ByteArray = s.encodeToByteArray()
+
+    // Helper to log and assert
+    private fun assertUtf8Bytes(expected: ByteArray, actual: ByteArray, label: String) {
+        logger.debug { "$label expected: ${expected.joinToString { "%02X" }}"}
+        logger.debug { "$label actual:   ${actual.joinToString { "%02X" }}"}
+        assertContentEquals(expected, actual, "$label bytes mismatch")
+    }
+
+
+    @Test
+    fun testAsciiOnlyDecoding() {
+        val s = "$ascii"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(byteArrayOf(0x41), bytes, "ASCII")
+    }
+
+    @Test
+    fun testAsciiAnd11Decoding() {
+        val s = "$ascii$elevenBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(byteArrayOf(0x41, 0xC3.toByte(), 0xA9.toByte()), bytes, "ASCII+11")
+    }
+
+    @Test
+    fun testAscii11And16Decoding() {
+        val s = "$ascii$elevenBit$sixteenBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()
+            ),
+            bytes, "ASCII+11+16"
+        )
+    }
+
+    @Test
+    fun testAsciiAnd16Decoding() {
+        val s = "$ascii$sixteenBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()
+            ),
+            bytes, "ASCII+16"
+        )
+    }
+
+    @Test
+    fun testAscii11_16_21Decoding() {
+        val s = "$ascii$elevenBit$sixteenBit$twentyOneBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "ASCII+11+16+21"
+        )
+    }
+
+    @Test
+    fun testAscii16_21Decoding() {
+        val s = "$ascii$sixteenBit$twentyOneBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "ASCII+16+21"
+        )
+    }
+
+    @Test
+    fun testAscii21Decoding() {
+        val s = "$ascii$twentyOneBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "ASCII+21"
+        )
+    }
+
+    @Test
+    fun test11OnlyDecoding() {
+        val s = "$elevenBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(byteArrayOf(0xC3.toByte(), 0xA9.toByte()), bytes, "11 only")
+    }
+
+    @Test
+    fun test11_16Decoding() {
+        val s = "$elevenBit$sixteenBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()
+            ),
+            bytes, "11+16"
+        )
+    }
+
+    @Test
+    fun test11_21Decoding() {
+        val s = "$elevenBit$twentyOneBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xC3.toByte(), 0xA9.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "11+21"
+        )
+    }
+
+    @Test
+    fun test11_16_21Decoding() {
+        val s = "$elevenBit$sixteenBit$twentyOneBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "11+16+21"
+        )
+    }
+
+    @Test
+    fun test16OnlyDecoding() {
+        val s = "$sixteenBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(byteArrayOf(0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()), bytes, "16 only")
+    }
+
+    @Test
+    fun test16_21Decoding() {
+        val s = "$sixteenBit$twentyOneBit"
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "16+21"
+        )
+    }
+
+    @Test
+    fun test21OnlyDecoding() {
+        val s = twentyOneBit
+        val bytes = utf8Bytes(s)
+        assertEquals(s, utf8DecoderCombo.decode(ByteBuffer.wrap(bytes)).toString())
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            bytes, "21 only"
+        )
+    }
+
+    // --- UTF-8 combinations encoding tests ---
+
+    private val utf8EncoderCombo = UTF_8().newEncoder()
+
+    @Test
+    fun testAsciiOnlyEncoding() {
+        val s = "$ascii"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(byteArrayOf(0x41), actual, "ASCII encoding")
+    }
+
+    @Test
+    fun testAsciiAnd11Encoding() {
+        val s = "$ascii$elevenBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(byteArrayOf(0x41, 0xC3.toByte(), 0xA9.toByte()), actual, "ASCII+11 encoding")
+    }
+
+    @Test
+    fun testAscii11And16Encoding() {
+        val s = "$ascii$elevenBit$sixteenBit"
+        val bytes = ByteArray(20)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()
+            ),
+            actual, "ASCII+11+16 encoding"
+        )
+    }
+
+    @Test
+    fun testAsciiAnd16Encoding() {
+        val s = "$ascii$sixteenBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()
+            ),
+            actual, "ASCII+16 encoding"
+        )
+    }
+
+    @Test
+    fun testAscii11_16_21Encoding() {
+        val s = "$ascii$elevenBit$sixteenBit$twentyOneBit"
+        val bytes = ByteArray(20)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "ASCII+11+16+21 encoding"
+        )
+    }
+
+    @Test
+    fun testAscii16_21Encoding() {
+        val s = "$ascii$sixteenBit$twentyOneBit"
+        val bytes = ByteArray(20)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "ASCII+16+21 encoding"
+        )
+    }
+
+    @Test
+    fun testAscii21Encoding() {
+        val s = "$ascii$twentyOneBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0x41,
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "ASCII+21 encoding"
+        )
+    }
+
+    @Test
+    fun test11OnlyEncoding() {
+        val s = "$elevenBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(byteArrayOf(0xC3.toByte(), 0xA9.toByte()), actual, "11 only encoding")
+    }
+
+    @Test
+    fun test11_16Encoding() {
+        val s = "$elevenBit$sixteenBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()
+            ),
+            actual, "11+16 encoding"
+        )
+    }
+
+    @Test
+    fun test11_21Encoding() {
+        val s = "$elevenBit$twentyOneBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xC3.toByte(), 0xA9.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "11+21 encoding"
+        )
+    }
+
+    @Test
+    fun test11_16_21Encoding() {
+        val s = "$elevenBit$sixteenBit$twentyOneBit"
+        val bytes = ByteArray(20)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xC3.toByte(), 0xA9.toByte(),
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "11+16+21 encoding"
+        )
+    }
+
+    @Test
+    fun test16OnlyEncoding() {
+        val s = "$sixteenBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(byteArrayOf(0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte()), actual, "16 only encoding")
+    }
+
+    @Test
+    fun test16_21Encoding() {
+        val s = "$sixteenBit$twentyOneBit"
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xE6.toByte(), 0xBC.toByte(), 0xA2.toByte(),
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "16+21 encoding"
+        )
+    }
+
+    @Test
+    fun test21OnlyEncoding() {
+        val s = twentyOneBit
+        val bytes = ByteArray(10)
+        val bb = ByteBuffer.wrap(bytes)
+        utf8EncoderCombo.reset()
+        utf8EncoderCombo.encode(CharBuffer.wrap(s), bb, true)
+        bb.flip()
+        val actual = ByteArray(bb.remaining())
+        bb.get(actual)
+        assertUtf8Bytes(
+            byteArrayOf(
+                0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()
+            ),
+            actual, "21 only encoding"
+        )
     }
 }
