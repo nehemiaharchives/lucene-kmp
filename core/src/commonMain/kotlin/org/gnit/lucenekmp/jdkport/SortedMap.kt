@@ -268,7 +268,7 @@ interface SortedMap<K, V> : SequencedMap<K, V> {
      * @return a set view of the mappings contained in this map,
      * sorted in ascending key order
      */
-    val entrySet: MutableSet<MutableMap.MutableEntry<K, V>?>
+    val entrySet: MutableSet<MutableMap.MutableEntry<K, V>>
 
     /**
      * Throws `UnsupportedOperationException`. The encounter order induced by this

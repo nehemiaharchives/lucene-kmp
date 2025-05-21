@@ -4,12 +4,12 @@ import kotlin.time.Duration
 
 // Scales as constants
 private const val NANO_SCALE = 1L
-private val MICRO_SCALE = 1000L * NANO_SCALE
-private val MILLI_SCALE = 1000L * MICRO_SCALE
-private val SECOND_SCALE = 1000L * MILLI_SCALE
-private val MINUTE_SCALE = 60L * SECOND_SCALE
-private val HOUR_SCALE = 60L * MINUTE_SCALE
-private val DAY_SCALE = 24L * HOUR_SCALE
+private const val MICRO_SCALE = 1000L * NANO_SCALE
+private const val MILLI_SCALE = 1000L * MICRO_SCALE
+private const val SECOND_SCALE = 1000L * MILLI_SCALE
+private const val MINUTE_SCALE = 60L * SECOND_SCALE
+private const val HOUR_SCALE = 60L * MINUTE_SCALE
+private const val DAY_SCALE = 24L * HOUR_SCALE
 
 /**
  * A `TimeUnit` represents time durations at a given unit of
@@ -86,7 +86,7 @@ enum class TimeUnit(/*
      */
     DAYS(DAY_SCALE);
 
-    private val maxNanos: Long
+    private val maxNanos: Long = Long.Companion.MAX_VALUE / scale
     private val maxMicros: Long
     private val maxMillis: Long
     private val maxSecs: Long
@@ -95,7 +95,6 @@ enum class TimeUnit(/*
     private val secRatio: Int // fits in 32 bits
 
     init {
-        this.maxNanos = Long.Companion.MAX_VALUE / scale
         val ur = if (scale >= MICRO_SCALE) (scale / MICRO_SCALE) else (MICRO_SCALE / scale)
         this.microRatio = ur
         this.maxMicros = Long.Companion.MAX_VALUE / ur
@@ -127,12 +126,12 @@ enum class TimeUnit(/*
      * or `Long.MAX_VALUE` if it would positively overflow.
      */
     fun convert(sourceDuration: Long, sourceUnit: TimeUnit): Long {
-        when (this) {
-            TimeUnit.NANOSECONDS -> return sourceUnit.toNanos(sourceDuration)
-            TimeUnit.MICROSECONDS -> return sourceUnit.toMicros(sourceDuration)
-            TimeUnit.MILLISECONDS -> return sourceUnit.toMillis(sourceDuration)
-            TimeUnit.SECONDS -> return sourceUnit.toSeconds(sourceDuration)
-            else -> return cvt(sourceDuration, scale, sourceUnit.scale)
+        return when (this) {
+            NANOSECONDS -> sourceUnit.toNanos(sourceDuration)
+            MICROSECONDS -> sourceUnit.toMicros(sourceDuration)
+            MILLISECONDS -> sourceUnit.toMillis(sourceDuration)
+            SECONDS -> sourceUnit.toSeconds(sourceDuration)
+            else -> cvt(sourceDuration, scale, sourceUnit.scale)
         }
     }
 
@@ -161,7 +160,7 @@ enum class TimeUnit(/*
      */
     fun convert(duration: Duration): Long {
         var secs: Long = duration.inWholeSeconds
-        var nano: Int = duration.inWholeNanoseconds.toInt()
+        var nano: Int = (duration.inWholeNanoseconds - secs * 1_000_000_000L ).toInt()
         if (secs < 0 && nano > 0) {
             // use representation compatible with integer division
             secs++
@@ -195,10 +194,10 @@ enum class TimeUnit(/*
     fun toNanos(duration: Long): Long {
         val s: Long
         val m: Long
-        if ((scale.also { s = it }) == NANO_SCALE) return duration
-        else if (duration > (maxNanos.also { m = it })) return Long.Companion.MAX_VALUE
-        else if (duration < -m) return Long.Companion.MIN_VALUE
-        else return duration * s
+        return if ((scale.also { s = it }) == NANO_SCALE) duration
+        else if (duration > (maxNanos.also { m = it })) Long.Companion.MAX_VALUE
+        else if (duration < -m) Long.Companion.MIN_VALUE
+        else duration * s
     }
 
     /**
@@ -212,10 +211,10 @@ enum class TimeUnit(/*
     fun toMicros(duration: Long): Long {
         val s: Long
         val m: Long
-        if ((scale.also { s = it }) <= MICRO_SCALE) return if (s == MICRO_SCALE) duration else duration / microRatio
-        else if (duration > (maxMicros.also { m = it })) return Long.Companion.MAX_VALUE
-        else if (duration < -m) return Long.Companion.MIN_VALUE
-        else return duration * microRatio
+        return if ((scale.also { s = it }) <= MICRO_SCALE) if (s == MICRO_SCALE) duration else duration / microRatio
+        else if (duration > (maxMicros.also { m = it })) Long.Companion.MAX_VALUE
+        else if (duration < -m) Long.Companion.MIN_VALUE
+        else duration * microRatio
     }
 
     /**
@@ -229,10 +228,10 @@ enum class TimeUnit(/*
     fun toMillis(duration: Long): Long {
         val s: Long
         val m: Long
-        if ((scale.also { s = it }) <= MILLI_SCALE) return if (s == MILLI_SCALE) duration else duration / milliRatio
-        else if (duration > (maxMillis.also { m = it })) return Long.Companion.MAX_VALUE
-        else if (duration < -m) return Long.Companion.MIN_VALUE
-        else return duration * milliRatio
+        return if ((scale.also { s = it }) <= MILLI_SCALE) if (s == MILLI_SCALE) duration else duration / milliRatio
+        else if (duration > (maxMillis.also { m = it })) Long.Companion.MAX_VALUE
+        else if (duration < -m) Long.Companion.MIN_VALUE
+        else duration * milliRatio
     }
 
     /**
@@ -246,10 +245,10 @@ enum class TimeUnit(/*
     fun toSeconds(duration: Long): Long {
         val s: Long
         val m: Long
-        if ((scale.also { s = it }) <= SECOND_SCALE) return if (s == SECOND_SCALE) duration else duration / secRatio
-        else if (duration > (maxSecs.also { m = it })) return Long.Companion.MAX_VALUE
-        else if (duration < -m) return Long.Companion.MIN_VALUE
-        else return duration * secRatio
+        return if ((scale.also { s = it }) <= SECOND_SCALE) if (s == SECOND_SCALE) duration else duration / secRatio
+        else if (duration > (maxSecs.also { m = it })) Long.Companion.MAX_VALUE
+        else if (duration < -m) Long.Companion.MIN_VALUE
+        else duration * secRatio
     }
 
     /**
@@ -298,9 +297,9 @@ enum class TimeUnit(/*
      */
     private fun excessNanos(d: Long, m: Long): Int {
         val s: Long
-        if ((scale.also { s = it }) == NANO_SCALE) return (d - (m * MILLI_SCALE)).toInt()
-        else if (s == MICRO_SCALE) return ((d * 1000L) - (m * MILLI_SCALE)).toInt()
-        else return 0
+        return if ((scale.also { s = it }) == NANO_SCALE) (d - (m * MILLI_SCALE)).toInt()
+        else if (s == MICRO_SCALE) ((d * 1000L) - (m * MILLI_SCALE)).toInt()
+        else 0
     }
 
     /**
@@ -402,7 +401,6 @@ enum class TimeUnit(/*
 
     companion object {
 
-
         /**
          * General conversion utility.
          *
@@ -410,16 +408,16 @@ enum class TimeUnit(/*
          * @param dst result unit scale
          * @param src source unit scale
          */
-        private fun cvt(d: Long, dst: Long, src: Long): Long {
+        fun cvt(d: Long, dst: Long, src: Long): Long {
             val r: Long
             val m: Long
-            if (src == dst) return d
-            else if (src < dst) return d / (dst / src)
+            return if (src == dst) d
+            else if (src < dst) d / (dst / src)
             else if (d > ((Long.Companion.MAX_VALUE / ((src / dst).also { r = it })).also {
                     m = it
-                })) return Long.Companion.MAX_VALUE
-            else if (d < -m) return Long.Companion.MIN_VALUE
-            else return d * r
+                })) Long.Companion.MAX_VALUE
+            else if (d < -m) Long.Companion.MIN_VALUE
+            else d * r
         }
 
         /**

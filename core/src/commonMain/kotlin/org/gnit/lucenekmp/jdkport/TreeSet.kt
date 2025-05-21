@@ -175,15 +175,6 @@ class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutable
     }
 
     /**
-     * Returns the number of elements in this set (its cardinality).
-     *
-     * @return the number of elements in this set (its cardinality)
-     */
-    fun size(): Int {
-        return m.size
-    }
-
-    /**
      * Returns `true` if this set contains no elements.
      *
      * @return `true` if this set contains no elements
@@ -208,6 +199,11 @@ class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutable
         return m.containsKey(element)
     }
 
+    /**
+     * Returns the number of elements in this set (its cardinality).
+     *
+     * @return the number of elements in this set (its cardinality)
+     */
     override val size: Int
         get() = m.size
 
