@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 722 | 538 | 74% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 722 | 545 | 75% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -13,13 +13,13 @@
 |       org.apache.lucene.codecs.lucene90.blocktree |           org.gnit.lucenekmp.codecs.lucene90.blocktree | 9 | 9 | 100% | [x] |
 |       org.apache.lucene.codecs.lucene90.compressing |           org.gnit.lucenekmp.codecs.lucene90.compressing | 10 | 10 | 100% | [x] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 16 | 55% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 22 | 75% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 0 | 0% | [ ] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 93 | 55% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 13 | 92% | [ ] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 6 | 0 | 0% | [ ] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 113 | 81% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 114 | 82% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
@@ -56,18 +56,12 @@
 | org.apache.lucene.search.BooleanQuery | org.gnit.lucenekmp.search.BooleanQuery | 11 | 11 | 0 | 100% | [x] |
 | org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
-| org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 17 | 2 | 89% | [x] |
-| TOTAL |  | 173 | 117 | 56 | 67% | [ ] |
+| org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
+| TOTAL |  | 173 | 119 | 54 | 68% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| org.apache.lucene.document.BinaryDocValuesField | org.gnit.lucenekmp.document.BinaryDocValuesField |
-| org.apache.lucene.document.BinaryPoint | org.gnit.lucenekmp.document.BinaryPoint |
-| org.apache.lucene.document.DoublePoint | org.gnit.lucenekmp.document.DoublePoint |
-| org.apache.lucene.document.FloatPoint | org.gnit.lucenekmp.document.FloatPoint |
-| org.apache.lucene.document.InetAddressPoint | org.gnit.lucenekmp.document.InetAddressPoint |
-| org.apache.lucene.document.KnnByteVectorField | org.gnit.lucenekmp.document.KnnByteVectorField |
 | org.apache.lucene.document.LatLonPoint | org.gnit.lucenekmp.document.LatLonPoint |
 | org.apache.lucene.document.LatLonPointDistanceFeatureQuery | org.gnit.lucenekmp.document.LatLonPointDistanceFeatureQuery |
 | org.apache.lucene.document.LatLonPointDistanceQuery | org.gnit.lucenekmp.document.LatLonPointDistanceQuery |
@@ -188,7 +182,6 @@
 | org.apache.lucene.search.CollectorManager | org.gnit.lucenekmp.search.CollectorManager |
 | org.apache.lucene.search.ExactPhraseMatcher | org.gnit.lucenekmp.search.ExactPhraseMatcher |
 | org.apache.lucene.search.FieldValueHitQueue | org.gnit.lucenekmp.search.FieldValueHitQueue |
-| org.apache.lucene.search.KnnByteVectorQuery | org.gnit.lucenekmp.search.KnnByteVectorQuery |
 | org.apache.lucene.search.LRUQueryCache | org.gnit.lucenekmp.search.LRUQueryCache |
 | org.apache.lucene.search.MaxScoreAccumulator | org.gnit.lucenekmp.search.MaxScoreAccumulator |
 | org.apache.lucene.search.MultiLeafFieldComparator | org.gnit.lucenekmp.search.MultiLeafFieldComparator |
