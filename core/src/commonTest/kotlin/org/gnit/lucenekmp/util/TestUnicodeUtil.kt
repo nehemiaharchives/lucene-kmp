@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
@@ -76,6 +77,8 @@ import kotlin.sequences.toList
 
 class TestUnicodeUtil : LuceneTestCase() {
 
+    private val logger = KotlinLogging.logger {}
+
     @Test
     fun testCodePointCount() {
         // Check invalid codepoints.
@@ -144,14 +147,14 @@ class TestUnicodeUtil : LuceneTestCase() {
 
             val codePoints: IntArray = s.codePointsSeq().toList().toIntArray()
             if (!Arrays.equals(codePoints, 0, codePoints.size, utf32, 0, codePoints.size)) {
-                println("FAILED")
+                logger.debug { "FAILED" }
                 for (j in 0..<s.length) {
-                    println("  char[" + j + "]=" + s[j].code.toHexString())
+                    logger.debug { "  char[" + j + "]=" + s[j].code.toHexString() }
                 }
-                println()
+                logger.debug { "\n" }
                 assertEquals(codePoints.size, utf32Len)
                 for (j in codePoints.indices) {
-                    println("  " + utf32[j].toHexString() + " vs " + codePoints[j].toHexString())
+                    logger.debug { "  " + utf32[j].toHexString() + " vs " + codePoints[j].toHexString() }
                 }
                 fail("mismatch")
             }

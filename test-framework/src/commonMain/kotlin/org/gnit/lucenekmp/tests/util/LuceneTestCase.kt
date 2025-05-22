@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.util
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
@@ -401,7 +402,9 @@ open class LuceneTestCase {
          * non-zero end-padding, to tickle latent bugs that fail to look at `BytesRef.offset`.
          */
         fun newBytesRef(bytesIn: ByteArray, offset: Int, length: Int): BytesRef {
-            println("LTC.newBytesRef!  bytesIn.length=" + bytesIn.size + " offset=" + offset + " length=" + length)
+            val logger = KotlinLogging.logger {}
+
+            logger.debug { "LTC.newBytesRef!  bytesIn.length=" + bytesIn.size + " offset=" + offset + " length=" + length }
 
             assertTrue(
                 "got offset=" + offset + " length=" + length + " bytesIn.length=" + bytesIn.size
@@ -427,7 +430,7 @@ open class LuceneTestCase {
 
             bytesIn.copyInto(bytes, startOffset, offset, offset + length)
 
-            println("LTC:  return bytes.length=" + bytes.size + " startOffset=" + startOffset + " length=" + length);
+            logger.debug { "LTC:  return bytes.length=" + bytes.size + " startOffset=" + startOffset + " length=" + length }
             val it: BytesRef = BytesRef(bytes, startOffset, length)
             assertTrue(it.isValid())
 
