@@ -48,9 +48,9 @@ This is the background of the project and current progress which is related to m
 
 
 ## the task
-This time, my request is this: create Unit tests for following class:
+This time, my request is this: generate platform agnostic kotlin common port of following Java Unit Test class:
 
-lucene-kmp/core/src/commonMain/kotlin/org/gnit/lucenekmp/util/[the class name to be tested].kt
+lucene/lucene/core/src/test/org/apache/lucene/util/[the class name to be tested].java
 
 in following dir:
 
