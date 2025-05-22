@@ -732,7 +732,7 @@ class ArrayUtil {
         }
 
         /** Copies an array into a new array.  */
-        fun <T> copyArray(array: Array<T>): Array<T> {
+        inline fun <reified T> copyArray(array: Array<T>): Array<T> {
             return copyOfSubArray(array, 0, array.size)
         }
 
@@ -743,41 +743,15 @@ class ArrayUtil {
          * @param from the initial index of range to be copied (inclusive)
          * @param to the final index of range to be copied (exclusive)
          */
-        fun <T> copyOfSubArray(array: Array<T>, from: Int, to: Int): Array<T> {
+        inline fun <reified T> copyOfSubArray(array: Array<T>, from: Int, to: Int): Array<T> {
             val subLength = to - from
-            val type: KClass<out Array<T>> = array::class
-            val copy: Array<T> =
-                    /* if (type == Array<Any>::class)
-                        arrayOfNulls<Any>(subLength) as Array<T>
-                    else
-                        java.lang.reflect.Array.newInstance(type.getComponentType(), subLength)*/
-
-                arrayOfNulls<Any>(subLength) as Array<T>
-
-            /*java.lang.System.arraycopy(array, from, copy, 0, subLength)*/
-
-            array.copyInto(copy, 0, from, to)
-
-            return copy
+            return Array(subLength) { i -> array[from + i] }
         }
 
         @JvmName("copyOfSubArrayNullable")
-        fun <T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
+        inline fun <reified T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
             val subLength = to - from
-            val type: KClass<out Array<T?>> = array::class
-            val copy: Array<T?> =
-                /* if (type == Array<Any>::class)
-                    arrayOfNulls<Any>(subLength) as Array<T>
-                else
-                    java.lang.reflect.Array.newInstance(type.getComponentType(), subLength)*/
-
-                arrayOfNulls<Any?>(subLength) as Array<T?>
-
-            /*java.lang.System.arraycopy(array, from, copy, 0, subLength)*/
-
-            array.copyInto(copy, 0, from, to)
-
-            return copy
+            return Array(subLength) { i -> array[from + i] }
         }
 
         /** Comparator for a fixed number of bytes.  */

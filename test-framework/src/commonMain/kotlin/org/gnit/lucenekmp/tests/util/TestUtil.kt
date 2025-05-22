@@ -55,6 +55,19 @@ class TestUtil {
             }
         }
 
+        /** Returns true rarely (about 1 in 20 times) */
+        fun rarely(random: Random): Boolean {
+            return random.nextInt(20) == 0
+        }
+
+        /**
+         * Returns a shared random instance for test code, similar to Lucene's random().
+         * This is useful for test classes that want a consistent random source.
+         */
+        fun random(): Random {
+            return Random.Default
+        }
+
 
     }// end of companion object
 }
