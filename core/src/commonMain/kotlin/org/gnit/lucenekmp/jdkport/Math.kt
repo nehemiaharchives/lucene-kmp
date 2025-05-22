@@ -1,6 +1,49 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.jdkport.Math.DEGREES_TO_RADIANS
+
+
 object Math {
+
+    /**
+     * The `double` value that is closer than any other to
+     * *e*, the base of the natural logarithms.
+     */
+    const val E: Double = 2.718281828459045
+
+    /**
+     * The `double` value that is closer than any other to
+     * *pi* (), the ratio of the circumference of a circle to
+     * its diameter.
+     */
+    const val PI: Double = 3.141592653589793
+
+    /**
+     * The `double` value that is closer than any other to
+     * *tau* (), the ratio of the circumference of a circle
+     * to its radius.
+     *
+     * @apiNote
+     * The value of *pi* is one half that of *tau*; in other
+     * words, *tau* is double *pi* .
+     *
+     * @since 19
+     */
+    val TAU: Double = 2.0 * PI
+
+    /**
+     * Constant by which to multiply an angular value in degrees to obtain an
+     * angular value in radians.
+     */
+    private const val DEGREES_TO_RADIANS: Double = 0.017453292519943295
+
+    /**
+     * Constant by which to multiply an angular value in radians to obtain an
+     * angular value in degrees.
+     */
+    private const val RADIANS_TO_DEGREES: Double = 57.29577951308232
+
+
     /**
      * ported from java.lang.Math.toIntExact
      *
@@ -309,5 +352,19 @@ object Math {
          */
         return (((Double.doubleToRawLongBits(d) and DoubleConsts.EXP_BIT_MASK) shr
                 (DoubleConsts.SIGNIFICAND_WIDTH - 1)) - DoubleConsts.EXP_BIAS).toInt()
+    }
+
+    /**
+     * Converts an angle measured in degrees to an approximately
+     * equivalent angle measured in radians.  The conversion from
+     * degrees to radians is generally inexact.
+     *
+     * @param   angdeg   an angle, in degrees
+     * @return  the measurement of the angle `angdeg`
+     * in radians.
+     * @since   1.2
+     */
+    fun toRadians(angdeg: Double): Double {
+        return angdeg * DEGREES_TO_RADIANS
     }
 }

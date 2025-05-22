@@ -99,4 +99,14 @@ class MathTest {
         assertEquals(Double.MAX_EXPONENT + 1, Math.getExponent(Double.NaN))
         assertEquals(Double.MIN_EXPONENT - 1, Math.getExponent(0.0))
     }
+
+    @Test
+    fun testToRadians() {
+        assertEquals(0.0, Math.toRadians(0.0))
+        assertEquals(Math.PI, Math.toRadians(180.0), 1e-15)
+        assertEquals(Math.PI / 2, Math.toRadians(90.0), 1e-15)
+        assertEquals(-Math.PI / 2, Math.toRadians(-90.0), 1e-15)
+        assertEquals(Math.PI / 4, Math.toRadians(45.0), 1e-15)
+    }
+
 }
