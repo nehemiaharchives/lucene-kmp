@@ -8,7 +8,8 @@ class TestUtil {
         // line 552 of TestUtil.java
         /** start and end are BOTH inclusive  */
         fun nextInt(r: Random, start: Int, end: Int): Int {
-            return r.nextInt(start, end)
+            require(end >= start)
+            return if (start == end) start else r.nextInt(start, end + 1)
         }
 
         // line 617 of TestUtil.java

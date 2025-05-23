@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlin.jvm.JvmName
 import kotlin.math.min
 
 object Arrays {
@@ -949,19 +950,8 @@ object Arrays {
      * implementation methods residing in other package-private
      * classes (except for legacyMergeSort, included in this class).
      */
-    /**
-     * Sorts the specified array into ascending numerical order.
-     *
-     * @implNote The sorting algorithm is a Dual-Pivot Quicksort
-     * by Vladimir Yaroslavskiy, Jon Bentley, and Joshua Bloch. This algorithm
-     * offers O(n log(n)) performance on all data sets, and is typically
-     * faster than traditional (one-pivot) Quicksort implementations.
-     *
-     * @param a the array to be sorted
-     */
-    fun sort(a: IntArray) {
-        dualPivotQuicksort(a, 0, a.size - 1)
-    }
+
+    fun <T : Comparable<T>>sort(a: Array<T>) = a.sort()
 
     /**
      * Sorts the specified array into ascending numerical order.
@@ -973,26 +963,32 @@ object Arrays {
      *
      * @param a the array to be sorted
      */
-    fun sort(a: LongArray) {
-        dualPivotQuicksort(a, 0, a.size - 1)
-    }
+    fun sort(a: IntArray) = a.sort()
 
-    fun sort(a: FloatArray) {
-        dualPivotQuicksort(a, 0, a.size - 1)
-    }
+    /**
+     * Sorts the specified array into ascending numerical order.
+     *
+     * @implNote The sorting algorithm is a Dual-Pivot Quicksort
+     * by Vladimir Yaroslavskiy, Jon Bentley, and Joshua Bloch. This algorithm
+     * offers O(n log(n)) performance on all data sets, and is typically
+     * faster than traditional (one-pivot) Quicksort implementations.
+     *
+     * @param a the array to be sorted
+     */
+    fun sort(a: LongArray) = a.sort()
 
-    fun sort(a: DoubleArray) {
-        dualPivotQuicksort(a, 0, a.size - 1)
-    }
+    fun sort(a: FloatArray) = a.sort()
+
+    fun sort(a: DoubleArray) = a.sort()
 
     fun sort(a: IntArray, fromIndex: Int, toIndex: Int) {
         rangeCheck(a.size, fromIndex, toIndex)
-        dualPivotQuicksort(a, fromIndex, toIndex - 1)
+        a.sort(fromIndex, toIndex)
     }
 
     fun sort(a: LongArray, fromIndex: Int, toIndex: Int) {
         rangeCheck(a.size, fromIndex, toIndex)
-        dualPivotQuicksort(a, fromIndex, toIndex - 1)
+        a.sort(fromIndex, toIndex)
     }
 
     /**
@@ -1045,204 +1041,64 @@ object Arrays {
         Timsort.sort(a, c)
     }
 
-    private fun dualPivotQuicksort(a: IntArray, low: Int, high: Int) {
-        if (low < high) {
-            // Choose two pivots: p from a[low] and q from a[high]
-            if (a[low] > a[high]) swap(a, low, high)
-            val p = a[low]
-            val q = a[high]
-
-            var l = low + 1    // will track the boundary for elements < p
-            var g = high - 1   // will track the boundary for elements > q
-            var k = l
-
-            while (k <= g) {
-                when {
-                    a[k] < p -> {
-                        swap(a, k, l)
-                        l++
-                        k++
-                    }
-
-                    a[k] > q -> {
-                        swap(a, k, g)
-                        g--
-                        // Don't increment k here as we need to re-examine the swapped element
-                    }
-
-                    else -> {
-                        // Element is between p and q (inclusive)
-                        k++
-                    }
-                }
-            }
-
-            l--  // pivot p will go here
-            g++  // pivot q will go here
-            swap(a, low, l)
-            swap(a, high, g)
-
-            // Recursively sort three parts:
-            dualPivotQuicksort(a, low, l - 1)
-            dualPivotQuicksort(a, l + 1, g - 1)
-            dualPivotQuicksort(a, g + 1, high)
-        }
-    }
-
-    private fun dualPivotQuicksort(a: LongArray, low: Int, high: Int) {
-        if (low < high) {
-            // Choose two pivots: p from a[low] and q from a[high]
-            if (a[low] > a[high]) swap(a, low, high)
-            val p = a[low]
-            val q = a[high]
-
-            var l = low + 1    // will track the boundary for elements < p
-            var g = high - 1   // will track the boundary for elements > q
-            var k = l
-
-            while (k <= g) {
-                when {
-                    a[k] < p -> {
-                        swap(a, k, l)
-                        l++
-                        k++
-                    }
-
-                    a[k] > q -> {
-                        swap(a, k, g)
-                        g--
-                        // Don't increment k here as we need to re-examine the swapped element
-                    }
-
-                    else -> {
-                        // Element is between p and q (inclusive)
-                        k++
-                    }
-                }
-            }
-
-            l--  // pivot p will go here
-            g++  // pivot q will go here
-            swap(a, low, l)
-            swap(a, high, g)
-
-            // Recursively sort three parts:
-            dualPivotQuicksort(a, low, l - 1)
-            dualPivotQuicksort(a, l + 1, g - 1)
-            dualPivotQuicksort(a, g + 1, high)
-        }
-    }
-
-    private fun dualPivotQuicksort(a: FloatArray, low: Int, high: Int) {
-        if (low < high) {
-            // Choose two pivots: p from a[low] and q from a[high]
-            if (a[low] > a[high]) swap(a, low, high)
-            val p = a[low]
-            val q = a[high]
-
-            var l = low + 1    // will track the boundary for elements < p
-            var g = high - 1   // will track the boundary for elements > q
-            var k = l
-
-            while (k <= g) {
-                when {
-                    a[k] < p -> {
-                        swap(a, k, l)
-                        l++
-                        k++
-                    }
-
-                    a[k] > q -> {
-                        swap(a, k, g)
-                        g--
-                        // Don't increment k here as we need to re-examine the swapped element
-                    }
-
-                    else -> {
-                        // Element is between p and q (inclusive)
-                        k++
-                    }
-                }
-            }
-
-            l--  // pivot p will go here
-            g++  // pivot q will go here
-            swap(a, low, l)
-            swap(a, high, g)
-
-            // Recursively sort three parts:
-            dualPivotQuicksort(a, low, l - 1)
-            dualPivotQuicksort(a, l + 1, g - 1)
-            dualPivotQuicksort(a, g + 1, high)
-        }
-    }
-
-    private fun dualPivotQuicksort(a: DoubleArray, low: Int, high: Int) {
-        if (low < high) {
-            // Choose two pivots: p from a[low] and q from a[high]
-            if (a[low] > a[high]) swap(a, low, high)
-            val p = a[low]
-            val q = a[high]
-
-            var l = low + 1    // will track the boundary for elements < p
-            var g = high - 1   // will track the boundary for elements > q
-            var k = l
-
-            while (k <= g) {
-                when {
-                    a[k] < p -> {
-                        swap(a, k, l)
-                        l++
-                        k++
-                    }
-
-                    a[k] > q -> {
-                        swap(a, k, g)
-                        g--
-                        // Don't increment k here as we need to re-examine the swapped element
-                    }
-
-                    else -> {
-                        // Element is between p and q (inclusive)
-                        k++
-                    }
-                }
-            }
-
-            l--  // pivot p will go here
-            g++  // pivot q will go here
-            swap(a, low, l)
-            swap(a, high, g)
-
-            // Recursively sort three parts:
-            dualPivotQuicksort(a, low, l - 1)
-            dualPivotQuicksort(a, l + 1, g - 1)
-            dualPivotQuicksort(a, g + 1, high)
-        }
-    }
-
-    private fun swap(a: IntArray, i: Int, j: Int) {
-        val temp = a[i]
-        a[i] = a[j]
-        a[j] = temp
-    }
-
-    private fun swap(a: LongArray, i: Int, j: Int) {
-        val temp = a[i]
-        a[i] = a[j]
-        a[j] = temp
-    }
-
-    private fun swap(a: FloatArray, i: Int, j: Int) {
-        val temp = a[i]
-        a[i] = a[j]
-        a[j] = temp
-    }
-
-    private fun swap(a: DoubleArray, i: Int, j: Int) {
-        val temp = a[i]
-        a[i] = a[j]
-        a[j] = temp
+    /**
+     * Sorts the specified range of the specified array of objects into
+     * ascending order, according to the
+     * [natural ordering][Comparable] of its
+     * elements.  The range to be sorted extends from index
+     * `fromIndex`, inclusive, to index `toIndex`, exclusive.
+     * (If `fromIndex==toIndex`, the range to be sorted is empty.)  All
+     * elements in this range must implement the [Comparable]
+     * interface.  Furthermore, all elements in this range must be *mutually
+     * comparable* (that is, `e1.compareTo(e2)` must not throw a
+     * `ClassCastException` for any elements `e1` and
+     * `e2` in the array).
+     *
+     *
+     * This sort is guaranteed to be *stable*:  equal elements will
+     * not be reordered as a result of the sort.
+     *
+     *
+     * Implementation note: This implementation is a stable, adaptive,
+     * iterative mergesort that requires far fewer than n lg(n) comparisons
+     * when the input array is partially sorted, while offering the
+     * performance of a traditional mergesort when the input array is
+     * randomly ordered.  If the input array is nearly sorted, the
+     * implementation requires approximately n comparisons.  Temporary
+     * storage requirements vary from a small constant for nearly sorted
+     * input arrays to n/2 object references for randomly ordered input
+     * arrays.
+     *
+     *
+     * The implementation takes equal advantage of ascending and
+     * descending order in its input array, and can take advantage of
+     * ascending and descending order in different parts of the same
+     * input array.  It is well-suited to merging two or more sorted arrays:
+     * simply concatenate the arrays and sort the resulting array.
+     *
+     *
+     * The implementation was adapted from Tim Peters's list sort for Python
+     * ([TimSort](http://svn.python.org/projects/python/trunk/Objects/listsort.txt)).  It uses techniques from Peter McIlroy's "Optimistic
+     * Sorting and Information Theoretic Complexity", in Proceedings of the
+     * Fourth Annual ACM-SIAM Symposium on Discrete Algorithms, pp 467-474,
+     * January 1993.
+     *
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be
+     * sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IllegalArgumentException if `fromIndex > toIndex` or
+     * (optional) if the natural ordering of the array elements is
+     * found to violate the [Comparable] contract
+     * @throws ArrayIndexOutOfBoundsException if `fromIndex < 0` or
+     * `toIndex > a.length`
+     * @throws ClassCastException if the array contains elements that are
+     * not *mutually comparable* (for example, strings and
+     * integers).
+     */
+    fun <T : Comparable<T>> sort(a: Array<T>, fromIndex: Int, toIndex: Int){
+        rangeCheck(a.size, fromIndex, toIndex)
+        a.sort(fromIndex, toIndex)
     }
 
     fun toString(a: IntArray): String = a.joinToString()

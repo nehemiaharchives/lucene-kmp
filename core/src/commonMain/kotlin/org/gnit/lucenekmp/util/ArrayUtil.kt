@@ -2,9 +2,9 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Arrays.mismatch
+import org.gnit.lucenekmp.jdkport.Character
 import kotlin.jvm.JvmName
 import kotlin.math.min
-import kotlin.reflect.KClass
 
 class ArrayUtil {
 
@@ -34,9 +34,6 @@ class ArrayUtil {
             return parseInt(chars, offset, len, 10)
         }
 
-        const val CHAR_MIN_RADIX = 2
-        const val CHAR_MAX_RADIX = 36
-
         /**
          * Parses the string argument as if it was an int value and returns the result. Throws
          * NumberFormatException if the string does not represent an int quantity. The second argument
@@ -51,7 +48,7 @@ class ArrayUtil {
         fun parseInt(chars: CharArray, offset: Int, len: Int, radix: Int): Int {
             var offset = offset
             var len = len
-            if (chars == null || radix < CHAR_MAX_RADIX || radix > CHAR_MAX_RADIX) {
+            if (chars == null || radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
                 throw NumberFormatException()
             }
             var i = 0
@@ -103,10 +100,6 @@ class ArrayUtil {
         END APACHE HARMONY CODE
          */
 
-        /*
-
-  END APACHE HARMONY CODE
-   */
         /**
          * Returns an array size &gt;= minTargetSize, generally over-allocating exponentially to achieve
          * amortized linear-time cost as the array grows.
@@ -182,14 +175,23 @@ class ArrayUtil {
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun <T> growExact(array: Array<T>, newLength: Int): Array<T> = array.copyOf(newLength) as Array<T>
+        inline fun <reified T> growExact(array: Array<T>, newLength: Int): Array<T> {
+            if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
+            return Array<T>(newLength) { i -> if (i < array.size) array[i] else null as T }
+        }
+
+        @JvmName("growExactNullable")
+        inline fun <reified T> growExact(array: Array<T?>, newLength: Int): Array<T?> {
+            if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
+            return Array(newLength) { i -> if (i < array.size) array[i] else null }
+        }
 
         /** Returns a larger array, generally over-allocating exponentially  */
         /*fun <T> grow(array: Array<T?>): Array<T?> {
             return grow<T?>(array, 1 + array.size)
         }*/
 
-        fun <T> grow(array: Array<T>): Array<T> {
+        inline fun <reified T> grow(array: Array<T>): Array<T> {
             return grow(array, 1 + array.size)
         }
 
@@ -197,17 +199,7 @@ class ArrayUtil {
          * Returns an array whose size is at least `minSize`, generally over-allocating
          * exponentially
          */
-        @JvmName("growNullable")
-        fun <T> grow(array: Array<T?>, minSize: Int): Array<T?> {
-            if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
-            if (array.size < minSize) {
-                val newLength: Int =
-                    oversize(minSize, RamUsageEstimator.NUM_BYTES_OBJECT_REF)
-                return growExact<T?>(array, newLength)
-            } else return array
-        }
-
-        fun <T> grow(array: Array<T>, minSize: Int): Array<T> {
+        inline fun <reified T> grow(array: Array<T>, minSize: Int): Array<T> {
             if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
             if (array.size < minSize) {
                 val newLength: Int =
@@ -216,10 +208,24 @@ class ArrayUtil {
             } else return array
         }
 
+        @JvmName("growNullable")
+        inline fun <reified T> grow(array: Array<T?>, minSize: Int): Array<T?> {
+            if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
+            if (array.size < minSize) {
+                val newLength: Int =
+                    oversize(minSize, RamUsageEstimator.NUM_BYTES_OBJECT_REF)
+                return growExact<T?>(array, newLength)
+            } else return array
+        }
+
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun growExact(array: ShortArray, newLength: Int): ShortArray = array.copyOf(newLength)
+        fun growExact(array: ShortArray, newLength: Int): ShortArray {
+            val copy = ShortArray(newLength)
+            array.copyInto(copy, 0, 0, array.size)
+            return copy
+        }
 
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating exponentially
@@ -239,8 +245,11 @@ class ArrayUtil {
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun growExact(array: FloatArray, newLength: Int): FloatArray = array.copyOf(newLength)
-
+        fun growExact(array: FloatArray, newLength: Int): FloatArray {
+            val copy = FloatArray(newLength)
+            array.copyInto(copy, 0, 0, array.size)
+            return copy
+        }
 
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating
@@ -390,7 +399,6 @@ class ArrayUtil {
             array.copyInto(copy, 0, 0, array.size)
             return copy
         }
-
 
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating
