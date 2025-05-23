@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import jdk.internal.vm.annotation.IntrinsicCandidate
-
 object StrictMath {
 
     /**
@@ -82,5 +80,50 @@ object StrictMath {
         //return java.lang.FdLibm.Sqrt.compute(a)
 
         return kotlin.math.sqrt(a)
+    }
+
+
+    /**
+     * Returns the smaller of two `double` values.  That
+     * is, the result is the value closer to negative infinity. If the
+     * arguments have the same value, the result is that same
+     * value. If either value is NaN, then the result is NaN.  Unlike
+     * the numerical comparison operators, this method considers
+     * negative zero to be strictly smaller than positive zero. If one
+     * argument is positive zero and the other is negative zero, the
+     * result is negative zero.
+     *
+     * @param   a   an argument.
+     * @param   b   another argument.
+     * @return  the smaller of `a` and `b`.
+     */
+    fun min(a: Double, b: Double): Double {
+        return kotlin.math.min(a, b)
+    }
+
+    fun min(a: Int, b: Int): Int {
+        return kotlin.math.min(a, b)
+    }
+
+    /**
+     * Returns the greater of two `double` values.  That
+     * is, the result is the argument closer to positive infinity. If
+     * the arguments have the same value, the result is that same
+     * value. If either value is NaN, then the result is NaN.  Unlike
+     * the numerical comparison operators, this method considers
+     * negative zero to be strictly smaller than positive zero. If one
+     * argument is positive zero and the other negative zero, the
+     * result is positive zero.
+     *
+     * @param   a   an argument.
+     * @param   b   another argument.
+     * @return  the larger of `a` and `b`.
+     */
+    fun max(a: Double, b: Double): Double {
+        return kotlin.math.max(a, b)
+    }
+
+    fun max(a: Int, b: Int): Int {
+        return kotlin.math.max(a, b)
     }
 }

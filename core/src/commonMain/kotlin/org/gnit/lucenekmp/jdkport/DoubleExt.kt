@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlin.math.abs
 import kotlin.math.pow
 
 /** Minimum unbiased exponent of a *normalised* binary-64 value (-1022). */
@@ -123,4 +124,22 @@ fun Double.Companion.longBitsToDouble(bits: Long): Double {
     // This computes: sign * (1.fraction) * 2^(exponent-1023) for normals,
     // and sign * (fraction * 2) * 2^(-1075) for subnormals.
     return sign * m.toDouble() * 2.0.pow(exponent - 1075.0)
+}
+
+/**
+ * Returns `true` if the argument is a finite floating-point
+ * value; returns `false` otherwise (for NaN and infinity
+ * arguments).
+ *
+ * @apiNote
+ * This method corresponds to the isFinite operation defined in
+ * IEEE 754.
+ *
+ * @param d the `double` value to be tested
+ * @return `true` if the argument is a finite
+ * floating-point value, `false` otherwise.
+ * @since 1.8
+ */
+fun Double.Companion.isFinite(d: Double): Boolean {
+    return abs(d) <= Double.Companion.MAX_VALUE
 }

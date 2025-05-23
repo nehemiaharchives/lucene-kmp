@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import org.gnit.lucenekmp.jdkport.Math.DEGREES_TO_RADIANS
-
 
 object Math {
 
@@ -366,5 +364,21 @@ object Math {
      */
     fun toRadians(angdeg: Double): Double {
         return angdeg * DEGREES_TO_RADIANS
+    }
+
+    /**
+     * Converts an angle measured in radians to an approximately
+     * equivalent angle measured in degrees.  The conversion from
+     * radians to degrees is generally inexact; users should
+     * *not* expect `cos(toRadians(90.0))` to exactly
+     * equal `0.0`.
+     *
+     * @param   angrad   an angle, in radians
+     * @return  the measurement of the angle `angrad`
+     * in degrees.
+     * @since   1.2
+     */
+    fun toDegrees(angrad: Double): Double {
+        return angrad * RADIANS_TO_DEGREES
     }
 }

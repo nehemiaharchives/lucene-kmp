@@ -2,23 +2,34 @@ package org.gnit.lucenekmp.jdkport
 
 class PriorityQueue<E : Any> {
 
+    companion object {
+        const val DEFAULT_INITIAL_CAPACITY: Int = 11
+    }
+
     private val comparator: Comparator<in E>
-    private val heap = mutableListOf<E>()
+    private val heap: MutableList<E>
     private var modCount: Int = 0
 
     /**
-     * Constructs a priority queue with the specified comparator.
+     * Creates a `PriorityQueue` with the specified initial capacity
+     * that orders its elements according to the specified comparator.
+     *
+     * @param  initialCapacity the initial capacity for this priority queue
+     * @param  comparator the comparator that will be used to order this
+     * priority queue.  If `null`, the [         natural ordering][Comparable] of the elements will be used.
+     * @throws IllegalArgumentException if `initialCapacity` is
+     * less than 1
      */
-    constructor(comparator: Comparator<in E>) {
+    constructor(
+        initialCapacity: Int = DEFAULT_INITIAL_CAPACITY,
+        comparator: Comparator<in E> = Comparator { a, b -> (a as Comparable<E>).compareTo(b) }
+    ) {
+        // Note: This restriction of at least one is not actually needed,
+        // but continues for 1.5 compatibility
+        require(initialCapacity >= 1)
+        this.heap = ArrayList<E>(initialCapacity)
         this.comparator = comparator
     }
-
-    /**
-     * Default constructor.
-     * This constructor can be used only when E implements Comparable,
-     * and it uses the natural ordering of the elements.
-     */
-    constructor() : this(Comparator { a, b -> (a as Comparable<E>).compareTo(b) })
 
     fun isEmpty(): Boolean = heap.isEmpty()
     fun size(): Int = heap.size

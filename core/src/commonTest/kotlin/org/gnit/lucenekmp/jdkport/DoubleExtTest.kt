@@ -39,4 +39,14 @@ class DoubleExtTest {
         val value = Double.longBitsToDouble(bits)
         assertEquals(123.456, value)
     }
+
+    @Test
+    fun testIsFinite() {
+        assertTrue(Double.isFinite(0.0))
+        assertTrue(Double.isFinite(123.456))
+        assertTrue(!Double.isFinite(Double.POSITIVE_INFINITY))
+        assertTrue(!Double.isFinite(Double.NEGATIVE_INFINITY))
+        assertTrue(!Double.isFinite(Double.NaN))
+    }
+
 }

@@ -109,4 +109,13 @@ class MathTest {
         assertEquals(Math.PI / 4, Math.toRadians(45.0), 1e-15)
     }
 
+    @Test
+    fun testToDegrees() {
+        assertEquals(0.0, Math.toDegrees(0.0))
+        assertEquals(180.0, Math.toDegrees(Math.PI), 1e-12)
+        assertEquals(90.0, Math.toDegrees(Math.PI / 2), 1e-12)
+        assertEquals(-90.0, Math.toDegrees(-Math.PI / 2), 1e-12)
+        assertEquals(45.0, Math.toDegrees(Math.PI / 4), 1e-12)
+    }
+
 }

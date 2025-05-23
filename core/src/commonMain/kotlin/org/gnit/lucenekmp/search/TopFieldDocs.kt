@@ -12,5 +12,5 @@ class TopFieldDocs
  */(
     totalHits: TotalHits?, scoreDocs: Array<ScoreDoc>,
     /** The fields which were used to sort results by.  */
-    var fields: Array<SortField>
+    var fields: Array<SortField>?
 ) : TopDocs(totalHits!!, scoreDocs)
