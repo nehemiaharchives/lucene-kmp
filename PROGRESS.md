@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 722 | 545 | 75% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 722 | 580 | 80% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -13,18 +13,18 @@
 |       org.apache.lucene.codecs.lucene90.blocktree |           org.gnit.lucenekmp.codecs.lucene90.blocktree | 9 | 9 | 100% | [x] |
 |       org.apache.lucene.codecs.lucene90.compressing |           org.gnit.lucenekmp.codecs.lucene90.compressing | 10 | 10 | 100% | [x] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 22 | 75% | [ ] |
-|   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 0 | 0% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
+|   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 93 | 55% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 13 | 92% | [ ] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 6 | 0 | 0% | [ ] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 114 | 82% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 115 | 83% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 38 | 23 | 60% | [ ] |
-|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 89 | 74 | 83% | [ ] |
+|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 89 | 75 | 84% | [ ] |
 |     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 20 | 20 | 100% | [x] |
 |     org.apache.lucene.util.bkd |         org.gnit.lucenekmp.util.bkd | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 2 | 2 | 100% | [x] |
@@ -48,7 +48,7 @@
 | org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader | 6 | 4 | 2 | 66% | [ ] |
 | org.apache.lucene.index.StandardDirectoryReader | org.gnit.lucenekmp.index.StandardDirectoryReader | 13 | 11 | 2 | 84% | [ ] |
 | org.apache.lucene.queryparser.classic.QueryParser | org.gnit.lucenekmp.queryparser.classic.QueryParser | 0 | 0 | 0 | 100% | [ ] |
-| org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 31 | 11 | 73% | [ ] |
+| org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 32 | 10 | 76% | [ ] |
 | org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory | 4 | 2 | 2 | 50% | [ ] |
 | org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 3 | 2 | 60% | [ ] |
 | org.apache.lucene.document.IntPoint | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
@@ -57,44 +57,11 @@
 | org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 173 | 119 | 54 | 68% | [ ] |
+| TOTAL |  | 173 | 120 | 53 | 69% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| org.apache.lucene.document.LatLonPoint | org.gnit.lucenekmp.document.LatLonPoint |
-| org.apache.lucene.document.LatLonPointDistanceFeatureQuery | org.gnit.lucenekmp.document.LatLonPointDistanceFeatureQuery |
-| org.apache.lucene.document.LatLonPointDistanceQuery | org.gnit.lucenekmp.document.LatLonPointDistanceQuery |
-| org.apache.lucene.document.LatLonPointQuery | org.gnit.lucenekmp.document.LatLonPointQuery |
-| org.apache.lucene.document.NearestNeighbor | org.gnit.lucenekmp.document.NearestNeighbor |
-| org.apache.lucene.document.ShapeField | org.gnit.lucenekmp.document.ShapeField |
-| org.apache.lucene.document.SpatialQuery | org.gnit.lucenekmp.document.SpatialQuery |
-| org.apache.lucene.geo.Circle | org.gnit.lucenekmp.geo.Circle |
-| org.apache.lucene.geo.Circle2D | org.gnit.lucenekmp.geo.Circle2D |
-| org.apache.lucene.geo.Component2D | org.gnit.lucenekmp.geo.Component2D |
-| org.apache.lucene.geo.ComponentTree | org.gnit.lucenekmp.geo.ComponentTree |
-| org.apache.lucene.geo.EdgeTree | org.gnit.lucenekmp.geo.EdgeTree |
-| org.apache.lucene.geo.GeoEncodingUtils | org.gnit.lucenekmp.geo.GeoEncodingUtils |
-| org.apache.lucene.geo.GeoUtils | org.gnit.lucenekmp.geo.GeoUtils |
-| org.apache.lucene.geo.Geometry | org.gnit.lucenekmp.geo.Geometry |
-| org.apache.lucene.geo.LatLonGeometry | org.gnit.lucenekmp.geo.LatLonGeometry |
-| org.apache.lucene.geo.Line | org.gnit.lucenekmp.geo.Line |
-| org.apache.lucene.geo.Line2D | org.gnit.lucenekmp.geo.Line2D |
-| org.apache.lucene.geo.Point | org.gnit.lucenekmp.geo.Point |
-| org.apache.lucene.geo.Point2D | org.gnit.lucenekmp.geo.Point2D |
-| org.apache.lucene.geo.Polygon | org.gnit.lucenekmp.geo.Polygon |
-| org.apache.lucene.geo.Polygon2D | org.gnit.lucenekmp.geo.Polygon2D |
-| org.apache.lucene.geo.Rectangle | org.gnit.lucenekmp.geo.Rectangle |
-| org.apache.lucene.geo.Rectangle2D | org.gnit.lucenekmp.geo.Rectangle2D |
-| org.apache.lucene.geo.SimpleGeoJSONPolygonParser | org.gnit.lucenekmp.geo.SimpleGeoJSONPolygonParser |
-| org.apache.lucene.geo.Tessellator | org.gnit.lucenekmp.geo.Tessellator |
-| org.apache.lucene.geo.XYCircle | org.gnit.lucenekmp.geo.XYCircle |
-| org.apache.lucene.geo.XYEncodingUtils | org.gnit.lucenekmp.geo.XYEncodingUtils |
-| org.apache.lucene.geo.XYGeometry | org.gnit.lucenekmp.geo.XYGeometry |
-| org.apache.lucene.geo.XYLine | org.gnit.lucenekmp.geo.XYLine |
-| org.apache.lucene.geo.XYPoint | org.gnit.lucenekmp.geo.XYPoint |
-| org.apache.lucene.geo.XYPolygon | org.gnit.lucenekmp.geo.XYPolygon |
-| org.apache.lucene.geo.XYRectangle | org.gnit.lucenekmp.geo.XYRectangle |
 | org.apache.lucene.index.ApproximatePriorityQueue | org.gnit.lucenekmp.index.ApproximatePriorityQueue |
 | org.apache.lucene.index.BaseCompositeReader | org.gnit.lucenekmp.index.BaseCompositeReader |
 | org.apache.lucene.index.BinaryDocValuesFieldUpdates | org.gnit.lucenekmp.index.BinaryDocValuesFieldUpdates |
@@ -178,7 +145,6 @@
 | org.apache.lucene.internal.tests.IndexWriterAccess | org.gnit.lucenekmp.internal.tests.IndexWriterAccess |
 | org.apache.lucene.internal.tests.SegmentReaderAccess | org.gnit.lucenekmp.internal.tests.SegmentReaderAccess |
 | org.apache.lucene.internal.tests.TestSecrets | org.gnit.lucenekmp.internal.tests.TestSecrets |
-| org.apache.lucene.search.CollectionTerminatedException | org.gnit.lucenekmp.search.CollectionTerminatedException |
 | org.apache.lucene.search.CollectorManager | org.gnit.lucenekmp.search.CollectorManager |
 | org.apache.lucene.search.ExactPhraseMatcher | org.gnit.lucenekmp.search.ExactPhraseMatcher |
 | org.apache.lucene.search.FieldValueHitQueue | org.gnit.lucenekmp.search.FieldValueHitQueue |
@@ -231,7 +197,6 @@
 | org.apache.lucene.util.RoaringDocIdSet | org.gnit.lucenekmp.util.RoaringDocIdSet |
 | org.apache.lucene.util.SameThreadExecutorService | org.gnit.lucenekmp.util.SameThreadExecutorService |
 | org.apache.lucene.util.SetOnce | org.gnit.lucenekmp.util.SetOnce |
-| org.apache.lucene.util.SloppyMath | org.gnit.lucenekmp.util.SloppyMath |
 | org.apache.lucene.util.SuppressForbidden | org.gnit.lucenekmp.util.SuppressForbidden |
 | org.apache.lucene.util.packed.BulkOperationPackedSingleBlock | org.gnit.lucenekmp.util.packed.BulkOperationPackedSingleBlock |
 | org.apache.lucene.util.packed.DeltaPackedLongValues | org.gnit.lucenekmp.util.packed.DeltaPackedLongValues |
