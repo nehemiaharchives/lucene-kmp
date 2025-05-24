@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Arrays.mismatch
 import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.assert
 import kotlin.jvm.JvmName
 import kotlin.math.min
 
@@ -311,7 +312,7 @@ class ArrayUtil {
          * exponentially, but never allocating more than `maxLength` elements.
          */
         fun growInRange(array: IntArray, minLength: Int, maxLength: Int): IntArray {
-            require(
+            assert(
                 minLength >= 0
             ) { "length must be positive (got $minLength): likely integer overflow?" }
 
