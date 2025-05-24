@@ -7,14 +7,57 @@ class Character {
 
     companion object {
 
+        /**
+         * The minimum radix available for conversion to and from strings.
+         * The constant value of this field is the smallest value permitted
+         * for the radix argument in radix-conversion methods such as the
+         * `digit` method, the `forDigit` method, and the
+         * `toString` method of class `Integer`.
+         *
+         * @see Character.digit
+         * @see Character.forDigit
+         * @see Integer.toString
+         * @see Integer.valueOf
+         */
         const val MIN_RADIX: Int = 2
+
+        /**
+         * The maximum radix available for conversion to and from strings.
+         * The constant value of this field is the largest value permitted
+         * for the radix argument in radix-conversion methods such as the
+         * `digit` method, the `forDigit` method, and the
+         * `toString` method of class `Integer`.
+         *
+         * @see Character.digit
+         * @see Character.forDigit
+         * @see Integer.toString
+         * @see Integer.valueOf
+         */
         const val MAX_RADIX: Int = 36
+
+
+        /**
+         * The constant value of this field is the smallest value of type
+         * `char`, `'\u005Cu0000'`.
+         *
+         * @since   1.0.2
+         */
+        const val MIN_VALUE: Char = '\u0000'
+
+        /**
+         * The constant value of this field is the largest value of type
+         * `char`, `'\u005CuFFFF'`.
+         *
+         * @since   1.0.2
+         */
+        const val MAX_VALUE: Char = '\uFFFF'
+
+
         const val MIN_CODE_POINT: Int = 0x000000
         const val MAX_CODE_POINT: Int = 0X10FFFF
         const val MIN_SUPPLEMENTARY_CODE_POINT: Int = 0x010000
         const val UNASSIGNED: Byte = 0
         const val ERROR: Int = -0x1
-
 
         /**
          * Undefined bidirectional character type. Undefined {@code char}

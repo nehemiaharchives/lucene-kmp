@@ -8,7 +8,8 @@ class TestUtil {
         // line 552 of TestUtil.java
         /** start and end are BOTH inclusive  */
         fun nextInt(r: Random, start: Int, end: Int): Int {
-            return r.nextInt(start, end)
+            require(end >= start)
+            return if (start == end) start else r.nextInt(start, end + 1)
         }
 
         // line 617 of TestUtil.java
@@ -53,6 +54,19 @@ class TestUtil {
                     chars[i++] = nextInt(random, 0xe000, 0xffff).toChar()
                 }
             }
+        }
+
+        /** Returns true rarely (about 1 in 20 times) */
+        fun rarely(random: Random): Boolean {
+            return random.nextInt(20) == 0
+        }
+
+        /**
+         * Returns a shared random instance for test code, similar to Lucene's random().
+         * This is useful for test classes that want a consistent random source.
+         */
+        fun random(): Random {
+            return Random.Default
         }
 
 

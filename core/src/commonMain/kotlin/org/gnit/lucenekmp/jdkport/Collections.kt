@@ -53,11 +53,9 @@ object Collections {
      * the `Comparable` interface.
      * @see Comparable
     </T> */
-    /*
-        fun <T> reverseOrder(): Comparator<T?> {
+        /*fun <T> reverseOrder(): Comparator<T?> {
             return ReverseComparator.REVERSE_ORDER as Comparator<T?>
-        }
-    */
+        }*/
 
     /**
      * Returns a comparator that imposes the reverse ordering of the specified

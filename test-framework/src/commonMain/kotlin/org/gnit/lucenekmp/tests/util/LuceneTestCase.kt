@@ -1,16 +1,15 @@
 package org.gnit.lucenekmp.tests.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
+import org.gnit.lucenekmp.util.BytesRef
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.test.*
 
 open class LuceneTestCase {
-
 
 
     //↓ line 2860 of LuceneTestCase.java
@@ -64,6 +63,18 @@ open class LuceneTestCase {
             /*Nightly::class.java.getAnnotation<A>(TestGroup::class.java)
                 .enabled()*/ false
         )
+
+
+        // line 408
+        // -----------------------------------------------------------------
+        // Truly immutable fields and constants, initialized once and valid
+        // for all suites ever since.
+        // -----------------------------------------------------------------
+        /**
+         * True if and only if tests are run in verbose mode. If this flag is false tests are not expected
+         * to print any messages. Enforced with [TestRuleLimitSysouts].
+         */
+        val VERBOSE: Boolean = systemPropertyAsBoolean("tests.verbose", false)
 
 
         // line 484
@@ -124,6 +135,37 @@ open class LuceneTestCase {
             }
         }
         // line 657
+
+        // line 725
+
+        // -----------------------------------------------------------------
+        // Test facilities and facades for subclasses.
+        // -----------------------------------------------------------------
+
+        /**
+         * Access to the current {@link RandomizedContext}'s Random instance. It is safe to use this
+         * method from multiple threads, etc., but it should be called while within a runner's scope (so
+         * no static initializers). The returned {@link Random} instance will be <b>different</b> when
+         * this method is called inside a {@link BeforeClass} hook (static suite scope) and within {@link
+         * Before}/ {@link After} hooks or test methods.
+         *
+         * <p>The returned instance must not be shared with other threads or cross a single scope's
+         * boundary. For example, a {@link Random} acquired within a test method shouldn't be reused for
+         * another test case.
+         *
+         * <p>There is an overhead connected with getting the {@link Random} for a particular context and
+         * thread. It is better to cache the {@link Random} locally if tight loops with multiple
+         * invocations are present or create a derivative local {@link Random} for millions of calls like
+         * this:
+         *
+         * <pre>
+         * Random random = new Random(random().nextLong());
+         * // tight loop with many invocations.
+         * </pre>
+         */
+        fun random(): Random {
+            return Random
+        }
 
         // line 820 of LuceneTestCase.java
         /**

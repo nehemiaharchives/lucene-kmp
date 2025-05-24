@@ -2,9 +2,10 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Arrays.mismatch
+import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.assert
 import kotlin.jvm.JvmName
 import kotlin.math.min
-import kotlin.reflect.KClass
 
 class ArrayUtil {
 
@@ -34,9 +35,6 @@ class ArrayUtil {
             return parseInt(chars, offset, len, 10)
         }
 
-        const val CHAR_MIN_RADIX = 2
-        const val CHAR_MAX_RADIX = 36
-
         /**
          * Parses the string argument as if it was an int value and returns the result. Throws
          * NumberFormatException if the string does not represent an int quantity. The second argument
@@ -51,7 +49,7 @@ class ArrayUtil {
         fun parseInt(chars: CharArray, offset: Int, len: Int, radix: Int): Int {
             var offset = offset
             var len = len
-            if (chars == null || radix < CHAR_MAX_RADIX || radix > CHAR_MAX_RADIX) {
+            if (chars == null || radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
                 throw NumberFormatException()
             }
             var i = 0
@@ -103,10 +101,6 @@ class ArrayUtil {
         END APACHE HARMONY CODE
          */
 
-        /*
-
-  END APACHE HARMONY CODE
-   */
         /**
          * Returns an array size &gt;= minTargetSize, generally over-allocating exponentially to achieve
          * amortized linear-time cost as the array grows.
@@ -182,14 +176,23 @@ class ArrayUtil {
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun <T> growExact(array: Array<T>, newLength: Int): Array<T> = array.copyOf(newLength) as Array<T>
+        inline fun <reified T> growExact(array: Array<T>, newLength: Int): Array<T> {
+            if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
+            return Array<T>(newLength) { i -> if (i < array.size) array[i] else null as T }
+        }
+
+        @JvmName("growExactNullable")
+        inline fun <reified T> growExact(array: Array<T?>, newLength: Int): Array<T?> {
+            if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
+            return Array(newLength) { i -> if (i < array.size) array[i] else null }
+        }
 
         /** Returns a larger array, generally over-allocating exponentially  */
         /*fun <T> grow(array: Array<T?>): Array<T?> {
             return grow<T?>(array, 1 + array.size)
         }*/
 
-        fun <T> grow(array: Array<T>): Array<T> {
+        inline fun <reified T> grow(array: Array<T>): Array<T> {
             return grow(array, 1 + array.size)
         }
 
@@ -197,17 +200,7 @@ class ArrayUtil {
          * Returns an array whose size is at least `minSize`, generally over-allocating
          * exponentially
          */
-        @JvmName("growNullable")
-        fun <T> grow(array: Array<T?>, minSize: Int): Array<T?> {
-            if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
-            if (array.size < minSize) {
-                val newLength: Int =
-                    oversize(minSize, RamUsageEstimator.NUM_BYTES_OBJECT_REF)
-                return growExact<T?>(array, newLength)
-            } else return array
-        }
-
-        fun <T> grow(array: Array<T>, minSize: Int): Array<T> {
+        inline fun <reified T> grow(array: Array<T>, minSize: Int): Array<T> {
             if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
             if (array.size < minSize) {
                 val newLength: Int =
@@ -216,10 +209,24 @@ class ArrayUtil {
             } else return array
         }
 
+        @JvmName("growNullable")
+        inline fun <reified T> grow(array: Array<T?>, minSize: Int): Array<T?> {
+            if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
+            if (array.size < minSize) {
+                val newLength: Int =
+                    oversize(minSize, RamUsageEstimator.NUM_BYTES_OBJECT_REF)
+                return growExact<T?>(array, newLength)
+            } else return array
+        }
+
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun growExact(array: ShortArray, newLength: Int): ShortArray = array.copyOf(newLength)
+        fun growExact(array: ShortArray, newLength: Int): ShortArray {
+            val copy = ShortArray(newLength)
+            array.copyInto(copy, 0, 0, array.size)
+            return copy
+        }
 
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating exponentially
@@ -239,8 +246,11 @@ class ArrayUtil {
         /**
          * Returns a new array whose size is exact the specified `newLength` without over-allocating
          */
-        fun growExact(array: FloatArray, newLength: Int): FloatArray = array.copyOf(newLength)
-
+        fun growExact(array: FloatArray, newLength: Int): FloatArray {
+            val copy = FloatArray(newLength)
+            array.copyInto(copy, 0, 0, array.size)
+            return copy
+        }
 
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating
@@ -302,7 +312,7 @@ class ArrayUtil {
          * exponentially, but never allocating more than `maxLength` elements.
          */
         fun growInRange(array: IntArray, minLength: Int, maxLength: Int): IntArray {
-            require(
+            assert(
                 minLength >= 0
             ) { "length must be positive (got $minLength): likely integer overflow?" }
 
@@ -390,7 +400,6 @@ class ArrayUtil {
             array.copyInto(copy, 0, 0, array.size)
             return copy
         }
-
 
         /**
          * Returns an array whose size is at least `minSize`, generally over-allocating
@@ -732,7 +741,7 @@ class ArrayUtil {
         }
 
         /** Copies an array into a new array.  */
-        fun <T> copyArray(array: Array<T>): Array<T> {
+        inline fun <reified T> copyArray(array: Array<T>): Array<T> {
             return copyOfSubArray(array, 0, array.size)
         }
 
@@ -743,41 +752,15 @@ class ArrayUtil {
          * @param from the initial index of range to be copied (inclusive)
          * @param to the final index of range to be copied (exclusive)
          */
-        fun <T> copyOfSubArray(array: Array<T>, from: Int, to: Int): Array<T> {
+        inline fun <reified T> copyOfSubArray(array: Array<T>, from: Int, to: Int): Array<T> {
             val subLength = to - from
-            val type: KClass<out Array<T>> = array::class
-            val copy: Array<T> =
-                    /* if (type == Array<Any>::class)
-                        arrayOfNulls<Any>(subLength) as Array<T>
-                    else
-                        java.lang.reflect.Array.newInstance(type.getComponentType(), subLength)*/
-
-                arrayOfNulls<Any>(subLength) as Array<T>
-
-            /*java.lang.System.arraycopy(array, from, copy, 0, subLength)*/
-
-            array.copyInto(copy, 0, from, to)
-
-            return copy
+            return Array(subLength) { i -> array[from + i] }
         }
 
         @JvmName("copyOfSubArrayNullable")
-        fun <T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
+        inline fun <reified T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
             val subLength = to - from
-            val type: KClass<out Array<T?>> = array::class
-            val copy: Array<T?> =
-                /* if (type == Array<Any>::class)
-                    arrayOfNulls<Any>(subLength) as Array<T>
-                else
-                    java.lang.reflect.Array.newInstance(type.getComponentType(), subLength)*/
-
-                arrayOfNulls<Any?>(subLength) as Array<T?>
-
-            /*java.lang.System.arraycopy(array, from, copy, 0, subLength)*/
-
-            array.copyInto(copy, 0, from, to)
-
-            return copy
+            return Array(subLength) { i -> array[from + i] }
         }
 
         /** Comparator for a fixed number of bytes.  */
