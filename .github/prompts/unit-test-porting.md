@@ -60,7 +60,7 @@ When you create tests for functions of a class, if the class is subclass of abst
 
 Unit tests should be ported, not created newly. Keep the test function/method name as it is. Keep the method signature, valuable names used in the unit test as it is. Just replace java assertions to kotlin test assertions. Do not create test which is not in the java lucene unit tests.
 
-Create unit tests following above requirement, run the test by ./gradlew allTest command if test fails, review both implementation of the tested function and the test code. Verify tested function is correctly implemented. Verify if the test assertion is correctly expecting the outcome of the unit test.
+Create unit tests following above requirement, run the test using shell script named gradle_output.sh. Use it like gradle_output.sh allTests. wait for the test execution, then read the build_output.txt to check if it pass or fail, or has compilation error. test command if test fails, review both implementation of the tested function and the test code. Verify tested function is correctly implemented. Verify if the test assertion is correctly expecting the outcome of the unit test.
 
 ## never forget this is kotlin common
 Always keep in mind that this is kotlin common project and never use jdk specific feature in the both tested and test code when you make change. The code also needs to work in iOS. Avoid expect/actual pattern to implement things but implement all of them by using just kotlin standard library for common target.
