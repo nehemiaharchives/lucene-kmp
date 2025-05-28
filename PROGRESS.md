@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 722 | 591 | 81% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 721 | 593 | 82% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -24,7 +24,7 @@
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 38 | 33 | 86% | [ ] |
-|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 89 | 76 | 85% | [ ] |
+|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 88 | 78 | 88% | [ ] |
 |     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 20 | 20 | 100% | [x] |
 |     org.apache.lucene.util.bkd |         org.gnit.lucenekmp.util.bkd | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 2 | 2 | 100% | [x] |
@@ -174,9 +174,6 @@
 | org.apache.lucene.store.LockValidatingDirectoryWrapper | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper |
 | org.apache.lucene.store.RateLimitedIndexOutput | org.gnit.lucenekmp.store.RateLimitedIndexOutput |
 | org.apache.lucene.store.RateLimiter | org.gnit.lucenekmp.store.RateLimiter |
-| org.apache.lucene.util.FileDeleter | org.gnit.lucenekmp.util.FileDeleter |
-| org.apache.lucene.util.FrequencyTrackingRingBuffer | org.gnit.lucenekmp.util.FrequencyTrackingRingBuffer |
-| org.apache.lucene.util.HotspotVMOptions | org.gnit.lucenekmp.util.HotspotVMOptions |
 | org.apache.lucene.util.IntBlockPool | org.gnit.lucenekmp.util.IntBlockPool |
 | org.apache.lucene.util.NamedThreadFactory | org.gnit.lucenekmp.util.NamedThreadFactory |
 | org.apache.lucene.util.NotDocIdSet | org.gnit.lucenekmp.util.NotDocIdSet |

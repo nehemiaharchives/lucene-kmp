@@ -12,6 +12,8 @@ import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
 import java.io.File
 
+
+
 /** Lucene → Kotlin‑MPP progress dashboard (core + test‑framework) */
 
 data class Source(val fqn: String, val file: File)
@@ -38,6 +40,12 @@ fun checkbox(ok: Boolean) = if (ok) "[x]" else "[ ]"
 
 // ─── main command ───────────────────────────────────────────────────────────
 class Progress : CliktCommand() {
+    // Hardcoded list of classes not to port
+    private val notToPort = mutableSetOf(
+        "org.apache.lucene.util.HotspotVMOptions"
+        // Add more FQNs here as needed
+    )
+
     private val javaDir by option("--java", "-j").default("/home/joel/code/lp/lucene")
     private val kmpDir  by option("--kmp", "-k").default("/home/joel/code/lp/lucene-kmp")
 
@@ -143,7 +151,9 @@ class Progress : CliktCommand() {
         markDown.appendLine(mdTable)
     }
     private fun renderPackageStats(depSet: Set<String>, kmpSet: Set<String>) {
-        val grouped = depSet.groupBy { it.substringBeforeLast('.', "<default>") }
+        // Exclude notToPort classes from statistics
+        val filteredDepSet = depSet.minus(notToPort)
+        val grouped = filteredDepSet.groupBy { it.substringBeforeLast('.', "<default>") }
             .filterKeys { k -> k != "<default>" && k.substringAfterLast('.').first().isLowerCase() }
 
         val rows = grouped.keys.sorted().map { pkg ->
@@ -216,7 +226,7 @@ class Progress : CliktCommand() {
         val globalDeps = mutableSetOf<String>()
         val globalPorts = mutableSetOf<String>()
 
-        fun deps(c: String) = directDeps(c).minus(pri1Set).minus(c)
+        fun deps(c: String) = directDeps(c).minus(pri1Set).minus(c).minus(notToPort)
 
         val rows = pri1.map { clazz ->
             val mapped = mapToKmp(clazz)
@@ -295,7 +305,8 @@ class Progress : CliktCommand() {
         index(kmpSrc, kmpIndex)
         val kmpSet = kmpSrc.map { it.fqn }.toSet()
 
-        val deps = collectTransitive(pri1.toSet()).filter { it in javaIndex }.toSet()
+        // Exclude notToPort from all dependency sets
+        val deps = collectTransitive(pri1.toSet()).filter { it in javaIndex && it !in notToPort }.toSet()
 
         val section = "# Lucene KMP Port Progress"
         term.println(bold(section))
@@ -308,7 +319,8 @@ class Progress : CliktCommand() {
             val mappedDep = mapToKmp(dep)
             val mappedOuter = mapToKmp(outer)
             mappedDep !in kmpSet && mappedOuter !in kmpSet
-        }.sorted()
+        }.filter { it !in notToPort } // Exclude notToPort from missing list
+         .sorted()
         renderMissing(missingDeps)
 
         File(kmpRoot, "PROGRESS.md").writeText(markDown.toString())
