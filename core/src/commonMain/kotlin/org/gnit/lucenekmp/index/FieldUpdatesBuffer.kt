@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.DocValuesUpdate.BinaryDocValuesUpdate
 import org.gnit.lucenekmp.index.DocValuesUpdate.NumericDocValuesUpdate
 import org.gnit.lucenekmp.jdkport.Arrays

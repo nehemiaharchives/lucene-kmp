@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.codecs.lucene90.blocktree
 
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.util.compress.LowercaseAsciiCompression
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Compression algorithm used for suffixes of a block of terms.  */
 enum class CompressionAlgorithm(val code: Int) {

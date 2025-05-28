@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util.packed
 
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.BitUtil.zigZagEncode
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.max
 import kotlin.math.min
 

@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.fst
 
 import org.gnit.lucenekmp.util.ByteBlockPool
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Reads in reverse from a ByteBlockPool.  */
 internal class ByteBlockPoolReverseBytesReader(private val buf: ByteBlockPool) : FST.BytesReader() {

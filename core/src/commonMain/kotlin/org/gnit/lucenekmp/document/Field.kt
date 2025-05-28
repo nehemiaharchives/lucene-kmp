@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.document
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttribute

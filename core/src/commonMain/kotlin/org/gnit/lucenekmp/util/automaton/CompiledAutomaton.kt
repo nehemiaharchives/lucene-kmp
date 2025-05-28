@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.automaton
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.SingleTermsEnum
 import org.gnit.lucenekmp.index.Term
 import org.gnit.lucenekmp.index.Terms

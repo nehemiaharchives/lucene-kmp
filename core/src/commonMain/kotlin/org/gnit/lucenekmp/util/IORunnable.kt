@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A Runnable that may throw an IOException

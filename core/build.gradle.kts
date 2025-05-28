@@ -33,7 +33,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.kotlinx.io)
+                implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
                 implementation(libs.kotlinx.coroutines)
@@ -43,6 +43,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation(libs.okio.fakefilesystem)
                 implementation(project(":test-framework"))
             }
         }

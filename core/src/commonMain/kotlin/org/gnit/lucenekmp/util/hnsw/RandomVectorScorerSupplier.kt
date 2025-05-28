@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.hnsw
 
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /** A supplier that creates [RandomVectorScorer] from an ordinal.  */

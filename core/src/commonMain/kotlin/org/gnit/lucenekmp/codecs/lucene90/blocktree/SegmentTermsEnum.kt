@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.fst.FST.Arc
 import org.gnit.lucenekmp.util.fst.FST.BytesReader
 import org.gnit.lucenekmp.util.fst.Util
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.experimental.and

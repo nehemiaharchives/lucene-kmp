@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.packed.DirectMonotonicWriter
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Efficient index format for block-based [Codec]s.

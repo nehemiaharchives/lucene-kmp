@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.IndexReaderContext
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.LeafReaderContext
@@ -156,7 +156,7 @@ class TermQuery : Query {
                         val te: TermsEnum? = getTermsEnum()
                         return te?.docFreq()?.toLong() ?: 0L
                     }catch (e: IOException) {
-                        throw IOException(e)
+                        throw IOException(e.message)
                     }
                 }
 

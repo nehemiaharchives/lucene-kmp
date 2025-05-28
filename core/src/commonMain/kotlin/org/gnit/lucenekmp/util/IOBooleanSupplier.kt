@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Boolean supplier that is allowed to throw an IOException.

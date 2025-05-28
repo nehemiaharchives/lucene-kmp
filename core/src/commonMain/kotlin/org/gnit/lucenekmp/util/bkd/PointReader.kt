@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.bkd
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * One pass iterator through all points previously written with a [PointWriter], abstracting

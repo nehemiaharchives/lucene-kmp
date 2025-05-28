@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.index.DocIDMerger
 import org.gnit.lucenekmp.index.FieldInfo

@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.fst.FSTCompiler.Companion.getOnHeapReaderWriter
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Provides storage of finite state machine (FST), using byte array or byte store allocated on heap.

@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.fst
 
 import org.gnit.lucenekmp.store.RandomAccessInput
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Implements reverse read from a RandomAccessInput.  */
 class ReverseRandomAccessReader(private val `in`: RandomAccessInput) : FST.BytesReader() {

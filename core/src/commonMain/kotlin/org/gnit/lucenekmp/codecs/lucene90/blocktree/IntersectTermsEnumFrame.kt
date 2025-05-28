@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.automaton.Transition
 import org.gnit.lucenekmp.util.fst.FST
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import kotlin.experimental.and
 

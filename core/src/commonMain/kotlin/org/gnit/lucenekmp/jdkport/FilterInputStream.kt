@@ -1,8 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.concurrent.Volatile
-
 
 /**
  * port of java.io.FilterInputStream

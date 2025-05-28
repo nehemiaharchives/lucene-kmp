@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.automaton
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.jdkport.codePointAt

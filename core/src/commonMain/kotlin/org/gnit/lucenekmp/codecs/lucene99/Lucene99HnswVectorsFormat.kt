@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.search.TaskExecutor
 import org.gnit.lucenekmp.util.hnsw.HnswGraphBuilder
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import kotlin.jvm.JvmOverloads
 

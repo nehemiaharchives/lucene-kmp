@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene90.compressing
 
 import org.gnit.lucenekmp.jdkport.Cloneable
-import kotlinx.io.IOException
+import okio.IOException
 
 
 abstract class FieldsIndex : Cloneable<FieldsIndex>, AutoCloseable {

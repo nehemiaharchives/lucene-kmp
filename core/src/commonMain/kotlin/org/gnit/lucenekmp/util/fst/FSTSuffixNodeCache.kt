@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.util.ByteBlockPool
 import org.gnit.lucenekmp.util.ByteBlockPool.DirectAllocator
 import org.gnit.lucenekmp.util.packed.PackedInts
 import org.gnit.lucenekmp.util.packed.PagedGrowableWriter
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import kotlin.math.max
 

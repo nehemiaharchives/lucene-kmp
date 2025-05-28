@@ -1,8 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.io.Buffer
-import kotlinx.io.Source
+import okio.Buffer
+import okio.BufferedSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -12,13 +12,13 @@ class InputStreamReaderTest {
 
     private val logger = KotlinLogging.logger {}
 
-    private fun byteArraySource(data: ByteArray): Source = Buffer().apply { write(data) }
+    private fun byteArraySource(data: ByteArray): BufferedSource = Buffer().apply { write(data) }
 
     @Test
     fun testReadSingleCharacter() {
         val input = "Hello, World!".encodeToByteArray()
         logger.debug { "Input bytes: ${input.joinToString(", ") { it.toString() }}" }
-        val inputStream = KIOSourceInputStream(byteArraySource(input))
+        val inputStream = OkioSourceInputStream(byteArraySource(input))
         val reader = InputStreamReader(inputStream, StandardCharsets.UTF_8)
 
         val firstChar = reader.read()
@@ -30,7 +30,7 @@ class InputStreamReaderTest {
     fun testReadIntoCharArray() {
         val input = "Hello, World!".encodeToByteArray()
         logger.debug { "Input bytes: ${input.joinToString(", ") { it.toString() }}" }
-        val inputStream = KIOSourceInputStream(byteArraySource(input))
+        val inputStream = OkioSourceInputStream(byteArraySource(input))
         val reader = InputStreamReader(inputStream, StandardCharsets.UTF_8)
 
         val buffer = CharArray(5)
@@ -43,7 +43,7 @@ class InputStreamReaderTest {
     @Test
     fun testReady() {
         val input = "Hello, World!".encodeToByteArray()
-        val inputStream = KIOSourceInputStream(byteArraySource(input))
+        val inputStream = OkioSourceInputStream(byteArraySource(input))
         val reader = InputStreamReader(inputStream, StandardCharsets.UTF_8)
 
         assertTrue(reader.ready())
@@ -52,7 +52,7 @@ class InputStreamReaderTest {
     @Test
     fun testClose() {
         val input = "Hello, World!".encodeToByteArray()
-        val inputStream = KIOSourceInputStream(byteArraySource(input))
+        val inputStream = OkioSourceInputStream(byteArraySource(input))
         val reader = InputStreamReader(inputStream, StandardCharsets.UTF_8)
 
         reader.close()

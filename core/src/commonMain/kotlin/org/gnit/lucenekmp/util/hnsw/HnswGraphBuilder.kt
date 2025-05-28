@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.search.knn.KnnSearchStrategy
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.InfoStream
 import org.gnit.lucenekmp.util.hnsw.HnswUtil.Component
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min

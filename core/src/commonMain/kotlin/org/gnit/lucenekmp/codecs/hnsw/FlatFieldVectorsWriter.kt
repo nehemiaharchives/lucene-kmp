@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.codecs.hnsw
 
 import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.index.DocsWithFieldSet
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Vectors' writer for a field

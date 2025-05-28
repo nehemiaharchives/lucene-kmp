@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.Impact
 import org.gnit.lucenekmp.index.Impacts
 import org.gnit.lucenekmp.index.ImpactsSource

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.BinaryDocValues
 import org.gnit.lucenekmp.index.DocValuesSkipIndexType
 import org.gnit.lucenekmp.index.DocValuesSkipper

@@ -30,7 +30,7 @@ import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.packed.BlockPackedWriter
 import org.gnit.lucenekmp.util.packed.DirectWriter
 import org.gnit.lucenekmp.util.packed.PackedInts
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.System

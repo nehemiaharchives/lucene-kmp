@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.System
 
 // Storing a single contiguous byte[] for the current node of the FST we are writing. The byte[]

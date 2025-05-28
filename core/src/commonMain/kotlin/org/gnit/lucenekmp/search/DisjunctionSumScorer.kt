@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.util.MathUtil
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.min
 
 /** A Scorer for OR like queries, counterpart of `ConjunctionScorer`.  */

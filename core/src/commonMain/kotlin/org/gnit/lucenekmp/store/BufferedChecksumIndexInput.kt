@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.CRC32
 
 
@@ -71,7 +71,7 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
     }
 
     @Throws(IOException::class)
-    override fun slice(sliceDescription: String?, offset: Long, length: Long): IndexInput {
+    override fun slice(sliceDescription: String, offset: Long, length: Long): IndexInput {
         throw UnsupportedOperationException()
     }
 }

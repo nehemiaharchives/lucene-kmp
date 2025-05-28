@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.store.DataInput
 

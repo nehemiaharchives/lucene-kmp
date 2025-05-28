@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A stream of doc IDs. Most methods on [DocIdStream]s are terminal, meaning that the [ ] may not be further used.

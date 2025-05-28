@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /** A delegating Directory that records which files were written to and deleted.  */

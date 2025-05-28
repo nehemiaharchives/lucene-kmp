@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.util.BitUtil
@@ -47,7 +47,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @see DataOutput.writeBytes
      */
     @Throws(IOException::class)
-    fun readBytes(b: ByteArray, offset: Int, len: Int, useBuffer: Boolean) {
+    open fun readBytes(b: ByteArray, offset: Int, len: Int, useBuffer: Boolean) {
         // Default to ignoring useBuffer entirely
         readBytes(b, offset, len)
     }
@@ -156,7 +156,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @param length the number of ints to read
      */
     @Throws(IOException::class)
-    fun readInts(dst: IntArray, offset: Int, length: Int) {
+    open fun readInts(dst: IntArray, offset: Int, length: Int) {
         Objects.checkFromIndexSize(offset, length, dst.size)
         for (i in 0..<length) {
             dst[offset + i] = readInt()

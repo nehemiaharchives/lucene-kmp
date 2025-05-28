@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.util.IOUtils
@@ -213,7 +213,7 @@ abstract class Directory : AutoCloseable {
          *
          * @see .createTempOutput
          */
-        protected fun getTempFileName(prefix: String, suffix: String, counter: Long): String {
+        fun getTempFileName(prefix: String, suffix: String, counter: Long): String {
             return IndexFileNames.segmentFileName(
                 prefix, suffix + "_" + counter.toString(Character.MAX_RADIX), "tmp"
             ).toString()

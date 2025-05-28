@@ -1,15 +1,14 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.Source
+import okio.Buffer
+import okio.BufferedSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class KIOSourceBufferedReaderTest {
 
-    private fun byteArraySource(data: ByteArray): Source = Buffer().apply { write(data) }
+    private fun byteArraySource(data: ByteArray): BufferedSource = Buffer().apply { write(data) }
 
     @Test
     fun testRead() {

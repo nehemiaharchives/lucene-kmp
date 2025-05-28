@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.util.BytesRefIterator
 import org.gnit.lucenekmp.util.IOSupplier

@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Reads vectors from an index. When searching this reader, it iterates every vector in the index

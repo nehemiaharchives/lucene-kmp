@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.EOFException
+import okio.Buffer
+import okio.EOFException
 import kotlin.math.min
 
 // Assuming BufferOverflowException and BufferUnderflowException are defined
@@ -62,17 +62,17 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
                 val bits = value.toBits() // Get IEEE 754 representation
                 when (tempOrder) {
                     ByteOrder.BIG_ENDIAN -> {
-                        buf.writeByte((bits shr 24).toByte())
-                        buf.writeByte((bits shr 16).toByte())
-                        buf.writeByte((bits shr 8).toByte())
-                        buf.writeByte(bits.toByte())
+                        buf.writeByte((bits shr 24))
+                        buf.writeByte((bits shr 16))
+                        buf.writeByte((bits shr 8))
+                        buf.writeByte(bits)
                     }
 
                     ByteOrder.LITTLE_ENDIAN -> {
-                        buf.writeByte(bits.toByte())
-                        buf.writeByte((bits shr 8).toByte())
-                        buf.writeByte((bits shr 16).toByte())
-                        buf.writeByte((bits shr 24).toByte())
+                        buf.writeByte(bits)
+                        buf.writeByte((bits shr 8))
+                        buf.writeByte((bits shr 16))
+                        buf.writeByte((bits shr 24))
                     }
                 }
             }

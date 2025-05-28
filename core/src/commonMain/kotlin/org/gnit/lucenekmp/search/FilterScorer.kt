@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.util.Unwrappable
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A `FilterScorer` contains another `Scorer`, which it uses as its basic source of

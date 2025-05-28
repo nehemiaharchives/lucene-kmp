@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.store.ByteBuffersDataInput
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput

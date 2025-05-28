@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.fst.FST.Arc
 import org.gnit.lucenekmp.util.fst.FST.Arc.BitTable
 import org.gnit.lucenekmp.util.fst.FST.BytesReader
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.System
 
 /**

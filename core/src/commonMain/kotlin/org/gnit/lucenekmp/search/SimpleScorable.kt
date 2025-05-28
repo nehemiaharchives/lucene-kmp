@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /** Simplest implementation of [Scorable], implemented via simple getters and setters.  */

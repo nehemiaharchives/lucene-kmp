@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene101
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.internal.vectorization.PostingDecodingUtil
 import org.gnit.lucenekmp.store.DataOutput
 

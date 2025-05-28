@@ -45,8 +45,8 @@ import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.LongsRef
-import kotlinx.io.EOFException
-import kotlinx.io.IOException
+import okio.EOFException
+import okio.IOException
 import org.gnit.lucenekmp.index.StoredFieldVisitor.*
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math

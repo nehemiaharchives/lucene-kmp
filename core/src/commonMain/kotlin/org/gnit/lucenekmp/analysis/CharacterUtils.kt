@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.analysis
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Reader
 import kotlin.jvm.JvmOverloads

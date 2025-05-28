@@ -1,8 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.IOException
-import kotlinx.io.readByteArray
+import okio.Buffer
+import okio.IOException
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
@@ -16,7 +15,7 @@ class FilterOutputStreamTest {
 
     private fun createTestStream(): Pair<TestFilterOutputStream, Buffer> {
         val buffer = Buffer()
-        val outputStream = TestFilterOutputStream(KIOSinkOutputStream(buffer))
+        val outputStream = TestFilterOutputStream(OkioSinkOutputStream(buffer))
         return Pair(outputStream, buffer)
     }
 

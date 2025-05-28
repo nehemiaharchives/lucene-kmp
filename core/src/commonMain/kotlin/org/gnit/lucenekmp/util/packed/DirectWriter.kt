@@ -1,8 +1,8 @@
 package org.gnit.lucenekmp.util.packed
 
 
-import kotlinx.io.EOFException
-import kotlinx.io.IOException
+import okio.EOFException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.store.DataOutput

@@ -21,7 +21,7 @@ import org.gnit.lucenekmp.search.Weight
 import org.gnit.lucenekmp.util.DocIdSetBuilder
 import org.gnit.lucenekmp.util.NumericUtils
 import org.gnit.lucenekmp.util.SloppyMath
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import kotlin.math.min
 import kotlin.reflect.cast

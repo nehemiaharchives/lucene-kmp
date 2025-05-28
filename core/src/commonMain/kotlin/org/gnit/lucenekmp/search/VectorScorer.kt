@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Computes the similarity score between a given query vector and different document vectors. This

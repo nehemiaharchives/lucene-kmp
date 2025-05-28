@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.min
 
 

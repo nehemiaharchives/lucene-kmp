@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.index.PointValues;
 import org.gnit.lucenekmp.internal.hppc.IntArrayList;
 import org.gnit.lucenekmp.util.Bits;
 import org.gnit.lucenekmp.util.SloppyMath;
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.geo.GeoEncodingUtils
 import org.gnit.lucenekmp.jdkport.PriorityQueue
 import org.gnit.lucenekmp.jdkport.compare

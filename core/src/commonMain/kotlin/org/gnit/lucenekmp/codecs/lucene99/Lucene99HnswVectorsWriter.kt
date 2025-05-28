@@ -37,7 +37,7 @@ import org.gnit.lucenekmp.util.hnsw.OnHeapHnswGraph
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorerSupplier
 import org.gnit.lucenekmp.util.hnsw.UpdateableRandomVectorScorer
 import org.gnit.lucenekmp.util.packed.DirectMonotonicWriter
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math

@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.FixedBitSet
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.min
 
 /**

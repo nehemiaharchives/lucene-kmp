@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.DocIdSetIterator
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.ArrayUtil.Companion.ByteArrayComparator
@@ -255,7 +255,7 @@ protected constructor() {
             require(pointTree.moveToParent() == false)
             return count
         } catch (ioe: IOException) {
-            throw IOException(ioe)
+            throw IOException(ioe.message)
         }
     }
 

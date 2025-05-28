@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util.fst
 
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.experimental.and
 
 /**

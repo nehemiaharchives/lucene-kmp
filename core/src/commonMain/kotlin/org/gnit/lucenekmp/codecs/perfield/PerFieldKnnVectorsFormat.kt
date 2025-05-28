@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.perfield
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.codecs.KnnVectorsFormat
 import org.gnit.lucenekmp.codecs.KnnVectorsReader

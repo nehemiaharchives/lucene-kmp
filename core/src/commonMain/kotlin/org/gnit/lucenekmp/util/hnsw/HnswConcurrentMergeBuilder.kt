@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.InfoStream
 import org.gnit.lucenekmp.util.hnsw.HnswGraphBuilder.Companion.HNSW_COMPONENT
 import org.gnit.lucenekmp.jdkport.AtomicInteger
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.concurrent.atomics.ExperimentalAtomicApi

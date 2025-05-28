@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /**
@@ -9,12 +9,11 @@ import kotlinx.io.IOException
  *
  * Typical use might look like:
  *
- * <pre class="prettyprint">
- * try (final Lock lock = directory.obtainLock("my.lock")) {
+ * ```
+ * directory.obtainLock("my.lock").use { lock ->
  * // ... code to execute while locked ...
  * }
-</pre> *
- *
+ *```
  * @see Directory.obtainLock
  * @lucene.internal
  */

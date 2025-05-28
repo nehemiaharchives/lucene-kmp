@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.util.NamedSPILoader

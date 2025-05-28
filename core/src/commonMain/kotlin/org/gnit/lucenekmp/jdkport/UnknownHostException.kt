@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Thrown to indicate that the IP address of a host could not be determined.

@@ -14,7 +14,7 @@ import org.gnit.lucenekmp.util.BitSet
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.InfoStream
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.VectorEncoding
 import kotlin.math.max
 

@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.FixedBitSet
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Class that plugs into term dictionaries, such as [Lucene90BlockTreeTermsWriter], and

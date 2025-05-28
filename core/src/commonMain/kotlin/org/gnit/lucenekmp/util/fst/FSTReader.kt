@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.util.fst
 import org.gnit.lucenekmp.util.fst.FST.BytesReader
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.Accountable
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Abstraction for reading bytes necessary for FST.  */
 interface FSTReader : Accountable {

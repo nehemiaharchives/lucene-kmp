@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsWriter
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Lucene 9.9 flat vector format, which encodes numeric vector values

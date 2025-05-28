@@ -21,7 +21,7 @@ import org.gnit.lucenekmp.util.fst.FST.Companion.getNumPresenceBytes
 import org.gnit.lucenekmp.util.fst.FST.INPUT_TYPE
 import org.gnit.lucenekmp.util.fst.FST.FSTMetadata
 import org.gnit.lucenekmp.util.fst.FST.BytesReader
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.experimental.or

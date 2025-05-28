@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.search.TaskExecutor
 import org.gnit.lucenekmp.util.BitSet
 import org.gnit.lucenekmp.util.FixedBitSet
-import kotlinx.io.IOException
+import okio.IOException
 
 /** This merger merges graph in a concurrent manner, by using [HnswConcurrentMergeBuilder]  */
 class ConcurrentHnswMerger(

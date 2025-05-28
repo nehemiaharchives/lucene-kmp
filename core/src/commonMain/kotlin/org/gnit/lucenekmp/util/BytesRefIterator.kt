@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /** A simple iterator interface for [BytesRef] iteration.  */

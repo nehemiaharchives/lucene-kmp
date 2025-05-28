@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.store
 
 import org.gnit.lucenekmp.jdkport.OutputStream
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /** A [DataOutput] wrapping a plain [OutputStream].  */

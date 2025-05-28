@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /** An I/O operation with a single input that can throw an IOException. (Functional interface) */
 fun interface IOConsumer<T> {

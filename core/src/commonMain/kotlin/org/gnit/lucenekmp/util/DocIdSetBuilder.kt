@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.PointValues
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.search.DocIdSet

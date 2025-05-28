@@ -1,8 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.io.Buffer
-import kotlinx.io.Source
+import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -11,9 +10,9 @@ class KIOSourceInputStreamTest {
 
     private val logger = KotlinLogging.logger {}
 
-    private fun createTestStream(data: ByteArray): KIOSourceInputStream {
+    private fun createTestStream(data: ByteArray): OkioSourceInputStream {
         val source = Buffer().apply { write(data) }
-        return KIOSourceInputStream(source)
+        return OkioSourceInputStream(source)
     }
 
     @Test
@@ -73,7 +72,7 @@ class KIOSourceInputStreamTest {
     fun testDirectStreamReading() {
         val input = "Hello, World!".encodeToByteArray()
         val buffer = Buffer().apply { write(input) }
-        val inputStream = KIOSourceInputStream(buffer)
+        val inputStream = OkioSourceInputStream(buffer)
         // Try reading bytes directly
         val bytes = ByteArray(input.size)
         val readCount = inputStream.read(bytes, 0, bytes.size)

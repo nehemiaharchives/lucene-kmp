@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.LongHeap
 import org.gnit.lucenekmp.util.packed.PackedInts
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import org.gnit.lucenekmp.jdkport.toUnsignedLong

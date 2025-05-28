@@ -24,7 +24,7 @@ import org.gnit.lucenekmp.util.DocIdSetBuilder
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.NumericUtils
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.doubleToLongBits
 import org.gnit.lucenekmp.jdkport.isFinite
 import kotlin.math.max

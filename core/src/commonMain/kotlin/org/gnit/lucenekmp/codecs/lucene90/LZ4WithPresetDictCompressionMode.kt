@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.compress.LZ4
 import org.gnit.lucenekmp.util.compress.LZ4.FastCompressionHashTable
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.math.min

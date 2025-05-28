@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.hnsw
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.util.hnsw.HnswGraph
 
 /**

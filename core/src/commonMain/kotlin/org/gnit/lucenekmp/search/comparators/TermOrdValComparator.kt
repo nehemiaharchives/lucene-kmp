@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search.comparators
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.DocValues
 import org.gnit.lucenekmp.index.FieldInfo
 import org.gnit.lucenekmp.index.IndexOptions

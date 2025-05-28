@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.IndexSorter.ComparableProvider
 import org.gnit.lucenekmp.index.MergeState.DocMap
 import org.gnit.lucenekmp.jdkport.compare

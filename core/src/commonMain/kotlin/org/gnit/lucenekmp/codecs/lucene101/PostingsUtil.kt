@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.codecs.lucene101
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.util.GroupVIntUtil
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Utility class to encode/decode postings block.  */
 internal object PostingsUtil {

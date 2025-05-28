@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Just like a [RandomVectorScorer] but allows the scoring ordinal to be changed. Useful

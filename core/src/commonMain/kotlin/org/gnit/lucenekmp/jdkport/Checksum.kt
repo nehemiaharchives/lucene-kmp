@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
+import okio.Buffer
 import kotlin.math.min
 
 /**
@@ -68,7 +67,7 @@ interface Checksum {
         while (buffer.size > 0L) {
             val chunkSize = min(buffer.size.toInt(), 4096)
             // readByteArray(chunkSize) returns a new ByteArray with exactly chunkSize bytes.
-            val temp = buffer.readByteArray(chunkSize)
+            val temp = buffer.readByteArray(chunkSize.toLong())
             update(temp, 0, temp.size)
         }
     }

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Optional
 
 /**
@@ -100,7 +100,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * is sought to the beginning.
      */
     @Throws(IOException::class)
-    abstract fun slice(sliceDescription: String?, offset: Long, length: Long): IndexInput
+    abstract fun slice(sliceDescription: String, offset: Long, length: Long): IndexInput
 
     /**
      * Create a slice with a specific [ReadAdvice]. This is typically used by [ ] implementations to honor the [ReadAdvice] of each file within the

@@ -28,7 +28,7 @@ import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.hnsw.CloseableRandomVectorScorerSupplier
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorerSupplier
 import org.gnit.lucenekmp.util.hnsw.UpdateableRandomVectorScorer
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.ByteOrder

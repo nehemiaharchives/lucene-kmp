@@ -61,7 +61,7 @@ class Optional<T> private constructor(value: T?) {
      * @return the non-`null` value described by this `Optional`
      * @throws NoSuchElementException if no value is present
      */
-    fun get(): T? {
+    fun get(): T {
         if (value == null) {
             throw NoSuchElementException("No value present")
         }
@@ -285,7 +285,7 @@ class Optional<T> private constructor(value: T?) {
      */
     override fun toString(): String {
         return if (value != null)
-            ("Optional[" + value + "]")
+            ("Optional[$value]")
         else
             "Optional.empty"
     }
@@ -309,8 +309,8 @@ class Optional<T> private constructor(value: T?) {
          * @param <T> The type of the non-existent value
          * @return an empty `Optional`
         </T> */
-        fun <T> empty(): Optional<T?> {
-            val t = EMPTY as Optional<T?>
+        fun <T> empty(): Optional<T> {
+            val t = EMPTY as Optional<T>
             return t
         }
 
@@ -322,7 +322,7 @@ class Optional<T> private constructor(value: T?) {
          * @return an Optional with the value present
          * @throws NullPointerException if value is null
          */
-        fun <T> of(value: T?): Optional<T> {
+        fun <T> of(value: T): Optional<T> {
             return Optional(checkNotNull(value))
         }
 

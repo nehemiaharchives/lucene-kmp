@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.store.ByteBuffersDataOutput
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput.Companion.ALLOCATE_BB_ON_HEAP
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput.Companion.NO_REUSE
 import org.gnit.lucenekmp.store.DataOutput
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 
 /**

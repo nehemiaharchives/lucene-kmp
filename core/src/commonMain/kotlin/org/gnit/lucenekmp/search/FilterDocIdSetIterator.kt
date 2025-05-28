@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Wrapper around a [DocIdSetIterator].  */
 class FilterDocIdSetIterator

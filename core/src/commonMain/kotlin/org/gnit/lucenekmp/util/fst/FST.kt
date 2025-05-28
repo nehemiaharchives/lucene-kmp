@@ -18,8 +18,8 @@ import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.reverseBytes
 import kotlin.experimental.and
 import kotlin.experimental.or
-import kotlinx.io.IOException
-import kotlinx.io.files.Path
+import okio.IOException
+import okio.Path
 import org.gnit.lucenekmp.jdkport.toHexString
 
 // TODO: break this into WritableFST and ReadOnlyFST.. then

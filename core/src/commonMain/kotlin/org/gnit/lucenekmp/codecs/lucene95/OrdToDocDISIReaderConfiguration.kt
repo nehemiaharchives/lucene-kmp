@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.util.packed.DirectMonotonicReader
 import org.gnit.lucenekmp.util.packed.DirectMonotonicWriter
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Configuration for [DirectMonotonicReader] and [IndexedDISI] for reading sparse

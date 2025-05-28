@@ -14,7 +14,7 @@ import org.gnit.lucenekmp.util.InfoStream
 import org.gnit.lucenekmp.util.packed.PackedInts
 import org.gnit.lucenekmp.util.packed.PackedLongValues
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Executor
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime

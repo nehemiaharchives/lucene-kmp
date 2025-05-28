@@ -11,7 +11,7 @@ import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.internal.hppc.IntHashSet
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.util.FixedBitSet
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
 import org.gnit.lucenekmp.jdkport.pop
 import org.gnit.lucenekmp.jdkport.push

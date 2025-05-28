@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.MathUtil
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.max
 import kotlin.math.min
 

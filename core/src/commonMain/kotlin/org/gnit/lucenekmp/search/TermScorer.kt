@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.ImpactsEnum
 import org.gnit.lucenekmp.index.NumericDocValues
 import org.gnit.lucenekmp.index.PostingsEnum

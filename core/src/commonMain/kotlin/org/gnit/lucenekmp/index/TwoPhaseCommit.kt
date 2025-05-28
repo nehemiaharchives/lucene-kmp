@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * An interface for implementations that support 2-phase commit. You can use [ ] to execute a 2-phase commit algorithm over several [TwoPhaseCommit]s.

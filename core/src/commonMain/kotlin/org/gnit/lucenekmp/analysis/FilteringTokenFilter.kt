@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Abstract base class for TokenFilters that may remove tokens. You have to implement [ ][.accept] and return a boolean if the current token should be preserved. [.incrementToken]

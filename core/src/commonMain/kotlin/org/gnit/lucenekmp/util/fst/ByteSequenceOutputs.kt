@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.StringHelper
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 

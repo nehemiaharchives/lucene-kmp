@@ -38,7 +38,7 @@ import org.gnit.lucenekmp.codecs.lucene101.ForUtil.Companion.expand16
 import org.gnit.lucenekmp.internal.vectorization.PostingDecodingUtil
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.packed.PackedInts
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Inspired from https://fulmicoton.com/posts/bitpacking/ Encodes multiple integers in a Java int to

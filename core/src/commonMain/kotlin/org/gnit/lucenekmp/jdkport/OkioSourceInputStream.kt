@@ -1,15 +1,15 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.io.Buffer
-import kotlinx.io.EOFException
-import kotlinx.io.IOException
-import kotlinx.io.Source
+import okio.Buffer
+import okio.BufferedSource
+import okio.EOFException
+import okio.IOException
 
 /**
- * A InputStream implementation which use kotlinx.io.Source
+ * A InputStream implementation which use okio.Source
  */
-class KIOSourceInputStream(val source: Source) : InputStream() {
+class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
 
     val logger = KotlinLogging.logger {}
 
@@ -25,7 +25,6 @@ class KIOSourceInputStream(val source: Source) : InputStream() {
      * stream is reached.
      * @throws     kotlinx.io.IOException  if an I/O error occurs.
      */
-    @Throws(IOException::class)
     override fun read(): Int {
         return try {
             source.readByte().toInt()
@@ -51,18 +50,16 @@ class KIOSourceInputStream(val source: Source) : InputStream() {
      *             other than end of file, or if the input stream has been closed,
      *             or if some other I/O error occurs.
      */
-    @Throws(IOException::class)
     override fun read(b: ByteArray, off: Int, len: Int): Int {
         if (len == 0) return 0
         logger.debug { "KIOSourceInputStream.read(byte[], $off, $len) called" }
 
-
         val bytesRead = try {
-            val result = source.readAtMostTo(b, off, off + len)
-            logger.debug { "source.readAtMostTo returned $result" }
+            val result = source.read(b, off, len)
+            logger.debug { "source.read returned $result" }
             result
         } catch (e: EOFException) {
-            logger.debug { "EOFException caught in readAtMostTo ${e.message}" }
+            logger.debug { "EOFException caught in read ${e.message}" }
             -1
         }
 
@@ -89,7 +86,6 @@ class KIOSourceInputStream(val source: Source) : InputStream() {
      * If the underlying Source is a Buffer, we can peek at its .size.
      * Otherwise we return 0.
      */
-    @Throws(IOException::class)
     override fun available(): Int {
         return (source as? Buffer)?.size?.toInt() ?: 0
     }

@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.index.VectorSimilarityFunction
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorerSupplier
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Provides mechanisms to score vectors that are stored in a flat file The purpose of this class is

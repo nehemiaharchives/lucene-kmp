@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

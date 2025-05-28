@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 //import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
-import kotlinx.io.IOException
+import okio.IOException
 //import org.gnit.lucenekmp.codecs.lucene90.DeflateWithPresetDictCompressionMode.Companion.DICT_SIZE_FACTOR
 //import org.gnit.lucenekmp.codecs.lucene90.DeflateWithPresetDictCompressionMode.Companion.NUM_SUB_BLOCKS
 //import org.gnit.lucenekmp.jdkport.DataFormatException

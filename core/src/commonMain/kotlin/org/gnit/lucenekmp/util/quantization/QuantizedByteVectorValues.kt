@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.codecs.lucene95.HasIndexSlice
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.search.VectorScorer
 import org.gnit.lucenekmp.store.IndexInput
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A version of [ByteVectorValues], but additionally retrieving score correction offset for

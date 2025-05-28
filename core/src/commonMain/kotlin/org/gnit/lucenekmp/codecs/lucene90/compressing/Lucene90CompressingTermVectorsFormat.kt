@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.index.FieldInfos
 import org.gnit.lucenekmp.index.SegmentInfo
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A [TermVectorsFormat] that compresses chunks of documents together in order to improve the

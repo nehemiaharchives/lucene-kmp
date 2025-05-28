@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.concurrent.Volatile
 
 

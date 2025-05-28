@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.IndexInput
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * The core terms dictionaries (BlockTermsReader, BlockTreeTermsReader) interact with a single

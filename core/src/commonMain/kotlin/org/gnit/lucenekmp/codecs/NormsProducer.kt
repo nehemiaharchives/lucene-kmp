@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.FieldInfo
 import org.gnit.lucenekmp.index.NumericDocValues
 

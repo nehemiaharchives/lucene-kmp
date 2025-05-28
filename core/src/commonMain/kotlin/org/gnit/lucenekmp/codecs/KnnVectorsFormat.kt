@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.index.SegmentReadState

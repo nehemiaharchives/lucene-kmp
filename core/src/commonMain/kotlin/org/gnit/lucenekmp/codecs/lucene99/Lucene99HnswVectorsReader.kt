@@ -36,7 +36,7 @@ import org.gnit.lucenekmp.util.packed.DirectMonotonicReader
 import org.gnit.lucenekmp.util.quantization.QuantizedByteVectorValues
 import org.gnit.lucenekmp.util.quantization.QuantizedVectorsReader
 import org.gnit.lucenekmp.util.quantization.ScalarQuantizer
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import kotlin.math.ln
 import kotlin.math.min

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.internal.vectorization
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
 import org.gnit.lucenekmp.store.IndexInput
 

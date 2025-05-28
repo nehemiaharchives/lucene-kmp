@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.util.MathUtil
 import org.gnit.lucenekmp.search.DisiPriorityQueueN.Companion.leftNode
 import org.gnit.lucenekmp.search.DisiPriorityQueueN.Companion.parentNode
 import org.gnit.lucenekmp.search.DisiPriorityQueueN.Companion.rightNode
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Collections
 import org.gnit.lucenekmp.jdkport.MIN_EXPONENT
 import org.gnit.lucenekmp.jdkport.Math

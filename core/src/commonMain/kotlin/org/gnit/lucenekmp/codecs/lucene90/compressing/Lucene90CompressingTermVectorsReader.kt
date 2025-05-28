@@ -48,7 +48,7 @@ import org.gnit.lucenekmp.util.packed.DirectReader
 import org.gnit.lucenekmp.util.packed.DirectWriter
 import org.gnit.lucenekmp.util.packed.PackedInts
 import org.gnit.lucenekmp.util.packed.PackedInts.ReaderIterator
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.intBitsToFloat

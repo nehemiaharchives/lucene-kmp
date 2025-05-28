@@ -23,7 +23,7 @@ import org.gnit.lucenekmp.util.BitSetIterator
 import org.gnit.lucenekmp.util.DocIdSetBuilder
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.IntsRef
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.geo.GeoEncodingUtils
 import org.gnit.lucenekmp.jdkport.StrictMath
 import kotlin.jvm.JvmName

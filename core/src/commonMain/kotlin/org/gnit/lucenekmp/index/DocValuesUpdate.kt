@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.util.RamUsageEstimator.Companion.NUM_BYTES_ARRAY_HEADE
 import org.gnit.lucenekmp.util.RamUsageEstimator.Companion.NUM_BYTES_OBJECT_HEADER
 import org.gnit.lucenekmp.util.RamUsageEstimator.Companion.NUM_BYTES_OBJECT_REF
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.document.NumericDocValuesField
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.store.DataInput

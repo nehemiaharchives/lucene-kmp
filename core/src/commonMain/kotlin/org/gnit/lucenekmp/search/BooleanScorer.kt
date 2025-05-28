@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.internal.hppc.LongArrayList
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.PriorityQueue
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
 import kotlin.math.max

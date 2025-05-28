@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.GroupVIntUtil

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /** A list of per-document numeric values, sorted according to [Long.compare].  */
 abstract class SortedNumericDocValues

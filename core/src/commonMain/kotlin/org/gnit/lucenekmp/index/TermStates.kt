@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.IndexSearcher
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.IOBooleanSupplier

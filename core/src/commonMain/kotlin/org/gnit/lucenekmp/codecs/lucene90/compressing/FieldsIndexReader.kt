@@ -11,7 +11,7 @@ import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.packed.DirectMonotonicReader
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.UncheckedIOException
 

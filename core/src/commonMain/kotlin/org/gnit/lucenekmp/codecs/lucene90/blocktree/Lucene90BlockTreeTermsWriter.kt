@@ -35,7 +35,7 @@ import org.gnit.lucenekmp.util.fst.FSTCompiler
 import org.gnit.lucenekmp.util.fst.FSTCompiler.Companion.getOnHeapReaderWriter
 import org.gnit.lucenekmp.util.fst.Util
 import org.gnit.lucenekmp.util.packed.PackedInts
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.Objects

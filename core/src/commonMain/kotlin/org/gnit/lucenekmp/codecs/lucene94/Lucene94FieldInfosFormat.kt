@@ -15,7 +15,7 @@ import org.gnit.lucenekmp.index.VectorSimilarityFunction
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.IndexInput
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.toBinaryString
 import kotlin.experimental.or
 

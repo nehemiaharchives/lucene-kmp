@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
+import okio.Buffer
 import kotlin.test.*
 
 /**
@@ -25,11 +24,11 @@ class BufferedOutputStreamTest {
     fun testWriteAndFlush() {
         val expected = "Hello, World!".encodeToByteArray()
         val buffer = Buffer()
-        BufferedOutputStream(KIOSinkOutputStream(buffer)).use { bos ->
+        BufferedOutputStream(OkioSinkOutputStream(buffer)).use { bos ->
             bos.write(expected)
             bos.flush()
         }
-        val actual = buffer.readByteArray(expected.size)
+        val actual = buffer.readByteArray(expected.size.toLong())
         assertContentEquals(expected, actual)
     }
 }

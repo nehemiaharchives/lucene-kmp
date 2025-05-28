@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.packed
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.floatToIntBits
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.ArrayUtil

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Optional
 
 
@@ -63,6 +63,8 @@ interface RandomAccessInput {
     @Throws(IOException::class)
     fun readLong(pos: Long): Long
 
+
+    // commenting out because BufferedIndexInput in inherits prefetch from both RandomAccessInput and IndexInput
     /**
      * Prefetch data in the background.
      *
@@ -72,11 +74,12 @@ interface RandomAccessInput {
     fun prefetch(offset: Long, length: Long) {
     }
 
-    val isLoaded: Optional<Boolean?>
+    // commenting out because BufferedIndexInput in inherits isLoaded from both RandomAccessInput and IndexInput
+    //val isLoaded: Optional<Boolean?>
         /**
          * Returns a hint whether all the contents of this input are resident in physical memory.
          *
          * @see IndexInput.isLoaded
          */
-        get() = Optional.empty<Boolean?>()
+        //get() = Optional.empty<Boolean?>()
 }

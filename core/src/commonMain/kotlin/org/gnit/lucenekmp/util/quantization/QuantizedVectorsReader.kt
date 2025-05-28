@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.quantization
 
 import org.gnit.lucenekmp.util.Accountable
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Quantized vector reader

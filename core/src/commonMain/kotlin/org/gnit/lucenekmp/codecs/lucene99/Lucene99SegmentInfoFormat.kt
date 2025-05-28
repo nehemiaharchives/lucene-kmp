@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.search.Sort
 import org.gnit.lucenekmp.search.SortField
 import org.gnit.lucenekmp.store.*
 import org.gnit.lucenekmp.util.Version
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Lucene 9.9 Segment info format.

@@ -10,8 +10,8 @@ import org.gnit.lucenekmp.util.packed.AbstractBlockPackedWriter.Companion.MAX_BL
 import org.gnit.lucenekmp.util.packed.AbstractBlockPackedWriter.Companion.MIN_BLOCK_SIZE
 import org.gnit.lucenekmp.util.packed.AbstractBlockPackedWriter.Companion.MIN_VALUE_EQUALS_0
 import org.gnit.lucenekmp.util.packed.PackedInts.checkBlockSize
-import kotlinx.io.EOFException
-import kotlinx.io.IOException
+import okio.EOFException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import kotlin.experimental.and
 import kotlin.math.min

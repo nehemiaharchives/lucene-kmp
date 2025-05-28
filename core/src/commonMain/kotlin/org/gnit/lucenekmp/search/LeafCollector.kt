@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Collector decouples the score from the collected doc: the score computation is skipped entirely

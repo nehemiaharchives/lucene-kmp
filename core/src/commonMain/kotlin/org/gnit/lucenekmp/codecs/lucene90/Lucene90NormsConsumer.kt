@@ -13,7 +13,7 @@ import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.IOUtils
 import kotlin.math.max
 import kotlin.math.min
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Writer for [Lucene90NormsFormat]  */
 internal class Lucene90NormsConsumer(

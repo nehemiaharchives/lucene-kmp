@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.util.InfoStream
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Interface for builder building the [OnHeapHnswGraph]

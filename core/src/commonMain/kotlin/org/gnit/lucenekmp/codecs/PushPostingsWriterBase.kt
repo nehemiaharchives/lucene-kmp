@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.TermsEnum
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.FixedBitSet
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import kotlin.experimental.or
 

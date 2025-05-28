@@ -18,7 +18,7 @@ import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Cloneable
-import kotlinx.io.IOException
+import okio.IOException
 
 /** Reader for [Lucene90NormsFormat]  */
 internal class Lucene90NormsProducer(
@@ -279,7 +279,7 @@ internal class Lucene90NormsProducer(
             }
 
             @Throws(IOException::class)
-            override fun slice(sliceDescription: String?, offset: Long, length: Long): IndexInput {
+            override fun slice(sliceDescription: String, offset: Long, length: Long): IndexInput {
                 throw UnsupportedOperationException("Unused by IndexedDISI")
             }
 

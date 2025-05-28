@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.DocIdSetIterator
 import kotlin.math.min
 import kotlin.reflect.KClass

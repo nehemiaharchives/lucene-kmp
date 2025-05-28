@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.EOFException
-import kotlinx.io.IOException
+import okio.EOFException
+import okio.IOException
 import kotlin.concurrent.Volatile
 import kotlin.math.min
 

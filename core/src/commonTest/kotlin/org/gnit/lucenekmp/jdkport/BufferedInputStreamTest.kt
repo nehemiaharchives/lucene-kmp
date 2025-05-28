@@ -1,8 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.IOException
-import kotlinx.io.Source
+import okio.Buffer
+import okio.BufferedSource
+import okio.IOException
 import kotlin.test.*
 
 /**
@@ -11,11 +11,11 @@ import kotlin.test.*
 class BufferedInputStreamTest {
 
     private val HELLO_WORLD_BYTES = "Hello, World!".encodeToByteArray()
-    private fun byteArraySource(data: ByteArray): Source = Buffer().apply { write(data) }
+    private fun byteArraySource(data: ByteArray): BufferedSource = Buffer().apply { write(data) }
 
     @Test
     fun testReadSingleBytes() {
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(HELLO_WORLD_BYTES)))
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(HELLO_WORLD_BYTES)))
         val actual = ByteArray(HELLO_WORLD_BYTES.size)
         for (i in actual.indices) {
             val b = inputStream.read()
@@ -29,7 +29,7 @@ class BufferedInputStreamTest {
     @Test
     fun testReadWithOffsetAndLength() {
         val data = "Hello, World!".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)))
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)))
 
         // 1. Read the full content into a buffer with offset.
         val buffer = ByteArray(data.size + 4) { 0x7A.toByte() } // fill with 'z' for visibility
@@ -64,7 +64,7 @@ class BufferedInputStreamTest {
     @Test
     fun testAvailableReportsCorrectValues() {
         val data = "abcde".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 2)
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 2)
 
         // Initially, all bytes should be available
         assertEquals(data.size, inputStream.available())
@@ -81,7 +81,7 @@ class BufferedInputStreamTest {
     @Test
     fun testAvailableOnClosedStreamThrows() {
         val data = "abcde".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)))
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)))
         inputStream.close()
         assertFailsWith<IOException> { inputStream.available() }
     }
@@ -89,7 +89,7 @@ class BufferedInputStreamTest {
     @Test
     fun testMarkAndResetRestoreReadPosition() {
         val data = "abcdefgh".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 4)
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 4)
 
         inputStream.mark(100)
         val read1 = inputStream.read()
@@ -108,7 +108,7 @@ class BufferedInputStreamTest {
     @Test
     fun testResetWithoutMarkThrows() {
         val data = "xyz".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)))
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)))
 
         // Don't call mark()
         assertFailsWith<IOException> {
@@ -119,7 +119,7 @@ class BufferedInputStreamTest {
     @Test
     fun testResetAfterMarkInvalidatedThrows() {
         val data = "ABCDEFG".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 2)
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 2)
 
         inputStream.mark(1) // small marklimit
         // Read more than marklimit to invalidate the mark
@@ -135,7 +135,7 @@ class BufferedInputStreamTest {
     @Test
     fun testMultipleMarksAndResets() {
         val data = "helloworld".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 5)
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 5)
 
         inputStream.mark(10)
         val first = ByteArray(5)
@@ -156,7 +156,7 @@ class BufferedInputStreamTest {
     @Test
     fun testSkip() {
         val data = "abcdef".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 3)
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 3)
         // skip 2 bytes
         val skipped = inputStream.skip(2)
         assertEquals(2, skipped)
@@ -170,7 +170,7 @@ class BufferedInputStreamTest {
     @Test
     fun testSkipPastEnd() {
         val data = "abc".encodeToByteArray()
-        val inputStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 2)
+        val inputStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 2)
         assertEquals(3, inputStream.skip(10)) // more than length, should only skip available
         assertEquals(-1, inputStream.read())
     }
@@ -178,7 +178,7 @@ class BufferedInputStreamTest {
     @Test
     fun testReadZeroBytesArray() {
         val data = "abc".encodeToByteArray()
-        val inStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)))
+        val inStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)))
         val buf = ByteArray(0)
         assertEquals(0, inStream.read(buf, 0, 0))
     }
@@ -187,17 +187,17 @@ class BufferedInputStreamTest {
     fun testConstructorThrowsOnInvalidSize() {
         val data = "abc".encodeToByteArray()
         assertFailsWith<IllegalArgumentException> {
-            BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), 0)
+            BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), 0)
         }
         assertFailsWith<IllegalArgumentException> {
-            BufferedInputStream(KIOSourceInputStream(byteArraySource(data)), -4)
+            BufferedInputStream(OkioSourceInputStream(byteArraySource(data)), -4)
         }
     }
 
     @Test
     fun testReadAfterCloseThrows() {
         val data = "test".encodeToByteArray()
-        val inStream = BufferedInputStream(KIOSourceInputStream(byteArraySource(data)))
+        val inStream = BufferedInputStream(OkioSourceInputStream(byteArraySource(data)))
         inStream.close()
         assertFailsWith<IOException> {
             inStream.read()

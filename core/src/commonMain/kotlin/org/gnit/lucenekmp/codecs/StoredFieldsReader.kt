@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.StoredFields
 import org.gnit.lucenekmp.jdkport.Cloneable
 

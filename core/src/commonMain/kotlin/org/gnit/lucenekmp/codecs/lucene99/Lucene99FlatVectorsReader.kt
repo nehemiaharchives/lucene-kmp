@@ -28,7 +28,7 @@ import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.UncheckedIOException
 

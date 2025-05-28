@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Source
-import kotlinx.io.IOException
+import okio.BufferedSource
+import okio.IOException
 
 /**
  * Multiplatform buffered character reader that mirrors the API of Java's BufferedReader&#8203;:contentReference[oaicite:0]{index=0}.
@@ -14,7 +14,7 @@ import kotlinx.io.IOException
  * resetting back to that position, and is intended to behave like `java.io.BufferedReader`.
  */
 class KIOSourceBufferedReader(
-    private val source: Source,
+    private val source: BufferedSource,
     private val bufferSize: Int = DEFAULT_BUFFER_SIZE
 ): Reader() {
     companion object {
@@ -322,7 +322,7 @@ class KIOSourceBufferedReader(
         }
         // Read bytes from source
         val byteBuf = ByteArray(bytesCapacity)
-        val bytesRead = source.readAtMost(byteBuf, 0, bytesCapacity)
+        val bytesRead = source.read(byteBuf, 0, bytesCapacity)
         if (bytesRead == -1) {
             return -1  // EOF
         }
@@ -333,10 +333,4 @@ class KIOSourceBufferedReader(
         end += charsAdded
         return charsAdded
     }
-}
-
-/* Extension function for Source to read up to a given byte array (kotlinx-io uses readAtMostTo) */
-private fun Source.readAtMost(buffer: ByteArray, startIndex: Int, endIndex: Int): Int {
-    // Using readAtMostTo from kotlinx-io Source&#8203;:contentReference[oaicite:34]{index=34}.
-    return this.readAtMostTo(buffer, startIndex, endIndex)
 }

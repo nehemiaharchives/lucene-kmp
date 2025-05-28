@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.min
 import org.gnit.lucenekmp.codecs.KnnVectorsReader
 import org.gnit.lucenekmp.index.FieldInfo

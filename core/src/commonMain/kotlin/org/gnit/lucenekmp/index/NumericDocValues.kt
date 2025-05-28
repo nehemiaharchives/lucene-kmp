@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 
 /** A per-document numeric value.  */
 abstract class NumericDocValues

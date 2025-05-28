@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.SortField
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput

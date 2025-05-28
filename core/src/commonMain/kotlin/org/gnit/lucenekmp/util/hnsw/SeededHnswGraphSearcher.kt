@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.search.DocIdSetIterator
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A [HnswGraphSearcher] that uses a set of seed ordinals to initiate the search.

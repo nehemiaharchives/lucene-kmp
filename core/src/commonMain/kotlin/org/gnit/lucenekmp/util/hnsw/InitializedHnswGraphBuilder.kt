@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.util.BitSet
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * This creates a graph builder that is initialized with the provided HnswGraph. This is useful for

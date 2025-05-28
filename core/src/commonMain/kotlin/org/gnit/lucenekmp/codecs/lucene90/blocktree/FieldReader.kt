@@ -13,7 +13,7 @@ import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 import org.gnit.lucenekmp.util.fst.ByteSequenceOutputs
 import org.gnit.lucenekmp.util.fst.FST
 import org.gnit.lucenekmp.util.fst.OffHeapFSTStore
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * BlockTree's implementation of [Terms].

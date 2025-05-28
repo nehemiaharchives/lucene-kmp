@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search.comparators
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.search.LeafFieldComparator

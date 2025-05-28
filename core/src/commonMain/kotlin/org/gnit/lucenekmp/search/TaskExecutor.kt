@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import kotlinx.coroutines.Runnable
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.ExecutionException
 import org.gnit.lucenekmp.jdkport.Executor

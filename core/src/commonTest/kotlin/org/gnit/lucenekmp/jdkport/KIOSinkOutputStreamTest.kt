@@ -1,17 +1,16 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.IOException
-import kotlinx.io.readByteArray
+import okio.Buffer
+import okio.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class KIOSinkOutputStreamTest {
 
-    private fun createTestStream(): Pair<KIOSinkOutputStream, Buffer> {
+    private fun createTestStream(): Pair<OkioSinkOutputStream, Buffer> {
         val buffer = Buffer()
-        val outputStream = KIOSinkOutputStream(buffer)
+        val outputStream = OkioSinkOutputStream(buffer)
         return Pair(outputStream, buffer)
     }
 
@@ -36,7 +35,7 @@ class KIOSinkOutputStreamTest {
         }
         outputStream.flush()
 
-        val bytes = buffer.readByteArray(data.size)
+        val bytes = buffer.readByteArray(data.size.toLong())
         assertEquals("Hello, World!", bytes.decodeToString())
     }
 

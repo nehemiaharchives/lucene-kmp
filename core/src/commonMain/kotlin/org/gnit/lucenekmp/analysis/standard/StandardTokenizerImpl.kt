@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.analysis.standard
 
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.jdkport.System

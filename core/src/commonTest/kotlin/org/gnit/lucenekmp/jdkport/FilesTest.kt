@@ -1,16 +1,14 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.files.Path
-import kotlinx.io.buffered
+
+import okio.Path
+import okio.Path.Companion.toPath
+import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
-import kotlin.test.assertFailsWith
 import kotlin.test.BeforeTest
 import kotlin.test.AfterTest
-import org.gnit.lucenekmp.jdkport.Files
-import org.gnit.lucenekmp.jdkport.StandardCharsets
 
 class FilesTest {
     private lateinit var testFilePath: Path
@@ -19,17 +17,19 @@ class FilesTest {
     @BeforeTest
     fun setUp() {
         // Set up the mock file system for testing
-        Files.setFileSystemProvider(MockFileSystemProvider())
+        Files.setFileSystem(FakeFileSystem())
+
+        Files.createDirectories("/test".toPath()) // Ensure the directory exists
 
         // Create a test file path - with mock file system, the actual path doesn't matter
         // but we'll use a consistent path for clarity
-        testFilePath = Path("/test/testfile.txt")
+        testFilePath = "/test/testfile.txt".toPath()
     }
 
     @AfterTest
     fun tearDown() {
         // Reset the file system provider to the default
-        Files.resetFileSystemProvider()
+        Files.resetFileSystem()
     }
 
     @Test

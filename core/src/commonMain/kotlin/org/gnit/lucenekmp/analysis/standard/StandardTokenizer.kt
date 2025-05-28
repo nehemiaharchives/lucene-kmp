@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttribute
 import org.gnit.lucenekmp.util.AttributeFactory
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A grammar-based tokenizer constructed with JFlex.

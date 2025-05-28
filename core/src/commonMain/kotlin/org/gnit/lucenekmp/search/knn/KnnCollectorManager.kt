@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search.knn
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.search.KnnCollector
 

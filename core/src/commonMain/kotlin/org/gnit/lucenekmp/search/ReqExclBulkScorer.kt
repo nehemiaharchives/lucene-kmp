@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.math.min
 
 internal class ReqExclBulkScorer : BulkScorer {

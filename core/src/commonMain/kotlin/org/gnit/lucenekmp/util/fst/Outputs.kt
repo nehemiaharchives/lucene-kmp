@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util.fst
 
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Represents the outputs for an FST, providing the basic algebra required for building and

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search.comparators
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.*
 import org.gnit.lucenekmp.index.PointValues.IntersectVisitor
 import org.gnit.lucenekmp.index.PointValues.PointTree

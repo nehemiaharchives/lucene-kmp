@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.fst
 
 import org.gnit.lucenekmp.util.fst.FST.BytesReader
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.bitCount
 import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros

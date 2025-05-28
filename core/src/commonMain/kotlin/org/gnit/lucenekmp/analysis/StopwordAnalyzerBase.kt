@@ -2,8 +2,8 @@ package org.gnit.lucenekmp.analysis
 
 
 import org.gnit.lucenekmp.util.IOUtils
-import kotlinx.io.IOException
-import kotlinx.io.files.Path
+import okio.IOException
+import okio.Path
 import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.jdkport.StandardCharsets

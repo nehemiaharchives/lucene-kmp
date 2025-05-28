@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.document.KnnFloatVectorField
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.DocValues

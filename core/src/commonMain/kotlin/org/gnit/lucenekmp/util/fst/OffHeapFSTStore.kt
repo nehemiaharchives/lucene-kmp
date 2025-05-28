@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.util.fst.FST.FSTMetadata
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.util.RamUsageEstimator
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Provides off heap storage of finite state machine (FST), using underlying index input instead of

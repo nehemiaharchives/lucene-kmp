@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.util.AttributeSource
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOBooleanSupplier

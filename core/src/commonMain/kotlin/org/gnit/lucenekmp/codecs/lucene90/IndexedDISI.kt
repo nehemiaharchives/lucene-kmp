@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.KnnVectorValues.DocIndexIterator
 import org.gnit.lucenekmp.jdkport.bitCount
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros

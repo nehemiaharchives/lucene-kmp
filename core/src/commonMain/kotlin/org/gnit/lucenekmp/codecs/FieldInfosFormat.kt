@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.FieldInfos
 import org.gnit.lucenekmp.index.SegmentInfo
 import org.gnit.lucenekmp.store.Directory

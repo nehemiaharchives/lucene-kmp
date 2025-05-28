@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.NormsConsumer
 import org.gnit.lucenekmp.codecs.NormsFormat
 import org.gnit.lucenekmp.codecs.NormsProducer

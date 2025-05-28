@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.bkd
 
-import kotlinx.io.EOFException
-import kotlinx.io.IOException
+import okio.EOFException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.store.ChecksumIndexInput

@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * BulkScorer implementation of [ConjunctionScorer]. For simplicity, it focuses on scorers

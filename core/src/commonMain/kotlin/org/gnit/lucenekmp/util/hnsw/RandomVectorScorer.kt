@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A [RandomVectorScorer] for scoring random nodes in batches against an abstract query. This

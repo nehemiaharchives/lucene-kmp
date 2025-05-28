@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.analysis
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
 import org.gnit.lucenekmp.util.AttributeFactory
 import org.gnit.lucenekmp.util.AttributeImpl

@@ -28,7 +28,7 @@ import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.NumericUtils
 import org.gnit.lucenekmp.util.SloppyMath
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * An indexed location field.

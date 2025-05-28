@@ -4,7 +4,7 @@ package org.gnit.lucenekmp.codecs.hnsw
 import org.gnit.lucenekmp.codecs.KnnVectorsFormat
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Encodes/decodes per-document vectors and provides a scoring interface for the flat stored vectors

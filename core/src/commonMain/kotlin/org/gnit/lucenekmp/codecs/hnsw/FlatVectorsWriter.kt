@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.codecs.KnnVectorsWriter
 import org.gnit.lucenekmp.index.FieldInfo
 import org.gnit.lucenekmp.index.MergeState
 import org.gnit.lucenekmp.util.hnsw.CloseableRandomVectorScorerSupplier
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Vectors' writer for a field that allows additional indexing logic to be implemented by the caller

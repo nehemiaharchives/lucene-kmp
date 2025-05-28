@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.packed
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
 import org.gnit.lucenekmp.store.DataInput

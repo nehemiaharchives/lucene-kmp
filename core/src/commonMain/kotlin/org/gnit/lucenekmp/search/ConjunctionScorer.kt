@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 
 
 /** Scorer for conjunctions, sets of queries, all of which are required.  */

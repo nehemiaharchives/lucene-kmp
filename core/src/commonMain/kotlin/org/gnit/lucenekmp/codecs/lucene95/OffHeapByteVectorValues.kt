@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
 import org.gnit.lucenekmp.util.packed.DirectMonotonicReader
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 
 /** Read the vector values from the index input. This supports both iterated and random access.  */

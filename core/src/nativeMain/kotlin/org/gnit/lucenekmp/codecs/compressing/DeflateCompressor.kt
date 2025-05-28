@@ -7,7 +7,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.refTo
 import kotlinx.cinterop.reinterpret
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.store.ByteBuffersDataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.ArrayUtil

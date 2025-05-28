@@ -1,14 +1,14 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.IOException
-import kotlinx.io.Sink
+import okio.Buffer
+import okio.BufferedSink
+import okio.IOException
 
 /**
- * A OutputStream implementation which uses either kotlinx.io.Sink or kotlinx.io.Buffer
+ * A OutputStream implementation which uses either okio.Sink or okio.Buffer
  */
-class KIOSinkOutputStream : OutputStream {
-    private val sink: Sink?
+class OkioSinkOutputStream : OutputStream {
+    private val sink: BufferedSink?
     private val buffer: Buffer?
     private var closed = false
 
@@ -17,7 +17,7 @@ class KIOSinkOutputStream : OutputStream {
      *
      * @param sink the Sink to write to
      */
-    constructor(sink: Sink) {
+    constructor(sink: BufferedSink) {
         this.sink = sink
         this.buffer = null
     }
@@ -41,16 +41,15 @@ class KIOSinkOutputStream : OutputStream {
      * @param      b   the `byte`.
      * @throws     kotlinx.io.IOException  if an I/O error occurs or if this stream has been closed.
      */
-    @Throws(IOException::class)
     override fun write(b: Int) {
         if (closed) {
             throw IOException("Stream closed")
         }
 
         if (sink != null) {
-            sink.writeByte(b.toByte())
+            sink.writeByte(b)
         } else if (buffer != null) {
-            buffer.writeByte(b.toByte())
+            buffer.writeByte(b)
         }
     }
 
@@ -60,7 +59,6 @@ class KIOSinkOutputStream : OutputStream {
      *
      * @throws     kotlinx.io.IOException  if an I/O error occurs or if this stream has been closed.
      */
-    @Throws(IOException::class)
     override fun flush() {
         if (closed) {
             throw IOException("Stream closed")

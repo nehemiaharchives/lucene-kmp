@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.bkd
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.index.CorruptIndexException
 import org.gnit.lucenekmp.index.PointValues

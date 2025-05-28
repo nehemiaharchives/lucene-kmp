@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
+import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

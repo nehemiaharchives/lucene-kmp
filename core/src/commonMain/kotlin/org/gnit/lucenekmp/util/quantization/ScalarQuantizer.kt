@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.search.ScoreDoc
 import org.gnit.lucenekmp.util.IntroSelector
 import org.gnit.lucenekmp.util.Selector
 import org.gnit.lucenekmp.util.VectorUtil
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math

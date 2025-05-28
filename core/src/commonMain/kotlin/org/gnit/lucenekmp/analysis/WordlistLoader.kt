@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
 import org.gnit.lucenekmp.util.IOUtils
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.BufferedReader
 import org.gnit.lucenekmp.jdkport.Charset
 import org.gnit.lucenekmp.jdkport.InputStream

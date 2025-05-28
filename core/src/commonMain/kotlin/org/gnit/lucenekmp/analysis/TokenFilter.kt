@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
 import org.gnit.lucenekmp.util.Unwrappable
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A TokenFilter is a TokenStream whose input is another TokenStream.

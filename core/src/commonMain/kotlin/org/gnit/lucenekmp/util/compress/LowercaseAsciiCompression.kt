@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.util.compress
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.BytesRef
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.experimental.and
 import kotlin.experimental.or
 

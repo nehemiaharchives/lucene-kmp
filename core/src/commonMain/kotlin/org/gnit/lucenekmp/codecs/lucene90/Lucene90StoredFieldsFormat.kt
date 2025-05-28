@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.StoredFieldsFormat
 import org.gnit.lucenekmp.codecs.StoredFieldsReader
 import org.gnit.lucenekmp.codecs.StoredFieldsWriter

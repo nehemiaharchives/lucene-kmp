@@ -17,7 +17,7 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.fst.ByteSequenceOutputs
 import org.gnit.lucenekmp.util.fst.Outputs
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A block-based terms index and dictionary that assigns terms to variable length blocks according

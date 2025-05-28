@@ -11,7 +11,7 @@ import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer.AbstractRandomVectorScore
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorerSupplier
 import org.gnit.lucenekmp.util.hnsw.UpdateableRandomVectorScorer
 import org.gnit.lucenekmp.util.hnsw.UpdateableRandomVectorScorer.AbstractUpdateableRandomVectorScorer
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.System
 
 

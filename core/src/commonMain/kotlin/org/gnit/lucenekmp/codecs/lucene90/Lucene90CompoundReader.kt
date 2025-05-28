@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
-import kotlinx.io.IOException
-import kotlinx.io.files.FileNotFoundException
+import okio.IOException
+import okio.FileNotFoundException
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.CompoundDirectory
 import org.gnit.lucenekmp.index.CorruptIndexException

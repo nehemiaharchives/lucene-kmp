@@ -1,11 +1,10 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.IOException
-import kotlinx.io.Source
+import okio.Buffer
+import okio.IOException
+import okio.BufferedSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 // Test-specific subclass that exposes the constructor
@@ -13,10 +12,10 @@ class TestFilterInputStream(input: InputStream) : FilterInputStream(input)
 
 class FilterInputStreamTest {
 
-    private fun byteArraySource(data: ByteArray): Source = Buffer().apply { write(data) }
+    private fun byteArraySource(data: ByteArray): BufferedSource = Buffer().apply { write(data) }
 
     private fun createTestStream(data: ByteArray): TestFilterInputStream {
-        return TestFilterInputStream(KIOSourceInputStream(byteArraySource(data)))
+        return TestFilterInputStream(OkioSourceInputStream(byteArraySource(data)))
     }
 
     @Test

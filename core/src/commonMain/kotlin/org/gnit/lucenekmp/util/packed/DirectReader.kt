@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.packed
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.UncheckedIOException
 import org.gnit.lucenekmp.jdkport.toUnsignedLong

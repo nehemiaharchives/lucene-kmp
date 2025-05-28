@@ -1,12 +1,11 @@
 package org.gnit.lucenekmp.util
 
-import kotlinx.io.IOException
-import kotlinx.io.Source
-import kotlinx.io.buffered
-import kotlinx.io.files.FileNotFoundException
-import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
-import kotlinx.io.readByteArray
+import okio.Closeable
+import okio.IOException
+import okio.FileNotFoundException
+import okio.Path
+import okio.FileSystem
+import okio.SYSTEM
 import org.gnit.lucenekmp.jdkport.BufferedReader
 import org.gnit.lucenekmp.jdkport.Charset
 import org.gnit.lucenekmp.jdkport.CharsetDecoder
@@ -19,6 +18,8 @@ import org.gnit.lucenekmp.util.IOUtils.rethrowAlways
 import kotlin.jvm.JvmName
 
 object IOUtils {
+
+    var fileSystem: FileSystem = FileSystem.SYSTEM
 
     /** UTF-8 charset string.  */
     const val UTF_8: String = "UTF-8"
@@ -96,6 +97,19 @@ object IOUtils {
             throw firstError
         }
         // If no fatal Error, all exceptions are suppressed and we return normally (exception already logged as suppressed in firstThrowable if any)
+    }
+
+    fun closeWhileHandlingException(closable: Closeable){
+        try {
+            closable.close()
+        } catch (e: Error) {
+            // If a fatal error occurred, rethrow it.
+            throw e
+        } catch (_: Throwable) {
+            // For any other Throwable, suppress it and return normally.
+            // This matches the behavior of closeWhileHandlingException(objects: Iterable<AutoCloseable>)
+            // when no Error is thrown.
+        }
     }
 
     /**
@@ -192,7 +206,7 @@ object IOUtils {
         for (path in files) {
             if (path != null) {
                 try {
-                    SystemFileSystem.delete(path, mustExist = false)  // ignore if doesn't exist
+                    fileSystem.delete(path, mustExist = false)  // ignore if doesn't exist
                 } catch (_: Throwable) {
                     // ignore all failures
                 }
@@ -215,7 +229,7 @@ object IOUtils {
         for (file in files) {
             try {
                 if (file != null) {
-                    SystemFileSystem.delete(file, mustExist = false) // won't throw if file not present
+                    fileSystem.delete(file, mustExist = false) // won't throw if file not present
                 }
             } catch (t: Throwable) {
                 th = useOrSuppress(th, t)
@@ -248,7 +262,7 @@ object IOUtils {
             for (location in locations) {
                 if (location != null) {
                     try {
-                        SystemFileSystem.delete(location, mustExist = false)
+                        fileSystem.delete(location, mustExist = false)
                     } catch (e: IOException) {
                         // If directory not empty or other issue, record it
                         unremoved[location] = e
@@ -316,7 +330,7 @@ object IOUtils {
             // If directory doesn't exist, throw FileNotFoundException (NoSuchFileException equivalent).
             try {
                 // Attempt to open or list directory to ensure it exists
-                SystemFileSystem.delete(fileToSync, mustExist = true)
+                fileSystem.delete(fileToSync, mustExist = true)
             } catch (e: FileNotFoundException) {
                 throw e
             } catch (_: Exception) {
@@ -326,9 +340,9 @@ object IOUtils {
         }
         // For a regular file, we try to ensure it exists and then perform no further action as a fallback.
         try {
-            if (SystemFileSystem.source(fileToSync) != null) {
+            if (fileSystem.source(fileToSync) != null) {
                 // Successfully opened file (implies exists). Close immediately.
-                SystemFileSystem.source(fileToSync).close()
+                fileSystem.source(fileToSync).close()
             }
         } catch (e: FileNotFoundException) {
             throw e

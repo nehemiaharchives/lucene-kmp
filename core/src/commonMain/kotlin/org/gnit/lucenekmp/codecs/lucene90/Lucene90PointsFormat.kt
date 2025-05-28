@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.PointsFormat
 import org.gnit.lucenekmp.codecs.PointsReader
 import org.gnit.lucenekmp.codecs.PointsWriter

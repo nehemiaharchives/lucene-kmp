@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.test.*
-import kotlinx.io.IOException
+import okio.IOException
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

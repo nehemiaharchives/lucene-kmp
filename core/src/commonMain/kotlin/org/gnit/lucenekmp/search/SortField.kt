@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.DocValues
 import org.gnit.lucenekmp.index.IndexSorter
 import org.gnit.lucenekmp.index.IndexSorter.DoubleSorter

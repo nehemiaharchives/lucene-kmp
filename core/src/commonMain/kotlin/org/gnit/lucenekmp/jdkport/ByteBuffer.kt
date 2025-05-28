@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.Buffer
-import kotlinx.io.IOException
+import okio.Buffer
+import okio.IOException
 import kotlin.math.min
 
 // A simple re-implementation of java.nio.ByteBuffer using a kotlin-io Buffer as the backing store.
@@ -318,6 +318,30 @@ open class ByteBuffer private constructor(
     }
 
     /**
+     * Relative *get* method for reading an int value.
+     *
+     * Reads the next four bytes at this buffer's current position,
+     * composing them into an int value according to the current byte order,
+     * and then increments the position by four.
+     *
+     * @return  The int value at the buffer's current position
+     *
+     * @throws  BufferUnderflowException
+     * If there are fewer than four bytes
+     * remaining in this buffer
+     */
+    fun getInt(): Int {
+        if (remaining() < 4)
+            throw BufferUnderflowException("Not enough bytes remaining to read an int (need 4, have ${remaining()})")
+
+        val value = getInt(position)
+        position += 4
+        return value
+    }
+
+    // Note: asDoubleBuffer is not yet implemented in the provided ByteBuffer class
+
+    /**
      * Absolute *get* method for reading a short value.
      *
      *
@@ -351,6 +375,39 @@ open class ByteBuffer private constructor(
             val hi = buffer[index.toLong() + 1L].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         }
+    }
+
+    /**
+     * Relative *get* method for reading a short value.
+     *
+     *
+     *  Reads the next two bytes at this buffer's current position,
+     * composing them into a short value according to the current byte order,
+     * and then increments the position by two.
+     *
+     * @return  The short value at the buffer's current position
+     *
+     * @throws  BufferUnderflowException
+     * If there are fewer than two bytes
+     * remaining in this buffer
+     */
+    fun getShort(): Short {
+        if (remaining() < 2)
+            throw BufferUnderflowException("Not enough bytes remaining to read a short (need 2, have ${remaining()})")
+
+        // Read according to the current byte order
+        val value = if (bigEndian) {                // BIG-ENDIAN  (MSB first)
+            val hi = buffer[position.toLong()].toInt() and 0xFF
+            val lo = buffer[position.toLong() + 1L].toInt() and 0xFF
+            ((hi shl 8) or lo).toShort()
+        } else {                                     // LITTLE-ENDIAN (LSB first)
+            val lo = buffer[position.toLong()].toInt() and 0xFF
+            val hi = buffer[position.toLong() + 1L].toInt() and 0xFF
+            ((hi shl 8) or lo).toShort()
+        }
+
+        position += 2
+        return value
     }
 
     /** Relative put: writes a byte at the current position then increments it. */
@@ -572,7 +629,7 @@ open class ByteBuffer private constructor(
      * @throws IndexOutOfBoundsException if there are fewer than 8 bytes available starting at [index].
      */
     fun getLong(index: Int): Long {
-        if (index < 0 || (limit - index) < 8) {
+        if (index < 0 || limit - index < 8) {
             throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
         }
         val offset = index.toLong()
@@ -581,7 +638,8 @@ open class ByteBuffer private constructor(
             for (i in 0 until 8) {
                 result = (result shl 8) or ((buffer.get(offset + i).toInt() and 0xFF).toLong())
             }
-        } else { // LITTLE_ENDIAN
+        } else {
+            // build the long MSB-first from the highest‐index byte down to index 0
             for (i in 7 downTo 0) {
                 result = (result shl 8) or ((buffer.get(offset + i).toInt() and 0xFF).toLong())
             }
@@ -717,7 +775,7 @@ open class ByteBuffer private constructor(
     fun slice(): ByteBuffer {
         val remaining = remaining()
         val sliceBuffer = Buffer()
-        buffer.copyTo(sliceBuffer, position.toLong(), position.toLong() + remaining)
+        buffer.copyTo(sliceBuffer, position.toLong(), remaining.toLong())
 
         val bb = ByteBuffer(sliceBuffer, capacity = remaining)
         bb.clear()
@@ -768,6 +826,33 @@ open class ByteBuffer private constructor(
         dup._readOnly = true
         dup.order(this.order())
         return dup
+    }
+
+    fun asIntBuffer(): IntBuffer {
+        // Calculate capacity in ints (bytes/4)
+        val intCapacity = remaining() / 4
+        if (intCapacity <= 0) {
+            return IntBuffer.allocate(0).apply { order = this@ByteBuffer.order() }
+        }
+
+        // Create a slice of this buffer from current position
+        val slice = duplicate()
+        slice.position(position)
+        slice.limit(position + (intCapacity * 4))
+
+        // Create an IntBuffer with the same byte order
+        val intBuffer = IntBuffer.allocate(intCapacity)
+        intBuffer.clear()
+        intBuffer.order = this.order()
+
+        // Copy data from this buffer to the intBuffer
+        for (i in 0 until intCapacity) {
+            val value = slice.getInt() // Reads the next 4 bytes as an int
+            intBuffer.put(value)
+        }
+        intBuffer.flip()
+
+        return intBuffer
     }
 
     /**
@@ -1007,7 +1092,7 @@ fun Buffer.setByteAt(position: Long, value: Byte) {
     }
 
     // Write the modified byte
-    writeByte(value)
+    writeByte(value.toInt())
 
     // Skip the byte in the original buffer
     copy.skip(position + 1)

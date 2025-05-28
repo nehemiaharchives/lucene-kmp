@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.search.knn.KnnCollectorManager
 import org.gnit.lucenekmp.search.knn.KnnSearchStrategy
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Objects
 import kotlin.jvm.JvmOverloads
 import kotlin.math.min

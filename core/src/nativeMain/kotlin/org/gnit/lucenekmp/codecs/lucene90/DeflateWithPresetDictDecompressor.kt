@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
 import kotlinx.cinterop.*
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.CorruptIndexException
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.util.ArrayUtil

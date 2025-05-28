@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util.packed
 
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.packed.PackedInts.checkBlockSize
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 
 abstract class AbstractBlockPackedWriter protected constructor(out: DataOutput, blockSize: Int) {

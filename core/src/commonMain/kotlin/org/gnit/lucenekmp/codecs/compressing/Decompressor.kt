@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.compressing
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.util.BytesRef

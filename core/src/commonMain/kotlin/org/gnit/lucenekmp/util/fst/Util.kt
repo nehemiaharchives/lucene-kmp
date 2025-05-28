@@ -13,7 +13,7 @@ import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Writer
 import org.gnit.lucenekmp.jdkport.toHexString
 import org.gnit.lucenekmp.jdkport.TreeSet
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.experimental.and
 
 /**

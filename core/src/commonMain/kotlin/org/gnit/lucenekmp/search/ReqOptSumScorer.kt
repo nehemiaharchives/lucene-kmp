@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.search
 
 
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.jvm.JvmName
 import kotlin.math.min
 

@@ -52,7 +52,7 @@ object System {
      * @see java.lang.SecurityManager.checkPropertyAccess
      * @see java.lang.System.getProperties
      */
-    fun getProperty(key: String, def: String?): String? {
+    fun getProperty(key: String, def: String? = null): String? {
         // TODO need better implementation for each platform using expect/actual pattern
         var result : String? = EnvVar[key]
 

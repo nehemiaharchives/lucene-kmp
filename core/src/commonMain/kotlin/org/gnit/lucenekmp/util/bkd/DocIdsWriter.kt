@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util.bkd
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.PointValues.IntersectVisitor
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.toUnsignedInt

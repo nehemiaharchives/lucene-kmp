@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.index.MergeState
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.InfoStream
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Abstraction of merging multiple graphs into one on-heap graph

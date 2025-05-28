@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.codecs.perfield
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.FieldsProducer
 import org.gnit.lucenekmp.index.DocValuesType
 import org.gnit.lucenekmp.index.FieldInfo

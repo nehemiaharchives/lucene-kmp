@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.document
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.index.DocValues
 import org.gnit.lucenekmp.index.DocValuesSkipper
 import org.gnit.lucenekmp.index.LeafReader

@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.index.SegmentInfo
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.packed.DirectMonotonicWriter
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * A [StoredFieldsFormat] that compresses documents in chunks in order to improve the

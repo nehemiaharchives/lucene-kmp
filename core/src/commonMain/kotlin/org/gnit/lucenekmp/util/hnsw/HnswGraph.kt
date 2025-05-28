@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util.hnsw
 
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.internal.hppc.IntArrayList
 import org.gnit.lucenekmp.internal.hppc.IntCursor
 import org.gnit.lucenekmp.jdkport.Arrays

@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.util.Bits
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * AbstractHnswGraphSearcher is the base class for HnswGraphSearcher implementations.

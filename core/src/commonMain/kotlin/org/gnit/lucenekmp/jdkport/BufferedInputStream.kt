@@ -1,10 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.io.IOException
+import okio.IOException
 import kotlin.concurrent.Volatile
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
-
 
 /**
  * A `BufferedInputStream` adds

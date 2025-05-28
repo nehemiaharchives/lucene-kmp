@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.util.hnsw
 
 
 import org.gnit.lucenekmp.util.ArrayUtil
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.isNaN

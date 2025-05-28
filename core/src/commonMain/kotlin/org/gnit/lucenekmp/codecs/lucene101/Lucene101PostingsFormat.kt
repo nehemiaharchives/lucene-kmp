@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene101
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.codecs.BlockTermState
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.FieldsConsumer

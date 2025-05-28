@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.io.IOException
+import okio.IOException
 import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.search.TopDocs
 import org.gnit.lucenekmp.search.TopDocsCollector

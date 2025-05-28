@@ -25,7 +25,7 @@ import org.gnit.lucenekmp.util.LongBitSet
 import org.gnit.lucenekmp.util.LongValues
 import org.gnit.lucenekmp.util.packed.PackedInts
 import org.gnit.lucenekmp.search.DocIdSetIterator
-import kotlinx.io.IOException
+import okio.IOException
 
 /**
  * Abstract API that consumes numeric, binary and sorted docvalues. Concrete implementations of this
