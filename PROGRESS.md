@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 722 | 580 | 80% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 722 | 591 | 81% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -23,8 +23,8 @@
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
-|   org.apache.lucene.store |       org.gnit.lucenekmp.store | 38 | 23 | 60% | [ ] |
-|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 89 | 75 | 84% | [ ] |
+|   org.apache.lucene.store |       org.gnit.lucenekmp.store | 38 | 33 | 86% | [ ] |
+|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 89 | 76 | 85% | [ ] |
 |     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 20 | 20 | 100% | [x] |
 |     org.apache.lucene.util.bkd |         org.gnit.lucenekmp.util.bkd | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 2 | 2 | 100% | [x] |
@@ -36,9 +36,9 @@
 ## Priority-1 API progress
 | Java class | Mapped class | Java Deps | KMP Deps Ported | KMP Deps To Port | % | Done |
 | --- | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 80 | 48 | 32 | 60% | [ ] |
+| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 80 | 49 | 31 | 61% | [ ] |
 | org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 8 | 7 | 53% | [ ] |
-| org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory | 8 | 4 | 4 | 50% | [ ] |
+| org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory | 8 | 8 | 0 | 100% | [x] |
 | org.apache.lucene.analysis.Analyzer | org.gnit.lucenekmp.analysis.Analyzer | 10 | 10 | 0 | 100% | [x] |
 | org.apache.lucene.document.Document | org.gnit.lucenekmp.document.Document | 2 | 2 | 0 | 100% | [x] |
 | org.apache.lucene.document.Field | org.gnit.lucenekmp.document.Field | 12 | 12 | 0 | 100% | [x] |
@@ -49,15 +49,15 @@
 | org.apache.lucene.index.StandardDirectoryReader | org.gnit.lucenekmp.index.StandardDirectoryReader | 13 | 11 | 2 | 84% | [ ] |
 | org.apache.lucene.queryparser.classic.QueryParser | org.gnit.lucenekmp.queryparser.classic.QueryParser | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 32 | 10 | 76% | [ ] |
-| org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory | 4 | 2 | 2 | 50% | [ ] |
-| org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 3 | 2 | 60% | [ ] |
+| org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory | 4 | 4 | 0 | 100% | [ ] |
+| org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 5 | 0 | 100% | [x] |
 | org.apache.lucene.document.IntPoint | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
 | org.apache.lucene.search.Query | org.gnit.lucenekmp.search.Query | 3 | 3 | 0 | 100% | [ ] |
 | org.apache.lucene.search.BooleanQuery | org.gnit.lucenekmp.search.BooleanQuery | 11 | 11 | 0 | 100% | [x] |
 | org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 173 | 120 | 53 | 69% | [ ] |
+| TOTAL |  | 173 | 127 | 46 | 73% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
@@ -169,22 +169,11 @@
 | org.apache.lucene.search.TotalHitCountCollectorManager | org.gnit.lucenekmp.search.TotalHitCountCollectorManager |
 | org.apache.lucene.search.UsageTrackingQueryCachingPolicy | org.gnit.lucenekmp.search.UsageTrackingQueryCachingPolicy |
 | org.apache.lucene.search.similarities.BM25Similarity | org.gnit.lucenekmp.search.similarities.BM25Similarity |
-| org.apache.lucene.store.BaseDirectory | org.gnit.lucenekmp.store.BaseDirectory |
-| org.apache.lucene.store.BufferedIndexInput | org.gnit.lucenekmp.store.BufferedIndexInput |
-| org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory |
-| org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory |
 | org.apache.lucene.store.FilterIndexInput | org.gnit.lucenekmp.store.FilterIndexInput |
 | org.apache.lucene.store.FilterIndexOutput | org.gnit.lucenekmp.store.FilterIndexOutput |
-| org.apache.lucene.store.LockFactory | org.gnit.lucenekmp.store.LockFactory |
-| org.apache.lucene.store.LockObtainFailedException | org.gnit.lucenekmp.store.LockObtainFailedException |
 | org.apache.lucene.store.LockValidatingDirectoryWrapper | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper |
-| org.apache.lucene.store.MMapDirectory | org.gnit.lucenekmp.store.MMapDirectory |
-| org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory |
-| org.apache.lucene.store.NativeFSLockFactory | org.gnit.lucenekmp.store.NativeFSLockFactory |
-| org.apache.lucene.store.OutputStreamIndexOutput | org.gnit.lucenekmp.store.OutputStreamIndexOutput |
 | org.apache.lucene.store.RateLimitedIndexOutput | org.gnit.lucenekmp.store.RateLimitedIndexOutput |
 | org.apache.lucene.store.RateLimiter | org.gnit.lucenekmp.store.RateLimiter |
-| org.apache.lucene.util.CommandLineUtil | org.gnit.lucenekmp.util.CommandLineUtil |
 | org.apache.lucene.util.FileDeleter | org.gnit.lucenekmp.util.FileDeleter |
 | org.apache.lucene.util.FrequencyTrackingRingBuffer | org.gnit.lucenekmp.util.FrequencyTrackingRingBuffer |
 | org.apache.lucene.util.HotspotVMOptions | org.gnit.lucenekmp.util.HotspotVMOptions |
