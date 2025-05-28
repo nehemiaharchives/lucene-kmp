@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlin.text.HexFormat
-
 /**
  * Returns the value obtained by rotating the two's complement binary
  * representation of the specified `int` value left by the
@@ -267,3 +265,21 @@ fun Int.Companion.reverseBytes(i: Int): Int {
             ((i ushr 8) and 0xff00) or
             (i ushr 24)
 }
+
+/**
+ * Returns an `int` value with at most a single one-bit, in the
+ * position of the highest-order ("leftmost") one-bit in the specified
+ * `int` value.  Returns zero if the specified value has no
+ * one-bits in its two's complement binary representation, that is, if it
+ * is equal to zero.
+ *
+ * @param i the value whose highest one bit is to be computed
+ * @return an `int` value with a single one-bit, in the position
+ * of the highest-order one-bit in the specified value, or zero if
+ * the specified value is itself equal to zero.
+ * @since 1.5
+ */
+fun Int.Companion.highestOneBit(i: Int): Int {
+    return i and (Int.Companion.MIN_VALUE ushr numberOfLeadingZeros(i))
+}
+

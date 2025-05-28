@@ -80,4 +80,15 @@ class IntExtTest {
         assertEquals("123", Int.toHexString(0x123))
         assertEquals("100", Int.toHexString(0x100))
     }
+
+    @Test
+    fun testHighestOneBit() {
+        // Test with various values
+        assertEquals(0, Int.highestOneBit(0)) // 0 should return 0
+        assertEquals(1, Int.highestOneBit(1)) // Highest bit in 1 is 1
+        assertEquals(8, Int.highestOneBit(15)) // Highest bit in 15 (1111) is 8 (1000)
+        assertEquals(16, Int.highestOneBit(31)) // Highest bit in 31 (11111) is 16 (10000)
+        assertEquals(0x40000000, Int.highestOneBit(Int.MAX_VALUE)) // Highest bit in MAX_VALUE
+        assertEquals(0x80000000.toInt(), Int.highestOneBit(Int.MIN_VALUE)) // Highest bit in MIN_VALUE
+    }
 }
