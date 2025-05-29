@@ -42,7 +42,8 @@ fun checkbox(ok: Boolean) = if (ok) "[x]" else "[ ]"
 class Progress : CliktCommand() {
     // Hardcoded list of classes not to port
     private val notToPort = mutableSetOf(
-        "org.apache.lucene.util.HotspotVMOptions"
+        "org.apache.lucene.util.HotspotVMOptions",
+        "org.apache.lucene.util.NamedThreadFactory",
         // Add more FQNs here as needed
     )
 
