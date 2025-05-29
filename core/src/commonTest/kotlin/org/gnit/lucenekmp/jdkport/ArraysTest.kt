@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import org.gnit.lucenekmp.tests.util.TestGroup
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -233,5 +232,78 @@ class ArraysTest {
         assertEquals(0, Arrays.mismatch(byteArrayOf(2), 0, 1, byteArrayOf(3), 0, 1))
         // Single element, equal
         assertEquals(-1, Arrays.mismatch(byteArrayOf(42), 0, 1, byteArrayOf(42), 0, 1))
+    }
+
+    // Tests for Arrays.fill
+
+    @Test
+    fun testFillByteArray() {
+        val arr = ByteArray(5) { it.toByte() }
+        Arrays.fill(arr, 1, 4, 9)
+        assertContentEquals(byteArrayOf(0, 9, 9, 9, 4), arr)
+        Arrays.fill(arr, 7)
+        assertContentEquals(byteArrayOf(7, 7, 7, 7, 7), arr)
+    }
+
+    @Test
+    fun testFillShortArray() {
+        val arr = ShortArray(4) { it.toShort() }
+        Arrays.fill(arr, 0, 2, 5)
+        assertContentEquals(shortArrayOf(5, 5, 2, 3), arr)
+        Arrays.fill(arr, 8)
+        assertContentEquals(shortArrayOf(8, 8, 8, 8), arr)
+    }
+
+    @Test
+    fun testFillIntArray() {
+        val arr = IntArray(6) { it }
+        Arrays.fill(arr, 2, 5, 42)
+        assertContentEquals(intArrayOf(0, 1, 42, 42, 42, 5), arr)
+        Arrays.fill(arr, 99)
+        assertContentEquals(IntArray(6) { 99 }, arr)
+    }
+
+    @Test
+    fun testFillLongArray() {
+        val arr = LongArray(3) { it.toLong() }
+        Arrays.fill(arr, 1, 3, 123L)
+        assertContentEquals(longArrayOf(0, 123, 123), arr)
+        Arrays.fill(arr, -1L)
+        assertContentEquals(longArrayOf(-1, -1, -1), arr)
+    }
+
+    @Test
+    fun testFillFloatArray() {
+        val arr = FloatArray(4) { it.toFloat() }
+        Arrays.fill(arr, 1.5f)
+        assertContentEquals(FloatArray(4) { 1.5f }, arr)
+    }
+
+    @Test
+    fun testFillGenericArray() {
+        val arr = arrayOfNulls<String>(3)
+        Arrays.fill(arr, 0, 2, "foo")
+        assertContentEquals(arrayOf("foo", "foo", null), arr)
+        Arrays.fill(arr, "bar")
+        assertContentEquals(arrayOf("bar", "bar", "bar"), arr)
+    }
+
+    @Test
+    fun testFillArrayOfIntArray() {
+        val arr = Array(3) { intArrayOf(1, 2) }
+        val fillVal = intArrayOf(9, 9)
+        Arrays.fill(arr, 1, 3, fillVal)
+        assertTrue(arr[0] contentEquals intArrayOf(1, 2))
+        assertTrue(arr[1] contentEquals fillVal)
+        assertTrue(arr[2] contentEquals fillVal)
+    }
+
+    @Test
+    fun testFillArrayOfByteArrayNullable() {
+        val arr = arrayOfNulls<ByteArray>(2)
+        val fillVal = byteArrayOf(7, 8)
+        Arrays.fill(arr, 0, 2, fillVal)
+        assertContentEquals(fillVal, arr[0])
+        assertContentEquals(fillVal, arr[1])
     }
 }

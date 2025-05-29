@@ -1145,6 +1145,14 @@ object Arrays {
         )
     }
 
+    fun fill(a: Array<IntArray>, frontIndex: Int, toIndex: Int, value: IntArray) {
+        a.fill(
+            element = value,
+            fromIndex = frontIndex,
+            toIndex = toIndex
+        )
+    }
+
     fun fill(a: Array<ByteArray?>, fromIndex: Int, toIndex: Int, value: ByteArray?) {
         a.fill(
             element = value,
