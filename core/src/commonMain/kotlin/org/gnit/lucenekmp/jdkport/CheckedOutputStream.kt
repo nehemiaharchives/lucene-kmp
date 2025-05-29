@@ -21,7 +21,7 @@ open class CheckedOutputStream(out: OutputStream, private val cksum: Checksum) :
      * @throws    IOException if an I/O error has occurred
      */
     override fun write(b: Int) {
-        out.write(b)
+        out!!.write(b)
         cksum.update(b)
     }
 
@@ -34,7 +34,7 @@ open class CheckedOutputStream(out: OutputStream, private val cksum: Checksum) :
      * @throws    IOException if an I/O error has occurred
      */
     override fun write(b: ByteArray, off: Int, len: Int) {
-        out.write(b, off, len)
+        out!!.write(b, off, len)
         cksum.update(b, off, len)
     }
 

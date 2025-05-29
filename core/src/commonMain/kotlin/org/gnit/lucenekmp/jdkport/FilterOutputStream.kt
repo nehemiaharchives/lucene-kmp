@@ -3,7 +3,6 @@ package org.gnit.lucenekmp.jdkport
 import okio.IOException
 import kotlin.concurrent.Volatile
 
-
 /**
  * This class is the superclass of all classes that filter output
  * streams. These streams sit on top of an already existing output
@@ -25,7 +24,7 @@ open class FilterOutputStream(
     /**
      * The underlying output stream to be filtered.
      */
-    protected var out: OutputStream
+    protected var out: OutputStream?
 ) : OutputStream() {
 
     /**
@@ -50,7 +49,7 @@ open class FilterOutputStream(
      */
     @Throws(IOException::class)
     override fun write(b: Int) {
-        out.write(b)
+        out!!.write(b)
     }
 
     /**
@@ -116,7 +115,7 @@ open class FilterOutputStream(
      */
     @Throws(IOException::class)
     override fun flush() {
-        out.flush()
+        out!!.flush()
     }
 
     /**
@@ -144,10 +143,10 @@ open class FilterOutputStream(
             throw e
         } finally {
             if (flushException == null) {
-                out.close()
+                out!!.close()
             } else {
                 try {
-                    out.close()
+                    out!!.close()
                 } catch (closeException: Throwable) {
                     if (flushException !== closeException) {
                         closeException.addSuppressed(flushException)

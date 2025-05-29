@@ -68,7 +68,7 @@ open class BufferedOutputStream private constructor(out: OutputStream, initialSi
     @Throws(IOException::class)
     private fun flushBuffer() {
         if (count > 0) {
-            out.write(buf, 0, count)
+            out!!.write(buf, 0, count)
             count = 0
         }
     }
@@ -130,7 +130,7 @@ open class BufferedOutputStream private constructor(out: OutputStream, initialSi
                flush the output buffer and then write the data directly.
                In this way buffered streams will cascade harmlessly. */
             flushBuffer()
-            out.write(b, off, len)
+            out!!.write(b, off, len)
             return
         }
         growIfNeeded(len)
@@ -151,7 +151,7 @@ open class BufferedOutputStream private constructor(out: OutputStream, initialSi
     @Throws(IOException::class)
     override fun flush() {
         flushBuffer()
-        out.flush()
+        out!!.flush()
     }
 
     companion object {

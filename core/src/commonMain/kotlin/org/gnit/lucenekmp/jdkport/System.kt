@@ -61,6 +61,12 @@ object System {
         return result
     }
 
+    /**
+     * for now target platform only includes JVM (server which means linux server), Android, and iOS
+     * all of them use "\n" as the line separator. this implementation will cause problem only on
+     * running this program in kotlin/JVM on Windows, or kotlin/Native on Windows.
+     */
+    fun lineSeparator() = "\n"
 
     /**
      * ported from java.lang.System.arraycopy()

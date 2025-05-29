@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.util
 
-
 /**
  * Debugging API for Lucene classes such as [IndexWriter] and [SegmentInfos].
  *
@@ -11,11 +10,11 @@ package org.gnit.lucenekmp.util
  */
 abstract class InfoStream : AutoCloseable {
     private class NoOutput : InfoStream() {
-        override fun message(component: String?, message: String?) {
+        override fun message(component: String, message: String) {
             require(false) { "message() should not be called when isEnabled returns false" }
         }
 
-        override fun isEnabled(component: String?): Boolean {
+        override fun isEnabled(component: String): Boolean {
             return false
         }
 
@@ -23,10 +22,10 @@ abstract class InfoStream : AutoCloseable {
     }
 
     /** prints a message  */
-    abstract fun message(component: String?, message: String?)
+    abstract fun message(component: String, message: String)
 
     /** returns true if messages are enabled and should be posted to [.message].  */
-    abstract fun isEnabled(component: String?): Boolean
+    abstract fun isEnabled(component: String): Boolean
 
     companion object {
         /** Instance of InfoStream that does no logging at all.  */

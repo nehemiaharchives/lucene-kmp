@@ -8,7 +8,7 @@ import kotlin.test.assertFailsWith
 
 // Test-specific subclass that exposes the constructor and the out field
 class TestFilterOutputStream(output: OutputStream) : FilterOutputStream(output) {
-    fun getOutputStream(): OutputStream = out
+    fun getOutputStream(): OutputStream? = out
 }
 
 class FilterOutputStreamTest {

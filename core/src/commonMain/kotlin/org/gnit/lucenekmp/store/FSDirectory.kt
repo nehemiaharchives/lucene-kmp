@@ -316,7 +316,7 @@ abstract class FSDirectory protected constructor(path: Path, lockFactory: LockFa
                 var length = length
                 while (length > 0) {
                     val chunk = min(length, CHUNK_SIZE)
-                    out.write(b, offset, chunk)
+                    out!!.write(b, offset, chunk)
                     length -= chunk
                     offset += chunk
                 }
