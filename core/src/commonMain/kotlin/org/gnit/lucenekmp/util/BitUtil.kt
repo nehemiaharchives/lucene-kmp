@@ -157,6 +157,15 @@ object BitUtil {
     /*@Deprecated("Better use little endian unless it is needed for backwards compatibility.")
     val VH_BE_SHORT: java.lang.invoke.VarHandle =
         java.lang.invoke.MethodHandles.byteArrayViewVarHandle(ShortArray::class.java, ByteOrder.BIG_ENDIAN)*/
+    object VH_BE_SHORT {
+        fun get(nextBlocks: ByteArray, offset: Int): Short {
+            return nextBlocks.getShortBE(offset)
+        }
+
+        fun set(nextBlocks: ByteArray, offset: Int, s: Short) {
+            nextBlocks.setShortBE(offset, s)
+        }
+    }
 
     /**
      * A [VarHandle] to read/write big endian `int` from a byte array. Shape: `int
