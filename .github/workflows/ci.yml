@@ -154,12 +154,24 @@ jobs:
       - name: Full Build
         run: ./gradlew build --no-daemon
 
+      - name: Generate Coverage Report
+        run: ./gradlew koverXmlReport --no-daemon
+
+      - name: Upload coverage reports to Codecov
+        if: ${{ env.ACT != 'true' }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: core/build/reports/kover/report.xml
+          token: ${{ secrets.CODECOV_TOKEN }} 
+
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: build-reports
-          path: build/reports/
+          path: |
+            build/reports/
+            core/build/reports/kover/
 
       - name: Build Summary
         if: always()

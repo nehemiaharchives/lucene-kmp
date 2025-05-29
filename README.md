@@ -1,6 +1,7 @@
 # Lucene Kotlin Multiplatform
 
 [![CI](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nehemiaharchives/lucene-kmp/graph/badge.svg?token=YRN8URPQA4)](https://codecov.io/gh/nehemiaharchives/lucene-kmp)
 
 ## What is it?
 
@@ -32,7 +33,7 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
 ### Classes needed to port to write minimum index:
 * [ ] org.apache.lucene.index.IndexWriter
 * [ ] org.apache.lucene.index.IndexWriterConfig
-* [ ] org.apache.lucene.store.FSDirectory
+* [x] org.apache.lucene.store.FSDirectory
 * [x] org.apache.lucene.analysis.Analyzer
 * [x] org.apache.lucene.document.Document
 * [x] org.apache.lucene.document.Field
@@ -45,8 +46,8 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
 * [ ] org.apache.lucene.index.StandardDirectoryReader
 * [ ] org.apache.lucene.queryparser.classic.QueryParser
 * [ ] org.apache.lucene.search.IndexSearcher
-* [ ] org.apache.lucene.store.FSLockFactory
-* [ ] org.apache.lucene.store.NIOFSDirectory
+* [x] org.apache.lucene.store.FSLockFactory
+* [x] org.apache.lucene.store.NIOFSDirectory
 * [x] org.apache.lucene.document.IntPoint
 * [x] org.apache.lucene.search.Query
 * [x] org.apache.lucene.search.BooleanQuery
