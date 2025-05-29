@@ -74,9 +74,9 @@ abstract class AbstractKnnVectorQuery(
             )
         val taskExecutor: TaskExecutor = indexSearcher.getTaskExecutor()
         val leafReaderContexts: MutableList<LeafReaderContext> = reader.leaves()
-        val tasks: MutableList<org.gnit.lucenekmp.jdkport.Callable<TopDocs>> = ArrayList(leafReaderContexts.size)
+        val tasks: MutableList<org.gnit.lucenekmp.jdkport.Callable<TopDocs?>> = ArrayList(leafReaderContexts.size)
         for (context in leafReaderContexts) {
-            tasks.add(object : org.gnit.lucenekmp.jdkport.Callable<TopDocs> {
+            tasks.add(object : org.gnit.lucenekmp.jdkport.Callable<TopDocs?> {
                 override fun call(): TopDocs {
                     return searchLeaf(
                         context,

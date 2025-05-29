@@ -4,6 +4,8 @@ import kotlinx.coroutines.Runnable
 
 
 /**
+ * port of java.util.concurrent.ExecutorService
+ *
  * An [Executor] that provides methods to manage termination and
  * methods that can produce a [Future] for tracking progress of
  * one or more asynchronous tasks.
@@ -38,42 +40,45 @@ import kotlinx.coroutines.Runnable
  * Here is a sketch of a network service in which threads in a thread
  * pool service incoming requests. It uses the preconfigured [ ][Executors.newFixedThreadPool] factory method:
  *
- * <pre> `class NetworkService implements Runnable {
- * private final ServerSocket serverSocket;
- * private final ExecutorService pool;
+ * ```
+ *     class NetworkService implements Runnable {
+ *         private final ServerSocket serverSocket;
+ *         private final ExecutorService pool;
  *
- * public NetworkService(int port, int poolSize)
- * throws IOException {
- * serverSocket = new ServerSocket(port);
- * pool = Executors.newFixedThreadPool(poolSize);
- * }
+ *         public NetworkService(int port, int poolSize) throws IOException {
+ *             serverSocket = new ServerSocket(port);
+ *             pool = Executors.newFixedThreadPool(poolSize);
+ *         }
  *
- * public void run() { // run the service
- * try {
- * for (;;) {
- * pool.execute(new Handler(serverSocket.accept()));
- * }
- * } catch (IOException ex) {
- * pool.shutdown();
- * }
- * }
- * }
+ *         public void run() { // run the service
+ *             try {
+ *                 for (;;) {
+ *                     pool.execute(new Handler(serverSocket.accept()));
+ *                 }
+ *             } catch (IOException ex) {
+ *                 pool.shutdown();
+ *             }
+ *         }
+ *     }
  *
- * class Handler implements Runnable {
- * private final Socket socket;
- * Handler(Socket socket) { this.socket = socket; }
- * public void run() {
- * // read and service request on socket
- * }
- * }`</pre>
+ *     class Handler implements Runnable {
+ *         private final Socket socket;
+ *         Handler(Socket socket) { this.socket = socket; }
+ *         public void run() {
+ *             // read and service request on socket
+ *         }
+ *     }
+ * ```
  *
  * An `ExecutorService` may also be established and closed
  * (shutdown, blocking until terminated) as follows; illustrating with
  * a different `Executors` factory method:
  *
- * <pre> `try (ExecutorService e =  Executors.newWorkStealingPool()) {
- * // submit or execute many tasks with e ...
- * }`</pre>
+ * ```
+ * try (ExecutorService e =  Executors.newWorkStealingPool()) {
+ *  // submit or execute many tasks with e ...
+ * }
+ * ```
  *
  * Further customization is also possible. For example, the following
  * method shuts down an `ExecutorService` in two phases, first
@@ -81,24 +86,25 @@ import kotlinx.coroutines.Runnable
  * calling `shutdownNow`, if necessary, to cancel any lingering
  * tasks:
  *
- * <pre> `void shutdownAndAwaitTermination(ExecutorService pool) {
- * pool.shutdown(); // Disable new tasks from being submitted
- * try {
- * // Wait a while for existing tasks to terminate
- * if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
- * pool.shutdownNow(); // Cancel currently executing tasks
- * // Wait a while for tasks to respond to being cancelled
- * if (!pool.awaitTermination(60, TimeUnit.SECONDS))
- * System.err.println("Pool did not terminate");
- * }
- * } catch (InterruptedException ex) {
- * // (Re-)Cancel if current thread also interrupted
- * pool.shutdownNow();
- * // Preserve interrupt status
- * Thread.currentThread().interrupt();
- * }
- * }`</pre>
- *
+ * ```
+ *  void shutdownAndAwaitTermination(ExecutorService pool) {
+ *      pool.shutdown(); // Disable new tasks from being submitted
+ *      try {
+ *          // Wait a while for existing tasks to terminate
+ *          if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+ *              pool.shutdownNow(); // Cancel currently executing tasks
+ *              // Wait a while for tasks to respond to being cancelled
+ *              if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+ *                  System.err.println("Pool did not terminate");
+ *          }
+ *      } catch (InterruptedException ex) {
+ *          // (Re-)Cancel if current thread also interrupted
+ *          pool.shutdownNow();
+ *          // Preserve interrupt status
+ *          Thread.currentThread().interrupt();
+ *      }
+ *  }
+ *```
  *
  * Memory consistency effects: Actions in a thread prior to the
  * submission of a `Runnable` or `Callable` task to an
@@ -211,7 +217,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * scheduled for execution
      * @throws NullPointerException if the task is null
     </T> */
-    fun <T> submit(task: Callable<T>): Future<T>
+    fun <T> submit(task: Callable<T?>): Future<T>
 
     /**
      * Submits a Runnable task for execution and returns a Future
@@ -262,8 +268,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * @throws RejectedExecutionException if any task cannot be
      * scheduled for execution
     </T> */
-    @Throws(InterruptedException::class)
-    fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>): MutableList<Future<T>>
+    suspend fun <T> invokeAll(tasks: MutableCollection<Callable<T?>>): MutableList<Future<T>>
 
     /**
      * Executes the given tasks, returning a list of Futures holding
@@ -293,9 +298,8 @@ interface ExecutorService : Executor, AutoCloseable {
      * @throws RejectedExecutionException if any task cannot be scheduled
      * for execution
     </T> */
-    @Throws(InterruptedException::class)
-    fun <T> invokeAll(
-        tasks: MutableCollection<out Callable<T>>,
+    suspend fun <T> invokeAll(
+        tasks: MutableCollection<Callable<T?>>,
         timeout: Long, unit: TimeUnit
     ): MutableList<Future<T>>
 
@@ -318,8 +322,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * @throws RejectedExecutionException if tasks cannot be scheduled
      * for execution
     </T> */
-    @Throws(InterruptedException::class, ExecutionException::class)
-    fun <T> invokeAny(tasks: MutableCollection<out Callable<T>>): T
+    suspend fun <T> invokeAny(tasks: MutableCollection<Callable<T?>>): T?
 
     /**
      * Executes the given tasks, returning the result
@@ -344,16 +347,11 @@ interface ExecutorService : Executor, AutoCloseable {
      * @throws RejectedExecutionException if tasks cannot be scheduled
      * for execution
     </T> */
-    @Throws(
-        InterruptedException::class,
-        ExecutionException::class,
-        TimeoutException::class
-    )
-    fun <T> invokeAny(
-        tasks: MutableCollection<out Callable<T>>,
+    suspend fun <T> invokeAny(
+        tasks: MutableCollection<Callable<T?>>,
         timeout: Long,
         unit: TimeUnit
-    ): T
+    ): T?
 
     /**
      * Initiates an orderly shutdown in which previously submitted tasks are

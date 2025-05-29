@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 720 | 599 | 83% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 720 | 600 | 83% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -24,7 +24,7 @@
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 38 | 33 | 86% | [ ] |
-|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 87 | 84 | 96% | [ ] |
+|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 87 | 85 | 97% | [ ] |
 |     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 20 | 20 | 100% | [x] |
 |     org.apache.lucene.util.bkd |         org.gnit.lucenekmp.util.bkd | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 2 | 2 | 100% | [x] |
@@ -174,7 +174,6 @@
 | org.apache.lucene.store.LockValidatingDirectoryWrapper | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper |
 | org.apache.lucene.store.RateLimitedIndexOutput | org.gnit.lucenekmp.store.RateLimitedIndexOutput |
 | org.apache.lucene.store.RateLimiter | org.gnit.lucenekmp.store.RateLimiter |
-| org.apache.lucene.util.SameThreadExecutorService | org.gnit.lucenekmp.util.SameThreadExecutorService |
 | org.apache.lucene.util.SetOnce | org.gnit.lucenekmp.util.SetOnce |
 | org.apache.lucene.util.SuppressForbidden | org.gnit.lucenekmp.util.SuppressForbidden |
 | org.apache.lucene.util.packed.BulkOperationPackedSingleBlock | org.gnit.lucenekmp.util.packed.BulkOperationPackedSingleBlock |

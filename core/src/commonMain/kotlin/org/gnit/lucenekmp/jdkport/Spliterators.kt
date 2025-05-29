@@ -6,12 +6,12 @@ object Spliterators {
     /**
      * A Spliterator designed for use by sources that traverse and split
      * elements maintained in an unmodifiable Array.
-     * Mimics java.util.Spliterators.ArraySpliterator.
+     * Mimics Spliterators.ArraySpliterator.
      */
     class ArraySpliterator<T> : Spliterator<T> {
         // Use Array<Any?> to match Java's Object[] for flexibility,
         // elements will be cast on consumption.
-        private val array: Array<Any?>
+        private val array: Array<T?>
         private var index: Int        // current index, modified on advance/split
         private val fence: Int        // one past last index
         private val characteristics: Int
@@ -23,7 +23,7 @@ object Spliterators {
          * @param array the array, assumed to be unmodified during use.
          * @param additionalCharacteristics Additional characteristics beyond SIZED/SUBSIZED.
          */
-        constructor(array: Array<Any?>, additionalCharacteristics: Int)
+        constructor(array: Array<T?>, additionalCharacteristics: Int)
                 : this(array, 0, array.size, additionalCharacteristics)
 
         /**
@@ -34,7 +34,7 @@ object Spliterators {
          * @param fence one past the greatest index to cover.
          * @param additionalCharacteristics Additional characteristics beyond SIZED/SUBSIZED.
          */
-        constructor(array: Array<Any?>, origin: Int, fence: Int, additionalCharacteristics: Int) {
+        constructor(array: Array<T?>, origin: Int, fence: Int, additionalCharacteristics: Int) {
             this.array = array
             this.index = origin
             this.fence = fence
@@ -49,8 +49,8 @@ object Spliterators {
          * @param array the array, assumed to be unmodified during use.
          * @param additionalCharacteristics Additional characteristics beyond SIZED/SUBSIZED.
          */
-        constructor(array: Array<Int>, additionalCharacteristics: Int)
-                : this(array.map { it as Any? }.toTypedArray(), 0, array.size, additionalCharacteristics)
+        /*constructor(array: Array<Int>, additionalCharacteristics: Int)
+                : this(array.map { it as T? }.toTypedArray(), 0, array.size, additionalCharacteristics)*/
 
         /**
          * Private constructor for use by trySplit, potentially without SIZED/SUBSIZED.
@@ -60,7 +60,7 @@ object Spliterators {
          * @param characteristics characteristics (SIZED/SUBSIZED may be removed).
          * @param estimatedSize the estimated size (non-negative).
          */
-        private constructor(array: Array<Any?>, origin: Int, fence: Int, characteristics: Int, estimatedSize: Long) {
+        private constructor(array: Array<T?>, origin: Int, fence: Int, characteristics: Int, estimatedSize: Long) {
             this.array = array
             this.index = origin
             this.fence = fence
@@ -135,7 +135,7 @@ object Spliterators {
 
     /**
      * A Spliterator that uses an Iterator for traversal.
-     * Mimics java.util.Spliterators.IteratorSpliterator.
+     * Mimics Spliterators.IteratorSpliterator.
      */
     class IteratorSpliterator<T> : Spliterator<T> {
         private val it: Iterator<T> // The underlying iterator
@@ -217,13 +217,13 @@ object Spliterators {
 
                 // Create ArraySpliterator for the split-off portion
                 // Convert the buffer to an array of Any? for the ArraySpliterator
-                val anyArray = Array<Any?>(j) { i -> buffer[i] as Any? }
+                val anyArray = Array<Any?>(j) { i -> buffer[i] as T? }
                 return ArraySpliterator(
                     anyArray,
                     0,
                     j,
                     characteristics()
-                )
+                ) as Spliterator<T>?
             }
             return null // Cannot split further
         }
@@ -262,5 +262,48 @@ object Spliterators {
             }
             throw IllegalStateException("Spliterator does not report SORTED characteristic")
         }
+    }
+
+    /**
+     * Creates a `Spliterator` covering a range of elements of a given
+     * array, using a customized set of spliterator characteristics.
+     *
+     *
+     * This method is provided as an implementation convenience for
+     * Spliterators which store portions of their elements in arrays, and need
+     * fine control over Spliterator characteristics.  Most other situations in
+     * which a Spliterator for an array is needed should use
+     * [Arrays.spliterator].
+     *
+     *
+     * The returned spliterator always reports the characteristics
+     * `SIZED` and `SUBSIZED`.  The caller may provide additional
+     * characteristics for the spliterator to report; it is common to
+     * additionally specify `IMMUTABLE` and `ORDERED`.
+     *
+     * @param <T> Type of elements
+     * @param array The array, assumed to be unmodified during use
+     * @param fromIndex The least index (inclusive) to cover
+     * @param toIndex One past the greatest index to cover
+     * @param additionalCharacteristics Additional spliterator characteristics
+     * of this spliterator's source or elements beyond `SIZED` and
+     * `SUBSIZED` which are always reported
+     * @return A spliterator for an array
+     * @throws NullPointerException if the given array is `null`
+     * @throws ArrayIndexOutOfBoundsException if `fromIndex` is negative,
+     * `toIndex` is less than `fromIndex`, or
+     * `toIndex` is greater than the array size
+     * @see Arrays.spliterator
+    </T> */
+    fun <T> spliterator(
+        array: Array<T?>, fromIndex: Int, toIndex: Int,
+        additionalCharacteristics: Int
+    ): Spliterator<T> {
+        /*Spliterators.checkFromToBounds(
+            java.util.Objects.requireNonNull<Array<Any?>?>(array).size,
+            fromIndex,
+            toIndex
+        )*/
+        return ArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics)
     }
 }

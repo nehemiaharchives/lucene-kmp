@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.*
 import kotlin.test.*
-import kotlin.time.Duration.Companion.milliseconds
 
 class FutureTaskTest {
 
@@ -12,13 +11,13 @@ class FutureTaskTest {
             // Use a CompletableDeferred to simulate a long-running task
             val deferred = CompletableDeferred<String>()
 
-            val task = FutureTask(Callable {
+            val task = FutureTask {
                 runBlocking {
                     withTimeout(2000) {
                         deferred.await()
                     }
                 }
-            })
+            }
 
             // Launch the task in a separate coroutine
             launch {
@@ -41,11 +40,11 @@ class FutureTaskTest {
             // Use a CompletableDeferred to control completion
             val deferred = CompletableDeferred<String>()
 
-            val task = FutureTask(Callable {
+            val task = FutureTask {
                 runBlocking {
                     deferred.await()
                 }
-            })
+            }
 
             // Launch the task in a separate coroutine
             launch {
@@ -68,13 +67,13 @@ class FutureTaskTest {
             // Use a CompletableDeferred to simulate a long-running task
             val deferred = CompletableDeferred<String>()
 
-            val task = FutureTask(Callable {
+            val task = FutureTask {
                 runBlocking {
                     withTimeout(2000) {
                         deferred.await()
                     }
                 }
-            })
+            }
 
             // Launch the task in a separate coroutine
             launch {
@@ -93,9 +92,9 @@ class FutureTaskTest {
     @Test
     fun testGet() {
         runBlocking {
-            val task = FutureTask(Callable {
+            val task = FutureTask {
                 "result"
-            })
+            }
             task.run()
             assertEquals("result", task.get())
         }
@@ -104,9 +103,9 @@ class FutureTaskTest {
     @Test
     fun testRun() {
         runBlocking {
-            val task = FutureTask(Callable {
+            val task = FutureTask {
                 "result"
-            })
+            }
             task.run()
             assertEquals("result", task.get())
         }
@@ -116,13 +115,13 @@ class FutureTaskTest {
     fun testRunAndReset() {
         runBlocking {
             // Create a custom FutureTask that exposes the protected runAndReset method
-            class TestFutureTask<V>(callable: Callable<V>) : FutureTask<V>(callable) {
+            class TestFutureTask<V>(callable: Callable<V?>) : FutureTask<V>(callable) {
                 fun publicRunAndReset(): Boolean = runAndReset()
             }
 
-            val task = TestFutureTask(Callable {
+            val task = TestFutureTask {
                 "result"
-            })
+            }
 
             assertTrue(task.publicRunAndReset())
             assertFalse(task.isDone())

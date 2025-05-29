@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.search
 
 import kotlinx.coroutines.Runnable
-import okio.IOException
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.ExecutionException
 import org.gnit.lucenekmp.jdkport.Executor
@@ -44,7 +43,7 @@ class TaskExecutor(executor: Executor) {
                 // execute directly on the current thread in case of rejection to ensure a rejecting
                 // executor only reduces parallelism and does not
                 // result in failure
-                runnable.invoke()
+                runnable.run()
             }
         }
     }
@@ -61,11 +60,11 @@ class TaskExecutor(executor: Executor) {
      * @param <T> the return type of the task execution
     </T> */
     @OptIn(ExperimentalAtomicApi::class)
-    suspend fun <T> invokeAll(callables: MutableCollection<Callable<T>>): MutableList<T> {
+    suspend fun <T> invokeAll(callables: MutableCollection<Callable<T?>>): MutableList<T> {
         val futures: MutableList<RunnableFuture<T>> =
-            mutableListOf<RunnableFuture<T>>()
+            mutableListOf()
         for (callable in callables) {
-            futures.add(Task<T>(callable, futures))
+            futures.add(Task(callable, futures))
         }
         val count = futures.size
         // taskId provides the first index of an un-executed task in #futures
@@ -77,7 +76,7 @@ class TaskExecutor(executor: Executor) {
                 Runnable {
                     val id: Int = taskId.fetchAndIncrement()
                     if (id < count) {
-                        futures.get(id).run()
+                        futures[id].run()
                     }
                 }
             for (j in 0..<count - 1) {
@@ -104,7 +103,7 @@ class TaskExecutor(executor: Executor) {
     }
 
     private class Task<T>(
-        callable: Callable<T>,
+        callable: Callable<T?>,
         private val futures: MutableList<RunnableFuture<T>>
     ) : FutureTask<T>(callable) {
 
@@ -147,7 +146,7 @@ class TaskExecutor(executor: Executor) {
     companion object {
         private suspend fun <T> collectResults(futures: MutableList<RunnableFuture<T>>): MutableList<T> {
             var exc: Throwable? = null
-            val results: MutableList<T> = ArrayList<T>(futures.size)
+            val results: MutableList<T> = ArrayList(futures.size)
             for (future in futures) {
                 try {
                     results.add(future.get())

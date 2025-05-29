@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.nanoseconds
  * Function interface to replace java.util.concurrent.Executor
  */
 fun interface Executor {
-    fun execute(task: () -> Unit)
+    fun execute(command: Runnable)
 }
 
 /**
@@ -55,14 +55,9 @@ interface RunnableFuture<T> : Future<T>, Runnable
 
 
 /**
- * Exception to replace java.util.concurrent.RejectedExecutionException
- */
-class RejectedExecutionException : Exception()
-
-/**
  * Exception to replace java.util.concurrent.ExecutionException
  */
-class ExecutionException(cause: Throwable) : Exception(cause)
+class ExecutionException(cause: Throwable? = null) : Exception(cause)
 
 /**
  * A cancellable asynchronous computation. This class provides a base
@@ -125,7 +120,7 @@ open class FutureTask<V> : RunnableFuture<V> {
     }
 
     /** The underlying callable; nulled out after running */
-    private var callable: Callable<V>?
+    private var callable: Callable<V?>?
 
     /**
      * Returns result or throws exception for completed task.
@@ -150,7 +145,7 @@ open class FutureTask<V> : RunnableFuture<V> {
      * @param callable the callable task
      * @throws NullPointerException if the callable is null
      */
-    constructor(callable: Callable<V>) {
+    constructor(callable: Callable<V?>) {
         this.callable = callable
         if (callable == null)
             throw NullPointerException()
@@ -168,7 +163,7 @@ open class FutureTask<V> : RunnableFuture<V> {
      * `Future<?> f = new FutureTask<Void>(runnable, null)`
      * @throws NullPointerException if the runnable is null
      */
-    constructor(runnable: Runnable, result: V) : this(Executors.callable(runnable, result))
+    constructor(runnable: Runnable, result: V?) : this(Executors.callable(runnable, result))
 
     @OptIn(ExperimentalAtomicApi::class)
     override fun isCancelled(): Boolean {
@@ -536,7 +531,7 @@ open class FutureTask<V> : RunnableFuture<V> {
 
 // Platform-agnostic equivalent of Executors.callable
 object Executors {
-    fun <T> callable(runnable: Runnable, result: T): Callable<T> {
+    fun <T> callable(runnable: Runnable, result: T?): Callable<T?> {
         return Callable {
             runnable.run()
             result

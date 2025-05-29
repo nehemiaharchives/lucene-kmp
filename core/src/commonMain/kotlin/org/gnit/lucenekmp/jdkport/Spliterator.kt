@@ -212,12 +212,14 @@ interface Spliterator<T> {
                         est -= j.toLong()
                     }
 
+                    val array: Array<Any?> = Array(buffer.size) { buffer[it] as Any?} // Convert to Array<T>
+
                     // Create ArraySpliterator for the split-off portion
                     // **Requires ArraySpliterator implementation in this package**
                     // Assuming ArraySpliterator constructor: ArraySpliterator(array, start, end, characteristics)
                     // Or potentially ArraySpliterator(list, characteristics)
                     return Spliterators.ArraySpliterator(
-                        buffer.toTypedArray(),
+                        array as Array<T?>, // Cast to Array<T> for type safety
                         0,
                         j,
                         characteristics()
