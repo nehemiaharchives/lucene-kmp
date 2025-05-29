@@ -61,9 +61,9 @@ class BitSet : Cloneable<BitSet> {
      * Every public method must preserve these invariants.
      */
     private fun checkInvariants() {
-        require(wordsInUse == 0 || words[wordsInUse - 1] != 0L)
-        require(wordsInUse >= 0 && wordsInUse <= words.size)
-        require(wordsInUse == words.size || words[wordsInUse] == 0L)
+        assert(wordsInUse == 0 || words[wordsInUse - 1] != 0L)
+        assert(wordsInUse >= 0 && wordsInUse <= words.size)
+        assert(wordsInUse == words.size || words[wordsInUse] == 0L)
     }
 
     /**
