@@ -45,7 +45,7 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
      * nulled out on close.)
      */
     @Volatile
-    protected var buf: ByteArray
+    protected var buf: ByteArray?
 
     /**
      * The index one greater than the index of the last valid byte in
@@ -221,7 +221,7 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
                 if (nsz > marklimit) nsz = marklimit
                 val nbuf = ByteArray(nsz)
                 System.arraycopy(buffer, 0, nbuf, 0, pos)
-
+                this.buf = nbuf
                 buffer = nbuf
             }
         }
@@ -244,6 +244,8 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
      */
     @Throws(IOException::class)
     override fun read(): Int {
+        ensureOpen()
+
         if (pos >= count) {
             fill()
             if (pos >= count) return -1
@@ -457,10 +459,10 @@ open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size
      * @throws     IOException  if an I/O error occurs.
      */
     override fun close() {
-        var buffer: ByteArray
-        while ((buf.also { buffer = it }) != null) {
+        while (buf != null) {
             val input: InputStream? = `in`
             `in` = null
+            buf = null // CAS to null, so that we can check for nullness in read() and fill()
             if (input != null) input.close()
             return
             // Else retry in case a new buf was CASed in fill()
