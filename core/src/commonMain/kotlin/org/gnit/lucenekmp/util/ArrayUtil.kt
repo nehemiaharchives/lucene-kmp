@@ -757,11 +757,11 @@ class ArrayUtil {
             return Array(subLength) { i -> array[from + i] }
         }
 
-        @JvmName("copyOfSubArrayNullable")
+        /*@JvmName("copyOfSubArrayNullable")
         inline fun <reified T> copyOfSubArray(array: Array<T?>, from: Int, to: Int): Array<T?> {
             val subLength = to - from
             return Array(subLength) { i -> array[from + i] }
-        }
+        }*/
 
         /** Comparator for a fixed number of bytes.  */
         fun interface ByteArrayComparator {

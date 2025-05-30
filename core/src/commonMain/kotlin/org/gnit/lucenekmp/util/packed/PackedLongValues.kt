@@ -10,7 +10,7 @@ import kotlin.math.min
 
 
 /** Utility class to compress integers into a [LongValues] instance.  */
-class PackedLongValues internal constructor(
+open class PackedLongValues internal constructor(
     val pageShift: Int,
     val pageMask: Int,
     values: Array<PackedInts.Reader>,
@@ -32,7 +32,7 @@ class PackedLongValues internal constructor(
         return size
     }
 
-    fun decodeBlock(block: Int, dest: LongArray): Int {
+    open fun decodeBlock(block: Int, dest: LongArray): Int {
         val vals: PackedInts.Reader = values[block]
         val size: Int = vals.size()
         var k = 0
@@ -42,7 +42,7 @@ class PackedLongValues internal constructor(
         return size
     }
 
-    fun get(block: Int, element: Int): Long {
+    open fun get(block: Int, element: Int): Long {
         return values[block].get(element)
     }
 
@@ -64,13 +64,12 @@ class PackedLongValues internal constructor(
 
     /** An iterator over long values.  */
     inner class Iterator internal constructor() {
-        val currentValues: LongArray
+        val currentValues: LongArray = LongArray(min(size.toInt(), pageMask + 1))
         var vOff: Int
         var pOff: Int = 0
         var currentCount: Int = 0 // number of entries of the current page
 
         init {
-            currentValues = LongArray(min(size.toInt(), pageMask + 1))
             vOff = pOff
             fillBlock()
         }
@@ -103,23 +102,20 @@ class PackedLongValues internal constructor(
     }
 
     /** A Builder for a [PackedLongValues] instance.  */
-    class Builder internal constructor(pageSize: Int, acceptableOverheadRatio: Float) : Accountable {
-        val pageShift: Int
-        val pageMask: Int
-        val acceptableOverheadRatio: Float
+    open class Builder internal constructor(pageSize: Int, acceptableOverheadRatio: Float) : Accountable {
+        val pageShift: Int = checkBlockSize(pageSize, MIN_PAGE_SIZE, MAX_PAGE_SIZE)
+        val pageMask: Int = pageSize - 1
+        val acceptableOverheadRatio: Float = acceptableOverheadRatio
         var pending: LongArray
         var size: Long
 
-        var values: Array<PackedInts.Reader?>
+        var values: Array<PackedInts.Reader>
         var ramBytesUsed: Long
         var valuesOff: Int
         var pendingOff: Int
 
         init {
-            pageShift = checkBlockSize(pageSize, MIN_PAGE_SIZE, MAX_PAGE_SIZE)
-            pageMask = pageSize - 1
-            this.acceptableOverheadRatio = acceptableOverheadRatio
-            values = kotlin.arrayOfNulls<PackedInts.Reader>(INITIAL_PAGE_COUNT)
+            values = kotlin.arrayOfNulls<PackedInts.Reader>(INITIAL_PAGE_COUNT) as Array<PackedInts.Reader>
             pending = LongArray(pageSize)
             valuesOff = 0
             pendingOff = 0
@@ -134,16 +130,16 @@ class PackedLongValues internal constructor(
          * Build a [PackedLongValues] instance that contains values that have been added to this
          * builder. This operation is destructive.
          */
-        fun build(): PackedLongValues {
+        open fun build(): PackedLongValues {
             finish()
             pending = LongArray(0)
-            val values: Array<PackedInts.Reader> = ArrayUtil.copyOfSubArray(this.values as Array<PackedInts.Reader> , 0, valuesOff)
+            val values: Array<PackedInts.Reader> = ArrayUtil.copyOfSubArray(this.values, 0, valuesOff)
             val ramBytesUsed: Long =
                 PackedLongValues.Companion.BASE_RAM_BYTES_USED + RamUsageEstimator.sizeOf(values as Array<Accountable?>)
             return PackedLongValues(pageShift, pageMask, values, size, ramBytesUsed)
         }
 
-        fun baseRamBytesUsed(): Long {
+        open fun baseRamBytesUsed(): Long {
             return BASE_RAM_BYTES_USED
         }
 
@@ -167,7 +163,7 @@ class PackedLongValues internal constructor(
                 }
                 pack()
             }
-            pending!![pendingOff++] = l
+            pending[pendingOff++] = l
             size += 1
             return this
         }
@@ -183,13 +179,13 @@ class PackedLongValues internal constructor(
 
         private fun pack() {
             pack(pending, pendingOff, valuesOff, acceptableOverheadRatio)
-            ramBytesUsed += values[valuesOff]!!.ramBytesUsed()
+            ramBytesUsed += values[valuesOff].ramBytesUsed()
             valuesOff += 1
             // reset pending buffer
             pendingOff = 0
         }
 
-        fun pack(values: LongArray, numValues: Int, block: Int, acceptableOverheadRatio: Float) {
+        open fun pack(values: LongArray, numValues: Int, block: Int, acceptableOverheadRatio: Float) {
             require(numValues > 0)
             // compute max delta
             var minValue = values[0]
@@ -214,7 +210,7 @@ class PackedLongValues internal constructor(
             }
         }
 
-        fun grow(newBlockCount: Int) {
+        open fun grow(newBlockCount: Int) {
             ramBytesUsed -= RamUsageEstimator.shallowSizeOf(values)
             values = ArrayUtil.growExact(values, newBlockCount)
             ramBytesUsed += RamUsageEstimator.shallowSizeOf(values)
@@ -234,7 +230,7 @@ class PackedLongValues internal constructor(
 
         // More than 1M doesn't really makes sense with these appending buffers
         // since their goal is to try to have small numbers of bits per value
-        val MAX_PAGE_SIZE: Int = 1 shl 20
+        const val MAX_PAGE_SIZE: Int = 1 shl 20
 
         /** Return a new [Builder] that will compress efficiently positive integers.  */
         fun packedBuilder(

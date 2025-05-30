@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.QueryVisitor
+import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 /**
@@ -590,12 +591,21 @@ class RamUsageEstimator {
          * Return the size of the provided array of [Accountable]s by summing up the shallow size of
          * the array and the [memory usage][Accountable.ramBytesUsed] reported by each [ ].
          */
+        @JvmName("sizeOfAccountableNullable")
         fun sizeOf(accountables: Array<Accountable?>): Long {
             var size = shallowSizeOf(accountables)
             for (accountable in accountables) {
                 if (accountable != null) {
                     size += accountable.ramBytesUsed()
                 }
+            }
+            return size
+        }
+
+        fun sizeOf(accountables: Array<Accountable>): Long {
+            var size = shallowSizeOf(accountables)
+            for (accountable in accountables) {
+                size += accountable.ramBytesUsed()
             }
             return size
         }
