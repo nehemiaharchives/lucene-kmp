@@ -369,7 +369,7 @@ object PackedInts {
             override fun byteCount(packedIntsVersion: Int, valueCount: Int, bitsPerValue: Int): Long {
                 return ceil(valueCount.toDouble() * bitsPerValue / 8).toLong()
             }
-        };
+        },
 
         /**
          * A format that may insert padding bits to improve encoding and decoding speed. Since this
@@ -378,7 +378,7 @@ object PackedInts {
          * best suits your needs.
          *
          */
-        /*@Deprecated("Use {@link #PACKED} instead.")
+        @Deprecated("Use {@link #PACKED} instead.")
         PACKED_SINGLE_BLOCK(1) {
             override fun longCount(packedIntsVersion: Int, valueCount: Int, bitsPerValue: Int): Int {
                 val valuesPerBlock = 64 / bitsPerValue
@@ -395,7 +395,7 @@ object PackedInts {
                 val overhead = 64 % bitsPerValue
                 return overhead.toFloat() / valuesPerBlock
             }
-        };*/
+        };
 
         /**
          * Computes how many byte blocks are needed to store `values` values of size `
