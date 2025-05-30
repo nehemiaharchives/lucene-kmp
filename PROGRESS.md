@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 719 | 604 | 84% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 719 | 605 | 84% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -30,7 +30,7 @@
 |     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.util.fst |         org.gnit.lucenekmp.util.fst | 17 | 17 | 100% | [x] |
 |     org.apache.lucene.util.hnsw |         org.gnit.lucenekmp.util.hnsw | 7 | 7 | 100% | [x] |
-|     org.apache.lucene.util.packed |         org.gnit.lucenekmp.util.packed | 47 | 44 | 93% | [ ] |
+|     org.apache.lucene.util.packed |         org.gnit.lucenekmp.util.packed | 47 | 45 | 95% | [ ] |
 
 
 ## Priority-1 API progress
@@ -174,7 +174,6 @@
 | org.apache.lucene.store.LockValidatingDirectoryWrapper | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper |
 | org.apache.lucene.store.RateLimitedIndexOutput | org.gnit.lucenekmp.store.RateLimitedIndexOutput |
 | org.apache.lucene.store.RateLimiter | org.gnit.lucenekmp.store.RateLimiter |
-| org.apache.lucene.util.packed.MonotonicLongValues | org.gnit.lucenekmp.util.packed.MonotonicLongValues |
 | org.apache.lucene.util.packed.Packed64SingleBlock | org.gnit.lucenekmp.util.packed.Packed64SingleBlock |
 | org.apache.lucene.util.packed.PagedMutable | org.gnit.lucenekmp.util.packed.PagedMutable |
 

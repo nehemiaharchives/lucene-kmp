@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import kotlin.math.min
 
-class DeltaPackedLongValues(
+open class DeltaPackedLongValues(
     pageShift: Int,
     pageMask: Int,
     values: Array<PackedInts.Reader>,
@@ -34,7 +34,7 @@ class DeltaPackedLongValues(
         return count
     }
 
-    class Builder(pageSize: Int, acceptableOverheadRatio: Float) :
+    open class Builder(pageSize: Int, acceptableOverheadRatio: Float) :
         PackedLongValues.Builder(pageSize, acceptableOverheadRatio) {
         var mins: LongArray
 
