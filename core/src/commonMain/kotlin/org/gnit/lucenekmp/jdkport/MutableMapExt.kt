@@ -36,7 +36,7 @@ fun <K, V> MutableMap<K, V>.putIfAbsent(key: K, value: V): V? {
  */
 fun <K, V> MutableMap<K, V>.remove(key: K, value: V): Boolean {
     val curValue = get(key)
-    if (curValue != null && curValue == value) {
+    if ((curValue != null && curValue == value) || (curValue == null && containsKey(key) && curValue == value)) {
         remove(key)
         return true
     }
@@ -59,7 +59,7 @@ fun <K, V> MutableMap<K, V>.remove(key: K, value: V): Boolean {
  */
 fun <K, V> MutableMap<K, V>.replace(key: K, value: V): V? {
     val curValue = get(key)
-    if (curValue != null) {
+    if (curValue != null || (curValue == null && containsKey(key))) {
         put(key, value)
         return curValue
     }
