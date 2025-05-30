@@ -5,15 +5,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 import kotlin.test.assertContentEquals
-import org.gnit.lucenekmp.jdkport.StandardCharsets // For StandardCharsets.UTF_8
-import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
-import org.gnit.lucenekmp.jdkport.StreamEncoder
-import org.gnit.lucenekmp.jdkport.Charset
-import org.gnit.lucenekmp.jdkport.CharBuffer
-import org.gnit.lucenekmp.jdkport.CharsetEncoder // Added for CharsetEncoder test
 import okio.IOException
+import kotlin.test.assertNotNull
 
 class StreamEncoderTest {
     // Helper to create a StreamEncoder with UTF-8 and a ByteArrayOutputStream
@@ -304,7 +298,11 @@ class StreamEncoderTest {
         val encoder = createEncoder(baos)
         val str = "World"
         val cb = CharBuffer.wrap(str.toCharArray())
-        cb.position(1).limit(4) // Set to read "orl"
+
+        // Set to read "orl"
+        cb.position = 1
+        cb.limit = 4
+
         val originalPosition = cb.position // Should be 1
 
         encoder.write(cb)
@@ -333,7 +331,11 @@ class StreamEncoderTest {
         // For now, let's assume wrap(charArrayOf()) is the primary way to get an empty buffer for testing.
         // Let's test a buffer that has capacity but is empty by setting position == limit
         val cbEmptyByPosLimit = CharBuffer.wrap(charArrayOf('a', 'b'))
-        cbEmptyByPosLimit.position(1).limit(1) // position == limit, so nothing to read
+
+        // position == limit, so nothing to read
+        cbEmptyByPosLimit.position = 1
+        cbEmptyByPosLimit.limit = 1
+
         originalPosition = cbEmptyByPosLimit.position
 
         encoder.write(cbEmptyByPosLimit)
