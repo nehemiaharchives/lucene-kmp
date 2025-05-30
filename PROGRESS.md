@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 712 | 612 | 85% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 712 | 613 | 86% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -21,7 +21,7 @@
 |   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 115 | 83% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
-|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 1 | 50% | [ ] |
+|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 2 | 100% | [x] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 37 | 37 | 100% | [x] |
 |   org.apache.lucene.util |       org.gnit.lucenekmp.util | 86 | 86 | 100% | [x] |
 |     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 20 | 20 | 100% | [x] |
@@ -47,7 +47,7 @@
 | org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader | 6 | 4 | 2 | 66% | [ ] |
 | org.apache.lucene.index.StandardDirectoryReader | org.gnit.lucenekmp.index.StandardDirectoryReader | 13 | 11 | 2 | 84% | [ ] |
 | org.apache.lucene.queryparser.classic.QueryParser | org.gnit.lucenekmp.queryparser.classic.QueryParser | 0 | 0 | 0 | 100% | [ ] |
-| org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 32 | 10 | 76% | [ ] |
+| org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 33 | 9 | 78% | [ ] |
 | org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory | 4 | 4 | 0 | 100% | [ ] |
 | org.apache.lucene.store.NIOFSDirectory | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 5 | 0 | 100% | [x] |
 | org.apache.lucene.document.IntPoint | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
@@ -56,7 +56,7 @@
 | org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 170 | 131 | 39 | 77% | [ ] |
+| TOTAL |  | 170 | 132 | 38 | 77% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
@@ -160,5 +160,4 @@
 | org.apache.lucene.search.TotalHitCountCollector | org.gnit.lucenekmp.search.TotalHitCountCollector |
 | org.apache.lucene.search.TotalHitCountCollectorManager | org.gnit.lucenekmp.search.TotalHitCountCollectorManager |
 | org.apache.lucene.search.UsageTrackingQueryCachingPolicy | org.gnit.lucenekmp.search.UsageTrackingQueryCachingPolicy |
-| org.apache.lucene.search.similarities.BM25Similarity | org.gnit.lucenekmp.search.similarities.BM25Similarity |
 

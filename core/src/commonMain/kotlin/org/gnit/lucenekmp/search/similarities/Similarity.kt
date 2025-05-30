@@ -197,7 +197,7 @@ abstract class Similarity
          * `1` if norms are disabled
          * @return document's score
          */
-        fun explain(freq: Explanation, norm: Long): Explanation {
+        open fun explain(freq: Explanation, norm: Long): Explanation {
             return Explanation.match(
                 score(freq.value.toFloat(), norm),
                 "score(freq=" + freq.value + "), with freq of:",
