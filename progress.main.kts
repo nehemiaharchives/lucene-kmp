@@ -44,6 +44,7 @@ class Progress : CliktCommand() {
     private val notToPort = mutableSetOf(
         "org.apache.lucene.util.HotspotVMOptions",
         "org.apache.lucene.util.NamedThreadFactory",
+        "org.apache.lucene.util.SuppressForbidden",
         // Add more FQNs here as needed
     )
 
