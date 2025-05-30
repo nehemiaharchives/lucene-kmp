@@ -45,6 +45,12 @@ class Progress : CliktCommand() {
         "org.apache.lucene.util.HotspotVMOptions",
         "org.apache.lucene.util.NamedThreadFactory",
         "org.apache.lucene.util.SuppressForbidden",
+        "org.apache.lucene.internal.tests.ConcurrentMergeSchedulerAccess",
+        "org.apache.lucene.internal.tests.FilterIndexInputAccess",
+        "org.apache.lucene.internal.tests.IndexPackageAccess",
+        "org.apache.lucene.internal.tests.IndexWriterAccess",
+        "org.apache.lucene.internal.tests.SegmentReaderAccess",
+        "org.apache.lucene.internal.tests.TestSecrets",
         // Add more FQNs here as needed
     )
 
