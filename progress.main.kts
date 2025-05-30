@@ -52,7 +52,6 @@ class Progress : CliktCommand() {
         "org.apache.lucene.internal.tests.SegmentReaderAccess",
         "org.apache.lucene.internal.tests.TestSecrets",
         "org.apache.lucene.store.FilterIndexInput",
-        "org.apache.lucene.store.FilterIndexOutput",
         // Add more FQNs here as needed
     )
 

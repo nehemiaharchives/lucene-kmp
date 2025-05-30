@@ -1,12 +1,12 @@
 package org.gnit.lucenekmp.search
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Runnable
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.ExecutionException
 import org.gnit.lucenekmp.jdkport.Executor
 import org.gnit.lucenekmp.jdkport.Future
 import org.gnit.lucenekmp.jdkport.FutureTask
-import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.RejectedExecutionException
 import org.gnit.lucenekmp.jdkport.RunnableFuture
 import org.gnit.lucenekmp.util.IOUtils
@@ -150,7 +150,7 @@ class TaskExecutor(executor: Executor) {
             for (future in futures) {
                 try {
                     results.add(future.get())
-                } catch (e: InterruptedException) {
+                } catch (e: CancellationException) {
                     exc = IOUtils.useOrSuppress(exc, ThreadInterruptedException(e))
                 } catch (e: ExecutionException) {
                     exc = IOUtils.useOrSuppress(exc, e.cause as Throwable)
