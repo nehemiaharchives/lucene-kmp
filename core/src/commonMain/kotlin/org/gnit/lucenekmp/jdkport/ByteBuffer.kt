@@ -1,12 +1,11 @@
 package org.gnit.lucenekmp.jdkport
 
-import okio.Buffer
 import okio.IOException
 import kotlin.math.min
 
-// A simple re-implementation of java.nio.ByteBuffer using a kotlin-io Buffer as the backing store.
+// A simple re-implementation of java.nio.ByteBuffer using a ByteArray as the backing store.
 open class ByteBuffer private constructor(
-    private val buffer: Buffer,
+    private val array: ByteArray,
     /** The fixed capacity of this ByteBuffer. */
     val capacity: Int
 ) : Comparable<ByteBuffer> {
@@ -64,30 +63,10 @@ open class ByteBuffer private constructor(
 
     /**
      * port of java.nio.ByteBuffer.array()
-     * Returns a copy of the byte array that backs this buffer.
+     * Returns byte array that backs this buffer.
      */
     fun array(): ByteArray {
-        // Create a byte array with the capacity of the buffer
-        val byteArray = ByteArray(capacity)
-
-        // Save the current position and limit
-        val savedPosition = position
-        val savedLimit = limit
-
-        try {
-            // Reset position to start and set limit to capacity to access all data
-            position = 0
-            limit = capacity
-
-            // Copy all bytes from the buffer to the array
-            get(byteArray)
-
-            return byteArray
-        } finally {
-            // Restore the original position and limit
-            position = savedPosition
-            limit = savedLimit
-        }
+        return array
     }
 
     /**
@@ -119,14 +98,11 @@ open class ByteBuffer private constructor(
      * If this buffer is not backed by an accessible array
      */
     fun arrayOffset(): Int {
-        // Since our array() method always creates a new array with the buffer contents,
-        // the offset is always 0 in this implementation
         if (!hasArray()) {
             throw UnsupportedOperationException("Buffer does not have a backing array")
         }
         return 0
     }
-
 
     /**
      * Sets this buffer's limit.
@@ -177,12 +153,10 @@ open class ByteBuffer private constructor(
         return this
     }
 
-    // --- Public API methods mimicking java.nio.ByteBuffer ---
-
     /** Relative get: reads the byte at the current position then increments it. */
     fun get(): Byte {
         if (position >= limit) throw BufferUnderflowException("Not enough bytes to read at position $position with limit $limit")
-        val b = buffer.get(position.toLong())
+        val b = array[position]
         position++
         return b
     }
@@ -191,7 +165,7 @@ open class ByteBuffer private constructor(
     fun get(index: Int): Byte {
         if (index !in 0 until limit)
             throw IndexOutOfBoundsException("Index ($index) out of bounds (0..${limit - 1})")
-        return buffer.get(index.toLong())
+        return array[index]
     }
 
     /**
@@ -249,30 +223,7 @@ open class ByteBuffer private constructor(
         return this
     }
 
-    // -- Other stuff --
-    /**
-     * Tells whether or not this buffer is backed by an accessible byte
-     * array.
-     *
-     *
-     *  If this method returns `true` then the [array][.array]
-     * and [arrayOffset][.arrayOffset] methods may safely be invoked.
-     *
-     *
-     * @return  `true` if, and only if, this buffer
-     * is backed by an array and is not read-only
-     */
-    /*
-    NOT_TODO will not implement this for now
-    fun hasArray(): Boolean {
-        return (hb != null) && !isReadOnly
-    }*/
-
     private fun getArray(index: Int, dst: ByteArray, offset: Int, length: Int): ByteBuffer {
-        // Simple implementation: copy bytes one by one using the get() method
-        // We're not implementing the JNI direct memory copy optimization from the Java version
-        // since we don't have equivalent functionality in kotlinx.io.Buffer
-
         val end = offset + length
         for (i in offset until end) {
             dst[i] = get(index + (i - offset))
@@ -303,18 +254,17 @@ open class ByteBuffer private constructor(
                 "Index $index out of bounds: need 4 bytes from index (limit: $limit)"
             )
         }
-
-        var result = 0
-        if (bigEndian) {                     // BIG-ENDIAN  (MSB first)
-            for (i in 0 until 4) {
-                result = (result shl 8) or (buffer[(index + i).toLong()].toInt() and 0xFF)
-            }
-        } else {                             // LITTLE-ENDIAN (LSB first)
-            for (i in 3 downTo 0) {
-                result = (result shl 8) or (buffer[(index + i).toLong()].toInt() and 0xFF)
-            }
+        return if (bigEndian) {
+            ((array[index].toInt() and 0xFF) shl 24) or
+            ((array[index + 1].toInt() and 0xFF) shl 16) or
+            ((array[index + 2].toInt() and 0xFF) shl 8) or
+            (array[index + 3].toInt() and 0xFF)
+        } else {
+            (array[index].toInt() and 0xFF) or
+            ((array[index + 1].toInt() and 0xFF) shl 8) or
+            ((array[index + 2].toInt() and 0xFF) shl 16) or
+            ((array[index + 3].toInt() and 0xFF) shl 24)
         }
-        return result
     }
 
     /**
@@ -333,13 +283,10 @@ open class ByteBuffer private constructor(
     fun getInt(): Int {
         if (remaining() < 4)
             throw BufferUnderflowException("Not enough bytes remaining to read an int (need 4, have ${remaining()})")
-
         val value = getInt(position)
         position += 4
         return value
     }
-
-    // Note: asDoubleBuffer is not yet implemented in the provided ByteBuffer class
 
     /**
      * Absolute *get* method for reading a short value.
@@ -364,15 +311,13 @@ open class ByteBuffer private constructor(
                 "Index $index out of bounds: need 2 bytes from index (limit: $limit)"
             )
         }
-
-        // Decide endianness from the flag that `order(ByteOrder)` really changes.
-        return if (bigEndian) {                    // BIG-ENDIAN  (MSB first)
-            val hi = buffer[index.toLong()].toInt() and 0xFF
-            val lo = buffer[index.toLong() + 1L].toInt() and 0xFF
+        return if (bigEndian) {
+            val hi = array[index].toInt() and 0xFF
+            val lo = array[index + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
-        } else {                                   // LITTLE-ENDIAN (LSB first)
-            val lo = buffer[index.toLong()].toInt() and 0xFF
-            val hi = buffer[index.toLong() + 1L].toInt() and 0xFF
+        } else {
+            val lo = array[index].toInt() and 0xFF
+            val hi = array[index + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         }
     }
@@ -394,18 +339,15 @@ open class ByteBuffer private constructor(
     fun getShort(): Short {
         if (remaining() < 2)
             throw BufferUnderflowException("Not enough bytes remaining to read a short (need 2, have ${remaining()})")
-
-        // Read according to the current byte order
-        val value = if (bigEndian) {                // BIG-ENDIAN  (MSB first)
-            val hi = buffer[position.toLong()].toInt() and 0xFF
-            val lo = buffer[position.toLong() + 1L].toInt() and 0xFF
+        val value = if (bigEndian) {
+            val hi = array[position].toInt() and 0xFF
+            val lo = array[position + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
-        } else {                                     // LITTLE-ENDIAN (LSB first)
-            val lo = buffer[position.toLong()].toInt() and 0xFF
-            val hi = buffer[position.toLong() + 1L].toInt() and 0xFF
+        } else {
+            val lo = array[position].toInt() and 0xFF
+            val hi = array[position + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         }
-
         position += 2
         return value
     }
@@ -414,7 +356,7 @@ open class ByteBuffer private constructor(
     fun put(b: Byte): ByteBuffer {
         checkWritable()
         if (position >= limit) throw BufferOverflowException("Not enough space to write at position $position with limit $limit")
-        buffer.setByteAt(position.toLong(), b)
+        array[position] = b
         position++
         return this
     }
@@ -424,7 +366,7 @@ open class ByteBuffer private constructor(
         checkWritable()
         if (index !in 0 until limit)
             throw IndexOutOfBoundsException("Index ($index) out of bounds (0..${limit - 1})")
-        buffer.setByteAt(index.toLong(), b)
+        array[index] = b
         return this
     }
 
@@ -518,22 +460,16 @@ open class ByteBuffer private constructor(
      */
     fun putShort(value: Short): ByteBuffer {
         checkWritable()
-        // Ensure there are at least 2 bytes left between position and limit
         if (remaining() < 2) {
             throw BufferOverflowException("Not enough space to write 2 bytes at position $position with limit $limit")
         }
-
-        // Write according to the current byte order
         if (order() == ByteOrder.BIG_ENDIAN) {
-            buffer.setByteAt(position.toLong(), (value.toInt() shr 8).toByte())
-            buffer.setByteAt(position.toLong() + 1, value.toByte())
+            array[position] = (value.toInt() shr 8).toByte()
+            array[position + 1] = value.toByte()
         } else {
-            // LITTLE_ENDIAN
-            buffer.setByteAt(position.toLong(), value.toByte())
-            buffer.setByteAt(position.toLong() + 1, (value.toInt() shr 8).toByte())
+            array[position] = value.toByte()
+            array[position + 1] = (value.toInt() shr 8).toByte()
         }
-
-        // Advance the position by 2 bytes
         position += 2
         return this
     }
@@ -561,34 +497,26 @@ open class ByteBuffer private constructor(
      */
     fun putInt(value: Int): ByteBuffer {
         checkWritable()
-        // Ensure there are at least 4 bytes left between position and limit
         if (remaining() < 4) {
             throw BufferOverflowException("Not enough space to write 4 bytes at position $position with limit $limit")
         }
-
-        // Write according to the current byte order
         if (order() == ByteOrder.BIG_ENDIAN) {
-            buffer.setByteAt(position.toLong(), (value shr 24).toByte())
-            buffer.setByteAt(position.toLong() + 1, (value shr 16).toByte())
-            buffer.setByteAt(position.toLong() + 2, (value shr 8).toByte())
-            buffer.setByteAt(position.toLong() + 3, value.toByte())
+            array[position] = (value shr 24).toByte()
+            array[position + 1] = (value shr 16).toByte()
+            array[position + 2] = (value shr 8).toByte()
+            array[position + 3] = value.toByte()
         } else {
-            // LITTLE_ENDIAN
-            buffer.setByteAt(position.toLong(), value.toByte())
-            buffer.setByteAt(position.toLong() + 1, (value shr 8).toByte())
-            buffer.setByteAt(position.toLong() + 2, (value shr 16).toByte())
-            buffer.setByteAt(position.toLong() + 3, (value shr 24).toByte())
+            array[position] = value.toByte()
+            array[position + 1] = (value shr 8).toByte()
+            array[position + 2] = (value shr 16).toByte()
+            array[position + 3] = (value shr 24).toByte()
         }
-
-        // Advance the position by 4 bytes
         position += 4
         return this
     }
 
     fun putBuffer(pos: Int, src: ByteBuffer, srcPos: Int, n: Int) {
         checkWritable()
-        // Simple buffer-to-buffer copy implementation without direct memory access
-        // Copy bytes one by one from src to this buffer
         for (i in 0 until n) {
             val b = src.get(srcPos + i)
             put(pos + i, b)
@@ -632,19 +560,25 @@ open class ByteBuffer private constructor(
         if (index < 0 || limit - index < 8) {
             throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
         }
-        val offset = index.toLong()
-        var result = 0L
-        if (order() == ByteOrder.BIG_ENDIAN) {
-            for (i in 0 until 8) {
-                result = (result shl 8) or ((buffer.get(offset + i).toInt() and 0xFF).toLong())
-            }
+        return if (order() == ByteOrder.BIG_ENDIAN) {
+            ((array[index].toLong() and 0xFF) shl 56) or
+            ((array[index + 1].toLong() and 0xFF) shl 48) or
+            ((array[index + 2].toLong() and 0xFF) shl 40) or
+            ((array[index + 3].toLong() and 0xFF) shl 32) or
+            ((array[index + 4].toLong() and 0xFF) shl 24) or
+            ((array[index + 5].toLong() and 0xFF) shl 16) or
+            ((array[index + 6].toLong() and 0xFF) shl 8) or
+            (array[index + 7].toLong() and 0xFF)
         } else {
-            // build the long MSB-first from the highest‐index byte down to index 0
-            for (i in 7 downTo 0) {
-                result = (result shl 8) or ((buffer.get(offset + i).toInt() and 0xFF).toLong())
-            }
+            (array[index].toLong() and 0xFF) or
+            ((array[index + 1].toLong() and 0xFF) shl 8) or
+            ((array[index + 2].toLong() and 0xFF) shl 16) or
+            ((array[index + 3].toLong() and 0xFF) shl 24) or
+            ((array[index + 4].toLong() and 0xFF) shl 32) or
+            ((array[index + 5].toLong() and 0xFF) shl 40) or
+            ((array[index + 6].toLong() and 0xFF) shl 48) or
+            ((array[index + 7].toLong() and 0xFF) shl 56)
         }
-        return result
     }
 
     /**
@@ -659,52 +593,35 @@ open class ByteBuffer private constructor(
     fun getLong(): Long {
         if (remaining() < 8)
             throw BufferUnderflowException("Not enough bytes remaining to read a long (need 8, have ${remaining()})")
-        val offset = position.toLong()
-        var result = 0L
-        if (order() == ByteOrder.BIG_ENDIAN) {
-            for (i in 0 until 8) {
-                result = (result shl 8) or ((buffer.get(offset + i).toInt() and 0xFF).toLong())
-            }
-        } else {
-            for (i in 7 downTo 0) {
-                result = (result shl 8) or ((buffer.get(offset + i).toInt() and 0xFF).toLong())
-            }
-        }
+        val value = getLong(position)
         position += 8
-        return result
+        return value
     }
-
 
     fun putLong(value: Long): ByteBuffer {
         checkWritable()
-        // Ensure there are at least 8 bytes left between position and limit
         if (remaining() < 8) {
             throw BufferOverflowException("Not enough space to write 8 bytes at position $position with limit $limit")
         }
-
-        // Write according to the current byte order
         if (order() == ByteOrder.BIG_ENDIAN) {
-            buffer.setByteAt(position.toLong(), (value shr 56).toByte())
-            buffer.setByteAt(position.toLong() + 1, (value shr 48).toByte())
-            buffer.setByteAt(position.toLong() + 2, (value shr 40).toByte())
-            buffer.setByteAt(position.toLong() + 3, (value shr 32).toByte())
-            buffer.setByteAt(position.toLong() + 4, (value shr 24).toByte())
-            buffer.setByteAt(position.toLong() + 5, (value shr 16).toByte())
-            buffer.setByteAt(position.toLong() + 6, (value shr 8).toByte())
-            buffer.setByteAt(position.toLong() + 7, (value).toByte())
+            array[position] = (value shr 56).toByte()
+            array[position + 1] = (value shr 48).toByte()
+            array[position + 2] = (value shr 40).toByte()
+            array[position + 3] = (value shr 32).toByte()
+            array[position + 4] = (value shr 24).toByte()
+            array[position + 5] = (value shr 16).toByte()
+            array[position + 6] = (value shr 8).toByte()
+            array[position + 7] = value.toByte()
         } else {
-            // LITTLE_ENDIAN
-            buffer.setByteAt(position.toLong(), (value).toByte())
-            buffer.setByteAt(position.toLong() + 1, (value shr 8).toByte())
-            buffer.setByteAt(position.toLong() + 2, (value shr 16).toByte())
-            buffer.setByteAt(position.toLong() + 3, (value shr 24).toByte())
-            buffer.setByteAt(position.toLong() + 4, (value shr 32).toByte())
-            buffer.setByteAt(position.toLong() + 5, (value shr 40).toByte())
-            buffer.setByteAt(position.toLong() + 6, (value shr 48).toByte())
-            buffer.setByteAt(position.toLong() + 7, (value shr 56).toByte())
+            array[position] = value.toByte()
+            array[position + 1] = (value shr 8).toByte()
+            array[position + 2] = (value shr 16).toByte()
+            array[position + 3] = (value shr 24).toByte()
+            array[position + 4] = (value shr 32).toByte()
+            array[position + 5] = (value shr 40).toByte()
+            array[position + 6] = (value shr 48).toByte()
+            array[position + 7] = (value shr 56).toByte()
         }
-
-        // Advance the position by 8 bytes
         position += 8
         return this
     }
@@ -761,27 +678,21 @@ open class ByteBuffer private constructor(
 
     /** Creates a new buffer that shares this buffer’s content but has independent position, limit, and mark. */
     fun duplicate(): ByteBuffer {
-        // For simplicity we assume the underlying Buffer supports copy (deep copy of segments)
-        val copy = buffer.copy()
+        val copy = array.copyOf()
         val dup = ByteBuffer(copy, capacity)
         dup.position = this.position
         dup.limit = this.limit
         dup.order(this.order())
-        // mark is not copied
         return dup
     }
 
     /** Creates a new buffer that is a view of this buffer's content between position and limit. */
     fun slice(): ByteBuffer {
         val remaining = remaining()
-        val sliceBuffer = Buffer()
-        buffer.copyTo(sliceBuffer, position.toLong(), remaining.toLong())
-
-        val bb = ByteBuffer(sliceBuffer, capacity = remaining)
+        val sliceArray = array.copyOfRange(position, limit)
+        val bb = ByteBuffer(sliceArray, capacity = remaining)
         bb.clear()
         bb.limit = remaining
-        sliceBuffer.clear()
-
         return bb
     }
 
@@ -829,29 +740,21 @@ open class ByteBuffer private constructor(
     }
 
     fun asIntBuffer(): IntBuffer {
-        // Calculate capacity in ints (bytes/4)
         val intCapacity = remaining() / 4
         if (intCapacity <= 0) {
             return IntBuffer.allocate(0).apply { order = this@ByteBuffer.order() }
         }
-
-        // Create a slice of this buffer from current position
         val slice = duplicate()
         slice.position(position)
         slice.limit(position + (intCapacity * 4))
-
-        // Create an IntBuffer with the same byte order
         val intBuffer = IntBuffer.allocate(intCapacity)
         intBuffer.clear()
         intBuffer.order = this.order()
-
-        // Copy data from this buffer to the intBuffer
         for (i in 0 until intCapacity) {
-            val value = slice.getInt() // Reads the next 4 bytes as an int
+            val value = slice.getInt()
             intBuffer.put(value)
         }
         intBuffer.flip()
-
         return intBuffer
     }
 
@@ -866,29 +769,21 @@ open class ByteBuffer private constructor(
      * @return A new long buffer that shares this buffer's content
      */
     fun asLongBuffer(): LongBuffer {
-        // Calculate capacity in longs (bytes/8)
         val longCapacity = remaining() / 8
         if (longCapacity <= 0) {
             return LongBuffer.allocate(0).apply { order = this@ByteBuffer.order() }
         }
-
-        // Create a slice of this buffer from current position
         val slice = duplicate()
         slice.position(position)
         slice.limit(position + (longCapacity * 8))
-
-        // Create a LongBuffer with the same byte order
         val longBuffer = LongBuffer.allocate(longCapacity)
         longBuffer.clear()
         longBuffer.order = this.order()
-
-        // Copy data from this buffer to the longBuffer
         for (i in 0 until longCapacity) {
             val value = slice.getLong()
             longBuffer.put(value)
         }
         longBuffer.flip()
-
         return longBuffer
     }
 
@@ -903,26 +798,18 @@ open class ByteBuffer private constructor(
      * @return A new float buffer that shares this buffer's content
      */
     fun asFloatBuffer(): FloatBuffer {
-        // Calculate capacity in floats (bytes/4)
         val floatCapacity = remaining() / 4
         if (floatCapacity <= 0) {
             return FloatBuffer.allocate(0).apply { order = this@ByteBuffer.order() }
         }
-
-        // Create a slice of this buffer from current position
         val slice = duplicate()
         slice.position(position)
         slice.limit(position + (floatCapacity * 4))
-
-        // Create a FloatBuffer with the same byte order
         val floatBuffer = FloatBuffer.allocate(floatCapacity)
         floatBuffer.clear()
         floatBuffer.order = this.order()
-
-        // Copy data from this buffer to the floatBuffer
         val floatArray = FloatArray(floatCapacity)
         for (i in 0 until floatCapacity) {
-            // Read from the ByteBuffer as bytes and convert to float
             val bits = when (order()) {
                 ByteOrder.BIG_ENDIAN -> {
                     ((slice.get().toInt() and 0xFF) shl 24) or
@@ -930,8 +817,7 @@ open class ByteBuffer private constructor(
                             ((slice.get().toInt() and 0xFF) shl 8) or
                             (slice.get().toInt() and 0xFF)
                 }
-
-                else -> { // LITTLE_ENDIAN
+                else -> {
                     (slice.get().toInt() and 0xFF) or
                             ((slice.get().toInt() and 0xFF) shl 8) or
                             ((slice.get().toInt() and 0xFF) shl 16) or
@@ -942,7 +828,6 @@ open class ByteBuffer private constructor(
         }
         floatBuffer.put(floatArray)
         floatBuffer.flip()
-
         return floatBuffer
     }
 
@@ -993,13 +878,8 @@ open class ByteBuffer private constructor(
         checkWritable()
         val rem = remaining()
         if (rem > 0) {
-            // Move remaining bytes to the beginning
-            val temp = ByteArray(rem)
             for (i in 0 until rem) {
-                temp[i] = get(position + i)
-            }
-            for (i in 0 until rem) {
-                buffer.setByteAt(i.toLong(), temp[i])
+                array[i] = array[position + i]
             }
         }
         position = rem
@@ -1008,21 +888,15 @@ open class ByteBuffer private constructor(
         return this
     }
 
-    // Add or replace this in your ByteBuffer class
     override fun toString(): String {
-        // We deliberately print “ByteBuffer” (not the internal subclass name)
         return "ByteBuffer[pos=${position} lim=${limit} cap=${capacity}]"
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ByteBuffer) return false
-
-        // Compare remaining bytes
         val thisRemaining = remaining()
         if (thisRemaining != other.remaining()) return false
-
-        // Compare bytes in the remaining range
         for (i in 0 until thisRemaining) {
             if (get(position + i) != other.get(other.position + i)) return false
         }
@@ -1038,68 +912,21 @@ open class ByteBuffer private constructor(
         return result
     }
 
-    // --- Companion object with factory methods ---
     companion object {
-        /**
-         * Allocates a new byte buffer with the given capacity.
-         * The buffer’s initial position is 0, its limit is its capacity, and its order is BIG_ENDIAN.
-         */
         fun allocate(capacity: Int): ByteBuffer {
             require(capacity >= 0) { "Capacity must be non-negative" }
-            // Create a backing Buffer and fill it with zeros up to capacity.
-            val backing = Buffer()
-            backing.write(ByteArray(capacity)) // writes capacity zeros
+            val backing = ByteArray(capacity)
             return ByteBuffer(backing, capacity).clear()
         }
 
-        /**
-         * Wraps the given byte array into a byte buffer.
-         * The new buffer’s capacity will be array.size, its position will be 0, and its limit will be array.size.
-         */
         fun wrap(array: ByteArray, offset: Int = 0, length: Int = array.size - offset): ByteBuffer {
             require(offset in 0..array.size)
             require(length in 0..(array.size - offset))
-            val backing = Buffer()
-            // Write only the specified portion.
-            backing.write(array, offset, offset + length)
-            val bb = ByteBuffer(backing, array.size)
+
+            val bb = ByteBuffer(array, array.size)
             bb.position = offset
             bb.limit = offset + length
             return bb
         }
     }
-}
-
-/**
- * Extension function for Buffer to set a byte at an absolute position.
- *
- * This is a simpler implementation using Buffer's existing API that doesn't require
- * direct access to internal segments.
- */
-fun Buffer.setByteAt(position: Long, value: Byte) {
-    require(position >= 0) { "Position must be non-negative" }
-    require(position < size) { "Position $position is beyond buffer size $size" }
-
-    // Create a temporary copy to preserve the buffer state
-    val copy = copy()
-
-    // Clear this buffer
-    clear()
-
-    // Write the first portion unchanged
-    if (position > 0) {
-        copy.copyTo(this, 0, position)
-    }
-
-    // Write the modified byte
-    writeByte(value.toInt())
-
-    // Skip the byte in the original buffer
-    copy.skip(position + 1)
-
-    // Write the remainder of the original buffer
-    copy.copyTo(this)
-
-    // Cleanup
-    copy.close()
 }

@@ -156,6 +156,14 @@ class ByteBufferTest {
     }
 
     @Test
+    fun testArrayAsBackingDataRepresentation() {
+        val array = byteArrayOf(1, 2, 3, 4, 5)
+        val buffer = ByteBuffer.wrap(array)
+        assertTrue(buffer.hasArray())
+        assertEquals(array, buffer.array())
+    }
+
+    @Test
     fun testArrayOffset() {
         val array = byteArrayOf(1, 2, 3, 4, 5)
         val buffer = ByteBuffer.wrap(array)

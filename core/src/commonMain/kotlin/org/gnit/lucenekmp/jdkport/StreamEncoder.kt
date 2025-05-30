@@ -1,11 +1,14 @@
 package org.gnit.lucenekmp.jdkport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import kotlin.concurrent.Volatile
 import kotlin.math.min
 
 
 class StreamEncoder : Writer {
+    private val logger = KotlinLogging.logger {}
+
     @Volatile
     private var closed = false
 
@@ -65,8 +68,8 @@ class StreamEncoder : Writer {
         val position: Int = cb.position
         try {
             //synchronized(lock) {
-                ensureOpen()
-                implWrite(cb)
+            ensureOpen()
+            implWrite(cb)
             //}
         } finally {
             cb.position = position
@@ -136,6 +139,8 @@ class StreamEncoder : Writer {
 
     @Throws(IOException::class)
     private fun writeBytes() {
+        logger.debug {"writeBytes() bb.position=${bb.position}, bb[0]=${bb.array()[0]}" }
+
         bb.flip()
         val lim: Int = bb.limit
         val pos: Int = bb.position
