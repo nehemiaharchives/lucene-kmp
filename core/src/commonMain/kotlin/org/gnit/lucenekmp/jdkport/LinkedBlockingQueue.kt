@@ -10,6 +10,9 @@ import kotlin.jvm.Transient
 import kotlin.math.min
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.runBlocking
 
 open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     AbstractQueue<E>(), BlockingQueue<E> {
@@ -83,18 +86,24 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     private var last: Node<E>
 
     // Channels to signal not empty/full
-    private val notEmptyCh = Channel<Unit>(capacity)
-    private val notFullCh = Channel<Unit>(capacity)
+    val isBounded: Boolean
+    private val notEmptyCh = Channel<Unit>(1)
+    private val notFullCh = Channel<Unit>(1)
+
+    // Add a mutex for synchronization
+    private val mutex = Mutex()
 
     /**
      * Links node at end of queue.
      *
      * @param node the node
      */
-    private fun enqueue(node: Node<E>) {
-        // assert last.next == null;
-        last.next = node
-        last = last.next!!
+    private suspend fun enqueue(node: Node<E>) {
+        mutex.withLock {
+            // assert last.next == null;
+            last.next = node
+            last = last.next!!
+        }
     }
 
     /**
@@ -102,15 +111,17 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
      *
      * @return the node
      */
-    private fun dequeue(): E? {
-        // assert head.item == null;
-        val h = head
-        val first = h!!.next
-        h.next = h // help GC
-        head = first
-        val x = first!!.item
-        first.item = null
-        return x
+    private suspend fun dequeue(): E? {
+        return mutex.withLock {
+            // assert head.item == null;
+            val h = head
+            val first = h!!.next
+            h.next = h // help GC
+            head = first
+            val x = first!!.item
+            first.item = null
+            x
+        }
     }
 
     /**
@@ -127,6 +138,7 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     init {
         require(capacity > 0)
         this.capacity = capacity
+        this.isBounded = this.capacity < Int.MAX_VALUE
         head = Node<E>(null)
         last = head!!
     }
@@ -146,7 +158,7 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         var n = 0
         for (e in c) {
             check(n != capacity) { "Queue full" }
-            enqueue(Node<E>(e))
+            runBlocking { enqueue(Node<E>(e)) } // Use runBlocking for constructor
             ++n
         }
         count.set(n)
@@ -201,7 +213,9 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
                 if (c == 0) notEmptyCh.trySend(Unit)
                 return
             } else {
-                notFullCh.receive()
+                if (isBounded) {
+                    notFullCh.receive()
+                }
             }
         }
     }
@@ -231,7 +245,9 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
                 if (now >= deadline) return false
                 val remaining = deadline - now
                 withTimeoutOrNull(remaining.toDuration(DurationUnit.NANOSECONDS)) {
-                    notFullCh.receive()
+                    if (isBounded) {
+                        notFullCh.receive()
+                    }
                 } ?: return false
             }
         }
@@ -253,10 +269,10 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         val count: AtomicInteger = this.count
         if (count.get() == capacity) return false
         val node = Node(e)
-        enqueue(node)
+        runBlocking { enqueue(node) }  // Use runBlocking to call suspend function
         val c = count.fetchAndIncrement()
-        if (c + 1 < capacity) notFullCh.trySendBlocking(Unit)
-        if (c == 0) notEmptyCh.trySendBlocking(Unit)
+        if (c + 1 < capacity) notFullCh.trySend(Unit)
+        if (c == 0) notEmptyCh.trySend(Unit)
         return true
     }
 
@@ -299,16 +315,11 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     @OptIn(ExperimentalAtomicApi::class)
     override fun poll(): E? {
         val count: AtomicInteger = this.count
-
         if (count.get() == 0) return null
-
-        val x = dequeue()
+        val x = runBlocking { dequeue() }  // Use runBlocking to call suspend function
         val c = count.fetchAndDecrement()
-
-        if (c > 1) notEmptyCh.trySendBlocking(Unit)
-
-        if (c == capacity) notFullCh.trySendBlocking(Unit)
-
+        if (c > 1) notEmptyCh.trySend(Unit)
+        if (c == capacity) notFullCh.trySend(Unit)
         return x
     }
 
@@ -316,20 +327,26 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     override fun peek(): E? {
         val count: AtomicInteger = this.count
         if (count.get() == 0) return null
-        return head!!.next!!.item
+        return runBlocking {
+            mutex.withLock {
+                head!!.next!!.item
+            }
+        }
     }
 
     /**
      * Unlinks interior Node p with predecessor pred.
      */
     @OptIn(ExperimentalAtomicApi::class)
-    fun unlink(p: Node<E>, pred: Node<E>) {
-        // p.next is not changed, to allow iterators that are
-        // traversing p to maintain their weak-consistency guarantee.
-        p.item = null
-        pred.next = p.next
-        if (last === p) last = pred
-        if (count.fetchAndDecrement() == capacity) notFullCh.trySend(Unit)
+    suspend fun unlink(p: Node<E>, pred: Node<E>) {
+        mutex.withLock {
+            // p.next is not changed, to allow iterators that are
+            // traversing p to maintain their weak-consistency guarantee.
+            p.item = null
+            pred.next = p.next
+            if (last === p) last = pred
+            if (count.fetchAndDecrement() == capacity) notFullCh.trySend(Unit)
+        }
     }
 
     /**
@@ -350,7 +367,7 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         while (p != null
         ) {
             if (o == p.item) {
-                unlink(p, pred!!)
+                runBlocking { unlink(p!!, pred!!) }
                 return true
             }
             pred = p
@@ -377,91 +394,8 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         return false
     }
 
-    /**
-     * Returns an array containing all of the elements in this queue, in
-     * proper sequence.
-     *
-     *
-     * The returned array will be "safe" in that no references to it are
-     * maintained by this queue.  (In other words, this method must allocate
-     * a new array).  The caller is thus free to modify the returned array.
-     *
-     *
-     * This method acts as bridge between array-based and collection-based
-     * APIs.
-     *
-     * @return an array containing all of the elements in this queue
-     */
-    /*@OptIn(ExperimentalAtomicApi::class)
-    override fun toArray(): Array<E> {
-        val size = count.get()
-        val a = kotlin.arrayOfNulls<E>(size)
-        var k = 0
-        var p = head!!.next
-        while (p != null) {
-            a[k++] = p.item
-            p = p.next
-        }
-        return a
-    }*/
-
-    /**
-     * Returns an array containing all of the elements in this queue, in
-     * proper sequence; the runtime type of the returned array is that of
-     * the specified array.  If the queue fits in the specified array, it
-     * is returned therein.  Otherwise, a new array is allocated with the
-     * runtime type of the specified array and the size of this queue.
-     *
-     *
-     * If this queue fits in the specified array with room to spare
-     * (i.e., the array has more elements than this queue), the element in
-     * the array immediately following the end of the queue is set to
-     * `null`.
-     *
-     *
-     * Like the [.toArray] method, this method acts as bridge between
-     * array-based and collection-based APIs.  Further, this method allows
-     * precise control over the runtime type of the output array, and may,
-     * under certain circumstances, be used to save allocation costs.
-     *
-     *
-     * Suppose `x` is a queue known to contain only strings.
-     * The following code can be used to dump the queue into a newly
-     * allocated array of `String`:
-     *
-     * <pre> `String[] y = x.toArray(new String[0]);`</pre>
-     *
-     * Note that `toArray(new Object[0])` is identical in function to
-     * `toArray()`.
-     *
-     * @param a the array into which the elements of the queue are to
-     * be stored, if it is big enough; otherwise, a new array of the
-     * same runtime type is allocated for this purpose
-     * @return an array containing all of the elements in this queue
-     * @throws ArrayStoreException if the runtime type of the specified array
-     * is not a supertype of the runtime type of every element in
-     * this queue
-     * @throws NullPointerException if the specified array is null
-     */
-    /*@OptIn(ExperimentalAtomicApi::class)
-    override fun <T> toArray(a: Array<T>): Array<T> {
-        var a = a
-        val size = count.get()
-        if (a.size < size) a =
-            java.lang.reflect.Array.newInstance(a.javaClass.getComponentType(), size) as Array<T>
-
-        var k = 0
-        var p = head!!.next
-        while (p != null) {
-            a[k++] = p.item as T
-            p = p.next
-        }
-        if (a.size > k) a[k] = null
-        return a
-    }*/
-
     override fun toString(): String {
-        return /*java.util.concurrent.Helpers.collectionToString(this)*/ this.joinToString(
+        return this.joinToString(
             prefix = "[",
             postfix = "]",
             separator = ", ",
@@ -475,16 +409,20 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
      */
     @OptIn(ExperimentalAtomicApi::class)
     override fun clear() {
-        var p: Node<E>?
-        var h = head
-        while ((h!!.next.also { p = it }) != null) {
-            h.next = h
-            p!!.item = null
-            h = p
+        runBlocking {
+            mutex.withLock {
+                var p: Node<E>?
+                var h = head
+                while ((h!!.next.also { p = it }) != null) {
+                    h.next = h
+                    p!!.item = null
+                    h = p
+                }
+                head = last
+                // assert head.item == null && head.next == null;
+                if (count.exchange(0) == capacity) notFullCh.trySend(Unit)
+            }
         }
-        head = last
-        // assert head.item == null && head.next == null;
-        if (count.exchange(0) == capacity) notFullCh.trySend(Unit)
     }
 
     /**
@@ -507,26 +445,30 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     override fun drainTo(c: MutableCollection<E>, maxElements: Int): Int {
         require(c !== this)
         if (maxElements <= 0) return 0
-        val n = min(maxElements, count.get())
-        // count.get provides visibility to first n Nodes
-        var h = head
-        var i = 0
-        try {
-            while (i < n) {
-                val p = h!!.next
-                c.add(p!!.item!!)
-                p.item = null
-                h.next = h
-                h = p
-                ++i
-            }
-            return n
-        } finally {
-            // Restore invariants even if c.add() threw
-            if (i > 0) {
-                // assert h.item == null;
-                head = h
-                if (count.fetchAndAdd(-i) == capacity) notFullCh.trySend(Unit)
+        return runBlocking {
+            mutex.withLock {
+                val n = min(maxElements, count.get())
+                // count.get provides visibility to first n Nodes
+                var h = head
+                var i = 0
+                try {
+                    while (i < n) {
+                        val p = h!!.next
+                        c.add(p!!.item!!)
+                        p.item = null
+                        h.next = h
+                        h = p
+                        ++i
+                    }
+                    n
+                } finally {
+                    // Restore invariants even if c.add() threw
+                    if (i > 0) {
+                        // assert h.item == null;
+                        head = h
+                        if (count.fetchAndAdd(-i) == capacity) notFullCh.trySend(Unit)
+                    }
+                }
             }
         }
     }
@@ -538,9 +480,13 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
      * - (possibly multiple) interior removed nodes (p.item == null)
      */
     fun succ(p: Node<E>): Node<E> {
-        var p = p
-        if (p === (p.next.also { p = it!! })) p = head!!.next!!
-        return p
+        return runBlocking {
+            mutex.withLock {
+                var currentP = p
+                if (currentP === (currentP.next.also { currentP = it!! })) currentP = head!!.next!!
+                currentP
+            }
+        }
     }
 
     /**
@@ -637,7 +583,7 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
             if (p.item != null) {
                 if (ancestor == null) ancestor = head
                 ancestor = findPred(p, ancestor!!)
-                unlink(p, ancestor!!)
+                runBlocking { unlink(p, ancestor!!) }
             }
         }
     }
@@ -814,113 +760,80 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
      * once a live ancestor of p (or head); allows unlinking of p.
      */
     fun findPred(p: Node<E>?, ancestor: Node<E>): Node<E> {
-        // assert p.item != null;
-        var ancestor = ancestor
-        if (ancestor.item == null) ancestor = head!!
-        // Fails with NPE if precondition not satisfied
-        var q: Node<E>?
-        while ((ancestor.next.also { q = it }) !== p) {
-            ancestor = q!!
+        // Synchronize access to the list while finding predecessor
+        return runBlocking {
+            mutex.withLock {
+                var currentAncestor = ancestor
+                // assert p.item != null;
+                if (currentAncestor.item == null) currentAncestor = head!!
+                // Fails with NPE if precondition not satisfied
+                var q: Node<E>?
+                while ((currentAncestor.next.also { q = it }) !== p) {
+                    currentAncestor = q!!
+                }
+                currentAncestor
+            }
         }
-        return ancestor
     }
 
     /** Implementation of bulk remove methods.  */
+    @OptIn(ExperimentalAtomicApi::class)
     private fun bulkRemove(filter: (E?) -> Boolean /*java.util.function.Predicate<in E>*/): Boolean {
-        var removed = false
-        var p: Node<E>? = null
-        var ancestor = head
-        var nodes: Array<Node<E>?>? = null
-        var n: Int
-        var len = 0
-        do {
-            // 1. Extract batch of up to 64 elements while holding the lock.
-            if (nodes == null) {  // first batch; initialize
-                p = head!!.next
-                var q = p
-                while (q != null) {
-                    if (q.item != null && ++len == 64) break
-                    q = succ(q)
-                }
-                nodes = kotlin.arrayOfNulls<Node<E>?>(len)
-            }
-            n = 0
-            while (p != null && n < len) {
-                nodes[n++] = p
-                p = succ(p)
-            }
-
-            // 2. Run the filter on the elements while lock is free.
-            var deathRow = 0L // "bitset" of size 64
-            for (i in 0..<n) {
-                val e: E?
-                if ((nodes[i]!!.item.also { e = it }) != null && filter(e)) deathRow = deathRow or (1L shl i)
-            }
-
-            // 3. Remove any filtered elements while holding the lock.
-            if (deathRow != 0L) {
-                for (i in 0..<n) {
-                    var q: Node<E>? = null
-                    if ((deathRow and (1L shl i)) != 0L
-                        && (nodes[i].also { q = it })!!.item != null
-                    ) {
-                        ancestor = findPred(q, ancestor!!)
-                        unlink(q!!, ancestor)
-                        removed = true
+        return runBlocking {
+            mutex.withLock {
+                var removed = false
+                var p: Node<E>? = null
+                var ancestor = head
+                var nodes: Array<Node<E>?>? = null
+                var n: Int
+                var len = 0
+                do {
+                    // 1. Extract batch of up to 64 elements while holding the lock.
+                    if (nodes == null) {  // first batch; initialize
+                        p = head!!.next
+                        var q = p
+                        while (q != null) {
+                            if (q.item != null && ++len == 64) break
+                            q = succ(q)
+                        }
+                        nodes = kotlin.arrayOfNulls<Node<E>?>(len)
                     }
-                    nodes[i] = null // help GC
-                }
+                    n = 0
+                    while (p != null && n < len) {
+                        nodes[n++] = p
+                        p = succ(p)
+                    }
+
+                    // 2. Run the filter on the elements while still holding the lock
+                    // (changed from original implementation to prevent concurrency issues)
+                    var deathRow = 0L // "bitset" of size 64
+                    for (i in 0..<n) {
+                        val e: E?
+                        if ((nodes[i]!!.item.also { e = it }) != null && filter(e)) deathRow = deathRow or (1L shl i)
+                    }
+
+                    // 3. Remove any filtered elements while holding the lock.
+                    if (deathRow != 0L) {
+                        for (i in 0..<n) {
+                            var q: Node<E>? = null
+                            if ((deathRow and (1L shl i)) != 0L
+                                && (nodes[i].also { q = it })!!.item != null
+                            ) {
+                                ancestor = findPred(q, ancestor!!)
+                                // Update unlink operation to directly modify instead of calling unlink
+                                // (since we're already in a withLock block)
+                                q!!.item = null
+                                ancestor.next = q!!.next
+                                if (last === q) last = ancestor
+                                if (count.fetchAndDecrement() == capacity) notFullCh.trySend(Unit)
+                                removed = true
+                            }
+                            nodes[i] = null // help GC
+                        }
+                    }
+                } while (n > 0 && p != null)
+                removed
             }
-        } while (n > 0 && p != null)
-        return removed
+        }
     }
-
-    /**
-     * Saves this queue to a stream (that is, serializes it).
-     *
-     * @param s the stream
-     * @throws IOException if an I/O error occurs
-     * @serialData The capacity is emitted (int), followed by all of
-     * its elements (each an `Object`) in the proper order,
-     * followed by a null
-     */
-    /*@Throws(IOException::class)
-    private fun writeObject(s: ObjectOutputStream) {
-        // Write out any hidden stuff, plus capacity
-        s.defaultWriteObject()
-
-        // Write out all elements in the proper order.
-        var p = head!!.next
-        while (p != null) {
-            s.writeObject(p.item)
-            p = p.next
-        }
-
-        // Use trailing null as sentinel
-        s.writeObject(null)
-    }*/
-
-    /**
-     * Reconstitutes this queue from a stream (that is, deserializes it).
-     * @param s the stream
-     * @throws ClassNotFoundException if the class of a serialized object
-     * could not be found
-     * @throws IOException if an I/O error occurs
-     */
-    /*@Throws(IOException::class, java.lang.ClassNotFoundException::class)
-    private fun readObject(s: ObjectInputStream) {
-        // Read in capacity, and any hidden stuff
-        s.defaultReadObject()
-
-        count.set(0)
-        head = Node<E>(null)
-        last = head!!
-
-        // Read in all elements and place in queue
-        while (true) {
-            val item = s.readObject() as E
-            if (item == null) break
-            add(item)
-        }
-    }*/
 }
