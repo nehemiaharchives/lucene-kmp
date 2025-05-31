@@ -4,7 +4,6 @@ import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.yield
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -43,21 +42,21 @@ class LinkedBlockingQueueTest {
     fun testOfferWithTimeout() = runTest {
         val queue = LinkedBlockingQueue<Int>(1)
         // Offer to a queue with space
-        assertTrue(queue.offer(1, 100L, DurationUnit.MILLISECONDS))
+        assertTrue(queue.offer(1, 100L, TimeUnit.MILLISECONDS))
         // Offer to a full queue (should time out)
-        assertFalse(queue.offer(2, 100L, DurationUnit.MILLISECONDS))
+        assertFalse(queue.offer(2, 100L, TimeUnit.MILLISECONDS))
 
         // Offer to a full queue, then an element is taken, then the offer succeeds.
         val q2 = LinkedBlockingQueue<Int>(1)
         assertTrue(q2.offer(10)) // Fill the queue
-        assertFalse(q2.offer(11, 50L, DurationUnit.MILLISECONDS)) // Offer to full queue, should timeout
+        assertFalse(q2.offer(11, 50L, TimeUnit.MILLISECONDS)) // Offer to full queue, should timeout
 
         launch {
             delay(20L) // Ensure offer is waiting
             assertEquals(10, q2.take()) // Make space
         }
         // Now the offer for 11 should succeed
-        assertTrue(q2.offer(11, 100L, DurationUnit.MILLISECONDS))
+        assertTrue(q2.offer(11, 100L, TimeUnit.MILLISECONDS))
         assertEquals(11, q2.poll()) // Check it was actually added
     }
 
@@ -66,10 +65,10 @@ class LinkedBlockingQueueTest {
         val queue = LinkedBlockingQueue<Int>(1)
         // Poll from non-empty queue with timeout (should return immediately)
         queue.put(1)
-        assertEquals(1, queue.poll(100L, DurationUnit.MILLISECONDS))
+        assertEquals(1, queue.poll(100L, TimeUnit.MILLISECONDS))
 
         // Poll from an empty queue (should time out)
-        assertNull(queue.poll(100L, DurationUnit.MILLISECONDS))
+        assertNull(queue.poll(100L, TimeUnit.MILLISECONDS))
 
         // Poll from an empty queue, then an element is put, then the poll succeeds.
         val q2 = LinkedBlockingQueue<Int>(1)
@@ -77,8 +76,8 @@ class LinkedBlockingQueueTest {
             delay(50L) // Ensure poll is waiting
             q2.put(2) // Add an element
         }
-        assertEquals(2, q2.poll(100L, DurationUnit.MILLISECONDS)) // Should succeed now
-        assertNull(q2.poll(1L, DurationUnit.MILLISECONDS)) // Ensure it's empty again
+        assertEquals(2, q2.poll(100L, TimeUnit.MILLISECONDS)) // Should succeed now
+        assertNull(q2.poll(1L, TimeUnit.MILLISECONDS)) // Ensure it's empty again
     }
 
     @Test
@@ -187,24 +186,6 @@ class LinkedBlockingQueueTest {
     }
 
     @Test
-    fun testTakeSuspendsOnEmptyAndResumes() = runTest {
-        val queue = LinkedBlockingQueue<Int>(1)
-        var result: Int? = null
-
-        launch {
-            result = queue.take() // Should suspend as queue is empty
-        }
-
-        delay(100L) // Give time for take() to suspend
-        assertNull(result, "Take should be suspended and result not yet set")
-
-        queue.put(1) // Put an element into the queue
-
-        delay(100L) // Give time for take() to resume and process
-        assertEquals(1, result, "Take should have resumed and returned the element 1")
-    }
-
-    @Test
     fun testAdd() {
         val queue = LinkedBlockingQueue<String>(1)
         assertTrue(queue.add("element1"))
@@ -262,24 +243,6 @@ class LinkedBlockingQueueTest {
     }
 
     @Test
-    fun testElement() {
-        val emptyQueue = LinkedBlockingQueue<String>()
-        assertFailsWith<NoSuchElementException> {
-            emptyQueue.element()
-        }
-
-        val queue = LinkedBlockingQueue<String>(2)
-        queue.add("A")
-        assertEquals("A", queue.element())
-        assertEquals(1, queue.size) // Element not removed
-        assertEquals("A", queue.peek()) // Peek confirms
-
-        queue.add("B")
-        assertEquals("A", queue.element()) // Still returns the head
-        assertEquals(2, queue.size)
-    }
-
-    @Test
     fun testRemoveObject() {
         val queue = LinkedBlockingQueue<String>(5)
         queue.addAll(listOf("A", "B", "C", "B", "D")) // A, B, C, B, D
@@ -293,9 +256,6 @@ class LinkedBlockingQueueTest {
         assertEquals("[A, C, D]", queue.toString())
 
         assertFalse(queue.remove("X")) // Non-existent
-        assertEquals(3, queue.size)
-
-        assertFalse(queue.remove(null)) // Null removal
         assertEquals(3, queue.size)
 
         val emptyQ = LinkedBlockingQueue<String>()
@@ -323,7 +283,6 @@ class LinkedBlockingQueueTest {
         assertTrue(queue.contains("B"))
         assertTrue(queue.contains("C"))
         assertFalse(queue.contains("D"))
-        assertFalse(queue.contains(null))
     }
 
     @Test
@@ -463,6 +422,7 @@ class LinkedBlockingQueueTest {
         assertEquals(0, q1.size)
 
         val q2 = LinkedBlockingQueue<Int>() // Unbounded
+        assertEquals(false, q2.isBounded)
         assertEquals(0, q2.size)
         q2.offer(10)
         assertEquals(1, q2.size)

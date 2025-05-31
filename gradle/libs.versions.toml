@@ -4,6 +4,7 @@ kotlin = "2.1.21"
 okio = "3.11.0"
 android-minSdk = "24"
 android-compileSdk = "34"
+kotlin-coroutines = "1.10.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -11,7 +12,8 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 kotlinenvvar = { module = "dev.scottpierce:kotlin-env-var", version = "1.0.5" }
 kotlinbignum = { module = "com.ionspin.kotlin:bignum" , version = "0.3.10" }
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "7.0.7" }
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
 
