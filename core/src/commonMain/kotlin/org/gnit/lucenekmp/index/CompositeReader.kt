@@ -78,7 +78,7 @@ protected constructor() : IndexReader() {
      *
      * @see IndexReader.leaves
      */
-    abstract val sequentialSubReaders: MutableList<out IndexReader>
+    abstract val sequentialSubReaders: List<IndexReader>
 
     override val context: CompositeReaderContext
         get() {
