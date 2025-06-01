@@ -5,21 +5,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.assertNull
-import org.gnit.lucenekmp.jdkport.Charset
-import org.gnit.lucenekmp.jdkport.OutputStreamWriter
-import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
-import org.gnit.lucenekmp.jdkport.CharBuffer // For CharBuffer tests
-import okio.IOException // For testing operations after close
-
-// Use kotlin.NullPointerException for explicit null checks,
-// IndexOutOfBoundsException for array/string bounds.
+import okio.IOException
 
 class OutputStreamWriterTest {
-
-    @Test
-    fun testBasicSetup() {
-        assertEquals(1, 1)
-    }
 
     // Constructor Tests
     @Test
@@ -38,26 +26,6 @@ class OutputStreamWriterTest {
         val encoder = charset.newEncoder()
         OutputStreamWriter(baos, encoder).use { writer ->
             assertEquals(charset.name(), writer.encoding)
-        }
-    }
-
-    @Test
-    fun testConstructorWithNullCharset() {
-        val baos = ByteArrayOutputStream()
-        assertFailsWith<kotlin.NullPointerException> {
-            @Suppress("UNCHECKED_CAST")
-            fun <T> getNull(): T = null as T
-            OutputStreamWriter(baos, getNull<Charset>()).use {}
-        }
-    }
-
-    @Test
-    fun testConstructorWithNullCharsetEncoder() {
-        val baos = ByteArrayOutputStream()
-        assertFailsWith<kotlin.NullPointerException> {
-            @Suppress("UNCHECKED_CAST")
-            fun <T> getNull(): T = null as T
-            OutputStreamWriter(baos, getNull<CharsetEncoder>()).use {}
         }
     }
 

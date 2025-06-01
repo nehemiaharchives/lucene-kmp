@@ -67,7 +67,6 @@ open class OutputStreamWriter : Writer {
      * If the named encoding is not supported
      */
     /*constructor(out: OutputStream, charsetName: String) : super(out) {
-        if (charsetName == null) throw NullPointerException("charsetName")
         se = StreamEncoder.forOutputStreamWriter(out, this, charsetName)
     }*/
 
@@ -98,7 +97,6 @@ open class OutputStreamWriter : Writer {
      * @since 1.4
      */
     constructor(out: OutputStream, cs: Charset) : super() {
-        if (cs == null) throw NullPointerException("charset")
         se = StreamEncoder.forOutputStreamWriter(out, cs)
     }
 
@@ -114,7 +112,6 @@ open class OutputStreamWriter : Writer {
      * @since 1.4
      */
     constructor(out: OutputStream, enc: CharsetEncoder) : super() {
-        //if (enc == null) throw NullPointerException("charset encoder")
         se = StreamEncoder.forOutputStreamWriter(out, enc)
     }
 
