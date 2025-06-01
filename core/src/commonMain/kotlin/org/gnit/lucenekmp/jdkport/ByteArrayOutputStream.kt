@@ -139,7 +139,7 @@ class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
      *
      * @see java.io.ByteArrayInputStream.count
      */
-    open fun reset() {
+    fun reset() {
         count = 0
     }
 
@@ -264,7 +264,7 @@ class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
      * @see java.io.ByteArrayOutputStream.toString
      * @see Charset.defaultCharset
      */
-    @Deprecated(
+    /*@Deprecated(
         """This method does not properly convert bytes into characters.
       As of JDK&nbsp;1.1, the preferred way to do this is via the
       {@link #toString(String charsetName)} or {@link #toString(Charset charset)}
@@ -272,7 +272,7 @@ class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
       or the {@code toString()} method, which uses the default charset.
      
       """
-    )
+    )*/
     /*fun toString(hibyte: Int): String {
         return String(buf, hibyte, 0, count)
     }*/
