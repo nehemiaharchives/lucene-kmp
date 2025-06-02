@@ -34,6 +34,14 @@ open class FilterOutputStream(
     private var closed = false
 
     /**
+     * Returns true if the stream is closed.
+     * This method is added to allow subclasses to check the closed state.
+     */
+    fun isClosed(): Boolean {
+        return closed
+    }
+
+    /**
      * Writes the specified `byte` to this output stream.
      *
      *
