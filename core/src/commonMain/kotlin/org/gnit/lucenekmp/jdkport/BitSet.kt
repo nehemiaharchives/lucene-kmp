@@ -923,7 +923,7 @@ class BitSet : Cloneable<BitSet> {
      * Calling this method may, but is not required to, affect the value
      * returned by a subsequent call to the [.size] method.
      */
-    private fun trimToSize() {
+    fun trimToSize() {
         if (wordsInUse != words.size) {
             words = words.copyOf(wordsInUse)
             checkInvariants()

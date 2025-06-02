@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.gnit.lucenekmp.jdkport.LongBuffer
 
 class BitSetTest {
 
@@ -1153,13 +1152,6 @@ class BitSetTest {
         assertTrue(clone.get(5))
     }
 
-    // Helper method to access private trimToSize for testing
-    private fun BitSet.callTrimToSize() {
-        val method = this::class.java.getDeclaredMethod("trimToSize")
-        method.isAccessible = true
-        method.invoke(this)
-    }
-
     @Test
     fun testTrimToSize_largerThanNecessary() {
         val bitSet = BitSet(256) // Initial capacity for 256 bits (4 words)
@@ -1171,7 +1163,7 @@ class BitSetTest {
         assertEquals(2, bitSet.cardinality())
         assertEquals(61, bitSet.length()) // Highest bit is 60, length is 61 (needs 1 word)
 
-        bitSet.callTrimToSize()
+        bitSet.trimToSize()
 
         // After trim, wordsInUse should be 1. So size() should be 1*64=64
         assertEquals(64, bitSet.size(), "Size should be reduced to fit used words")
@@ -1197,7 +1189,7 @@ class BitSetTest {
         assertEquals(1, bitSet.cardinality())
 
         val originalSize = bitSet.size()
-        bitSet.callTrimToSize() // Should do nothing as wordsInUse is likely 1, and words.size is 1
+        bitSet.trimToSize() // Should do nothing as wordsInUse is likely 1, and words.size is 1
 
         assertEquals(originalSize, bitSet.size(), "Size should not change")
         assertEquals(1, bitSet.cardinality())
@@ -1212,7 +1204,7 @@ class BitSetTest {
         assertEquals(64, originalSize)
         assertEquals(0, bitSet.length())
 
-        bitSet.callTrimToSize() // wordsInUse is 0, words.size is 1. Should trim to 0 words.
+        bitSet.trimToSize() // wordsInUse is 0, words.size is 1. Should trim to 0 words.
                                 // The implementation words = words.copyOf(wordsInUse)
                                 // would make words an empty array. size() would be 0.
 
@@ -1239,7 +1231,7 @@ class BitSetTest {
         assertEquals(2, bitSet.cardinality())
         val sizeBeforeTrim = bitSet.size() // Still 64
 
-        bitSet.callTrimToSize() // wordsInUse is 1, words.size is 1. No change expected.
+        bitSet.trimToSize() // wordsInUse is 1, words.size is 1. No change expected.
 
         assertEquals(sizeBeforeTrim, bitSet.size(), "Size should not change if already minimal for content")
         assertTrue(bitSet.get(5))
@@ -1258,7 +1250,7 @@ class BitSetTest {
         assertEquals(66, bitSet.length())
         assertEquals(2, bitSet.cardinality())
 
-        bitSet.callTrimToSize() // wordsInUse is 2, words.size is 3. Should trim to 2 words.
+        bitSet.trimToSize() // wordsInUse is 2, words.size is 3. Should trim to 2 words.
 
         assertEquals(128, bitSet.size(), "Size should be reduced to 2 words (128 bits)")
         assertTrue(bitSet.get(0))
@@ -1286,7 +1278,7 @@ class BitSetTest {
         assertEquals(71, bitSet.length())
         assertEquals(2, bitSet.cardinality())
 
-        bitSet.callTrimToSize() // Should trim to 2 words (wordsInUse = 2, words.size = 2 initially because 70 is in word 1)
+        bitSet.trimToSize() // Should trim to 2 words (wordsInUse = 2, words.size = 2 initially because 70 is in word 1)
                                 // Actually, bit 70 is in words[1]. wordsInUse will be 2.
                                 // If BitSet(128) allocates exactly 2 words, no change in size here.
                                 // Let's make it more explicit: BitSet(200) -> 4 words. set bit 70 -> wordsInUse = 2.
@@ -1297,7 +1289,7 @@ class BitSetTest {
         assertEquals(71, bs200.length())
         assertEquals(2, bs200.cardinality())
 
-        bs200.callTrimToSize() // wordsInUse = 2. words.size should become 2. Size = 128.
+        bs200.trimToSize() // wordsInUse = 2. words.size should become 2. Size = 128.
         assertEquals(128, bs200.size(), "Size should be trimmed to 2 words (128 bits)")
         assertTrue(bs200.get(10))
         assertTrue(bs200.get(70))
@@ -1351,7 +1343,7 @@ class BitSetTest {
 
         bs200.clear()
         bs200.set(1)
-        bs200.callTrimToSize() // size should be 64
+        bs200.trimToSize() // size should be 64
         assertEquals(64, bs200.size())
         other.clear()
         other.set(65) // size 128
