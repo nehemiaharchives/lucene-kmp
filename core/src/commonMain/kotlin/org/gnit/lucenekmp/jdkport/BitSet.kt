@@ -118,7 +118,13 @@ class BitSet : Cloneable<BitSet> {
      */
     private constructor(words: LongArray) {
         this.words = words
-        this.wordsInUse = words.size
+        // Correctly initialize wordsInUse by finding the last non-zero word
+        var i = words.size - 1
+        while (i >= 0) {
+            if (words[i] != 0L) break
+            i--
+        }
+        this.wordsInUse = i + 1
         checkInvariants()
     }
 
