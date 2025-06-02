@@ -179,7 +179,7 @@ class BufferedReaderTest {
         assertEquals("line1", reader.readLine(false, term))
         assertTrue(term[0])
         assertEquals("line2", reader.readLine(false, term))
-        assertTrue(term[0])
+        assertFalse(term[0])
 
         input = "line3"
         reader = BufferedReader(StringReader(input))
