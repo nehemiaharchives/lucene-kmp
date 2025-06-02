@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.jdkport
 import okio.Buffer
 // import okio.Sink // Not directly needed by TrackingOutputStream if it takes Buffer
 // import okio.buffer // Not directly needed by TrackingOutputStream if it takes Buffer
-import java.io.IOException // Changed to java.io.IOException
+import okio.IOException // Changed to IOException
 import kotlin.test.*
 
 // Helper class to track if close() was called on the underlying stream
@@ -265,42 +265,42 @@ class BufferedOutputStreamTest {
         try {
             bos.write(123) // Attempt to write a single byte
             fail("Expected an exception when writing to a closed stream (single byte)")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             // Expected path
             assertEquals("Stream closed", e.message, "Exception message mismatch for write(byte)")
         } catch (e: Exception) {
-            fail("Expected java.io.IOException but got ${e::class.simpleName}: ${e.message} for write(byte)")
+            fail("Expected IOException but got ${e::class.simpleName}: ${e.message} for write(byte)")
         }
 
         try {
             bos.write("more data".encodeToByteArray()) // Attempt to write a byte array
             fail("Expected an exception when writing to a closed stream (byte array)")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             // Expected path
             assertEquals("Stream closed", e.message, "Exception message mismatch for write(byteArray)")
         } catch (e: Exception) {
-            fail("Expected java.io.IOException but got ${e::class.simpleName}: ${e.message} for write(byteArray)")
+            fail("Expected IOException but got ${e::class.simpleName}: ${e.message} for write(byteArray)")
         }
 
         try {
             bos.write("even more data".encodeToByteArray(), 0, 4) // Attempt to write a sub-array
             fail("Expected an exception when writing to a closed stream (sub-array)")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             // Expected path
             assertEquals("Stream closed", e.message, "Exception message mismatch for write(byteArray, off, len)")
         } catch (e: Exception) {
-            fail("Expected java.io.IOException but got ${e::class.simpleName}: ${e.message} for write(byteArray, off, len)")
+            fail("Expected IOException but got ${e::class.simpleName}: ${e.message} for write(byteArray, off, len)")
         }
         
         // Also test flush() on a closed stream
         try {
             bos.flush()
             fail("Expected an exception when flushing a closed stream")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             // Expected path
             assertEquals("Stream closed", e.message, "Exception message mismatch for flush()")
         } catch (e: Exception) {
-            fail("Expected java.io.IOException but got ${e::class.simpleName}: ${e.message} for flush()")
+            fail("Expected IOException but got ${e::class.simpleName}: ${e.message} for flush()")
         }
     }
 
@@ -332,11 +332,11 @@ class BufferedOutputStreamTest {
         try {
             bos.write(42)
             fail("Expected an exception when writing to a closed stream after multiple closes")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             // Expected path
              assertEquals("Stream closed", e.message, "Exception message mismatch for write post-multiple-closes")
         } catch (e: Exception) {
-            fail("Expected java.io.IOException but got ${e::class.simpleName}: ${e.message} for write post-multiple-closes")
+            fail("Expected IOException but got ${e::class.simpleName}: ${e.message} for write post-multiple-closes")
         }
     }
 }
