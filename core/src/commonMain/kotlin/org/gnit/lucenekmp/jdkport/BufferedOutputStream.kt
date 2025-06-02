@@ -98,6 +98,9 @@ open class BufferedOutputStream private constructor(out: OutputStream, initialSi
      */
     @Throws(IOException::class)
     override fun write(b: Int) {
+        if (isClosed()) {
+            throw IOException("Stream closed")
+        }
         growIfNeeded(1)
         if (count >= buf.size) {
             flushBuffer()
@@ -125,6 +128,9 @@ open class BufferedOutputStream private constructor(out: OutputStream, initialSi
      */
     @Throws(IOException::class)
     override fun write(b: ByteArray, off: Int, len: Int) {
+        if (isClosed()) {
+            throw IOException("Stream closed")
+        }
         if (len >= maxBufSize) {
             /* If the request length exceeds the max size of the output buffer,
                flush the output buffer and then write the data directly.
@@ -150,8 +156,14 @@ open class BufferedOutputStream private constructor(out: OutputStream, initialSi
      */
     @Throws(IOException::class)
     override fun flush() {
+        // Removed: if (isClosed()) throw IOException("Stream closed")
+        // flushBuffer will attempt to write to out. If FilterOutputStream.close()
+        // has already run and closed 'out', then out.write (called by flushBuffer)
+        // or out.flush() should throw an IOException.
+        // If this flush is called as part of FilterOutputStream.close(), 'isClosed()' would be true
+        // but the buffer *must* be flushed before 'out' is truly closed.
         flushBuffer()
-        out!!.flush()
+        out!!.flush() // out is from FilterOutputStream. If it's closed, this will throw.
     }
 
     companion object {
