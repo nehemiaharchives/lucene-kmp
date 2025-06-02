@@ -4,15 +4,13 @@ package org.gnit.lucenekmp.index
 /** [IndexReaderContext] for [CompositeReader] instance.  */
 class CompositeReaderContext private constructor(
     parent: CompositeReaderContext?,
-    reader: CompositeReader,
+    private val reader: CompositeReader,
     ordInParent: Int,
     docbaseInParent: Int,
-    children: MutableList<IndexReaderContext>,
+    private val children: MutableList<IndexReaderContext>,
     leaves: MutableList<LeafReaderContext>?
 ) : IndexReaderContext(parent!!, ordInParent, docbaseInParent) {
-    private val children: MutableList<IndexReaderContext>
-    private val leaves: MutableList<LeafReaderContext>
-    private val reader: CompositeReader
+    private val leaves: MutableList<LeafReaderContext> = leaves!!
 
     /**
      * Creates a [CompositeReaderContext] for intermediate readers that aren't top-level readers
@@ -36,35 +34,24 @@ class CompositeReaderContext private constructor(
         leaves: MutableList<LeafReaderContext>
     ) : this(null, reader, 0, 0, children, leaves)
 
-    init {
-        this.children = children
-        this.leaves = leaves!!
-        this.reader = reader
-    }
-
     @Throws(UnsupportedOperationException::class)
-    public override fun leaves(): MutableList<LeafReaderContext> {
+    override fun leaves(): MutableList<LeafReaderContext> {
         if (!isTopLevel) throw UnsupportedOperationException("This is not a top-level context.")
         checkNotNull(leaves)
         return leaves
     }
 
-    public override fun children(): MutableList<IndexReaderContext> {
+    override fun children(): MutableList<IndexReaderContext> {
         return children
     }
 
-    public override fun reader(): CompositeReader {
+    override fun reader(): CompositeReader {
         return reader
     }
 
-    private class Builder(reader: CompositeReader) {
-        private val reader: CompositeReader
-        private val leaves: MutableList<LeafReaderContext> = mutableListOf<LeafReaderContext>()
+    private class Builder(private val reader: CompositeReader) {
+        private val leaves: MutableList<LeafReaderContext> = mutableListOf()
         private var leafDocBase = 0
-
-        init {
-            this.reader = reader
-        }
 
         fun build(): CompositeReaderContext {
             return build(null, reader, 0, 0) as CompositeReaderContext
@@ -81,25 +68,25 @@ class CompositeReaderContext private constructor(
                 return atomic
             } else {
                 val cr: CompositeReader = reader as CompositeReader
-                val sequentialSubReaders: MutableList<out IndexReader> = cr.sequentialSubReaders
+                val sequentialSubReaders: List<IndexReader> = cr.sequentialSubReaders
                 val children: MutableList<IndexReaderContext> =
-                    mutableListOf<IndexReaderContext?>(
+                    mutableListOf(
                         *kotlin.arrayOfNulls<IndexReaderContext>(
                             sequentialSubReaders.size
                         )
                     ) as MutableList<IndexReaderContext>
-                val newParent: CompositeReaderContext
-                if (parent == null) {
-                    newParent = CompositeReaderContext(cr, children, leaves)
+
+                val newParent: CompositeReaderContext = if (parent == null) {
+                    CompositeReaderContext(cr, children, leaves)
                 } else {
-                    newParent = CompositeReaderContext(parent, cr, ord, docBase, children)
+                    CompositeReaderContext(parent, cr, ord, docBase, children)
                 }
                 var newDocBase = 0
                 var i = 0
                 val c = sequentialSubReaders.size
                 while (i < c) {
-                    val r: IndexReader = sequentialSubReaders.get(i)
-                    children.set(i, build(newParent, r, i, newDocBase))
+                    val r: IndexReader = sequentialSubReaders[i]
+                    children[i] = build(newParent, r, i, newDocBase)
                     newDocBase += r.maxDoc()
                     i++
                 }

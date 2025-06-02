@@ -36,35 +36,35 @@ protected constructor() : LeafReader() {
      *
      * @lucene.internal
      */
-    abstract val normsReader: NormsProducer
+    abstract val normsReader: NormsProducer?
 
     /**
      * Expert: retrieve underlying DocValuesProducer
      *
      * @lucene.internal
      */
-    abstract val docValuesReader: DocValuesProducer
+    abstract val docValuesReader: DocValuesProducer?
 
     /**
      * Expert: retrieve underlying FieldsProducer
      *
      * @lucene.internal
      */
-    abstract val postingsReader: FieldsProducer
+    abstract val postingsReader: FieldsProducer?
 
     /**
      * Expert: retrieve underlying PointsReader
      *
      * @lucene.internal
      */
-    abstract val pointsReader: PointsReader
+    abstract val pointsReader: PointsReader?
 
     /**
      * Expert: retrieve underlying VectorReader
      *
      * @lucene.internal
      */
-    abstract val vectorReader: KnnVectorsReader
+    abstract val vectorReader: KnnVectorsReader?
 
     @Throws(IOException::class)
     override fun storedFields(): StoredFields {
@@ -104,7 +104,7 @@ protected constructor() : LeafReader() {
             // Field does not exist or does not index postings
             return null
         }
-        return this.postingsReader.terms(field)
+        return this.postingsReader!!.terms(field)
     }
 
     // returns the FieldInfo that corresponds to the given field and type, or
@@ -135,7 +135,7 @@ protected constructor() : LeafReader() {
         if (fi == null) {
             return null
         }
-        return this.docValuesReader.getNumeric(fi)
+        return this.docValuesReader!!.getNumeric(fi)
     }
 
     @Throws(IOException::class)
@@ -145,7 +145,7 @@ protected constructor() : LeafReader() {
         if (fi == null) {
             return null
         }
-        return this.docValuesReader.getBinary(fi)
+        return this.docValuesReader!!.getBinary(fi)
     }
 
     @Throws(IOException::class)
@@ -155,7 +155,7 @@ protected constructor() : LeafReader() {
         if (fi == null) {
             return null
         }
-        return this.docValuesReader.getSorted(fi)
+        return this.docValuesReader!!.getSorted(fi)
     }
 
     @Throws(IOException::class)
@@ -166,7 +166,7 @@ protected constructor() : LeafReader() {
         if (fi == null) {
             return null
         }
-        return this.docValuesReader.getSortedNumeric(fi)
+        return this.docValuesReader!!.getSortedNumeric(fi)
     }
 
     @Throws(IOException::class)
@@ -176,7 +176,7 @@ protected constructor() : LeafReader() {
         if (fi == null) {
             return null
         }
-        return this.docValuesReader.getSortedSet(fi)
+        return this.docValuesReader!!.getSortedSet(fi)
     }
 
     @Throws(IOException::class)
@@ -186,7 +186,7 @@ protected constructor() : LeafReader() {
         if (fi == null || fi.docValuesSkipIndexType() === DocValuesSkipIndexType.NONE) {
             return null
         }
-        return this.docValuesReader.getSkipper(fi)
+        return this.docValuesReader!!.getSkipper(fi)
     }
 
     @Throws(IOException::class)
@@ -198,7 +198,7 @@ protected constructor() : LeafReader() {
             return null
         }
 
-        return this.normsReader.getNorms(fi)
+        return this.normsReader!!.getNorms(fi)
     }
 
     @Throws(IOException::class)
@@ -210,7 +210,7 @@ protected constructor() : LeafReader() {
             return null
         }
 
-        return this.pointsReader.getValues(field)
+        return this.pointsReader!!.getValues(field)
     }
 
     @Throws(IOException::class)
@@ -222,7 +222,7 @@ protected constructor() : LeafReader() {
             return null
         }
 
-        return this.vectorReader.getFloatVectorValues(field)
+        return this.vectorReader!!.getFloatVectorValues(field)
     }
 
     @Throws(IOException::class)
@@ -234,7 +234,7 @@ protected constructor() : LeafReader() {
             return null
         }
 
-        return this.vectorReader.getByteVectorValues(field)
+        return this.vectorReader!!.getByteVectorValues(field)
     }
 
     @Throws(IOException::class)
@@ -247,7 +247,7 @@ protected constructor() : LeafReader() {
             // Field does not exist or does not index vectors
             return
         }
-        this.vectorReader.search(field, target, knnCollector, acceptDocs)
+        this.vectorReader!!.search(field, target, knnCollector, acceptDocs)
     }
 
     @Throws(IOException::class)
@@ -260,7 +260,7 @@ protected constructor() : LeafReader() {
             // Field does not exist or does not index vectors
             return
         }
-        this.vectorReader.search(field, target, knnCollector, acceptDocs)
+        this.vectorReader!!.search(field, target, knnCollector, acceptDocs)
     }
 
     @Throws(IOException::class)
@@ -273,17 +273,17 @@ protected constructor() : LeafReader() {
 
         // terms/postings
         if (this.postingsReader != null) {
-            this.postingsReader.checkIntegrity()
+            this.postingsReader!!.checkIntegrity()
         }
 
         // norms
         if (this.normsReader != null) {
-            this.normsReader.checkIntegrity()
+            this.normsReader!!.checkIntegrity()
         }
 
         // docvalues
         if (this.docValuesReader != null) {
-            this.docValuesReader.checkIntegrity()
+            this.docValuesReader!!.checkIntegrity()
         }
 
         // stored fields
@@ -298,12 +298,12 @@ protected constructor() : LeafReader() {
 
         // points
         if (this.pointsReader != null) {
-            this.pointsReader.checkIntegrity()
+            this.pointsReader!!.checkIntegrity()
         }
 
         // vectors
         if (this.vectorReader != null) {
-            this.vectorReader.checkIntegrity()
+            this.vectorReader!!.checkIntegrity()
         }
     }
 }

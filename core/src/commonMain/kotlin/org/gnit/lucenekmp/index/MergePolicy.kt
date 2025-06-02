@@ -15,8 +15,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import okio.IOException
-import org.gnit.lucenekmp.index.MergeTrigger
-import org.gnit.lucenekmp.index.SegmentReader
 import org.gnit.lucenekmp.jdkport.ExecutionException
 import org.gnit.lucenekmp.jdkport.Executor
 import org.gnit.lucenekmp.jdkport.InterruptedException
@@ -66,13 +64,28 @@ abstract class MergePolicy
     /**
      * If the size of the merge segment exceeds this ratio of the total index size then it will remain
      * in non-compound format
+     * Returns current `noCFSRatio`.
+     *
+     * @see .setNoCFSRatio
      */
-    protected var noCFSRatio: Double = DEFAULT_NO_CFS_RATIO,
+    noCFSRatio: Double = DEFAULT_NO_CFS_RATIO,
     /**
      * If the size of the merged segment exceeds this value then it will not use compound file format.
      */
     protected var maxCFSSegmentSize: Long = DEFAULT_MAX_CFS_SEGMENT_SIZE
 ) {
+
+    protected var noCFSRatio: Double = noCFSRatio
+        /**
+         * If a merged segment will be more than this percentage of the total size of the index, leave the
+         * segment as non-compound file even if compound file is enabled. Set to 1.0 to always use CFS
+         * regardless of merge size.
+         */
+        set(noCFSRatio) {
+            require(!(noCFSRatio < 0.0 || noCFSRatio > 1.0)) { "noCFSRatio must be 0.0 to 1.0 inclusive; got $noCFSRatio" }
+            this.noCFSRatio = noCFSRatio
+        }
+
     /**
      * Progress and state for an executing merge. This class encapsulates the logic to pause and
      * resume the merge thread or to abort the merge entirely.
@@ -97,8 +110,9 @@ abstract class MergePolicy
         private val pausing: Channel<Unit> = Channel<Unit>(Channel.RENDEZVOUS)
 
         /** Pause times (in nanoseconds) for each [PauseReason].  */
+        // Place all the pause reasons in there immediately so that we can simply update values.
         @OptIn(ExperimentalAtomicApi::class)
-        private val pauseTimesNS: MutableMap<PauseReason, AtomicLong>
+        private val pauseTimesNS: MutableMap<PauseReason, AtomicLong> = mutableMapOf<PauseReason, AtomicLong>()
 
         /** Return the aborted state of this merge.  */
         @Volatile
@@ -113,8 +127,6 @@ abstract class MergePolicy
 
         /** Creates a new merge progress info.  */
         init {
-            // Place all the pause reasons in there immediately so that we can simply update values.
-            pauseTimesNS = mutableMapOf<PauseReason, AtomicLong>()
             for (p in PauseReason.entries) {
                 pauseTimesNS.put(p, AtomicLong(0))
             }
@@ -139,11 +151,10 @@ abstract class MergePolicy
          * method is needed. Other threads can wake up any sleeping thread by calling [     ][.wakeup], but it'd fall to sleep for the remainder of the requested time if this
          * condition
          */
-        @Throws(InterruptedException::class)
         suspend fun pauseNanos(initialPauseNanos: Long, reason: PauseReason, condition: () -> Boolean /*java.util.function.BooleanSupplier*/) {
             var remainingNanosToPause = initialPauseNanos
             val functionStartTime: Long = System.nanoTime()
-            val timeUpdate: AtomicLong = pauseTimesNS.get(reason)!!
+            val timeUpdate: AtomicLong = pauseTimesNS[reason]!!
             pauseLock.lock()
             try {
                 while (remainingNanosToPause > 0 && !this.isAborted && condition()) {
@@ -262,7 +273,7 @@ abstract class MergePolicy
             val readers: MutableList<MergeReader> = ArrayList(codecReaders.size)
             var totalDocs = 0
             for (r in codecReaders) {
-                readers.add(MergePolicy.MergeReader(r, r.liveDocs!!))
+                readers.add(MergeReader(r, r.liveDocs!!))
                 totalDocs += r.numDocs()
             }
             this.mergeReader = readers.toMutableList()
@@ -285,7 +296,6 @@ abstract class MergePolicy
          * Called by [IndexWriter] after the merge started and from the thread that will be
          * executing the merge.
          */
-        @Throws(IOException::class)
         suspend fun mergeInit() {
             val currentJob = coroutineContext[Job] ?: throw IOException("mergeInit must be called from a coroutine context with a Job")
             mergeProgress.setMergeThread(currentJob)
@@ -312,8 +322,8 @@ abstract class MergePolicy
                 mergeFinished(success, segmentDropped)
             } finally {
                 val readers = this.mergeReader
-                this.mergeReader = mutableListOf<MergePolicy.MergeReader>()
-                IOUtils.applyToAll<MergePolicy.MergeReader>(
+                this.mergeReader = mutableListOf()
+                IOUtils.applyToAll(
                     readers,
                     readerConsumer
                 )
@@ -372,7 +382,7 @@ abstract class MergePolicy
 
         /** Returns a readable description of the current merge state.  */
         fun segString(): String {
-            val b: StringBuilder = StringBuilder()
+            val b = StringBuilder()
             val numSegments = segments.size
             for (i in 0..<numSegments) {
                 if (i > 0) {
@@ -439,8 +449,8 @@ abstract class MergePolicy
          * @return true if the merge finished within the specified timeout
          */
         suspend fun await(timeout: Long, timeUnit: TimeUnit): Boolean {
-            try {
-                return withTimeout(timeUnit.toNanos(timeout).nanoseconds) {
+            return try {
+                withTimeout(timeUnit.toNanos(timeout).nanoseconds) {
                     // Wait for the merge to complete
                     mergeCompleted.await()
                     true
@@ -448,11 +458,11 @@ abstract class MergePolicy
             } catch (ce: kotlinx.coroutines.CancellationException) {
                 throw ThreadInterruptedException(ce)
             } catch (e: ExecutionException) {
-                return false
+                false
             } catch (e: TimeoutException) {
-                return false
+                false
             } catch (e: TimeoutCancellationException) {
-                return false
+                false
             }
         }
 
@@ -484,7 +494,7 @@ abstract class MergePolicy
         fun initMergeReaders(readerFactory: IOFunction<SegmentCommitInfo, MergeReader>) {
             assert(mergeReader.isEmpty()) { "merge readers must be empty" }
             assert(!mergeCompleted.isCompleted) { "merge is already done" }
-            val readers: ArrayList<MergeReader> = ArrayList<MergeReader>(segments.size)
+            val readers: ArrayList<MergeReader> = ArrayList(segments.size)
             try {
                 for (info in segments) {
                     // Hold onto the "live" reader; we will use this to
@@ -507,11 +517,11 @@ abstract class MergePolicy
     /** Sole constructor. Use [.add] to add merges.  */
     {
         /** The subset of segments to be included in the primitive merge.  */
-        val merges: MutableList<OneMerge> = ArrayList<OneMerge>()
+        val merges: MutableList<OneMerge> = ArrayList()
 
         /** Adds the provided [OneMerge] to this specification.  */
         fun add(merge: OneMerge) {
-            merges.add(merge!!)
+            merges.add(merge)
         }
 
         // TODO: deprecate me (dir is never used!  and is sometimes difficult to provide!)
@@ -739,21 +749,21 @@ abstract class MergePolicy
         mergedInfo: SegmentCommitInfo,
         mergeContext: MergeContext
     ): Boolean {
-        if (getNoCFSRatio() == 0.0) {
+        if (noCFSRatio == 0.0) {
             return false
         }
         val mergedInfoSize = size(mergedInfo, mergeContext)
         if (mergedInfoSize > maxCFSSegmentSize) {
             return false
         }
-        if (getNoCFSRatio() >= 1.0) {
+        if (noCFSRatio >= 1.0) {
             return true
         }
         var totalSize: Long = 0
         for (info in infos) {
             totalSize += size(info, mergeContext)
         }
-        return mergedInfoSize <= getNoCFSRatio() * totalSize
+        return mergedInfoSize <= noCFSRatio * totalSize
     }
 
     /**
@@ -781,7 +791,7 @@ abstract class MergePolicy
 
     /** Asserts that the delCount for this SegmentCommitInfo is valid  */
     protected fun assertDelCount(delCount: Int, info: SegmentCommitInfo): Boolean {
-        assert(delCount >= 0) { "delCount must be positive: " + delCount }
+        assert(delCount >= 0) { "delCount must be positive: $delCount" }
         assert(
             delCount <= info.info.maxDoc()
         ) { "delCount: " + delCount + " must be leq than maxDoc: " + info.info.maxDoc() }
@@ -803,25 +813,6 @@ abstract class MergePolicy
         assert(assertDelCount(delCount, info))
         return delCount == 0
                 && useCompoundFile(infos, info, mergeContext) == info.info.useCompoundFile
-    }
-
-    /**
-     * Returns current `noCFSRatio`.
-     *
-     * @see .setNoCFSRatio
-     */
-    fun getNoCFSRatio(): Double {
-        return noCFSRatio
-    }
-
-    /**
-     * If a merged segment will be more than this percentage of the total size of the index, leave the
-     * segment as non-compound file even if compound file is enabled. Set to 1.0 to always use CFS
-     * regardless of merge size.
-     */
-    fun setNoCFSRatio(noCFSRatio: Double) {
-        require(!(noCFSRatio < 0.0 || noCFSRatio > 1.0)) { "noCFSRatio must be 0.0 to 1.0 inclusive; got $noCFSRatio" }
-        this.noCFSRatio = noCFSRatio
     }
 
     var maxCFSSegmentSizeMB: Double

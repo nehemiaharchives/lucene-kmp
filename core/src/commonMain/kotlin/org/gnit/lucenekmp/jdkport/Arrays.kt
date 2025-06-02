@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlin.jvm.JvmName
 import kotlin.math.min
 
 object Arrays {
@@ -951,7 +950,7 @@ object Arrays {
      * classes (except for legacyMergeSort, included in this class).
      */
 
-    fun <T : Comparable<T>>sort(a: Array<T>) = a.sort()
+    fun <T : Comparable<T>> sort(a: Array<T>) = a.sort()
 
     /**
      * Sorts the specified array into ascending numerical order.
@@ -1037,8 +1036,13 @@ object Arrays {
      * @throws IllegalArgumentException (optional) if the comparator is
      * found to violate the [Comparator] contract
     </T> */
-    fun <T> sort(a: Array<T>, c: Comparator<T>) {
+    /*fun <T> sort(a: Array<T>, c: Comparator<T>) {
         Timsort.sort(a, c)
+    }*/
+    fun <T> sort(a: Array<out T>, c: Comparator<out T>) {
+        val castedArray = a as Array<T>
+        val castedComparator = c as Comparator<T>
+        Timsort.sort(castedArray, castedComparator)
     }
 
     /**
@@ -1096,7 +1100,7 @@ object Arrays {
      * not *mutually comparable* (for example, strings and
      * integers).
      */
-    fun <T : Comparable<T>> sort(a: Array<T>, fromIndex: Int, toIndex: Int){
+    fun <T : Comparable<T>> sort(a: Array<T>, fromIndex: Int, toIndex: Int) {
         rangeCheck(a.size, fromIndex, toIndex)
         a.sort(fromIndex, toIndex)
     }

@@ -49,8 +49,6 @@ class Progress : CliktCommand() {
         "org.apache.lucene.internal.tests.FilterIndexInputAccess",
         "org.apache.lucene.internal.tests.IndexPackageAccess",
         "org.apache.lucene.internal.tests.IndexWriterAccess",
-        "org.apache.lucene.internal.tests.SegmentReaderAccess",
-        "org.apache.lucene.internal.tests.TestSecrets",
         "org.apache.lucene.store.FilterIndexInput",
         // Add more FQNs here as needed
     )

@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 712 | 614 | 86% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 626 | 87% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,8 +15,9 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 94 | 55% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 104 | 61% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
+|     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
 |   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 115 | 83% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
@@ -35,8 +36,8 @@
 ## Priority-1 API progress
 | Java class | Mapped class | Java Deps | KMP Deps Ported | KMP Deps To Port | % | Done |
 | --- | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 77 | 51 | 26 | 66% | [ ] |
-| org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 10 | 5 | 66% | [ ] |
+| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 78 | 57 | 21 | 73% | [ ] |
+| org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 11 | 4 | 73% | [ ] |
 | org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory | 8 | 8 | 0 | 100% | [x] |
 | org.apache.lucene.analysis.Analyzer | org.gnit.lucenekmp.analysis.Analyzer | 10 | 10 | 0 | 100% | [x] |
 | org.apache.lucene.document.Document | org.gnit.lucenekmp.document.Document | 2 | 2 | 0 | 100% | [x] |
@@ -44,8 +45,8 @@
 | org.apache.lucene.document.IntPoint | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
 | org.apache.lucene.document.StoredField | org.gnit.lucenekmp.document.StoredField | 3 | 3 | 0 | 100% | [x] |
 | org.apache.lucene.document.TextField | org.gnit.lucenekmp.document.TextField | 4 | 4 | 0 | 100% | [x] |
-| org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader | 6 | 4 | 2 | 66% | [ ] |
-| org.apache.lucene.index.StandardDirectoryReader | org.gnit.lucenekmp.index.StandardDirectoryReader | 13 | 11 | 2 | 84% | [ ] |
+| org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader | 6 | 6 | 0 | 100% | [x] |
+| org.apache.lucene.index.StandardDirectoryReader | org.gnit.lucenekmp.index.StandardDirectoryReader | 13 | 13 | 0 | 100% | [x] |
 | org.apache.lucene.queryparser.classic.QueryParser | org.gnit.lucenekmp.queryparser.classic.QueryParser | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.IndexSearcher | org.gnit.lucenekmp.search.IndexSearcher | 42 | 33 | 9 | 78% | [ ] |
 | org.apache.lucene.store.FSLockFactory | org.gnit.lucenekmp.store.FSLockFactory | 4 | 4 | 0 | 100% | [ ] |
@@ -56,12 +57,11 @@
 | org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 170 | 132 | 38 | 77% | [ ] |
+| TOTAL |  | 171 | 139 | 32 | 81% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| org.apache.lucene.index.BaseCompositeReader | org.gnit.lucenekmp.index.BaseCompositeReader |
 | org.apache.lucene.index.BinaryDocValuesFieldUpdates | org.gnit.lucenekmp.index.BinaryDocValuesFieldUpdates |
 | org.apache.lucene.index.BinaryDocValuesWriter | org.gnit.lucenekmp.index.BinaryDocValuesWriter |
 | org.apache.lucene.index.BufferedUpdatesStream | org.gnit.lucenekmp.index.BufferedUpdatesStream |
@@ -71,7 +71,6 @@
 | org.apache.lucene.index.CheckIndex | org.gnit.lucenekmp.index.CheckIndex |
 | org.apache.lucene.index.ConcurrentApproximatePriorityQueue | org.gnit.lucenekmp.index.ConcurrentApproximatePriorityQueue |
 | org.apache.lucene.index.ConcurrentMergeScheduler | org.gnit.lucenekmp.index.ConcurrentMergeScheduler |
-| org.apache.lucene.index.DirectoryReader | org.gnit.lucenekmp.index.DirectoryReader |
 | org.apache.lucene.index.DocValuesFieldUpdates | org.gnit.lucenekmp.index.DocValuesFieldUpdates |
 | org.apache.lucene.index.DocValuesLeafReader | org.gnit.lucenekmp.index.DocValuesLeafReader |
 | org.apache.lucene.index.DocValuesWriter | org.gnit.lucenekmp.index.DocValuesWriter |
@@ -92,16 +91,13 @@
 | org.apache.lucene.index.FrozenBufferedUpdates | org.gnit.lucenekmp.index.FrozenBufferedUpdates |
 | org.apache.lucene.index.IndexDeletionPolicy | org.gnit.lucenekmp.index.IndexDeletionPolicy |
 | org.apache.lucene.index.IndexFileDeleter | org.gnit.lucenekmp.index.IndexFileDeleter |
-| org.apache.lucene.index.IndexNotFoundException | org.gnit.lucenekmp.index.IndexNotFoundException |
 | org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig |
 | org.apache.lucene.index.IndexWriterEventListener | org.gnit.lucenekmp.index.IndexWriterEventListener |
 | org.apache.lucene.index.IndexingChain | org.gnit.lucenekmp.index.IndexingChain |
 | org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy | org.gnit.lucenekmp.index.KeepOnlyLastCommitDeletionPolicy |
-| org.apache.lucene.index.LiveIndexWriterConfig | org.gnit.lucenekmp.index.LiveIndexWriterConfig |
 | org.apache.lucene.index.LockableConcurrentApproximatePriorityQueue | org.gnit.lucenekmp.index.LockableConcurrentApproximatePriorityQueue |
 | org.apache.lucene.index.MergeRateLimiter | org.gnit.lucenekmp.index.MergeRateLimiter |
 | org.apache.lucene.index.MergeScheduler | org.gnit.lucenekmp.index.MergeScheduler |
-| org.apache.lucene.index.MergeTrigger | org.gnit.lucenekmp.index.MergeTrigger |
 | org.apache.lucene.index.MultiBits | org.gnit.lucenekmp.index.MultiBits |
 | org.apache.lucene.index.MultiDocValues | org.gnit.lucenekmp.index.MultiDocValues |
 | org.apache.lucene.index.MultiReader | org.gnit.lucenekmp.index.MultiReader |
@@ -115,12 +111,7 @@
 | org.apache.lucene.index.PointValuesWriter | org.gnit.lucenekmp.index.PointValuesWriter |
 | org.apache.lucene.index.ReaderPool | org.gnit.lucenekmp.index.ReaderPool |
 | org.apache.lucene.index.ReadersAndUpdates | org.gnit.lucenekmp.index.ReadersAndUpdates |
-| org.apache.lucene.index.SegmentCoreReaders | org.gnit.lucenekmp.index.SegmentCoreReaders |
-| org.apache.lucene.index.SegmentDocValues | org.gnit.lucenekmp.index.SegmentDocValues |
-| org.apache.lucene.index.SegmentDocValuesProducer | org.gnit.lucenekmp.index.SegmentDocValuesProducer |
-| org.apache.lucene.index.SegmentInfos | org.gnit.lucenekmp.index.SegmentInfos |
 | org.apache.lucene.index.SegmentMerger | org.gnit.lucenekmp.index.SegmentMerger |
-| org.apache.lucene.index.SegmentReader | org.gnit.lucenekmp.index.SegmentReader |
 | org.apache.lucene.index.SlowCompositeCodecReaderWrapper | org.gnit.lucenekmp.index.SlowCompositeCodecReaderWrapper |
 | org.apache.lucene.index.SortedDocValuesWriter | org.gnit.lucenekmp.index.SortedDocValuesWriter |
 | org.apache.lucene.index.SortedNumericDocValuesWriter | org.gnit.lucenekmp.index.SortedNumericDocValuesWriter |

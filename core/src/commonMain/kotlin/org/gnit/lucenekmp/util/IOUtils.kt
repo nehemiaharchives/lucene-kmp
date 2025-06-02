@@ -355,8 +355,26 @@ object IOUtils {
 
     /** Applies the [consumer] to all non-null elements in the [collection].
      * If the consumer throws an exception for one element, that exception is re-thrown after applying to all elements, and later exceptions are suppressed. */
+    @JvmName("applyToAllNullable")
     @Throws(IOException::class)
     fun <T> applyToAll(collection: Collection<T?>, consumer: IOConsumer<T>) {
+        var firstException: Throwable? = null
+        for (item in collection) {
+            if (item != null) {
+                try {
+                    consumer.accept(item)
+                } catch (t: Throwable) {
+                    firstException = useOrSuppress(firstException, t)  // first exception gets rethrown, others suppressed
+                }
+            }
+        }
+        if (firstException != null) {
+            throw firstException
+        }
+    }
+
+    @Throws(IOException::class)
+    fun <T> applyToAll(collection: Collection<T>, consumer: IOConsumer<T>) {
         var firstException: Throwable? = null
         for (item in collection) {
             if (item != null) {

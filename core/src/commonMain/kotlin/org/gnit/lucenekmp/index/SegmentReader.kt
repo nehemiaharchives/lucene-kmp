@@ -1,5 +1,8 @@
 package org.gnit.lucenekmp.index
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesProducer
 import org.gnit.lucenekmp.codecs.FieldInfosFormat
@@ -9,9 +12,6 @@ import org.gnit.lucenekmp.codecs.NormsProducer
 import org.gnit.lucenekmp.codecs.PointsReader
 import org.gnit.lucenekmp.codecs.StoredFieldsReader
 import org.gnit.lucenekmp.codecs.TermVectorsReader
-import org.gnit.lucenekmp.index.SegmentCoreReader
-import org.gnit.lucenekmp.index.SegmentDocValue
-import org.gnit.lucenekmp.index.SegmentDocValuesProduce
 import org.gnit.lucenekmp.internal.hppc.LongArrayList
 import org.gnit.lucenekmp.internal.tests.SegmentReaderAccess
 import org.gnit.lucenekmp.internal.tests.TestSecrets
@@ -22,8 +22,7 @@ import org.gnit.lucenekmp.util.IOUtils
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.assert
-import org.gnit.lucenekmp.util.IOConsumer
-import java.util.concurrent.CopyOnWriteArraySet
+/*import java.util.concurrent.CopyOnWriteArraySet*/
 
 /**
  * IndexReader implementation over a single segment.
@@ -42,8 +41,21 @@ class SegmentReader : CodecReader {
     // and lookup pooled readers etc.
     private val originalSi: SegmentCommitInfo
     override val metaData: LeafMetaData
-    override val liveDocs: Bits?
-    private val hardLiveDocs: Bits
+
+    override var liveDocs: Bits?
+        get(): Bits? {
+            ensureOpen()
+            return liveDocs
+        }
+
+    /**
+     * Returns the live docs that are not hard-deleted. This is an expert API to be used with
+     * soft-deletes to filter out document that hard deleted for instance due to aborted documents or
+     * to distinguish soft and hard deleted documents ie. a rolled back tombstone.
+     *
+     * @lucene.experimental
+     */
+    val hardLiveDocs: Bits?
 
     // Normally set to si.maxDoc - si.delDocCount, unless we
     // were created as an NRT reader from IW, in which case IW
@@ -59,8 +71,13 @@ class SegmentReader : CodecReader {
      */
     val isNRT: Boolean
 
-    val docValuesProducer: DocValuesProducer
-    val fieldInfos: FieldInfos
+    val docValuesProducer: DocValuesProducer?
+
+    override var fieldInfos: FieldInfos
+        get(): FieldInfos {
+            ensureOpen()
+            return fieldInfos
+        }
 
     /**
      * Constructs a new SegmentReader with a new core.
@@ -96,11 +113,11 @@ class SegmentReader : CodecReader {
                 // NOTE: the bitvector is stored using the regular directory, not cfs
                 liveDocs =
                     codec.liveDocsFormat().readLiveDocs(directory(), si, IOContext.READONCE)
-                hardLiveDocs = liveDocs
+                hardLiveDocs = liveDocs!!
             } else {
                 assert(si.getDelCount() == 0)
                 liveDocs = null
-                hardLiveDocs = liveDocs
+                hardLiveDocs = liveDocs!!
             }
             numDocs = si.info.maxDoc() - si.getDelCount()
 
@@ -127,16 +144,16 @@ class SegmentReader : CodecReader {
     internal constructor(
         si: SegmentCommitInfo,
         sr: SegmentReader,
-        liveDocs: Bits,
-        hardLiveDocs: Bits,
+        liveDocs: Bits?,
+        hardLiveDocs: Bits?,
         numDocs: Int,
         isNRT: Boolean
     ) {
         require(numDocs <= si.info.maxDoc()) { "numDocs=" + numDocs + " but maxDoc=" + si.info.maxDoc() }
-        require(!(liveDocs != null && liveDocs.length() != si.info.maxDoc())) { "maxDoc=" + si.info.maxDoc() + " but liveDocs.size()=" + liveDocs.length() }
+        require(!(liveDocs != null && liveDocs.length() != si.info.maxDoc())) { "maxDoc=" + si.info.maxDoc() + " but liveDocs.size()=" + liveDocs!!.length() }
         this.si = si.clone()
         this.originalSi = si
-        this.metaData = sr.getMetaData()
+        this.metaData = sr.metaData
         this.liveDocs = liveDocs
         this.hardLiveDocs = hardLiveDocs
         assert(assertLiveDocs(isNRT, hardLiveDocs, liveDocs))
@@ -160,21 +177,16 @@ class SegmentReader : CodecReader {
 
     /** init most recent DocValues for the current commit  */
     @Throws(IOException::class)
-    private fun initDocValuesProducer(): DocValuesProducer {
-        if (fieldInfos.hasDocValues() == false) {
+    private fun initDocValuesProducer(): DocValuesProducer? {
+        if (!fieldInfos.hasDocValues()) {
             return null
         } else {
-            val dir: Directory
-            if (core.cfsReader != null) {
-                dir = core.cfsReader
-            } else {
-                dir = si.info.dir
-            }
-            if (si.hasFieldUpdates()) {
-                return SegmentDocValuesProducer(si, dir, core.coreFieldInfos, fieldInfos, segDocValues)
+            val dir: Directory = core.cfsReader ?: si.info.dir
+            return if (si.hasFieldUpdates()) {
+                SegmentDocValuesProducer(si, dir, core.coreFieldInfos, fieldInfos, segDocValues)
             } else {
                 // simple case, no DocValues updates
-                return segDocValues.getDocValuesProducer(-1L, si, dir, fieldInfos)
+                segDocValues.getDocValuesProducer(-1L, si, dir, fieldInfos)
             }
         }
     }
@@ -192,28 +204,20 @@ class SegmentReader : CodecReader {
         }
     }
 
-    override fun getLiveDocs(): Bits {
-        ensureOpen()
-        return liveDocs
-    }
-
     @Throws(IOException::class)
-    protected override fun doClose() {
+    override fun doClose() {
         // System.out.println("SR.close seg=" + si);
         try {
-            core.decRef()
+            runBlocking{
+                core.decRef()
+            }
         } finally {
             if (docValuesProducer is SegmentDocValuesProducer) {
                 segDocValues.decRef((docValuesProducer as SegmentDocValuesProducer).dvGens)
             } else if (docValuesProducer != null) {
-                segDocValues.decRef(org.apache.lucene.internal.hppc.LongArrayList.from(-1L))
+                segDocValues.decRef(LongArrayList.from(-1L))
             }
         }
-    }
-
-    override fun getFieldInfos(): FieldInfos {
-        ensureOpen()
-        return fieldInfos
     }
 
     override fun numDocs(): Int {
@@ -226,44 +230,40 @@ class SegmentReader : CodecReader {
         return si.info.maxDoc()
     }
 
-    val termVectorsReader: TermVectorsReader
+    override val termVectorsReader: TermVectorsReader?
         get() {
             ensureOpen()
-            if (core.termVectorsReaderOrig == null) {
-                return null
-            } else {
-                return core.termVectorsReaderOrig.clone()
-            }
+            return core.termVectorsReaderOrig?.clone()
         }
 
-    val fieldsReader: StoredFieldsReader
+    override val fieldsReader: StoredFieldsReader
         get() {
             ensureOpen()
             return core.fieldsReaderOrig.clone()
         }
 
-    val pointsReader: PointsReader
+    override val pointsReader: PointsReader?
         get() {
             ensureOpen()
             return core.pointsReader
         }
 
-    val normsReader: NormsProducer
+    override val normsReader: NormsProducer?
         get() {
             ensureOpen()
             return core.normsProducer
         }
 
-    val docValuesReader: DocValuesProducer
+    override val docValuesReader: DocValuesProducer?
         get() {
             ensureOpen()
             return docValuesProducer
         }
 
-    val vectorReader: KnnVectorsReader
+    override val vectorReader: KnnVectorsReader?
         get() = core.knnVectorsReader
 
-    val postingsReader: FieldsProducer
+    override val postingsReader: FieldsProducer?
         get() {
             ensureOpen()
             return core.fields
@@ -291,48 +291,44 @@ class SegmentReader : CodecReader {
         return si.info.dir
     }
 
-    private val readerClosedListeners: MutableSet<IndexReader.ClosedListener> =
-        CopyOnWriteArraySet<IndexReader.ClosedListener>()
+    private val readerClosedListeners: MutableSet<ClosedListener> = mutableSetOf()
+        /*CopyOnWriteArraySet<ClosedListener>()*/
+    private val readerClosedListenersLock = Mutex()
 
-    @Throws(IOException::class)
-    override fun notifyReaderClosedListeners() {
-        synchronized(readerClosedListeners) {
-            IOUtils.applyToAll<IndexReader.ClosedListener>(
-                readerClosedListeners,
-                IOConsumer { l: ClosedListener ->
-                    l.onClose(readerCacheHelper.getKey())
-                })
+    override suspend fun notifyReaderClosedListeners() {
+        readerClosedListenersLock.withLock {
+            IOUtils.applyToAll(
+                readerClosedListeners
+            ) { l: ClosedListener ->
+                l.onClose(readerCacheHelper.key)
+            }
         }
     }
 
-    override val readerCacheHelper: IndexReader.CacheHelper =
-        object : IndexReader.CacheHelper {
-            private val cacheKey: IndexReader.CacheKey =
-                IndexReader.CacheKey()
+    override val readerCacheHelper: CacheHelper =
+        object : CacheHelper {
+            private val cacheKey: CacheKey =
+                CacheKey()
 
-            override val key: IndexReader.CacheKey
+            override val key: CacheKey
                 get() = cacheKey
 
-            override fun addClosedListener(listener: IndexReader.ClosedListener) {
+            override suspend fun addClosedListener(listener: ClosedListener) {
                 ensureOpen()
                 readerClosedListeners.add(listener)
             }
         }
 
-    /*override fun getReaderCacheHelper(): IndexReader.CacheHelper {
-        return readerCacheHelper
-    }*/
-
     /**
      * Wrap the cache helper of the core to add ensureOpen() calls that make sure users do not
      * register closed listeners on closed indices.
      */
-    override val coreCacheHelper: IndexReader.CacheHelper =
-        object : IndexReader.CacheHelper {
-            override val key: IndexReader.CacheKey
-                get() = core.getCacheHelper().getKey()
+    override val coreCacheHelper: CacheHelper =
+        object : CacheHelper {
+            override val key: CacheKey
+                get() = core.getCacheHelper().key
 
-            override fun addClosedListener(listener: IndexReader.ClosedListener) {
+            override suspend fun addClosedListener(listener: ClosedListener) {
                 ensureOpen()
                 core.getCacheHelper().addClosedListener(listener)
             }
@@ -348,30 +344,17 @@ class SegmentReader : CodecReader {
          */
         get() = originalSi
 
-    /**
-     * Returns the live docs that are not hard-deleted. This is an expert API to be used with
-     * soft-deletes to filter out document that hard deleted for instance due to aborted documents or
-     * to distinguish soft and hard deleted documents ie. a rolled back tombstone.
-     *
-     * @lucene.experimental
-     */
-    fun getHardLiveDocs(): Bits {
-        return hardLiveDocs
-    }
-
     @Throws(IOException::class)
     override fun checkIntegrity() {
         super.checkIntegrity()
-        if (core.cfsReader != null) {
-            core.cfsReader.checkIntegrity()
-        }
+        core.cfsReader?.checkIntegrity()
     }
 
     companion object {
         private fun assertLiveDocs(
             isNRT: Boolean,
-            hardLiveDocs: Bits,
-            liveDocs: Bits
+            hardLiveDocs: Bits?,
+            liveDocs: Bits?
         ): Boolean {
             if (isNRT) {
                 assert(
@@ -385,8 +368,8 @@ class SegmentReader : CodecReader {
 
         init {
             TestSecrets.setSegmentReaderAccess(
-                object : SegmentReaderAccess() {
-                    public override fun getCore(segmentReader: SegmentReader): Any {
+                object : SegmentReaderAccess {
+                    override fun getCore(segmentReader: SegmentReader): Any {
                         return segmentReader.core
                     }
                 })

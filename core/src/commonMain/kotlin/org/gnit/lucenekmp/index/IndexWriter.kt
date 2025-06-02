@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.index
 import okio.IOException
 import org.gnit.lucenekmp.search.Sort
 import org.gnit.lucenekmp.search.SortField
+import org.gnit.lucenekmp.store.Directory
 
 /**
  * An <code>IndexWriter</code> creates and maintains an index.
@@ -124,6 +125,75 @@ class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.Mer
          */
         @Throws(IOException::class)
         fun warm(reader: LeafReader?)
+    }
+
+    /**
+     * Record that the files referenced by this [SegmentInfos] are still in use.
+     *
+     * @lucene.internal
+     */
+    @Throws(IOException::class)
+    fun incRefDeleter(segmentInfos: SegmentInfos) {
+        /*ensureOpen()
+        deleter.incRef(segmentInfos, false)
+        if (infoStream.isEnabled("IW")) {
+            infoStream.message(
+                "IW",
+                ("incRefDeleter for NRT reader version="
+                        + segmentInfos.getVersion()
+                        + " segments="
+                        + segString(segmentInfos))
+            )
+        }*/
+    }
+
+    private var closed = false
+
+    fun isClosed(): Boolean {
+        return closed
+    }
+
+    fun nrtIsCurrent(infos: SegmentInfos ): Boolean {
+        return true
+    }
+
+    /**
+     * Record that the files referenced by this [SegmentInfos] are no longer in use. Only call
+     * this if you are sure you previously called [.incRefDeleter].
+     *
+     * @lucene.internal
+     */
+    @Throws(IOException::class)
+    fun decRefDeleter(segmentInfos: SegmentInfos) {
+        /*ensureOpen()
+        deleter.decRef(segmentInfos)
+        if (infoStream.isEnabled("IW")) {
+            infoStream.message(
+                "IW",
+                ("decRefDeleter for NRT reader version="
+                        + segmentInfos.getVersion()
+                        + " segments="
+                        + segString(segmentInfos))
+            )
+        }*/
+    }
+
+
+    // The instance that was passed to the constructor. It is saved only in order
+    // to allow users to query an IndexWriter settings.
+    val config: LiveIndexWriterConfig? = null
+
+    private val directoryOrig: Directory? = null // original user directory
+
+
+    /** Returns the Directory used by this index.  */
+    fun getDirectory(): Directory {
+        // return the original directory the user supplied, unwrapped.
+        return directoryOrig!!
+    }
+
+    fun getReader(applyAllDeletes: Boolean, writeAllDeletes: Boolean): DirectoryReader{
+        throw UnsupportedOperationException()
     }
 
     companion object{

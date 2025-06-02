@@ -26,10 +26,10 @@ protected constructor() : Comparable<IndexCommit?> {
     /** Get the segments file (`segments_N`) associated with this commit point.  */
     abstract val segmentsFileName: String?
 
-    abstract val fileNames: MutableCollection<String?>?
+    abstract val fileNames: MutableCollection<String>
 
     /** Returns the [Directory] for the index.  */
-    abstract val directory: Directory?
+    abstract val directory: Directory
 
     /**
      * Delete this commit point. This only applies when using the commit point in the context of
@@ -70,7 +70,7 @@ protected constructor() : Comparable<IndexCommit?> {
     /** Returns the generation (the _N in segments_N) for this IndexCommit  */
     abstract val generation: Long
 
-    abstract val userData: MutableMap<String?, String?>?
+    abstract val userData: MutableMap<String, String>
 
     override fun compareTo(commit: IndexCommit?): Int {
         if (this.directory !== commit!!.directory) {
@@ -84,7 +84,7 @@ protected constructor() : Comparable<IndexCommit?> {
         return gen.compareTo(comgen)
     }
 
-    val reader: StandardDirectoryReader?
+    open val reader: StandardDirectoryReader?
         /**
          * Package-private API for IndexWriter to init from a commit-point pulled from an NRT or non-NRT
          * reader.

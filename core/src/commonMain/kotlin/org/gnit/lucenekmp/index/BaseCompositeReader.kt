@@ -36,13 +36,13 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  * @lucene.internal
  */
 abstract class BaseCompositeReader<R : IndexReader> protected constructor(
-    subReaders: Array<R>,
-    subReadersSorter: Comparator<R>
+    subReaders: Array<out R>,
+    subReadersSorter: Comparator<out R>?
 ) : CompositeReader() {
-    private val subReaders: Array<R>
+    private val subReaders: Array<out R>
 
     /** A comparator for sorting sub-readers  */
-    protected val subReadersSorter: Comparator<R>
+    protected val subReadersSorter: Comparator<out R>?
 
     private val starts: IntArray // 1st docno for each reader
     private val maxDoc: Int
@@ -256,7 +256,7 @@ abstract class BaseCompositeReader<R : IndexReader> protected constructor(
 
     /** Helper method for subclasses to get the corresponding reader for a doc ID  */
     protected fun readerIndex(docID: Int): Int {
-        require(!(docID < 0 || docID >= maxDoc)) { "docID must be >= 0 and < maxDoc=" + maxDoc + " (got docID=" + docID + ")" }
+        require(!(docID < 0 || docID >= maxDoc)) { "docID must be >= 0 and < maxDoc=$maxDoc (got docID=$docID)" }
         return ReaderUtil.subIndex(docID, this.starts)
     }
 

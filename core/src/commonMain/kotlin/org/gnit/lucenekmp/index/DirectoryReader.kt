@@ -8,7 +8,6 @@ import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.Directory
 import kotlin.jvm.JvmOverloads
 
-
 /**
  * DirectoryReader is an implementation of [CompositeReader] that can read indexes in a [ ].
  *
@@ -33,8 +32,8 @@ import kotlin.jvm.JvmOverloads
  */
 abstract class DirectoryReader protected constructor(
     directory: Directory,
-    segmentReaders: Array<LeafReader>,
-    leafSorter: Comparator<LeafReader>
+    segmentReaders: Array<out LeafReader>,
+    leafSorter: Comparator<out LeafReader>?
 ) : BaseCompositeReader<LeafReader>(segmentReaders, leafSorter) {
     /** The index directory.  */
     protected val directory: Directory
@@ -71,7 +70,7 @@ abstract class DirectoryReader protected constructor(
      * @return null if there are no changes; else, a new DirectoryReader instance.
      */
     @Throws(IOException::class)
-    protected abstract fun doOpenIfChanged(): DirectoryReader
+    protected abstract fun doOpenIfChanged(): DirectoryReader?
 
     /**
      * Implement this method to support [.openIfChanged]. If this
@@ -81,7 +80,7 @@ abstract class DirectoryReader protected constructor(
      * @return null if there are no changes; else, a new DirectoryReader instance.
      */
     @Throws(IOException::class)
-    protected abstract fun doOpenIfChanged(commit: IndexCommit): DirectoryReader
+    protected abstract fun doOpenIfChanged(commit: IndexCommit?): DirectoryReader?
 
     /**
      * Implement this method to support [.openIfChanged].
@@ -94,7 +93,7 @@ abstract class DirectoryReader protected constructor(
     protected abstract fun doOpenIfChanged(
         writer: IndexWriter,
         applyAllDeletes: Boolean
-    ): DirectoryReader
+    ): DirectoryReader?
 
     /**
      * Version number when this IndexReader was opened.
@@ -105,10 +104,8 @@ abstract class DirectoryReader protected constructor(
      */
     abstract val version: Long
 
-    @get:Throws(IOException::class)
     abstract val isCurrent: Boolean
 
-    @get:Throws(IOException::class)
     abstract val indexCommit: IndexCommit
 
     companion object {
@@ -237,7 +234,7 @@ abstract class DirectoryReader protected constructor(
          * eventually close
          */
         @Throws(IOException::class)
-        fun openIfChanged(oldReader: DirectoryReader): DirectoryReader {
+        fun openIfChanged(oldReader: DirectoryReader): DirectoryReader? {
             val newReader = oldReader.doOpenIfChanged()
             assert(newReader !== oldReader)
             return newReader
@@ -250,7 +247,7 @@ abstract class DirectoryReader protected constructor(
          * @see .openIfChanged
          */
         @Throws(IOException::class)
-        fun openIfChanged(oldReader: DirectoryReader, commit: IndexCommit): DirectoryReader {
+        fun openIfChanged(oldReader: DirectoryReader, commit: IndexCommit): DirectoryReader? {
             val newReader = oldReader.doOpenIfChanged(commit)
             assert(newReader !== oldReader)
             return newReader
@@ -315,7 +312,7 @@ abstract class DirectoryReader protected constructor(
         @Throws(IOException::class)
         fun openIfChanged(
             oldReader: DirectoryReader, writer: IndexWriter, applyAllDeletes: Boolean = true
-        ): DirectoryReader {
+        ): DirectoryReader? {
             val newReader = oldReader.doOpenIfChanged(writer, applyAllDeletes)
             assert(newReader !== oldReader)
             return newReader
@@ -337,7 +334,7 @@ abstract class DirectoryReader protected constructor(
             val commits: MutableList<IndexCommit> = ArrayList()
 
             val latest: SegmentInfos = SegmentInfos.readLatestCommit(dir, 0)
-            val currentGen: Long = latest.getGeneration()
+            val currentGen: Long = latest.generation
 
             commits.add(ReaderCommit(null, latest, dir))
 
@@ -347,7 +344,7 @@ abstract class DirectoryReader protected constructor(
                 if (fileName.startsWith(IndexFileNames.SEGMENTS)
                     && SegmentInfos.generationFromSegmentsFileName(fileName) < currentGen
                 ) {
-                    var sis: SegmentInfos = null
+                    var sis: SegmentInfos? = null
                     try {
                         // IOException allowed to throw there, in case
                         // segments_N is corrupt

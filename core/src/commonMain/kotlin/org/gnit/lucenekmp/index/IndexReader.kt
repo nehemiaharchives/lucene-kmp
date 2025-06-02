@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import kotlin.concurrent.atomics.AtomicInt
@@ -105,7 +106,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
         /**
          * Add a [ClosedListener] which will be called when the resource guarded by [ ][.getKey] is closed.
          */
-        fun addClosedListener(listener: ClosedListener)
+        suspend fun addClosedListener(listener: ClosedListener)
     }
 
     /** A cache key identifying a resource that is being cached on.  */
@@ -151,8 +152,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      *
      * @lucene.internal
      */
-    @Throws(IOException::class)
-    protected fun notifyReaderClosedListeners() {
+    protected open suspend fun notifyReaderClosedListeners() {
         // nothing to notify in the base impl
     }
 
@@ -231,8 +231,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      * @see .incRef
      */
     @OptIn(ExperimentalAtomicApi::class)
-    @Throws(IOException::class)
-    fun decRef() {
+    suspend fun decRef() {
         // only check refcount here (don't call ensureOpen()), so we can
         // still close the reader if it was made invalid by a child:
         if (refCount.load() <= 0) {
@@ -242,12 +241,10 @@ abstract class IndexReader internal constructor() : AutoCloseable {
         val rc: Int = refCount.addAndFetch(-1)
         if (rc == 0) {
             closed = true
-            AutoCloseable { this.reportCloseToParentReaders() }.use { `_` ->
-                AutoCloseable { this.notifyReaderClosedListeners() }.use { `_` ->
-                    doClose()
-                }
-            }
-        } else check(rc >= 0) { "too many decRef calls: refCount is " + rc + " after decrement" }
+            this.reportCloseToParentReaders()
+            this.notifyReaderClosedListeners()
+            doClose()
+        } else check(rc >= 0) { "too many decRef calls: refCount is $rc after decrement" }
     }
 
     /**
@@ -379,7 +376,9 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      */
     override fun close() {
         if (!closed) {
-            decRef()
+            runBlocking {
+                decRef()
+            }
             closed = true
         }
     }

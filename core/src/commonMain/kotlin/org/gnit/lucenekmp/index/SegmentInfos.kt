@@ -11,6 +11,7 @@ import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.jdkport.PrintStream
+import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.ChecksumIndexInput
 import org.gnit.lucenekmp.store.DataInput
@@ -86,12 +87,24 @@ import kotlin.jvm.JvmOverloads
  *
  * @lucene.experimental
  */
-class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentCommitInfo> {
+class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Iterable<SegmentCommitInfo> {
     /** Used to name new segments.  */
     var counter: Long = 0
 
     /** Counts how often the index has been changed.  */
     var version: Long = 0
+        set(newVersion) {
+            require(newVersion >= version) {
+                ("newVersion (="
+                        + newVersion
+                        + ") cannot be less than current version (="
+                        + version
+                        + ")")
+            }
+            // System.out.println(Thread.currentThread().getName() + ": SIS.setVersion change from " +
+            // version + " to " + newVersion);
+            version = newVersion
+        }
 
     /** Returns current generation.  */
     var generation: Long = 0 // generation of the "segments_N" for the next commit
@@ -103,11 +116,15 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
 
     // or wrote; this is normally the same as generation except if
     // there was an IOException that had interrupted a commit
-    /** Opaque Map&lt;String, String&gt; that user can specify during IndexWriter.commit  */
-    var userData: MutableMap<String, String> = mutableMapOf<String, String>()
+    /** Opaque Map&lt;String, String&gt; that user can specify during IndexWriter.commit
+     * Return `userData` saved with this commit.
+     *
+     * @see IndexWriter.commit
+     */
+    var userData: MutableMap<String, String> = mutableMapOf()
 
     private var segments: MutableList<SegmentCommitInfo> =
-        ArrayList<SegmentCommitInfo>()
+        ArrayList()
 
     /** Id for this commit; only written starting with Lucene 5.0  */
     private lateinit var id: ByteArray
@@ -128,7 +145,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
 
     /** Returns [SegmentCommitInfo] at the provided index.  */
     fun info(i: Int): SegmentCommitInfo {
-        return segments.get(i)
+        return segments[i]
     }
 
     val segmentsFileName: String?
@@ -142,16 +159,16 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
     private val nextPendingGeneration: Long
         /** return generation of the next pending_segments_N that will be written  */
         get() {
-            if (generation == -1L) {
-                return 1
+            return if (generation == -1L) {
+                1
             } else {
-                return generation + 1
+                generation + 1
             }
         }
 
     /** Since Lucene 5.0, every commit (segments_N) writes a unique id. This will return that id  */
     fun getId(): ByteArray {
-        return id.clone()
+        return id.copyOf()
     }
 
     // Only true after prepareCommit has been called and
@@ -190,7 +207,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
             segnOutput = directory.createOutput(segmentFileName!!, IOContext.DEFAULT)
             write(segnOutput)
             segnOutput.close()
-            directory.sync(mutableSetOf<String>(segmentFileName))
+            directory.sync(mutableSetOf(segmentFileName))
             success = true
         } finally {
             if (success) {
@@ -312,26 +329,21 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
     }
 
     /** Returns a copy of this instance, also copying each SegmentInfo.  */
-    public override fun clone(): SegmentInfos {
+    override fun clone(): SegmentInfos {
         try {
             val sis = /*super.clone() as SegmentInfos*/ SegmentInfos(indexCreatedVersionMajor)
             // deep clone, first recreate all collections:
-            sis.segments = ArrayList<SegmentCommitInfo>(size())
+            sis.segments = ArrayList(size())
             for (info in this) {
                 checkNotNull(info.info.getCodec())
                 // dont directly access segments, use add method!!!
                 sis.add(info.clone())
             }
-            sis.userData = HashMap<String, String>(userData)
+            sis.userData = HashMap(userData)
             return sis
         } catch (e: /*CloneNotSupported*/Exception) {
             throw RuntimeException("should not happen", e)
         }
-    }
-
-    /** version number when this SegmentInfos was generated.  */
-    fun getVersion(): Long {
-        return version
     }
 
     /**
@@ -352,7 +364,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
                 return doBody(commit.segmentsFileName!!)
             }
 
-            var lastGen: Long = -1
+            var lastGen: Long
             var gen: Long = -1
             var exc: IOException? = null
 
@@ -376,7 +388,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
                     // listAll() is weakly consistent, this means we hit "concurrent modification exception"
                     continue
                 }
-                gen = Companion.getLastCommitGeneration(files)
+                gen = getLastCommitGeneration(files)
 
                 if (infoStream != null) {
                     message("directory listing gen=$gen")
@@ -586,22 +598,9 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
         return buffer.toString()
     }
 
-    /**
-     * Return `userData` saved with this commit.
-     *
-     * @see IndexWriter.commit
-     */
-    fun getUserData(): MutableMap<String, String> {
-        return userData!!
-    }
-
     /** Sets the commit data.  */
     fun setUserData(data: MutableMap<String, String>, doIncrementVersion: Boolean) {
-        if (data == null) {
-            userData = mutableMapOf<String, String>()
-        } else {
-            userData = data
-        }
+        userData = data ?: mutableMapOf()
         if (doIncrementVersion) {
             changed()
         }
@@ -635,40 +634,27 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
         // new Throwable().printStackTrace(System.out);
     }
 
-    fun setVersion(newVersion: Long) {
-        require(newVersion >= version) {
-            ("newVersion (="
-                    + newVersion
-                    + ") cannot be less than current version (="
-                    + version
-                    + ")")
-        }
-        // System.out.println(Thread.currentThread().getName() + ": SIS.setVersion change from " +
-        // version + " to " + newVersion);
-        version = newVersion
-    }
-
     /** applies all changes caused by committing a merge to this SegmentInfos  */
     fun applyMergeChanges(merge: OneMerge, dropSegment: Boolean) {
-        require(!(indexCreatedVersionMajor >= 7 && merge.info.info.minVersion == null)) { "All segments must record the minVersion for indices created on or after Lucene 7" }
+        require(!(indexCreatedVersionMajor >= 7 && merge.info!!.info.minVersion == null)) { "All segments must record the minVersion for indices created on or after Lucene 7" }
 
         val mergedAway: MutableSet<SegmentCommitInfo> =
-            HashSet<SegmentCommitInfo>(merge.segments)
+            HashSet(merge.segments)
         var inserted = false
         var newSegIdx = 0
         var segIdx = 0
         val cnt = segments.size
         while (segIdx < cnt) {
             assert(segIdx >= newSegIdx)
-            val info: SegmentCommitInfo = segments.get(segIdx)
+            val info: SegmentCommitInfo = segments[segIdx]
             if (mergedAway.contains(info)) {
                 if (!inserted && !dropSegment) {
-                    segments.set(segIdx, merge.info)
+                    segments[segIdx] = merge.info!!
                     inserted = true
                     newSegIdx++
                 }
             } else {
-                segments.set(newSegIdx, info)
+                segments[newSegIdx] = info
                 newSegIdx++
             }
             segIdx++
@@ -683,13 +669,13 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
         // be the case that the new segment is also all deleted,
         // we insert it at the beginning if it should not be dropped:
         if (!inserted && !dropSegment) {
-            segments.add(0, merge.info)
+            segments.add(0, merge.info!!)
         }
     }
 
     fun createBackupSegmentInfos(): MutableList<SegmentCommitInfo> {
         val list: MutableList<SegmentCommitInfo> =
-            ArrayList<SegmentCommitInfo>(size())
+            ArrayList(size())
         for (info in this) {
             checkNotNull(info.info.getCodec())
             list.add(info.clone())
@@ -795,7 +781,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
         /** The version that recorded SegmentCommitInfo IDs  */
         const val VERSION_86: Int = 10
 
-        val VERSION_CURRENT: Int = VERSION_86
+        const val VERSION_CURRENT: Int = VERSION_86
 
         /** Name of the generation reference file name  */
         const val OLD_SEGMENTS_GEN: String = "segments.gen"
@@ -867,10 +853,10 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
         /** Parse the generation off the segments file name and return it.  */
         fun generationFromSegmentsFileName(fileName: String): Long {
             require(fileName != OLD_SEGMENTS_GEN) { "\"$OLD_SEGMENTS_GEN\" is not a valid segment file name since 4.0" }
-            if (fileName == IndexFileNames.SEGMENTS) {
-                return 0
+            return if (fileName == IndexFileNames.SEGMENTS) {
+                0
             } else if (fileName.startsWith(IndexFileNames.SEGMENTS)) {
-                return fileName.substring(1 + IndexFileNames.SEGMENTS.length)
+                fileName.substring(1 + IndexFileNames.SEGMENTS.length)
                     .toLong(Character.MAX_RADIX)
             } else {
                 throw IllegalArgumentException("fileName \"$fileName\" is not a segments file")
@@ -980,7 +966,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
                                 + (if (minSupportedMajorVersion == Version.MIN_SUPPORTED_MAJOR)
                             " the current and previous major versions"
                         else
-                            " from version " + minSupportedMajorVersion + " upwards"))
+                            " from version $minSupportedMajorVersion upwards"))
                     )
                 }
 
@@ -1015,7 +1001,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
             infos.counter = input.readVLong()
             val numSegments: Int = CodecUtil.readBEInt(input)
             if (numSegments < 0) {
-                throw CorruptIndexException("invalid segment count: " + numSegments, input)
+                throw CorruptIndexException("invalid segment count: $numSegments", input)
             }
 
             if (numSegments > 0) {
@@ -1061,12 +1047,12 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
                 if (format > VERSION_74) {
                     val marker: Byte = input.readByte()
                     when (marker) {
-                        1 -> {
+                        1.toByte() -> {
                             sciId = ByteArray(StringHelper.ID_LENGTH)
                             input.readBytes(sciId, 0, sciId.size)
                         }
 
-                        0 -> sciId = null
+                        0.toByte() -> sciId = null
                         else -> throw CorruptIndexException(
                             "invalid SegmentCommitInfo ID marker: $marker", input
                         )
@@ -1087,7 +1073,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
                 val dvUpdateFiles: MutableMap<Int, MutableSet<String>>
                 val numDVFields: Int = CodecUtil.readBEInt(input)
                 if (numDVFields == 0) {
-                    dvUpdateFiles = mutableMapOf<Int, MutableSet<String>>()
+                    dvUpdateFiles = mutableMapOf()
                 } else {
                     val map: MutableMap<Int, MutableSet<String>> =
                         CollectionUtil.newHashMap(numDVFields)
@@ -1101,7 +1087,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable, Iterable<SegmentC
 
                 val segmentVersion: Version = info.getVersion()
 
-                if (segmentVersion.onOrAfter(infos.minSegmentLuceneVersion!!) == false) {
+                if (!segmentVersion.onOrAfter(infos.minSegmentLuceneVersion!!)) {
                     throw CorruptIndexException(
                         ("segments file recorded minSegmentLuceneVersion="
                                 + infos.minSegmentLuceneVersion

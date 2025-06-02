@@ -11,7 +11,7 @@ import kotlin.concurrent.atomics.incrementAndFetch
  * Manages reference counting for a given object. Extensions can override [.release] to do
  * custom logic when reference counting hits 0.
  */
-class RefCount<T>(protected val `object`: T?) {
+open class RefCount<T>(protected val `object`: T?) {
     @OptIn(ExperimentalAtomicApi::class)
     private val refCount: AtomicInteger = AtomicInteger(1)
 
@@ -20,7 +20,7 @@ class RefCount<T>(protected val `object`: T?) {
      * override to e.g. release resources attached to object that is managed by this class.
      */
     @Throws(IOException::class)
-    protected fun release() {
+    protected open fun release() {
     }
 
     /**
