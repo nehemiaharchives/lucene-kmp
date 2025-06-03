@@ -63,9 +63,27 @@ class CharBuffer private constructor(
 
     /** Reads [length] characters into [dst] starting at [dstOffset], advancing the buffer’s position. */
     fun get(dst: CharArray, dstOffset: Int, length: Int): CharBuffer {
-        if (length > remaining()) throw BufferUnderflowException("Not enough characters remaining")
-        if (dstOffset < 0 || dstOffset + length > dst.size)
-            throw IndexOutOfBoundsException("Destination out of bounds")
+        // 1. Validate destination array arguments (dstOffset, length) against dst.size.
+        //    Objects.checkFromIndexSize handles:
+        //    - dstOffset < 0
+        //    - length < 0
+        //    - dstOffset + length > dst.size (including overflow of dstOffset + length)
+        //    It throws IndexOutOfBoundsException if any condition is met.
+        Objects.checkFromIndexSize(dstOffset, length, dst.size)
+
+        // 2. If length is 0, it's a no-op (after validating dst args).
+        //    Return immediately. Position must not change.
+        if (length == 0) {
+            return this
+        }
+
+        // 3. Now, it's established that length > 0.
+        //    Check if the buffer has enough elements to satisfy the request.
+        if (length > remaining()) {
+            throw BufferUnderflowException("Requested $length characters, but only ${remaining()} remain in the buffer.")
+        }
+
+        // 4. Perform the copy. The relative get() will modify the position.
         for (i in 0 until length) {
             dst[dstOffset + i] = get()
         }
@@ -75,9 +93,23 @@ class CharBuffer private constructor(
     /** Writes [length] characters from [src] (starting at [srcOffset]) into this buffer, advancing the position. */
     fun put(src: CharArray, srcOffset: Int, length: Int): CharBuffer {
         if (readOnly) throw ReadOnlyBufferException("Buffer is read-only")
-        if (length > remaining()) throw BufferOverflowException("Not enough space remaining")
-        if (srcOffset < 0 || srcOffset + length > src.size)
-            throw IndexOutOfBoundsException("Source out of bounds")
+
+        // 1. Validate source array arguments (srcOffset, length) against src.size.
+        Objects.checkFromIndexSize(srcOffset, length, src.size)
+
+        // 2. If length is 0, it's a no-op (after validating src args).
+        //    Return immediately. Position must not change.
+        if (length == 0) {
+            return this
+        }
+
+        // 3. Now, it's established that length > 0.
+        //    Check if this buffer has enough space.
+        if (length > remaining()) {
+            throw BufferOverflowException("Requested put of $length characters, but only ${remaining()} space remains.")
+        }
+
+        // 4. Perform the copy. The relative put() will modify the position.
         for (i in 0 until length) {
             put(src[srcOffset + i])
         }
