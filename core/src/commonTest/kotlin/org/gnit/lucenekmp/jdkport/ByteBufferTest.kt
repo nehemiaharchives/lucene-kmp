@@ -499,8 +499,8 @@ class ByteBufferTest {
 
         dstPartial.clear() // capacity 10
         dstPartial.put(srcPartial)
-        assertEquals(5, dstPartial.position(), "Dst position should be 5 after putting 5 bytes")
-        assertEquals(5, srcPartial.position(), "Src position should be 5 after being put")
+        assertEquals(5, dstPartial.position, "Dst position should be 5 after putting 5 bytes")
+        assertEquals(5, srcPartial.position, "Src position should be 5 after being put")
         dstPartial.flip()
         for (i in 0 until 5) {
             assertEquals(i.toByte(), dstPartial.get(), "Data in dstPartial should match srcPartial data at index $i")
@@ -545,7 +545,7 @@ class ByteBufferTest {
         // Test putting at the exact end of the buffer
         val exactEndBuffer = ByteBuffer.allocate(2)
         exactEndBuffer.putShort(value)
-        assertEquals(2, exactEndBuffer.position())
+        assertEquals(2, exactEndBuffer.position)
         assertFailsWith<BufferOverflowException>("Should throw BufferOverflowException when trying to put past limit") {
             exactEndBuffer.putShort(0.toShort()) // Try to put one more
         }
@@ -593,7 +593,7 @@ class ByteBufferTest {
         // Test putting at the exact end of the buffer
         val exactEndBuffer = ByteBuffer.allocate(4)
         exactEndBuffer.putInt(value)
-        assertEquals(4, exactEndBuffer.position())
+        assertEquals(4, exactEndBuffer.position)
         assertFailsWith<BufferOverflowException>("Should throw BufferOverflowException when trying to put past limit") {
             exactEndBuffer.putInt(0) // Try to put one more
         }
@@ -812,7 +812,7 @@ class ByteBufferTest {
         // Test putting at the exact end of the buffer
         val exactEndBuffer = ByteBuffer.allocate(8)
         exactEndBuffer.putLong(value)
-        assertEquals(8, exactEndBuffer.position())
+        assertEquals(8, exactEndBuffer.position)
         assertFailsWith<BufferOverflowException>("Should throw BufferOverflowException when trying to put past limit") {
             exactEndBuffer.putLong(0L) // Try to put one more
         }
