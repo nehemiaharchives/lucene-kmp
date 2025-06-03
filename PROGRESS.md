@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 628 | 87% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 630 | 88% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,7 +15,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 106 | 62% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 108 | 63% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -62,7 +62,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| org.apache.lucene.index.BinaryDocValuesWriter | org.gnit.lucenekmp.index.BinaryDocValuesWriter |
 | org.apache.lucene.index.BufferedUpdatesStream | org.gnit.lucenekmp.index.BufferedUpdatesStream |
 | org.apache.lucene.index.ByteSlicePool | org.gnit.lucenekmp.index.ByteSlicePool |
 | org.apache.lucene.index.ByteSliceReader | org.gnit.lucenekmp.index.ByteSliceReader |
@@ -71,7 +70,6 @@
 | org.apache.lucene.index.ConcurrentApproximatePriorityQueue | org.gnit.lucenekmp.index.ConcurrentApproximatePriorityQueue |
 | org.apache.lucene.index.ConcurrentMergeScheduler | org.gnit.lucenekmp.index.ConcurrentMergeScheduler |
 | org.apache.lucene.index.DocValuesLeafReader | org.gnit.lucenekmp.index.DocValuesLeafReader |
-| org.apache.lucene.index.DocValuesWriter | org.gnit.lucenekmp.index.DocValuesWriter |
 | org.apache.lucene.index.DocumentsWriter | org.gnit.lucenekmp.index.DocumentsWriter |
 | org.apache.lucene.index.DocumentsWriterDeleteQueue | org.gnit.lucenekmp.index.DocumentsWriterDeleteQueue |
 | org.apache.lucene.index.DocumentsWriterFlushControl | org.gnit.lucenekmp.index.DocumentsWriterFlushControl |
