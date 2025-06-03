@@ -921,15 +921,15 @@ abstract class MergePolicy
     class MergeReader {
         val codecReader: CodecReader
         val reader: SegmentReader?
-        val hardLiveDocs: Bits
+        val hardLiveDocs: Bits?
 
-        constructor(reader: SegmentReader, hardLiveDocs: Bits) {
+        constructor(reader: SegmentReader, hardLiveDocs: Bits?) {
             this.codecReader = reader
             this.reader = reader
             this.hardLiveDocs = hardLiveDocs
         }
 
-        constructor(reader: CodecReader, hardLiveDocs: Bits) {
+        constructor(reader: CodecReader, hardLiveDocs: Bits?) {
             if (/*SegmentReader::class.java.isAssignableFrom(reader.javaClass)*/ reader is SegmentReader) {
                 this.reader = reader as SegmentReader
             } else {

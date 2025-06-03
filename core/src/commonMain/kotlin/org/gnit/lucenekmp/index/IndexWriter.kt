@@ -196,6 +196,35 @@ class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.Mer
         throw UnsupportedOperationException()
     }
 
+    // FrozenBufferedUpdates
+    /**
+     * Translates a frozen packet of delete term/query, or doc values updates, into their actual
+     * docIDs in the index, and applies the change. This is a heavy operation and is done concurrently
+     * by incoming indexing threads. This method will return immediately without blocking if another
+     * thread is currently applying the package. In order to ensure the packet has been applied,
+     * [IndexWriter.forceApply] must be called.
+     */
+    @Throws(IOException::class)
+    fun tryApply(updates: FrozenBufferedUpdates): Boolean {
+        if (updates.tryLock()) {
+            try {
+                forceApply(updates)
+                return true
+            } finally {
+                updates.unlock()
+            }
+        }
+        return false
+    }
+
+    fun forceApply(updates: FrozenBufferedUpdates) {
+        // This method is called by the IndexWriter to apply the updates
+        // to the index. It should be implemented in a way that it applies
+        // the updates to the index and ensures that the changes are visible
+        // to readers.
+        throw UnsupportedOperationException("forceApply is not implemented")
+    }
+
     companion object{
 
         /**

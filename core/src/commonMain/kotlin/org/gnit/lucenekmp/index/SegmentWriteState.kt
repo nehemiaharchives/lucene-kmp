@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.util.InfoStream
  */
 class SegmentWriteState {
     /** [InfoStream] used for debugging messages.  */
-    val infoStream: InfoStream
+    val infoStream: InfoStream?
 
     /** [Directory] where this segment will be written to.  */
     val directory: Directory
@@ -38,7 +38,7 @@ class SegmentWriteState {
      * it was deleted/updated at one point, and it's mapped to the docIDUpto, meaning any docID &lt;
      * docIDUpto containing this term should be deleted/updated.
      */
-    val segUpdates: BufferedUpdates
+    val segUpdates: BufferedUpdates?
 
     /**
      * [FixedBitSet] recording live documents; this is only set if there is one or more deleted
@@ -64,11 +64,11 @@ class SegmentWriteState {
 
     /** Sole constructor.  */
     constructor(
-        infoStream: InfoStream,
+        infoStream: InfoStream?,
         directory: Directory,
         segmentInfo: SegmentInfo,
         fieldInfos: FieldInfos,
-        segUpdates: BufferedUpdates,
+        segUpdates: BufferedUpdates?,
         context: IOContext
     ) : this(infoStream, directory, segmentInfo, fieldInfos, segUpdates, context, "")
 
@@ -78,11 +78,11 @@ class SegmentWriteState {
      * @see .SegmentWriteState
      */
     constructor(
-        infoStream: InfoStream,
+        infoStream: InfoStream?,
         directory: Directory,
         segmentInfo: SegmentInfo,
         fieldInfos: FieldInfos,
-        segUpdates: BufferedUpdates,
+        segUpdates: BufferedUpdates?,
         context: IOContext,
         segmentSuffix: String
     ) {

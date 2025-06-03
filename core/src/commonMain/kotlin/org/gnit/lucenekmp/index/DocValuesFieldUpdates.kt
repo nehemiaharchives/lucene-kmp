@@ -216,7 +216,7 @@ internal abstract class DocValuesFieldUpdates protected constructor(
 
     /** Returns true if this instance contains any updates.  */
     /*@Synchronized*/
-    fun any(): Boolean {
+    open fun any(): Boolean {
         return size > 0
     }
 
@@ -231,7 +231,7 @@ internal abstract class DocValuesFieldUpdates protected constructor(
      * @param doc the doc to update
      */
     /*@Synchronized*/
-    fun reset(doc: Int) {
+    open fun reset(doc: Int) {
         addInternal(doc, HAS_NO_VALUE_MASK)
     }
 
