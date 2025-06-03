@@ -95,19 +95,25 @@ object Collections {
         }
     }*/
 
-    fun <T> reverseOrder(cmp: Comparator<T>?): Comparator<T> {
-        return if (cmp == null) {
-            // If cmp is null, return a comparator that reverses the natural order
-            @Suppress("UNCHECKED_CAST")
-            ReverseComparator.REVERSE_ORDER as Comparator<T>
-        } else {
-            // If cmp is not null, return a comparator that reverses the given comparator
-            object : Comparator<T> {
-                override fun compare(a: T, b: T): Int {
-                    return cmp.compare(b, a)
-                }
-            }
+    @Suppress("UNCHECKED_CAST")
+    fun <T> reverseOrder(): Comparator<T> = ReverseComparator.REVERSE_ORDER as Comparator<T>
+
+    fun <T> reverseOrder(cmp: Comparator<T?>?): Comparator<T?> {
+        if (cmp == null) {
+            // Type cast is safe as REVERSE_ORDER is a Comparator<Comparable<Any>>
+            // and T? would be Comparable<Any?> effectively.
+            return ReverseComparator.REVERSE_ORDER as Comparator<T?>
         }
+        // TODO: Add check for cmp === Comparators.NaturalOrderComparator.INSTANCE if we implement it
+        // else if (cmp === Comparators.NaturalOrderComparator.INSTANCE) {
+        //    return ReverseComparator.REVERSE_ORDER as Comparator<T?>
+        // }
+        if (cmp is ReverseComparator2<*>) {
+            // If cmp is already a ReverseComparator2, return its underlying comparator
+            return (cmp as ReverseComparator2<T?>).cmp
+        }
+        // Otherwise, wrap cmp in a new ReverseComparator2
+        return ReverseComparator2(cmp)
     }
 
     class ReverseComparator<T> : Comparator<Comparable<T>> {
@@ -115,11 +121,14 @@ object Collections {
             // The test expects this to behave like natural order but with arguments swapped
             // For compare(2, 1), it should return 1 (as if 2 > 1)
             // For compare(1, 2), it should return -1 (as if 1 < 2)
-            return c1.compareTo(c2 as T)
+            // This implementation matches the behavior of JDK's Collections.reverseOrder()
+            // which is equivalent to c2.compareTo(c1)
+            @Suppress("UNCHECKED_CAST")
+            return (c2 as Comparable<Any>).compareTo(c1 as Any)
         }
 
-        fun <T : Comparable<T>> readResolve(): Comparator<T> {
-            return reverseOrder()
+        fun readResolve(): Any {
+            return REVERSE_ORDER
         }
 
         /*fun <T : Comparable<T>> reversed(): Comparator<T> {
@@ -127,11 +136,11 @@ object Collections {
         }*/
 
         companion object {
-            val REVERSE_ORDER: ReverseComparator<Any> = ReverseComparator<Any>()
+            val REVERSE_ORDER: ReverseComparator<Any> = ReverseComparator()
         }
     }
 
-    private class ReverseComparator2<T>(cmp: Comparator<T?>) : Comparator<T?> {
+    internal class ReverseComparator2<T>(val cmp: Comparator<T?>) : Comparator<T?> {
         /**
          * The comparator specified in the static factory.  This will never
          * be null, as the static factory returns a ReverseComparator
@@ -140,11 +149,8 @@ object Collections {
          * @serial
          */
         // Conditionally serializable
-        val cmp: Comparator<T?>
-
         init {
             checkNotNull(cmp)
-            this.cmp = cmp
         }
 
         override fun compare(t1: T?, t2: T?): Int {
