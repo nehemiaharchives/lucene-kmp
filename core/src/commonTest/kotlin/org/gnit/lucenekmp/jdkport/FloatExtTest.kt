@@ -177,8 +177,8 @@ class FloatExtTest {
         // Test with 0 (0.0f)
         assertEquals(0.0f, Float.intBitsToFloat(0))
         // Test with 0x80000000 (-0.0f)
-        assertEquals(-0.0f, Float.intBitsToFloat(0x80000000.toInt()))
-        assertTrue(Float.intBitsToFloat(0x80000000.toInt()).toBits() == (-0.0f).toBits())
+        assertEquals((-0.0f).toRawBits(), Float.intBitsToFloat(0x80000000.toInt()).toRawBits(), "Test -0.0f conversion from bits") // Line 180
+        assertTrue(Float.intBitsToFloat(0x80000000.toInt()).toRawBits() == (-0.0f).toRawBits(), "Bit patterns for -0.0f must match") // Line 181 (adjusted for toRawBits and clarity)
 
 
         // Test with 0x3f800000 (1.0f)
