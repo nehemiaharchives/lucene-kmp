@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.jdkport.Arrays
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
