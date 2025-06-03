@@ -99,7 +99,7 @@ class BytesRef : Comparable<BytesRef> {
      * Returns a shallow clone of this instance (the underlying bytes are not copied and will
      * be shared by both the returned object and this object.
      */
-    public fun clone(): BytesRef {
+    fun clone(): BytesRef {
         return BytesRef(bytes, offset, length)
     }
 
