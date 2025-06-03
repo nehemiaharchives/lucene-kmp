@@ -3,7 +3,6 @@ package org.gnit.lucenekmp.jdkport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class ArraysSupportTest {
 
@@ -30,8 +29,8 @@ class ArraysSupportTest {
         // Test with edge cases like empty arrays or zero length
         val emptyArray = floatArrayOf()
         assertEquals(-1, ArraysSupport.mismatch(emptyArray, 0, emptyArray, 0, 0))
-        assertEquals(0, ArraysSupport.mismatch(a1, 0, emptyArray, 0, 0)) // Mismatch at index 0 due to length
-        assertEquals(0, ArraysSupport.mismatch(emptyArray, 0, a1, 0, 0)) // Mismatch at index 0 due to length
+        assertEquals(-1, ArraysSupport.mismatch(a1, 0, emptyArray, 0, 0)) // Mismatch at index 0 due to length
+        assertEquals(-1, ArraysSupport.mismatch(emptyArray, 0, a1, 0, 0)) // Mismatch at index 0 due to length
 
 
         // Test with NaN and +/- Infinity values
@@ -49,7 +48,7 @@ class ArraysSupportTest {
         // Setting test to reflect this common JVM outcome for stability.
         val a2 = floatArrayOf(zero)
         val b2 = floatArrayOf(negZero)
-        assertEquals(-1, ArraysSupport.mismatch(a2, 0, b2, 0, 1))
+        assertEquals(0, ArraysSupport.mismatch(a2, 0, b2, 0, 1))
 
         val a3 = floatArrayOf(nan1, posInf, negInf, zero)
         val b3 = floatArrayOf(nan1, posInf, negInf, zero)
@@ -76,7 +75,7 @@ class ArraysSupportTest {
         assertEquals(2, ArraysSupport.mismatch(a5, 1, b5, 0, b5.size)) // a5 from index 1 vs b5 from index 0
 
         val c5 = floatArrayOf(0.0f, 1.0f, 2.0f, 3.0f, 4.0f)       // Sub-array to compare
-        assertEquals(2, ArraysSupport.mismatch(a5, 0, c5, 1, c5.size -1)) // a5 from index 0 vs c5 from index 1, for 4 elements
+        assertEquals(0, ArraysSupport.mismatch(a5, 0, c5, 1, c5.size -1)) // a5 from index 0 vs c5 from index 1, for 4 elements
     }
 
     @Test

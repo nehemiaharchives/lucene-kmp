@@ -31,6 +31,15 @@ object ArraysSupport {
         b: FloatArray, bFromIndex: Int,
         length: Int
     ): Int {
+        if (length <= 0) return -1
+
+        val aRem = a.size - aFromIndex
+        val bRem = b.size - bFromIndex
+        // if we try to compare beyond either array, report that index
+        if (length > aRem || length > bRem) {
+            return minOf(aRem, bRem)
+        }
+
         for (i in 0 until length) {
             if (Float.floatToRawIntBits(a[aFromIndex + i]) != Float.floatToRawIntBits(b[bFromIndex + i]))
                 return i
