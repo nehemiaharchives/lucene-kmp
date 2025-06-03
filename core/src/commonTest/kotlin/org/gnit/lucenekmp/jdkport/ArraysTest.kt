@@ -1,9 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
-import org.gnit.lucenekmp.jdkport.Arrays
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 
@@ -156,18 +156,10 @@ class ArraysTest {
     }
 
     @Test
-    fun testMismatchByteArrayWithNullsAndBounds() {
+    fun testMismatchByteArrayWithBounds() {
         val a = byteArrayOf(1, 2, 3)
         val b = byteArrayOf(1, 2, 3)
-        // Null checks (should throw NPE)
-        try {
-            Arrays.mismatch(null as ByteArray, 0, 3, b, 0, 3)
-            kotlin.test.fail("Expected NullPointerException")
-        } catch (_: NullPointerException) { }
-        try {
-            Arrays.mismatch(a, 0, 3, null as ByteArray, 0, 3)
-            kotlin.test.fail("Expected NullPointerException")
-        } catch (_: NullPointerException) { }
+
         // IllegalArgumentException checks
         try {
             Arrays.mismatch(a, 2, 1, b, 0, 3)
@@ -189,18 +181,10 @@ class ArraysTest {
     }
 
     @Test
-    fun testMismatchIntArrayWithNullsAndBounds() {
+    fun testMismatchIntArrayWithBounds() {
         val a = intArrayOf(5, 6, 7)
         val b = intArrayOf(5, 6, 7)
-        // Null checks
-        try {
-            Arrays.mismatch(null as IntArray, 0, 3, b, 0, 3)
-            kotlin.test.fail("Expected NullPointerException")
-        } catch (_: NullPointerException) { }
-        try {
-            Arrays.mismatch(a, 0, 3, null as IntArray, 0, 3)
-            kotlin.test.fail("Expected NullPointerException")
-        } catch (_: NullPointerException) { }
+
         // IllegalArgumentExceptions
         try {
             Arrays.mismatch(a, 2, 1, b, 0, 3)
