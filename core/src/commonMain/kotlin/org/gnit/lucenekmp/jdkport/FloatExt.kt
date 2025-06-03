@@ -84,7 +84,7 @@ fun Float.Companion.isInfinite(v: Float): Boolean {
  */
 fun Float.Companion.floatToRawIntBits(value: Float): Int {
     // In common code, Float.toBits() returns the raw bit pattern.
-    return value.toBits()
+    return value.toRawBits()
 }
 
 /**
