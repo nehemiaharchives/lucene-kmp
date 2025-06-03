@@ -1900,10 +1900,14 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
             toEnd: Boolean, hi: K, hiInclusive: Boolean
         ) : NavigableSubMap<K, V>(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive) {
             // Conditionally serializable
-            private val reverseComparator: Comparator<K> =
-                Collections.reverseOrder(m.comparator)
+            // m.comparator() is Comparator<K>?, Collections.reverseOrder expects Comparator<K?>?.
+            // The result of reverseOrder is Comparator<K?>.
+            // We need to return Comparator<K>? for the override.
+            @Suppress("UNCHECKED_CAST")
+            private val reverseComparator: Comparator<K>? =
+                Collections.reverseOrder(m.comparator() as Comparator<K?>?) as Comparator<K>?
 
-            override fun comparator(): Comparator<K> {
+            override fun comparator(): Comparator<K>? {
                 return reverseComparator
             }
 
