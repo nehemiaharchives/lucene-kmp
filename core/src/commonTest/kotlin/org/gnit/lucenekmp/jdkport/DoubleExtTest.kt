@@ -49,4 +49,18 @@ class DoubleExtTest {
         assertTrue(!Double.isFinite(Double.NaN))
     }
 
+    @Test
+    fun testMinExponent() {
+        assertEquals(-1022, Double.MIN_EXPONENT)
+    }
+
+    @Test
+    fun testPrecision() {
+        assertEquals(53, Double.PRECISION)
+    }
+
+    @Test
+    fun testMaxExponent() {
+        assertEquals(1023, Double.MAX_EXPONENT)
+    }
 }
