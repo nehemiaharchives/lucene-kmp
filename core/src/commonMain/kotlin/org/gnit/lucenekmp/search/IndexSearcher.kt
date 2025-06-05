@@ -1,17 +1,19 @@
 package org.gnit.lucenekmp.search
 
 import okio.IOException
-import org.gnit.lucenekmp.index.IndexReader
-import org.gnit.lucenekmp.index.IndexReaderContext
-import org.gnit.lucenekmp.index.QueryTimeout
-import org.gnit.lucenekmp.index.Term
-import org.gnit.lucenekmp.index.Terms
+import org.gnit.lucenekmp.index.*
 import org.gnit.lucenekmp.search.similarities.Similarity
 import kotlin.jvm.JvmOverloads
 
 class IndexSearcher {
 
     //TODO all things below are fake to compile pass, just copied and commented out partially from java lucene, need to be re-written
+
+    constructor(r: IndexReader)
+
+    fun setQueryCache(queryCache: QueryCache?) {
+        //this.queryCache = queryCache
+    }
 
     val reader: IndexReader? = null // package private for testing!
 

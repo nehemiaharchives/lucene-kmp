@@ -274,7 +274,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         val fieldVectorProperties: FieldVectorProperties
     )
 
-    internal class FieldNumbers(softDeletesFieldName: String?, parentFieldName: String?) {
+    class FieldNumbers(softDeletesFieldName: String?, parentFieldName: String?) {
         private val numberToName: IntObjectHashMap<String>
         private val fieldProperties: MutableMap<String, FieldProperties>
 

@@ -28,7 +28,7 @@ import kotlin.math.max
  * Each packet is assigned a generation, and each flushed or merged segment is also assigned a
  * generation, so we can track which BufferedDeletes packets to apply to any given segment.
  */
-internal class BufferedUpdatesStream(infoStream: InfoStream) :
+class BufferedUpdatesStream(infoStream: InfoStream) :
     Accountable {
     private val updates: MutableSet<FrozenBufferedUpdates> = HashSet<FrozenBufferedUpdates>()
 
@@ -123,9 +123,12 @@ internal class BufferedUpdatesStream(infoStream: InfoStream) :
     fun waitApplyAll(writer: IndexWriter) {
         /*assert(java.lang.Thread.holdsLock(writer) == false)*/ // jvm specific operation, need to do something for kotlin common
         val waitFor: MutableSet<FrozenBufferedUpdates>
-        synchronized(this) {
+
+
+        // TODO implement synchronized in kotlin common
+        //synchronized(this) {
             waitFor = HashSet<FrozenBufferedUpdates>(updates)
-        }
+        //}
 
         waitApply(waitFor, writer)
     }
@@ -182,7 +185,9 @@ internal class BufferedUpdatesStream(infoStream: InfoStream) :
         }
 
         val waitFor: MutableSet<FrozenBufferedUpdates> = HashSet()
-        synchronized(this) {
+
+        // TODO implement synchronized in kotlin common
+        //synchronized(this) {
             for (packet in updates) {
                 if (packet.delGen() <= maxDelGen) {
                     // We must wait for this packet before finishing the merge because its
@@ -190,7 +195,7 @@ internal class BufferedUpdatesStream(infoStream: InfoStream) :
                     waitFor.add(packet)
                 }
             }
-        }
+        //}
 
         if (infoStream.isEnabled("BD")) {
             infoStream.message(
@@ -256,7 +261,7 @@ internal class BufferedUpdatesStream(infoStream: InfoStream) :
     }
 
     /** Holds all per-segment internal state used while resolving deletions.  */
-    internal class SegmentState(
+    class SegmentState(
         rld: ReadersAndUpdates,
         onClose: IOConsumer<ReadersAndUpdates>,
         info: SegmentCommitInfo
@@ -283,7 +288,6 @@ internal class BufferedUpdatesStream(infoStream: InfoStream) :
             return "SegmentState(" + rld.info + ")"
         }
 
-        @Throws(IOException::class)
         override fun close() {
             IOUtils.close(
                 AutoCloseable { runBlocking{ rld.release(reader) } },

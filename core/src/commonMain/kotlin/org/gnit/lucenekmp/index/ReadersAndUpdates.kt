@@ -30,7 +30,7 @@ import okio.IOException
 // Used by IndexWriter to hold open SegmentReaders (for
 // searching or merging), plus pending deletes and updates,
 // for a given segment
-internal class ReadersAndUpdates(
+class ReadersAndUpdates(
     // the major version this index was created with
     private val indexCreatedVersionMajor: Int,
     // Not final because we replace (clone) when we need to
@@ -179,14 +179,12 @@ internal class ReadersAndUpdates(
     }
 
     /*@Synchronized*/
-    @Throws(IOException::class)
     suspend fun release(sr: SegmentReader) {
         assert(info === sr.originalSegmentInfo)
         sr.decRef()
     }
 
     /*@Synchronized*/
-    @Throws(IOException::class)
     suspend fun delete(docID: Int): Boolean {
         if (reader == null && pendingDeletes.mustInitOnDelete()) {
             getReader(IOContext.DEFAULT).decRef() // pass a reader to initialize the pending deletes
@@ -196,7 +194,6 @@ internal class ReadersAndUpdates(
 
     // NOTE: removes callers ref
     /*@Synchronized*/
-    @Throws(IOException::class)
     suspend fun dropReaders() {
         // TODO: can we somehow use IOUtils here...  problem is
         // we are calling .decRef not .close)...
@@ -216,7 +213,6 @@ internal class ReadersAndUpdates(
      * close()).
      */
     /*@Synchronized*/
-    @Throws(IOException::class)
     suspend fun getReadOnlyClone(context: IOContext): SegmentReader {
         if (reader == null) {
             getReader(context).decRef()
@@ -242,7 +238,6 @@ internal class ReadersAndUpdates(
         return pendingDeletes.numDeletesToMerge(policy) { this.latestReader }
     }
 
-    @get:Throws(IOException::class)
     /*@get:Synchronized*/
     private val latestReader: CodecReader
         get() {
@@ -542,7 +537,6 @@ internal class ReadersAndUpdates(
 
     /*@Synchronized*/
     @OptIn(ExperimentalAtomicApi::class)
-    @Throws(IOException::class)
     suspend fun writeFieldUpdates(
         dir: Directory,
         fieldNumbers: FieldInfos.FieldNumbers,
@@ -739,7 +733,6 @@ internal class ReadersAndUpdates(
         )
     }
 
-    @Throws(IOException::class)
     private suspend fun createNewReaderWithLatestLiveDocs(reader: SegmentReader): SegmentReader {
         checkNotNull(reader)
         /*assert(java.lang.Thread.holdsLock(this)) { java.lang.Thread.currentThread().getName() }*/ // this operation is jvm specific, not possible in kotlin common
@@ -764,7 +757,6 @@ internal class ReadersAndUpdates(
         return newReader
     }
 
-    @Throws(IOException::class)
     private suspend fun swapNewReaderWithLatestLiveDocs() {
         reader = createNewReaderWithLatestLiveDocs(reader!!)
     }
@@ -781,7 +773,6 @@ internal class ReadersAndUpdates(
 
     /** Returns a reader for merge, with the latest doc values updates and deletions.  */
     /*@Synchronized*/
-    @Throws(IOException::class)
     suspend fun getReaderForMerge(
         context: IOContext,
         readerConsumer: IOConsumer<MergePolicy.MergeReader>
@@ -840,8 +831,7 @@ internal class ReadersAndUpdates(
         return sb.toString()
     }
 
-    @get:Throws(IOException::class)
-            /*@get:Synchronized*/
+    /*@get:Synchronized*/
     val isFullyDeleted: Boolean
         get() = pendingDeletes.isFullyDeleted { this.latestReader }
 

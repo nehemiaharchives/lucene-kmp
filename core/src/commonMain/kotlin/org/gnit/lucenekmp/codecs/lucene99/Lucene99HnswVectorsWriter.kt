@@ -111,7 +111,7 @@ class Lucene99HnswVectorsWriter(
                 fieldInfo,
                 M,
                 beamWidth,
-                segmentWriteState.infoStream
+                segmentWriteState.infoStream!!
             )
         fields.add(newField)
         return newField
@@ -363,7 +363,7 @@ class Lucene99HnswVectorsWriter(
                 graph =
                     merger.merge(
                         mergedVectorValues,
-                        segmentWriteState.infoStream,
+                        segmentWriteState.infoStream!!,
                         scorerSupplier.totalVectorCount()
                     )
                 vectorIndexNodeOffsets = writeGraph(graph)

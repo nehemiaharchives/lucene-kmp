@@ -14,7 +14,7 @@ import kotlin.jvm.JvmOverloads
 
 
 /** This class handles accounting and applying pending deletes for live segment readers  */
-internal class PendingDeletes @JvmOverloads constructor(
+class PendingDeletes @JvmOverloads constructor(
     val info: SegmentCommitInfo,
     liveDocs: Bits? = null,
     liveDocsInitialized: Boolean = info.hasDeletions() == false

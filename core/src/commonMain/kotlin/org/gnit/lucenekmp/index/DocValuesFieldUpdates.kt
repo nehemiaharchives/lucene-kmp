@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.util.packed.PagedMutable
  *
  * @lucene.experimental
  */
-internal abstract class DocValuesFieldUpdates protected constructor(
+abstract class DocValuesFieldUpdates protected constructor(
     protected val maxDoc: Int,
     val delGen: Long,
     val field: String,
@@ -26,7 +26,7 @@ internal abstract class DocValuesFieldUpdates protected constructor(
      * An iterator over documents and their updated values. Only documents with updates are returned
      * by this iterator, and the documents are returned in increasing order.
      */
-    internal abstract class Iterator : DocValuesIterator() {
+    abstract class Iterator : DocValuesIterator() {
         override fun advanceExact(target: Int): Boolean {
             throw UnsupportedOperationException()
         }

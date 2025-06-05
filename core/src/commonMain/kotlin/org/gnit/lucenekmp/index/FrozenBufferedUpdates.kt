@@ -12,11 +12,11 @@ import org.gnit.lucenekmp.util.BytesRef;
 import org.gnit.lucenekmp.util.InfoStream;
 import org.gnit.lucenekmp.util.RamUsageEstimator;
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.CountDownLatch
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
@@ -132,8 +132,7 @@ class FrozenBufferedUpdates(
      * Applies pending delete-by-term, delete-by-query and doc values updates to all segments in the
      * index, returning the number of new deleted or updated documents.
      */
-    @Throws(IOException::class)
-    fun apply(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
+    suspend fun apply(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
         assert(applyLock.isHeldByCurrentThread())
         require(delGen != -1L) { "gen is not yet set; call BufferedUpdatesStream.push first" }
 
@@ -193,8 +192,7 @@ class FrozenBufferedUpdates(
     }
 
     // Delete by query
-    @Throws(IOException::class)
-    private fun applyQueryDeletes(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
+    private suspend fun applyQueryDeletes(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
         if (deleteQueries.size == 0) {
             return 0
         }
@@ -215,7 +213,7 @@ class FrozenBufferedUpdates(
                 continue
             }
 
-            val readerContext: LeafReaderContext = segState.reader.getContext()
+            val readerContext: LeafReaderContext = segState.reader.context
             for (i in deleteQueries.indices) {
                 var query: Query = deleteQueries[i]
                 val limit: Int
@@ -242,7 +240,7 @@ class FrozenBufferedUpdates(
                                 .also { docID = it }) != DocIdSetIterator.NO_MORE_DOCS
                         ) {
                             // The limit is in the pre-sorted doc space:
-                            if (segState.rld.sortMap.newToOld(docID) < limit) {
+                            if (segState.rld.sortMap!!.newToOld(docID) < limit) {
                                 if (segState.rld.delete(docID)) {
                                     delCount++
                                 }
@@ -272,8 +270,7 @@ class FrozenBufferedUpdates(
         return delCount
     }
 
-    @Throws(IOException::class)
-    private fun applyTermDeletes(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
+    private suspend fun applyTermDeletes(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
         if (deleteTerms.size() == 0L) {
             return 0
         }
@@ -356,13 +353,13 @@ class FrozenBufferedUpdates(
             s += " numDeleteQueries=" + deleteQueries.size
         }
         if (fieldUpdates.size > 0) {
-            s += " fieldUpdates=" + fieldUpdatesCount
+            s += " fieldUpdates=$fieldUpdatesCount"
         }
         if (bytesUsed != 0) {
-            s += " bytesUsed=" + bytesUsed
+            s += " bytesUsed=$bytesUsed"
         }
         if (privateSegment != null) {
-            s += " privateSegment=" + privateSegment
+            s += " privateSegment=$privateSegment"
         }
 
         return s
@@ -473,7 +470,6 @@ class FrozenBufferedUpdates(
             return true
         }
 
-        @get:Throws(IOException::class)
         private val docs: DocIdSetIterator
             get() {
                 checkNotNull(termsEnum)
@@ -487,7 +483,7 @@ class FrozenBufferedUpdates(
    * in multiple threads, and this compression is sizable (~8.3% of the original size), so it's important
    * we run this before applying the deletes/updates. */
         /* Query we often undercount (say 24 bytes), plus int. */
-        val BYTES_PER_DEL_QUERY: Int =
+        const val BYTES_PER_DEL_QUERY: Int =
             RamUsageEstimator.NUM_BYTES_OBJECT_REF + Int.SIZE_BYTES + 24
 
         @Throws(IOException::class)
@@ -587,7 +583,7 @@ class FrozenBufferedUpdates(
                         } else {
                             docIdConsumer = { doc: Int -> update.add(doc, binaryValue!!) }
                         }
-                        val acceptDocs: Bits = segState.rld.getLiveDocs()
+                        val acceptDocs: Bits? = segState.rld.liveDocs
                         if (segState.rld.sortMap != null && segmentPrivateDeletes) {
                             // This segment was sorted on flush; we must apply seg-private deletes carefully in this
                             // case:
@@ -597,8 +593,8 @@ class FrozenBufferedUpdates(
                             ) {
                                 if (acceptDocs == null || acceptDocs.get(doc)) {
                                     // The limit is in the pre-sorted doc space:
-                                    if (segState.rld.sortMap.newToOld(doc) < limit) {
-                                        docIdConsumer.accept(doc)
+                                    if (segState.rld.sortMap!!.newToOld(doc) < limit) {
+                                        docIdConsumer(doc)
                                         updateCount++
                                     }
                                 }
@@ -612,7 +608,7 @@ class FrozenBufferedUpdates(
                                     break // no more docs that can be updated for this term
                                 }
                                 if (acceptDocs == null || acceptDocs.get(doc)) {
-                                    docIdConsumer.accept(doc)
+                                    docIdConsumer(doc)
                                     updateCount++
                                 }
                             }
