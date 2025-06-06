@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 637 | 89% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 638 | 89% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,7 +15,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 115 | 68% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 116 | 68% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -36,7 +36,7 @@
 ## Priority-1 API progress
 | Java class | Mapped class | Java Deps | KMP Deps Ported | KMP Deps To Port | % | Done |
 | --- | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 78 | 63 | 15 | 80% | [ ] |
+| org.apache.lucene.index.IndexWriter | org.gnit.lucenekmp.index.IndexWriter | 78 | 64 | 14 | 82% | [ ] |
 | org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 11 | 4 | 73% | [ ] |
 | org.apache.lucene.store.FSDirectory | org.gnit.lucenekmp.store.FSDirectory | 8 | 8 | 0 | 100% | [x] |
 | org.apache.lucene.analysis.Analyzer | org.gnit.lucenekmp.analysis.Analyzer | 10 | 10 | 0 | 100% | [x] |
@@ -57,12 +57,11 @@
 | org.apache.lucene.search.BooleanClause | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | org.apache.lucene.search.Sort | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | org.apache.lucene.search.SortField | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 171 | 145 | 26 | 84% | [ ] |
+| TOTAL |  | 171 | 146 | 25 | 85% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| org.apache.lucene.index.CachingMergeContext | org.gnit.lucenekmp.index.CachingMergeContext |
 | org.apache.lucene.index.CheckIndex | org.gnit.lucenekmp.index.CheckIndex |
 | org.apache.lucene.index.ConcurrentApproximatePriorityQueue | org.gnit.lucenekmp.index.ConcurrentApproximatePriorityQueue |
 | org.apache.lucene.index.ConcurrentMergeScheduler | org.gnit.lucenekmp.index.ConcurrentMergeScheduler |
