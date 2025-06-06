@@ -428,7 +428,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      *
      * @lucene.experimental
      */
-    abstract val readerCacheHelper: CacheHelper
+    abstract val readerCacheHelper: CacheHelper?
 
     /**
      * Returns the number of documents containing the `term`. This method returns 0 if the

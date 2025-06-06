@@ -264,7 +264,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    override fun doClose() {
+    public override fun doClose() {
     }
 
     @Throws(IOException::class)
