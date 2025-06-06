@@ -559,4 +559,37 @@ class UTF_8Test {
             actual, "21 only encoding"
         )
     }
+
+    // --- Additional tests for remaining public API ---
+
+    @Test
+    fun testUpdatePositionsCharToByte() {
+        val srcArray = charArrayOf('a', 'b', 'c', 'd', 'e', 'f')
+        val dstArray = ByteArray(6)
+        val src = CharBuffer.wrap(srcArray)
+        val dst = ByteBuffer.wrap(dstArray)
+        src.position = 2
+        dst.position = 3
+        updatePositions(src, 1, dst, 2)
+        assertEquals(1, src.position)
+        assertEquals(2, dst.position)
+    }
+
+    private val utf8Encoder = UTF_8().newEncoder()
+
+    @Test
+    fun testEncoderCanEncode() {
+        assertTrue(utf8Encoder.canEncode('A'))
+        assertTrue(!utf8Encoder.canEncode('\uD800'))
+    }
+
+    @Test
+    fun testIsLegalReplacement() {
+        // Single ASCII byte is legal
+        assertTrue(utf8Encoder.isLegalReplacement(byteArrayOf(0x41)))
+        // Truncated multi-byte sequence is illegal
+        assertTrue(!utf8Encoder.isLegalReplacement(byteArrayOf(0xC3.toByte())))
+        // Valid two-byte sequence for 'é'
+        assertTrue(utf8Encoder.isLegalReplacement(byteArrayOf(0xC3.toByte(), 0xA9.toByte())))
+    }
 }
