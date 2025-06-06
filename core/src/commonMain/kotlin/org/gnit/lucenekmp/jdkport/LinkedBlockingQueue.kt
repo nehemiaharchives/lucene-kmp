@@ -1,7 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndDecrement
@@ -10,9 +12,6 @@ import kotlin.jvm.Transient
 import kotlin.math.min
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.runBlocking
 
 open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     AbstractQueue<E>(), BlockingQueue<E> {
@@ -269,7 +268,19 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         val count: AtomicInteger = this.count
         if (count.get() == capacity) return false
         val node = Node(e)
-        runBlocking { enqueue(node) }  // Use runBlocking to call suspend function
+        // Instead of runBlocking, do not call suspend function. Only allow non-blocking offer.
+        // This is a non-blocking offer, so only add if mutex is available and no contention.
+        var enqueued = false
+        if (mutex.tryLock()) {
+            try {
+                last.next = node
+                last = last.next!!
+                enqueued = true
+            } finally {
+                mutex.unlock()
+            }
+        }
+        if (!enqueued) return false
         val c = count.fetchAndIncrement()
         if (c + 1 < capacity) notFullCh.trySend(Unit)
         if (c == 0) notEmptyCh.trySend(Unit)
@@ -316,7 +327,23 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     override fun poll(): E? {
         val count: AtomicInteger = this.count
         if (count.get() == 0) return null
-        val x = runBlocking { dequeue() }  // Use runBlocking to call suspend function
+        // Instead of runBlocking, do not call suspend function. Only allow non-blocking poll.
+        var x: E? = null
+        if (mutex.tryLock()) {
+            try {
+                val h = head
+                val first = h!!.next
+                if (first != null) {
+                    h.next = h // help GC
+                    head = first
+                    x = first.item
+                    first.item = null
+                }
+            } finally {
+                mutex.unlock()
+            }
+        }
+        if (x == null) return null
         val c = count.fetchAndDecrement()
         if (c > 1) notEmptyCh.trySend(Unit)
         if (c == capacity) notFullCh.trySend(Unit)
@@ -327,11 +354,16 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     override fun peek(): E? {
         val count: AtomicInteger = this.count
         if (count.get() == 0) return null
-        return runBlocking {
-            mutex.withLock {
-                head!!.next!!.item
+        // Instead of runBlocking, do not call suspend function. Only allow non-blocking peek.
+        var item: E? = null
+        if (mutex.tryLock()) {
+            try {
+                item = head!!.next?.item
+            } finally {
+                mutex.unlock()
             }
         }
+        return item
     }
 
     /**
@@ -360,6 +392,7 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
      * @param o element to be removed from this queue, if present
      * @return `true` if this queue changed as a result of the call
      */
+    @OptIn(ExperimentalAtomicApi::class)
     override fun remove(o: E): Boolean {
         if (o == null) return false
         var pred = head
@@ -367,8 +400,20 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         while (p != null
         ) {
             if (o == p.item) {
-                runBlocking { unlink(p!!, pred!!) }
-                return true
+                // Only allow non-blocking remove
+                if (mutex.tryLock()) {
+                    try {
+                        p.item = null
+                        pred!!.next = p.next
+                        if (last === p) last = pred!!
+                        if (count.fetchAndDecrement() == capacity) notFullCh.trySend(Unit)
+                        return true
+                    } finally {
+                        mutex.unlock()
+                    }
+                } else {
+                    return false
+                }
             }
             pred = p
             p = p.next
@@ -479,13 +524,25 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
      * - dequeued nodes (p.next == p)
      * - (possibly multiple) interior removed nodes (p.item == null)
      */
-    fun succ(p: Node<E>): Node<E> {
-        return runBlocking {
-            mutex.withLock {
-                var currentP = p
-                if (currentP === (currentP.next.also { currentP = it!! })) currentP = head!!.next!!
-                currentP
-            }
+    fun succ(pNode: Node<E>): Node<E>? { // Changed return type to Node<E>? and parameter name
+        // This function provides the actual successor of pNode.
+        // If pNode has been dequeued, its 'next' field points to itself.
+        // In that case, the true successor is the current head's next node.
+        // Otherwise, it's simply pNode.next.
+        // This function does not acquire locks; callers must ensure thread-safety if needed.
+
+        val currentNext = pNode.next // Read pNode.next once.
+
+        if (pNode === currentNext) {
+            // pNode was dequeued (its next field points to itself as a marker).
+            // The actual next node in sequence is the current head's successor.
+            // 'head' is the sentinel node (head.item is null) and is guaranteed non-null.
+            // head.next is the first actual element, or null if the queue is empty.
+            return head!!.next
+        } else {
+            // pNode is either an active node or an internally unlinked node (item == null).
+            // In both cases, 'currentNext' is its actual successor (or null if it was the last node).
+            return currentNext
         }
     }
 
@@ -577,14 +634,7 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         }
 
         override fun remove() {
-            val p = lastRet
-            checkNotNull(p)
-            lastRet = null
-            if (p.item != null) {
-                if (ancestor == null) ancestor = head
-                ancestor = findPred(p, ancestor!!)
-                runBlocking { unlink(p, ancestor!!) }
-            }
+            throw UnsupportedOperationException("remove() is not supported in non-blocking context")
         }
     }
 
@@ -737,103 +787,107 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    fun removeIf(filter: (E?) -> Boolean /*java.util.function.Predicate<in E>*/): Boolean {
+    suspend fun removeIf(filter: (E?) -> Boolean /*java.util.function.Predicate<in E>*/): Boolean {
         return bulkRemove(filter)
     }
 
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    override fun removeAll(c: Collection<E>): Boolean {
+    suspend fun removeAllSuspend(c: Collection<E>): Boolean {
         return bulkRemove { e: E? -> c.contains(e) }
+    }
+
+    override fun removeAll(c: Collection<E>): Boolean {
+        return runBlocking { bulkRemove { e: E? -> c.contains(e) } }
     }
 
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    override fun retainAll(c: Collection<E>): Boolean {
+    suspend fun retainAllSuspend(c: Collection<E>): Boolean {
         return bulkRemove { e: E? -> !c.contains(e) }
+    }
+
+    override fun retainAll(c: Collection<E>): Boolean {
+        return runBlocking { bulkRemove { e: E? -> !c.contains(e) } }
     }
 
     /**
      * Returns the predecessor of live node p, given a node that was
      * once a live ancestor of p (or head); allows unlinking of p.
      */
-    fun findPred(p: Node<E>?, ancestor: Node<E>): Node<E> {
-        // Synchronize access to the list while finding predecessor
-        return runBlocking {
-            mutex.withLock {
-                var currentAncestor = ancestor
-                // assert p.item != null;
-                if (currentAncestor.item == null) currentAncestor = head!!
-                // Fails with NPE if precondition not satisfied
-                var q: Node<E>?
-                while ((currentAncestor.next.also { q = it }) !== p) {
-                    currentAncestor = q!!
-                }
-                currentAncestor
-            }
+    fun findPred(
+        p: Node<E>,
+        ancestor: Node<E>
+    ): Node<E>? {
+        // assert p.item != null;
+        var ancestor: Node<E> = ancestor
+        if (ancestor.item == null) ancestor = head!!
+        // Fails with NPE if precondition not satisfied
+        var q: Node<E>
+        while ((ancestor.next.also { q = it!! }) !== p) {
+            ancestor = q
         }
+        return ancestor
     }
 
     /** Implementation of bulk remove methods.  */
     @OptIn(ExperimentalAtomicApi::class)
-    private fun bulkRemove(filter: (E?) -> Boolean /*java.util.function.Predicate<in E>*/): Boolean {
-        return runBlocking {
-            mutex.withLock {
-                var removed = false
-                var p: Node<E>? = null
-                var ancestor = head
-                var nodes: Array<Node<E>?>? = null
-                var n: Int
-                var len = 0
-                do {
-                    // 1. Extract batch of up to 64 elements while holding the lock.
-                    if (nodes == null) {  // first batch; initialize
-                        p = head!!.next
-                        var q = p
-                        while (q != null) {
-                            if (q.item != null && ++len == 64) break
-                            q = succ(q)
-                        }
-                        nodes = kotlin.arrayOfNulls<Node<E>?>(len)
+    private suspend fun bulkRemove(filter: (E?) -> Boolean /*java.util.function.Predicate<in E>*/): Boolean {
+        return mutex.withLock {
+            var removed = false
+            var p: Node<E>? = null
+            var ancestor = head
+            var nodes: Array<Node<E>?>? = null
+            var n: Int
+            var len = 0
+            do {
+                // 1. Extract batch of up to 64 elements while holding the lock.
+                if (nodes == null) {  // first batch; initialize
+                    p = head!!.next
+                    var q = p
+                    while (q != null) {
+                        if (q.item != null && ++len == 64) break
+                        q = succ(q)
                     }
-                    n = 0
-                    while (p != null && n < len) {
-                        nodes[n++] = p
-                        p = succ(p)
-                    }
+                    nodes = kotlin.arrayOfNulls<Node<E>?>(len)
+                }
+                n = 0
+                while (p != null && n < len) {
+                    nodes[n++] = p
+                    p = succ(p)
+                }
 
-                    // 2. Run the filter on the elements while still holding the lock
-                    // (changed from original implementation to prevent concurrency issues)
-                    var deathRow = 0L // "bitset" of size 64
+                // 2. Run the filter on the elements while still holding the lock
+                // (changed from original implementation to prevent concurrency issues)
+                var deathRow = 0L // "bitset" of size 64
+                for (i in 0..<n) {
+                    val e: E?
+                    if ((nodes[i]!!.item.also { e = it }) != null && filter(e)) deathRow = deathRow or (1L shl i)
+                }
+
+                // 3. Remove any filtered elements while holding the lock.
+                if (deathRow != 0L) {
                     for (i in 0..<n) {
-                        val e: E?
-                        if ((nodes[i]!!.item.also { e = it }) != null && filter(e)) deathRow = deathRow or (1L shl i)
-                    }
-
-                    // 3. Remove any filtered elements while holding the lock.
-                    if (deathRow != 0L) {
-                        for (i in 0..<n) {
-                            var q: Node<E>? = null
-                            if ((deathRow and (1L shl i)) != 0L
-                                && (nodes[i].also { q = it })!!.item != null
-                            ) {
-                                ancestor = findPred(q, ancestor!!)
-                                // Update unlink operation to directly modify instead of calling unlink
-                                // (since we're already in a withLock block)
-                                q!!.item = null
-                                ancestor.next = q!!.next
-                                if (last === q) last = ancestor
-                                if (count.fetchAndDecrement() == capacity) notFullCh.trySend(Unit)
-                                removed = true
-                            }
-                            nodes[i] = null // help GC
+                        var q: Node<E>? = null
+                        if ((deathRow and (1L shl i)) != 0L
+                            && (nodes[i].also { q = it })!!.item != null
+                        ) {
+                            ancestor = findPred(q!!, ancestor!!)
+                            // Update unlink operation to directly modify instead of calling unlink
+                            // (since we're already in a withLock block)
+                            q!!.item = null
+                            ancestor!!.next = q!!.next
+                            if (last === q) last = ancestor
+                            if (count.fetchAndDecrement() == capacity) notFullCh.trySend(Unit)
+                            removed = true
                         }
+                        nodes[i] = null // help GC
                     }
-                } while (n > 0 && p != null)
-                removed
-            }
+                }
+            } while (n > 0 && p != null)
+            removed
         }
     }
 }
