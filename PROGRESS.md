@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 640 | 89% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 645 | 90% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,7 +15,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 118 | 69% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 123 | 72% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -75,9 +75,7 @@
 | org.apache.lucene.index.FilterMergePolicy | org.gnit.lucenekmp.index.FilterMergePolicy |
 | org.apache.lucene.index.FlushByRamOrCountsPolicy | org.gnit.lucenekmp.index.FlushByRamOrCountsPolicy |
 | org.apache.lucene.index.FlushPolicy | org.gnit.lucenekmp.index.FlushPolicy |
-| org.apache.lucene.index.FreqProxFields | org.gnit.lucenekmp.index.FreqProxFields |
 | org.apache.lucene.index.FreqProxTermsWriter | org.gnit.lucenekmp.index.FreqProxTermsWriter |
-| org.apache.lucene.index.FreqProxTermsWriterPerField | org.gnit.lucenekmp.index.FreqProxTermsWriterPerField |
 | org.apache.lucene.index.IndexDeletionPolicy | org.gnit.lucenekmp.index.IndexDeletionPolicy |
 | org.apache.lucene.index.IndexFileDeleter | org.gnit.lucenekmp.index.IndexFileDeleter |
 | org.apache.lucene.index.IndexWriterConfig | org.gnit.lucenekmp.index.IndexWriterConfig |
@@ -93,7 +91,6 @@
 | org.apache.lucene.index.NormValuesWriter | org.gnit.lucenekmp.index.NormValuesWriter |
 | org.apache.lucene.index.NumericDocValuesWriter | org.gnit.lucenekmp.index.NumericDocValuesWriter |
 | org.apache.lucene.index.OneMergeWrappingMergePolicy | org.gnit.lucenekmp.index.OneMergeWrappingMergePolicy |
-| org.apache.lucene.index.ParallelPostingsArray | org.gnit.lucenekmp.index.ParallelPostingsArray |
 | org.apache.lucene.index.PendingSoftDeletes | org.gnit.lucenekmp.index.PendingSoftDeletes |
 | org.apache.lucene.index.PointValuesWriter | org.gnit.lucenekmp.index.PointValuesWriter |
 | org.apache.lucene.index.ReaderPool | org.gnit.lucenekmp.index.ReaderPool |
@@ -108,8 +105,6 @@
 | org.apache.lucene.index.StoredFieldsConsumer | org.gnit.lucenekmp.index.StoredFieldsConsumer |
 | org.apache.lucene.index.TermVectorsConsumer | org.gnit.lucenekmp.index.TermVectorsConsumer |
 | org.apache.lucene.index.TermVectorsConsumerPerField | org.gnit.lucenekmp.index.TermVectorsConsumerPerField |
-| org.apache.lucene.index.TermsHash | org.gnit.lucenekmp.index.TermsHash |
-| org.apache.lucene.index.TermsHashPerField | org.gnit.lucenekmp.index.TermsHashPerField |
 | org.apache.lucene.index.TieredMergePolicy | org.gnit.lucenekmp.index.TieredMergePolicy |
 | org.apache.lucene.index.TrackingTmpOutputDirectoryWrapper | org.gnit.lucenekmp.index.TrackingTmpOutputDirectoryWrapper |
 | org.apache.lucene.index.VectorValuesConsumer | org.gnit.lucenekmp.index.VectorValuesConsumer |

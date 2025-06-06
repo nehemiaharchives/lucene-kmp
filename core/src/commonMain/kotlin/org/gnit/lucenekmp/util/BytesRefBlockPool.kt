@@ -31,7 +31,7 @@ class BytesRefBlockPool : Accountable {
 
     /** Reset this buffer to the empty state.  */
     fun reset() {
-        byteBlockPool.reset(false, false) // we don't need to 0-fill the buffers
+        byteBlockPool.reset(zeroFillBuffers = false, reuseFirst = false) // we don't need to 0-fill the buffers
     }
 
     /**
