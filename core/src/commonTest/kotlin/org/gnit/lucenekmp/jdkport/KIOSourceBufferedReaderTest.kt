@@ -445,7 +445,7 @@ class KIOSourceBufferedReaderTest {
         assertEquals('b'.code, reader.read(), "Reset to 'b' after reading 10 chars within larger limit")
         var count = 1
         while(reader.read() != -1) count++
-        assertEquals(13, count, "Should read remaining 13 chars (c..o) after reset")
+        assertEquals(14, count, "Should read remaining 14 chars (b..o) after reset")
     }
 
     @Test
@@ -491,9 +491,9 @@ class KIOSourceBufferedReaderTest {
         assertEquals(3L, skipped)
         assertEquals('d'.code, reader.read(), "Next char should be 'd' after skipping 3")
 
-        skipped = reader.skip(2) // Skip "de"
+        skipped = reader.skip(2) // Skip "ef" according to JDK semantics
         assertEquals(2L, skipped)
-        assertEquals('f'.code, reader.read(), "Next char should be 'f' after skipping 2 more")
+        assertEquals('g'.code, reader.read(), "Next char should be 'g' after skipping 2 more")
     }
 
     @Test
