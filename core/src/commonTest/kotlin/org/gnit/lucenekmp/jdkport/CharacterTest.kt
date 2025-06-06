@@ -89,4 +89,78 @@ class CharacterTest {
         assertEquals(36, Character.MAX_RADIX)
         assertEquals(16, Character.SIZE)
     }
+
+    @Test
+    fun testToCodePoint() {
+        val high = '\uD83D'
+        val low = '\uDE00'
+        val codePoint = Character.toCodePoint(high, low)
+        assertEquals(0x1F600, codePoint)
+    }
+
+    @Test
+    fun testToCharsBmp() {
+        val arr = CharArray(1)
+        val written = Character.toChars('A'.code, arr, 0)
+        assertEquals(1, written)
+        assertEquals('A', arr[0])
+    }
+
+    @Test
+    fun testToCharsSupplementary() {
+        val arr = CharArray(2)
+        val codePoint = 0x1F600
+        val written = Character.toChars(codePoint, arr, 0)
+        assertEquals(2, written)
+        assertEquals(Character.highSurrogate(codePoint), arr[0])
+        assertEquals(Character.lowSurrogate(codePoint), arr[1])
+    }
+
+    @Test
+    fun testToCharsInvalid() {
+        val arr = CharArray(1)
+        assertFailsWith<IllegalArgumentException> {
+            Character.toChars(-1, arr, 0)
+        }
+    }
+
+    @Test
+    fun testToSurrogates() {
+        val codePoint = 0x1F600
+        val arr = CharArray(2)
+        Character.toSurrogates(codePoint, arr, 0)
+        assertEquals(Character.highSurrogate(codePoint), arr[0])
+        assertEquals(Character.lowSurrogate(codePoint), arr[1])
+    }
+
+    @Test
+    fun testLowHighSurrogate() {
+        val codePoint = 0x1F600
+        val high = Character.highSurrogate(codePoint)
+        val low = Character.lowSurrogate(codePoint)
+        assertTrue(Character.isHighSurrogate(high))
+        assertTrue(low.isLowSurrogate())
+        assertEquals(codePoint, Character.toCodePoint(high, low))
+    }
+
+    @Test
+    fun testIsBmpCodePoint() {
+        assertTrue(Character.isBmpCodePoint('A'.code))
+        assertFalse(Character.isBmpCodePoint(0x1F600))
+    }
+
+    @Test
+    fun testIsValidCodePoint() {
+        assertTrue(Character.isValidCodePoint(0))
+        assertTrue(Character.isValidCodePoint(0x10FFFF))
+        assertFalse(Character.isValidCodePoint(-1))
+        assertFalse(Character.isValidCodePoint(0x110000))
+    }
+
+    @Test
+    fun testIsSupplementaryCodePoint() {
+        assertTrue(Character.isSupplementaryCodePoint(0x10000))
+        assertTrue(Character.isSupplementaryCodePoint(0x10FFFF))
+        assertFalse(Character.isSupplementaryCodePoint(0xFFFF))
+    }
 }
