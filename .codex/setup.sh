@@ -20,6 +20,9 @@ set -euxo pipefail
 # -----------------------------------------------------------------------------
 # Config block (versions and URLs)
 # -----------------------------------------------------------------------------
+#OPT_DIR="$HOME/.local/opt"   #in case mkdir fail in /opt like in jules.google.com
+OPT_DIR="/opt"                #/opt is fine in most cases such as chatgpt.com/codex
+
 JDK_VERSION="24.0.1_9"
 KONAN_VERSION="2.1.21"
 KONAN_PLATFORM="linux-x86_64"   # this container is Linux/amd64
@@ -37,12 +40,12 @@ RELEASE_BASE_URL="https://github.com/nehemiaharchives/lucene-kmp-gc/releases/dow
 JDK_URL="https://github.com/adoptium/temurin24-binaries/releases/download/jdk-${JDK_VERSION//_/%2B}/OpenJDK24U-jdk_x64_linux_hotspot_${JDK_VERSION}.tar.gz"
 
 curl -fL "$JDK_URL" -o /tmp/jdk24.tar.gz
-mkdir -p /opt/jdk
+mkdir -p "$OPT_DIR/jdk"
 # --strip-components=1 removes top-level directory
-tar -xzf /tmp/jdk24.tar.gz --strip-components=1 -C /opt/jdk
+tar -xzf /tmp/jdk24.tar.gz --strip-components=1 -C "$OPT_DIR/jdk"
 rm /tmp/jdk24.tar.gz
 
-export JAVA_HOME=/opt/jdk
+export JAVA_HOME="$OPT_DIR/jdk"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # -----------------------------------------------------------------------------
@@ -57,8 +60,10 @@ keytool -importcert -noprompt -trustcacerts \
 # -----------------------------------------------------------------------------
 # 3  Install Android cmdline-tools
 # -----------------------------------------------------------------------------
-SDK_ROOT=/opt/android-sdk
+SDK_ROOT="$OPT_DIR/android-sdk"
 SDK_ZIP="https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip"
+
+export ANDROID_HOME="$SDK_ROOT"
 
 mkdir -p "$SDK_ROOT/cmdline-tools"
 curl -fL "$SDK_ZIP" -o /tmp/cmdline-tools.zip
