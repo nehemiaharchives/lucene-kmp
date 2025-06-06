@@ -116,10 +116,9 @@ fun Float.Companion.intBitsToFloat(bits: Int): Float {
                 return Float.fromBits(bits) // This correctly preserves the sign of zero
             }
             // Subnormal number
-            val mVal = mantissa shl 1 // No implicit leading 1
-            // The float value is computed as: sign * mVal * 2^(1 - 127 - 23) = sign * mVal * 2^-149
+            // The float value is computed as: sign * mantissa * 2^(1 - 127 - 23)
             // (1 - 127 for exponent bias for subnormals, 23 for mantissa bits)
-            (sign * mVal * 2.0.pow(1 - 127 - 23)).toFloat()
+            (sign * mantissa.toDouble() * 2.0.pow(1 - 127 - 23)).toFloat()
         }
         else -> { // Normalized number
             val mVal = mantissa or 0x800000 // Add implicit leading 1
