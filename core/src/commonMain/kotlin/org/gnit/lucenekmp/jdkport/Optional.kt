@@ -323,7 +323,7 @@ class Optional<T> private constructor(value: T?) {
          * @throws NullPointerException if value is null
          */
         fun <T> of(value: T): Optional<T> {
-            return Optional(checkNotNull(value))
+            return Optional(value ?: throw NullPointerException())
         }
 
         /**
