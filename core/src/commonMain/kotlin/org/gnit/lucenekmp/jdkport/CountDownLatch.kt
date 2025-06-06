@@ -6,58 +6,40 @@ package org.gnit.lucenekmp.jdkport
  *
  * TODO later we will implement or refactor with kotlin coroutines
  */
-class CountDownLatch {
+import kotlinx.coroutines.Job
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
-    /**
-     * Synchronization control For CountDownLatch.
-     * Uses AQS state to represent count.
-     */
-    /*private class Sync internal constructor(count: Int) : java.util.concurrent.locks.AbstractQueuedSynchronizer() {
-        init {
-            setState(count)
+class CountDownLatch(count: Int) {
+
+    @OptIn(ExperimentalAtomicApi::class)
+    private val count = AtomicInt(count)
+
+    private val completed = Job()
+
+    init {
+        require(count >= 0) { "count < 0" }
+        if (count == 0) {
+            completed.complete()
         }
+    }
 
-        val count: Int
-            get() = getState()
+    @OptIn(ExperimentalAtomicApi::class)
+    fun getCount(): Long {
+        return count.load().toLong()
+    }
 
-        override fun tryAcquireShared(acquires: Int): Int {
-            return if (getState() == 0) 1 else -1
-        }
-
-        override fun tryReleaseShared(releases: Int): Boolean {
-            // Decrement count; signal when transition to zero
-            while (true) {
-                val c: Int = getState()
-                if (c == 0) return false
-                val nextc = c - 1
-                if (compareAndSetState(c, nextc)) return nextc == 0
+    @OptIn(ExperimentalAtomicApi::class)
+    fun countDown() {
+        while (true) {
+            val c = count.load()
+            if (c == 0) return
+            if (count.compareAndSet(c, c - 1)) {
+                if (c - 1 == 0) {
+                    completed.complete()
+                }
+                return
             }
         }
-    }*/
-
-    //private val sync: java.util.concurrent.CountDownLatch.Sync? = null
-
-
-    constructor(count: Int) {
-        // Initialize the latch with the given count
-        // This is a placeholder implementation
-
-        /*require(count >= 0) { "count < 0" }
-        this.sync = java.util.concurrent.CountDownLatch.Sync(count)*/
-    }
-
-    fun getCount(): Long{
-        // Return the current count of the latch
-        // This is a placeholder implementation
-        return 0L
-
-        // return sync.getCount()
-    }
-
-    fun countDown(){
-        // Decrement the count of the latch
-        // This is a placeholder implementation
-
-        // sync.releaseShared(1)
     }
 }
