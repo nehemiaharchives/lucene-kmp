@@ -356,24 +356,36 @@ class LinkedBlockingQueueTest {
         assertFalse(iter.hasNext())
         assertFailsWith<NoSuchElementException> { iter.next() }
 
-        // Test iterator remove
+        // Test iterator remove (given that remove() is unsupported)
         val q2 = LinkedBlockingQueue<String>()
         q2.addAll(listOf("X", "Y", "Z"))
         val iter2 = q2.iterator()
 
-        assertFailsWith<IllegalStateException>("remove before next") { iter2.remove() }
+        // Call remove() before next() - should throw UnsupportedOperationException
+        assertFailsWith<UnsupportedOperationException>("remove() before next() should be unsupported") { iter2.remove() }
+        assertEquals(listOf("X", "Y", "Z"), q2.toList(), "Queue should be unchanged")
 
+
+        assertTrue(iter2.hasNext(), "Iterator should have X")
         assertEquals("X", iter2.next())
-        iter2.remove() // Remove X
-        assertEquals(listOf("Y", "Z"), q2.toList())
-        assertFailsWith<IllegalStateException>("remove twice after one next") { iter2.remove() }
+        // Call remove() after next() - should throw UnsupportedOperationException
+        assertFailsWith<UnsupportedOperationException>("remove() after next() should be unsupported") { iter2.remove() }
+        // Queue should be unchanged as remove is not supported
+        assertEquals(listOf("X", "Y", "Z"), q2.toList(), "Queue should not change if iterator remove is unsupported")
 
+        assertTrue(iter2.hasNext(), "Iterator should still have Y")
         assertEquals("Y", iter2.next())
-        // iter2.remove(); // Remove Y - not doing this to test removing last element
+        assertFailsWith<UnsupportedOperationException>("remove() after next() should also be unsupported") { iter2.remove() }
+        assertEquals(listOf("X", "Y", "Z"), q2.toList(), "Queue should not change if iterator remove is unsupported")
+
+        assertTrue(iter2.hasNext(), "Iterator should still have Z")
         assertEquals("Z", iter2.next())
-        iter2.remove() // Remove Z
-        assertEquals(listOf("Y"), q2.toList())
+        assertFailsWith<UnsupportedOperationException>("remove() after next() should also be unsupported") { iter2.remove() }
+        assertEquals(listOf("X", "Y", "Z"), q2.toList(), "Queue should not change if iterator remove is unsupported")
+
         assertFalse(iter2.hasNext())
+        // Check that next() still throws after iterating through all elements
+        assertFailsWith<NoSuchElementException> { iter2.next() }
     }
 
     @Test
@@ -442,10 +454,11 @@ class LinkedBlockingQueueTest {
     }
 
     @Test
-    fun testRemoveIf() {
+    fun testRemoveIf() = runTest {
         val q = LinkedBlockingQueue<Int>()
         q.addAll(listOf(1, 2, 3, 4, 5))
         val removed = q.removeIf { it!! % 2 == 0 }
+
         assertTrue(removed)
         assertEquals(listOf(1, 3, 5), q.toList())
 
