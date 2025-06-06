@@ -610,7 +610,7 @@ class ByteBufferTest {
         buffer.position(2) // Start reading from index 2 (value 20)
         val returnedBuffer1 = buffer.get(dst1, 0, 5)
         assertEquals(buffer, returnedBuffer1, "Returned buffer should be the same instance")
-        assertContentEquals(ByteArray(5) { (it + 2) * 10.toByte() }, dst1, "Data in dst1 not as expected") // 20,30,40,50,60
+        assertContentEquals(ByteArray(5) { ((it + 2) * 10).toByte() }, dst1, "Data in dst1 not as expected") // 20,30,40,50,60
         assertEquals(2 + 5, buffer.position, "Buffer position incorrect after basic get")
 
         // Scenario 2: Get with offset
@@ -629,7 +629,7 @@ class ByteBufferTest {
         val dst3 = ByteArray(3)
         buffer.position(8) // Starts at 80
         buffer.get(dst3) // Reads 3 bytes (dst3.size)
-        assertContentEquals(ByteArray(3) { (it + 8) * 10.toByte() }, dst3, "Data in dst3 (default args) not as expected") // 80,90,100
+        assertContentEquals(ByteArray(3) { ((it + 8) * 10).toByte() }, dst3, "Data in dst3 (default args) not as expected") // 80,90,100
         assertEquals(8 + 3, buffer.position, "Buffer position incorrect after get with default args")
 
         // Edge Case: Reading more than remaining
@@ -648,11 +648,11 @@ class ByteBufferTest {
         // The `require` in ByteBuffer.kt might intend IllegalArgumentException for parameter validation.
         // Let's test for what the current implementation likely throws or what `require` implies.
         // Given that `dst.size - offset < length` would be `5 - 3 < 3` (false, 2 < 3), this is an invalid combo.
-        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for invalid offset/length (offset + length > dst.size)") {
+        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for invalid offset/length (offset + length > dst.size)") {
             buffer.get(dstInvalid, 3, 3) // offset 3, length 3 into a size 5 array
         }
         // offset < 0
-        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative offset") {
+        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative offset") {
             buffer.get(dstInvalid, -1, 2)
         }
         // length < 0 (ByteBuffer.kt has explicit check for this, should be IllegalArgumentException)
@@ -731,10 +731,10 @@ class ByteBufferTest {
         buffer.clear()
         val srcInvalid = ByteArray(5)
         // Similar to bulk get, expect IndexOutOfBounds or IllegalArgumentException
-        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for invalid offset/length (offset + length > src.size)") {
+        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for invalid offset/length (offset + length > src.size)") {
             buffer.put(srcInvalid, 3, 3) // offset 3, length 3 from a size 5 array
         }
-        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative offset") {
+        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative offset") {
             buffer.put(srcInvalid, -1, 2)
         }
         assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative length") {
@@ -752,20 +752,21 @@ class ByteBufferTest {
         // Test putting zero bytes
         buffer.clear()
         val initialBufferContent = ByteArray(bufferCapacity)
-        buffer.get(0, initialBufferContent) // Save current state
+        buffer.get(0, initialBufferContent, 0, initialBufferContent.size) // Save current state
         buffer.position(1)
         val srcZero = ByteArray(5)
         buffer.put(srcZero, 0, 0)
         assertEquals(1, buffer.position, "Position should not change when putting zero bytes")
         val afterPutZeroContent = ByteArray(bufferCapacity)
-        buffer.get(0, afterPutZeroContent)
+        buffer.get(0, afterPutZeroContent, 0, afterPutZeroContent.size)
         assertContentEquals(initialBufferContent, afterPutZeroContent, "Buffer content should not change when putting zero bytes")
     }
 
     @Test
     fun testPutLong() {
         val capacity = 12
-        val value = 0x0123456789ABCDEF_L // Example long value
+        // Example long value. The 'L' suffix ensures Kotlin treats it as Long.
+        val value = 0x0123456789ABCDEFL
 
         // Test with Big Endian
         var bufferBE = ByteBuffer.allocate(capacity)
