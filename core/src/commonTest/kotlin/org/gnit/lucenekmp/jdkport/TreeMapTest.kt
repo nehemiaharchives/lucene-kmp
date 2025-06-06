@@ -156,4 +156,115 @@ class TreeMapTest {
         assertTrue(map.remove(2, "y"))
         assertNull(map[2])
     }
+
+    @Test
+    fun testPutIfAbsent() {
+        val map = TreeMap<Int, String>()
+        map[1] = "one"
+        val prevExisting = map.putIfAbsent(1, "uno")
+        assertEquals("one", prevExisting)
+        assertEquals("one", map[1])
+        val prevMissing = map.putIfAbsent(2, "two")
+        assertNull(prevMissing)
+        assertEquals("two", map[2])
+    }
+
+    @Test
+    fun testPollFirstAndLastEntry() {
+        val map = TreeMap<Int, String>()
+        map[2] = "two"
+        map[1] = "one"
+        map[3] = "three"
+        val first = map.pollFirstEntry()
+        assertEquals(1, first?.key)
+        assertEquals("one", first?.value)
+        val last = map.pollLastEntry()
+        assertEquals(3, last?.key)
+        assertEquals("three", last?.value)
+        assertEquals(setOf(2), map.keys)
+        map.clear()
+        assertNull(map.pollFirstEntry())
+        assertNull(map.pollLastEntry())
+    }
+
+    @Test
+    fun testComputeIfAbsent() {
+        val map = TreeMap<Int, String?>()
+        map[1] = "a"
+        var called = false
+        val existing = map.computeIfAbsent(1) { called = true; "b" }
+        assertEquals("a", existing)
+        assertFalse(called)
+        val added = map.computeIfAbsent(2) { "b" }
+        assertEquals("b", added)
+        assertEquals("b", map[2])
+        val none = map.computeIfAbsent(3) { null }
+        assertNull(none)
+        assertFalse(map.containsKey(3))
+    }
+
+    @Test
+    fun testComputeIfPresent() {
+        val map = TreeMap<Int, String?>()
+        map[1] = "a"
+        map[2] = null
+        val updated = map.computeIfPresent(1) { _, v -> v + "1" }
+        assertEquals("a1", updated)
+        assertEquals("a1", map[1])
+        val nullResult = map.computeIfPresent(2) { _, _ -> "x" }
+        assertNull(nullResult)
+        val absent = map.computeIfPresent(3) { _, _ -> "y" }
+        assertNull(absent)
+        val removed = map.computeIfPresent(1) { _, _ -> null }
+        assertNull(removed)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun testCompute() {
+        val map = TreeMap<Int, String?>()
+        map[1] = "a"
+        val res1 = map.compute(1) { _, v -> v + "x" }
+        assertEquals("ax", res1)
+        assertEquals("ax", map[1])
+        val res2 = map.compute(2) { _, _ -> "b" }
+        assertEquals("b", res2)
+        assertEquals("b", map[2])
+        val res3 = map.compute(3) { _, _ -> null }
+        assertNull(res3)
+        assertFalse(map.containsKey(3))
+        val res4 = map.compute(1) { _, _ -> null }
+        assertNull(res4)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun testMerge() {
+        val map = TreeMap<Int, String?>()
+        map[1] = "a"
+        val merged = map.merge(1, "b") { o, n -> o + n }
+        assertEquals("ab", merged)
+        assertEquals("ab", map[1])
+        val mergedNew = map.merge(2, "c") { o, n -> o + n }
+        assertEquals("c", mergedNew)
+        assertEquals("c", map[2])
+        val removed = map.merge(1, "x") { _, _ -> null }
+        assertNull(removed)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun testDescendingMapView() {
+        val map = TreeMap<Int, String>()
+        for (i in 1..3) map[i] = "v$i"
+        val desc = map.descendingMap()
+        assertEquals(listOf(3, 2, 1), desc.keys.toList())
+        desc[0] = "v0"
+        assertTrue(map.containsKey(0))
+        map[4] = "v4"
+        assertTrue(desc.containsKey(4))
+        desc.remove(2)
+        assertFalse(map.containsKey(2))
+    }
+
 }
