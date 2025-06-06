@@ -103,22 +103,28 @@ fun Float.Companion.intBitsToFloat(bits: Int): Float {
     val sign = if ((bits ushr 31) == 0) 1 else -1
 
     return when (e) {
-        0xff -> {
-            // If exponent bits are all ones:
-            //   if mantissa is zero, it's infinity; otherwise, it's NaN.
+        0xff -> { // Infinity or NaN
             if (mantissa == 0) {
                 if (sign > 0) Float.POSITIVE_INFINITY else Float.NEGATIVE_INFINITY
             } else {
                 Float.NaN
             }
         }
-        else -> {
-            // For normalized numbers, the implicit leading 1 is added;
-            // for subnormals (e==0) the mantissa is shifted left.
-            val m = if (e == 0) mantissa shl 1 else mantissa or 0x800000
-            // The float value is computed as: sign * m * 2^(e - 150)
-            // (150 = 127 (bias) + 23 (mantissa bits))
-            (sign * m * 2.0.pow((e - 150).toDouble())).toFloat()
+        0 -> { // Zero or subnormal
+            if (mantissa == 0) {
+                // Handle +0.0 and -0.0 explicitly
+                return Float.fromBits(bits) // This correctly preserves the sign of zero
+            }
+            // Subnormal number
+            // The float value is computed as: sign * mantissa * 2^(1 - 127 - 23)
+            // (1 - 127 for exponent bias for subnormals, 23 for mantissa bits)
+            (sign * mantissa.toDouble() * 2.0.pow(1 - 127 - 23)).toFloat()
+        }
+        else -> { // Normalized number
+            val mVal = mantissa or 0x800000 // Add implicit leading 1
+            // The float value is computed as: sign * mVal * 2^(e - 127 - 23)
+            // (e - 127 for exponent bias, 23 for mantissa bits)
+            (sign * mVal * 2.0.pow((e - 127 - 23).toDouble())).toFloat()
         }
     }
 }
