@@ -429,4 +429,56 @@ class LinkedBlockingQueueTest {
         assertEquals(10, q2.poll())
         assertEquals(0, q2.size)
     }
+
+    @Test
+    fun testForEach() {
+        val q = LinkedBlockingQueue<Int>()
+        q.addAll(listOf(1, 2, 3))
+        val visited = mutableListOf<Int>()
+        q.forEach { visited.add(it) }
+        assertEquals(listOf(1, 2, 3), visited)
+        // Ensure queue remains unchanged
+        assertEquals(listOf(1, 2, 3), q.toList())
+    }
+
+    @Test
+    fun testRemoveIf() {
+        val q = LinkedBlockingQueue<Int>()
+        q.addAll(listOf(1, 2, 3, 4, 5))
+        val removed = q.removeIf { it!! % 2 == 0 }
+        assertTrue(removed)
+        assertEquals(listOf(1, 3, 5), q.toList())
+
+        // Removing again with filter matching none
+        assertFalse(q.removeIf { it!! < 0 })
+        assertEquals(listOf(1, 3, 5), q.toList())
+    }
+
+    @Test
+    fun testRemoveAllAndRetainAll() {
+        val q = LinkedBlockingQueue<String>()
+        q.addAll(listOf("A", "B", "C", "D"))
+        assertTrue(q.removeAll(listOf("B", "D")))
+        assertEquals(listOf("A", "C"), q.toList())
+
+        // removeAll with no matching elements
+        assertFalse(q.removeAll(listOf("X")))
+        assertEquals(listOf("A", "C"), q.toList())
+
+        assertTrue(q.retainAll(listOf("A")))
+        assertEquals(listOf("A"), q.toList())
+
+        // retainAll with all elements retained
+        assertFalse(q.retainAll(listOf("A")))
+        assertEquals(listOf("A"), q.toList())
+    }
+
+    @Test
+    fun testIsBoundedProperty() {
+        val bounded = LinkedBlockingQueue<Int>(2)
+        assertTrue(bounded.isBounded)
+
+        val unbounded = LinkedBlockingQueue<Int>()
+        assertFalse(unbounded.isBounded)
+    }
 }
