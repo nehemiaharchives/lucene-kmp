@@ -7,33 +7,39 @@ package org.gnit.lucenekmp.jdkport
  *
  * TODO later we will implement or refactor with kotlin coroutines
  */
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+
 class ReentrantLock {
 
-    fun tryLock(): Boolean {
-        // Attempt to acquire the lock without blocking
-        // This is a placeholder implementation
-        // In a real implementation, this would attempt to acquire the lock and return true if successful, false otherwise
+    private val mutex = Mutex()
+    private var holdCount = 0
 
-        return true
+    fun tryLock(): Boolean {
+        val locked = mutex.tryLock()
+        if (locked) {
+            holdCount++
+        }
+        return locked
     }
 
     fun lock() {
-        // Acquire the lock, blocking until it is available
-        // This is a placeholder implementation
-        // In a real implementation, this would block until the lock is acquired
+        runBlocking {
+            mutex.lock()
+        }
+        holdCount++
     }
 
     fun unlock() {
-        // Release the lock
-        // This is a placeholder implementation
-        // In a real implementation, this would release the lock if it is held by the current thread
+        if (holdCount > 0) {
+            holdCount--
+            if (holdCount == 0) {
+                mutex.unlock()
+            }
+        }
     }
 
     fun isHeldByCurrentThread(): Boolean {
-        // Check if the lock is held by the current thread
-        // This is a placeholder implementation
-        // In a real implementation, this would return true if the current thread holds the lock, false otherwise
-
-        return false
+        return holdCount > 0
     }
 }
