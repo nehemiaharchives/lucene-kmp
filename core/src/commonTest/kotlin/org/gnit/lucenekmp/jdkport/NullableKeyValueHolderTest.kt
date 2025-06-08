@@ -39,8 +39,8 @@ class NullableKeyValueHolderTest {
 
     @Test
     fun testEqualsAndHashCode() {
-        val holder1 = NullableKeyValueHolder("k", "v")
-        val holder2 = NullableKeyValueHolder("k", "v")
+        val holder1 = NullableKeyValueHolder<String?, String?>("k", "v")
+        val holder2 = NullableKeyValueHolder<String?, String?>("k", "v")
         assertEquals(holder1, holder2)
         assertEquals(holder1.hashCode(), holder2.hashCode())
 
