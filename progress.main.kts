@@ -53,8 +53,9 @@ class Progress : CliktCommand() {
         // Add more FQNs here as needed
     )
 
-    private val javaDir by option("--java", "-j").default("/home/joel/code/lp/lucene")
-    private val kmpDir  by option("--kmp", "-k").default("/home/joel/code/lp/lucene-kmp")
+    private val homeDir = System.getenv("HOME") ?: System.getProperty("user.home")
+    private val javaDir by option("--java", "-j").default("$homeDir/code/lp/lucene")
+    private val kmpDir  by option("--kmp", "-k").default("$homeDir/code/lp/lucene-kmp")
 
     private val term = Terminal()
     private val javaIndex = mutableMapOf<String, Source>()
