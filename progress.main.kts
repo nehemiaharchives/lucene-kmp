@@ -29,6 +29,15 @@ fun File.collectSources(ext: String): List<Source> =
             Source(fqn, f)
         }.toList()
 
+// Helper functions to create markdown links for Java FQNs
+fun markdownLinkForJavaFQN(javaFqn: String): String {
+    return "[$javaFqn](${createGitHubLink(javaFqn)})"
+}
+
+fun markdownLinkForTestFQN(javaFqn: String): String {
+    return "[$javaFqn](${createGitHubLink(javaFqn, "core", "test")})"
+}
+
 fun mapToKmp(fqn: String): String = when {
     fqn.startsWith("org.apache.lucene.") -> "org.gnit.lucenekmp." + fqn.removePrefix("org.apache.lucene.")
     fqn.startsWith("java.")              -> "org.gnit.lucenekmp.jdkport." + fqn.substringAfterLast('.')
@@ -37,6 +46,20 @@ fun mapToKmp(fqn: String): String = when {
 
 fun linesOf(file: File) = file.useLines { it.count() }
 fun checkbox(ok: Boolean) = if (ok) "[x]" else "[ ]"
+
+val javaLuceneCommitId = "ec75fcad5a4208c7b9e35e870229d9b703cda8f3"
+
+/** Create a GitHub link to the source file in the Lucene repository.
+ *  @param javaFqn Fully qualified name of the Java class (e.g., "org.apache.lucene.analysis.Analyzer").
+ *  @param srcDir Source directory (e.g., "java" or "test" for unit tests).
+ *  @param luceneModule Lucene module name (default is "core", can be "test-framework", "analysis" etc).
+ *  @return URL to the source file in the Lucene GitHub repository.
+ */
+fun createGitHubLink(javaFqn: String, luceneModule: String = "core", srcDir: String = "java"): String {
+    // for exammple: https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/Analyzer.java
+    val path = javaFqn.replace('.', '/') + ".java"
+    return "https://github.com/apache/lucene/blob/$javaLuceneCommitId/lucene/$luceneModule/src/$srcDir/$path"
+}
 
 // ─── main command ───────────────────────────────────────────────────────────
 class Progress : CliktCommand() {
@@ -255,10 +278,14 @@ class Progress : CliktCommand() {
         
         term.println(tbl)
         
-        // Markdown table
+        // Markdown table with links for test classes
+        val mdRows = rows.map { row -> 
+            listOf(markdownLinkForTestFQN(row[0]), row[1])
+        }
+        
         val mdTable = mdTableBuilder(
             listOf("Java Test FQN", "Kotlin Test FQN"),
-            rows
+            mdRows
         )
         markDown.appendLine(mdTable)
     }
@@ -334,10 +361,11 @@ class Progress : CliktCommand() {
         term.println(tbl)
 
 
-        // Markdown table
+        // Markdown table with links for Java FQNs
+        val mdRows = missing.map { listOf(markdownLinkForJavaFQN(it), mapToKmp(it)) }
         val mdTable = mdTableBuilder(
             listOf("Java FQN", "Expected KMP FQN"),
-            missing.map { listOf(it, mapToKmp(it)) }
+            mdRows
         )
         markDown.appendLine(mdTable)
     }
@@ -459,9 +487,9 @@ class Progress : CliktCommand() {
         // Markdown table generation
         val mdRows = rows.map { r ->
             val pct = if (r.total == 0) 100 else r.ported * 100 / r.total
-            listOf(r.java, r.kmp, r.total, r.ported, r.remain, "$pct%", checkbox(r.done))
+            listOf(markdownLinkForJavaFQN(r.java), r.kmp, r.total, r.ported, r.remain, "$pct%", checkbox(r.done))
         } + listOf(
-            // Footer row
+            // Footer row doesn't need a link
             run {
                 val total = globalDeps.size
                 val port = globalPorts.size
