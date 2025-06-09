@@ -22,7 +22,7 @@ data class Source(val fqn: String, val file: File)
 fun File.collectSources(ext: String): List<Source> =
     walkTopDown()
         .filter { it.isFile && it.extension == ext }
-        .mapNotNull { f ->
+        .map { f ->
             val pkgLine = f.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
             val pkg = pkgLine?.removePrefix("package ")?.trim()?.trimEnd(';') ?: ""
             val fqn = if (pkg.isEmpty()) f.nameWithoutExtension else "$pkg.${f.nameWithoutExtension}"
@@ -99,6 +99,29 @@ class Progress : CliktCommand() {
         return counts
     }
 
+    private fun countKotlinTestClasses(testDir: File): Map<String, Int> {
+        val counts = mutableMapOf<String, Int>()
+        
+        if (testDir.exists() && testDir.isDirectory) {
+            testDir.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
+                .forEach { file ->
+                    // Get the relative path from the testDir
+                    val relativePath = file.parentFile.toRelativePath(testDir)
+                    // Use the full package path format for consistency with the mapping we'll do later
+                    val packageName = "org.gnit.lucenekmp." + relativePath.replace(File.separatorChar, '.')
+
+                    // read file and count lines of code and if loc > 5 increment the count
+                    val lineCount = file.useLines { it.count() }
+                    if (lineCount > 5) {
+                        counts[packageName] = counts.getOrDefault(packageName, 0) + 1
+                    }
+                }
+        }
+        
+        return counts
+    }
+
     private fun File.toRelativePath(baseDir: File): String {
         val basePath = baseDir.absolutePath
         return if (this.absolutePath.startsWith(basePath)) {
@@ -113,43 +136,57 @@ class Progress : CliktCommand() {
         if (pkg == "org.apache.lucene") pkg else "  ".repeat(pkg.removePrefix("org.apache.lucene").count { it == '.' }) + pkg
     
     private fun renderTestClassesTable() {
-        val testDir = File(javaDir, "lucene/core/src/test/org/apache/lucene")
-        if (!testDir.exists()) {
-            term.println("Test directory not found: $testDir")
+        val javaTestDir = File(javaDir, "lucene/core/src/test/org/apache/lucene")
+        val ktTestDir = File(kmpDir, "core/src/commonTest/kotlin/org/gnit/lucenekmp")
+        
+        if (!javaTestDir.exists()) {
+            term.println("Java test directory not found: $javaTestDir")
             return
         }
-
-        val counts = countTestClasses(testDir)
-
-        // Calculate total
-        val total = counts.values.sum()
-
-        val section = "## Test Classes Count"
+        
+        val javaCounts = countTestClasses(javaTestDir)
+        val ktCounts = countKotlinTestClasses(ktTestDir)
+        
+        // Calculate totals
+        val javaTotal = javaCounts.values.sum()
+        val ktTotal = ktCounts.values.sum()
+        
+        val section = "## Test Classes Port Progress"
         term.println()
         term.println(bold(section))
         markDown.appendLine()
         markDown.appendLine(section)
-
-        val sortedRows = counts.entries
+        
+        val sortedRows = javaCounts.entries
             .sortedBy { it.key }
-            .map { listOf(indent(it.key), it.value) }  // Use the indent function here
+            .map { 
+                val pkg = it.key
+                val javaCount = it.value
+                // Find the corresponding Kotlin package
+                val ktPkg = "org.gnit.lucenekmp." + pkg.removePrefix("org.apache.lucene.")
+                val ktCount = ktCounts[ktPkg] ?: 0
+                // Calculate percentage
+                val percentage = if (javaCount == 0) 100 else ktCount * 100 / javaCount
+                listOf(indent(pkg), javaCount, ktCount, "$percentage%")
+            }
             .toMutableList()
-
-        // Add total row
-        sortedRows.add(listOf("Total", total))
-
+        
+        // Add total row with percentage
+        val totalPercentage = if (javaTotal == 0) 100 else ktTotal * 100 / javaTotal
+        sortedRows.add(listOf("Total", javaTotal, ktTotal, "$totalPercentage%"))
+        
         val tbl = table {
-            header { row("Subpackage", "Count") }
+            header { row("Subpackage", "Count", "Ported", "%") }
             body {
-                sortedRows.forEach { row(it[0], it[1]) }
+                sortedRows.forEach { row(it[0], it[1], it[2], it[3]) }
             }
         }
-
+        
         term.println(tbl)
-
+        
         // Markdown table
         val mdTable = mdTableBuilder(
-            listOf("Subpackage", "Count"),
+            listOf("Subpackage", "Count", "Ported", "%"),
             sortedRows
         )
         markDown.appendLine(mdTable)
