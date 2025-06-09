@@ -88,10 +88,13 @@ class Progress : CliktCommand() {
             testDir.walkTopDown()
                 .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
                 .forEach { file ->
-                    // Get the relative path from the testDir
+                    // Since we're already in org/apache/lucene, don't add the prefix again
                     val relativePath = file.parentFile.toRelativePath(testDir)
-                    // Use the full package path format for consistency
-                    val packageName = "org.apache.lucene." + relativePath.replace(File.separatorChar, '.')
+                    val packageName = if (relativePath.isEmpty()) {
+                        "org.apache.lucene"
+                    } else {
+                        "org.apache.lucene." + relativePath.replace(File.separatorChar, '.')
+                    }
                     counts[packageName] = counts.getOrDefault(packageName, 0) + 1
                 }
         }
@@ -106,12 +109,14 @@ class Progress : CliktCommand() {
             testDir.walkTopDown()
                 .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
                 .forEach { file ->
-                    // Get the relative path from the testDir
+                    // Since we're already in org/gnit/lucenekmp, don't add the prefix again
                     val relativePath = file.parentFile.toRelativePath(testDir)
-                    // Use the full package path format for consistency with the mapping we'll do later
-                    val packageName = "org.gnit.lucenekmp." + relativePath.replace(File.separatorChar, '.')
+                    val packageName = if (relativePath.isEmpty()) {
+                        "org.gnit.lucenekmp"
+                    } else {
+                        "org.gnit.lucenekmp." + relativePath.replace(File.separatorChar, '.')
+                    }
 
-                    // read file and count lines of code and if loc > 5 increment the count
                     val lineCount = file.useLines { it.count() }
                     if (lineCount > 5) {
                         counts[packageName] = counts.getOrDefault(packageName, 0) + 1
@@ -188,6 +193,72 @@ class Progress : CliktCommand() {
         val mdTable = mdTableBuilder(
             listOf("Subpackage", "Count", "Ported", "%"),
             sortedRows
+        )
+        markDown.appendLine(mdTable)
+    }
+
+    private fun renderTestsToPort() {
+        val javaTestDir = File(javaDir, "lucene/core/src/test/org/apache/lucene")
+        val ktTestDir = File(kmpDir, "core/src/commonTest/kotlin/org/gnit/lucenekmp")
+        
+        if (!javaTestDir.exists()) {
+            term.println("Java test directory not found: $javaTestDir")
+            return
+        }
+        
+        // Collect all Java test files
+        val javaTests = mutableListOf<Source>()
+        javaTestDir.walkTopDown()
+            .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
+            .forEach { file ->
+                // Read package from file content
+                val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
+                val pkg = pkgLine?.removePrefix("package ")?.trim()?.trimEnd(';') ?: ""
+                val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
+                javaTests.add(Source(fqn, file))
+            }
+        
+        // Create mapping of existing Kotlin test files
+        val ktTestMap = mutableMapOf<String, Source>()
+        ktTestDir.walkTopDown()
+            .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
+            .forEach { file ->
+                val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
+                val pkg = pkgLine?.removePrefix("package ")?.trim() ?: ""
+                val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
+                ktTestMap[fqn] = Source(fqn, file)
+            }
+        
+        val section = "## Tests To Port"
+        term.println()
+        term.println(bold(section))
+        markDown.appendLine()
+        markDown.appendLine(section)
+        
+        // Filter out tests that are already ported
+        val rows = javaTests
+            .map { javaTest ->
+                val javaFqn = javaTest.fqn
+                val expectedKtFqn = mapToKmp(javaFqn)
+                Pair(javaFqn, expectedKtFqn)
+            }
+            .filter { (_, ktFqn) -> ktFqn !in ktTestMap } // Only include tests that haven't been ported
+            .map { (javaFqn, ktFqn) -> listOf(javaFqn, ktFqn) }
+            .sortedBy { it[0] }
+        
+        val tbl = table {
+            header { row("Java Test FQN", "Kotlin Test FQN") }
+            body {
+                rows.forEach { row(it[0], it[1]) }
+            }
+        }
+        
+        term.println(tbl)
+        
+        // Markdown table
+        val mdTable = mdTableBuilder(
+            listOf("Java Test FQN", "Kotlin Test FQN"),
+            rows
         )
         markDown.appendLine(mdTable)
     }
@@ -443,6 +514,9 @@ class Progress : CliktCommand() {
         
         // Add the table with Test classes count
         renderTestClassesTable()
+        
+        // Add the new Tests To Port table
+        renderTestsToPort()
 
         File(kmpRoot, "PROGRESS.md").writeText(markDown.toString())
     }
