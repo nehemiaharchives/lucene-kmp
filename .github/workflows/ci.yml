@@ -26,6 +26,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: true
 
       - name: Build JVM
         run: ./gradlew jvmMainClasses jvmTest --no-daemon
@@ -70,6 +72,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: true
 
       - name: Build Android
         run: ./gradlew assembleRelease testReleaseUnitTest --no-daemon
@@ -111,6 +115,16 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Konan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
 
       - name: Build iOS
         run: ./gradlew iosX64Test iosX64MainKlibrary iosArm64MainKlibrary iosSimulatorArm64MainKlibrary --no-daemon
@@ -150,6 +164,16 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Konan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
 
       - name: Full Build
         run: ./gradlew build --no-daemon
@@ -162,7 +186,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: core/build/reports/kover/report.xml
-          token: ${{ secrets.CODECOV_TOKEN }} 
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
