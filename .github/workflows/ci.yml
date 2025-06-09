@@ -26,8 +26,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: true
 
       - name: Build JVM
         run: ./gradlew jvmMainClasses jvmTest --no-daemon
@@ -72,8 +70,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: true
 
       - name: Build Android
         run: ./gradlew assembleRelease testReleaseUnitTest --no-daemon
@@ -115,8 +111,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: true
 
       - name: Konan cache
         uses: actions/cache@v4
@@ -164,8 +158,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: true
 
       - name: Konan cache
         uses: actions/cache@v4
