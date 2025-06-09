@@ -25,7 +25,7 @@ jobs:
           java-version: '24'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build JVM
         run: ./gradlew jvmMainClasses jvmTest --no-daemon
@@ -56,9 +56,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v3
-
       - name: Set up JDK 24
         uses: actions/setup-java@v4
         with:
@@ -69,7 +66,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Android
         run: ./gradlew assembleRelease testReleaseUnitTest --no-daemon
@@ -100,9 +97,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v3
-
       - name: Set up JDK 24
         uses: actions/setup-java@v4
         with:
@@ -110,7 +104,7 @@ jobs:
           java-version: '24'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Konan cache
         uses: actions/cache@v4
@@ -157,7 +151,7 @@ jobs:
           java-version: '24'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Konan cache
         uses: actions/cache@v4
