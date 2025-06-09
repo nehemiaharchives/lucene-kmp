@@ -28,7 +28,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build JVM
-        run: ./gradlew jvmMainClasses jvmTest --no-daemon
+        run: ./gradlew jvmMainClasses jvmTest
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -69,7 +69,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Android
-        run: ./gradlew assembleRelease testReleaseUnitTest --no-daemon
+        run: ./gradlew assembleRelease testReleaseUnitTest
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -115,7 +115,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Build iOS
-        run: ./gradlew iosX64Test iosX64MainKlibrary iosArm64MainKlibrary iosSimulatorArm64MainKlibrary --no-daemon
+        run: ./gradlew iosX64Test iosX64MainKlibrary iosArm64MainKlibrary iosSimulatorArm64MainKlibrary
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -162,10 +162,10 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Full Build
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build
 
       - name: Generate Coverage Report
-        run: ./gradlew koverXmlReport --no-daemon
+        run: ./gradlew koverXmlReport
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
