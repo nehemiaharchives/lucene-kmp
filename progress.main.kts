@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 @file:DependsOn("com.github.ajalt.clikt:clikt-jvm:5.0.3")
-@file:DependsOn("com.github.ajalt.mordant:mordant:2.2.0")
+@file:DependsOn("com.github.ajalt.mordant:mordant:3.0.2")
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.main
