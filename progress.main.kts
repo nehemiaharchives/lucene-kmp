@@ -79,6 +79,81 @@ class Progress : CliktCommand() {
     private fun index(src: List<Source>, dst: MutableMap<String, Source>) {
         src.forEach { dst[it.fqn] = it }
     }
+    
+    // ── test classes counter ────────────────────────────────────────────────
+    private fun countTestClasses(testDir: File): Map<String, Int> {
+        val counts = mutableMapOf<String, Int>()
+        
+        if (testDir.exists() && testDir.isDirectory) {
+            testDir.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
+                .forEach { file ->
+                    // Get the relative path from the testDir
+                    val relativePath = file.parentFile.toRelativePath(testDir)
+                    // Use the full package path format for consistency
+                    val packageName = "org.apache.lucene." + relativePath.replace(File.separatorChar, '.')
+                    counts[packageName] = counts.getOrDefault(packageName, 0) + 1
+                }
+        }
+
+        return counts
+    }
+
+    private fun File.toRelativePath(baseDir: File): String {
+        val basePath = baseDir.absolutePath
+        return if (this.absolutePath.startsWith(basePath)) {
+            this.absolutePath.substring(basePath.length).trimStart(File.separatorChar)
+        } else {
+            this.absolutePath
+        }
+    }
+
+    // Helper function for indentation - moved outside of renderPackageStats to be reusable
+    private fun indent(pkg: String) =
+        if (pkg == "org.apache.lucene") pkg else "  ".repeat(pkg.removePrefix("org.apache.lucene").count { it == '.' }) + pkg
+    
+    private fun renderTestClassesTable() {
+        val testDir = File(javaDir, "lucene/core/src/test/org/apache/lucene")
+        if (!testDir.exists()) {
+            term.println("Test directory not found: $testDir")
+            return
+        }
+
+        val counts = countTestClasses(testDir)
+
+        // Calculate total
+        val total = counts.values.sum()
+
+        val section = "## Test Classes Count"
+        term.println()
+        term.println(bold(section))
+        markDown.appendLine()
+        markDown.appendLine(section)
+
+        val sortedRows = counts.entries
+            .sortedBy { it.key }
+            .map { listOf(indent(it.key), it.value) }  // Use the indent function here
+            .toMutableList()
+
+        // Add total row
+        sortedRows.add(listOf("Total", total))
+
+        val tbl = table {
+            header { row("Subpackage", "Count") }
+            body {
+                sortedRows.forEach { row(it[0], it[1]) }
+            }
+        }
+
+        term.println(tbl)
+
+        // Markdown table
+        val mdTable = mdTableBuilder(
+            listOf("Subpackage", "Count"),
+            sortedRows
+        )
+        markDown.appendLine(mdTable)
+    }
 
     // ── dependency helpers ────────────────────────────────────────────────
     /** collapse inner‑class FQN like Foo\$Bar\$Baz → first existing outer found in javaIndex */
@@ -184,10 +259,8 @@ class Progress : CliktCommand() {
         val overallTotal = topTotals.values.sum()
         val overallPort  = topPorted.values.sum()
 
+        // Using the class-level indent function now
         val allRows = listOf(Triple("org.apache.lucene", overallTotal, overallPort)) + rows
-
-        fun indent(pkg: String) =
-            if (pkg == "org.apache.lucene") pkg else "  ".repeat(pkg.removePrefix("org.apache.lucene").count { it == '.' }) + pkg
 
         val section = "## Package statistics (priority‑1 deps)"
         term.println(bold(section))
@@ -316,7 +389,7 @@ class Progress : CliktCommand() {
         // Exclude notToPort from all dependency sets
         val deps = collectTransitive(pri1.toSet()).filter { it in javaIndex && it !in notToPort }.toSet()
 
-        val section = "# Lucene KMP Port Progress"
+        val section = "# Lucene KMP Port Progress"
         term.println(bold(section))
         markDown.appendLine(section)
 
@@ -330,6 +403,9 @@ class Progress : CliktCommand() {
         }.filter { it !in notToPort } // Exclude notToPort from missing list
          .sorted()
         renderMissing(missingDeps)
+        
+        // Add the table with Test classes count
+        renderTestClassesTable()
 
         File(kmpRoot, "PROGRESS.md").writeText(markDown.toString())
     }

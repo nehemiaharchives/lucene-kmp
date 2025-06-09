@@ -1,4 +1,4 @@
-# Lucene KMP Port Progress
+# Lucene KMP Port Progress
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
@@ -131,4 +131,45 @@
 | org.apache.lucene.search.TotalHitCountCollector | org.gnit.lucenekmp.search.TotalHitCountCollector |
 | org.apache.lucene.search.TotalHitCountCollectorManager | org.gnit.lucenekmp.search.TotalHitCountCollectorManager |
 | org.apache.lucene.search.UsageTrackingQueryCachingPolicy | org.gnit.lucenekmp.search.UsageTrackingQueryCachingPolicy |
+
+
+## Test Classes Count
+| Subpackage | Count |
+| --- | --- |
+|   org.apache.lucene. | 6 |
+|   org.apache.lucene.analysis | 15 |
+|     org.apache.lucene.analysis.standard | 2 |
+|     org.apache.lucene.analysis.tokenattributes | 4 |
+|   org.apache.lucene.codecs | 4 |
+|     org.apache.lucene.codecs.compressing | 5 |
+|     org.apache.lucene.codecs.hnsw | 1 |
+|     org.apache.lucene.codecs.lucene101 | 6 |
+|     org.apache.lucene.codecs.lucene102 | 2 |
+|     org.apache.lucene.codecs.lucene90 | 14 |
+|       org.apache.lucene.codecs.lucene90.blocktree | 1 |
+|       org.apache.lucene.codecs.lucene90.compressing | 3 |
+|     org.apache.lucene.codecs.lucene94 | 1 |
+|     org.apache.lucene.codecs.lucene99 | 6 |
+|     org.apache.lucene.codecs.perfield | 4 |
+|   org.apache.lucene.document | 50 |
+|   org.apache.lucene.geo | 17 |
+|   org.apache.lucene.index | 197 |
+|     org.apache.lucene.internal.hppc | 15 |
+|     org.apache.lucene.internal.tests | 1 |
+|     org.apache.lucene.internal.vectorization | 4 |
+|   org.apache.lucene.search | 149 |
+|     org.apache.lucene.search.knn | 1 |
+|     org.apache.lucene.search.similarities | 25 |
+|   org.apache.lucene.store | 27 |
+|   org.apache.lucene.util | 63 |
+|     org.apache.lucene.util.automaton | 15 |
+|     org.apache.lucene.util.bkd | 8 |
+|     org.apache.lucene.util.compress | 3 |
+|     org.apache.lucene.util.fst | 8 |
+|     org.apache.lucene.util.graph | 1 |
+|     org.apache.lucene.util.hnsw | 8 |
+|     org.apache.lucene.util.mutable | 1 |
+|     org.apache.lucene.util.packed | 3 |
+|     org.apache.lucene.util.quantization | 3 |
+| Total | 673 |
 
