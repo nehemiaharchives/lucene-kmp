@@ -1,4 +1,4 @@
-#!/usr/bin/env kotlin
+#!/usr/bin/env -S kotlin -J--enable-native-access=ALL-UNNAMED
 
 @file:DependsOn("com.github.ajalt.clikt:clikt-jvm:5.0.3")
 @file:DependsOn("com.github.ajalt.mordant:mordant:3.0.2")
