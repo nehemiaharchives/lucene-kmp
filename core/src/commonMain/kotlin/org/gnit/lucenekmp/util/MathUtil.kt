@@ -60,8 +60,8 @@ object MathUtil {
     fun gcd(a: Long, b: Long): Long {
         var a = a
         var b = b
-        a = abs(a.toDouble()).toLong()
-        b = abs(b.toDouble()).toLong()
+        a = abs(a)
+        b = abs(b)
         if (a == 0L) {
             return b
         } else if (b == 0L) {
