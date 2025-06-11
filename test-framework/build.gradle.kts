@@ -32,6 +32,7 @@ kotlin {
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
                 implementation(libs.kotlin.logging)
+                implementation(libs.okio)
             }
         }
         val commonTest by getting {
