@@ -48,7 +48,7 @@ class RamUsageEstimator {
          * A constant specifying the object alignment boundary inside the JVM. Objects will always take a
          * full multiple of this constant, possibly wasting some space.
          */
-        const val NUM_BYTES_OBJECT_ALIGNMENT: Int = 0
+        const val NUM_BYTES_OBJECT_ALIGNMENT: Int = 8
 
         /**
          * Approximate memory usage that we assign to all unknown queries - this maps roughly to a
