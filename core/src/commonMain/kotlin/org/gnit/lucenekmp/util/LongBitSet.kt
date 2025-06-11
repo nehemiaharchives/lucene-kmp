@@ -436,7 +436,7 @@ class LongBitSet : Accountable {
         }
 
         /** The maximum `numBits` supported.  */
-        val MAX_NUM_BITS: Long = 64 * ArrayUtil.MAX_ARRAY_LENGTH as Long
+        val MAX_NUM_BITS: Long = 64L * ArrayUtil.MAX_ARRAY_LENGTH.toLong()
 
         /** Returns the number of 64 bit words it would take to hold numBits  */
         fun bits2words(numBits: Long): Int {
