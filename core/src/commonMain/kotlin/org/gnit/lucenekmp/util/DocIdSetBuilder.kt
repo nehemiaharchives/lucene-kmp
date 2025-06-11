@@ -72,13 +72,13 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
     @JvmRecord
     private data class BufferAdder(val buffer: Buffer) : BulkAdder {
         override fun add(doc: Int) {
-            buffer!!.array[buffer.length++] = doc
+            buffer.array[buffer.length++] = doc
         }
 
         override fun add(docs: IntsRef) {
-            /*java.lang.System.arraycopy(docs.ints, docs.offset, buffer!!.array, buffer.length, docs.length)*/
+            /*java.lang.System.arraycopy(docs.ints, docs.offset, buffer.array, buffer.length, docs.length)*/
             docs.ints.copyInto(
-                destination = buffer!!.array,
+                destination = buffer.array,
                 destinationOffset = buffer.length,
                 startIndex = docs.offset,
                 endIndex = docs.offset + docs.length
@@ -101,7 +101,7 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
     val multivalued: Boolean
     var numValuesPerDoc: Double = 0.0
 
-    private var buffers: MutableList<Buffer>? = null
+    private var buffers: MutableList<Buffer> = mutableListOf()
     private var totalAllocated = 0 // accumulated size of the allocated buffers
 
     private var bitSet: FixedBitSet?
@@ -190,12 +190,12 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
     }
 
     private fun ensureBufferCapacity(numDocs: Int) {
-        if (buffers!!.isEmpty()) {
+        if (buffers.isEmpty()) {
             addBuffer(additionalCapacity(numDocs))
             return
         }
 
-        val current = buffers!!.get(buffers!!.size - 1)
+        val current = buffers[buffers.size - 1]
         if (current.array.size - current.length >= numDocs) {
             // current buffer is large enough
             return
@@ -224,7 +224,7 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
 
     private fun addBuffer(len: Int): Buffer {
         val buffer = Buffer(len)
-        buffers!!.add(buffer)
+        buffers.add(buffer)
         adder = BufferAdder(buffer)
         totalAllocated += buffer.array.size
         return buffer
@@ -239,7 +239,7 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
         require(bitSet == null)
         val bitSet = FixedBitSet(maxDoc)
         var counter: Long = 0
-        for (buffer in buffers!!) {
+        for (buffer in buffers) {
             val array = buffer.array
             val length = buffer.length
             counter += length.toLong()
@@ -261,7 +261,7 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
                 val cost: Long = kotlin.math.round(counter.toDouble() / numValuesPerDoc).toLong()
                 return BitDocIdSet(bitSet!!, cost)
             } else {
-                val concatenated = concat(buffers!!)
+                val concatenated = concat(buffers)
                 val sorter = LSBRadixSorter()
                 sorter.sort(PackedInts.bitsRequired(maxDoc - 1L), concatenated.array, concatenated.length)
                 val l: Int
@@ -276,7 +276,7 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
                 return IntArrayDocIdSet(concatenated.array, l)
             }
         } finally {
-            this.buffers = null
+        this.buffers = mutableListOf()
             this.bitSet = null
         }
     }
