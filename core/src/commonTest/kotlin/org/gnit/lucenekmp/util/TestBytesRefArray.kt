@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.jdkport.Character
+import kotlin.comparisons.naturalOrder
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -88,7 +89,7 @@ class TestBytesRefArray : LuceneTestCase() {
                 stringList.add(str)
             }
             stringList.sortWith(STRING_CODEPOINT_COMPARATOR)
-            val iter = list.iterator(Comparator.naturalOrder())
+            val iter = list.iterator(naturalOrder())
             var i = 0
             while (true) {
                 val next = iter.next() ?: break
@@ -125,7 +126,7 @@ class TestBytesRefArray : LuceneTestCase() {
                 stringList.add(str)
             }
             stringList.sortWith(STRING_CODEPOINT_COMPARATOR)
-            val state = list.sort(Comparator.naturalOrder(), true)
+            val state = list.sort(naturalOrder(), true)
             val iter = list.iterator(state)
             var i = 0
             var lastOrd = -1
