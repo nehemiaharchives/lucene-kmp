@@ -253,7 +253,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
 
     private fun upHeap(origPos: Int): Boolean {
         var i = origPos
-        val node = heap[i]!! // save bottom node
+        val node = heap[i] ?: return false // save bottom node
         var j = i ushr 1
         while (j > 0 && lessThan(node, heap[j]!!)) {
             heap[i] = heap[j] // shift parents down
@@ -266,7 +266,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
 
     private fun downHeap(i: Int) {
         var i = i
-        val node = heap[i]!! // save top node
+        val node = heap[i] ?: return // save top node
         var j = i shl 1 // find smaller child
         var k = j + 1
         if (k <= size && lessThan(heap[k]!!, heap[j]!!)) {
