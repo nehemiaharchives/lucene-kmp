@@ -171,7 +171,7 @@ class BytesRef : Comparable<BytesRef> {
 
     /** Performs internal consistency checks. Always returns true (or throws exception) */
     fun isValid(): Boolean {
-        require(bytes.isNotEmpty()) { "bytes is null or empty" }
+        require(bytes.isNotEmpty() || length == 0) { "bytes is null or empty" }
         require(length >= 0) { "length is negative: $length" }
         require(length <= bytes.size) { "length is out of bounds: $length, bytes.size=${bytes.size}" }
         require(offset >= 0) { "offset is negative: $offset" }
