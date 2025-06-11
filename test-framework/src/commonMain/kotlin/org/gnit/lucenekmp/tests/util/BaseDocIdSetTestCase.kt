@@ -180,7 +180,9 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         set.set(42)
         val copy = copyOf(set, 256)
         val from = TestUtil.nextInt(Random, 0, 20)
-        val to = TestUtil.nextInt(Random, from + 23, 256)
+        // use a fixed lower bound of 43 to ensure that all set bits are within
+        // the destination bit set's range
+        val to = TestUtil.nextInt(Random, 43, 256)
         val offset = TestUtil.nextInt(Random, 0, from)
         val dest1 = FixedBitSet(42 - offset + 1)
         val it1 = copy.iterator()!!
