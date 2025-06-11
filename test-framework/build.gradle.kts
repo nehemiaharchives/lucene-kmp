@@ -29,6 +29,7 @@ kotlin {
             dependencies {
                 implementation(project(":core"))
                 implementation(libs.kotlin.test)
+                implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
                 implementation(libs.kotlin.logging)
