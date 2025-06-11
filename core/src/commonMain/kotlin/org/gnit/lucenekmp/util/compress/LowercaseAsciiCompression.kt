@@ -60,13 +60,16 @@ object LowercaseAsciiCompression {
         // 3. Now pack the bytes so that we record 4 ASCII chars in 3 bytes
         var o = 0
         for (i in compressedLen..<len) {
-            tmp[o++] = tmp[o++] or ((tmp[i] and 0x30).toInt() shl 2).toByte() // bits 4-5
+            tmp[o] = (tmp[o].toInt() or ((tmp[i] and 0x30).toInt() shl 2)).toByte() // bits 4-5
+            o++
         }
         for (i in compressedLen..<len) {
-            tmp[o++] = tmp[o++] or ((tmp[i] and 0x0C).toInt() shl 4).toByte() // bits 2-3
+            tmp[o] = (tmp[o].toInt() or ((tmp[i] and 0x0C).toInt() shl 4)).toByte() // bits 2-3
+            o++
         }
         for (i in compressedLen..<len) {
-            tmp[o++] = tmp[o++] or ((tmp[i] and 0x03).toInt() shl 6).toByte() // bits 0-1
+            tmp[o] = (tmp[o].toInt() or ((tmp[i] and 0x03).toInt() shl 6)).toByte() // bits 0-1
+            o++
         }
         require(o <= compressedLen)
 
@@ -138,7 +141,7 @@ object LowercaseAsciiCompression {
         val numExceptions: Int = `in`.readVInt()
         var i = 0
         for (exception in 0..<numExceptions) {
-            i += `in`.readByte() and 0xFF.toByte()
+            i += `in`.readByte().toInt() and 0xFF
             out[i] = `in`.readByte()
         }
     }
