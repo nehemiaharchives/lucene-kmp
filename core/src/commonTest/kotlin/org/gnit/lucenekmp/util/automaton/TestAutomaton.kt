@@ -65,4 +65,72 @@ class TestAutomaton {
         assertEquals("foobar", Operations.getCommonPrefix(a))
     }
 
+
+    @Test
+    fun testCommonPrefixEmpty() {
+        assertEquals("", Operations.getCommonPrefix(Automata.makeEmpty()))
+    }
+
+    @Test
+    fun testCommonPrefixEmptyString() {
+        assertEquals("", Operations.getCommonPrefix(Automata.makeEmptyString()))
+    }
+
+    @Test
+    fun testCommonPrefixAny() {
+        assertEquals("", Operations.getCommonPrefix(Automata.makeAnyString()))
+    }
+
+    @Test
+    fun testCommonPrefixRange() {
+        assertEquals("", Operations.getCommonPrefix(Automata.makeCharRange('a'.code, 'b'.code)))
+    }
+
+    @Test
+    fun testAlternatives() {
+        val a = Automata.makeChar('a'.code)
+        val c = Automata.makeChar('c'.code)
+        assertEquals("", Operations.getCommonPrefix(Operations.union(mutableListOf(a, c))))
+    }
+
+    @Test
+    fun testCommonPrefixLeadingWildcard() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeAnyChar(), Automata.makeString("boo")))
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertEquals("", Operations.getCommonPrefix(a))
+    }
+
+    @Test
+    fun testCommonPrefixTrailingWildcard() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeString("boo"), Automata.makeAnyChar()))
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertEquals("boo", Operations.getCommonPrefix(a))
+    }
+
+    @Test
+    fun testCommonPrefixLeadingKleenStar() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeAnyString(), Automata.makeString("boo")))
+        AutomatonTestUtil.assertCleanNFA(a)
+        assertEquals("", Operations.getCommonPrefix(a))
+    }
+
+    @Test
+    fun testCommonPrefixTrailingKleenStar() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeString("boo"), Automata.makeAnyString()))
+        AutomatonTestUtil.assertCleanDFA(a)
+        assertEquals("boo", Operations.getCommonPrefix(a))
+    }
+
+    @Test
+    fun testCommonPrefixOptional() {
+        val a = Automaton()
+        val init = a.createState()
+        val fini = a.createState()
+        a.setAccept(init, true)
+        a.setAccept(fini, true)
+        a.addTransition(init, fini, 'm'.code, 'm'.code)
+        a.addTransition(fini, fini, 'm'.code, 'm'.code)
+        a.finishState()
+        assertEquals("", Operations.getCommonPrefix(a))
+    }
 }
