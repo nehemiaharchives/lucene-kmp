@@ -358,6 +358,111 @@ class TestBKD : LuceneTestCase() {
         verify(docValues, null, numDataDims, numIndexDims, numBytesPerDim, TestUtil.nextInt(random(), 20, 50))
     }
 
+    @Test
+    fun testOneDimTwoValues() {
+        val numBytesPerDim = TestUtil.nextInt(random(), 2, 30)
+        val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
+        val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
+
+        val numDocs = atLeast(1000)
+        val theDim = random().nextInt(numDataDims)
+        val value1 = ByteArray(numBytesPerDim).also { random().nextBytes(it) }
+        val value2 = ByteArray(numBytesPerDim).also { random().nextBytes(it) }
+
+        val docValues = Array(numDocs) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
+        for (docID in 0 until numDocs) {
+            for (dim in 0 until numDataDims) {
+                docValues[docID][dim] = if (dim == theDim) {
+                    if (random().nextBoolean()) value1 else value2
+                } else {
+                    ByteArray(numBytesPerDim).also { random().nextBytes(it) }
+                }
+            }
+        }
+        verify(docValues, null, numDataDims, numIndexDims, numBytesPerDim)
+    }
+
+    @Test
+    fun testRandomFewDifferentValues() {
+        val numBytesPerDim = TestUtil.nextInt(random(), 2, 30)
+        val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
+        val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
+
+        val numDocs = atLeast(10000)
+        val cardinality = TestUtil.nextInt(random(), 2, 100)
+        val values = Array(cardinality) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
+        for (i in 0 until cardinality) {
+            for (j in 0 until numDataDims) {
+                random().nextBytes(values[i][j])
+            }
+        }
+
+        val docValues = Array(numDocs) { values[random().nextInt(cardinality)] }
+        verify(docValues, null, numDataDims, numIndexDims, numBytesPerDim)
+    }
+
+    @Test
+    fun testMultiValued() {
+        val numBytesPerDim = TestUtil.nextInt(random(), 2, 30)
+        val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
+        val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
+
+        val numDocs = atLeast(1000)
+        val docValues = mutableListOf<Array<ByteArray>>()
+        val docIDs = mutableListOf<Int>()
+
+        for (docID in 0 until numDocs) {
+            val numValuesInDoc = TestUtil.nextInt(random(), 1, 5)
+            for (ord in 0 until numValuesInDoc) {
+                docIDs.add(docID)
+                val values = Array(numDataDims) { ByteArray(numBytesPerDim) }
+                for (dim in 0 until numDataDims) {
+                    random().nextBytes(values[dim])
+                }
+                docValues.add(values)
+            }
+        }
+
+        val docValuesArray = docValues.toTypedArray()
+        val docIDsArray = docIDs.toIntArray()
+        verify(docValuesArray, docIDsArray, numDataDims, numIndexDims, numBytesPerDim)
+    }
+
+    @Test
+    fun testBitFlippedOnPartition1() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testBitFlippedOnPartition2() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testTieBreakOrder() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testCheckDataDimOptimalOrder() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun test2DLongOrdsOffline() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testWastedLeadingBytes() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testEstimatePointCount() {
+        // TODO: implement test logic
+    }
+
     private fun randomBigInt(numBytes: Int): BigInteger {
         val bytes = ByteArray(numBytes)
         random().nextBytes(bytes)
