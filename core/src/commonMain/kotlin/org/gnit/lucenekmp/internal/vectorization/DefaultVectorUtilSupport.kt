@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.internal.vectorization
 
 import kotlin.math.sqrt
+import org.gnit.lucenekmp.util.getIntLE
+import org.gnit.lucenekmp.jdkport.bitCount
 
 /**
  * A common Kotlin implementation of the VectorUtilSupport interface.
@@ -105,20 +107,24 @@ class DefaultVectorUtilSupport : VectorUtilSupport {
      * is set (1) then the int4 value is added to the dot product.
      */
     override fun int4BitDotProduct(int4Quantized: ByteArray, binaryQuantized: ByteArray): Long {
-        val length = int4Quantized.size * 2
-        val totalBits = binaryQuantized.size * 8
-        require(length <= totalBits) { "Length mismatch: int4 vector length is $length but binary vector has $totalBits bits" }
+        require(int4Quantized.size == binaryQuantized.size * 4) { "vector dimensions incompatible: ${int4Quantized.size} != 4 x ${binaryQuantized.size}" }
+        val size = binaryQuantized.size
         var result = 0L
-        for (i in 0 until length) {
-            val int4Val = getInt4FromPacked(int4Quantized, i)
-            // Extract the corresponding bit from the binaryQuantized vector.
-            val byteIndex = i / 8
-            val bitIndex = i % 8
-            // Assuming the most-significant bit (bit 7) is the first bit in each byte.
-            val bit = (binaryQuantized[byteIndex].toInt() ushr (7 - bitIndex)) and 1
-            if (bit == 1) {
-                result += int4Val
+        for (i in 0 until 4) {
+            var sub = 0
+            var r = 0
+            val upperBound = size and -Int.SIZE_BYTES
+            while (r < upperBound) {
+                val qInt = int4Quantized.getIntLE(i * size + r)
+                val dInt = binaryQuantized.getIntLE(r)
+                sub += Int.bitCount(qInt and dInt)
+                r += Int.SIZE_BYTES
             }
+            while (r < size) {
+                sub += Int.bitCount((int4Quantized[i * size + r].toInt() and binaryQuantized[r].toInt()) and 0xFF)
+                r++
+            }
+            result += (sub.toLong() shl i)
         }
         return result
     }
