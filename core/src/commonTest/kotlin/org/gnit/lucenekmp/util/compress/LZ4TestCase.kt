@@ -155,7 +155,12 @@ abstract class LZ4TestCase : LuceneTestCase() {
 
         val restoreOffset = TestUtil.nextInt(random(), 1, 10)
         val restored = ByteArray(restoreOffset + dictLen + length + random().nextInt(10))
-        java.lang.System.arraycopy(data, dictOff, restored, restoreOffset, dictLen)
+        data.copyInto(
+            destination = restored,
+            destinationOffset = restoreOffset,
+            startIndex = dictOff,
+            endIndex = dictOff + dictLen
+        )
         LZ4.decompress(ByteArrayDataInput(compressed), length, restored, dictLen + restoreOffset)
         assertContentEquals(
             ArrayUtil.copyOfSubArray(data, dictOff + dictLen, dictOff + dictLen + length),
@@ -192,7 +197,12 @@ abstract class LZ4TestCase : LuceneTestCase() {
         val matchRef = random().nextInt(30)
         val matchOff = TestUtil.nextInt(random(), data.size - 40, data.size - 20)
         val matchLength = TestUtil.nextInt(random(), 4, 10)
-        java.lang.System.arraycopy(data, matchRef, data, matchOff, matchLength)
+        data.copyInto(
+            destination = data,
+            destinationOffset = matchOff,
+            startIndex = matchRef,
+            endIndex = matchRef + matchLength
+        )
         doTest(data, newHashTable())
     }
 
