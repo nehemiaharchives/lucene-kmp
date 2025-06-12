@@ -240,6 +240,11 @@ class TestBKD : LuceneTestCase() {
     }
 
     @Test
+    fun testWithExceptions() {
+        // TODO: implement test logic
+    }
+
+    @Test
     fun testRandomBinaryTiny() {
         doTestRandomBinary(10)
     }
@@ -460,6 +465,21 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testEstimatePointCount() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testTotalPointCountValidation() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testTooManyPoints() {
+        // TODO: implement test logic
+    }
+
+    @Test
+    fun testTooManyPoints1D() {
         // TODO: implement test logic
     }
 
