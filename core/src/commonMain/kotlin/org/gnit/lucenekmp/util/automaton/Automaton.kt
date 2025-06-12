@@ -71,6 +71,11 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
     /** Create a new state.  */
     fun createState(): Int {
         growStates()
+        if (isAccept.size() < nextState / 2 + 1) {
+            val newBits = BitSet(nextState / 2 + 1)
+            newBits.or(isAccept)
+            isAccept = newBits
+        }
         val state = nextState / 2
         states[nextState] = -1
         nextState += 2
@@ -80,7 +85,13 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
     /** Set or clear this state as an accept state.  */
     fun setAccept(state: Int, accept: Boolean) {
         Objects.checkIndex(state, this.numStates)
-        isAccept = BitSet(numStates)
+        // ensure bitset is sized to current number of states
+        if (isAccept.size() < numStates) {
+            val newBits = BitSet(numStates)
+            newBits.or(isAccept)
+            isAccept = newBits
+        }
+        isAccept.set(state, accept)
     }
 
     val sortedTransitions: Array<Array<Transition>>
