@@ -462,8 +462,8 @@ class ByteBuffersDataOutput @JvmOverloads constructor(
         // clean up partial results in case of memory pressure.
         val cloned =
             ByteBuffersDataOutput(targetBlockBits, targetBlockBits, blockAllocate, NO_REUSE)
-        var block: ByteBuffer
-        while ((blocks.pollFirst().also { block = it!! }) != null) {
+        while (true) {
+            val block = blocks.pollFirst() ?: break
             block.flip()
             cloned.writeBytes(block)
             if (blockReuse !== NO_REUSE) {

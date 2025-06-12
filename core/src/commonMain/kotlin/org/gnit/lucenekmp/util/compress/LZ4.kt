@@ -69,7 +69,7 @@ object LZ4 {
 
         do {
             // literals
-            val token: Int = (compressed.readByte() and 0xFF.toByte()).toInt()
+            val token: Int = compressed.readByte().toInt() and 0xFF
             var literalLen = token ushr 4
 
             if (literalLen != 0) {
@@ -89,7 +89,7 @@ object LZ4 {
             }
 
             // matches
-            val matchDec: Int = (compressed.readShort() and 0xFFFF.toShort()).toInt()
+            val matchDec: Int = compressed.readShort().toInt() and 0xFFFF
             require(matchDec > 0)
 
             var matchLen = token and 0x0F
@@ -120,7 +120,7 @@ object LZ4 {
                     destination = dest,
                     destinationOffset = dOff,
                     startIndex = dOff - matchDec,
-                    endIndex = dOff + fastLen,
+                    endIndex = dOff - matchDec + fastLen,
                 )
                 dOff += matchLen
             }
