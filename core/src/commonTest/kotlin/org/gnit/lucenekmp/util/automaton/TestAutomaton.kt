@@ -12,6 +12,8 @@ import org.gnit.lucenekmp.util.automaton.Automata
 import org.gnit.lucenekmp.util.automaton.Operations
 import org.gnit.lucenekmp.util.automaton.MinimizationOperations
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
+import org.gnit.lucenekmp.util.automaton.UTF32ToUTF8
+import org.gnit.lucenekmp.tests.util.LuceneTestCase
 
 
 class TestAutomaton {
@@ -246,6 +248,190 @@ class TestAutomaton {
         val a2 = Operations.reverse(ra)
         AutomatonTestUtil.assertMinimalDFA(a2)
         assertTrue(AutomatonTestUtil.sameLanguage(a, a2))
+    }
+
+    @Test
+    fun testOptional() {
+        val a = Automata.makeString("foobar")
+        val a2 = Operations.optional(a)
+        AutomatonTestUtil.assertMinimalDFA(a2)
+
+        assertTrue(Operations.run(a, "foobar"))
+        assertFalse(Operations.run(a, ""))
+        assertTrue(Operations.run(a2, "foobar"))
+        assertTrue(Operations.run(a2, ""))
+    }
+
+    @Test
+    fun testRepeatAny() {
+        val a = Automata.makeString("zee")
+        val a2 = Operations.repeat(a)
+        AutomatonTestUtil.assertMinimalDFA(a2)
+
+        assertTrue(Operations.run(a2, ""))
+        assertTrue(Operations.run(a2, "zee"))
+        assertTrue(Operations.run(a2, "zeezee"))
+        assertTrue(Operations.run(a2, "zeezeezee"))
+    }
+
+    @Test
+    fun testRepeatMin() {
+        val a = Automata.makeString("zee")
+        val a2 = Operations.repeat(a, 2)
+        AutomatonTestUtil.assertCleanDFA(a2)
+
+        assertFalse(Operations.run(a2, ""))
+        assertFalse(Operations.run(a2, "zee"))
+        assertTrue(Operations.run(a2, "zeezee"))
+        assertTrue(Operations.run(a2, "zeezeezee"))
+    }
+
+    @Ignore
+    @Test
+    fun testRepeatMinMax1() {
+        val a = Automata.makeString("zee")
+        val a2 = Operations.repeat(a, 0, 2)
+        AutomatonTestUtil.assertMinimalDFA(a2)
+
+        assertTrue(Operations.run(a2, ""))
+        assertTrue(Operations.run(a2, "zee"))
+        assertTrue(Operations.run(a2, "zeezee"))
+        assertFalse(Operations.run(a2, "zeezeezee"))
+    }
+
+    @Ignore
+    @Test
+    fun testRepeatMinMax2() {
+        val a = Automata.makeString("zee")
+        val a2 = Operations.repeat(a, 2, 4)
+        AutomatonTestUtil.assertMinimalDFA(a2)
+
+        assertFalse(Operations.run(a2, ""))
+        assertFalse(Operations.run(a2, "zee"))
+        assertTrue(Operations.run(a2, "zeezee"))
+        assertTrue(Operations.run(a2, "zeezeezee"))
+        assertTrue(Operations.run(a2, "zeezeezeezee"))
+        assertFalse(Operations.run(a2, "zeezeezeezeezee"))
+    }
+
+    @Test
+    fun testComplement() {
+        val a = Automata.makeString("zee")
+        val a2 = Operations.complement(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+        AutomatonTestUtil.assertMinimalDFA(a2)
+
+        assertTrue(Operations.run(a2, ""))
+        assertFalse(Operations.run(a2, "zee"))
+        assertTrue(Operations.run(a2, "zeezee"))
+        assertTrue(Operations.run(a2, "zeezeezee"))
+    }
+
+    @Test
+    fun testInterval() {
+        val a = Automata.makeDecimalInterval(17, 100, 3)
+        AutomatonTestUtil.assertCleanDFA(a)
+
+        assertFalse(Operations.run(a, ""))
+        assertTrue(Operations.run(a, "017"))
+        assertTrue(Operations.run(a, "100"))
+        assertTrue(Operations.run(a, "073"))
+    }
+
+    @Test
+    fun testCommonSuffix() {
+        val a = Automaton()
+        val init = a.createState()
+        val fini = a.createState()
+        a.setAccept(init, true)
+        a.setAccept(fini, true)
+        a.addTransition(init, fini, 'm'.code)
+        a.addTransition(fini, fini, 'm'.code)
+        a.finishState()
+        assertEquals(0, Operations.getCommonSuffixBytesRef(a).length)
+    }
+
+    @Test
+    fun testCommonSuffixEmpty() {
+        assertEquals(LuceneTestCase.newBytesRef(), Operations.getCommonSuffixBytesRef(Automata.makeEmpty()))
+    }
+
+    @Test
+    fun testCommonSuffixEmptyString() {
+        assertEquals(LuceneTestCase.newBytesRef(), Operations.getCommonSuffixBytesRef(Automata.makeEmptyString()))
+    }
+
+    @Test
+    fun testCommonSuffixTrailingWildcard() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeString("boo"), Automata.makeAnyChar()))
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertEquals(LuceneTestCase.newBytesRef(), Operations.getCommonSuffixBytesRef(a))
+    }
+
+    @Test
+    fun testCommonSuffixLeadingKleenStar() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeAnyString(), Automata.makeString("boo")))
+        AutomatonTestUtil.assertCleanNFA(a)
+        assertEquals(LuceneTestCase.newBytesRef("boo"), Operations.getCommonSuffixBytesRef(a))
+    }
+
+    @Test
+    fun testCommonSuffixTrailingKleenStar() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeString("boo"), Automata.makeAnyString()))
+        AutomatonTestUtil.assertCleanDFA(a)
+        assertEquals(LuceneTestCase.newBytesRef(), Operations.getCommonSuffixBytesRef(a))
+    }
+
+    @Test
+    fun testCommonSuffixUnicode() {
+        val a = Operations.concatenate(mutableListOf(Automata.makeAnyString(), Automata.makeString("boo😂😂😂")))
+        AutomatonTestUtil.assertCleanNFA(a)
+        val binary = UTF32ToUTF8().convert(a)
+        assertEquals(LuceneTestCase.newBytesRef("boo😂😂😂"), Operations.getCommonSuffixBytesRef(binary))
+    }
+
+    @Ignore
+    @Test
+    fun testReverseRandom1() {
+    }
+
+    @Ignore
+    @Test
+    fun testReverseRandom2() {
+    }
+
+    @Test
+    fun testAnyStringEmptyString() {
+        val a = Automata.makeAnyString()
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(Operations.run(a, ""))
+    }
+
+    @Test
+    fun testBasicIsEmpty() {
+        val a = Automaton()
+        a.createState()
+        assertTrue(Operations.isEmpty(a))
+    }
+
+    @Test
+    fun testRemoveDeadTransitionsEmpty() {
+        val a = Automata.makeEmpty()
+        val a2 = Operations.removeDeadStates(a)
+        assertTrue(Operations.isEmpty(a2))
+    }
+
+    @Test
+    fun testInvalidAddTransition() {
+        val a = Automaton()
+        val s1 = a.createState()
+        val s2 = a.createState()
+        a.addTransition(s1, s2, 'a'.code)
+        a.addTransition(s2, s2, 'a'.code)
+        try {
+            a.addTransition(s1, s2, 'b'.code)
+            kotlin.test.fail("expected IllegalStateException")
+        } catch (_: IllegalStateException) {
+        }
     }
 }
 
