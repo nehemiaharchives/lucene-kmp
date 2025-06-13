@@ -384,8 +384,8 @@ open class LongArrayList(expectedElements: Int) : MutableIterable<LongCursor>, C
             this.cursor.index = -1
         }
 
-        override fun fetch(): LongCursor {
-            if (cursor.index + 1 == size) return done()!!
+        override fun fetch(): LongCursor? {
+            if (cursor.index + 1 == size) return done()
 
             cursor.value = buffer[++cursor.index]
             return cursor
