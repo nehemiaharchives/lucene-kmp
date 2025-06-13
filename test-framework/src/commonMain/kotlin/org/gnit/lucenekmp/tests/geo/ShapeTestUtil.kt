@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.geo
 
+import org.gnit.lucenekmp.geo.XYCircle
 import org.gnit.lucenekmp.geo.XYPolygon
 import org.gnit.lucenekmp.geo.XYRectangle
 import org.gnit.lucenekmp.geo.XYLine
@@ -7,19 +8,26 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.random.Random
 
-/** Utilities for generating random XY shapes for tests. */
+/** Utility methods for generating random cartesian shapes. */
 object ShapeTestUtil {
-  
-    // TODO which nextFloat implementation is good?
-    /*private fun nextFloat(random: Random): Float {
-        val sign = if (random.nextBoolean()) 1f else -1f
-        return random.nextFloat() * Float.MAX_VALUE * sign
-    }*/
 
     fun nextFloat(random: Random): Float {
-        return ((random.nextDouble() * 2.0) - 1.0).toFloat() * Float.MAX_VALUE
+        val value = random.nextFloat() * Float.MAX_VALUE
+        return if (random.nextBoolean()) value else -value
     }
-  
+
+    /** Returns the next pseudorandom circle. */
+    fun nextCircle(): XYCircle {
+        val random = LuceneTestCase.random()
+        val x = nextFloat(random)
+        val y = nextFloat(random)
+        var radius = 0f
+        while (radius == 0f) {
+            radius = random.nextFloat() * (Float.MAX_VALUE / 2)
+        }
+        return XYCircle(x, y, radius)
+    }
+    
     fun nextBox(random: Random): XYRectangle {
         var x0 = nextFloat(random)
         var x1 = nextFloat(random)
