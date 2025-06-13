@@ -25,7 +25,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFailsWith
 
-@Ignore
 class TestBKD : LuceneTestCase() {
     private lateinit var fakeFileSystem: FakeFileSystem
 
