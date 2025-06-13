@@ -2,17 +2,25 @@ package org.gnit.lucenekmp.tests.geo
 
 import org.gnit.lucenekmp.geo.XYPolygon
 import org.gnit.lucenekmp.geo.XYRectangle
+import org.gnit.lucenekmp.geo.XYLine
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.random.Random
 
 /** Utilities for generating random XY shapes for tests. */
 object ShapeTestUtil {
-    private fun nextFloat(random: Random): Float {
+  
+    // TODO which nextFloat implementation is good?
+    /*private fun nextFloat(random: Random): Float {
         val sign = if (random.nextBoolean()) 1f else -1f
         return random.nextFloat() * Float.MAX_VALUE * sign
-    }
+    }*/
 
-    private fun nextBox(random: Random): XYRectangle {
+    fun nextFloat(random: Random): Float {
+        return ((random.nextDouble() * 2.0) - 1.0).toFloat() * Float.MAX_VALUE
+    }
+  
+    fun nextBox(random: Random): XYRectangle {
         var x0 = nextFloat(random)
         var x1 = nextFloat(random)
         while (x0 == x1) {
@@ -53,5 +61,17 @@ object ShapeTestUtil {
         val random = LuceneTestCase.random()
         val box = nextBox(random)
         return if (random.nextBoolean()) boxPolygon(box) else trianglePolygon(box)
+    }
+
+    fun nextLine(): XYLine {
+        val random = LuceneTestCase.random()
+        val count = TestUtil.nextInt(random, 2, 10)
+        val xs = FloatArray(count)
+        val ys = FloatArray(count)
+        for (i in 0 until count) {
+            xs[i] = nextFloat(random)
+            ys[i] = nextFloat(random)
+        }
+        return XYLine(xs, ys)
     }
 }
