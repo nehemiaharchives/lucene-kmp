@@ -14,6 +14,9 @@ import org.gnit.lucenekmp.util.automaton.MinimizationOperations
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.automaton.UTF32ToUTF8
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.util.IntsRef
+import org.gnit.lucenekmp.util.IntsRefBuilder
+import org.gnit.lucenekmp.util.fst.Util
 
 class TestAutomaton {
     @Test
@@ -431,6 +434,235 @@ class TestAutomaton {
         } catch (_: IllegalStateException) {
         }
     }
+
+    @Ignore
+    @Test
+    fun testBuilderRandom() {
+        // requires random automaton utilities
+    }
+
+    @Test
+    fun testIsTotal() {
+        assertFalse(Operations.isTotal(Automaton()))
+        val a = Automaton()
+        val init = a.createState()
+        val fini = a.createState()
+        a.setAccept(fini, true)
+        a.addTransition(init, fini, Character.MIN_CODE_POINT, Character.MAX_CODE_POINT)
+        a.finishState()
+        assertFalse(Operations.isTotal(a))
+        a.addTransition(fini, fini, Character.MIN_CODE_POINT, Character.MAX_CODE_POINT)
+        a.finishState()
+        assertFalse(Operations.isTotal(a))
+        a.setAccept(init, true)
+        assertTrue(Operations.isTotal(MinimizationOperations.minimize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)))
+    }
+
+    @Test
+    fun testMinimizeEmpty() {
+        var a = Automaton()
+        val init = a.createState()
+        val fini = a.createState()
+        a.addTransition(init, fini, 'a'.code)
+        a.finishState()
+        a = MinimizationOperations.minimize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+        assertEquals(0, a.numStates)
+    }
+
+    @Ignore
+    @Test
+    fun testMinus() {
+        val a1 = Automata.makeString("foobar")
+        val a2 = Automata.makeString("boobar")
+        val a3 = Automata.makeString("beebar")
+        val a = Operations.union(mutableListOf(a1, a2, a3))
+        AutomatonTestUtil.assertCleanNFA(a)
+        AutomatonTestUtil.assertMatches(a, "foobar", "beebar", "boobar")
+
+        var a4 = Operations.minus(a, a2, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+        AutomatonTestUtil.assertCleanDFA(a4)
+
+        assertTrue(Operations.run(a4, "foobar"))
+        assertFalse(Operations.run(a4, "boobar"))
+        assertTrue(Operations.run(a4, "beebar"))
+        AutomatonTestUtil.assertMatches(a4, "foobar", "beebar")
+
+        a4 = Operations.minus(a4, a1, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+        AutomatonTestUtil.assertCleanDFA(a4)
+
+        assertFalse(Operations.run(a4, "foobar"))
+        assertFalse(Operations.run(a4, "boobar"))
+        assertTrue(Operations.run(a4, "beebar"))
+        AutomatonTestUtil.assertMatches(a4, "beebar")
+
+        a4 = Operations.minus(a4, a3, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+        AutomatonTestUtil.assertCleanDFA(a4)
+
+        assertFalse(Operations.run(a4, "foobar"))
+        assertFalse(Operations.run(a4, "boobar"))
+        assertFalse(Operations.run(a4, "beebar"))
+        AutomatonTestUtil.assertMatches(a4)
+    }
+
+    @Ignore
+    @Test
+    fun testOneInterval() {
+        var a = Automata.makeDecimalInterval(999, 1032, 0)
+        AutomatonTestUtil.assertCleanNFA(a)
+        a = Operations.determinize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+        assertTrue(Operations.run(a, "0999"))
+        assertTrue(Operations.run(a, "00999"))
+        assertTrue(Operations.run(a, "000999"))
+    }
+
+    @Test
+    fun testAnotherInterval() {
+        val a = Automata.makeDecimalInterval(1, 2, 0)
+        AutomatonTestUtil.assertCleanDFA(a)
+        assertTrue(Operations.run(a, "01"))
+    }
+
+    @Ignore
+    @Test
+    fun testIntervalRandom() {
+        // relies on random generation utilities
+    }
+
+    @Test
+    fun testConcatenatePreservesDet() {
+        val a1 = Automata.makeString("foobar")
+        AutomatonTestUtil.assertMinimalDFA(a1)
+        val a2 = Automata.makeString("baz")
+        AutomatonTestUtil.assertMinimalDFA(a2)
+        val a3 = Operations.concatenate(mutableListOf(a1, a2))
+        AutomatonTestUtil.assertMinimalDFA(a3)
+    }
+
+    @Test
+    fun testRemoveDeadStates() {
+        var a = Automaton()
+        val s1 = a.createState()
+        a.createState()
+        a.setAccept(s1, true)
+        a.finishState()
+        assertEquals(2, a.numStates)
+        a = Operations.removeDeadStates(a)
+        assertEquals(1, a.numStates)
+    }
+
+    @Test
+    fun testRemoveDeadStatesEmpty1() {
+        val a = Automaton()
+        a.finishState()
+        assertTrue(Operations.isEmpty(a))
+        assertTrue(Operations.isEmpty(Operations.removeDeadStates(a)))
+    }
+
+    @Test
+    fun testRemoveDeadStatesEmpty2() {
+        val a = Automaton()
+        a.finishState()
+        assertTrue(Operations.isEmpty(a))
+        assertTrue(Operations.isEmpty(Operations.removeDeadStates(a)))
+    }
+
+    @Test
+    fun testRemoveDeadStatesEmpty3() {
+        val a = Automaton()
+        val init = a.createState()
+        val fini = a.createState()
+        a.addTransition(init, fini, 'a'.code)
+        val a2 = Operations.removeDeadStates(a)
+        assertEquals(0, a2.numStates)
+    }
+
+    @Test
+    fun testConcatEmpty() {
+        var a = Operations.concatenate(mutableListOf(Automata.makeEmpty(), Automata.makeString("foo")))
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertEquals(emptySet<IntsRef>(), AutomatonTestUtil.getFiniteStrings(a))
+
+        a = Operations.concatenate(mutableListOf(Automata.makeString("foo"), Automata.makeEmpty()))
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertEquals(emptySet<IntsRef>(), AutomatonTestUtil.getFiniteStrings(a))
+    }
+
+    @Test
+    fun testSeemsNonEmptyButIsNot1() {
+        val a = Automaton()
+        val init = a.createState()
+        val s = a.createState()
+        a.addTransition(init, s, 'a'.code)
+        a.finishState()
+        assertTrue(Operations.isEmpty(a))
+    }
+
+    @Test
+    fun testSeemsNonEmptyButIsNot2() {
+        val a = Automaton()
+        val init = a.createState()
+        var s = a.createState()
+        a.addTransition(init, s, 'a'.code)
+        s = a.createState()
+        a.setAccept(s, true)
+        a.finishState()
+        assertTrue(Operations.isEmpty(a))
+    }
+
+    @Test
+    fun testSameLanguage1() {
+        val a = Automata.makeEmptyString()
+        val a2 = Automata.makeEmptyString()
+        val state = a2.createState()
+        a2.addTransition(0, state, 'a'.code)
+        a2.finishState()
+        assertTrue(AutomatonTestUtil.sameLanguage(a, Operations.removeDeadStates(a2)))
+    }
+
+    @Ignore
+    @Test
+    fun testRandomFinite() {
+        // depends on complex random operations
+    }
+
+    @Test
+    fun testMakeBinaryIntervalBasic() {
+        val a = Automata.makeBinaryInterval(LuceneTestCase.newBytesRef("bar"), true, LuceneTestCase.newBytesRef("foo"), true)
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(Operations.run(a, intsRef("bar")))
+        assertTrue(Operations.run(a, intsRef("foo")))
+        assertTrue(Operations.run(a, intsRef("beep")))
+        assertFalse(Operations.run(a, intsRef("baq")))
+        assertTrue(Operations.run(a, intsRef("bara")))
+    }
+
+    @Test
+    fun testMakeBinaryIntervalLowerBoundEmptyString() {
+        var a = Automata.makeBinaryInterval(LuceneTestCase.newBytesRef(""), true, LuceneTestCase.newBytesRef("bar"), true)
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(Operations.run(a, intsRef("")))
+        assertTrue(Operations.run(a, intsRef("a")))
+        assertTrue(Operations.run(a, intsRef("bar")))
+        assertFalse(Operations.run(a, intsRef("bara")))
+        assertFalse(Operations.run(a, intsRef("baz")))
+
+        a = Automata.makeBinaryInterval(LuceneTestCase.newBytesRef(""), false, LuceneTestCase.newBytesRef("bar"), true)
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertFalse(Operations.run(a, intsRef("")))
+        assertTrue(Operations.run(a, intsRef("a")))
+        assertTrue(Operations.run(a, intsRef("bar")))
+        assertFalse(Operations.run(a, intsRef("bara")))
+        assertFalse(Operations.run(a, intsRef("baz")))
+    }
+
+    @Test
+    fun testMakeBinaryIntervalEqual() {
+        val a = Automata.makeBinaryInterval(LuceneTestCase.newBytesRef("bar"), true, LuceneTestCase.newBytesRef("bar"), true)
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(Operations.run(a, intsRef("bar")))
+        assertTrue(AutomatonTestUtil.isFinite(a))
+        assertEquals(1, AutomatonTestUtil.getFiniteStrings(a).size)
+    }
 }
 
 private fun String.toCodePoints(): IntArray {
@@ -453,5 +685,11 @@ private fun String.toCodePoints(): IntArray {
         result[j++] = cp
     }
     return result.copyOf(j)
+
+private fun intsRef(s: String): IntsRef {
+    val builder = IntsRefBuilder()
+    Util.toIntsRef(LuceneTestCase.newBytesRef(s), builder)
+    return builder.toIntsRef()
+}
 
 }
