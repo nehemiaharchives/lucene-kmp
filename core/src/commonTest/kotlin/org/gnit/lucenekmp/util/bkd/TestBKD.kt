@@ -4,6 +4,7 @@ import okio.fakefilesystem.FakeFileSystem
 import okio.Path.Companion.toPath
 import org.gnit.lucenekmp.jdkport.BitSet
 import org.gnit.lucenekmp.jdkport.Files
+import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.NIOFSDirectory
@@ -15,11 +16,14 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.test.Ignore
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.util.NumericUtils
+import org.gnit.lucenekmp.codecs.MutablePointTree
+import org.gnit.lucenekmp.util.BytesRef
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 @Ignore
 class TestBKD : LuceneTestCase() {
@@ -241,7 +245,19 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testWithExceptions() {
-        // TODO: implement test logic
+        val numDocs = atLeast(100)
+        val numBytesPerDim = TestUtil.nextInt(random(), 2, 30)
+        val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
+        val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
+
+        val docValues = Array(numDocs) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
+        for (docID in 0 until numDocs) {
+            for (dim in 0 until numDataDims) {
+                random().nextBytes(docValues[docID][dim])
+            }
+        }
+
+        verify(docValues, null, numDataDims, numIndexDims, numBytesPerDim)
     }
 
     @Test
@@ -435,52 +451,358 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testBitFlippedOnPartition1() {
-        // TODO: implement test logic
+        val numDocs = atLeast(100)
+        val numBytesPerDim = 4
+        val numDims = 3
+
+        val docValues = Array(numDocs) { Array(numDims) { ByteArray(numBytesPerDim) } }
+        var counter: Byte = 0
+        for (docID in 0 until numDocs) {
+            for (dim in 0 until numDims) {
+                for (i in 0 until numBytesPerDim) {
+                    docValues[docID][dim][i] = counter
+                    counter = (counter + 1).toByte()
+                }
+            }
+        }
+        verify(docValues, null, numDims, numDims, numBytesPerDim)
     }
 
     @Test
     fun testBitFlippedOnPartition2() {
-        // TODO: implement test logic
+        val numDocs = atLeast(100)
+        val numBytesPerDim = 4
+        val numDims = 3
+
+        val docValues = Array(numDocs) { Array(numDims) { ByteArray(numBytesPerDim) } }
+        var counter: Byte = 0
+        for (docID in 0 until numDocs) {
+            for (dim in 0 until numDims) {
+                for (i in 0 until numBytesPerDim) {
+                    docValues[docID][dim][i] = counter
+                    counter = (counter + 1).toByte()
+                }
+            }
+        }
+        verify(docValues, null, numDims, numDims, numBytesPerDim)
     }
 
     @Test
     fun testTieBreakOrder() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numDocs = 100
+            val writer = BKDWriter(numDocs, dir, "tmp", BKDConfig(1, 1, Int.SIZE_BYTES, 2), 0.01, numDocs.toLong())
+            val zeros = ByteArray(Int.SIZE_BYTES)
+            for (i in 0 until numDocs) {
+                writer.add(zeros, i)
+            }
+
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(numDocs, 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+
+            dir.openInput("bkd", IOContext(FlushInfo(numDocs, 0L))).use { input ->
+                input.seek(indexFP)
+                val r = getPointValues(input)
+                var lastDocID = -1
+                r.intersect(object : org.gnit.lucenekmp.index.PointValues.IntersectVisitor {
+                    override fun visit(docID: Int) {
+                        assertTrue(docID > lastDocID, "lastDocID=$lastDocID docID=$docID")
+                        lastDocID = docID
+                    }
+
+                    override fun visit(docID: Int, packedValue: ByteArray) {
+                        visit(docID)
+                    }
+
+                    override fun compare(minPacked: ByteArray, maxPacked: ByteArray): org.gnit.lucenekmp.index.PointValues.Relation {
+                        return org.gnit.lucenekmp.index.PointValues.Relation.CELL_CROSSES_QUERY
+                    }
+                })
+            }
+        }
     }
 
     @Test
     fun testCheckDataDimOptimalOrder() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numValues = atLeast(1000)
+            val maxPointsInLeafNode = TestUtil.nextInt(random(), 50, 500)
+            val numBytesPerDim = TestUtil.nextInt(random(), 1, 4)
+            val numIndexDims = TestUtil.nextInt(random(), 1, 4)
+            val numDataDims = TestUtil.nextInt(random(), numIndexDims, 4)
+
+            val pointValue1 = ByteArray(numDataDims * numBytesPerDim)
+            val pointValue2 = ByteArray(numDataDims * numBytesPerDim)
+            random().nextBytes(pointValue1)
+            random().nextBytes(pointValue2)
+
+            for (i in 0 until numIndexDims) {
+                org.gnit.lucenekmp.jdkport.System.arraycopy(pointValue1, i * numBytesPerDim, pointValue2, i * numBytesPerDim, numBytesPerDim)
+            }
+
+            val writer = BKDWriter(
+                2 * numValues,
+                dir,
+                "_temp",
+                BKDConfig(numDataDims, numIndexDims, numBytesPerDim, maxPointsInLeafNode),
+                1.0,
+                (2 * numValues).toLong()
+            )
+            for (i in 0 until numValues) {
+                writer.add(pointValue1, i)
+                writer.add(pointValue2, i)
+            }
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(2 * numValues, 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+
+            dir.openInput("bkd", IOContext(FlushInfo(2 * numValues, 0L))).use { input ->
+                input.seek(indexFP)
+                val points = getPointValues(input)
+                var previous: ByteArray? = null
+                var hasChanged = false
+                points.intersect(object : org.gnit.lucenekmp.index.PointValues.IntersectVisitor {
+                    override fun visit(docID: Int) {
+                        throw UnsupportedOperationException()
+                    }
+
+                    override fun visit(docID: Int, packedValue: ByteArray) {
+                        if (previous == null) {
+                            previous = packedValue.copyOf()
+                        } else {
+                            val mismatch = org.gnit.lucenekmp.jdkport.Arrays.mismatch(packedValue, 0, packedValue.size, previous, 0, previous!!.size)
+                            if (mismatch != -1) {
+                                if (!hasChanged) {
+                                    hasChanged = true
+                                org.gnit.lucenekmp.jdkport.System.arraycopy(packedValue, 0, previous!!, 0, packedValue.size)
+                                } else {
+                                    throw AssertionError("Points are not in optimal order")
+                                }
+                            }
+                        }
+                    }
+
+                    override fun compare(minPackedValue: ByteArray, maxPackedValue: ByteArray): org.gnit.lucenekmp.index.PointValues.Relation {
+                        return org.gnit.lucenekmp.index.PointValues.Relation.CELL_CROSSES_QUERY
+                    }
+                })
+            }
+        }
     }
 
     @Test
     fun test2DLongOrdsOffline() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numDocs = 1000
+            val writer = BKDWriter(numDocs, dir, "tmp", BKDConfig(2, 2, Int.SIZE_BYTES, 2), 0.01, numDocs.toLong())
+            val buffer = ByteArray(2 * Int.SIZE_BYTES)
+            for (i in 0 until numDocs) {
+                random().nextBytes(buffer)
+                writer.add(buffer, i)
+            }
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(numDocs, 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+            dir.openInput("bkd", IOContext(FlushInfo(numDocs, 0L))).use { input ->
+                input.seek(indexFP)
+                val r = getPointValues(input)
+                val count = intArrayOf(0)
+                r.intersect(object : org.gnit.lucenekmp.index.PointValues.IntersectVisitor {
+                    override fun visit(docID: Int) { count[0]++ }
+                    override fun visit(docID: Int, packedValue: ByteArray) { visit(docID) }
+                    override fun compare(minPacked: ByteArray, maxPacked: ByteArray): org.gnit.lucenekmp.index.PointValues.Relation {
+                        return if (random().nextInt(7) == 1) org.gnit.lucenekmp.index.PointValues.Relation.CELL_CROSSES_QUERY else org.gnit.lucenekmp.index.PointValues.Relation.CELL_INSIDE_QUERY
+                    }
+                })
+                assertEquals(numDocs, count[0])
+            }
+        }
     }
 
     @Test
     fun testWastedLeadingBytes() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
+            val numIndexDims = TestUtil.nextInt(random(), 1, numDims)
+            val bytesPerDim = org.gnit.lucenekmp.index.PointValues.MAX_NUM_BYTES
+            val bytesUsed = TestUtil.nextInt(random(), 1, 3)
+
+            val writer = BKDWriter(atLeast(1000), dir, "tmp", BKDConfig(numDims, numIndexDims, bytesPerDim, 32), 1.0, atLeast(1000).toLong())
+            val tmp = ByteArray(bytesUsed)
+            val buffer = ByteArray(numDims * bytesPerDim)
+            for (i in 0 until atLeast(1000)) {
+                for (dim in 0 until numDims) {
+                    random().nextBytes(tmp)
+                    org.gnit.lucenekmp.jdkport.System.arraycopy(tmp, 0, buffer, dim * bytesPerDim + (bytesPerDim - bytesUsed), tmp.size)
+                }
+                writer.add(buffer, i)
+            }
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(atLeast(1000), 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+            dir.openInput("bkd", IOContext(FlushInfo(atLeast(1000), 0L))).use { input ->
+                input.seek(indexFP)
+                val r = getPointValues(input)
+                val count = intArrayOf(0)
+                r.intersect(object : org.gnit.lucenekmp.index.PointValues.IntersectVisitor {
+                    override fun visit(docID: Int) { count[0]++ }
+                    override fun visit(docID: Int, packedValue: ByteArray) { visit(docID) }
+                    override fun compare(minPacked: ByteArray, maxPacked: ByteArray): org.gnit.lucenekmp.index.PointValues.Relation {
+                        return if (random().nextInt(7) == 1) org.gnit.lucenekmp.index.PointValues.Relation.CELL_CROSSES_QUERY else org.gnit.lucenekmp.index.PointValues.Relation.CELL_INSIDE_QUERY
+                    }
+                })
+                assertEquals(atLeast(1000), count[0])
+            }
+        }
     }
 
     @Test
     fun testEstimatePointCount() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numValues = atLeast(1000)
+            val maxPointsInLeafNode = TestUtil.nextInt(random(), 50, 500)
+            val numBytesPerDim = TestUtil.nextInt(random(), 1, 4)
+            val uniquePointValue = ByteArray(numBytesPerDim).also { random().nextBytes(it) }
+            val pointValue = ByteArray(numBytesPerDim)
+
+            val writer = BKDWriter(numValues, dir, "_temp", BKDConfig(1, 1, numBytesPerDim, maxPointsInLeafNode), BKDWriter.DEFAULT_MAX_MB_SORT_IN_HEAP.toDouble(), numValues.toLong())
+            for (i in 0 until numValues) {
+                if (i == numValues / 2) {
+                    writer.add(uniquePointValue, i)
+                } else {
+                    do {
+                        random().nextBytes(pointValue)
+                    } while (pointValue.contentEquals(uniquePointValue))
+                    writer.add(pointValue, i)
+                }
+            }
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(numValues, 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+
+            dir.openInput("bkd", IOContext(FlushInfo(numValues, 0L))).use { input ->
+                input.seek(indexFP)
+                val points = getPointValues(input)
+                assertEquals(numValues.toLong(), points.estimatePointCount(object : org.gnit.lucenekmp.index.PointValues.IntersectVisitor {
+                    override fun visit(docID: Int) {}
+                    override fun visit(docID: Int, packedValue: ByteArray) {}
+                    override fun compare(minPackedValue: ByteArray, maxPackedValue: ByteArray): org.gnit.lucenekmp.index.PointValues.Relation {
+                        return org.gnit.lucenekmp.index.PointValues.Relation.CELL_INSIDE_QUERY
+                    }
+                }))
+            }
+        }
     }
 
     @Test
     fun testTotalPointCountValidation() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val writer = BKDWriter(10, dir, "tmp", BKDConfig(1, 1, 4, 2), 1.0, 10)
+            val scratch = ByteArray(4)
+            for (i in 0 until 10) {
+                NumericUtils.intToSortableBytes(i, scratch, 0)
+                writer.add(scratch, i)
+            }
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(10, 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+            dir.openInput("bkd", IOContext(FlushInfo(10, 0L))).use { input ->
+                input.seek(indexFP)
+                val r = getPointValues(input)
+                assertEquals(10L, r.size())
+            }
+        }
     }
 
     @Test
     fun testTooManyPoints() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numValues = 10
+            val numBytesPerDim = TestUtil.nextInt(random(), 1, 4)
+            val pointValue = ByteArray(numBytesPerDim)
+            val writer = BKDWriter(numValues, dir, "_temp", BKDConfig(1, 1, numBytesPerDim, 2), BKDWriter.DEFAULT_MAX_MB_SORT_IN_HEAP.toDouble(), numValues.toLong())
+            for (i in 0 until numValues) {
+                random().nextBytes(pointValue)
+                writer.add(pointValue, i)
+            }
+            random().nextBytes(pointValue)
+            val ex = assertFailsWith<IllegalStateException> { writer.add(pointValue, numValues) }
+            assertTrue(ex.message!!.contains("totalPointCount"))
+            writer.close()
+        }
     }
 
     @Test
     fun testTooManyPoints1D() {
-        // TODO: implement test logic
+        getDirectory().use { dir ->
+            val numValues = 10
+            val numBytesPerDim = TestUtil.nextInt(random(), 1, 4)
+            val pointValue = Array(numValues + 1) { ByteArray(numBytesPerDim) }
+            val docId = IntArray(numValues + 1) { it }
+            val writer = BKDWriter(numValues + 1, dir, "_temp", BKDConfig(1, 1, numBytesPerDim, 2), BKDWriter.DEFAULT_MAX_MB_SORT_IN_HEAP.toDouble(), numValues.toLong())
+            for (i in 0 until numValues + 1) {
+                random().nextBytes(pointValue[i])
+            }
+            val tree = object : MutablePointTree() {
+                val tmpValues = Array(numValues) { ByteArray(numBytesPerDim) }
+                val tmpDocs = IntArray(numValues)
+                override fun getValue(i: Int, packedValue: org.gnit.lucenekmp.util.BytesRef) {
+                    packedValue.bytes = pointValue[i]
+                    packedValue.offset = 0
+                    packedValue.length = numBytesPerDim
+                }
+                override fun getDocID(i: Int): Int = docId[i]
+                override fun getByteAt(i: Int, k: Int): Byte = pointValue[i][k]
+                override fun swap(i: Int, j: Int) {
+                    val tmp = pointValue[i]
+                    pointValue[i] = pointValue[j]
+                    pointValue[j] = tmp
+                    val tmpDoc = docId[i]
+                    docId[i] = docId[j]
+                    docId[j] = tmpDoc
+                }
+                override fun save(i: Int, j: Int) {
+                    tmpValues[j] = pointValue[i]
+                    tmpDocs[j] = docId[i]
+                }
+                override fun restore(i: Int, j: Int) {
+                    org.gnit.lucenekmp.jdkport.System.arraycopy(tmpValues, i, pointValue, i, j - i)
+                    org.gnit.lucenekmp.jdkport.System.arraycopy(tmpDocs, i, docId, i, j - i)
+                }
+                override fun size(): Long = (numValues + 1).toLong()
+                override fun visitDocValues(visitor: org.gnit.lucenekmp.index.PointValues.IntersectVisitor) {
+                    for (i in 0 until size().toInt()) {
+                        visitor.visit(docId[i], pointValue[i])
+                    }
+                }
+            }
+            dir.createOutput("bkd", IOContext(FlushInfo(numValues, 0L))).use { out ->
+                val ex = assertFailsWith<IllegalStateException> {
+                    writer.writeField(out, out, out, "", tree)
+                }
+                assertTrue(ex.message!!.contains("totalPointCount"))
+                writer.close()
+            }
+        }
     }
 
     private fun randomBigInt(numBytes: Int): BigInteger {
@@ -503,11 +825,51 @@ class TestBKD : LuceneTestCase() {
         numBytesPerDim: Int,
         maxPointsInLeafNode: Int = TestUtil.nextInt(random(), 50, 1000)
     ) {
-        // TODO: implement full verification logic
+        getDirectory().use { dir ->
+            val writer = BKDWriter(
+                docValues.size,
+                dir,
+                "bkd",
+                BKDConfig(numDataDims, numIndexDims, numBytesPerDim, maxPointsInLeafNode),
+                1.0,
+                docValues.size.toLong()
+            )
+            val scratch = ByteArray(numBytesPerDim * numDataDims)
+            for (ord in docValues.indices) {
+                for (dim in 0 until numDataDims) {
+                    org.gnit.lucenekmp.jdkport.System.arraycopy(docValues[ord][dim], 0, scratch, dim * numBytesPerDim, numBytesPerDim)
+                }
+                val docID = docIDs?.get(ord) ?: ord
+                writer.add(scratch, docID)
+            }
+            val indexFP: Long
+            dir.createOutput("bkd", IOContext(FlushInfo(docValues.size, 0L))).use { out ->
+                val finalizer = writer.finish(out, out, out)
+                indexFP = out.filePointer
+                finalizer?.run()
+            }
+            dir.openInput("bkd", IOContext(FlushInfo(docValues.size, 0L))).use { input ->
+                input.seek(indexFP)
+                val pv = getPointValues(input)
+                assertEquals(docValues.size.toLong(), pv.size())
+            }
+        }
     }
 
     private fun doTestRandomBinary(count: Int) {
-        // TODO: implement test logic
+        val numDocs = TestUtil.nextInt(random(), count, count * 2)
+        val numBytesPerDim = TestUtil.nextInt(random(), 2, 30)
+
+        val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
+        val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
+
+        val docValues = Array(numDocs) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
+        for (docID in 0 until numDocs) {
+            for (dim in 0 until numDataDims) {
+                random().nextBytes(docValues[docID][dim])
+            }
+        }
+        verify(docValues, null, numDataDims, numIndexDims, numBytesPerDim)
     }
 
     private fun getIntersectVisitor(
