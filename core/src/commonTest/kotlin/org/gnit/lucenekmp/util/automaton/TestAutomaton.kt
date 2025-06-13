@@ -15,7 +15,6 @@ import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.automaton.UTF32ToUTF8
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 
-
 class TestAutomaton {
     @Test
     fun testBasic() {
@@ -72,7 +71,6 @@ class TestAutomaton {
         AutomatonTestUtil.assertCleanDFA(a)
         assertEquals("foobar", Operations.getCommonPrefix(a))
     }
-
 
     @Test
     fun testCommonPrefixEmpty() {
@@ -455,4 +453,5 @@ private fun String.toCodePoints(): IntArray {
         result[j++] = cp
     }
     return result.copyOf(j)
+
 }

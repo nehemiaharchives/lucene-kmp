@@ -98,4 +98,5 @@ object AutomatonTestUtil {
         }
         assertEquals(expected, getFiniteStrings(a))
     }
+
 }

@@ -266,7 +266,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
 
     private fun downHeap(i: Int) {
         var i = i
-        val node = heap[i]!! // save top node
+        val node = heap[i] ?: return // queue is empty
         var j = i shl 1 // find smaller child
         var k = j + 1
         if (k <= size && lessThan(heap[k]!!, heap[j]!!)) {

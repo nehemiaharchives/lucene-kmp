@@ -117,7 +117,7 @@ class ByteArrayDataInput : DataInput {
     // NOTE: AIOOBE not EOF if you read too much
     override fun readBytes(b: ByteArray, offset: Int, len: Int) {
         /*java.lang.System.arraycopy(bytes, this.position, b, offset, len)*/
-        b.copyInto(
+        bytes.copyInto(
             destination = b,
             destinationOffset = offset,
             startIndex = this.position,
