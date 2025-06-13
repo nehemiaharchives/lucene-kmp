@@ -161,17 +161,17 @@
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 0 | 0% |
 |   org.apache.lucene.store | 27 | 0 | 0% |
-|   org.apache.lucene.util | 63 | 11 | 17% |
-|     org.apache.lucene.util.automaton | 15 | 0 | 0% |
-|     org.apache.lucene.util.bkd | 8 | 0 | 0% |
-|     org.apache.lucene.util.compress | 3 | 0 | 0% |
+|   org.apache.lucene.util | 63 | 36 | 57% |
+|     org.apache.lucene.util.automaton | 15 | 1 | 6% |
+|     org.apache.lucene.util.bkd | 8 | 1 | 12% |
+|     org.apache.lucene.util.compress | 3 | 3 | 100% |
 |     org.apache.lucene.util.fst | 8 | 0 | 0% |
 |     org.apache.lucene.util.graph | 1 | 0 | 0% |
-|     org.apache.lucene.util.hnsw | 8 | 0 | 0% |
+|     org.apache.lucene.util.hnsw | 8 | 1 | 12% |
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 0 | 0% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 11 | 1% |
+| Total | 673 | 42 | 6% |
 
 
 ## Tests To Port
@@ -735,56 +735,30 @@
 | [org.apache.lucene.store.TestTrackingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestTrackingDirectoryWrapper.java) | org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper |
 | [org.apache.lucene.util.Test2BPagedBytes](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/Test2BPagedBytes.java) | org.gnit.lucenekmp.util.Test2BPagedBytes |
 | [org.apache.lucene.util.TestAttributeSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestAttributeSource.java) | org.gnit.lucenekmp.util.TestAttributeSource |
-| [org.apache.lucene.util.TestByteBlockPool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestByteBlockPool.java) | org.gnit.lucenekmp.util.TestByteBlockPool |
 | [org.apache.lucene.util.TestBytesRefHash](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestBytesRefHash.java) | org.gnit.lucenekmp.util.TestBytesRefHash |
-| [org.apache.lucene.util.TestCharsRef](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestCharsRef.java) | org.gnit.lucenekmp.util.TestCharsRef |
 | [org.apache.lucene.util.TestCharsRefBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestCharsRefBuilder.java) | org.gnit.lucenekmp.util.TestCharsRefBuilder |
 | [org.apache.lucene.util.TestClassLoaderUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestClassLoaderUtils.java) | org.gnit.lucenekmp.util.TestClassLoaderUtils |
 | [org.apache.lucene.util.TestCloseableThreadLocal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestCloseableThreadLocal.java) | org.gnit.lucenekmp.util.TestCloseableThreadLocal |
-| [org.apache.lucene.util.TestDocIdSetBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestDocIdSetBuilder.java) | org.gnit.lucenekmp.util.TestDocIdSetBuilder |
 | [org.apache.lucene.util.TestFilterIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFilterIterator.java) | org.gnit.lucenekmp.util.TestFilterIterator |
 | [org.apache.lucene.util.TestFixedBitDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFixedBitDocIdSet.java) | org.gnit.lucenekmp.util.TestFixedBitDocIdSet |
-| [org.apache.lucene.util.TestFixedBitSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFixedBitSet.java) | org.gnit.lucenekmp.util.TestFixedBitSet |
 | [org.apache.lucene.util.TestFixedLengthBytesRefArray](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFixedLengthBytesRefArray.java) | org.gnit.lucenekmp.util.TestFixedLengthBytesRefArray |
-| [org.apache.lucene.util.TestFrequencyTrackingRingBuffer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFrequencyTrackingRingBuffer.java) | org.gnit.lucenekmp.util.TestFrequencyTrackingRingBuffer |
-| [org.apache.lucene.util.TestInPlaceMergeSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestInPlaceMergeSorter.java) | org.gnit.lucenekmp.util.TestInPlaceMergeSorter |
-| [org.apache.lucene.util.TestIntArrayDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestIntArrayDocIdSet.java) | org.gnit.lucenekmp.util.TestIntArrayDocIdSet |
-| [org.apache.lucene.util.TestIntsRef](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestIntsRef.java) | org.gnit.lucenekmp.util.TestIntsRef |
 | [org.apache.lucene.util.TestJavaLoggingInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestJavaLoggingInfoStream.java) | org.gnit.lucenekmp.util.TestJavaLoggingInfoStream |
 | [org.apache.lucene.util.TestLongBitSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestLongBitSet.java) | org.gnit.lucenekmp.util.TestLongBitSet |
-| [org.apache.lucene.util.TestLongHeap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestLongHeap.java) | org.gnit.lucenekmp.util.TestLongHeap |
-| [org.apache.lucene.util.TestMSBRadixSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestMSBRadixSorter.java) | org.gnit.lucenekmp.util.TestMSBRadixSorter |
-| [org.apache.lucene.util.TestMathUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestMathUtil.java) | org.gnit.lucenekmp.util.TestMathUtil |
-| [org.apache.lucene.util.TestMergedIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestMergedIterator.java) | org.gnit.lucenekmp.util.TestMergedIterator |
 | [org.apache.lucene.util.TestNamedSPILoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestNamedSPILoader.java) | org.gnit.lucenekmp.util.TestNamedSPILoader |
-| [org.apache.lucene.util.TestNotDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestNotDocIdSet.java) | org.gnit.lucenekmp.util.TestNotDocIdSet |
 | [org.apache.lucene.util.TestNumericUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestNumericUtils.java) | org.gnit.lucenekmp.util.TestNumericUtils |
 | [org.apache.lucene.util.TestOfflineSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestOfflineSorter.java) | org.gnit.lucenekmp.util.TestOfflineSorter |
 | [org.apache.lucene.util.TestPagedBytes](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestPagedBytes.java) | org.gnit.lucenekmp.util.TestPagedBytes |
-| [org.apache.lucene.util.TestPriorityQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestPriorityQueue.java) | org.gnit.lucenekmp.util.TestPriorityQueue |
 | [org.apache.lucene.util.TestQueryBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestQueryBuilder.java) | org.gnit.lucenekmp.util.TestQueryBuilder |
-| [org.apache.lucene.util.TestRadixSelector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRadixSelector.java) | org.gnit.lucenekmp.util.TestRadixSelector |
-| [org.apache.lucene.util.TestRamUsageEstimator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRamUsageEstimator.java) | org.gnit.lucenekmp.util.TestRamUsageEstimator |
 | [org.apache.lucene.util.TestRecyclingByteBlockAllocator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRecyclingByteBlockAllocator.java) | org.gnit.lucenekmp.util.TestRecyclingByteBlockAllocator |
 | [org.apache.lucene.util.TestRecyclingIntBlockAllocator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRecyclingIntBlockAllocator.java) | org.gnit.lucenekmp.util.TestRecyclingIntBlockAllocator |
 | [org.apache.lucene.util.TestRoaringDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRoaringDocIdSet.java) | org.gnit.lucenekmp.util.TestRoaringDocIdSet |
 | [org.apache.lucene.util.TestRollingBuffer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRollingBuffer.java) | org.gnit.lucenekmp.util.TestRollingBuffer |
 | [org.apache.lucene.util.TestSentinelIntSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSentinelIntSet.java) | org.gnit.lucenekmp.util.TestSentinelIntSet |
-| [org.apache.lucene.util.TestSetOnce](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSetOnce.java) | org.gnit.lucenekmp.util.TestSetOnce |
-| [org.apache.lucene.util.TestSloppyMath](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSloppyMath.java) | org.gnit.lucenekmp.util.TestSloppyMath |
-| [org.apache.lucene.util.TestSmallFloat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSmallFloat.java) | org.gnit.lucenekmp.util.TestSmallFloat |
 | [org.apache.lucene.util.TestSparseFixedBitDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSparseFixedBitDocIdSet.java) | org.gnit.lucenekmp.util.TestSparseFixedBitDocIdSet |
-| [org.apache.lucene.util.TestSparseFixedBitSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSparseFixedBitSet.java) | org.gnit.lucenekmp.util.TestSparseFixedBitSet |
-| [org.apache.lucene.util.TestStableMSBRadixSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestStableMSBRadixSorter.java) | org.gnit.lucenekmp.util.TestStableMSBRadixSorter |
 | [org.apache.lucene.util.TestStressRamUsageEstimator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestStressRamUsageEstimator.java) | org.gnit.lucenekmp.util.TestStressRamUsageEstimator |
-| [org.apache.lucene.util.TestStringHelper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestStringHelper.java) | org.gnit.lucenekmp.util.TestStringHelper |
-| [org.apache.lucene.util.TestStringSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestStringSorter.java) | org.gnit.lucenekmp.util.TestStringSorter |
-| [org.apache.lucene.util.TestTimSorterWorstCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestTimSorterWorstCase.java) | org.gnit.lucenekmp.util.TestTimSorterWorstCase |
-| [org.apache.lucene.util.TestVectorUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestVectorUtil.java) | org.gnit.lucenekmp.util.TestVectorUtil |
 | [org.apache.lucene.util.TestVersion](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestVersion.java) | org.gnit.lucenekmp.util.TestVersion |
 | [org.apache.lucene.util.TestVirtualMethod](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestVirtualMethod.java) | org.gnit.lucenekmp.util.TestVirtualMethod |
 | [org.apache.lucene.util.TestWeakIdentityMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestWeakIdentityMap.java) | org.gnit.lucenekmp.util.TestWeakIdentityMap |
-| [org.apache.lucene.util.automaton.TestAutomaton](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestAutomaton.java) | org.gnit.lucenekmp.util.automaton.TestAutomaton |
 | [org.apache.lucene.util.automaton.TestCompiledAutomaton](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestCompiledAutomaton.java) | org.gnit.lucenekmp.util.automaton.TestCompiledAutomaton |
 | [org.apache.lucene.util.automaton.TestDeterminism](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminism.java) | org.gnit.lucenekmp.util.automaton.TestDeterminism |
 | [org.apache.lucene.util.automaton.TestDeterminizeLexicon](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminizeLexicon.java) | org.gnit.lucenekmp.util.automaton.TestDeterminizeLexicon |
@@ -804,12 +778,8 @@
 | [org.apache.lucene.util.bkd.TestBKDConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestBKDConfig.java) | org.gnit.lucenekmp.util.bkd.TestBKDConfig |
 | [org.apache.lucene.util.bkd.TestBKDRadixSelector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestBKDRadixSelector.java) | org.gnit.lucenekmp.util.bkd.TestBKDRadixSelector |
 | [org.apache.lucene.util.bkd.TestBKDRadixSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestBKDRadixSort.java) | org.gnit.lucenekmp.util.bkd.TestBKDRadixSort |
-| [org.apache.lucene.util.bkd.TestBKDUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestBKDUtil.java) | org.gnit.lucenekmp.util.bkd.TestBKDUtil |
 | [org.apache.lucene.util.bkd.TestDocIdsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestDocIdsWriter.java) | org.gnit.lucenekmp.util.bkd.TestDocIdsWriter |
 | [org.apache.lucene.util.bkd.TestMutablePointTreeReaderUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestMutablePointTreeReaderUtils.java) | org.gnit.lucenekmp.util.bkd.TestMutablePointTreeReaderUtils |
-| [org.apache.lucene.util.compress.TestFastLZ4](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/compress/TestFastLZ4.java) | org.gnit.lucenekmp.util.compress.TestFastLZ4 |
-| [org.apache.lucene.util.compress.TestHighLZ4](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/compress/TestHighLZ4.java) | org.gnit.lucenekmp.util.compress.TestHighLZ4 |
-| [org.apache.lucene.util.compress.TestLowercaseAsciiCompression](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/compress/TestLowercaseAsciiCompression.java) | org.gnit.lucenekmp.util.compress.TestLowercaseAsciiCompression |
 | [org.apache.lucene.util.fst.Test2BFST](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/Test2BFST.java) | org.gnit.lucenekmp.util.fst.Test2BFST |
 | [org.apache.lucene.util.fst.Test2BFSTOffHeap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/Test2BFSTOffHeap.java) | org.gnit.lucenekmp.util.fst.Test2BFSTOffHeap |
 | [org.apache.lucene.util.fst.TestBitTableUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/TestBitTableUtil.java) | org.gnit.lucenekmp.util.fst.TestBitTableUtil |
@@ -819,7 +789,6 @@
 | [org.apache.lucene.util.fst.TestGrowableByteArrayDataOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/TestGrowableByteArrayDataOutput.java) | org.gnit.lucenekmp.util.fst.TestGrowableByteArrayDataOutput |
 | [org.apache.lucene.util.fst.TestUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/TestUtil.java) | org.gnit.lucenekmp.util.fst.TestUtil |
 | [org.apache.lucene.util.graph.TestGraphTokenStreamFiniteStrings](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/graph/TestGraphTokenStreamFiniteStrings.java) | org.gnit.lucenekmp.util.graph.TestGraphTokenStreamFiniteStrings |
-| [org.apache.lucene.util.hnsw.TestBlockingFloatHeap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestBlockingFloatHeap.java) | org.gnit.lucenekmp.util.hnsw.TestBlockingFloatHeap |
 | [org.apache.lucene.util.hnsw.TestFloatHeap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestFloatHeap.java) | org.gnit.lucenekmp.util.hnsw.TestFloatHeap |
 | [org.apache.lucene.util.hnsw.TestHnswByteVectorGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswByteVectorGraph.java) | org.gnit.lucenekmp.util.hnsw.TestHnswByteVectorGraph |
 | [org.apache.lucene.util.hnsw.TestHnswFloatVectorGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswFloatVectorGraph.java) | org.gnit.lucenekmp.util.hnsw.TestHnswFloatVectorGraph |
