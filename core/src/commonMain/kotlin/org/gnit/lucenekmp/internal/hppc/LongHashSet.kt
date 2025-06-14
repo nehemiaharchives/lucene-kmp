@@ -338,12 +338,7 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
     }
 
     override fun clone(): LongHashSet {
-        val cloned = LongHashSet()
-        cloned.keys = keys?.copyOf()
-        cloned.hasEmptyKey = hasEmptyKey
-        cloned.iterationSeed = ITERATION_SEED.incrementAndFetch()
-        // Copy any additional relevant fields if needed
-        return cloned
+        return LongHashSet(this)
     }
 
     override fun iterator(): Iterator<LongCursor> {
@@ -567,7 +562,7 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
      * Validate load factor range and return it. Override and suppress if you need insane load
      * factors.
      */
-    protected fun verifyLoadFactor(loadFactor: Double): Double {
+    protected open fun verifyLoadFactor(loadFactor: Double): Double {
         checkLoadFactor(loadFactor, MIN_LOAD_FACTOR.toDouble(), MAX_LOAD_FACTOR.toDouble())
         return loadFactor
     }
@@ -596,7 +591,7 @@ open class LongHashSet @JvmOverloads constructor(expectedElements: Int, loadFact
      * Allocate new internal buffers. This method attempts to allocate and assign internal buffers
      * atomically (either allocations succeed or not).
      */
-    protected fun allocateBuffers(arraySize: Int) {
+    protected open fun allocateBuffers(arraySize: Int) {
         require(Int.bitCount(arraySize) == 1)
 
         // Ensure no change is done if we hit an OOM.

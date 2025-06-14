@@ -56,6 +56,10 @@ open class Field : IndexableField {
     /** Field's value  */
     protected lateinit var fieldsData: Any
 
+    protected fun isFieldsDataInitialized(): Boolean {
+        return this::fieldsData.isInitialized
+    }
+
     /**
      * Expert: creates a field with no initial value. This is intended to be used by custom [ ] sub-classes with pre-configured [IndexableFieldType]s.
      *
