@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.tests.geo
 
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.geo.Point
 
 import org.gnit.lucenekmp.geo.Line
 
@@ -27,5 +28,11 @@ object GeoTestUtil {
             lons[i] = nextLongitude()
         }
         return Line(lats, lons)
+    }
+
+    fun nextPoint(): Point {
+        val lat = nextLatitude()
+        val lon = nextLongitude()
+        return Point(lat, lon)
     }
 }
