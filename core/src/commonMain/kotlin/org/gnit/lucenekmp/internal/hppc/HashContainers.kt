@@ -34,9 +34,7 @@ object HashContainers {
     val MAX_HASH_ARRAY_LENGTH: Int = -0x80000000 ushr 1
 
     @OptIn(ExperimentalAtomicApi::class)
-    val ITERATION_SEED: AtomicInt = AtomicInt(
-        value = TODO()
-    )
+    val ITERATION_SEED: AtomicInt = AtomicInt(0)
 
     fun iterationIncrement(seed: Int): Int {
         return 29 + ((seed and 7) shl 1) // Small odd integer.

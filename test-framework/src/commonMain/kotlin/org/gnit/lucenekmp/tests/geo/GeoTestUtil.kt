@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.tests.geo
 
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+
+import org.gnit.lucenekmp.geo.Point
 import org.gnit.lucenekmp.geo.Circle
 import org.gnit.lucenekmp.geo.GeoUtils
 import kotlin.math.PI
@@ -24,5 +26,11 @@ object GeoTestUtil {
         val lon = nextLongitude()
         val radiusMeters = LuceneTestCase.random().nextDouble() * GeoUtils.EARTH_MEAN_RADIUS_METERS * PI / 2.0 + 1.0
         return Circle(lat, lon, radiusMeters)
+    }
+    
+    fun nextPoint(): Point {
+        val lat = nextLatitude()
+        val lon = nextLongitude()
+        return Point(lat, lon)
     }
 }
