@@ -399,16 +399,14 @@ internal open class EdgeTree private constructor(
                     }
                     ret
                 })
-            return createTree(edges, 0, edges.size - 1)
+            return createTree(edges, 0, edges.size - 1)!!
         }
 
         /** Creates tree from sorted edges (with range low and high inclusive)  */
-        private fun createTree(edges: Array<EdgeTree>, low: Int, high: Int): EdgeTree {
-            // java lucene returns null but lucene-kmp will throw an exception
-            /*if (low > high) {
+        private fun createTree(edges: Array<EdgeTree>, low: Int, high: Int): EdgeTree? {
+            if (low > high) {
                 return null
-            }*/
-            require(low <= high) { "low: $low, high: $high" }
+            }
 
             // add midpoint
             val mid = (low + high) ushr 1
