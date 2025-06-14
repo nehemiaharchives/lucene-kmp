@@ -1,10 +1,14 @@
 package org.gnit.lucenekmp.tests.util.automaton
 
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gnit.lucenekmp.util.automaton.Automaton
 import org.gnit.lucenekmp.util.automaton.Operations
 import org.gnit.lucenekmp.util.automaton.Transition
+import org.gnit.lucenekmp.util.IntsRef
+import org.gnit.lucenekmp.util.IntsRefBuilder
+import org.gnit.lucenekmp.util.fst.Util
 import org.gnit.lucenekmp.jdkport.BitSet
 
 object AutomatonTestUtil {
@@ -55,4 +59,44 @@ object AutomatonTestUtil {
         visited.set(state)
         return true
     }
+
+    fun getFiniteStrings(a: Automaton): Set<IntsRef> {
+        assertTrue(isFinite(a), "automaton must be finite")
+        val results = mutableSetOf<IntsRef>()
+        if (a.numStates == 0) {
+            return results
+        }
+        val transition = Transition()
+        fun collect(state: Int, path: IntArray, depth: Int) {
+            if (a.isAccept(state)) {
+                results.add(IntsRef(path.copyOf(depth), 0, depth))
+            }
+            val count = a.initTransition(state, transition)
+            for (i in 0 until count) {
+                a.getNextTransition(transition)
+                for (label in transition.min..transition.max) {
+                    var newPath = path
+                    if (depth == newPath.size) {
+                        newPath = newPath.copyOf(depth + 10)
+                    }
+                    newPath[depth] = label
+                    collect(transition.dest, newPath, depth + 1)
+                }
+            }
+        }
+        collect(0, IntArray(10), 0)
+        return results
+    }
+
+    fun assertMatches(a: Automaton, vararg strings: String) {
+        val expected = mutableSetOf<IntsRef>()
+        val builder = IntsRefBuilder()
+        for (s in strings) {
+            builder.clear()
+            Util.toUTF32(s, builder)
+            expected.add(builder.toIntsRef())
+        }
+        assertEquals(expected, getFiniteStrings(a))
+    }
+
 }
