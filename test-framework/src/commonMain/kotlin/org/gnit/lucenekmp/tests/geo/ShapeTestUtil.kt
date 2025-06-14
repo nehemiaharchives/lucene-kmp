@@ -27,7 +27,7 @@ object ShapeTestUtil {
         }
         return XYCircle(x, y, radius)
     }
-    
+
     fun nextBox(random: Random): XYRectangle {
         var x0 = nextFloat(random)
         var x1 = nextFloat(random)
