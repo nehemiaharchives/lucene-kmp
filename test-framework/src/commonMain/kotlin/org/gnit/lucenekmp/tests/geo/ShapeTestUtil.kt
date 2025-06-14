@@ -23,7 +23,7 @@ object ShapeTestUtil {
         val y = nextFloat(random)
         var radius = 0f
         while (radius == 0f) {
-            radius = random.nextFloat() * (Float.MAX_VALUE / 2)
+            radius = random.nextFloat() * Float.MAX_VALUE / 2f
         }
         return XYCircle(x, y, radius)
     }
