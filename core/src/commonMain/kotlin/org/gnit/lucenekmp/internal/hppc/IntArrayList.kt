@@ -20,7 +20,7 @@ import kotlin.reflect.cast
  *
  * @lucene.internal
  */
-class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<IntArrayList>, Accountable {
+open class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<IntArrayList>, Accountable {
     /**
      * Internal array for storing the list. The array may be larger than the current size ([ ][.size]).
      */
@@ -141,6 +141,7 @@ class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<IntAr
             startIndex = index + 1,
             endIndex = elementsCount
         )
+        elementsCount--
         return v
     }
 
@@ -352,7 +353,7 @@ class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<IntAr
     }
 
     /** Compare index-aligned elements against another [IntArrayList].  */
-    protected fun equalElements(other: IntArrayList): Boolean {
+    internal fun equalElements(other: IntArrayList): Boolean {
         val max = size()
         if (other.size() != max) {
             return false
@@ -417,8 +418,8 @@ class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<IntAr
             this.buffer = buffer
         }
 
-        protected override fun fetch(): IntCursor {
-            if (cursor.index + 1 === size) return done()!!
+        protected override fun fetch(): IntCursor? {
+            if (cursor.index + 1 == size) return done()
 
             cursor.value = buffer[++cursor.index]
             return cursor
