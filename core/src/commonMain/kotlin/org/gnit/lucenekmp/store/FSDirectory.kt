@@ -68,11 +68,7 @@ import kotlin.math.min
  */
 abstract class FSDirectory protected constructor(path: Path, lockFactory: LockFactory) :
     BaseDirectory(lockFactory) {
-    var directory: Path // The underlying filesystem directory
-        get(){
-            ensureOpen()
-            return directory
-        }
+    val directory: Path // The underlying filesystem directory
 
     /**
      * Maps files that we are trying to delete (or we tried already but failed) before attempting to

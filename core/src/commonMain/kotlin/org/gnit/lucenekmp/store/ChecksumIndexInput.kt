@@ -21,13 +21,7 @@ protected constructor(resourceDescription: String) : IndexInput(resourceDescript
        * concurrently on different threads can clobber the contents of a shared buffer,
        * corrupting the checksum. See LUCENE-5583 for additional context.
        */
-    private var skipBuffer: ByteArray?
-        get() {
-            return skipBuffer
-        }
-        set(value) {
-            skipBuffer = value
-        }
+    private var skipBuffer: ByteArray? = null
 
     abstract val checksum: Long
 
