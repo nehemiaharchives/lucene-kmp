@@ -196,7 +196,7 @@ class TestIntHashSet : LuceneTestCase() {
     @Test
     fun testBug_HPPC73_FullCapacityGet() {
         val elements = 0x7F
-        set = IntHashSet(elements, 0.99)
+        set = IntHashSet(elements - 1, 0.99)
         val before = set.keys
         for (i in 1..elements) {
             set.add(cast(i))
