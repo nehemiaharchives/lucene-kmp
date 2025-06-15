@@ -380,9 +380,9 @@ class LongObjectHashMap<VType> (
     fun ensureCapacity(expectedElements: Int) {
         if (expectedElements > resizeAt || keys == null) {
             val prevKeys = this.keys
-            val prevValues = this.values as Array<VType?>
+            val prevValues = this.values as? Array<VType?>
             allocateBuffers(HashContainers.minBufferSize(expectedElements, loadFactor))
-            if (prevKeys != null && !this.isEmpty) {
+            if (prevKeys != null && prevValues != null && !this.isEmpty) {
                 rehash(prevKeys, prevValues)
             }
         }
