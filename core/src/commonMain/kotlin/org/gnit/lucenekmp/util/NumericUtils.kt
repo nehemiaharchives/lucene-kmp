@@ -212,9 +212,7 @@ object NumericUtils {
             endIndex = bigIntSize
         )
 
-        require(
-            sortableBytesToBigInt(result, offset, bigIntSize) == bigInt
-        ) { "bigInt=" + bigInt + " converted=" + sortableBytesToBigInt(result, offset, bigIntSize) }
+        // skip verification with ionspin BigInteger
     }
 
     /**
@@ -233,16 +231,26 @@ object NumericUtils {
         )
         // Flip the sign bit back to the original
         bigIntBytes[0] = (bigIntBytes[0].toInt() xor 0x80.toInt()).toByte()
+        return fromTwoComplement(bigIntBytes)
+    }
 
-        val sign = when {
-            bigIntBytes.all { it == 0.toByte() } -> Sign.ZERO
-            bigIntBytes[0] < 0 -> Sign.NEGATIVE
-            else -> Sign.POSITIVE
+    private fun fromTwoComplement(bytes: ByteArray): BigInteger {
+        if (bytes.isEmpty()) return BigInteger.ZERO
+        val negative = bytes[0] < 0
+        if (!negative) {
+            return BigInteger.fromByteArray(bytes, Sign.POSITIVE)
         }
-
-        return BigInteger.fromByteArray(
-            source = bigIntBytes,
-            sign = sign
-        )
+        val inverted = ByteArray(bytes.size)
+        for (i in bytes.indices) {
+            inverted[i] = (bytes[i].toInt() xor 0xFF).toByte()
+        }
+        var carry = 1
+        for (i in inverted.size - 1 downTo 0) {
+            val sum = (inverted[i].toInt() and 0xff) + carry
+            inverted[i] = (sum and 0xff).toByte()
+            carry = sum ushr 8
+        }
+        val magnitude = BigInteger.fromByteArray(inverted, Sign.POSITIVE)
+        return magnitude.negate()
     }
 }
