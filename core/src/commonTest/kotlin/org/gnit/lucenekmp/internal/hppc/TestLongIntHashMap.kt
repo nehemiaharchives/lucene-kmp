@@ -24,8 +24,8 @@ import kotlin.random.Random
 import kotlin.test.*
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.jdkport.get
 
-@Ignore
 class TestLongIntHashMap : LuceneTestCase() {
     private val keyE: Long = 0
     private val key1: Long = cast(1)
@@ -63,7 +63,13 @@ class TestLongIntHashMap : LuceneTestCase() {
     @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testEnsureCapacity() {
-        val local = LongIntHashMap(0)
+        val expands = AtomicInt(0)
+        val local = object : LongIntHashMap(0) {
+            override fun allocateBuffers(arraySize: Int) {
+                super.allocateBuffers(arraySize)
+                expands.incrementAndFetch()
+            }
+        }
 
         val max = if (rarely()) 0 else randomIntBetween(0, 250)
         for (i in 0 until max) {
@@ -72,11 +78,11 @@ class TestLongIntHashMap : LuceneTestCase() {
 
         val additions = randomIntBetween(max, max + 5000)
         local.ensureCapacity(additions + local.size())
-        val sizeBefore = local.size()
+        val before = expands.get()
         for (i in 0 until additions) {
             local.put(cast(i), value0)
         }
-        assertEquals(sizeBefore + additions, local.size())
+        assertEquals(before, expands.get())
     }
 
     @Test
@@ -315,20 +321,39 @@ class TestLongIntHashMap : LuceneTestCase() {
     @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testBug_HPPC73_FullCapacityGet() {
+        val reallocations = AtomicInt(0)
         val elements = 0x7F
-        map = LongIntHashMap(elements, 0.99)
-        val sizeBefore = map.size()
+        map = object : LongIntHashMap(elements, 1.0) {
+            override fun verifyLoadFactor(loadFactor: Double): Double {
+                return loadFactor
+            }
+
+            override fun allocateBuffers(arraySize: Int) {
+                super.allocateBuffers(arraySize)
+                reallocations.incrementAndFetch()
+            }
+        }
+
+        val reallocationsBefore = reallocations.get()
+        assertEquals(reallocationsBefore, 1)
         for (i in 1..elements) {
             map.put(cast(i), value1)
         }
+
         val outOfSet = cast(elements + 1)
         map.remove(outOfSet)
         assertFalse(map.containsKey(outOfSet))
+        assertEquals(reallocationsBefore, reallocations.get())
+
         map.put(key1, value2)
+        assertEquals(reallocationsBefore, reallocations.get())
+
         map.remove(key1)
+        assertEquals(reallocationsBefore, reallocations.get())
         map.put(key1, value2)
+
         map.put(outOfSet, value1)
-        assertEquals(sizeBefore + elements + 1, map.size())
+        assertEquals(reallocationsBefore + 1, reallocations.get())
     }
 
     @Test
