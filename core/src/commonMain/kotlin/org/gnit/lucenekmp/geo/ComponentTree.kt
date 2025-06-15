@@ -276,7 +276,7 @@ internal class ComponentTree private constructor(component: Component2D, splitX:
             if (components.size == 1) {
                 return components[0]
             }
-            val root = createTree(components, 0, components.size - 1, false)
+            val root = createTree(components, 0, components.size - 1, false)!!
             // pull up min values for the root node so it contains a consistent bounding box
             for (component in components) {
                 root.minY = min(root.minY, component.minY)
@@ -288,13 +288,10 @@ internal class ComponentTree private constructor(component: Component2D, splitX:
         /** Creates tree from sorted components (with range low and high inclusive)  */
         private fun createTree(
             components: Array<Component2D>, low: Int, high: Int, splitX: Boolean
-        ): ComponentTree {
-            // java lucene returns null but lucene-kmp will throw exception
-            /*if (low > high) {
+        ): ComponentTree? {
+            if (low > high) {
                 return null
-            }*/
-
-            require(low <= high) { "low: $low, high: $high" }
+            }
 
             val mid = (low + high) ushr 1
             if (low < high) {
