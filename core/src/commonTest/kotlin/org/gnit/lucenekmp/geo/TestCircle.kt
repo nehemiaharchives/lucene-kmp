@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.geo
 
 import org.gnit.lucenekmp.tests.geo.GeoTestUtil
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import kotlin.math.PI
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -44,7 +45,7 @@ class TestCircle : LuceneTestCase() {
     private fun nextCircle(): Circle {
         val lat = GeoTestUtil.nextLatitude()
         val lon = GeoTestUtil.nextLongitude()
-        val radiusMeters = random().nextDouble() * GeoUtils.EARTH_MEAN_RADIUS_METERS * Math.PI / 2.0 + 1.0
+        val radiusMeters = random().nextDouble() * GeoUtils.EARTH_MEAN_RADIUS_METERS * PI / 2.0 + 1.0
         return Circle(lat, lon, radiusMeters)
     }
 
