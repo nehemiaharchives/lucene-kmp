@@ -16,7 +16,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
     private var count = 0
 
     override val entries: MutableSet<MutableMap.MutableEntry<Any, V>>
-        get() = TODO("Not yet implemented")
+        get() = entrySet()
 
     // package private because used in CharArraySet's non Set-conform CharArraySetIterator
     var keysArray: Array<CharArray?>
@@ -153,15 +153,15 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
     }
 
     /** Add the given mapping.  */
-    /*fun put(text: String, value: V): V? {
-        return put(text.toCharArray(), value)
-    }*/
+    open fun put(text: String, value: V): V? {
+        return putCharArray(text.toCharArray(), value)
+    }
 
     /**
      * Add the given mapping. If ignoreCase is true for this Set, the text array will be directly
      * modified. The user should never modify this text array after calling this method.
      */
-    fun putCharArray(text: CharArray, value: V?): V? {
+    open fun putCharArray(text: CharArray, value: V?): V? {
         if (ignoreCase) {
             CharacterUtils.toLowerCase(text, 0, text.size)
         }
@@ -469,9 +469,13 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
             throw UnsupportedOperationException()
         }
 
-        /*fun put(text: CharArray, `val`: V): V? {
+        override fun putCharArray(text: CharArray, value: V?): V? {
             throw UnsupportedOperationException()
-        }*/
+        }
+
+        override fun put(text: String, value: V): V? {
+            throw UnsupportedOperationException()
+        }
 
         /*override fun put(text: CharSequence?, `val`: V?): V? {
             throw UnsupportedOperationException()
