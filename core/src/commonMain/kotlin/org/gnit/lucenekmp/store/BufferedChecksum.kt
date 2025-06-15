@@ -32,7 +32,7 @@ class BufferedChecksum @JvmOverloads constructor(private val `in`: Checksum, buf
                 flush()
             }
             /*java.lang.System.arraycopy(b, off, buffer, upto, len)*/
-            buffer.copyInto(
+            b.copyInto(
                 destination = buffer,
                 destinationOffset = upto,
                 startIndex = off,
