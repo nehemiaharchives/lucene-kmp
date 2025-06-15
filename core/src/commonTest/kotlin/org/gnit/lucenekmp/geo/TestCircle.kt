@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.geo
 
 import org.gnit.lucenekmp.tests.geo.GeoTestUtil
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.geo.GeoUtils
 import kotlin.math.PI
 import kotlin.test.Test
 import kotlin.test.assertEquals
