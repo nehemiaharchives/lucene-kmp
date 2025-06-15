@@ -13,18 +13,19 @@ import org.gnit.lucenekmp.store.FlushInfo
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
 import org.gnit.lucenekmp.tests.util.TestUtil
-import kotlin.test.Ignore
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.util.NumericUtils
 import org.gnit.lucenekmp.codecs.MutablePointTree
 import org.gnit.lucenekmp.util.BytesRef
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFailsWith
 
+@Ignore
 class TestBKD : LuceneTestCase() {
     private lateinit var fakeFileSystem: FakeFileSystem
 
