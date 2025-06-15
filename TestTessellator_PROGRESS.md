@@ -1,0 +1,6 @@
+- [x] testLinesIntersect()
+- [x] testSimpleTessellation()
+- [x] testSimpleTessellationAtNight()
+- [x] testLUCENE8454()
+- [ ] testLUCENE8534()
+- [ ] testInvalidPolygonIntersects()
