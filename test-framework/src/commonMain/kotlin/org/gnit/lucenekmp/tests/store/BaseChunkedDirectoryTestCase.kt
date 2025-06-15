@@ -2,22 +2,21 @@ package org.gnit.lucenekmp.tests.store
 
 import okio.Path
 import org.gnit.lucenekmp.store.Directory
-import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.store.BaseDirectoryTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
-import kotlin.random.Random
 
 /**
  * Ported from Lucene's BaseChunkedDirectoryTestCase.
  * This is currently a skeleton to satisfy compilation.
  */
-abstract class BaseChunkedDirectoryTestCase : LuceneTestCase() {
+abstract class BaseChunkedDirectoryTestCase : BaseDirectoryTestCase() {
     /** Returns a new directory instance for the given path and chunk size. */
     @Throws(Exception::class)
     protected abstract fun getDirectory(path: Path, maxChunkSize: Int): Directory
 
     /** Returns a directory with a random chunk size. */
     @Throws(Exception::class)
-    open fun getDirectory(path: Path): Directory {
+    override fun getDirectory(path: Path): Directory {
         val chunk = 1 shl TestUtil.nextInt(random(), 10, 20)
         return getDirectory(path, chunk)
     }
