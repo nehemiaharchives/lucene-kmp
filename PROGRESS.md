@@ -151,27 +151,27 @@
 |     org.apache.lucene.codecs.lucene94 | 1 | 0 | 0% |
 |     org.apache.lucene.codecs.lucene99 | 6 | 0 | 0% |
 |     org.apache.lucene.codecs.perfield | 4 | 0 | 0% |
-|   org.apache.lucene.document | 50 | 0 | 0% |
-|   org.apache.lucene.geo | 17 | 0 | 0% |
+|   org.apache.lucene.document | 50 | 1 | 2% |
+|   org.apache.lucene.geo | 17 | 13 | 76% |
 |   org.apache.lucene.index | 197 | 0 | 0% |
-|     org.apache.lucene.internal.hppc | 15 | 0 | 0% |
+|     org.apache.lucene.internal.hppc | 15 | 3 | 20% |
 |     org.apache.lucene.internal.tests | 1 | 0 | 0% |
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
 |   org.apache.lucene.search | 149 | 0 | 0% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 0 | 0% |
-|   org.apache.lucene.store | 27 | 0 | 0% |
-|   org.apache.lucene.util | 63 | 36 | 57% |
+|   org.apache.lucene.store | 27 | 1 | 3% |
+|   org.apache.lucene.util | 63 | 37 | 58% |
 |     org.apache.lucene.util.automaton | 15 | 1 | 6% |
 |     org.apache.lucene.util.bkd | 8 | 1 | 12% |
 |     org.apache.lucene.util.compress | 3 | 3 | 100% |
 |     org.apache.lucene.util.fst | 8 | 0 | 0% |
 |     org.apache.lucene.util.graph | 1 | 0 | 0% |
-|     org.apache.lucene.util.hnsw | 8 | 1 | 12% |
+|     org.apache.lucene.util.hnsw | 8 | 2 | 25% |
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 0 | 0% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 42 | 6% |
+| Total | 673 | 62 | 9% |
 
 
 ## Tests To Port
@@ -273,7 +273,6 @@
 | [org.apache.lucene.document.TestLatLonMultiPointPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiPointPointQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiPointPointQueries |
 | [org.apache.lucene.document.TestLatLonMultiPointShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiPointShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiPointShapeQueries |
 | [org.apache.lucene.document.TestLatLonMultiPolygonShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiPolygonShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiPolygonShapeQueries |
-| [org.apache.lucene.document.TestLatLonPoint](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPoint.java) | org.gnit.lucenekmp.document.TestLatLonPoint |
 | [org.apache.lucene.document.TestLatLonPointDistanceFeatureQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointDistanceFeatureQuery.java) | org.gnit.lucenekmp.document.TestLatLonPointDistanceFeatureQuery |
 | [org.apache.lucene.document.TestLatLonPointDistanceSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointDistanceSort.java) | org.gnit.lucenekmp.document.TestLatLonPointDistanceSort |
 | [org.apache.lucene.document.TestLatLonPointPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointPointQueries.java) | org.gnit.lucenekmp.document.TestLatLonPointPointQueries |
@@ -301,22 +300,9 @@
 | [org.apache.lucene.document.TestXYShape](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestXYShape.java) | org.gnit.lucenekmp.document.TestXYShape |
 | [org.apache.lucene.document.TestXYShapeEncoding](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestXYShapeEncoding.java) | org.gnit.lucenekmp.document.TestXYShapeEncoding |
 | [org.apache.lucene.geo.TestCircle](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestCircle.java) | org.gnit.lucenekmp.geo.TestCircle |
-| [org.apache.lucene.geo.TestCircle2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestCircle2D.java) | org.gnit.lucenekmp.geo.TestCircle2D |
-| [org.apache.lucene.geo.TestGeoEncodingUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestGeoEncodingUtils.java) | org.gnit.lucenekmp.geo.TestGeoEncodingUtils |
-| [org.apache.lucene.geo.TestGeoUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestGeoUtils.java) | org.gnit.lucenekmp.geo.TestGeoUtils |
-| [org.apache.lucene.geo.TestLine2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestLine2D.java) | org.gnit.lucenekmp.geo.TestLine2D |
-| [org.apache.lucene.geo.TestPoint](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestPoint.java) | org.gnit.lucenekmp.geo.TestPoint |
-| [org.apache.lucene.geo.TestPoint2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestPoint2D.java) | org.gnit.lucenekmp.geo.TestPoint2D |
-| [org.apache.lucene.geo.TestPolygon](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestPolygon.java) | org.gnit.lucenekmp.geo.TestPolygon |
 | [org.apache.lucene.geo.TestPolygon2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestPolygon2D.java) | org.gnit.lucenekmp.geo.TestPolygon2D |
-| [org.apache.lucene.geo.TestRectangle2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestRectangle2D.java) | org.gnit.lucenekmp.geo.TestRectangle2D |
 | [org.apache.lucene.geo.TestSimpleWKTShapeParsing](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestSimpleWKTShapeParsing.java) | org.gnit.lucenekmp.geo.TestSimpleWKTShapeParsing |
 | [org.apache.lucene.geo.TestTessellator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestTessellator.java) | org.gnit.lucenekmp.geo.TestTessellator |
-| [org.apache.lucene.geo.TestXYCircle](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestXYCircle.java) | org.gnit.lucenekmp.geo.TestXYCircle |
-| [org.apache.lucene.geo.TestXYLine](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestXYLine.java) | org.gnit.lucenekmp.geo.TestXYLine |
-| [org.apache.lucene.geo.TestXYPoint](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestXYPoint.java) | org.gnit.lucenekmp.geo.TestXYPoint |
-| [org.apache.lucene.geo.TestXYPolygon](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestXYPolygon.java) | org.gnit.lucenekmp.geo.TestXYPolygon |
-| [org.apache.lucene.geo.TestXYRectangle](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/geo/TestXYRectangle.java) | org.gnit.lucenekmp.geo.TestXYRectangle |
 | [org.apache.lucene.index.Test2BBinaryDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BBinaryDocValues.java) | org.gnit.lucenekmp.index.Test2BBinaryDocValues |
 | [org.apache.lucene.index.Test2BDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BDocs.java) | org.gnit.lucenekmp.index.Test2BDocs |
 | [org.apache.lucene.index.Test2BNumericDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BNumericDocValues.java) | org.gnit.lucenekmp.index.Test2BNumericDocValues |
@@ -515,16 +501,13 @@
 | [org.apache.lucene.internal.hppc.TestCharHashSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestCharHashSet.java) | org.gnit.lucenekmp.internal.hppc.TestCharHashSet |
 | [org.apache.lucene.internal.hppc.TestCharObjectHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestCharObjectHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestCharObjectHashMap |
 | [org.apache.lucene.internal.hppc.TestFloatArrayList](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestFloatArrayList.java) | org.gnit.lucenekmp.internal.hppc.TestFloatArrayList |
-| [org.apache.lucene.internal.hppc.TestIntArrayList](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntArrayList.java) | org.gnit.lucenekmp.internal.hppc.TestIntArrayList |
 | [org.apache.lucene.internal.hppc.TestIntDoubleHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntDoubleHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntDoubleHashMap |
 | [org.apache.lucene.internal.hppc.TestIntFloatHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntFloatHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntFloatHashMap |
 | [org.apache.lucene.internal.hppc.TestIntHashSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntHashSet.java) | org.gnit.lucenekmp.internal.hppc.TestIntHashSet |
 | [org.apache.lucene.internal.hppc.TestIntIntHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntIntHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntIntHashMap |
 | [org.apache.lucene.internal.hppc.TestIntLongHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntLongHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntLongHashMap |
 | [org.apache.lucene.internal.hppc.TestIntObjectHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntObjectHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntObjectHashMap |
-| [org.apache.lucene.internal.hppc.TestLongArrayList](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongArrayList.java) | org.gnit.lucenekmp.internal.hppc.TestLongArrayList |
 | [org.apache.lucene.internal.hppc.TestLongFloatHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongFloatHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongFloatHashMap |
-| [org.apache.lucene.internal.hppc.TestLongHashSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongHashSet.java) | org.gnit.lucenekmp.internal.hppc.TestLongHashSet |
 | [org.apache.lucene.internal.hppc.TestLongIntHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongIntHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongIntHashMap |
 | [org.apache.lucene.internal.hppc.TestLongObjectHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongObjectHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongObjectHashMap |
 | [org.apache.lucene.internal.tests.TestTestSecrets](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/tests/TestTestSecrets.java) | org.gnit.lucenekmp.internal.tests.TestTestSecrets |
@@ -713,7 +696,6 @@
 | [org.apache.lucene.store.TestByteBuffersDataOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestByteBuffersDataOutput.java) | org.gnit.lucenekmp.store.TestByteBuffersDataOutput |
 | [org.apache.lucene.store.TestByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestByteBuffersDirectory |
 | [org.apache.lucene.store.TestChecksumIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestChecksumIndexInput.java) | org.gnit.lucenekmp.store.TestChecksumIndexInput |
-| [org.apache.lucene.store.TestDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestDirectory.java) | org.gnit.lucenekmp.store.TestDirectory |
 | [org.apache.lucene.store.TestFileSwitchDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFileSwitchDirectory.java) | org.gnit.lucenekmp.store.TestFileSwitchDirectory |
 | [org.apache.lucene.store.TestFilterDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFilterDirectory.java) | org.gnit.lucenekmp.store.TestFilterDirectory |
 | [org.apache.lucene.store.TestFilterIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFilterIndexOutput.java) | org.gnit.lucenekmp.store.TestFilterIndexOutput |
@@ -751,7 +733,6 @@
 | [org.apache.lucene.util.TestQueryBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestQueryBuilder.java) | org.gnit.lucenekmp.util.TestQueryBuilder |
 | [org.apache.lucene.util.TestRecyclingByteBlockAllocator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRecyclingByteBlockAllocator.java) | org.gnit.lucenekmp.util.TestRecyclingByteBlockAllocator |
 | [org.apache.lucene.util.TestRecyclingIntBlockAllocator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRecyclingIntBlockAllocator.java) | org.gnit.lucenekmp.util.TestRecyclingIntBlockAllocator |
-| [org.apache.lucene.util.TestRoaringDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRoaringDocIdSet.java) | org.gnit.lucenekmp.util.TestRoaringDocIdSet |
 | [org.apache.lucene.util.TestRollingBuffer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRollingBuffer.java) | org.gnit.lucenekmp.util.TestRollingBuffer |
 | [org.apache.lucene.util.TestSentinelIntSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSentinelIntSet.java) | org.gnit.lucenekmp.util.TestSentinelIntSet |
 | [org.apache.lucene.util.TestSparseFixedBitDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSparseFixedBitDocIdSet.java) | org.gnit.lucenekmp.util.TestSparseFixedBitDocIdSet |
@@ -793,7 +774,6 @@
 | [org.apache.lucene.util.hnsw.TestHnswByteVectorGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswByteVectorGraph.java) | org.gnit.lucenekmp.util.hnsw.TestHnswByteVectorGraph |
 | [org.apache.lucene.util.hnsw.TestHnswFloatVectorGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswFloatVectorGraph.java) | org.gnit.lucenekmp.util.hnsw.TestHnswFloatVectorGraph |
 | [org.apache.lucene.util.hnsw.TestHnswUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswUtil.java) | org.gnit.lucenekmp.util.hnsw.TestHnswUtil |
-| [org.apache.lucene.util.hnsw.TestNeighborArray](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestNeighborArray.java) | org.gnit.lucenekmp.util.hnsw.TestNeighborArray |
 | [org.apache.lucene.util.hnsw.TestNeighborQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestNeighborQueue.java) | org.gnit.lucenekmp.util.hnsw.TestNeighborQueue |
 | [org.apache.lucene.util.hnsw.TestOnHeapHnswGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestOnHeapHnswGraph.java) | org.gnit.lucenekmp.util.hnsw.TestOnHeapHnswGraph |
 | [org.apache.lucene.util.mutable.TestMutableValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/mutable/TestMutableValues.java) | org.gnit.lucenekmp.util.mutable.TestMutableValues |
