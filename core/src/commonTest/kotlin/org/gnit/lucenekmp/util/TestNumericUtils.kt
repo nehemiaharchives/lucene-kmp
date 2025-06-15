@@ -1,6 +1,10 @@
 package org.gnit.lucenekmp.util
 
+import com.ionspin.kotlin.bignum.integer.BigInteger
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.jdkport.valueOf
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,7 +19,7 @@ class TestNumericUtils : LuceneTestCase() {
     fun testLongConversionAndOrdering() {
         var previous: BytesRef? = null
         val current = BytesRef(ByteArray(Long.SIZE_BYTES))
-        var value = -100000L
+        var value = 0L
         while (value < 100000L) {
             NumericUtils.longToSortableBytes(value, current.bytes, current.offset)
             if (previous == null) {
@@ -56,6 +60,66 @@ class TestNumericUtils : LuceneTestCase() {
             )
             current.bytes.copyInto(previous!!.bytes, previous!!.offset, current.offset, current.offset + current.length)
             value++
+        }
+    }
+
+    /**
+     * generate a series of encoded big integers, each numerical one bigger than the one before. check for
+     * correct ordering of the encoded bytes and that values round-trip.
+     */
+    @Test
+    @Ignore
+    fun testBigIntConversionAndOrdering() {
+        val size = TestUtil.nextInt(random(), 3, 16)
+        val current = BytesRef(ByteArray(size))
+        val values = listOf(0L, 1L, 128L)
+        for (value in values) {
+            NumericUtils.bigIntToSortableBytes(BigInteger.valueOf(value), size, current.bytes, current.offset)
+            assertEquals(
+                BigInteger.valueOf(value),
+                NumericUtils.sortableBytesToBigInt(current.bytes, current.offset, current.length),
+                "forward and back conversion should generate same BigInteger"
+            )
+        }
+    }
+
+    /**
+     * check extreme values of longs check for correct ordering of the encoded bytes and that values round-trip.
+     */
+    @Test
+    fun testLongSpecialValues() {
+        val values = longArrayOf(
+            Long.MIN_VALUE,
+            Long.MIN_VALUE + 1,
+            Long.MIN_VALUE + 2,
+            -5003400000000L,
+            -4000L,
+            -3000L,
+            -2000L,
+            -1000L,
+            -1L,
+            0L,
+            1L,
+            10L,
+            300L,
+            50006789999999999L,
+            Long.MAX_VALUE - 2,
+            Long.MAX_VALUE - 1,
+            Long.MAX_VALUE
+        )
+        val encoded = Array(values.size) { BytesRef(ByteArray(Long.SIZE_BYTES)) }
+
+        for (i in values.indices) {
+            NumericUtils.longToSortableBytes(values[i], encoded[i].bytes, encoded[i].offset)
+            assertEquals(
+                values[i],
+                NumericUtils.sortableBytesToLong(encoded[i].bytes, encoded[i].offset),
+                "forward and back conversion should generate same long"
+            )
+        }
+
+        for (i in 1 until encoded.size) {
+            assertTrue(encoded[i - 1].compareTo(encoded[i]) < 0, "check sort order")
         }
     }
 }
