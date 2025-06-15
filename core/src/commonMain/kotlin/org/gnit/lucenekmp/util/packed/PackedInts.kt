@@ -320,12 +320,14 @@ object PackedInts {
             destPos += written
             remaining -= written
             /*java.lang.System.arraycopy(buf, written, buf, 0, remaining)*/
-            buf.copyInto(
-                destination = buf,
-                destinationOffset = 0,
-                startIndex = written,
-                endIndex = remaining
-            )
+            if (remaining > 0) {
+                buf.copyInto(
+                    destination = buf,
+                    destinationOffset = 0,
+                    startIndex = written,
+                    endIndex = written + remaining
+                )
+            }
         }
     }
 

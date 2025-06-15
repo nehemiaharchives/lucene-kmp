@@ -104,6 +104,47 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
+    fun testRandomBulkCopy() {
+        val rnd = random()
+        val numIters = atLeast(rnd, 3)
+        repeat(numIters) {
+            val valueCount = if (LuceneTestCase.TEST_NIGHTLY) atLeast(rnd, 100000) else atLeast(rnd, 10000)
+            var bits1 = TestUtil.nextInt(rnd, 1, 64)
+            var bits2 = TestUtil.nextInt(rnd, 1, 64)
+            if (bits1 > bits2) {
+                val tmp = bits1
+                bits1 = bits2
+                bits2 = tmp
+            }
+            val packed1 = PackedInts.getMutable(valueCount, bits1, PackedInts.COMPACT)
+            val packed2 = PackedInts.getMutable(valueCount, bits2, PackedInts.COMPACT)
+            val maxValue = PackedInts.maxValue(bits1)
+            for (i in 0 until valueCount) {
+                val v = nextLong(rnd, 0, maxValue)
+                packed1.set(i, v)
+                packed2.set(i, v)
+            }
+            val buffer = LongArray(valueCount)
+            repeat(20) {
+                val start = rnd.nextInt(valueCount - 1)
+                val len = TestUtil.nextInt(rnd, 1, valueCount - start)
+                val offset = if (len == valueCount) 0 else rnd.nextInt(valueCount - len)
+                if (rnd.nextBoolean()) {
+                    val got = packed1.get(start, buffer, offset, len)
+                    assertTrue(got <= len)
+                    val sot = packed2.set(start, buffer, offset, got)
+                    assertTrue(sot <= got)
+                } else {
+                    PackedInts.copy(packed1, offset, packed2, offset, len, rnd.nextInt(10 * len))
+                }
+            }
+            for (i in 0 until valueCount) {
+                assertEquals(packed1.get(i), packed2.get(i), "value $i")
+            }
+        }
+    }
+
+    @Test
     @Ignore
     fun testFill() {
         val valueCount = 1111
