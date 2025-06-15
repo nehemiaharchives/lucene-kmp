@@ -19,6 +19,9 @@ package org.gnit.lucenekmp.util.packed
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.RamUsageTester
+import org.gnit.lucenekmp.store.ByteArrayDataInput
+import org.gnit.lucenekmp.store.ByteArrayDataOutput
+import org.gnit.lucenekmp.util.LongsRef
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.Ignore
@@ -68,6 +71,124 @@ class TestPackedInts : LuceneTestCase() {
         assertEquals(255, PackedInts.maxValue(8), "8 bit -> max == 255")
         assertEquals(Long.MAX_VALUE, PackedInts.maxValue(63), "63 bit -> max == Long.MAX_VALUE")
         assertEquals(Long.MAX_VALUE, PackedInts.maxValue(64), "64 bit -> max == Long.MAX_VALUE (same as for 63 bit)")
+    }
+
+    @Test
+    fun testPackedInts() {
+        val iters = atLeast(3)
+        repeat(iters) {
+            for (nbits in 1..64) {
+                val maxValue = PackedInts.maxValue(nbits)
+                val valueCount = TestUtil.nextInt(random(), 1, 600)
+                val bufferSize = if (random().nextBoolean()) {
+                    TestUtil.nextInt(random(), 0, 48)
+                } else {
+                    TestUtil.nextInt(random(), 0, 4096)
+                }
+
+                val byteCount = PackedInts.Format.PACKED.byteCount(
+                    PackedInts.VERSION_CURRENT,
+                    valueCount,
+                    nbits
+                ).toInt()
+                val bytes = ByteArray(byteCount)
+                val out = ByteArrayDataOutput(bytes)
+                val mem = random().nextInt(2 * PackedInts.DEFAULT_BUFFER_SIZE)
+                val writer = PackedInts.getWriterNoHeader(
+                    out,
+                    PackedInts.Format.PACKED,
+                    valueCount,
+                    nbits,
+                    mem
+                )
+                val start = out.position
+                val actualValueCount = if (random().nextBoolean()) {
+                    valueCount
+                } else {
+                    TestUtil.nextInt(random(), 0, valueCount)
+                }
+                val values = LongArray(valueCount)
+                for (i in 0 until actualValueCount) {
+                    val v = if (nbits == 64) random().nextLong() else nextLong(random(), 0, maxValue)
+                    values[i] = v
+                    writer.add(v)
+                }
+                writer.finish()
+                val fp = out.position
+                val expectedBytes = PackedInts.Format.PACKED.byteCount(
+                    PackedInts.VERSION_CURRENT,
+                    valueCount,
+                    nbits
+                )
+                assertEquals(expectedBytes, (fp - start).toLong())
+
+                // reader iterator next
+                val input1 = ByteArrayDataInput(bytes, 0, fp)
+                val r1 = PackedInts.getReaderIteratorNoHeader(
+                    input1,
+                    PackedInts.Format.PACKED,
+                    PackedInts.VERSION_CURRENT,
+                    valueCount,
+                    nbits,
+                    bufferSize
+                )
+                for (i in 0 until valueCount) {
+                    val msg = "index=$i valueCount=$valueCount nbits=$nbits for ${r1::class.simpleName}"
+                    assertEquals(values[i], r1.next(), msg)
+                    assertEquals(i, r1.ord())
+                }
+                assertEquals(fp.toLong(), input1.position.toLong())
+
+                // reader iterator bulk next
+                val input2 = ByteArrayDataInput(bytes, 0, fp)
+                val r2 = PackedInts.getReaderIteratorNoHeader(
+                    input2,
+                    PackedInts.Format.PACKED,
+                    PackedInts.VERSION_CURRENT,
+                    valueCount,
+                    nbits,
+                    bufferSize
+                )
+                var i = 0
+                while (i < valueCount) {
+                    val count = TestUtil.nextInt(random(), 1, 95)
+                    val next = r2.next(count)
+                    for (k in 0 until next.length) {
+                        val msg = "index=${i + k} valueCount=$valueCount nbits=$nbits for ${r2::class.simpleName}"
+                        assertEquals(values[i + k], next.longs[next.offset + k], msg)
+                    }
+                    i += next.length
+                }
+                assertEquals(fp.toLong(), input2.position.toLong())
+            }
+        }
+    }
+
+    @Test
+    fun testEndPointer() {
+        val valueCount = TestUtil.nextInt(random(), 1, 1000)
+        for (version in PackedInts.VERSION_START..PackedInts.VERSION_CURRENT) {
+            for (bpv in 1..64) {
+                for (format in PackedInts.Format.values()) {
+                    if (format != PackedInts.Format.PACKED) continue
+                    if (!format.isSupported(bpv)) continue
+                    val byteCount = format.byteCount(version, valueCount, bpv)
+                    val bytes = ByteArray(byteCount.toInt())
+                    val input = ByteArrayDataInput(bytes)
+                    val msg = "format=$format,version=$version,valueCount=$valueCount,bpv=$bpv"
+                    val iterator = PackedInts.getReaderIteratorNoHeader(
+                        input,
+                        format,
+                        version,
+                        valueCount,
+                        bpv,
+                        TestUtil.nextInt(random(), 1, 1 shl 16)
+                    )
+                    repeat(valueCount) { iterator.next() }
+                    assertEquals(byteCount, input.position.toLong(), msg)
+                }
+            }
+        }
     }
 
     @Test
