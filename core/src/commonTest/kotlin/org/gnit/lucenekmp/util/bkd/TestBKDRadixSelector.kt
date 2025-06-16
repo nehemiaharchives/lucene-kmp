@@ -339,7 +339,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         dir.close()
     }
 
-    @Ignore
     @Test
     fun testRandomLastByteTwoValues() {
         val values = random().nextInt(15000) + 1
