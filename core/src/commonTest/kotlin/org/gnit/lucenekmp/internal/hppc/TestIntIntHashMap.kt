@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.random.Random
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 
@@ -189,6 +190,30 @@ class TestIntIntHashMap : LuceneTestCase() {
 
         assertTrue(map.containsKey(key1))
         assertEquals(value1, map.get(key1))
+    }
+
+    @Test
+    fun testPutOverExistingKey() {
+        map.put(key1, value1)
+        assertEquals(value1, map.put(key1, value3))
+        assertEquals(value3, map.get(key1))
+    }
+
+    @Test
+    fun testPutWithExpansions() {
+        val count = 10000
+        val rnd = Random(random().nextLong())
+        val values = HashSet<Int>()
+        for (i in 0 until count) {
+            val v = rnd.nextInt()
+            val hadKey = values.contains(cast(v))
+            values.add(cast(v))
+
+            assertEquals(hadKey, map.containsKey(cast(v)))
+            map.put(cast(v), vcast(v))
+            assertEquals(values.size, map.size())
+        }
+        assertEquals(values.size, map.size())
     }
 }
 
