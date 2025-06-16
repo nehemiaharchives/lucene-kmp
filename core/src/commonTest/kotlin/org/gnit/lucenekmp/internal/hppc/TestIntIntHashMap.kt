@@ -170,5 +170,25 @@ class TestIntIntHashMap : LuceneTestCase() {
         assertEquals(map.get(key2), map2.get(key2))
         assertEquals(map.get(key3), map2.get(key3))
     }
+
+    @Test
+    fun testGetOrDefault() {
+        map.put(key2, value2)
+        assertTrue(map.containsKey(key2))
+
+        map.put(key1, value1)
+        assertEquals(value1, map.getOrDefault(key1, value3))
+        assertEquals(value3, map.getOrDefault(key3, value3))
+        map.remove(key1)
+        assertEquals(value3, map.getOrDefault(key1, value3))
+    }
+
+    @Test
+    fun testPut() {
+        map.put(key1, value1)
+
+        assertTrue(map.containsKey(key1))
+        assertEquals(value1, map.get(key1))
+    }
 }
 
