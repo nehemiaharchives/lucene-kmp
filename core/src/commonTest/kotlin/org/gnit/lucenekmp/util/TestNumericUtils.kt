@@ -203,4 +203,80 @@ class TestNumericUtils : LuceneTestCase() {
             assertTrue(encoded[i - 1].compareTo(encoded[i]) < 0, "check sort order")
         }
     }
+
+    /**
+     * check various sorted values of doubles (including extreme values) check for
+     * correct ordering of the encoded bytes and that values round-trip.
+     */
+    @Test
+    fun testDoubles() {
+        val values = doubleArrayOf(
+            Double.NEGATIVE_INFINITY,
+            -2.3E25,
+            -1.0E15,
+            -1.0,
+            -1.0E-1,
+            -1.0E-2,
+            -0.0,
+            +0.0,
+            1.0E-2,
+            1.0E-1,
+            1.0,
+            1.0E15,
+            2.3E25,
+            Double.POSITIVE_INFINITY,
+            Double.NaN
+        )
+        val encoded = LongArray(values.size)
+
+        for (i in values.indices) {
+            encoded[i] = NumericUtils.doubleToSortableLong(values[i])
+            assertTrue(
+                values[i].compareTo(NumericUtils.sortableLongToDouble(encoded[i])) == 0,
+                "forward and back conversion should generate same double"
+            )
+        }
+
+        for (i in 1 until encoded.size) {
+            assertTrue(encoded[i - 1] < encoded[i], "check sort order")
+        }
+    }
+
+    /**
+     * check various sorted values of floats (including extreme values) check for
+     * correct ordering of the encoded bytes and that values round-trip.
+     */
+    @Test
+    fun testFloats() {
+        val values = floatArrayOf(
+            Float.NEGATIVE_INFINITY,
+            -2.3E25f,
+            -1.0E15f,
+            -1.0f,
+            -1.0E-1f,
+            -1.0E-2f,
+            -0.0f,
+            +0.0f,
+            1.0E-2f,
+            1.0E-1f,
+            1.0f,
+            1.0E15f,
+            2.3E25f,
+            Float.POSITIVE_INFINITY,
+            Float.NaN
+        )
+        val encoded = IntArray(values.size)
+
+        for (i in values.indices) {
+            encoded[i] = NumericUtils.floatToSortableInt(values[i])
+            assertTrue(
+                values[i].compareTo(NumericUtils.sortableIntToFloat(encoded[i])) == 0,
+                "forward and back conversion should generate same float"
+            )
+        }
+
+        for (i in 1 until encoded.size) {
+            assertTrue(encoded[i - 1] < encoded[i], "check sort order")
+        }
+    }
 }
