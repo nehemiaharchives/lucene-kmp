@@ -13,6 +13,8 @@ import org.gnit.lucenekmp.util.automaton.MinimizationOperations
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.automaton.UTF32ToUTF8
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.IntsRefBuilder
 import org.gnit.lucenekmp.util.fst.Util
@@ -21,6 +23,7 @@ import org.gnit.lucenekmp.util.automaton.TooComplexToDeterminizeException
 import org.gnit.lucenekmp.util.automaton.RegExp
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.random.Random
     class TestAutomaton {
     fun testBasic() {
         val a = Automaton()
@@ -550,6 +553,143 @@ import kotlin.test.assertNull
     fun testRandomFinite() {
         // depends on complex random operations
     }
+
+    @Test
+    fun testMakeBinaryIntervalFiniteCasesBasic() {
+        val zeros = ByteArray(3)
+        var a = makeBinaryInterval(
+            LuceneTestCase.newBytesRef(zeros, 0, 1), true,
+            LuceneTestCase.newBytesRef(zeros, 0, 2), true
+        )
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(AutomatonTestUtil.isFinite(a))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef()))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 1)))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 2)))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 3)))
+
+        a = makeBinaryInterval(
+            LuceneTestCase.newBytesRef(), true,
+            LuceneTestCase.newBytesRef(zeros, 0, 2), true
+        )
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(AutomatonTestUtil.isFinite(a))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef()))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 1)))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 2)))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 3)))
+
+        a = makeBinaryInterval(
+            LuceneTestCase.newBytesRef(), false,
+            LuceneTestCase.newBytesRef(zeros, 0, 2), true
+        )
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(AutomatonTestUtil.isFinite(a))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef()))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 1)))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 2)))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 3)))
+
+        a = makeBinaryInterval(
+            LuceneTestCase.newBytesRef(zeros, 0, 1), false,
+            LuceneTestCase.newBytesRef(zeros, 0, 2), true
+        )
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(AutomatonTestUtil.isFinite(a))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef()))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 1)))
+        assertTrue(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 2)))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 3)))
+
+        a = makeBinaryInterval(
+            LuceneTestCase.newBytesRef(zeros, 0, 1), false,
+            LuceneTestCase.newBytesRef(zeros, 0, 2), false
+        )
+        AutomatonTestUtil.assertMinimalDFA(a)
+        assertTrue(AutomatonTestUtil.isFinite(a))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef()))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 1)))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 2)))
+        assertFalse(accepts(a, LuceneTestCase.newBytesRef(zeros, 0, 3)))
+    }
+
+    @Test
+    fun testMakeBinaryIntervalFiniteCasesRandom() {
+        val random = LuceneTestCase.random()
+        val iters = LuceneTestCase.atLeast(100)
+        for (iter in 0 until iters) {
+            val prefix = LuceneTestCase.newBytesRef(TestUtil.randomUnicodeString(random))
+            var b = BytesRefBuilder()
+            b.append(prefix)
+            var numZeros = random.nextInt(10)
+            repeat(numZeros) { b.append(0) }
+            val minTerm = b.toBytesRef()
+
+            b = BytesRefBuilder()
+            b.append(minTerm)
+            numZeros = random.nextInt(10)
+            repeat(numZeros) { b.append(0) }
+            val maxTerm = b.toBytesRef()
+
+            val minInclusive = random.nextBoolean()
+            val maxInclusive = random.nextBoolean()
+            val a = makeBinaryInterval(minTerm, minInclusive, maxTerm, maxInclusive)
+            assertTrue(AutomatonTestUtil.isFinite(a))
+            var expectedCount = maxTerm.length - minTerm.length + 1
+            if (!minInclusive) expectedCount--
+            if (!maxInclusive) expectedCount--
+            if (expectedCount <= 0) {
+                assertTrue(Operations.isEmpty(a))
+                continue
+            } else {
+                assertEquals(expectedCount, AutomatonTestUtil.getFiniteStrings(a).size)
+            }
+
+            b = BytesRefBuilder()
+            b.append(minTerm)
+            if (!minInclusive) {
+                assertFalse(accepts(a, b.toBytesRef()))
+                b.append(0)
+            }
+            while (b.length() < maxTerm.length) {
+                b.append(0)
+                val expected = if (b.length() == maxTerm.length) maxInclusive else true
+                assertEquals(expected, accepts(a, b.toBytesRef()))
+            }
+        }
+    }
+
+    @Test
+    fun testMakeBinaryIntervalRandom() {
+        val random = LuceneTestCase.random()
+        val iters = LuceneTestCase.atLeast(100)
+        for (iter in 0 until iters) {
+            val minTerm = randomBinaryTerm(random)
+            val minInclusive = random.nextBoolean()
+            val maxTerm = randomBinaryTerm(random)
+            val maxInclusive = random.nextBoolean()
+
+            val a = makeBinaryInterval(minTerm, minInclusive, maxTerm, maxInclusive)
+
+            for (iter2 in 0 until 500) {
+                val term = randomBinaryTerm(random)
+                val minCmp = minTerm.compareTo(term)
+                val maxCmp = maxTerm.compareTo(term)
+
+                val expected = when {
+                    minCmp > 0 || maxCmp < 0 -> false
+                    minCmp == 0 && maxCmp == 0 -> minInclusive && maxInclusive
+                    minCmp == 0 -> minInclusive
+                    maxCmp == 0 -> maxInclusive
+                    else -> true
+                }
+
+                val intsBuilder = IntsRefBuilder()
+                Util.toIntsRef(term, intsBuilder)
+                assertEquals(expected, Operations.run(a, intsBuilder.toIntsRef()))
+            }
+        }
+    }
     @Test
     fun testMakeBinaryIntervalBasic() {
         val a = Automata.makeBinaryInterval(LuceneTestCase.newBytesRef("bar"), true, LuceneTestCase.newBytesRef("foo"), true)
@@ -786,6 +926,31 @@ import kotlin.test.assertNull
     Util.toIntsRef(LuceneTestCase.newBytesRef(s), builder)
     return builder.toIntsRef()
 }
+
+    private fun accepts(a: Automaton, b: BytesRef): Boolean {
+        val builder = IntsRefBuilder()
+        Util.toIntsRef(b, builder)
+        return Operations.run(a, builder.toIntsRef())
+    }
+
+    private fun makeBinaryInterval(
+        minTerm: BytesRef?, minInclusive: Boolean,
+        maxTerm: BytesRef?, maxInclusive: Boolean
+    ): Automaton {
+        val a = Automata.makeBinaryInterval(minTerm, minInclusive, maxTerm, maxInclusive)
+        val minA = MinimizationOperations.minimize(a, Int.MAX_VALUE)
+        if (minA.numStates != a.numStates) {
+            assertTrue(minA.numStates < a.numStates)
+            kotlin.test.fail("automaton was not minimal")
+        }
+        return a
+    }
+
+    private fun randomBinaryTerm(random: Random, length: Int = random.nextInt(15)): BytesRef {
+        val bytes = ByteArray(length)
+        random.nextBytes(bytes)
+        return BytesRef(bytes)
+    }
     }
 
 }

@@ -396,8 +396,9 @@ object Util {
     /** Just takes unsigned byte values from the BytesRef and converts into an IntsRef.  */
     fun toIntsRef(input: BytesRef, scratch: IntsRefBuilder): IntsRef {
         scratch.growNoCopy(input.length)
-        for (i in 0..<input.length) {
-            scratch.setIntAt(i, (input.bytes[i + input.offset] and 0xFF.toByte()).toInt())
+        for (i in 0 until input.length) {
+            val value = input.bytes[i + input.offset].toInt() and 0xFF
+            scratch.setIntAt(i, value)
         }
         scratch.setLength(input.length)
         return scratch.get()
