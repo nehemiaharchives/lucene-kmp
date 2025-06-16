@@ -285,6 +285,54 @@ class TestLongObjectHashMap : LuceneTestCase() {
         assertEquals(counted, map.size())
     }
 
+    @Test
+    fun testClear() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value1)
+        map.clear()
+        assertEquals(0, map.size())
+
+        assertEquals(null, map.put(key1, value1))
+        assertEquals(null, map.remove(key2))
+        map.clear()
+
+        testPutWithExpansions()
+    }
+
+    @Test
+    fun testRelease() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value1)
+        map.release()
+        assertEquals(0, map.size())
+
+        testPutWithExpansions()
+    }
+
+    @Test
+    fun testIterable() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value3)
+        map.remove(key2)
+
+        var count = 0
+        for (cursor in map) {
+            count++
+            assertTrue(map.containsKey(cursor.key))
+            assertEquals(cursor.value, map.get(cursor.key))
+            assertEquals(cursor.value, map.values!![cursor.index])
+            assertEquals(cursor.key, map.keys!![cursor.index])
+        }
+        assertEquals(count, map.size())
+
+        map.clear()
+        assertFalse(map.iterator().hasNext())
+    }
+
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
