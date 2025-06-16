@@ -299,7 +299,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         dir.close()
     }
 
-    @Ignore
     @Test
     fun testRandomBinaryTiny() {
         doTestRandomBinary(10)
