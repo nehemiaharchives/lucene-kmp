@@ -22,6 +22,12 @@ import org.gnit.lucenekmp.tests.util.RamUsageTester
 import org.gnit.lucenekmp.store.ByteArrayDataInput
 import org.gnit.lucenekmp.store.ByteArrayDataOutput
 import org.gnit.lucenekmp.util.LongsRef
+import org.gnit.lucenekmp.util.ArrayUtil
+import org.gnit.lucenekmp.jdkport.ByteBuffer
+import org.gnit.lucenekmp.jdkport.LongBuffer
+import org.gnit.lucenekmp.util.packed.PagedGrowableWriter
+import org.gnit.lucenekmp.util.packed.PagedMutable
+import org.gnit.lucenekmp.util.packed.PackedLongValues
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.Ignore
@@ -431,6 +437,211 @@ class TestPackedInts : LuceneTestCase() {
         assertEquals(RamUsageTester.ramUsed(wrt), wrt.ramBytesUsed())
     }
 
+    @Test
+    @Ignore("See LUCENE-4488")
+    fun testIntOverflow() {
+        val index = (1 shl 30) + 1
+        val bits = 2
+        var p64: Packed64? = null
+        try {
+            p64 = Packed64(index, bits)
+        } catch (_: OutOfMemoryError) {
+        }
+        if (p64 != null) {
+            p64.set(index - 1, 1)
+            assertEquals(1L, p64.get(index - 1), "The value at position ${index - 1} should be correct for Packed64")
+            p64 = null
+        }
+        var p64sb: Packed64SingleBlock? = null
+        try {
+            p64sb = Packed64SingleBlock.create(index, bits)
+        } catch (_: OutOfMemoryError) {
+        }
+        if (p64sb != null) {
+            p64sb.set(index - 1, 1)
+            assertEquals(1L, p64sb.get(index - 1), "The value at position ${index - 1} should be correct for ${p64sb::class.simpleName}")
+        }
+    }
+
+    @Test
+    fun testPagedGrowableWriter() {
+        val rnd = random()
+        val pageSize = 1 shl TestUtil.nextInt(rnd, 6, 30)
+        var writer = PagedGrowableWriter(0, pageSize, TestUtil.nextInt(rnd, 1, 64), rnd.nextFloat())
+        assertEquals(0L, writer.size())
+
+        val buf = PackedLongValues.deltaPackedBuilder(rnd.nextFloat())
+        val size = if (LuceneTestCase.TEST_NIGHTLY) rnd.nextInt(1_000_000) else rnd.nextInt(100_000)
+        var max = 5L
+        for (i in 0 until size) {
+            buf.add(nextLong(rnd, 0, max))
+            if (TestUtil.rarely(rnd)) {
+                max = PackedInts.maxValue(
+                    if (TestUtil.rarely(rnd)) TestUtil.nextInt(rnd, 0, 63) else TestUtil.nextInt(rnd, 0, 31)
+                )
+            }
+        }
+        writer = PagedGrowableWriter(size.toLong(), pageSize, TestUtil.nextInt(rnd, 1, 64), rnd.nextFloat())
+        assertEquals(size.toLong(), writer.size())
+        val values = buf.build()
+        for (i in size - 1 downTo 0) {
+            writer.set(i.toLong(), values.get(i.toLong()))
+        }
+        for (i in 0 until size) {
+            assertEquals(values.get(i.toLong()), writer.get(i.toLong()))
+        }
+        assertEquals(RamUsageTester.ramUsed(writer), writer.ramBytesUsed())
+
+        val copySize = nextLong(rnd, writer.size() / 2, writer.size() * 3 / 2)
+        val copy = writer.resize(copySize)
+        for (i in 0 until copy.size()) {
+            if (i < writer.size()) {
+                assertEquals(writer.get(i), copy.get(i))
+            } else {
+                assertEquals(0L, copy.get(i))
+            }
+        }
+
+        val growSize = nextLong(rnd, writer.size() / 2, writer.size() * 3 / 2)
+        val grow = writer.grow(growSize)
+        for (i in 0 until grow.size()) {
+            if (i < writer.size()) {
+                assertEquals(writer.get(i), grow.get(i))
+            } else {
+                assertEquals(0L, grow.get(i))
+            }
+        }
+    }
+
+    @Test
+    fun testPagedMutable() {
+        val rnd = random()
+        val bitsPerValue = TestUtil.nextInt(rnd, 1, 64)
+        val max = PackedInts.maxValue(bitsPerValue)
+        val pageSize = 1 shl TestUtil.nextInt(rnd, 6, 30)
+        var writer = PagedMutable(0, pageSize, bitsPerValue, rnd.nextFloat() / 2)
+        assertEquals(0L, writer.size())
+
+        val buf = PackedLongValues.deltaPackedBuilder(rnd.nextFloat())
+        val size = if (LuceneTestCase.TEST_NIGHTLY) rnd.nextInt(1_000_000) else rnd.nextInt(100_000)
+        for (i in 0 until size) {
+            val v = if (bitsPerValue == 64) rnd.nextLong() else nextLong(rnd, 0, max)
+            buf.add(v)
+        }
+        writer = PagedMutable(size.toLong(), pageSize, bitsPerValue, rnd.nextFloat())
+        assertEquals(size.toLong(), writer.size())
+        val values = buf.build()
+        for (i in size - 1 downTo 0) {
+            writer.set(i.toLong(), values.get(i.toLong()))
+        }
+        for (i in 0 until size) {
+            assertEquals(values.get(i.toLong()), writer.get(i.toLong()))
+        }
+        assertEquals(RamUsageTester.ramUsed(writer) - RamUsageTester.ramUsed(writer.format), writer.ramBytesUsed())
+
+        val copySize = nextLong(rnd, writer.size() / 2, writer.size() * 3 / 2)
+        val copy = writer.resize(copySize)
+        for (i in 0 until copy.size()) {
+            if (i < writer.size()) {
+                assertEquals(writer.get(i), copy.get(i))
+            } else {
+                assertEquals(0L, copy.get(i))
+            }
+        }
+
+        val growSize = nextLong(rnd, writer.size() / 2, writer.size() * 3 / 2)
+        val grow = writer.grow(growSize)
+        for (i in 0 until grow.size()) {
+            if (i < writer.size()) {
+                assertEquals(writer.get(i), grow.get(i))
+            } else {
+                assertEquals(0L, grow.get(i))
+            }
+        }
+    }
+
+    @Test
+    fun testEncodeDecode() {
+        for (format in PackedInts.Format.values()) {
+            for (bpv in 1..64) {
+                if (!format.isSupported(bpv)) continue
+                val msg = "$format $bpv"
+                val encoder = PackedInts.getEncoder(format, PackedInts.VERSION_CURRENT, bpv)
+                val decoder = PackedInts.getDecoder(format, PackedInts.VERSION_CURRENT, bpv)
+                val longBlockCount = encoder.longBlockCount()
+                val longValueCount = encoder.longValueCount()
+                val byteBlockCount = encoder.byteBlockCount()
+                val byteValueCount = encoder.byteValueCount()
+                assertEquals(longBlockCount, decoder.longBlockCount())
+                assertEquals(longValueCount, decoder.longValueCount())
+                assertEquals(byteBlockCount, decoder.byteBlockCount())
+                assertEquals(byteValueCount, decoder.byteValueCount())
+
+                val longIterations = random().nextInt(100)
+                val byteIterations = longIterations * longValueCount / byteValueCount
+                assertEquals(longIterations * longValueCount, byteIterations * byteValueCount)
+                val blocksOffset = random().nextInt(100)
+                val valuesOffset = random().nextInt(100)
+                val blocksOffset2 = random().nextInt(100)
+                val blocksLen = longIterations * longBlockCount
+
+                val blocks = LongArray(blocksOffset + blocksLen) { random().nextLong() }
+                if (format == PackedInts.Format.PACKED_SINGLE_BLOCK && 64 % bpv != 0) {
+                    val toClear = 64 % bpv
+                    for (i in blocks.indices) {
+                        blocks[i] = (blocks[i] shl toClear) ushr toClear
+                    }
+                }
+
+                val values = LongArray(valuesOffset + longIterations * longValueCount)
+                decoder.decode(blocks, blocksOffset, values, valuesOffset, longIterations)
+                for (value in values) {
+                    assertTrue(value <= PackedInts.maxValue(bpv))
+                }
+                val intValues: IntArray? = if (bpv <= 32) {
+                    IntArray(values.size).also { decoder.decode(blocks, blocksOffset, it, valuesOffset, longIterations); assertTrue(equals(it, values)) }
+                } else null
+
+                val blocks2 = LongArray(blocksOffset2 + blocksLen)
+                encoder.encode(values, valuesOffset, blocks2, blocksOffset2, longIterations)
+                assertContentEquals(
+                    ArrayUtil.copyOfSubArray(blocks, blocksOffset, blocks.size),
+                    ArrayUtil.copyOfSubArray(blocks2, blocksOffset2, blocks2.size),
+                    msg
+                )
+                if (bpv <= 32) {
+                    val blocks3 = LongArray(blocks2.size)
+                    encoder.encode(intValues!!, valuesOffset, blocks3, blocksOffset2, longIterations)
+                    assertContentEquals(blocks2, blocks3, msg)
+                }
+
+                val byteBlocks = ByteArray(8 * blocks.size)
+                val bb = ByteBuffer.wrap(byteBlocks)
+                for (b in blocks) bb.putLong(b)
+                val values2 = LongArray(valuesOffset + longIterations * longValueCount)
+                decoder.decode(byteBlocks, blocksOffset * 8, values2, valuesOffset, byteIterations)
+                for (value in values2) {
+                    assertTrue(value <= PackedInts.maxValue(bpv), msg)
+                }
+                assertContentEquals(values, values2, msg)
+                if (bpv <= 32) {
+                    val intValues2 = IntArray(values2.size)
+                    decoder.decode(byteBlocks, blocksOffset * 8, intValues2, valuesOffset, byteIterations)
+                    assertTrue(equals(intValues2, values2), msg)
+                }
+
+                val blocks3 = ByteArray(8 * (blocksOffset2 + blocksLen))
+                encoder.encode(values, valuesOffset, blocks3, 8 * blocksOffset2, byteIterations)
+                assertEquals(LongBuffer.wrap(blocks2), ByteBuffer.wrap(blocks3).asLongBuffer(), msg)
+                if (bpv <= 32) {
+                    val blocks4 = ByteArray(blocks3.size)
+                    encoder.encode(intValues!!, valuesOffset, blocks4, 8 * blocksOffset2, byteIterations)
+                    assertContentEquals(blocks3, blocks4, msg)
+                }
+            }
+        }
+    }
+
     // helper methods ---------------------------------------------------------
 
     private fun createPackedInts(valueCount: Int, bitsPerValue: Int): List<PackedInts.Mutable> {
@@ -479,6 +690,14 @@ class TestPackedInts : LuceneTestCase() {
                 assertEquals(base.get(i), packedInts[j].get(i), msg)
             }
         }
+    }
+
+    private fun equals(ints: IntArray, longs: LongArray): Boolean {
+        if (ints.size != longs.size) return false
+        for (i in ints.indices) {
+            if ((ints[i].toLong() and 0xFFFFFFFFL) != longs[i]) return false
+        }
+        return true
     }
 
     private fun nextLong(r: Random, start: Long, end: Long): Long {
