@@ -18,7 +18,7 @@ class TestIntObjectHashMap : LuceneTestCase() {
     }
 
     @Test
-    fun testPutAndGet() {
+    fun testPut() {
         map.put(1, "one")
         assertTrue(map.containsKey(1))
         assertEquals("one", map.get(1))
@@ -108,6 +108,38 @@ class TestIntObjectHashMap : LuceneTestCase() {
 
         val clone = IntObjectHashMap<Any?>(map)
         assertSameMap(map, clone)
+    }
+
+    @Test
+    fun testFromArrays() {
+        map.put(1, 1)
+        map.put(2, 2)
+        map.put(3, 3)
+
+        val keys = intArrayOf(1, 2, 3)
+        val values = arrayOf<Any?>(1, 2, 3)
+        val map2 = IntObjectHashMap.from(keys, values)
+        assertSameMap(map, map2)
+    }
+
+    @Test
+    fun testGetOrDefault() {
+        map.put(2, 2)
+        assertTrue(map.containsKey(2))
+
+        map.put(1, 1)
+        assertEquals(1, map.getOrDefault(1, 3))
+        assertEquals(3, map.getOrDefault(3, 3))
+        map.remove(1)
+        assertEquals(3, map.getOrDefault(1, 3))
+    }
+
+    @Test
+    fun testNullValue() {
+        map.put(1, null)
+
+        assertTrue(map.containsKey(1))
+        assertNull(map.get(1))
     }
 
     private fun assertSameMap(c1: IntObjectHashMap<Any?>, c2: IntObjectHashMap<Any?>) {
