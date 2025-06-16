@@ -519,6 +519,27 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
+    fun testPagedGrowableWriterOverflow() {
+        val size = nextLong(random(), 2L * Int.MAX_VALUE, 3L * Int.MAX_VALUE)
+        val pageSize = 1 shl TestUtil.nextInt(random(), 16, 30)
+        val writer = PagedGrowableWriter(size, pageSize, 1, random().nextFloat(), false)
+        val index = nextLong(random(), Int.MAX_VALUE.toLong(), size - 1)
+        val pageIdx = writer.pageIndex(index)
+        val valueCount = if (pageIdx == writer.subMutables.size - 1) writer.lastPageSize(size) else writer.pageSize()
+        writer.subMutables[pageIdx] = GrowableWriter(1, valueCount, writer.acceptableOverheadRatio)
+        writer.set(index, 2)
+        assertEquals(2L, writer.get(index))
+        repeat(1000) {
+            val idx = nextLong(random(), 0, size)
+            val pIdx = writer.pageIndex(idx)
+            val sub = writer.subMutables[pIdx]
+            val value = sub?.get(writer.indexInPage(idx)) ?: 0L
+            val expected = if (idx == index) 2L else 0L
+            assertEquals(expected, value)
+        }
+    }
+
+    @Test
     fun testPagedMutable() {
         val rnd = random()
         val bitsPerValue = TestUtil.nextInt(rnd, 1, 64)
