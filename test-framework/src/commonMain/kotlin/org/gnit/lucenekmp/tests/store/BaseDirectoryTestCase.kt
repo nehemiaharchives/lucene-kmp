@@ -9,14 +9,22 @@ import okio.FileNotFoundException
 import org.gnit.lucenekmp.index.DirectoryReader
 import org.gnit.lucenekmp.index.IndexNotFoundException
 import org.gnit.lucenekmp.store.FSDirectory
+import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.jdkport.FileAlreadyExistsException
+import org.gnit.lucenekmp.store.FilterDirectory
+import org.gnit.lucenekmp.store.MMapDirectory
+import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.util.packed.PackedInts
+import org.gnit.lucenekmp.util.GroupVIntUtil
+import org.gnit.lucenekmp.util.BitUtil
+import org.gnit.lucenekmp.util.Constants
 import org.gnit.lucenekmp.store.IOContext
 import kotlin.random.Random
 
@@ -1045,6 +1053,275 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
         }
     }
 
+    @Throws(Exception::class)
+    fun testSeekBeyondEndOfFile() {
+        newDirectory().use { dir ->
+            dir.createOutput("a", IOContext.DEFAULT).use { out ->
+                repeat(1024) { out.writeByte(0) }
+            }
+            dir.openInput("a", IOContext.DEFAULT).use { input ->
+                input.seek(100)
+                kotlin.test.assertEquals(100L, input.filePointer)
+                LuceneTestCase.expectThrows(EOFException::class) { input.seek(1025) }
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testPendingDeletions() {
+        val path = createTempDir("pending")
+        getDirectory(path).use { dir ->
+            if (dir !is FSDirectory) return
+            val fsDir = dir
+            val candidate = IndexFileNames.segmentFileName(
+                randomSimpleString(Random, 6),
+                randomSimpleString(Random),
+                "test"
+            )
+            fsDir.createOutput(candidate, IOContext.DEFAULT).use { }
+            fsDir.deleteFile(candidate)
+            kotlin.test.assertTrue(fsDir.pendingDeletions.isEmpty())
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testListAllIsSorted() {
+        newDirectory().use { dir ->
+            val count = LuceneTestCase.atLeast(20)
+            val names = mutableSetOf<String>()
+            while (names.size < count) {
+                val name = IndexFileNames.segmentFileName(
+                    randomSimpleString(Random, 6),
+                    randomSimpleString(Random),
+                    "test"
+                )
+                if (Random.nextInt(5) == 1) {
+                    dir.createTempOutput(name, "foo", IOContext.DEFAULT).use { out ->
+                        names.add(out.name)
+                    }
+                } else if (!names.contains(name)) {
+                    dir.createOutput(name, IOContext.DEFAULT).use { }
+                    names.add(name)
+                }
+            }
+            val actual = dir.listAll()
+            val expected = actual.copyOf()
+            expected.sort()
+            kotlin.test.assertContentEquals(expected, actual)
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testDataTypes() {
+        val values = longArrayOf(43, 12345, 123456, 1234567890)
+        getDirectory(createTempDir("testDataTypes")).use { dir ->
+            dir.createOutput("test", IOContext.DEFAULT).use { out ->
+                out.writeByte(43.toByte())
+                out.writeShort(12345.toShort())
+                out.writeInt(1234567890)
+                out.writeGroupVInts(values, 4)
+                out.writeLong(1234567890123456789L)
+            }
+
+            val restored = LongArray(4)
+            dir.openInput("test", IOContext.DEFAULT).use { input ->
+                kotlin.test.assertEquals(43, input.readByte().toInt())
+                kotlin.test.assertEquals(12345.toShort(), input.readShort())
+                kotlin.test.assertEquals(1234567890, input.readInt())
+                GroupVIntUtil.readGroupVInts(input, restored, 4)
+                kotlin.test.assertContentEquals(values, restored)
+                kotlin.test.assertEquals(1234567890123456789L, input.readLong())
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testGroupVIntOverflow() {
+        getDirectory(createTempDir("testGroupVIntOverflow")).use { dir ->
+            val size = 32
+            val values = LongArray(size)
+            val restore = LongArray(size)
+            values[0] = 1L shl 31
+            for (i in 0 until size) {
+                if (Random.nextBoolean()) {
+                    values[i] = values[0]
+                }
+            }
+
+            val limit = Random.nextInt(1, size)
+            val out = dir.createOutput("test", IOContext.DEFAULT)
+            out.writeGroupVInts(values, limit)
+            out.close()
+            dir.openInput("test", IOContext.DEFAULT).use { input ->
+                GroupVIntUtil.readGroupVInts(input, restore, limit)
+                for (i in 0 until limit) {
+                    kotlin.test.assertEquals(values[i], restore[i])
+                }
+            }
+
+            values[0] = 0xFFFFFFFFL + 1
+            kotlin.test.assertFailsWith<ArithmeticException> { out.writeGroupVInts(values, 4) }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testGroupVInt() {
+        getDirectory(createTempDir("testGroupVInt")).use { dir ->
+            doTestGroupVInt(dir, 5, 1, 6, 8)
+            doTestGroupVInt(dir, LuceneTestCase.atLeast(100), 1, 31, 128)
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testPrefetch() {
+        doTestPrefetch(0)
+    }
+
+    @Throws(Exception::class)
+    fun testPrefetchOnSlice() {
+        doTestPrefetch(TestUtil.nextInt(Random, 1, 1024))
+    }
+
+    @Throws(Exception::class)
+    fun testUpdateReadAdvice() {
+        getDirectory(createTempDir("testUpdateReadAdvice")).use { dir ->
+            val totalLength = TestUtil.nextInt(Random, 16384, 65536)
+            val arr = ByteArray(totalLength)
+            Random.nextBytes(arr)
+            dir.createOutput("temp.bin", IOContext.DEFAULT).use { out ->
+                out.writeBytes(arr, arr.size)
+            }
+
+            dir.openInput("temp.bin", IOContext.DEFAULT).use { orig ->
+                val input = if (Random.nextBoolean()) orig.clone() else orig
+                input.updateReadAdvice(ReadAdvice.values().random())
+                for (i in 0 until totalLength) {
+                    val offset = TestUtil.nextInt(Random, 0, input.length().toInt() - 1)
+                    input.seek(offset.toLong())
+                    kotlin.test.assertEquals(arr[offset], input.readByte())
+                }
+
+                for (i in 0 until 10_000) {
+                    val offset = TestUtil.nextInt(Random, 0, input.length().toInt() - 1)
+                    input.seek(offset.toLong())
+                    kotlin.test.assertEquals(arr[offset], input.readByte())
+                    if (Random.nextBoolean()) {
+                        input.updateReadAdvice(ReadAdvice.values().random())
+                    }
+                }
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testIsLoaded() {
+        testIsLoaded(0)
+    }
+
+    private fun doTestGroupVInt(
+        dir: Directory,
+        iterations: Int,
+        minBpv: Int,
+        maxBpv: Int,
+        maxNumValues: Int
+    ) {
+        val values = LongArray(maxNumValues)
+        val numValuesArray = IntArray(iterations)
+        val groupVIntOut = dir.createOutput("group-varint", IOContext.DEFAULT)
+        val vIntOut = dir.createOutput("vint", IOContext.DEFAULT)
+
+        for (iter in 0 until iterations) {
+            val bpv = TestUtil.nextInt(Random, minBpv, maxBpv)
+            numValuesArray[iter] = TestUtil.nextInt(Random, 1, maxNumValues)
+            for (j in 0 until numValuesArray[iter]) {
+                values[j] = Random.nextInt(0, PackedInts.maxValue(bpv).toInt() + 1).toLong()
+                vIntOut.writeVInt(values[j].toInt())
+            }
+            groupVIntOut.writeGroupVInts(values, numValuesArray[iter])
+        }
+        groupVIntOut.close()
+        vIntOut.close()
+
+        val groupVIntIn = dir.openInput("group-varint", IOContext.DEFAULT)
+        val vIntIn = dir.openInput("vint", IOContext.DEFAULT)
+        for (iter in 0 until iterations) {
+            GroupVIntUtil.readGroupVInts(groupVIntIn, values, numValuesArray[iter])
+            for (j in 0 until numValuesArray[iter]) {
+                kotlin.test.assertEquals(vIntIn.readVInt(), values[j].toInt())
+            }
+        }
+        groupVIntIn.close()
+        vIntIn.close()
+        dir.deleteFile("group-varint")
+        dir.deleteFile("vint")
+    }
+
+    private fun doTestPrefetch(startOffset: Int) {
+        newDirectory().use { dir ->
+            val totalLength = startOffset + TestUtil.nextInt(Random, 16384, 65536)
+            val arr = ByteArray(totalLength)
+            Random.nextBytes(arr)
+            dir.createOutput("temp.bin", IOContext.DEFAULT).use { out ->
+                out.writeBytes(arr, arr.size)
+            }
+            val temp = ByteArray(2048)
+
+            dir.openInput("temp.bin", IOContext.DEFAULT).use { orig ->
+                val input = if (startOffset == 0) orig.clone() else orig.slice("slice", startOffset.toLong(), (totalLength - startOffset).toLong())
+                for (i in 0 until 10_000) {
+                    val offset = TestUtil.nextInt(Random, 0, input.length().toInt() - 1)
+                    if (Random.nextBoolean()) {
+                        val prefetchLength = Random.nextLong(1, input.length() - offset.toLong() + 1)
+                        input.prefetch(offset.toLong(), prefetchLength)
+                    }
+                    input.seek(offset.toLong())
+                    kotlin.test.assertEquals(offset.toLong(), input.filePointer)
+                    when (Random.nextInt(100)) {
+                        0 -> kotlin.test.assertEquals(arr[startOffset + offset], input.readByte())
+                        1 -> if (input.length() - offset.toLong() >= Long.SIZE_BYTES) {
+                            kotlin.test.assertEquals(BitUtil.VH_LE_LONG.get(arr, startOffset + offset).toLong(), input.readLong())
+                        }
+                        else -> {
+                            val readLength = TestUtil.nextInt(Random, 1, minOf(temp.size, (input.length() - offset.toLong()).toInt()))
+                            input.readBytes(temp, 0, readLength)
+                            kotlin.test.assertContentEquals(
+                                arr.copyOfRange(startOffset + offset, startOffset + offset + readLength),
+                                temp.copyOfRange(0, readLength)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun testIsLoaded(startOffset: Int) {
+        newDirectory().use { dir ->
+            if (FilterDirectory.unwrap(dir) is MMapDirectory) {
+                (FilterDirectory.unwrap(dir) as MMapDirectory).setPreload(MMapDirectory.ALL_FILES)
+            }
+            val totalLength = startOffset + TestUtil.nextInt(Random, 16384, 65536)
+            val arr = ByteArray(totalLength)
+            Random.nextBytes(arr)
+            dir.createOutput("temp.bin", IOContext.DEFAULT).use { out ->
+                out.writeBytes(arr, arr.size)
+            }
+
+            dir.openInput("temp.bin", IOContext.DEFAULT).use { orig ->
+                val input = if (startOffset == 0) orig.clone() else orig.slice("slice", startOffset.toLong(), (totalLength - startOffset).toLong())
+                val loaded = input.isLoaded
+                if (Constants.WINDOWS) {
+                    // skip check on Windows for now
+                } else if (FilterDirectory.unwrap(dir) is MMapDirectory && !dir::class.simpleName!!.contains("DirectIO")) {
+                    kotlin.test.assertTrue(loaded.isPresent)
+                    kotlin.test.assertTrue(loaded.get() == true)
+                } else {
+                    kotlin.test.assertFalse(loaded.isPresent)
+                }
+            }
+        }
+    }
+
     protected fun assertBytes(slice: RandomAccessInput, bytes: ByteArray, bytesOffset: Int) {
         val toRead = bytes.size - bytesOffset
         for (i in 0 until toRead) {
@@ -1074,4 +1351,13 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
             kotlin.test.assertContentEquals(bytes, bytes2)
         }
     }
+
+    private fun randomSimpleString(r: Random, maxLength: Int): String {
+        val length = TestUtil.nextInt(r, 0, maxLength)
+        val sb = StringBuilder(length)
+        repeat(length) { sb.append(('a' + r.nextInt(26)).toChar()) }
+        return sb.toString()
+    }
+
+    private fun randomSimpleString(r: Random): String = randomSimpleString(r, 20)
 }
