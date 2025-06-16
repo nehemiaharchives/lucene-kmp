@@ -142,6 +142,99 @@ class TestIntObjectHashMap : LuceneTestCase() {
         assertNull(map.get(1))
     }
 
+    @Test
+    fun testPutOverExistingKey() {
+        map.put(1, 1)
+        assertEquals(1, map.put(1, 3))
+        assertEquals(3, map.get(1))
+
+        assertEquals(3, map.put(1, null))
+        assertTrue(map.containsKey(1))
+        assertNull(map.get(1))
+
+        assertNull(map.put(1, 1))
+        assertEquals(1, map.get(1))
+    }
+
+    @Test
+    fun testPutWithExpansions() {
+        val count = 10_000
+        val rnd = kotlin.random.Random(random().nextLong())
+        val values = hashSetOf<Int>()
+
+        repeat(count) {
+            val v = rnd.nextInt()
+            val hadKey = values.contains(v)
+            values.add(v)
+
+            assertEquals(hadKey, map.containsKey(v))
+            map.put(v, v)
+            assertEquals(values.size, map.size())
+        }
+        assertEquals(values.size, map.size())
+    }
+
+    @Test
+    fun testPutAll() {
+        map.put(1, 1)
+        map.put(2, 1)
+
+        val map2 = IntObjectHashMap<Any?>()
+        map2.put(2, 2)
+        map2.put(0, 1)
+
+        assertEquals(1, map.putAll(map2))
+
+        assertEquals(2, map.get(2))
+        assertEquals(1, map.get(0))
+        assertEquals(3, map.size())
+    }
+
+    @Test
+    fun testPutIfAbsent() {
+        assertTrue(map.putIfAbsent(1, 1))
+        assertFalse(map.putIfAbsent(1, 2))
+        assertEquals(1, map.get(1))
+    }
+
+    @Test
+    fun testEmptyKey() {
+        val empty = 0
+
+        map.put(empty, 1)
+        assertEquals(1, map.size())
+        assertFalse(map.isEmpty)
+        assertEquals(1, map.get(empty))
+        assertEquals(1, map.getOrDefault(empty, 2))
+        assertTrue(map.iterator().hasNext())
+        val it = map.iterator()
+        val entry = it.next()!!
+        assertEquals(empty, entry.key)
+        assertEquals(1, entry.value)
+
+        map.remove(empty)
+        assertNull(map.get(empty))
+        assertEquals(0, map.size())
+
+        map.put(empty, null)
+        assertEquals(1, map.size())
+        assertTrue(map.containsKey(empty))
+        assertNull(map.get(empty))
+
+        map.remove(empty)
+        assertEquals(0, map.size())
+        assertFalse(map.containsKey(empty))
+        assertNull(map.get(empty))
+
+        assertNull(map.put(empty, 1))
+        assertEquals(1, map.put(empty, 2))
+        map.clear()
+        assertFalse(map.indexExists(map.indexOf(empty)))
+        assertNull(map.put(empty, 1))
+        map.clear()
+        assertNull(map.remove(empty))
+    }
+
     private fun assertSameMap(c1: IntObjectHashMap<Any?>, c2: IntObjectHashMap<Any?>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
