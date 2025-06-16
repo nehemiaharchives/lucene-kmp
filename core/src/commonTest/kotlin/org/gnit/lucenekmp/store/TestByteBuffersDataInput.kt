@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.store
 
+import org.gnit.lucenekmp.tests.util.RandomizedTest
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomNumbers
 import org.gnit.lucenekmp.tests.util.TestUtil
@@ -14,7 +15,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertContentEquals
 import okio.EOFException
 
-class TestByteBuffersDataInput : LuceneTestCase() {
+class TestByteBuffersDataInput : RandomizedTest() {
 
     private fun addRandomData(out: ByteBuffersDataOutput, rnd: Random, maxAddCalls: Int): List<(ByteBuffersDataInput) -> Unit> {
         val operations = mutableListOf<(ByteBuffersDataInput) -> Unit>()
@@ -113,7 +114,7 @@ class TestByteBuffersDataInput : LuceneTestCase() {
         val out = ByteBuffersDataOutput()
         val o1 = out.toDataInput()
         assertEquals(0L, o1.length())
-        expectThrows(EOFException::class) { o1.readByte() }
+        LuceneTestCase.expectThrows(EOFException::class) { o1.readByte() }
 
         out.writeByte(1)
 
@@ -126,38 +127,38 @@ class TestByteBuffersDataInput : LuceneTestCase() {
         assertEquals(1.toByte(), o2.readByte())
         assertEquals(1L, o2.position())
         assertEquals(1.toByte(), o2.readByte(0))
-        expectThrows(EOFException::class) { o2.readByte() }
+        LuceneTestCase.expectThrows(EOFException::class) { o2.readByte() }
         assertEquals(1L, o2.position())
     }
 
     @Test
     fun testRandomReads() {
         val dst = ByteBuffersDataOutput()
-        val seed = random().nextLong()
+        val seed = LuceneTestCase.random().nextLong()
         val max = if (LuceneTestCase.TEST_NIGHTLY) 1_000 else 100
         val ops = addRandomData(dst, Random(seed), max)
         val src = dst.toDataInput()
         for (op in ops) {
             op(src)
         }
-        expectThrows(EOFException::class) { src.readByte() }
+        LuceneTestCase.expectThrows(EOFException::class) { src.readByte() }
     }
 
     @Test
     fun testRandomReadsOnSlices() {
-        repeat(RandomNumbers.randomIntBetween(random(), 1, 3)) {
+        repeat(RandomNumbers.randomIntBetween(LuceneTestCase.random(), 1, 3)) {
             val dst = ByteBuffersDataOutput()
-            val prefix = ByteArray(RandomNumbers.randomIntBetween(random(), 0, 1024 * 8))
+            val prefix = ByteArray(RandomNumbers.randomIntBetween(LuceneTestCase.random(), 0, 1024 * 8))
             dst.writeBytes(prefix)
-            val seed = random().nextLong()
+            val seed = LuceneTestCase.random().nextLong()
             val ops = addRandomData(dst, Random(seed), 50)
-            val suffix = ByteArray(RandomNumbers.randomIntBetween(random(), 0, 1024 * 8))
+            val suffix = ByteArray(RandomNumbers.randomIntBetween(LuceneTestCase.random(), 0, 1024 * 8))
             dst.writeBytes(suffix)
             val src = dst.toDataInput().slice(prefix.size.toLong(), dst.size() - prefix.size - suffix.size)
             assertEquals(0L, src.position())
             assertEquals(dst.size() - prefix.size - suffix.size, src.length())
             for (op in ops) { op(src) }
-            expectThrows(EOFException::class) { src.readByte() }
+            LuceneTestCase.expectThrows(EOFException::class) { src.readByte() }
         }
     }
 
@@ -166,21 +167,21 @@ class TestByteBuffersDataInput : LuceneTestCase() {
         val dst = ByteBuffersDataOutput()
         val input = dst.toDataInput()
         input.seek(0)
-        expectThrows(EOFException::class) { input.seek(1) }
+        LuceneTestCase.expectThrows(EOFException::class) { input.seek(1) }
         input.seek(0)
-        expectThrows(EOFException::class) { input.readByte() }
+        LuceneTestCase.expectThrows(EOFException::class) { input.readByte() }
     }
 
     @Test
     fun testSeekAndSkip() {
-        repeat(RandomNumbers.randomIntBetween(random(), 1, 3)) {
+        repeat(RandomNumbers.randomIntBetween(LuceneTestCase.random(), 1, 3)) {
             val dst = ByteBuffersDataOutput()
             var prefix = ByteArray(0)
-            if (random().nextBoolean()) {
-                prefix = ByteArray(RandomNumbers.randomIntBetween(random(), 1, 1024 * 8))
+            if (LuceneTestCase.random().nextBoolean()) {
+                prefix = ByteArray(RandomNumbers.randomIntBetween(LuceneTestCase.random(), 1, 1024 * 8))
                 dst.writeBytes(prefix)
             }
-            val seed = random().nextLong()
+            val seed = LuceneTestCase.random().nextLong()
             val ops = addRandomData(dst, Random(seed), 20)
             val input = dst.toDataInput().slice(prefix.size.toLong(), dst.size() - prefix.size)
 
@@ -193,7 +194,7 @@ class TestByteBuffersDataInput : LuceneTestCase() {
             array = ArrayUtil.copyOfSubArray(array, prefix.size, array.size)
 
             for (i in 0 until 10) {
-                val offs = RandomNumbers.randomIntBetween(random(), 0, array.size - 1)
+                val offs = RandomNumbers.randomIntBetween(LuceneTestCase.random(), 0, array.size - 1)
                 input.seek(offs.toLong())
                 assertEquals(offs.toLong(), input.position())
                 assertEquals(array[offs], input.readByte())
@@ -203,7 +204,7 @@ class TestByteBuffersDataInput : LuceneTestCase() {
             input.seek(0)
             var curr = 0
             while (curr < maxSkipTo) {
-                val skipTo = RandomNumbers.randomIntBetween(random(), curr, maxSkipTo)
+                val skipTo = RandomNumbers.randomIntBetween(LuceneTestCase.random(), curr, maxSkipTo)
                 val step = skipTo - curr
                 input.skipBytes(step.toLong())
                 assertEquals(array[skipTo], input.readByte())
@@ -212,7 +213,7 @@ class TestByteBuffersDataInput : LuceneTestCase() {
 
             input.seek(input.length())
             assertEquals(input.length(), input.position())
-            expectThrows(EOFException::class) { input.readByte() }
+            LuceneTestCase.expectThrows(EOFException::class) { input.readByte() }
         }
     }
 
@@ -222,7 +223,7 @@ class TestByteBuffersDataInput : LuceneTestCase() {
         assertEquals(0L, dst.toDataInput().slice(0, 0).length())
 
         val bytes = ByteArray(1024 * 8)
-        random().nextBytes(bytes)
+        LuceneTestCase.random().nextBytes(bytes)
         dst.writeBytes(bytes)
         val input = dst.toDataInput()
         val max = dst.size().toInt()
@@ -239,11 +240,11 @@ class TestByteBuffersDataInput : LuceneTestCase() {
     fun testEofOnArrayReadPastBufferSize() {
         val dst = ByteBuffersDataOutput()
         dst.writeBytes(ByteArray(10))
-        expectThrows(EOFException::class) {
+        LuceneTestCase.expectThrows(EOFException::class) {
             val input = dst.toDataInput()
             input.readBytes(ByteArray(100), 0, 100)
         }
-        expectThrows(EOFException::class) {
+        LuceneTestCase.expectThrows(EOFException::class) {
             val input = dst.toDataInput()
             input.readBytes(ByteBuffer.allocate(100), 100)
         }
@@ -253,9 +254,9 @@ class TestByteBuffersDataInput : LuceneTestCase() {
     fun testSlicingLargeBuffers() {
         val MB = 1024 * 1024
         val pageBytes = ByteArray(4 * MB)
-        random().nextBytes(pageBytes)
-        val shift = RandomNumbers.randomIntBetween(random(), 0, pageBytes.size / 2)
-        val simulatedLength = random().nextLong(0, 2019) + 4L * Int.MAX_VALUE
+        LuceneTestCase.random().nextBytes(pageBytes)
+        val shift = RandomNumbers.randomIntBetween(LuceneTestCase.random(), 0, pageBytes.size / 2)
+        val simulatedLength = LuceneTestCase.random().nextLong(0, 2019) + 4L * Int.MAX_VALUE
         val buffers = mutableListOf<ByteBuffer>()
         var remaining = simulatedLength + shift
         while (remaining > 0) {
@@ -281,7 +282,7 @@ class TestByteBuffersDataInput : LuceneTestCase() {
                 val expected = pageBytes[((shift + offset + i).toInt()) % pageBytes.size]
                 assertEquals(expected, slice.readByte(i.toLong()))
             }
-            offset += RandomNumbers.randomIntBetween(random(), MB, 4 * MB).toLong()
+            offset += RandomNumbers.randomIntBetween(LuceneTestCase.random(), MB, 4 * MB).toLong()
         }
     }
 }
