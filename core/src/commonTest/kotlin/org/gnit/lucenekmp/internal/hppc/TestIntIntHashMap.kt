@@ -296,6 +296,70 @@ class TestIntIntHashMap : LuceneTestCase() {
         assertSortedListEquals(map.keys().toArray(), key1, key2, key3)
     }
 
+    @Test
+    fun testMapKeySetIterator() {
+        map.put(key1, value3)
+        map.put(key2, value2)
+        map.put(key3, value1)
+
+        var counted = 0
+        for (c in map.keys()) {
+            assertEquals(map.keys!![c.index], c.value)
+            counted++
+        }
+        assertEquals(counted, map.size())
+    }
+
+    @Test
+    fun testClear() {
+        map.put(key1, value1)
+        map.put(key2, value1)
+        map.clear()
+        assertEquals(0, map.size())
+
+        // internal field - not accessible in Kotlin, so skip map.assigned check
+
+        assertEquals(0, map.put(key1, value1))
+        assertEquals(0, map.remove(key2))
+        map.clear()
+
+        testPutWithExpansions()
+    }
+
+    @Test
+    fun testRelease() {
+        map.put(key1, value1)
+        map.put(key2, value1)
+        map.release()
+        assertEquals(0, map.size())
+
+        // internal field - not accessible in Kotlin, so skip map.assigned check
+
+        testPutWithExpansions()
+    }
+
+    @Test
+    fun testIterable() {
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value3)
+        map.remove(key2)
+
+        var count = 0
+        for (cursor in map) {
+            count++
+            assertTrue(map.containsKey(cursor.key))
+            assertEquals(cursor.value, map.get(cursor.key))
+
+            assertEquals(cursor.value, map.values!![cursor.index])
+            assertEquals(cursor.key, map.keys!![cursor.index])
+        }
+        assertEquals(count, map.size())
+
+        map.clear()
+        assertFalse(map.iterator().hasNext())
+    }
+
     private fun assertSortedListEquals(array: IntArray, vararg elements: Int) {
         assertEquals(elements.size, array.size)
         array.sort()
