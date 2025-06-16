@@ -122,4 +122,85 @@ class TestNumericUtils : LuceneTestCase() {
             assertTrue(encoded[i - 1].compareTo(encoded[i]) < 0, "check sort order")
         }
     }
+
+    /**
+     * check extreme values of ints check for correct ordering of the encoded bytes and that values round-trip.
+     */
+    @Test
+    fun testIntSpecialValues() {
+        val values = intArrayOf(
+            Int.MIN_VALUE,
+            Int.MIN_VALUE + 1,
+            Int.MIN_VALUE + 2,
+            -64765767,
+            -4000,
+            -3000,
+            -2000,
+            -1000,
+            -1,
+            0,
+            1,
+            10,
+            300,
+            765878989,
+            Int.MAX_VALUE - 2,
+            Int.MAX_VALUE - 1,
+            Int.MAX_VALUE
+        )
+        val encoded = Array(values.size) { BytesRef(ByteArray(Int.SIZE_BYTES)) }
+
+        for (i in values.indices) {
+            NumericUtils.intToSortableBytes(values[i], encoded[i].bytes, encoded[i].offset)
+            assertEquals(
+                values[i],
+                NumericUtils.sortableBytesToInt(encoded[i].bytes, encoded[i].offset),
+                "forward and back conversion should generate same int"
+            )
+        }
+
+        for (i in 1 until encoded.size) {
+            assertTrue(encoded[i - 1].compareTo(encoded[i]) < 0, "check sort order")
+        }
+    }
+
+    /**
+     * check extreme values of big integers (4 bytes) check for correct ordering of the encoded bytes and that values round-trip.
+     */
+    @Test
+    @Ignore
+    fun testBigIntSpecialValues() {
+        val values = arrayOf(
+            BigInteger.valueOf(Int.MIN_VALUE.toLong()),
+            BigInteger.valueOf((Int.MIN_VALUE + 1).toLong()),
+            BigInteger.valueOf((Int.MIN_VALUE + 2).toLong()),
+            BigInteger.valueOf(-64765767L),
+            BigInteger.valueOf(-4000L),
+            BigInteger.valueOf(-3000L),
+            BigInteger.valueOf(-2000L),
+            BigInteger.valueOf(-1000L),
+            BigInteger.valueOf(-1L),
+            BigInteger.valueOf(0L),
+            BigInteger.valueOf(1L),
+            BigInteger.valueOf(10L),
+            BigInteger.valueOf(300L),
+            BigInteger.valueOf(765878989L),
+            BigInteger.valueOf((Int.MAX_VALUE - 2).toLong()),
+            BigInteger.valueOf((Int.MAX_VALUE - 1).toLong()),
+            BigInteger.valueOf(Int.MAX_VALUE.toLong())
+        )
+        val encoded = Array(values.size) { BytesRef(ByteArray(Int.SIZE_BYTES)) }
+
+        for (i in values.indices) {
+            NumericUtils.bigIntToSortableBytes(values[i], Int.SIZE_BYTES, encoded[i].bytes, encoded[i].offset)
+            assertEquals(
+                values[i],
+                NumericUtils.sortableBytesToBigInt(encoded[i].bytes, encoded[i].offset, Int.SIZE_BYTES),
+                "forward and back conversion should generate same big integer"
+            )
+        }
+
+        for (i in 1 until encoded.size) {
+            assertTrue(encoded[i - 1].compareTo(encoded[i]) < 0, "check sort order")
+        }
+    }
 }
