@@ -309,7 +309,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         doTestRandomBinary(25000)
     }
 
-    @Ignore
     @LuceneTestCase.Companion.Nightly
     @Test
     fun testRandomBinaryBig() {
