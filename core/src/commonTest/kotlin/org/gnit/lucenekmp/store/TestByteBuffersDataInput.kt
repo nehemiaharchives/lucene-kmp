@@ -279,7 +279,7 @@ class TestByteBuffersDataInput : RandomizedTest() {
             val slice = input.slice(offset, window)
             assertEquals(window, slice.length())
             for (i in 0 until window) {
-                val expected = pageBytes[((shift + offset + i).toInt()) % pageBytes.size]
+                val expected = pageBytes[((shift + offset + i) % pageBytes.size).toInt()]
                 assertEquals(expected, slice.readByte(i.toLong()))
             }
             offset += RandomNumbers.randomIntBetween(LuceneTestCase.random(), MB, 4 * MB).toLong()
