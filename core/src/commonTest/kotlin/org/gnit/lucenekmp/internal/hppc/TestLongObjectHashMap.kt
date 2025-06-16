@@ -187,6 +187,31 @@ class TestLongObjectHashMap : LuceneTestCase() {
         assertEquals(values.size, map.size())
     }
 
+    @Test
+    fun testPutAll() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value1)
+
+        val map2 = LongObjectHashMap<Int>()
+        map2.put(key2, value2)
+        map2.put(keyE, value1)
+
+        assertEquals(1, map.putAll(map2))
+        assertEquals(value2, map.get(key2))
+        assertEquals(value1, map.get(keyE))
+        assertEquals(3, map.size())
+    }
+
+    @Test
+    fun testPutIfAbsent() {
+        map = LongObjectHashMap()
+
+        assertTrue(map.putIfAbsent(key1, value1))
+        assertFalse(map.putIfAbsent(key1, value2))
+        assertEquals(value1, map.get(key1))
+    }
+
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {

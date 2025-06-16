@@ -510,36 +510,6 @@
 | [org.apache.lucene.internal.hppc.TestLongFloatHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongFloatHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongFloatHashMap |
 | [org.apache.lucene.internal.hppc.TestLongIntHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongIntHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongIntHashMap |
 | [org.apache.lucene.internal.hppc.TestLongObjectHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongObjectHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongObjectHashMap |
-
-### TestLongObjectHashMap progress
-- [x] testEnsureCapacity()
-- [x] testCursorIndexIsValid()
-- [x] testIndexMethods()
-- [x] testCloningConstructor()
-- [x] testFromArrays()
-- [x] testGetOrDefault()
-- [x] testPut()
-- [x] testNullValue()
-- [x] testPutOverExistingKey()
-- [x] testPutWithExpansions()
-- [ ] testPutAll()
-- [ ] testPutIfAbsent()
-- [ ] testRemove()
-- [ ] testEmptyKey()
-- [ ] testMapKeySet()
-- [ ] testMapKeySetIterator()
-- [ ] testClear()
-- [ ] testRelease()
-- [ ] testIterable()
-- [ ] testBug_HPPC73_FullCapacityGet()
-- [ ] testHashCodeEquals()
-- [ ] testBug_HPPC37()
-- [ ] testAgainstHashMap()
-- [ ] testClone()
-- [ ] testMapValues()
-- [ ] testMapValuesIterator()
-- [ ] testEqualsSameClass()
-- [ ] testEqualsSubClass()
 | [org.apache.lucene.internal.tests.TestTestSecrets](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/tests/TestTestSecrets.java) | org.gnit.lucenekmp.internal.tests.TestTestSecrets |
 | [org.apache.lucene.internal.vectorization.TestPostingDecodingUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestPostingDecodingUtil.java) | org.gnit.lucenekmp.internal.vectorization.TestPostingDecodingUtil |
 | [org.apache.lucene.internal.vectorization.TestVectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorScorer.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorScorer |
