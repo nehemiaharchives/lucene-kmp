@@ -235,6 +235,77 @@ class TestIntObjectHashMap : LuceneTestCase() {
         assertNull(map.remove(empty))
     }
 
+    @Test
+    fun testMapKeySet() {
+        map.put(1, 3)
+        map.put(2, 2)
+        map.put(3, 1)
+
+        assertSortedListEquals(map.keys().toArray(), 1, 2, 3)
+    }
+
+    @Test
+    fun testMapKeySetIterator() {
+        map.put(1, 3)
+        map.put(2, 2)
+        map.put(3, 1)
+
+        var counted = 0
+        for (c in map.keys()) {
+            val cursor = c!!
+            assertEquals(map.keys!![cursor.index], cursor.value)
+            counted++
+        }
+        assertEquals(counted, map.size())
+    }
+
+    @Test
+    fun testClear() {
+        map.put(1, 1)
+        map.put(2, 1)
+        map.clear()
+        assertEquals(0, map.size())
+
+        assertNull(map.put(1, 1))
+        assertNull(map.remove(2))
+        map.clear()
+
+        testPutWithExpansions()
+    }
+
+    @Test
+    fun testRelease() {
+        map.put(1, 1)
+        map.put(2, 1)
+        map.release()
+        assertEquals(0, map.size())
+
+        testPutWithExpansions()
+    }
+
+    @Test
+    fun testIterable() {
+        map.put(1, 1)
+        map.put(2, 2)
+        map.put(3, 3)
+        map.remove(2)
+
+        var count = 0
+        for (cursor in map) {
+            val c = cursor!!
+            count++
+            assertTrue(map.containsKey(c.key))
+            assertEquals(c.value, map.get(c.key))
+
+            assertEquals(c.value, map.values!![c.index])
+            assertEquals(c.key, map.keys!![c.index])
+        }
+        assertEquals(count, map.size())
+
+        map.clear()
+        assertFalse(map.iterator().hasNext())
+    }
+
     private fun assertSameMap(c1: IntObjectHashMap<Any?>, c2: IntObjectHashMap<Any?>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
@@ -242,6 +313,13 @@ class TestIntObjectHashMap : LuceneTestCase() {
             assertTrue(c2.containsKey(e.key))
             assertEquals(e.value, c2.get(e.key))
         }
+    }
+
+    private fun assertSortedListEquals(array: IntArray, vararg elements: Int) {
+        val expected = elements.copyOf()
+        array.sort()
+        expected.sort()
+        assertTrue(array contentEquals expected)
     }
 
     private fun rarely(): Boolean = org.gnit.lucenekmp.tests.util.TestUtil.rarely(random())

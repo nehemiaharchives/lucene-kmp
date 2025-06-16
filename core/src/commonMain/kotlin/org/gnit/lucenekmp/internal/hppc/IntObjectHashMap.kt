@@ -389,9 +389,9 @@ class IntObjectHashMap<VType>
     fun ensureCapacity(expectedElements: Int) {
         if (expectedElements > resizeAt || keys == null) {
             val prevKeys = this.keys
-            val prevValues = this.values as Array<VType?>
+            val prevValues = this.values as Array<VType?>?
             allocateBuffers(minBufferSize(expectedElements, loadFactor))
-            if (prevKeys != null && !this.isEmpty) {
+            if (prevKeys != null && prevValues != null && !this.isEmpty) {
                 rehash(prevKeys, prevValues)
             }
         }
@@ -669,7 +669,7 @@ class IntObjectHashMap<VType>
 
         // Ensure no change is done if we hit an OOM.
         val prevKeys = this.keys
-        val prevValues = this.values as Array<VType?>
+        val prevValues = this.values as Array<VType?>?
         try {
             val emptyElementSlot = 1
             this.keys = (IntArray(arraySize + emptyElementSlot))
