@@ -1218,6 +1218,11 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
         testIsLoaded(0)
     }
 
+    @Throws(Exception::class)
+    fun testIsLoadedOnSlice() {
+        testIsLoaded(TestUtil.nextInt(Random, 1, 1024))
+    }
+
     private fun doTestGroupVInt(
         dir: Directory,
         iterations: Int,
