@@ -315,7 +315,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         doTestRandomBinary(500000)
     }
 
-    @Ignore
     @Test
     fun testRandomAllDimensionsEquals() {
         val dimensions = TestUtil.nextInt(random(), 1, BKDConfig.MAX_INDEX_DIMS)
