@@ -279,4 +279,44 @@ class TestNumericUtils : LuceneTestCase() {
             assertTrue(encoded[i - 1] < encoded[i], "check sort order")
         }
     }
+
+    @Test
+    fun testSortableDoubleNaN() {
+        val plusInf = NumericUtils.doubleToSortableLong(Double.POSITIVE_INFINITY)
+        val values = doubleArrayOf(
+            Double.NaN,
+            Double.fromBits(0x7ff0000000000001L),
+            Double.fromBits(0x7fffffffffffffffL),
+            Double.fromBits(-0xfffffffffffffL),
+            Double.fromBits(-1L)
+        )
+        for (nan in values) {
+            assertTrue(nan.isNaN())
+            val sortable = NumericUtils.doubleToSortableLong(nan)
+            assertTrue(
+                sortable > plusInf,
+                "Double not sorted correctly: $nan, long repr: $sortable, positive inf.: $plusInf"
+            )
+        }
+    }
+
+    @Test
+    fun testSortableFloatNaN() {
+        val plusInf = NumericUtils.floatToSortableInt(Float.POSITIVE_INFINITY)
+        val values = floatArrayOf(
+            Float.NaN,
+            Float.fromBits(0x7f800001),
+            Float.fromBits(0x7fffffff),
+            Float.fromBits(-0x007fffff),
+            Float.fromBits(-1)
+        )
+        for (nan in values) {
+            assertTrue(nan.isNaN())
+            val sortable = NumericUtils.floatToSortableInt(nan)
+            assertTrue(
+                sortable > plusInf,
+                "Float not sorted correctly: $nan, int repr: $sortable, positive inf.: $plusInf"
+            )
+        }
+    }
 }
