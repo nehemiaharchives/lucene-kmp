@@ -67,10 +67,6 @@ abstract class BaseChunkedDirectoryTestCase : BaseDirectoryTestCase() {
         TODO("Not yet implemented")
     }
 
-    @Throws(Exception::class)
-    open fun testSliceOfSlice() {
-        TODO("Not yet implemented")
-    }
 
     @Throws(Exception::class)
     open fun testRandomChunkSizes() {

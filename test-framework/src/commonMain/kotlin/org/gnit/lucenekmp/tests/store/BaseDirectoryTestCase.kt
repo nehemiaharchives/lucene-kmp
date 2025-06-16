@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.store.FSDirectory
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
+import org.gnit.lucenekmp.jdkport.FileAlreadyExistsException
 import org.gnit.lucenekmp.store.RandomAccessInput
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -805,6 +806,256 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
                     }
                 }
             }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testRandomShort() {
+        newDirectory().use { dir ->
+            dir.createOutput("shorts", IOContext.DEFAULT).use { output ->
+                val num = TestUtil.nextInt(Random, 50, 3000)
+                val shorts = ShortArray(num)
+                for (i in shorts.indices) {
+                    shorts[i] = Random.nextInt().toShort()
+                    output.writeShort(shorts[i])
+                }
+            }
+
+            dir.openInput("shorts", IOContext.DEFAULT).use { input ->
+                val slice = input.randomAccessSlice(0, input.length())
+                kotlin.test.assertEquals(input.length(), slice.length())
+                val shorts = ShortArray((input.length() / 2).toInt())
+                for (i in shorts.indices) {
+                    shorts[i] = slice.readShort(i * 2L)
+                }
+
+                for (i in 1 until shorts.size) {
+                    val offset = i * 2L
+                    val subslice = input.randomAccessSlice(offset, input.length() - offset)
+                    kotlin.test.assertEquals(input.length() - offset, subslice.length())
+                    for (j in i until shorts.size) {
+                        kotlin.test.assertEquals(shorts[j], subslice.readShort((j - i) * 2L))
+                    }
+                }
+
+                for (i in 0 until 7) {
+                    val name = "shorts-$i"
+                    dir.createOutput(name, IOContext.DEFAULT).use { o ->
+                        val junk = ByteArray(i)
+                        Random.nextBytes(junk)
+                        o.writeBytes(junk, junk.size)
+                        input.seek(0)
+                        o.copyBytes(input, input.length())
+                    }
+                    dir.openInput(name, IOContext.DEFAULT).use { padded ->
+                        val whole = padded.randomAccessSlice(i.toLong(), padded.length() - i.toLong())
+                        kotlin.test.assertEquals(padded.length() - i.toLong(), whole.length())
+                        for (j in shorts.indices) {
+                            kotlin.test.assertEquals(shorts[j], whole.readShort(j * 2L))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testRandomByte() {
+        newDirectory().use { dir ->
+            dir.createOutput("bytes", IOContext.DEFAULT).use { output ->
+                val num = if (LuceneTestCase.TEST_NIGHTLY) TestUtil.nextInt(Random, 1000, 3000)
+                else TestUtil.nextInt(Random, 50, 1000)
+                val bytes = ByteArray(num)
+                Random.nextBytes(bytes)
+                for (b in bytes) {
+                    output.writeByte(b)
+                }
+            }
+
+            dir.openInput("bytes", IOContext.DEFAULT).use { input ->
+                val slice = input.randomAccessSlice(0, input.length())
+                kotlin.test.assertEquals(input.length(), slice.length())
+                val bytes = ByteArray(input.length().toInt())
+                for (i in bytes.indices) {
+                    bytes[i] = slice.readByte(i.toLong())
+                }
+
+                for (offset in 1 until bytes.size) {
+                    val subslice = input.randomAccessSlice(offset.toLong(), input.length() - offset.toLong())
+                    kotlin.test.assertEquals(input.length() - offset.toLong(), subslice.length())
+                    assertBytes(subslice, bytes, offset)
+                }
+
+                for (i in 1 until 7) {
+                    val name = "bytes-$i"
+                    dir.createOutput(name, IOContext.DEFAULT).use { o ->
+                        val junk = ByteArray(i)
+                        Random.nextBytes(junk)
+                        o.writeBytes(junk, junk.size)
+                        input.seek(0)
+                        o.copyBytes(input, input.length())
+                    }
+                    dir.openInput(name, IOContext.DEFAULT).use { padded ->
+                        val whole = padded.randomAccessSlice(i.toLong(), padded.length() - i.toLong())
+                        kotlin.test.assertEquals(padded.length() - i.toLong(), whole.length())
+                        assertBytes(whole, bytes, 0)
+                    }
+                }
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testSliceOfSlice() {
+        newDirectory().use { dir ->
+            dir.createOutput("bytes", IOContext.DEFAULT).use { output ->
+                val num = if (LuceneTestCase.TEST_NIGHTLY) TestUtil.nextInt(Random, 250, 2500)
+                else TestUtil.nextInt(Random, 50, 250)
+                val bytes = ByteArray(num)
+                Random.nextBytes(bytes)
+                for (b in bytes) output.writeByte(b)
+            }
+
+            val input = dir.openInput("bytes", IOContext.DEFAULT)
+            input.seek(Random.nextLong(0, input.length()))
+            val bytes = ByteArray(input.length().toInt())
+            input.readBytes(bytes, 0, bytes.size)
+
+            for (i in bytes.indices step 16) {
+                val slice1 = input.slice("slice1", i.toLong(), bytes.size - i.toLong())
+                kotlin.test.assertEquals(0L, slice1.filePointer)
+                kotlin.test.assertEquals(bytes.size - i.toLong(), slice1.length())
+                slice1.seek(Random.nextLong(0, slice1.length()))
+                for (j in 0 until slice1.length() step 16) {
+                    var slice2: org.gnit.lucenekmp.store.IndexInput = slice1.slice("slice2", j.toLong(), slice1.length() - j.toLong())
+                    if (Random.nextBoolean()) slice2 = slice2.clone()
+                    kotlin.test.assertEquals(0L, slice2.filePointer)
+                    kotlin.test.assertEquals(slice1.length() - j.toLong(), slice2.length())
+                    val data = ByteArray(bytes.size)
+                    bytes.copyInto(data, 0, 0, i + j.toInt())
+                    if (Random.nextBoolean()) {
+                        slice2.readBytes(data, i + j.toInt(), bytes.size - i - j.toInt())
+                    } else {
+                        val seek = Random.nextLong(0, slice2.length())
+                        slice2.seek(seek)
+                        slice2.readBytes(data, (i + j + seek).toInt(), (bytes.size - i - j.toInt() - seek.toInt()))
+                        slice2.seek(0)
+                        slice2.readBytes(data, i + j.toInt(), seek.toInt())
+                    }
+                    kotlin.test.assertContentEquals(bytes, data)
+                }
+            }
+
+            input.close()
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testLargeWrites() {
+        newDirectory().use { dir ->
+            val os = dir.createOutput("testBufferStart.txt", IOContext.DEFAULT)
+            val largeBuf = ByteArray(2048)
+            Random.nextBytes(largeBuf)
+            val currentPos = os.filePointer
+            os.writeBytes(largeBuf, largeBuf.size)
+            try {
+                kotlin.test.assertEquals(currentPos + largeBuf.size, os.filePointer)
+            } finally {
+                os.close()
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testIndexOutputToString() {
+        newDirectory().use { dir ->
+            dir.createOutput("camelCase.txt", IOContext.DEFAULT).use { out ->
+                kotlin.test.assertTrue(out.toString().contains("camelCase.txt"))
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testDoubleCloseOutput() {
+        newDirectory().use { dir ->
+            val out = dir.createOutput("foobar", IOContext.DEFAULT)
+            out.writeString("testing")
+            out.close()
+            out.close()
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testDoubleCloseInput() {
+        newDirectory().use { dir ->
+            dir.createOutput("foobar", IOContext.DEFAULT).use { out -> out.writeString("testing") }
+            val input = dir.openInput("foobar", IOContext.DEFAULT)
+            kotlin.test.assertEquals("testing", input.readString())
+            input.close()
+            input.close()
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testCreateTempOutput() {
+        newDirectory().use { dir ->
+            val names = mutableListOf<String>()
+            val iters = LuceneTestCase.atLeast(50)
+            for (iter in 0 until iters) {
+                val out = dir.createTempOutput("foo", "bar", IOContext.DEFAULT)
+                names.add(out.name)
+                out.writeVInt(iter)
+                out.close()
+            }
+            for (iter in 0 until iters) {
+                dir.openInput(names[iter], IOContext.DEFAULT).use { input ->
+                    kotlin.test.assertEquals(iter, input.readVInt())
+                }
+            }
+            val files = dir.listAll().toSet()
+            kotlin.test.assertEquals(names.toSet(), files)
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testCreateOutputForExistingFile() {
+        newDirectory().use { dir ->
+            val name = "file"
+            dir.createOutput(name, IOContext.DEFAULT).use { }
+            LuceneTestCase.expectThrows(FileAlreadyExistsException::class) {
+                dir.createOutput(name, IOContext.DEFAULT).use { }
+            }
+            dir.deleteFile(name)
+            dir.createOutput(name, IOContext.DEFAULT).close()
+        }
+    }
+
+    @Throws(Exception::class)
+    fun testSeekToEndOfFile() {
+        newDirectory().use { dir ->
+            dir.createOutput("a", IOContext.DEFAULT).use { out ->
+                repeat(1024) { out.writeByte(0) }
+            }
+            dir.openInput("a", IOContext.DEFAULT).use { input ->
+                input.seek(100)
+                kotlin.test.assertEquals(100L, input.filePointer)
+                input.seek(1024)
+                kotlin.test.assertEquals(1024L, input.filePointer)
+            }
+        }
+    }
+
+    protected fun assertBytes(slice: RandomAccessInput, bytes: ByteArray, bytesOffset: Int) {
+        val toRead = bytes.size - bytesOffset
+        for (i in 0 until toRead) {
+            kotlin.test.assertEquals(bytes[bytesOffset + i], slice.readByte(i.toLong()))
+            val offset = Random.nextInt(1000)
+            val sub1 = ByteArray(offset + i)
+            slice.readBytes(0, sub1, offset, i)
+            kotlin.test.assertContentEquals(bytes.copyOfRange(bytesOffset, bytesOffset + i), sub1.copyOfRange(offset, sub1.size))
+            val sub2 = ByteArray(offset + toRead - i)
+            slice.readBytes(i.toLong(), sub2, offset, toRead - i)
+            kotlin.test.assertContentEquals(bytes.copyOfRange(bytesOffset + i, bytes.size), sub2.copyOfRange(offset, sub2.size))
         }
     }
 
