@@ -613,13 +613,9 @@ open class LongIntHashMap
     }
 
     override fun clone(): LongIntHashMap {
-        val cloned = LongIntHashMap()
-        cloned.keys = keys?.copyOf()
-        cloned.values = values?.copyOf()
-        cloned.hasEmptyKey = hasEmptyKey
-        cloned.iterationSeed = ITERATION_SEED.incrementAndFetch()
-        // Copy other necessary fields if your class has any
-        return cloned
+        // Use the copy constructor to ensure all internal state is correctly
+        // transferred to the cloned instance.
+        return LongIntHashMap(this)
     }
 
     /** Convert the contents of this map to a human-friendly string.  */
