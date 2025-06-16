@@ -21,6 +21,8 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.RamUsageTester
 import org.gnit.lucenekmp.store.ByteArrayDataInput
 import org.gnit.lucenekmp.store.ByteArrayDataOutput
+import org.gnit.lucenekmp.store.ByteBuffersDataInput
+import org.gnit.lucenekmp.store.ByteBuffersDataOutput
 import org.gnit.lucenekmp.util.LongsRef
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.jdkport.ByteBuffer
@@ -35,11 +37,13 @@ import kotlin.math.pow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 /**
  * Port of Lucene's TestPackedInts from commit ec75fcad.
  */
 class TestPackedInts : LuceneTestCase() {
+    private enum class DataType { PACKED, DELTA_PACKED, MONOTONIC }
     @Test
     fun testByteCount() {
         val iters = atLeast(3)
@@ -438,7 +442,7 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("See LUCENE-4488")
+    @Ignore
     fun testIntOverflow() {
         val index = (1 shl 30) + 1
         val bits = 2
@@ -464,6 +468,7 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
+    @Ignore
     fun testPagedGrowableWriter() {
         val rnd = random()
         val pageSize = 1 shl TestUtil.nextInt(rnd, 6, 30)
@@ -640,6 +645,175 @@ class TestPackedInts : LuceneTestCase() {
                 }
             }
         }
+    }
+
+    @Test
+    fun testPackedLongValuesOnZeros() {
+        val pageSize = 1 shl TestUtil.nextInt(random(), 6, 20)
+        val ratio = random().nextFloat()
+
+        val a = PackedLongValues.packedBuilder(pageSize, ratio).add(0).build().ramBytesUsed()
+        val b = PackedLongValues.packedBuilder(pageSize, ratio).add(0).add(0).build().ramBytesUsed()
+        assertEquals(a, b)
+
+        val v = random().nextLong()
+        val c = PackedLongValues.deltaPackedBuilder(pageSize, ratio).add(v).build().ramBytesUsed()
+        val d = PackedLongValues.deltaPackedBuilder(pageSize, ratio).add(v).add(v).build().ramBytesUsed()
+        assertEquals(c, d)
+
+        val avg = random().nextInt(100)
+        val e = PackedLongValues.monotonicBuilder(pageSize, ratio).add(v).add(v + avg).build().ramBytesUsed()
+        val f = PackedLongValues.monotonicBuilder(pageSize, ratio).add(v).add(v + avg).add(v + 2L * avg).build().ramBytesUsed()
+        assertEquals(e, f)
+    }
+
+    @Test
+    fun testPackedLongValues() {
+        val arr = LongArray(if (LuceneTestCase.TEST_NIGHTLY) random().nextInt(1_000_000) else random().nextInt(10_000).coerceAtLeast(1))
+        val ratioOptions = floatArrayOf(PackedInts.DEFAULT, PackedInts.COMPACT, PackedInts.FAST)
+        val bpvOptions = intArrayOf(0, 1, 63, 64, TestUtil.nextInt(random(), 2, 62))
+        for (bpv in bpvOptions) {
+            for (dataType in DataType.values()) {
+                val pageSize = 1 shl TestUtil.nextInt(random(), 6, 20)
+                val ratio = ratioOptions[TestUtil.nextInt(random(), 0, ratioOptions.size - 1)]
+                var buf: PackedLongValues.Builder
+                val inc: Int
+                when (dataType) {
+                    DataType.PACKED -> { buf = PackedLongValues.packedBuilder(pageSize, ratio); inc = 0 }
+                    DataType.DELTA_PACKED -> { buf = PackedLongValues.deltaPackedBuilder(pageSize, ratio); inc = 0 }
+                    DataType.MONOTONIC -> { buf = PackedLongValues.monotonicBuilder(pageSize, ratio); inc = TestUtil.nextInt(random(), -1000, 1000) }
+                }
+
+                if (bpv == 0) {
+                    arr[0] = random().nextLong()
+                    for (i in 1 until arr.size) arr[i] = arr[i - 1] + inc
+                } else if (bpv == 64) {
+                    for (i in arr.indices) arr[i] = random().nextLong()
+                } else {
+                    val minValue = nextLong(random(), Long.MIN_VALUE, Long.MAX_VALUE - PackedInts.maxValue(bpv))
+                    for (i in arr.indices) arr[i] = (minValue + inc * i + random().nextLong()) and PackedInts.maxValue(bpv)
+                }
+
+                for (v in arr) buf.add(v)
+                assertEquals(arr.size.toLong(), buf.size())
+                val values = buf.build()
+                LuceneTestCase.Companion.expectThrows(IllegalStateException::class) { buf.add(random().nextLong()) }
+                assertEquals(arr.size.toLong(), values.size())
+
+                for (i in arr.indices) assertEquals(arr[i], values.get(i.toLong()))
+
+                val it = values.iterator()
+                for (i in arr.indices) {
+                    if (random().nextBoolean()) assertTrue(it.hasNext())
+                    assertEquals(arr[i], it.next())
+                }
+                assertFalse(it.hasNext())
+            }
+        }
+    }
+
+    @Test
+    @Ignore
+    fun testPackedInputOutput() {
+        // PackedDataInput/PackedDataOutput not yet implemented
+    }
+
+    @Test
+    fun testBlockPackedReaderWriter() {
+        val rnd = random()
+        val iters = atLeast(2)
+        repeat(iters) {
+            val blockSize = 1 shl TestUtil.nextInt(rnd, 6, 18)
+            val valueCount = if (LuceneTestCase.TEST_NIGHTLY) rnd.nextInt(1 shl 18) else rnd.nextInt(1 shl 15)
+            val values = LongArray(valueCount)
+            var minValue = 0L
+            var bpv = 0
+            for (i in 0 until valueCount) {
+                if (i % blockSize == 0) {
+                    minValue = if (TestUtil.rarely(rnd)) rnd.nextInt(256).toLong() else if (TestUtil.rarely(rnd)) -5 else rnd.nextLong()
+                    bpv = rnd.nextInt(65)
+                }
+                values[i] = when (bpv) {
+                    0 -> minValue
+                    64 -> rnd.nextLong()
+                    else -> minValue + nextLong(rnd, 0, (1L shl bpv) - 1)
+                }
+            }
+
+            val out = ByteBuffersDataOutput()
+            val writer = BlockPackedWriter(out, blockSize)
+            for (i in 0 until valueCount) {
+                assertEquals(i.toLong(), writer.ord())
+                writer.add(values[i])
+            }
+            assertEquals(valueCount.toLong(), writer.ord())
+            writer.finish()
+            assertEquals(valueCount.toLong(), writer.ord())
+            val bytes = out.toArrayCopy()
+
+            val in1 = ByteBuffersDataInput(mutableListOf(ByteBuffer.wrap(bytes)))
+            val in2 = ByteArrayDataInput(bytes)
+            val data = if (rnd.nextBoolean()) in1 else in2
+
+            val it = BlockPackedReaderIterator(data, PackedInts.VERSION_CURRENT, blockSize, valueCount.toLong())
+            var i = 0
+            while (i < valueCount) {
+                if (rnd.nextBoolean()) {
+                    assertEquals(values[i], it.next(), "" + i)
+                    i++
+                } else {
+                    val next = it.next(TestUtil.nextInt(rnd, 1, 1024))
+                    for (j in 0 until next.length) {
+                        assertEquals(values[i + j], next.longs[next.offset + j], "" + (i + j))
+                    }
+                    i += next.length
+                }
+                assertEquals(i.toLong(), it.ord())
+            }
+            val expectedPos = bytes.size.toLong()
+            if (data is ByteArrayDataInput) {
+                assertEquals(expectedPos, data.position.toLong())
+            } else {
+                assertEquals(expectedPos, (data as ByteBuffersDataInput).position())
+            }
+        }
+    }
+
+    @Test
+    @Ignore
+    fun testMonotonicBlockPackedReaderWriter() {
+        // MonotonicBlockPackedWriter not implemented
+    }
+
+    @Test
+    @LuceneTestCase.Companion.Nightly
+    fun testBlockReaderOverflow() {
+        val valueCount = nextLong(random(), 1L + Int.MAX_VALUE, 2L * Int.MAX_VALUE)
+        val blockSize = 1 shl TestUtil.nextInt(random(), 20, 22)
+        val out = ByteBuffersDataOutput()
+        val writer = BlockPackedWriter(out, blockSize)
+        val value = random().nextInt().toLong() and 0xFFFFFFFFL
+        val valueOffset = nextLong(random(), 0, valueCount - 1)
+        var i = 0L
+        while (i < valueCount) {
+            assertEquals(i, writer.ord())
+            if ((i and (blockSize - 1).toLong()) == 0L && (i + blockSize < valueOffset || (i > valueOffset && i + blockSize < valueCount))) {
+                writer.addBlockOfZeros()
+                i += blockSize.toLong()
+            } else if (i == valueOffset) {
+                writer.add(value)
+                i++
+            } else {
+                writer.add(0)
+                i++
+            }
+        }
+        writer.finish()
+        val bytes = out.toArrayCopy()
+        val input = ByteArrayDataInput(bytes)
+        val it = BlockPackedReaderIterator(input, PackedInts.VERSION_CURRENT, blockSize, valueCount)
+        it.skip(valueOffset)
+        assertEquals(value, it.next())
     }
 
     // helper methods ---------------------------------------------------------
