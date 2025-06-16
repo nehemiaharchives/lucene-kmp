@@ -215,5 +215,27 @@ class TestIntIntHashMap : LuceneTestCase() {
         }
         assertEquals(values.size, map.size())
     }
+
+    @Test
+    fun testPutAll() {
+        map.put(key1, value1)
+        map.put(key2, value1)
+
+        val map2 = newInstance()
+        map2.put(key2, value2)
+        map2.put(keyE, value1)
+
+        assertEquals(1, map.putAll(map2))
+        assertEquals(value2, map.get(key2))
+        assertEquals(value1, map.get(keyE))
+        assertEquals(3, map.size())
+    }
+
+    @Test
+    fun testPutIfAbsent() {
+        assertTrue(map.putIfAbsent(key1, value1))
+        assertFalse(map.putIfAbsent(key1, value2))
+        assertEquals(value1, map.get(key1))
+    }
 }
 
