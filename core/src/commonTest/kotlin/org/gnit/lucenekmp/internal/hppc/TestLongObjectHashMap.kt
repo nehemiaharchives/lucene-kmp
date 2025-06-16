@@ -5,16 +5,19 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class TestLongObjectHashMap : LuceneTestCase() {
     private val keyE: Long = 0
     private val key1: Long = cast(1)
     private val key2: Long = cast(2)
+    private val key3: Long = cast(3)
 
     private val value0 = vcast(0)
     private val value1 = vcast(1)
     private val value2 = vcast(2)
     private val value3 = vcast(3)
+    private val value4 = vcast(4)
 
     private lateinit var map: LongObjectHashMap<Int>
 
@@ -48,6 +51,64 @@ class TestLongObjectHashMap : LuceneTestCase() {
         for (c in map) {
             assertTrue(map.indexExists(c.index))
             assertEquals(c.value, map.indexGet(c.index))
+        }
+    }
+
+    @Test
+    fun testIndexMethods() {
+        map = LongObjectHashMap()
+        map.put(keyE, value1)
+        map.put(key1, value2)
+
+        assertTrue(map.indexOf(keyE) >= 0)
+        assertTrue(map.indexOf(key1) >= 0)
+        assertTrue(map.indexOf(key2) < 0)
+
+        assertTrue(map.indexExists(map.indexOf(keyE)))
+        assertTrue(map.indexExists(map.indexOf(key1)))
+        assertFalse(map.indexExists(map.indexOf(key2)))
+
+        assertEquals(value1, map.indexGet(map.indexOf(keyE)))
+        assertEquals(value2, map.indexGet(map.indexOf(key1)))
+
+        expectThrows<AssertionError>(AssertionError::class) {
+            map.indexGet(map.indexOf(key2))
+        }
+
+        assertEquals(value1, map.indexReplace(map.indexOf(keyE), value3))
+        assertEquals(value2, map.indexReplace(map.indexOf(key1), value4))
+        assertEquals(value3, map.indexGet(map.indexOf(keyE)))
+        assertEquals(value4, map.indexGet(map.indexOf(key1)))
+
+        map.indexInsert(map.indexOf(key2), key2, value1)
+        assertEquals(value1, map.indexGet(map.indexOf(key2)))
+        assertEquals(3, map.size())
+
+        assertEquals(value3, map.indexRemove(map.indexOf(keyE)))
+        assertEquals(2, map.size())
+        assertEquals(value1, map.indexRemove(map.indexOf(key2)))
+        assertEquals(1, map.size())
+        assertTrue(map.indexOf(keyE) < 0)
+        assertTrue(map.indexOf(key1) >= 0)
+        assertTrue(map.indexOf(key2) < 0)
+    }
+
+    @Test
+    fun testCloningConstructor() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value3)
+
+        val cloned = LongObjectHashMap(map)
+        assertSameMap(map, cloned)
+    }
+
+    private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
+        assertEquals(c1.size(), c2.size())
+        for (entry in c1) {
+            assertTrue(c2.containsKey(entry.key))
+            assertEquals(entry.value, c2.get(entry.key))
         }
     }
 
