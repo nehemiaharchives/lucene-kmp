@@ -149,7 +149,7 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
 
     /** Return a number for the k-th character between 0 and [.HISTOGRAM_SIZE].  */
     private fun getBucket(i: Int, k: Int): Int {
-        return byteAt(i, k) + 1
+        return (byteAt(i, k).toInt() and 0xff) + 1
     }
 
     /**

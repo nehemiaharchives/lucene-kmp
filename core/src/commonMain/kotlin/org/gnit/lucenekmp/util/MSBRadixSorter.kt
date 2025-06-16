@@ -167,7 +167,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
 
     /** Return a number for the k-th character between 0 and [.HISTOGRAM_SIZE].  */
     protected fun getBucket(i: Int, k: Int): Int {
-        return byteAt(i, k) + 1
+        return (byteAt(i, k).toInt() and 0xff) + 1
     }
 
     /**
