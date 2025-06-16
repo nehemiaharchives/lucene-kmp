@@ -104,6 +104,34 @@ class TestLongObjectHashMap : LuceneTestCase() {
         assertSameMap(map, cloned)
     }
 
+    @Test
+    fun testFromArrays() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value3)
+
+        val map2 = LongObjectHashMap.from(
+            longArrayOf(key1, key2, key3),
+            arrayOf(value1, value2, value3)
+        )
+
+        assertSameMap(map, map2)
+    }
+
+    @Test
+    fun testGetOrDefault() {
+        map = LongObjectHashMap()
+        map.put(key2, value2)
+        assertTrue(map.containsKey(key2))
+
+        map.put(key1, value1)
+        assertEquals(value1, map.getOrDefault(key1, value3))
+        assertEquals(value3, map.getOrDefault(key3, value3))
+        map.remove(key1)
+        assertEquals(value3, map.getOrDefault(key1, value3))
+    }
+
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
