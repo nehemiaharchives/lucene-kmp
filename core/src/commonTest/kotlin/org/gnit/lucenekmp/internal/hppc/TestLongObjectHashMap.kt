@@ -6,6 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
+import kotlin.collections.HashSet
 
 class TestLongObjectHashMap : LuceneTestCase() {
     private val keyE: Long = 0
@@ -148,6 +149,42 @@ class TestLongObjectHashMap : LuceneTestCase() {
 
         assertTrue(map.containsKey(key1))
         assertEquals(null, map.get(key1))
+    }
+
+    @Test
+    fun testPutOverExistingKey() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+
+        assertEquals(value1, map.put(key1, value3))
+        assertEquals(value3, map.get(key1))
+
+        assertEquals(value3, map.put(key1, null))
+        assertTrue(map.containsKey(key1))
+        assertEquals(null, map.get(key1))
+
+        assertEquals(null, map.put(key1, value1))
+        assertEquals(value1, map.get(key1))
+    }
+
+    @Test
+    fun testPutWithExpansions() {
+        map = LongObjectHashMap()
+        val COUNT = 10000
+        val rnd = kotlin.random.Random(random().nextLong())
+        val values = HashSet<Long>()
+
+        for (i in 0 until COUNT) {
+            val v = rnd.nextInt()
+            val key = cast(v)
+            val hadKey = values.contains(key)
+            values.add(key)
+
+            assertEquals(hadKey, map.containsKey(key))
+            map.put(key, vcast(v))
+            assertEquals(values.size, map.size())
+        }
+        assertEquals(values.size, map.size())
     }
 
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
