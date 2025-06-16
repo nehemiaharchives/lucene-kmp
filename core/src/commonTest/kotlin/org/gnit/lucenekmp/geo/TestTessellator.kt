@@ -424,6 +424,21 @@ class TestTessellator : LuceneTestCase() {
         checkPolygon(wkt)
     }
 
+    @Test
+    fun testComplexPolygon17() {
+        val wkt = (
+            "POLYGON((14.1989238 40.8274753, 14.1990593 40.8275004, 14.1991793 40.8275226, 14.1993451 40.8275478, 14.1993761 40.8275525, 14.1994599 40.8275746, 14.1996909 40.8276174, 14.1996769 40.8276728, 14.1993975 40.8277665, " +
+                "14.1993717 40.8277752, 14.1992074 40.8278304, 14.1990929 40.8278688, 14.1989635 40.8279122, 14.1988594 40.8276864, 14.1989238 40.8274753), (14.1993717 40.8277752, 14.1993975 40.8277665, 14.1995864 40.8276576, 14.1994599 40.8275746," +
+                " 14.1993761 40.8275525, 14.1993451 40.8275478, 14.1993073 40.8276704, 14.1993717 40.8277752), (14.1990593 40.8275004, 14.1989907 40.8276889, 14.1990929 40.8278688, 14.1992074 40.8278304, 14.1991335 40.8276763, 14.1991793 40.8275226, 14.1990593 40.8275004))"
+        )
+        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val ex = expectThrows(IllegalArgumentException::class) { Tessellator.tessellate(polygon, true) }
+        assertEquals(
+            "Polygon ring self-intersection at lat=40.8278688 lon=14.1990929",
+            ex!!.message
+        )
+    }
+
     // helper functions ported from Java
     private fun checkPolygon(wkt: String) {
         val polygon = SimpleWKTShapeParser.parse(wkt)

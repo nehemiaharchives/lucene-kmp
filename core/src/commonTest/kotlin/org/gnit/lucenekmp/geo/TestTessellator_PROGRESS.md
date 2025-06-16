@@ -14,7 +14,7 @@
 [x] testComplexPolygon14()
 [x] testComplexPolygon15()
 [x] testComplexPolygon16()
-[] testComplexPolygon17()
+[x] testComplexPolygon17()
 [] testComplexPolygon18()
 [] testComplexPolygon19()
 [] testComplexPolygon20()
