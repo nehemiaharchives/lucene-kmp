@@ -49,6 +49,19 @@ class TestIntObjectHashMap : LuceneTestCase() {
         assertTrue(valuesBefore === localMap.values)
     }
 
+    @Test
+    fun testCursorIndexIsValid() {
+        map.put(0, 1)
+        map.put(1, 2)
+        map.put(2, 3)
+
+        for (c in map) {
+            val cursor = c!!
+            assertTrue(map.indexExists(cursor.index))
+            assertEquals(cursor.value, map.indexGet(cursor.index))
+        }
+    }
+
     private fun rarely(): Boolean = org.gnit.lucenekmp.tests.util.TestUtil.rarely(random())
 
     private fun randomIntBetween(min: Int, max: Int): Int = min + random().nextInt(max + 1 - min)

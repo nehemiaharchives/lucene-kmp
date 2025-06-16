@@ -436,7 +436,7 @@ class IntObjectHashMap<VType>
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntObjectCursor<VType?> {
+        protected override fun fetch(): IntObjectCursor<VType?>? {
             val mask = this@IntObjectHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -457,7 +457,7 @@ class IntObjectHashMap<VType>
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -500,7 +500,7 @@ class IntObjectHashMap<VType>
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntCursor {
+        protected override fun fetch(): IntCursor? {
             val mask = this@IntObjectHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -519,7 +519,7 @@ class IntObjectHashMap<VType>
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
