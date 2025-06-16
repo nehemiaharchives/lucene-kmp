@@ -136,7 +136,6 @@ class TestCharArraySet : LuceneTestCase() {
         expectThrows<NullPointerException>(NullPointerException::class) { CharArraySet.unmodifiableSet(null!!) }
     }
 
-    @Ignore
     @Test
     fun testSupplementaryChars() {
         val upperArr = arrayOf("Abc\uD801\uDC1C", "\uD801\uDC1C\uD801\uDC1CCDE", "A\uD801\uDC1CB")
@@ -155,7 +154,6 @@ class TestCharArraySet : LuceneTestCase() {
         }
     }
 
-    @Ignore
     @Test
     fun testSingleHighSurrogate() {
         val upperArr = arrayOf("ABC\uD800", "ABC\uD800EfG", "\uD800EfG", "\uD800\uD801\uDC1CB")
