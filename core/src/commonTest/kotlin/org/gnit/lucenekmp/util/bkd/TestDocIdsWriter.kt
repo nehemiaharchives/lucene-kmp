@@ -47,8 +47,15 @@ class TestDocIdsWriter : LuceneTestCase() {
             repeat(numIters) {
                 val docIDs = IntArray(1 + random().nextInt(5000))
                 val bpv = TestUtil.nextInt(random(), 1, 32)
+                val maxValue: Int =
+                    if (bpv == 32) Int.MAX_VALUE else (1 shl bpv) - 1
                 for (i in docIDs.indices) {
-                    docIDs[i] = TestUtil.nextInt(random(), 0, (1 shl bpv) - 1)
+                    if (maxValue == Int.MAX_VALUE) {
+                        // TestUtil.nextInt cannot handle end == Int.MAX_VALUE
+                        docIDs[i] = random().nextLong(0L, (Int.MAX_VALUE.toLong() + 1)).toInt()
+                    } else {
+                        docIDs[i] = TestUtil.nextInt(random(), 0, maxValue)
+                    }
                 }
                 test(dir, docIDs)
             }
@@ -62,8 +69,14 @@ class TestDocIdsWriter : LuceneTestCase() {
             repeat(numIters) {
                 val docIDs = IntArray(1 + random().nextInt(5000))
                 val bpv = TestUtil.nextInt(random(), 1, 32)
+                val maxValue: Int =
+                    if (bpv == 32) Int.MAX_VALUE else (1 shl bpv) - 1
                 for (i in docIDs.indices) {
-                    docIDs[i] = TestUtil.nextInt(random(), 0, (1 shl bpv) - 1)
+                    if (maxValue == Int.MAX_VALUE) {
+                        docIDs[i] = random().nextLong(0L, (Int.MAX_VALUE.toLong() + 1)).toInt()
+                    } else {
+                        docIDs[i] = TestUtil.nextInt(random(), 0, maxValue)
+                    }
                 }
                 docIDs.sort()
                 test(dir, docIDs)
