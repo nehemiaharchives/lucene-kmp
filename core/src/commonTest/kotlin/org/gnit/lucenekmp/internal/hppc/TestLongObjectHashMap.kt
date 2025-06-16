@@ -6,6 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.collections.HashSet
 import kotlin.test.assertContentEquals
 
@@ -331,6 +332,74 @@ class TestLongObjectHashMap : LuceneTestCase() {
 
         map.clear()
         assertFalse(map.iterator().hasNext())
+    }
+
+    @Test
+    fun testBug_HPPC73_FullCapacityGet() {
+        val elements = 0x7F
+        map = LongObjectHashMap(elements - 1, 0.99)
+        val beforeKeys = map.keys
+        val beforeValues = map.values
+
+        for (i in 1..elements) {
+            map.put(cast(i), value1)
+        }
+
+        val outOfSet = cast(elements + 1)
+        map.remove(outOfSet)
+        assertFalse(map.containsKey(outOfSet))
+        assertTrue(beforeKeys === map.keys)
+        assertTrue(beforeValues === map.values)
+
+        map.put(key1, value2)
+        assertTrue(beforeKeys === map.keys)
+        assertTrue(beforeValues === map.values)
+
+        map.remove(key1)
+        assertTrue(beforeKeys === map.keys)
+        assertTrue(beforeValues === map.values)
+        map.put(key1, value2)
+
+        map.put(outOfSet, value1)
+        assertTrue(beforeKeys !== map.keys)
+        assertTrue(beforeValues !== map.values)
+    }
+
+    @Test
+    fun testHashCodeEquals() {
+        val l0 = LongObjectHashMap<Int>()
+        assertEquals(0, l0.hashCode())
+        assertEquals(l0, LongObjectHashMap<Int>())
+
+        val l1 = LongObjectHashMap.from(
+            longArrayOf(key1, key2, key3),
+            arrayOf(value1, value2, value3)
+        )
+
+        val l2 = LongObjectHashMap.from(
+            longArrayOf(key2, key1, key3),
+            arrayOf(value2, value1, value3)
+        )
+
+        val l3 = LongObjectHashMap.from(
+            longArrayOf(key1, key2),
+            arrayOf(value2, value1)
+        )
+
+        assertEquals(l1.hashCode(), l2.hashCode())
+        assertEquals(l1, l2)
+
+        assertNotEquals(l1, l3)
+        assertNotEquals(l2, l3)
+    }
+
+    @Test
+    fun testBug_HPPC37() {
+        val l1 = LongObjectHashMap.from(longArrayOf(key1), arrayOf(value1))
+        val l2 = LongObjectHashMap.from(longArrayOf(key2), arrayOf(value1))
+
+        assertNotEquals(l1, l2)
+        assertNotEquals(l2, l1)
     }
 
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
