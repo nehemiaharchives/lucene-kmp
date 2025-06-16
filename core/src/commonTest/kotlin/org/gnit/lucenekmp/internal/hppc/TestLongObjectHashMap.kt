@@ -132,6 +132,24 @@ class TestLongObjectHashMap : LuceneTestCase() {
         assertEquals(value3, map.getOrDefault(key1, value3))
     }
 
+    @Test
+    fun testPut() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+
+        assertTrue(map.containsKey(key1))
+        assertEquals(value1, map.get(key1))
+    }
+
+    @Test
+    fun testNullValue() {
+        map = LongObjectHashMap()
+        map.put(key1, null)
+
+        assertTrue(map.containsKey(key1))
+        assertEquals(null, map.get(key1))
+    }
+
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
