@@ -304,7 +304,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         doTestRandomBinary(10)
     }
 
-    @Ignore
     @Test
     fun testRandomBinaryMedium() {
         doTestRandomBinary(25000)

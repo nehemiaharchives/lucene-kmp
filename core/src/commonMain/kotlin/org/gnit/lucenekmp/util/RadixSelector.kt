@@ -174,7 +174,7 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
         var j = 0
         while (j < commonPrefixLength) {
             val b = byteAt(from, k + j).toInt()
-            commonPrefix[j] = b
+            commonPrefix[j] = if (b == -1) -1 else (b and 0xff)
             if (b == -1) {
                 commonPrefixLength = j + 1
                 break
@@ -194,11 +194,12 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
         outer@ while (i < to) {
             for (j in 0..<commonPrefixLength) {
                 val b = byteAt(i, k + j).toInt()
-                if (b != commonPrefix[j]) {
+                val ub = if (b == -1) -1 else (b and 0xff)
+                if (ub != commonPrefix[j]) {
                     commonPrefixLength = j
                     if (commonPrefixLength == 0) { // we have no common prefix
                         histogram[commonPrefix[0] + 1] = i - from
-                        histogram[b + 1] = 1
+                        histogram[ub + 1] = 1
                         break@outer
                     }
                     break
