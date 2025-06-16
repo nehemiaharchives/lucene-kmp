@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertContentEquals
 import kotlin.random.Random
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
@@ -236,6 +237,71 @@ class TestIntIntHashMap : LuceneTestCase() {
         assertTrue(map.putIfAbsent(key1, value1))
         assertFalse(map.putIfAbsent(key1, value2))
         assertEquals(value1, map.get(key1))
+    }
+
+    @Test
+    fun testPutOrAdd() {
+        assertEquals(value1, map.putOrAdd(key1, value1, value2))
+        assertEquals(value3, map.putOrAdd(key1, value1, value2))
+    }
+
+    @Test
+    fun testAddTo() {
+        assertEquals(value1, map.addTo(key1, value1))
+        assertEquals(value3, map.addTo(key1, value2))
+    }
+
+    @Test
+    fun testRemove() {
+        map.put(key1, value1)
+        assertEquals(value1, map.remove(key1))
+        assertEquals(0, map.remove(key1))
+        assertEquals(0, map.size())
+        // internal field - not accessible in Kotlin, so skip map.assigned check
+    }
+
+    @Test
+    fun testEmptyKey() {
+        val empty = 0
+
+        map.put(empty, value1)
+        assertEquals(1, map.size())
+        assertFalse(map.isEmpty)
+        assertEquals(value1, map.get(empty))
+        assertEquals(value1, map.getOrDefault(empty, value2))
+        assertTrue(map.iterator().hasNext())
+        val cursor = map.iterator().next()
+        assertEquals(empty, cursor.key)
+        assertEquals(value1, cursor.value)
+
+        map.remove(empty)
+        assertEquals(0, map.get(empty))
+        assertEquals(0, map.size())
+
+        assertEquals(0, map.put(empty, value1))
+        assertEquals(value1, map.put(empty, value2))
+        map.clear()
+        assertFalse(map.indexExists(map.indexOf(empty)))
+        assertEquals(0, map.put(empty, value1))
+        map.clear()
+        assertEquals(0, map.remove(empty))
+    }
+
+    @Test
+    fun testMapKeySet() {
+        map.put(key1, value3)
+        map.put(key2, value2)
+        map.put(key3, value1)
+
+        assertSortedListEquals(map.keys().toArray(), key1, key2, key3)
+    }
+
+    private fun assertSortedListEquals(array: IntArray, vararg elements: Int) {
+        assertEquals(elements.size, array.size)
+        array.sort()
+        val sorted = elements.copyOf()
+        sorted.sort()
+        assertContentEquals(sorted, array)
     }
 }
 
