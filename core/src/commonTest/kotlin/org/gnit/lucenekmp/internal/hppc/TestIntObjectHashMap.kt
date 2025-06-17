@@ -306,6 +306,119 @@ class TestIntObjectHashMap : LuceneTestCase() {
         assertFalse(map.iterator().hasNext())
     }
 
+    @Test
+    fun testBug_HPPC73_FullCapacityGet() {
+        val elements = 0x7F
+        val localMap = IntObjectHashMap<Any?>(elements)
+        for (i in 1..elements) {
+            localMap.put(i, 1)
+        }
+
+        val outOfSet = elements + 1
+        localMap.remove(outOfSet)
+        assertFalse(localMap.containsKey(outOfSet))
+
+        localMap.put(1, 2)
+        localMap.remove(1)
+        localMap.put(1, 2)
+
+        localMap.put(outOfSet, 1)
+        assertEquals(elements + 1, localMap.size())
+        assertEquals(1, localMap.get(outOfSet))
+    }
+
+    @Test
+    fun testHashCodeEquals() {
+        val l0 = IntObjectHashMap<Any?>()
+        assertEquals(0, l0.hashCode())
+        assertEquals(l0, IntObjectHashMap<Any?>())
+
+        val l1 = IntObjectHashMap.from(intArrayOf(1, 2, 3), arrayOf<Any?>(1, 2, 3))
+        val l2 = IntObjectHashMap.from(intArrayOf(2, 1, 3), arrayOf<Any?>(2, 1, 3))
+        val l3 = IntObjectHashMap.from(intArrayOf(1, 2), arrayOf<Any?>(2, 1))
+
+        assertEquals(l1.hashCode(), l2.hashCode())
+        assertEquals(l1, l2)
+        assertFalse(l1 == l3)
+        assertFalse(l2 == l3)
+    }
+
+    @Test
+    fun testBug_HPPC37() {
+        val l1 = IntObjectHashMap.from(intArrayOf(1), arrayOf<Any?>(1))
+        val l2 = IntObjectHashMap.from(intArrayOf(2), arrayOf<Any?>(1))
+
+        assertFalse(l1 == l2)
+        assertFalse(l2 == l1)
+    }
+
+    @Test
+    fun testAgainstHashMap() {
+        val rnd = random()
+        val other = HashMap<Int, Int?>()
+
+        var size = 1000
+        while (size < 20000) {
+            other.clear()
+            map.clear()
+
+            for (round in 0 until size * 20) {
+                var key = rnd.nextInt(size)
+                if (rnd.nextInt(50) == 0) {
+                    key = 0
+                }
+
+                val value = rnd.nextInt()
+
+                if (rnd.nextBoolean()) {
+                    val previousValue: Int?
+                    if (rnd.nextBoolean()) {
+                        val index = map.indexOf(key)
+                        if (map.indexExists(index)) {
+                            previousValue = map.indexReplace(index, value) as Int?
+                        } else {
+                            map.indexInsert(index, key, value)
+                            previousValue = null
+                        }
+                    } else {
+                        previousValue = map.put(key, value) as Int?
+                    }
+                    assertEquals(other.put(key, value), previousValue)
+
+                    assertEquals(value, map.get(key))
+                    assertEquals(value, map.indexGet(map.indexOf(key)))
+                    assertTrue(map.containsKey(key))
+                    assertTrue(map.indexExists(map.indexOf(key)))
+                } else {
+                    assertEquals(other.containsKey(key), map.containsKey(key))
+                    val previousValue: Int? = if (map.containsKey(key) && rnd.nextBoolean()) {
+                        map.indexRemove(map.indexOf(key)) as Int?
+                    } else {
+                        map.remove(key) as Int?
+                    }
+                    assertEquals(other.remove(key), previousValue)
+                }
+
+                assertEquals(other.size, map.size())
+            }
+
+            size += 4000
+        }
+    }
+
+    @Test
+    fun testClone() {
+        map.put(1, 1)
+        map.put(2, 2)
+        map.put(3, 3)
+
+        val cloned = map.clone()
+        cloned.remove(1)
+
+        assertSortedListEquals(map.keys().toArray(), 1, 2, 3)
+        assertSortedListEquals(cloned.keys().toArray(), 2, 3)
+    }
+
     private fun assertSameMap(c1: IntObjectHashMap<Any?>, c2: IntObjectHashMap<Any?>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
