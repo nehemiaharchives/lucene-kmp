@@ -1,6 +1,6 @@
 [x] testBasic()
 [x] testBasicBinary()
-[] testRandomMinimized()
+[x] testRandomMinimized()
 [] testRandomUnicodeOnly()
 [] testRandomBinary()
 [] testLargeTerms()

@@ -5,8 +5,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
+import org.gnit.lucenekmp.tests.util.automaton.MinimizationOperations
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefIterator
+import org.gnit.lucenekmp.util.automaton.Automata
 
 class TestStringsToAutomaton : LuceneTestCase() {
     @Test
@@ -29,6 +31,34 @@ class TestStringsToAutomaton : LuceneTestCase() {
         checkMinimized(a)
     }
 
+    @Test
+    fun testRandomMinimized() {
+        val iters = if (LuceneTestCase.TEST_NIGHTLY) 20 else 5
+        repeat(iters) {
+            val buildBinary = random().nextBoolean()
+            val size = random().nextInt(2, 50)
+            val terms = mutableSetOf<BytesRef>()
+            val automata = mutableListOf<Automaton>()
+            for (j in 0 until size) {
+                if (buildBinary) {
+                    val bytes = ByteArray(random().nextInt(1, 9)) { random().nextInt(0, 256).toByte() }
+                    val t = BytesRef(bytes)
+                    terms.add(t)
+                    automata.add(Automata.makeBinary(t))
+                } else {
+                    val s = LuceneTestCase.randomUnicodeString(random(), 8)
+                    terms.add(newBytesRef(s))
+                    automata.add(Automata.makeString(s))
+                }
+            }
+            val sortedTerms = terms.toList().sorted()
+            val expected =
+                MinimizationOperations.minimize(Operations.union(automata), Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+            val actual = build(sortedTerms, buildBinary)
+            assertSameAutomaton(expected, actual)
+        }
+    }
+
     private fun checkAutomaton(expected: List<BytesRef>, a: Automaton, isBinary: Boolean) {
         val c = CompiledAutomaton(a, true, false, isBinary)
         val runAutomaton = c.runAutomaton!!
@@ -40,8 +70,8 @@ class TestStringsToAutomaton : LuceneTestCase() {
     }
 
     private fun checkMinimized(a: Automaton) {
-        // TODO: MinimizationOperations not yet ported
-        val minimized = Operations.removeDeadStates(a)
+        val minimized =
+            MinimizationOperations.minimize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         assertSameAutomaton(minimized, a)
     }
 
