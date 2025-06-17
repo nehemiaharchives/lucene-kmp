@@ -19,6 +19,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

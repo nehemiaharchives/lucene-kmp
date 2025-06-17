@@ -6,7 +6,7 @@ import dev.scottpierce.envvar.EnvVar
 /** *
  * ported from package com.carrotsearch.randomizedtesting.RandomizedTest
  */
-class RandomizedTest {
+open class RandomizedTest {
     companion object {
 
         //↓ line 814 of RandomizedTest.java

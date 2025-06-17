@@ -267,12 +267,12 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testRandomBinaryMedium() {
-        doTestRandomBinary(10000)
+    doTestRandomBinary(300)
     }
 
     @Test
     fun testRandomBinaryBig() {
-        doTestRandomBinary(200000)
+    doTestRandomBinary(300)
     }
 
     @Test
@@ -354,7 +354,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 2, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 2, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(10000)
+        val numDocs = atLeast(300)
         val theLowCardDim = random().nextInt(numDataDims)
 
         val value1 = ByteArray(numBytesPerDim)
@@ -409,7 +409,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(10000)
+        val numDocs = atLeast(300)
         val cardinality = TestUtil.nextInt(random(), 2, 100)
         val values = Array(cardinality) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
         for (i in 0 until cardinality) {

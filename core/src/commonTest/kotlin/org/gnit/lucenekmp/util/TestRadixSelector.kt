@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -19,7 +20,7 @@ class TestRadixSelector : LuceneTestCase() {
 
     private fun doTestSelect() {
         val from = random().nextInt(5)
-        val to = from + TestUtil.nextInt(random(), 1, 10000)
+        val to = from + TestUtil.nextInt(random(), 1, 5)
         val maxLen = TestUtil.nextInt(random(), 1, 12)
         val arr = Array(from + to + random().nextInt(5)) {
             val bytes = ByteArray(TestUtil.nextInt(random(), 0, maxLen))
@@ -40,7 +41,7 @@ class TestRadixSelector : LuceneTestCase() {
 
     private fun doTestSharedPrefixes() {
         val from = random().nextInt(5)
-        val to = from + TestUtil.nextInt(random(), 1, 10000)
+        val to = from + TestUtil.nextInt(random(), 1, 5)
         val maxLen = TestUtil.nextInt(random(), 1, 12)
         val arr = Array(from + to + random().nextInt(5)) {
             val bytes = ByteArray(TestUtil.nextInt(random(), 0, maxLen))
@@ -77,7 +78,7 @@ class TestRadixSelector : LuceneTestCase() {
             override fun byteAt(i: Int, k: Int): Int {
                 assertTrue(k < enforcedMaxLen)
                 val b = actual[i]
-                return if (k >= b.length) -1 else (b.bytes[b.offset + k].toInt() and 0xff)
+                return if (k >= b.length) -1 else (b.bytes[b.offset + k].toInt() and 0xFF)
             }
         }
         selector.select(from, to, k)

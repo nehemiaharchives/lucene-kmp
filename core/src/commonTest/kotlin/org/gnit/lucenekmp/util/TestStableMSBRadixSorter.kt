@@ -19,6 +19,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -47,7 +48,7 @@ class TestStableMSBRadixSorter : LuceneTestCase() {
             override fun byteAt(i: Int, k: Int): Int {
                 assertTrue(k < finalMaxLength)
                 val ref = refs[i]
-                return if (ref.length <= k) -1 else (ref.bytes[ref.offset + k].toInt() and 0xff)
+                return if (ref.length <= k) -1 else (ref.bytes[ref.offset + k].toInt() and 0xFF)
             }
 
             override fun swap(i: Int, j: Int) {

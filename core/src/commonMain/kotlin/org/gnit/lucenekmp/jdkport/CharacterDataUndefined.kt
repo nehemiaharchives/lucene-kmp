@@ -56,15 +56,15 @@ internal class CharacterDataUndefined private constructor() : CharacterData() {
     }
 
     override fun toLowerCase(ch: Int): Int {
-        return ch
+        return if (ch in 0x10400..0x10427) ch + 0x28 else ch
     }
 
     override fun toUpperCase(ch: Int): Int {
-        return ch
+        return if (ch in 0x10428..0x1044F) ch - 0x28 else ch
     }
 
     override fun toTitleCase(ch: Int): Int {
-        return ch
+        return toUpperCase(ch)
     }
 
     override fun digit(ch: Int, radix: Int): Int {

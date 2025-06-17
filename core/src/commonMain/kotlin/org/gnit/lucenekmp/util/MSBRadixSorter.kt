@@ -63,7 +63,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
 
             override fun comparePivot(j: Int): Int {
                 for (o in 0..<pivot.length()) {
-                    val b1 = pivot.byteAt(o).toInt() and 0xff
+                    val b1 = pivot.byteAt(o).toInt() and 0xFF
                     val b2 = byteAt(j, k + o)
                     if (b1 != b2) {
                         return b1 - b2

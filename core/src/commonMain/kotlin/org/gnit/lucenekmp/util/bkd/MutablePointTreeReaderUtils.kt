@@ -56,7 +56,7 @@ object MutablePointTreeReaderUtils {
                     Byte.toUnsignedInt(reader.getByteAt(i, k))
                 } else {
                     val shift = bitsPerDocId - ((k - config.packedBytesLength() + 1) shl 3)
-                    (reader.getDocID(i) ushr max(0, shift)) and 0xff
+                    (reader.getDocID(i) ushr max(0, shift)) and 0xFF
                 }
             }
         }.sort(from, to)
@@ -206,7 +206,7 @@ object MutablePointTreeReaderUtils {
                     )
                 } else {
                     val shift = bitsPerDocId - ((k - dataCmpBytes + 1) shl 3)
-                    (reader.getDocID(i) ushr max(0, shift)) and 0xff
+                    (reader.getDocID(i) ushr max(0, shift)) and 0xFF
                 }
             }
         }.select(from, to, mid)

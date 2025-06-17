@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import org.gnit.lucenekmp.util.IntroSelector
 import org.gnit.lucenekmp.util.IntroSorter
 import org.gnit.lucenekmp.util.MSBRadixSorter
@@ -421,7 +422,7 @@ class BKDRadixSelector(// BKD tree configuration
 
             override fun byteAt(i: Int, k: Int): Int {
                 require(k >= 0) { "negative prefix $k" }
-                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xff
+                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xFF
             }
 
             override fun getFallbackSelector(d: Int): Selector {
@@ -485,7 +486,7 @@ class BKDRadixSelector(// BKD tree configuration
         object : MSBRadixSorter(bytesSorted - commonPrefixLength) {
             override fun byteAt(i: Int, k: Int): Int {
                 require(k >= 0) { "negative prefix $k" }
-                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xff
+                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xFF
             }
 
             override fun swap(i: Int, j: Int) {
