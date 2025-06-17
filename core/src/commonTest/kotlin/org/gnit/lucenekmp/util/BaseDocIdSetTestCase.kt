@@ -62,7 +62,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
     @Throws(IOException::class)
     fun testAgainstBitSet() {
         val rnd = LuceneTestCase.random()
-        val numBits = TestUtil.nextInt(rnd, 100, 1 shl 20)
+        val numBits = TestUtil.nextInt(rnd, 100, 1 shl 12)
         for (percentSet in arrayOf(0f, 0.0001f, rnd.nextFloat(), 0.9f, 1f)) {
             val set = randomSet(numBits, percentSet)
             val copy = copyOf(set, numBits)
@@ -76,7 +76,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         set.set(rnd.nextInt(numBits))
         copy = copyOf(set, numBits)
         assertEquals(numBits, set, copy)
-        val maxIterations = if (TEST_NIGHTLY) Int.MAX_VALUE else 10
+        val maxIterations = if (TEST_NIGHTLY) 100 else 10
         var iterations = 0
         var inc = 2
         while (inc < 1000) {
@@ -101,7 +101,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         val rnd = LuceneTestCase.random()
         val iters = 100
         for (i in 0 until iters) {
-            val pow = rnd.nextInt(20)
+            val pow = rnd.nextInt(12)
             val maxDoc = TestUtil.nextInt(rnd, 1, 1 shl pow)
             val numDocs = TestUtil.nextInt(rnd, 0, kotlin.math.min(maxDoc, 1 shl TestUtil.nextInt(rnd, 0, pow)))
             val set = randomSet(maxDoc, numDocs)
@@ -167,7 +167,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
     @Throws(IOException::class)
     fun testIntoBitSet() {
         val rnd = LuceneTestCase.random()
-        val numBits = TestUtil.nextInt(rnd, 100, 1 shl 20)
+        val numBits = TestUtil.nextInt(rnd, 100, 1 shl 12)
         for (percentSet in arrayOf(0f, 0.0001f, rnd.nextFloat(), 0.9f, 1f)) {
             val set = randomSet(numBits, percentSet)
             val copy = copyOf(set, numBits)

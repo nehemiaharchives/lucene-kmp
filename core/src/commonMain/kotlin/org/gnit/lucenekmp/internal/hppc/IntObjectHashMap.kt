@@ -33,7 +33,7 @@ import kotlin.reflect.cast
  * @lucene.internal
  */
 @OptIn(ExperimentalAtomicApi::class)
-class IntObjectHashMap<VType>
+open class IntObjectHashMap<VType>
 @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
     Iterable<IntObjectHashMap.IntObjectCursor<VType?>>, Accountable, Cloneable<IntObjectHashMap<VType>> {
     /** The array holding keys.  */
@@ -389,9 +389,9 @@ class IntObjectHashMap<VType>
     fun ensureCapacity(expectedElements: Int) {
         if (expectedElements > resizeAt || keys == null) {
             val prevKeys = this.keys
-            val prevValues = this.values as Array<VType?>
+            val prevValues = this.values as Array<VType?>?
             allocateBuffers(minBufferSize(expectedElements, loadFactor))
-            if (prevKeys != null && !this.isEmpty) {
+            if (prevKeys != null && prevValues != null && !this.isEmpty) {
                 rehash(prevKeys, prevValues)
             }
         }
@@ -436,7 +436,7 @@ class IntObjectHashMap<VType>
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntObjectCursor<VType?> {
+        protected override fun fetch(): IntObjectCursor<VType?>? {
             val mask = this@IntObjectHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -457,7 +457,7 @@ class IntObjectHashMap<VType>
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -500,7 +500,7 @@ class IntObjectHashMap<VType>
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntCursor {
+        protected override fun fetch(): IntCursor? {
             val mask = this@IntObjectHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -519,7 +519,7 @@ class IntObjectHashMap<VType>
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -669,7 +669,7 @@ class IntObjectHashMap<VType>
 
         // Ensure no change is done if we hit an OOM.
         val prevKeys = this.keys
-        val prevValues = this.values as Array<VType?>
+        val prevValues = this.values as Array<VType?>?
         try {
             val emptyElementSlot = 1
             this.keys = (IntArray(arraySize + emptyElementSlot))

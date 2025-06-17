@@ -24,7 +24,7 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
      * or equal to `k`. This may only be called with a value of `k` between `0`
      * included and `maxLength` excluded.
      */
-    protected abstract fun byteAt(i: Int, k: Int): Byte
+    protected abstract fun byteAt(i: Int, k: Int): Int
 
     /**
      * Get a fall-back selector which may assume that the first `d` bytes of all compared
@@ -55,7 +55,7 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
             override fun setPivot(i: Int) {
                 pivot.setLength(0)
                 for (o in d..<maxLength) {
-                    val b = byteAt(i, o).toInt()
+                    val b = byteAt(i, o)
                     if (b == -1) {
                         break
                     }

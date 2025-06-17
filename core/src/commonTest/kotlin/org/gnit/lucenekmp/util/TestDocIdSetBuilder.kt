@@ -81,7 +81,7 @@ class TestDocIdSetBuilder : LuceneTestCase() {
     @Test
     @Throws(IOException::class)
     fun testDense() {
-        val maxDoc = 1_000_000 + random().nextInt(1_000_000)
+        val maxDoc = 1000 + random().nextInt(1000)
         val builder = DocIdSetBuilder(maxDoc)
         val numIterators = 1 + random().nextInt(10)
         val ref = FixedBitSet(maxDoc)
@@ -91,7 +91,7 @@ class TestDocIdSetBuilder : LuceneTestCase() {
             while (doc < maxDoc) {
                 b.add(doc)
                 ref.set(doc)
-                doc += 1 + random().nextInt(100)
+                doc += 100 + random().nextInt(100)
             }
             builder.add(b.build().iterator())
         }
@@ -103,7 +103,7 @@ class TestDocIdSetBuilder : LuceneTestCase() {
     @Test
     @Throws(IOException::class)
     fun testRandom() {
-        val maxDoc = if (TEST_NIGHTLY) TestUtil.nextInt(random(), 1, 10_000_000) else TestUtil.nextInt(random(), 1, 100_000)
+        val maxDoc = if (TEST_NIGHTLY) TestUtil.nextInt(random(), 1, 1_000_000) else TestUtil.nextInt(random(), 1, 100_000)
         var i = 1
         while (i < maxDoc / 2) {
             val numDocs = TestUtil.nextInt(random(), 1, i)

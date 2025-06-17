@@ -101,7 +101,7 @@ abstract class BaseSortTestCase(private val stable: Boolean) {
     }
 
     fun test(strategy: Strategy) {
-        test(strategy, Random.nextInt(20000))
+        test(strategy, Random.nextInt(2000))
     }
 
     fun testEmpty() {

@@ -51,12 +51,12 @@ object MutablePointTreeReaderUtils {
                 reader.restore(i, j)
             }
 
-            override fun byteAt(i: Int, k: Int): Byte {
+            override fun byteAt(i: Int, k: Int): Int {
                 if (k < config.packedBytesLength()) {
-                    return Byte.toUnsignedInt(reader.getByteAt(i, k)).toByte()
+                    return Byte.toUnsignedInt(reader.getByteAt(i, k))
                 } else {
                     val shift = bitsPerDocId - ((k - config.packedBytesLength() + 1) shl 3)
-                    return ((reader.getDocID(i) ushr max(0, shift)) and 0xff).toByte()
+                    return (reader.getDocID(i) ushr max(0, shift)) and 0xff
                 }
             }
         }.sort(from, to)
@@ -197,16 +197,16 @@ object MutablePointTreeReaderUtils {
                 reader.swap(i, j)
             }
 
-            override fun byteAt(i: Int, k: Int): Byte {
+            override fun byteAt(i: Int, k: Int): Int {
                 if (k < dimCmpBytes) {
-                    return Byte.toUnsignedInt(reader.getByteAt(i, dimOffset + k)).toByte()
+                    return Byte.toUnsignedInt(reader.getByteAt(i, dimOffset + k))
                 } else if (k < dataCmpBytes) {
                     return Byte.toUnsignedInt(
                         reader.getByteAt(i, config.packedIndexBytesLength() + k - dimCmpBytes)
-                    ).toByte()
+                    )
                 } else {
                     val shift = bitsPerDocId - ((k - dataCmpBytes + 1) shl 3)
-                    return ((reader.getDocID(i) ushr max(0, shift)) and 0xff).toByte()
+                    return (reader.getDocID(i) ushr max(0, shift)) and 0xff
                 }
             }
         }.select(from, to, mid)
