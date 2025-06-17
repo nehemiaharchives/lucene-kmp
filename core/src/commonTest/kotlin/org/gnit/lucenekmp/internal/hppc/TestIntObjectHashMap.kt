@@ -260,6 +260,37 @@ class TestIntObjectHashMap : LuceneTestCase() {
     }
 
     @Test
+    fun testMapValues() {
+        map.put(1, 3)
+        map.put(2, 2)
+        map.put(3, 1)
+
+        val values = IntArray(map.values().size())
+        var i = 0
+        for (c in map.values()) {
+            val cursor = c!!
+            values[i++] = cursor.value as Int
+        }
+        assertEquals(map.size(), i)
+        assertSortedListEquals(values, 3, 2, 1)
+    }
+
+    @Test
+    fun testMapValuesIterator() {
+        map.put(1, 3)
+        map.put(2, 2)
+        map.put(3, 1)
+
+        var counted = 0
+        for (c in map.values()) {
+            val cursor = c!!
+            assertEquals(map.values!![cursor.index], cursor.value)
+            counted++
+        }
+        assertEquals(counted, map.size())
+    }
+
+    @Test
     fun testClear() {
         map.put(1, 1)
         map.put(2, 1)
@@ -350,6 +381,36 @@ class TestIntObjectHashMap : LuceneTestCase() {
 
         assertFalse(l1 == l2)
         assertFalse(l2 == l1)
+    }
+
+    @Test
+    fun testEqualsSameClass() {
+        val m1 = IntObjectHashMap<Any?>()
+        val m2 = IntObjectHashMap<Any?>()
+
+        m1.put(1, 1)
+        m1.put(2, 2)
+        m2.put(1, 1)
+        m2.put(2, 2)
+
+        assertTrue(m1 == m2)
+        assertTrue(m2 == m1)
+
+        m2.put(2, 3)
+        assertFalse(m1 == m2)
+        assertFalse(m2 == m1)
+    }
+
+    @Test
+    fun testEqualsSubClass() {
+        val m1 = IntObjectHashMap<Any?>()
+        val m2 = object : IntObjectHashMap<Any?>() {}
+
+        m1.put(1, 1)
+        m2.put(1, 1)
+
+        assertFalse(m1 == m2)
+        assertFalse(m2 == m1)
     }
 
     @Test
