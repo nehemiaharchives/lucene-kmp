@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import com.ionspin.kotlin.bignum.integer.Sign
 import org.gnit.lucenekmp.jdkport.valueOf
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -318,5 +319,52 @@ class TestNumericUtils : LuceneTestCase() {
                 "Float not sorted correctly: $nan, int repr: $sortable, positive inf.: $plusInf"
             )
         }
+    }
+
+    private fun randomBigInteger(numBits: Int): BigInteger {
+        val numBytes = (numBits + 7) / 8
+        val bytes = ByteArray(numBytes)
+        for (i in bytes.indices) {
+            bytes[i] = random().nextInt(256).toByte()
+        }
+        val extraBits = numBytes * 8 - numBits
+        if (extraBits > 0) {
+            val mask = (1 shl (8 - extraBits)) - 1
+            bytes[0] = (bytes[0].toInt() and mask).toByte()
+        }
+        return BigInteger.fromByteArray(bytes, Sign.POSITIVE)
+    }
+
+    @Test
+    fun testAdd() {
+        val iters = atLeast(1000)
+        val numBytes = TestUtil.nextInt(random(), 1, 100)
+        for (iter in 0 until iters) {
+            val v1 = randomBigInteger(8 * numBytes - 1)
+            val v2 = randomBigInteger(8 * numBytes - 1)
+            val v1Bytes = ByteArray(numBytes)
+            val v1Raw = v1.toByteArray()
+            check(v1Raw.size <= numBytes)
+            v1Raw.copyInto(v1Bytes, v1Bytes.size - v1Raw.size)
+            val v2Bytes = ByteArray(numBytes)
+            val v2Raw = v2.toByteArray()
+            check(v2Raw.size <= numBytes)
+            v2Raw.copyInto(v2Bytes, v2Bytes.size - v2Raw.size)
+            val result = ByteArray(numBytes)
+            NumericUtils.add(numBytes, 0, v1Bytes, v2Bytes, result)
+            val sum = v1 + v2
+            assertTrue(sum == BigInteger.fromByteArray(result, Sign.POSITIVE))
+        }
+    }
+
+    @Test
+    fun testIllegalAdd() {
+        val bytes = ByteArray(4) { 0xff.toByte() }
+        val one = ByteArray(4)
+        one[3] = 1
+        val expected = expectThrows(IllegalArgumentException::class) {
+            NumericUtils.add(4, 0, bytes, one, ByteArray(4))
+        }
+        assertEquals("a + b overflows bytesPerDim=4", expected?.message)
     }
 }
