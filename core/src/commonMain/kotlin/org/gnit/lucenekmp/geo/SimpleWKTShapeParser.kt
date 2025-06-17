@@ -37,6 +37,54 @@ object SimpleWKTShapeParser {
         return Polygon(outer.first, outer.second, *holes)
     }
 
+    @Throws(ParseException::class)
+    fun parseMulti(wkt: String): Array<Polygon> {
+        val trimmed = wkt.trim()
+        if (!trimmed.startsWith("MULTIPOLYGON")) {
+            throw ParseException("Only MULTIPOLYGON WKT is supported", 0)
+        }
+        val start = trimmed.indexOf("(")
+        val end = trimmed.lastIndexOf(")")
+        if (start == -1 || end == -1 || end <= start) {
+            throw ParseException("Invalid MULTIPOLYGON WKT", 0)
+        }
+        val body = trimmed.substring(start + 1, end)
+        val polys = mutableListOf<Polygon>()
+        val sb = StringBuilder()
+        var depth = 0
+        for (ch in body) {
+            when (ch) {
+                '(' -> {
+                    depth++
+                    sb.append(ch)
+                }
+                ')' -> {
+                    depth--
+                    sb.append(ch)
+                }
+                ',' -> {
+                    if (depth == 0) {
+                        val polyStr = sb.toString().trim()
+                        if (polyStr.isNotEmpty()) {
+                            polys.add(parse("POLYGON" + polyStr))
+                        }
+                        sb.setLength(0)
+                        continue
+                    }
+                    sb.append(ch)
+                }
+                else -> sb.append(ch)
+            }
+        }
+        if (sb.isNotEmpty()) {
+            val polyStr = sb.toString().trim()
+            if (polyStr.isNotEmpty()) {
+                polys.add(parse("POLYGON" + polyStr))
+            }
+        }
+        return polys.toTypedArray()
+    }
+
     private fun splitRings(body: String): List<String> {
         val result = mutableListOf<String>()
         val sb = StringBuilder()
