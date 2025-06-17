@@ -51,12 +51,12 @@ object MutablePointTreeReaderUtils {
                 reader.restore(i, j)
             }
 
-            override fun byteAt(i: Int, k: Int): Byte {
-                if (k < config.packedBytesLength()) {
-                    return Byte.toUnsignedInt(reader.getByteAt(i, k)).toByte()
+            override fun byteAt(i: Int, k: Int): Int {
+                return if (k < config.packedBytesLength()) {
+                    Byte.toUnsignedInt(reader.getByteAt(i, k))
                 } else {
                     val shift = bitsPerDocId - ((k - config.packedBytesLength() + 1) shl 3)
-                    return ((reader.getDocID(i) ushr max(0, shift)) and 0xff).toByte()
+                    (reader.getDocID(i) ushr max(0, shift)) and 0xff
                 }
             }
         }.sort(from, to)

@@ -483,9 +483,9 @@ class BKDRadixSelector(// BKD tree configuration
         val dimCmpBytes: Int = config.bytesPerDim - commonPrefixLength
         val dataOffset = config.packedIndexBytesLength() - dimCmpBytes
         object : MSBRadixSorter(bytesSorted - commonPrefixLength) {
-            override fun byteAt(i: Int, k: Int): Byte {
+            override fun byteAt(i: Int, k: Int): Int {
                 require(k >= 0) { "negative prefix $k" }
-                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k)
+                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xff
             }
 
             override fun swap(i: Int, j: Int) {
