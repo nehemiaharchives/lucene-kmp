@@ -39,11 +39,13 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
 
             override fun compare(i: Int, j: Int): Int {
                 for (o in k..<maxLength) {
-                    val b1 = byteAt(i, o)
-                    val b2 = byteAt(j, o)
+                    val b1 = byteAt(i, o).toInt()
+                    val b2 = byteAt(j, o).toInt()
                     if (b1 != b2) {
-                        return b1 - b2
-                    } else if (b1.toInt() == -1) {
+                        val ub1 = if (b1 == -1) -1 else (b1 and 0xff)
+                        val ub2 = if (b2 == -1) -1 else (b2 and 0xff)
+                        return ub1 - ub2
+                    } else if (b1 == -1) {
                         break
                     }
                 }
@@ -53,20 +55,21 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
             override fun setPivot(i: Int) {
                 pivot.setLength(0)
                 for (o in k..<maxLength) {
-                    val b = byteAt(i, o)
-                    if (b.toInt() == -1) {
+                    val b = byteAt(i, o).toInt()
+                    if (b == -1) {
                         break
                     }
-                    pivot.append(b.toByte())
+                    pivot.append((b and 0xff).toByte())
                 }
             }
 
             override fun comparePivot(j: Int): Int {
                 for (o in 0..<pivot.length()) {
-                    val b1 = pivot.byteAt(o) and 0xff.toByte()
-                    val b2 = byteAt(j, k + o)
-                    if (b1 != b2) {
-                        return b1 - b2
+                    val b1 = pivot.byteAt(o).toInt() and 0xff
+                    val b2 = byteAt(j, k + o).toInt()
+                    val ub2 = if (b2 == -1) -1 else (b2 and 0xff)
+                    if (b1 != ub2) {
+                        return b1 - ub2
                     }
                 }
                 if (k + pivot.length() == maxLength) {

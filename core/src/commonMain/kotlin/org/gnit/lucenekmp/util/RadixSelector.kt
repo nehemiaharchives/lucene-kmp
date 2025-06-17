@@ -39,11 +39,13 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
 
             override fun compare(i: Int, j: Int): Int {
                 for (o in d..<maxLength) {
-                    val b1 = byteAt(i, o)
-                    val b2 = byteAt(j, o)
+                    val b1 = byteAt(i, o).toInt()
+                    val b2 = byteAt(j, o).toInt()
                     if (b1 != b2) {
-                        return b1 - b2
-                    } else if (b1.toInt() == -1) {
+                        val ub1 = if (b1 == -1) -1 else (b1 and 0xff)
+                        val ub2 = if (b2 == -1) -1 else (b2 and 0xff)
+                        return ub1 - ub2
+                    } else if (b1 == -1) {
                         break
                     }
                 }
@@ -57,16 +59,17 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
                     if (b == -1) {
                         break
                     }
-                    pivot.append(b.toByte())
+                    pivot.append((b and 0xff).toByte())
                 }
             }
 
             override fun comparePivot(j: Int): Int {
                 for (o in 0..<pivot.length()) {
-                    val b1: Byte = pivot.byteAt(o) and 0xff.toByte()
-                    val b2: Byte = byteAt(j, d + o)
-                    if (b1 != b2) {
-                        return b1 - b2
+                    val b1 = pivot.byteAt(o).toInt() and 0xff
+                    val b2 = byteAt(j, d + o).toInt()
+                    val ub2 = if (b2 == -1) -1 else (b2 and 0xff)
+                    if (b1 != ub2) {
+                        return b1 - ub2
                     }
                 }
                 if (d + pivot.length() == maxLength) {
@@ -149,7 +152,8 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
 
     /** Return a number for the k-th character between 0 and [.HISTOGRAM_SIZE].  */
     private fun getBucket(i: Int, k: Int): Int {
-        return (byteAt(i, k).toInt() and 0xff) + 1
+        val b = byteAt(i, k).toInt()
+        return if (b == -1) 0 else (b and 0xff) + 1
     }
 
     /**
