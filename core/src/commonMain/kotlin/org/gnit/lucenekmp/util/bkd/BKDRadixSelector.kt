@@ -422,7 +422,7 @@ class BKDRadixSelector(// BKD tree configuration
 
             override fun byteAt(i: Int, k: Int): Int {
                 require(k >= 0) { "negative prefix $k" }
-                return Byte.toUnsignedInt(points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k))
+                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xFF
             }
 
             override fun getFallbackSelector(d: Int): Selector {
@@ -486,7 +486,7 @@ class BKDRadixSelector(// BKD tree configuration
         object : MSBRadixSorter(bytesSorted - commonPrefixLength) {
             override fun byteAt(i: Int, k: Int): Int {
                 require(k >= 0) { "negative prefix $k" }
-                return Byte.toUnsignedInt(points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k))
+                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xFF
             }
 
             override fun swap(i: Int, j: Int) {

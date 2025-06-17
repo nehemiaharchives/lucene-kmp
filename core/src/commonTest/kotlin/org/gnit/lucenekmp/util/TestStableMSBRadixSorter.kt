@@ -48,7 +48,7 @@ class TestStableMSBRadixSorter : LuceneTestCase() {
             override fun byteAt(i: Int, k: Int): Int {
                 assertTrue(k < finalMaxLength)
                 val ref = refs[i]
-                return if (ref.length <= k) -1 else Byte.toUnsignedInt(ref.bytes[ref.offset + k])
+                return if (ref.length <= k) -1 else (ref.bytes[ref.offset + k].toInt() and 0xFF)
             }
 
             override fun swap(i: Int, j: Int) {

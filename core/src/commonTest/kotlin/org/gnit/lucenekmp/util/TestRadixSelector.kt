@@ -78,7 +78,7 @@ class TestRadixSelector : LuceneTestCase() {
             override fun byteAt(i: Int, k: Int): Int {
                 assertTrue(k < enforcedMaxLen)
                 val b = actual[i]
-                return if (k >= b.length) -1 else Byte.toUnsignedInt(b.bytes[b.offset + k])
+                return if (k >= b.length) -1 else (b.bytes[b.offset + k].toInt() and 0xFF)
             }
         }
         selector.select(from, to, k)
