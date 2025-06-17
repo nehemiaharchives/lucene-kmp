@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.tests.store
 
-import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.EOFException
@@ -47,8 +46,8 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
 
     /** Create a temporary directory for tests. */
     protected fun createTempDir(prefix: String): Path {
-        val base = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "lucenekmp_${prefix}_${Random.nextInt()}")
-        FileSystem.SYSTEM.createDirectories(base)
+        val base = ("/tmp".toPath() / "lucenekmp_${prefix}_${Random.nextInt()}")
+        Files.createDirectories(base)
         return base
     }
 
