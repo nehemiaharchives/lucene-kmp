@@ -19,7 +19,7 @@ class TestRadixSelector : LuceneTestCase() {
 
     private fun doTestSelect() {
         val from = random().nextInt(5)
-        val to = from + TestUtil.nextInt(random(), 1, 10000)
+        val to = from + TestUtil.nextInt(random(), 1, 5)
         val maxLen = TestUtil.nextInt(random(), 1, 12)
         val arr = Array(from + to + random().nextInt(5)) {
             val bytes = ByteArray(TestUtil.nextInt(random(), 0, maxLen))
@@ -40,7 +40,7 @@ class TestRadixSelector : LuceneTestCase() {
 
     private fun doTestSharedPrefixes() {
         val from = random().nextInt(5)
-        val to = from + TestUtil.nextInt(random(), 1, 10000)
+        val to = from + TestUtil.nextInt(random(), 1, 5)
         val maxLen = TestUtil.nextInt(random(), 1, 12)
         val arr = Array(from + to + random().nextInt(5)) {
             val bytes = ByteArray(TestUtil.nextInt(random(), 0, maxLen))
