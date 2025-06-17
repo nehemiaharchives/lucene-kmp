@@ -5,6 +5,8 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import com.ionspin.kotlin.bignum.integer.Sign
 import org.gnit.lucenekmp.jdkport.valueOf
+import org.gnit.lucenekmp.jdkport.floatToIntBits
+import org.gnit.lucenekmp.jdkport.doubleToLongBits
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -366,5 +368,209 @@ class TestNumericUtils : LuceneTestCase() {
             NumericUtils.add(4, 0, bytes, one, ByteArray(4))
         }
         assertEquals("a + b overflows bytesPerDim=4", expected?.message)
+    }
+
+    @Test
+    fun testSubtract() {
+        val iters = atLeast(1000)
+        val numBytes = TestUtil.nextInt(random(), 1, 100)
+        for (iter in 0 until iters) {
+            var v1 = randomBigInteger(8 * numBytes - 1)
+            var v2 = randomBigInteger(8 * numBytes - 1)
+            if (v1 < v2) {
+                val tmp = v1
+                v1 = v2
+                v2 = tmp
+            }
+
+            val v1Bytes = ByteArray(numBytes)
+            val v1Raw = v1.toByteArray()
+            check(v1Raw.size <= numBytes)
+            v1Raw.copyInto(v1Bytes, v1Bytes.size - v1Raw.size)
+
+            val v2Bytes = ByteArray(numBytes)
+            val v2Raw = v2.toByteArray()
+            check(v2Raw.size <= numBytes)
+            v2Raw.copyInto(v2Bytes, v2Bytes.size - v2Raw.size)
+
+            val result = ByteArray(numBytes)
+            NumericUtils.subtract(numBytes, 0, v1Bytes, v2Bytes, result)
+
+            val diff = v1 - v2
+            assertTrue(diff == BigInteger.fromByteArray(result, Sign.POSITIVE))
+        }
+    }
+
+    @Test
+    fun testIllegalSubtract() {
+        val v1 = ByteArray(4)
+        v1[3] = 0xf0.toByte()
+        val v2 = ByteArray(4)
+        v2[3] = 0xf1.toByte()
+        val expected = expectThrows(IllegalArgumentException::class) {
+            NumericUtils.subtract(4, 0, v1, v2, ByteArray(4))
+        }
+        assertEquals("a < b", expected?.message)
+    }
+
+    @Test
+    fun testIntsRoundTrip() {
+        val encoded = ByteArray(Int.SIZE_BYTES)
+        repeat(10000) {
+            val value = random().nextInt()
+            NumericUtils.intToSortableBytes(value, encoded, 0)
+            assertEquals(value, NumericUtils.sortableBytesToInt(encoded, 0))
+        }
+    }
+
+    @Test
+    fun testLongsRoundTrip() {
+        val encoded = ByteArray(Long.SIZE_BYTES)
+        repeat(10000) {
+            val value = random().nextLong()
+            NumericUtils.longToSortableBytes(value, encoded, 0)
+            assertEquals(value, NumericUtils.sortableBytesToLong(encoded, 0))
+        }
+    }
+
+    @Test
+    fun testFloatsRoundTrip() {
+        val encoded = ByteArray(Float.SIZE_BYTES)
+        repeat(10000) {
+            val value = Float.fromBits(random().nextInt())
+            NumericUtils.intToSortableBytes(NumericUtils.floatToSortableInt(value), encoded, 0)
+            val actual = NumericUtils.sortableIntToFloat(NumericUtils.sortableBytesToInt(encoded, 0))
+            assertEquals(Float.floatToIntBits(value), Float.floatToIntBits(actual))
+        }
+    }
+
+    @Test
+    @Ignore
+    fun testDoublesRoundTrip() {
+        val encoded = ByteArray(Double.SIZE_BYTES)
+        repeat(10000) {
+            val value = Double.fromBits(random().nextLong())
+            NumericUtils.longToSortableBytes(NumericUtils.doubleToSortableLong(value), encoded, 0)
+            val actual = NumericUtils.sortableLongToDouble(NumericUtils.sortableBytesToLong(encoded, 0))
+            assertEquals(Double.doubleToLongBits(value), Double.doubleToLongBits(actual))
+        }
+    }
+
+    private fun randomSignedBigInteger(maxBytes: Int): BigInteger {
+        // ionspin BigInteger does not use two's complement, so generate positive values only
+        val numBits = maxBytes * 8 - 1
+        return randomBigInteger(numBits)
+    }
+
+    @Test
+    @Ignore
+    fun testBigIntsRoundTrip() {
+        repeat(10000) {
+            val value = randomSignedBigInteger(16)
+            val length = value.toByteArray().size
+            val maxLength = TestUtil.nextInt(random(), length, length + 3)
+            val encoded = ByteArray(maxLength)
+            NumericUtils.bigIntToSortableBytes(value, maxLength, encoded, 0)
+            val decoded = NumericUtils.sortableBytesToBigInt(encoded, 0, maxLength)
+            assertEquals(value, decoded, "value=$value decoded=$decoded")
+        }
+    }
+
+    @Test
+    fun testIntsCompare() {
+        val left = BytesRef(ByteArray(Int.SIZE_BYTES))
+        val right = BytesRef(ByteArray(Int.SIZE_BYTES))
+        repeat(10000) {
+            val leftValue = random().nextInt()
+            NumericUtils.intToSortableBytes(leftValue, left.bytes, left.offset)
+
+            val rightValue = random().nextInt()
+            NumericUtils.intToSortableBytes(rightValue, right.bytes, right.offset)
+
+            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+        }
+    }
+
+    @Test
+    fun testLongsCompare() {
+        val left = BytesRef(ByteArray(Long.SIZE_BYTES))
+        val right = BytesRef(ByteArray(Long.SIZE_BYTES))
+        repeat(10000) {
+            val leftValue = random().nextLong()
+            NumericUtils.longToSortableBytes(leftValue, left.bytes, left.offset)
+
+            val rightValue = random().nextLong()
+            NumericUtils.longToSortableBytes(rightValue, right.bytes, right.offset)
+
+            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+        }
+    }
+
+    @Test
+    fun testFloatsCompare() {
+        val left = BytesRef(ByteArray(Float.SIZE_BYTES))
+        val right = BytesRef(ByteArray(Float.SIZE_BYTES))
+        repeat(10000) {
+            val leftValue = Float.fromBits(random().nextInt())
+            NumericUtils.intToSortableBytes(NumericUtils.floatToSortableInt(leftValue), left.bytes, left.offset)
+
+            val rightValue = Float.fromBits(random().nextInt())
+            NumericUtils.intToSortableBytes(NumericUtils.floatToSortableInt(rightValue), right.bytes, right.offset)
+
+            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+        }
+    }
+
+    @Test
+    fun testDoublesCompare() {
+        val left = BytesRef(ByteArray(Double.SIZE_BYTES))
+        val right = BytesRef(ByteArray(Double.SIZE_BYTES))
+        repeat(10000) {
+            val leftValue = Double.fromBits(random().nextLong())
+            NumericUtils.longToSortableBytes(NumericUtils.doubleToSortableLong(leftValue), left.bytes, left.offset)
+
+            val rightValue = Double.fromBits(random().nextLong())
+            NumericUtils.longToSortableBytes(NumericUtils.doubleToSortableLong(rightValue), right.bytes, right.offset)
+
+            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+        }
+    }
+
+    @Test
+    @Ignore
+    fun testBigIntsCompare() {
+        repeat(10000) {
+            val maxLength = TestUtil.nextInt(random(), 1, 16)
+
+            val leftValue = randomSignedBigInteger(maxLength)
+            val left = BytesRef(ByteArray(maxLength))
+            NumericUtils.bigIntToSortableBytes(leftValue, maxLength, left.bytes, left.offset)
+
+            val rightValue = randomSignedBigInteger(maxLength)
+            val right = BytesRef(ByteArray(maxLength))
+            NumericUtils.bigIntToSortableBytes(rightValue, maxLength, right.bytes, right.offset)
+
+            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+        }
+    }
+
+    private fun fromTwoComplement(bytes: ByteArray): BigInteger {
+        if (bytes.isEmpty()) return BigInteger.ZERO
+        val negative = bytes[0] < 0
+        if (!negative) {
+            return BigInteger.fromByteArray(bytes, Sign.POSITIVE)
+        }
+        val inverted = ByteArray(bytes.size)
+        for (i in bytes.indices) {
+            inverted[i] = (bytes[i].toInt() xor 0xFF).toByte()
+        }
+        var carry = 1
+        for (i in inverted.size - 1 downTo 0) {
+            val sum = (inverted[i].toInt() and 0xff) + carry
+            inverted[i] = (sum and 0xff).toByte()
+            carry = sum ushr 8
+        }
+        val magnitude = BigInteger.fromByteArray(inverted, Sign.POSITIVE)
+        return magnitude.negate()
     }
 }

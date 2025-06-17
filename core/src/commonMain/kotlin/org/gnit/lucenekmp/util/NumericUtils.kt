@@ -170,47 +170,10 @@ object NumericUtils {
     fun bigIntToSortableBytes(
         bigInt: BigInteger, bigIntSize: Int, result: ByteArray, offset: Int
     ) {
-        val bigIntBytes: ByteArray = bigInt.toByteArray()
-        val fullBigIntBytes: ByteArray
-
-        if (bigIntBytes.size < bigIntSize) {
-            fullBigIntBytes = ByteArray(bigIntSize)
-            /*java.lang.System.arraycopy(
-                bigIntBytes, 0, fullBigIntBytes, bigIntSize - bigIntBytes.size, bigIntBytes.size
-            )*/
-            bigIntBytes.copyInto(
-                destination = fullBigIntBytes,
-                destinationOffset = bigIntSize - bigIntBytes.size,
-                startIndex = 0,
-                endIndex = bigIntBytes.size
-            )
-
-            if ((bigIntBytes[0].toInt() and 0x80) != 0) {
-                // sign extend
-                /*java.util.Arrays.fill(fullBigIntBytes, 0, bigIntSize - bigIntBytes.size, 0xff.toByte())*/
-                fullBigIntBytes.fill(
-                    element = 0xff.toByte(),
-                    fromIndex = 0,
-                    toIndex = bigIntSize - bigIntBytes.size
-                )
-            }
-        } else if (bigIntBytes.size == bigIntSize) {
-            fullBigIntBytes = bigIntBytes
-        } else {
-            throw IllegalArgumentException(
-                "BigInteger: $bigInt requires more than $bigIntSize bytes storage"
-            )
-        }
+        val fullBigIntBytes = toTwoComplement(bigInt, bigIntSize)
         // Flip the sign bit so negative bigints sort before positive bigints:
-        fullBigIntBytes[0] = (fullBigIntBytes[0].toInt() xor 0x80.toInt()).toByte()
-
-        /*java.lang.System.arraycopy(fullBigIntBytes, 0, result, offset, bigIntSize)*/
-        fullBigIntBytes.copyInto(
-            destination = result,
-            destinationOffset = offset,
-            startIndex = 0,
-            endIndex = bigIntSize
-        )
+        fullBigIntBytes[0] = (fullBigIntBytes[0].toInt() xor 0x80).toByte()
+        fullBigIntBytes.copyInto(result, destinationOffset = offset, startIndex = 0, endIndex = bigIntSize)
 
         // skip verification with ionspin BigInteger
     }
@@ -252,5 +215,24 @@ object NumericUtils {
         }
         val magnitude = BigInteger.fromByteArray(inverted, Sign.POSITIVE)
         return magnitude.negate()
+    }
+
+    private fun toTwoComplement(value: BigInteger, size: Int): ByteArray {
+        val result = ByteArray(size)
+        val mag = value.abs().toByteArray()
+        require(mag.size <= size) { "BigInteger too large" }
+        mag.copyInto(result, size - mag.size)
+        if (value.signum() < 0) {
+            for (i in result.indices) {
+                result[i] = (result[i].toInt() xor 0xFF).toByte()
+            }
+            var carry = 1
+            for (i in result.size - 1 downTo 0) {
+                val sum = (result[i].toInt() and 0xff) + carry
+                result[i] = (sum and 0xff).toByte()
+                carry = sum ushr 8
+            }
+        }
+        return result
     }
 }
