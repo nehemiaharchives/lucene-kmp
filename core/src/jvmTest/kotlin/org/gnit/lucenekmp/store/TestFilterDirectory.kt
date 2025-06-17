@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.store
 
 import okio.Path
 import org.gnit.lucenekmp.tests.store.BaseDirectoryTestCase
+import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -9,7 +10,7 @@ import java.lang.reflect.Method
 
 class TestFilterDirectory : BaseDirectoryTestCase() {
     override fun getDirectory(path: Path): Directory {
-        return object : FilterDirectory(FSDirectory.open(path)) {}
+        return object : FilterDirectory(ByteBuffersDirectory()) {}
     }
 
     @Test
