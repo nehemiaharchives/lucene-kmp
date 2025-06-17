@@ -13,6 +13,7 @@ import kotlin.test.assertContentEquals
 class TestLongObjectHashMap : LuceneTestCase() {
     private val keyE: Long = 0
     private val key1: Long = cast(1)
+    private val key4: Long = cast(4)
     private val key2: Long = cast(2)
     private val key3: Long = cast(3)
 
@@ -402,6 +403,143 @@ class TestLongObjectHashMap : LuceneTestCase() {
         assertNotEquals(l2, l1)
     }
 
+
+    @Test
+    fun testAgainstHashMap() {
+        val rnd = random()
+        val other = HashMap<Long, Int?>()
+
+        var size = 1000
+        while (size < 20000) {
+            other.clear()
+            map.clear()
+            for (round in 0 until size * 20) {
+                var key = cast(rnd.nextInt(size))
+                if (rnd.nextInt(50) == 0) {
+                    key = 0
+                }
+
+                val value = vcast(rnd.nextInt())
+
+                if (rnd.nextBoolean()) {
+                    val previousValue: Int?
+                    if (rnd.nextBoolean()) {
+                        val index = map.indexOf(key)
+                        previousValue = if (map.indexExists(index)) {
+                            map.indexReplace(index, value)
+                        } else {
+                            map.indexInsert(index, key, value)
+                            null
+                        }
+                    } else {
+                        previousValue = map.put(key, value)
+                    }
+
+                    assertEquals(other.put(key, value), previousValue)
+                    assertEquals(value, map.get(key))
+                    assertEquals(value, map.indexGet(map.indexOf(key)))
+                    assertTrue(map.containsKey(key))
+                    assertTrue(map.indexExists(map.indexOf(key)))
+                } else {
+                    assertEquals(other.containsKey(key), map.containsKey(key))
+                    val previousValue = if (map.containsKey(key) && rnd.nextBoolean()) {
+                        map.indexRemove(map.indexOf(key))
+                    } else {
+                        map.remove(key)
+                    }
+                    assertEquals(other.remove(key), previousValue)
+                }
+
+                assertEquals(other.size, map.size())
+            }
+
+            size += 4000
+        }
+    }
+
+    @Test
+    fun testClone() {
+        map = LongObjectHashMap()
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value3)
+
+        val cloned = map.clone()
+        cloned.remove(key1)
+
+        assertSortedListEquals(map.keys().toArray(), asArray(key1, key2, key3))
+        assertSortedListEquals(cloned.keys().toArray(), asArray(key2, key3))
+    }
+
+    @Test
+    fun testMapValues() {
+        map = LongObjectHashMap()
+        map.put(key1, value3)
+        map.put(key2, value2)
+        map.put(key3, value1)
+        assertContentEquals(listOf(value1, value2, value3).sorted(), toList(map.values()).map { it!! }.sorted())
+
+        map.clear()
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value2)
+        assertContentEquals(listOf(value1, value2, value2).sorted(), toList(map.values()).map { it!! }.sorted())
+    }
+
+    @Test
+    fun testMapValuesIterator() {
+        map = LongObjectHashMap()
+        map.put(key1, value3)
+        map.put(key2, value2)
+        map.put(key3, value1)
+
+        var counted = 0
+        for (c in map.values()) {
+            assertEquals(map.values!![c.index], c.value)
+            counted++
+        }
+        assertEquals(counted, map.size())
+    }
+
+    @Test
+    fun testEqualsSameClass() {
+        val l1 = LongObjectHashMap<Int>()
+        l1.put(key1, value0)
+        l1.put(key2, value1)
+        l1.put(key3, value2)
+
+        val l2 = LongObjectHashMap(l1)
+        l2.putAll(l1)
+
+        val l3 = LongObjectHashMap(l2)
+        l3.putAll(l2)
+        l3.put(key4, value0)
+
+        assertEquals(l2, l1)
+        assertEquals(l2.hashCode(), l1.hashCode())
+        assertNotEquals(l1, l3)
+    }
+
+    @Test
+    fun testEqualsSubClass() {
+        class Sub : LongObjectHashMap<Int>()
+
+        val l1 = LongObjectHashMap<Int>()
+        l1.put(key1, value0)
+        l1.put(key2, value1)
+        l1.put(key3, value2)
+
+        val l2 = Sub()
+        l2.putAll(l1)
+        l2.put(key4, value3)
+
+        val l3 = Sub()
+        l3.putAll(l2)
+
+        assertNotEquals(l1, l2)
+        assertEquals(l3.hashCode(), l2.hashCode())
+        assertEquals(l3, l2)
+    }
     private fun assertSameMap(c1: LongObjectHashMap<Int>, c2: LongObjectHashMap<Int>) {
         assertEquals(c1.size(), c2.size())
         for (entry in c1) {
@@ -420,6 +558,15 @@ class TestLongObjectHashMap : LuceneTestCase() {
         org.gnit.lucenekmp.jdkport.Arrays.sort(sortedElements)
         assertContentEquals(sortedElements, sortedArray)
     }
+
+    private fun <T> toList(values: Iterable<ObjectCursor<T>>): List<T?> {
+        val result = mutableListOf<T?>()
+        for (c in values) {
+            result.add(c.value)
+        }
+        return result
+    }
+
 
     private fun rarely(): Boolean = TestUtil.rarely(random())
     private fun randomIntBetween(min: Int, max: Int): Int = TestUtil.nextInt(random(), min, max)

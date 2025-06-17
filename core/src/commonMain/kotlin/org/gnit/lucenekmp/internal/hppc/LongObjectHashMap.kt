@@ -24,7 +24,7 @@ import kotlin.reflect.cast
  * @lucene.internal
  */
 @OptIn(ExperimentalAtomicApi::class)
-class LongObjectHashMap<VType> (
+open class LongObjectHashMap<VType> (
     expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELEMENTS,
     loadFactor: Double = HashContainers.DEFAULT_LOAD_FACTOR.toDouble()
 ) : Iterable<LongObjectHashMap.LongObjectCursor<VType>>, Accountable, Cloneable<LongObjectHashMap<VType>> {
