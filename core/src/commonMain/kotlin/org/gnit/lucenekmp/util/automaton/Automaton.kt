@@ -88,7 +88,11 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
 
     private fun ensureAcceptCapacity(size: Int) {
         if (isAccept.size() < size) {
-            val newBits = BitSet(size)
+            var newSize = max(1, isAccept.size())
+            while (newSize < size) {
+                newSize = newSize * 2
+            }
+            val newBits = BitSet(newSize)
             newBits.or(isAccept)
             isAccept = newBits
         }
