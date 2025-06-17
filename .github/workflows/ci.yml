@@ -162,7 +162,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Full Build
-        run: ./gradlew build
+        run: ./gradlew build -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverCachedVerify -x koverVerify
 
       - name: Generate Coverage Report
         run: ./gradlew koverXmlReport
