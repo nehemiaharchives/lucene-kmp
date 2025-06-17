@@ -460,7 +460,7 @@ open class LongIntHashMap
             slot = seed and mask
         }
 
-        override fun fetch(): LongIntCursor {
+        override fun fetch(): LongIntCursor? {
             val mask = this@LongIntHashMap.mask
             while (index <= mask) {
                 val existing: Long
@@ -481,7 +481,7 @@ open class LongIntHashMap
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -527,7 +527,7 @@ open class LongIntHashMap
             slot = seed and mask
         }
 
-        override fun fetch(): LongCursor {
+        override fun fetch(): LongCursor? {
             val mask = this@LongIntHashMap.mask
             while (index <= mask) {
                 val existing: Long
@@ -546,7 +546,7 @@ open class LongIntHashMap
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -590,7 +590,7 @@ open class LongIntHashMap
             slot = seed and mask
         }
 
-        override fun fetch(): IntCursor {
+        override fun fetch(): IntCursor? {
             val mask = this@LongIntHashMap.mask
             while (index <= mask) {
                 index++
@@ -608,7 +608,7 @@ open class LongIntHashMap
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
