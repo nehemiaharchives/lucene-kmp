@@ -411,7 +411,6 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
-    @Ignore
     fun testGrowableWriter() {
         val valueCount = 113 + random().nextInt(1111)
         var wrt = GrowableWriter(1, valueCount, PackedInts.DEFAULT)
