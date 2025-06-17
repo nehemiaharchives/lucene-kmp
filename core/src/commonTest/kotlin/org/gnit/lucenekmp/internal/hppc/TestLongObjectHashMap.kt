@@ -406,6 +406,7 @@ class TestLongObjectHashMap : LuceneTestCase() {
 
     @Test
     fun testAgainstHashMap() {
+        map = LongObjectHashMap()
         val rnd = random()
         val other = HashMap<Long, Int?>()
 

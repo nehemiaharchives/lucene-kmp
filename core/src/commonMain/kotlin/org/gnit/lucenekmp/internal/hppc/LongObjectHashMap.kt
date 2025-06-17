@@ -568,20 +568,18 @@ open class LongObjectHashMap<VType> (
     }
 
     override fun clone(): LongObjectHashMap<VType> {
-        try {
-            /*  */
-            val cloned = LongObjectHashMap<VType>(
-                expectedElements = size(),
-                loadFactor = loadFactor
-            )
-            cloned.keys = keys!!.copyOf()
-            cloned.values = values!!.copyOf()
-            cloned.hasEmptyKey = hasEmptyKey
-            cloned.iterationSeed = HashContainers.ITERATION_SEED.incrementAndFetch()
-            return cloned
-        } catch (e: /*CloneNotSupported*/Exception) {
-            throw RuntimeException(e)
-        }
+        val cloned = LongObjectHashMap<VType>()
+        cloned.keys = keys?.copyOf()
+        cloned.values = values?.copyOf()
+
+        cloned.mask = mask
+        cloned.assigned = assigned
+        cloned.resizeAt = resizeAt
+        cloned.hasEmptyKey = hasEmptyKey
+        cloned.loadFactor = loadFactor
+        cloned.iterationSeed = HashContainers.ITERATION_SEED.incrementAndFetch()
+
+        return cloned
     }
 
     /** Convert the contents of this map to a human-friendly string.  */
