@@ -236,15 +236,15 @@ internal class Packed64(valueCount: Int, bitsPerValue: Int) : MutableImpl(valueC
             nAlignedValuesBlocks = values.blocks
             require(nAlignedBlocks <= nAlignedValuesBlocks.size)
         }
-        val startBlock = ((fromIndex.toLong() * bitsPerValue) ushr 6) as Int
-        val endBlock = ((toIndex.toLong() * bitsPerValue) ushr 6) as Int
+        val startBlock = ((fromIndex.toLong() * bitsPerValue) ushr 6).toInt()
+        val endBlock = ((toIndex.toLong() * bitsPerValue) ushr 6).toInt()
         for (block in startBlock..<endBlock) {
             val blockValue = nAlignedValuesBlocks[block % nAlignedBlocks]
             blocks[block] = blockValue
         }
 
         // fill the gap
-        for (i in ((endBlock.toLong() shl 6) / bitsPerValue) as Int..<toIndex) {
+        for (i in ((endBlock.toLong() shl 6) / bitsPerValue).toInt()..<toIndex) {
             set(i, `val`)
         }
     }

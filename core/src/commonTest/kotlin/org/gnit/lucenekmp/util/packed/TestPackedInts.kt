@@ -276,7 +276,6 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
-    @Ignore
     fun testFill() {
         val valueCount = 1111
         val from = random().nextInt(valueCount + 1)
