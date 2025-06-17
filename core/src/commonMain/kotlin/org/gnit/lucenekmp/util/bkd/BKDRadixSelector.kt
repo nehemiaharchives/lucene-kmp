@@ -419,9 +419,9 @@ class BKDRadixSelector(// BKD tree configuration
                 points.swap(i, j)
             }
 
-            override fun byteAt(i: Int, k: Int): Byte {
+            override fun byteAt(i: Int, k: Int): Int {
                 require(k >= 0) { "negative prefix $k" }
-                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k)
+                return points.byteAt(i, if (k < dimCmpBytes) dimOffset + k else dataOffset + k).toInt() and 0xff
             }
 
             override fun getFallbackSelector(d: Int): Selector {

@@ -197,16 +197,16 @@ object MutablePointTreeReaderUtils {
                 reader.swap(i, j)
             }
 
-            override fun byteAt(i: Int, k: Int): Byte {
-                if (k < dimCmpBytes) {
-                    return Byte.toUnsignedInt(reader.getByteAt(i, dimOffset + k)).toByte()
+            override fun byteAt(i: Int, k: Int): Int {
+                return if (k < dimCmpBytes) {
+                    Byte.toUnsignedInt(reader.getByteAt(i, dimOffset + k))
                 } else if (k < dataCmpBytes) {
-                    return Byte.toUnsignedInt(
+                    Byte.toUnsignedInt(
                         reader.getByteAt(i, config.packedIndexBytesLength() + k - dimCmpBytes)
-                    ).toByte()
+                    )
                 } else {
                     val shift = bitsPerDocId - ((k - dataCmpBytes + 1) shl 3)
-                    return ((reader.getDocID(i) ushr max(0, shift)) and 0xff).toByte()
+                    (reader.getDocID(i) ushr max(0, shift)) and 0xff
                 }
             }
         }.select(from, to, mid)
