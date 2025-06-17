@@ -75,6 +75,71 @@ class TestRegExpParsing {
         AutomatonTestUtil.assertMinimalDFA(re.toAutomaton()!!)
     }
 
+    @Test
+    fun testCaseInsensitiveCharUpper() {
+        val re = RegExp("C", RegExp.NONE, RegExp.ASCII_CASE_INSENSITIVE)
+        assertEquals("\\C", re.toString())
+        assertEquals("REGEXP_CHAR char=C\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeCharSet(intArrayOf('c'.code, 'C'.code))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCaseInsensitiveCharNotSensitive() {
+        val re = RegExp("4", RegExp.NONE, RegExp.ASCII_CASE_INSENSITIVE)
+        assertEquals("\\4", re.toString())
+        assertEquals("REGEXP_CHAR char=4\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeChar('4'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCaseInsensitiveCharNonAscii() {
+        val re = RegExp("Ж", RegExp.NONE, RegExp.ASCII_CASE_INSENSITIVE)
+        assertEquals("\\Ж", re.toString())
+        assertEquals("REGEXP_CHAR char=Ж\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeCharSet(intArrayOf('Ж'.code, 'ж'.code))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCaseInsensitiveCharUnicode() {
+        val re = RegExp("Ж", RegExp.NONE, RegExp.CASE_INSENSITIVE)
+        assertEquals("\\Ж", re.toString())
+        assertEquals("REGEXP_CHAR char=Ж\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeCharSet(intArrayOf('Ж'.code, 'ж'.code))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCaseInsensitiveCharUnicodeSigma() {
+        val re = RegExp("σ", RegExp.NONE, RegExp.CASE_INSENSITIVE)
+        assertEquals("\\σ", re.toString())
+        assertEquals("REGEXP_CHAR char=σ\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeCharSet(intArrayOf('Σ'.code, 'σ'.code, 'ς'.code))
+        assertSameLanguage(expected, actual)
+    }
+
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
         val detExpected = Operations.determinize(expected, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         val detActual = Operations.determinize(actual, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
