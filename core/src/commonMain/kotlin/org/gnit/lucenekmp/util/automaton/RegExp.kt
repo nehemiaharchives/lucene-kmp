@@ -619,26 +619,22 @@ class RegExp {
      */
     private fun toCaseInsensitiveChar(codepoint: Int): IntArray {
         val altCodepoints: IntArray? = CaseFolding.lookupAlternates(codepoint)
-        if (altCodepoints != null) {
+        val all = if (altCodepoints != null) {
             val concat = IntArray(altCodepoints.size + 1)
-            /*java.lang.System.arraycopy(altCodepoints, 0, concat, 0, altCodepoints.size)*/
-            altCodepoints.copyInto(
-                concat,
-                0,
-                0,
-                altCodepoints.size
-            )
+            altCodepoints.copyInto(concat)
             concat[altCodepoints.size] = codepoint
-            return concat
+            concat
         } else {
             val altCase =
                 if (Character.isLowerCase(codepoint)) Character.toUpperCase(codepoint) else Character.toLowerCase(codepoint)
             if (altCase != codepoint) {
-                return intArrayOf(altCase, codepoint)
+                intArrayOf(altCase, codepoint)
             } else {
-                return intArrayOf(codepoint)
+                intArrayOf(codepoint)
             }
         }
+        all.sort()
+        return all
     }
 
     private fun toCaseInsensitiveString(): Automaton {
