@@ -19,6 +19,16 @@ class TestStringsToAutomaton : LuceneTestCase() {
         checkMinimized(a)
     }
 
+    @Test
+    fun testBasicBinary() {
+        val terms = basicTerms()
+        terms.sort()
+
+        val a = build(terms, true)
+        checkAutomaton(terms, a, true)
+        checkMinimized(a)
+    }
+
     private fun checkAutomaton(expected: List<BytesRef>, a: Automaton, isBinary: Boolean) {
         val c = CompiledAutomaton(a, true, false, isBinary)
         val runAutomaton = c.runAutomaton!!
