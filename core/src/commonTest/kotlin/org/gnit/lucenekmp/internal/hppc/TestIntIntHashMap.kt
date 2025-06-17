@@ -465,6 +465,87 @@ class TestIntIntHashMap : LuceneTestCase() {
         }
     }
 
+    @Test
+    fun testClone() {
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value3)
+
+        val cloned = map.clone()
+        cloned.remove(key1)
+
+        assertSortedListEquals(map.keys().toArray(), key1, key2, key3)
+        assertSortedListEquals(cloned.keys().toArray(), key2, key3)
+    }
+
+    @Test
+    fun testMapValues() {
+        map.put(key1, value3)
+        map.put(key2, value2)
+        map.put(key3, value1)
+        assertSortedListEquals(map.values().toArray(), value1, value2, value3)
+
+        map.clear()
+        map.put(key1, value1)
+        map.put(key2, value2)
+        map.put(key3, value2)
+        assertSortedListEquals(map.values().toArray(), value1, value2, value2)
+    }
+
+    @Test
+    fun testMapValuesIterator() {
+        map.put(key1, value3)
+        map.put(key2, value2)
+        map.put(key3, value1)
+
+        var counted = 0
+        for (c in map.values()) {
+            assertEquals(map.values!![c.index], c.value)
+            counted++
+        }
+        assertEquals(counted, map.size())
+    }
+
+    @Test
+    fun testEqualsSameClass() {
+        val l1 = newInstance()
+        l1.put(key1, value0)
+        l1.put(key2, value1)
+        l1.put(key3, value2)
+
+        val l2 = IntIntHashMap(l1)
+        l2.putAll(l1)
+
+        val l3 = IntIntHashMap(l2)
+        l3.putAll(l2)
+        l3.put(key4, value0)
+
+        assertEquals(l2, l1)
+        assertEquals(l2.hashCode(), l1.hashCode())
+        assertNotEquals(l1, l3)
+    }
+
+    @Test
+    fun testEqualsSubClass() {
+        class Sub : IntIntHashMap()
+
+        val l1 = newInstance()
+        l1.put(key1, value0)
+        l1.put(key2, value1)
+        l1.put(key3, value2)
+
+        val l2: IntIntHashMap = Sub()
+        l2.putAll(l1)
+        l2.put(key4, value3)
+
+        val l3: IntIntHashMap = Sub()
+        l3.putAll(l2)
+
+        assertNotEquals(l1, l2)
+        assertEquals(l3.hashCode(), l2.hashCode())
+        assertEquals(l3, l2)
+    }
+
     private fun assertSortedListEquals(array: IntArray, vararg elements: Int) {
         assertEquals(elements.size, array.size)
         array.sort()
