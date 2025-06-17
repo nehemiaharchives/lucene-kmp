@@ -25,7 +25,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
      * or equal to `k`. This may only be called with a value of `i` between `0`
      * included and `maxLength` excluded.
      */
-    protected abstract fun byteAt(i: Int, k: Int): Byte
+    protected abstract fun byteAt(i: Int, k: Int): Int
 
     /**
      * Get a fall-back sorter which may assume that the first k bytes of all compared strings are
@@ -43,7 +43,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
                     val b2 = byteAt(j, o)
                     if (b1 != b2) {
                         return b1 - b2
-                    } else if (b1.toInt() == -1) {
+                    } else if (b1 == -1) {
                         break
                     }
                 }
@@ -54,7 +54,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
                 pivot.setLength(0)
                 for (o in k..<maxLength) {
                     val b = byteAt(i, o)
-                    if (b.toInt() == -1) {
+                    if (b == -1) {
                         break
                     }
                     pivot.append(b.toByte())
@@ -63,7 +63,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
 
             override fun comparePivot(j: Int): Int {
                 for (o in 0..<pivot.length()) {
-                    val b1 = pivot.byteAt(o) and 0xff.toByte()
+                    val b1 = pivot.byteAt(o).toInt() and 0xFF
                     val b2 = byteAt(j, k + o)
                     if (b1 != b2) {
                         return b1 - b2
@@ -191,7 +191,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
         var commonPrefixLength = min(commonPrefix.size, maxLength - k)
         var j = 0
         while (j < commonPrefixLength) {
-            val b = byteAt(from, k + j).toInt()
+            val b = byteAt(from, k + j)
             commonPrefix[j] = b
             if (b == -1) {
                 commonPrefixLength = j + 1
@@ -211,7 +211,7 @@ abstract class MSBRadixSorter protected constructor(protected val maxLength: Int
         var i: Int = from + 1
         outer@ while (i < to) {
             for (j in 0..<commonPrefixLength) {
-                val b = byteAt(i, k + j).toInt()
+                val b = byteAt(i, k + j)
                 if (b != commonPrefix[j]) {
                     commonPrefixLength = j
                     if (commonPrefixLength == 0) { // we have no common prefix
