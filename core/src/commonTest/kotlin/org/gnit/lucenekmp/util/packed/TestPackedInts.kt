@@ -381,7 +381,6 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
-    @Ignore
     fun testCopy() {
         val valueCount = TestUtil.nextInt(random(), 5, 600)
         val off1 = random().nextInt(valueCount)
