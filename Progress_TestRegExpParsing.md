@@ -1,5 +1,5 @@
 [x] testAnyChar()
-[] testAnyString()
+[x] testAnyString()
 [] testChar()
 [] testCaseInsensitiveChar()
 [] testCaseInsensitiveClassChar()

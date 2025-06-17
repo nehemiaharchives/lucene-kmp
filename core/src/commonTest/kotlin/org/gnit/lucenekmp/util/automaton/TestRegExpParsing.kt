@@ -19,6 +19,19 @@ class TestRegExpParsing {
         assertSameLanguage(expected, actual)
     }
 
+    @Test
+    fun testAnyString() {
+        val re = RegExp("@", RegExp.ANYSTRING)
+        assertEquals("@", re.toString())
+        assertEquals("REGEXP_ANYSTRING\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeAnyString()
+        assertSameLanguage(expected, actual)
+    }
+
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
         val detExpected = Operations.determinize(expected, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         val detActual = Operations.determinize(actual, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
