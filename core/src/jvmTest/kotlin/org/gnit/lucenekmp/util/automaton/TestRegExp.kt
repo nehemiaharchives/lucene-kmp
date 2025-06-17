@@ -5,6 +5,8 @@ import kotlin.test.Ignore
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import java.util.Locale
+import kotlin.random.Random
+import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 
 @Ignore
@@ -91,5 +93,59 @@ class TestRegExp : LuceneTestCase() {
                 "\uD802\uDC89".length
             )
         )
+    }
+
+    @Test
+    fun testRandomUnicodeInsensitiveMatchPatternParity() {
+        val reserved = setOf(
+            '.', '^', '$', '*', '+', '?', '(', ')', '[', '{', '\\', '|', '-', '"', '<', '>', '#', '@', '&', '~'
+        ).map { it.code }.toSet()
+        val maxIters = 1000
+        for (i in 0 until maxIters) {
+            val code1 = Random.nextInt(0, org.gnit.lucenekmp.jdkport.Character.MAX_CODE_POINT + 1)
+            val code2 = Random.nextInt(0, org.gnit.lucenekmp.jdkport.Character.MAX_CODE_POINT + 1)
+            if (reserved.contains(code1)) {
+                continue
+            }
+
+            val pattern = StringBuilder().appendCodePoint(code1).toString()
+            val altString = StringBuilder().appendCodePoint(code2).toString()
+
+            val javaRegex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE)
+            val r = RegExp(pattern, RegExp.ALL, RegExp.CASE_INSENSITIVE)
+            val cra = CharacterRunAutomaton(r.toAutomaton()!!)
+
+            if (javaRegex.matcher(altString).matches()) {
+                val msg = "Pattern and RegExp disagree on pattern: " +
+                    code1.toString(16).uppercase().padStart(4, '0') +
+                    " :text: " + code2.toString(16).uppercase().padStart(4, '0')
+                assertTrue(cra.run(altString), msg)
+            }
+        }
+    }
+
+    @Test
+    fun testUnicodeInsensitiveMatchPatternParity() {
+        for (codepoint in 0..org.gnit.lucenekmp.jdkport.Character.MAX_CODE_POINT) {
+            val alts = CaseFolding.lookupAlternates(codepoint)
+            if (alts != null) {
+                val pattern = StringBuilder().appendCodePoint(codepoint).toString()
+                val javaRegex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE)
+                val r = RegExp(pattern, RegExp.ALL, RegExp.CASE_INSENSITIVE)
+                val cra = CharacterRunAutomaton(r.toAutomaton()!!)
+                for (alt in alts) {
+                    val altString = StringBuilder().appendCodePoint(alt).toString()
+                    if (javaRegex.matcher(altString).matches()) {
+                        assertTrue(cra.run(altString))
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testRepeatWithEmptyString() {
+        val a = RegExp("[^y]*{1,2}").toAutomaton()
+        assertTrue(a.toString().isNotEmpty())
     }
 }
