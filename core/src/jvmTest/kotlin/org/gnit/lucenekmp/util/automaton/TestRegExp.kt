@@ -232,13 +232,13 @@ class TestRegExp : LuceneTestCase() {
         }
         val sb = StringBuilder()
         for (i in 0 until minLength) {
-            sb.append(charPalette[randomInt(charPalette.length - 1)])
+            sb.append(charPalette[randomInt(charPalette.length)])
         }
         return sb.toString()
     }
 
     private fun randomInt(bound: Int): Int {
-        return if (bound == 0) 0 else Random.nextInt(bound)
+        return if (bound <= 0) 0 else Random.nextInt(bound)
     }
 
     private fun checkRandomExpression(docValue: String): String {
