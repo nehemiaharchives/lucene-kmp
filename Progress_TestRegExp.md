@@ -1,5 +1,5 @@
 [x] testSmoke()
-[] testUnicodeAsciiInsensitiveFlags()
+[x] testUnicodeAsciiInsensitiveFlags()
 [] testRandomUnicodeInsensitiveMatchPatternParity()
 [] testUnicodeInsensitiveMatchPatternParity()
 [] testRepeatWithEmptyString()
