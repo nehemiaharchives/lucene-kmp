@@ -234,7 +234,6 @@ class TestDirectMonotonic : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("Fails due to binary search mismatch")
     fun testMonotonicBinarySearchRandom() {
         newDirectory().use { dir ->
             val iters = atLeast(100)
@@ -269,10 +268,9 @@ class TestDirectMonotonic : LuceneTestCase() {
                 } else {
                     for (i in array.indices) {
                         val index = reader.binarySearch(0L, array.size.toLong(), array[i])
-                        val resolved = if (index >= 0) index else -1 - index
-                        assertTrue(resolved >= 0)
-                        assertTrue(resolved < array.size)
-                        assertEquals(array[i], reader.get(resolved))
+                        assertTrue(index >= 0)
+                        assertTrue(index < array.size)
+                        assertEquals(array[i], reader.get(index))
                     }
                     if (array[0] != Long.MIN_VALUE) {
                         assertEquals(-1, reader.binarySearch(0L, array.size.toLong(), array[0] - 1))
