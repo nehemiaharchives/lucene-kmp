@@ -7,7 +7,6 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
 class ByteBuffersIndexInput(private var input: ByteBuffersDataInput?, resourceDescription: String) :
     IndexInput(resourceDescription), RandomAccessInput {
 
-    @Throws(IOException::class)
     override fun close() {
         input = null
     }

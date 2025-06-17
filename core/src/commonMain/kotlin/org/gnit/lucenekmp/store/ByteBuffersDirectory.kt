@@ -4,6 +4,9 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.ByteOrder
 import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.NoSuchFileException
+import org.gnit.lucenekmp.jdkport.FileAlreadyExistsException
+import org.gnit.lucenekmp.jdkport.AccessDeniedException
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.jdkport.CRC32
 import kotlin.concurrent.Volatile
@@ -37,7 +40,7 @@ class ByteBuffersDirectory : BaseDirectory {
         }
     }
 
-    private val files = java.util.concurrent.ConcurrentHashMap<String, FileEntry>()
+    private val files = mutableMapOf<String, FileEntry>()
     private val outputToInput: (String, ByteBuffersDataOutput) -> IndexInput
     private val bbOutputSupplier: () -> ByteBuffersDataOutput
 
@@ -65,14 +68,14 @@ class ByteBuffersDirectory : BaseDirectory {
         ensureOpen()
         val removed = files.remove(name)
         if (removed == null) {
-            throw java.nio.file.NoSuchFileException(name)
+            throw NoSuchFileException(name)
         }
     }
 
     @Throws(IOException::class)
     override fun fileLength(name: String): Long {
         ensureOpen()
-        val file = files[name] ?: throw java.nio.file.NoSuchFileException(name)
+        val file = files[name] ?: throw NoSuchFileException(name)
         return file.length()
     }
 
@@ -84,10 +87,11 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun createOutput(name: String, context: IOContext): IndexOutput {
         ensureOpen()
-        val e = FileEntry(name)
-        if (files.putIfAbsent(name, e) != null) {
-            throw java.nio.file.FileAlreadyExistsException("File already exists: $name")
+        if (files.containsKey(name)) {
+            throw FileAlreadyExistsException("File already exists: $name")
         }
+        val e = FileEntry(name)
+        files[name] = e
         return e.createOutput(outputToInput)
     }
 
@@ -96,8 +100,9 @@ class ByteBuffersDirectory : BaseDirectory {
         ensureOpen()
         while (true) {
             val name = IndexFileNames.segmentFileName(prefix, tempFileName.invoke(suffix), "tmp")
-            val e = FileEntry(name)
-            if (files.putIfAbsent(name, e) == null) {
+            if (!files.containsKey(name)) {
+                val e = FileEntry(name)
+                files[name] = e
                 return e.createOutput(outputToInput)
             }
         }
@@ -106,11 +111,12 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun rename(source: String, dest: String) {
         ensureOpen()
-        val file = files[source] ?: throw java.nio.file.NoSuchFileException(source)
-        if (files.putIfAbsent(dest, file) != null) {
-            throw java.nio.file.FileAlreadyExistsException(dest)
+        val file = files[source] ?: throw NoSuchFileException(source)
+        if (files.containsKey(dest)) {
+            throw FileAlreadyExistsException(dest)
         }
-        if (!files.remove(source, file)) {
+        files[dest] = file
+        if (files[source] !== file) {
             throw IllegalStateException("File was unexpectedly replaced: $source")
         }
         files.remove(source)
@@ -129,7 +135,7 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun openInput(name: String, context: IOContext): IndexInput {
         ensureOpen()
-        val e = files[name] ?: throw java.nio.file.NoSuchFileException(name)
+        val e = files[name] ?: throw NoSuchFileException(name)
         return e.openInput()
     }
 
@@ -154,7 +160,7 @@ class ByteBuffersDirectory : BaseDirectory {
 
         @Throws(IOException::class)
         fun openInput(): IndexInput {
-            val local = content ?: throw java.nio.file.AccessDeniedException("Can't open a file still open for writing: $fileName")
+            val local = content ?: throw AccessDeniedException("Can't open a file still open for writing: $fileName")
             return local.clone()
         }
 
