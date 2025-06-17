@@ -8,6 +8,9 @@ import java.util.Locale
 import kotlin.random.Random
 import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
+import org.gnit.lucenekmp.util.automaton.Automata
+import org.gnit.lucenekmp.util.automaton.Operations
 
 @Ignore
 class TestRegExp : LuceneTestCase() {
@@ -197,6 +200,29 @@ class TestRegExp : LuceneTestCase() {
             val legalExpression = "\\" + ch
             RegExp(legalExpression)
         }
+    }
+
+    @Test
+    fun testParseIllegalRepeatExp() {
+        val expected = expectThrows(IllegalArgumentException::class) {
+            RegExp("a{99,11}")
+        }
+        assertTrue(expected!!.message!!.contains("out of order"))
+    }
+
+    @Test
+    fun testRegExpNoStackOverflow() {
+        RegExp("(a)|".repeat(50000) + "(a)")
+    }
+
+    @Test
+    fun testDeprecatedComplement() {
+        val expected = Operations.complement(
+            Automata.makeString("abcd"),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        val actual = RegExp("~(abcd)", RegExp.DEPRECATED_COMPLEMENT).toAutomaton()!!
+        assertTrue(AutomatonTestUtil.sameLanguage(expected, actual))
     }
 
     private fun randomDocValue(minLength: Int, includeUnicode: Boolean): String {
