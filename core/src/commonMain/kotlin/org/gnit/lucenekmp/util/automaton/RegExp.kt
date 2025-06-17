@@ -625,8 +625,12 @@ class RegExp {
             concat[altCodepoints.size] = codepoint
             concat
         } else {
-            val altCase =
+            val altCase = if (codepoint <= Char.MAX_VALUE.code) {
+                val ch = codepoint.toChar()
+                if (ch.isLowerCase()) ch.uppercaseChar().code else ch.lowercaseChar().code
+            } else {
                 if (Character.isLowerCase(codepoint)) Character.toUpperCase(codepoint) else Character.toLowerCase(codepoint)
+            }
             if (altCase != codepoint) {
                 intArrayOf(altCase, codepoint)
             } else {
