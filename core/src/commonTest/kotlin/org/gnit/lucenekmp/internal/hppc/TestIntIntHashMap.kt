@@ -23,9 +23,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.assertContentEquals
+import kotlin.test.assertNotEquals
 import kotlin.random.Random
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.internal.hppc.HashContainers
 
 class TestIntIntHashMap : LuceneTestCase() {
     private val keyE = 0
@@ -358,6 +360,109 @@ class TestIntIntHashMap : LuceneTestCase() {
 
         map.clear()
         assertFalse(map.iterator().hasNext())
+    }
+
+    @Test
+    fun testBug_HPPC73_FullCapacityGet() {
+        val elements = 0x7F
+        map = IntIntHashMap(elements, HashContainers.MAX_LOAD_FACTOR.toDouble())
+        for (i in 1..elements) {
+            map.put(cast(i), value1)
+        }
+        val initialSize = map.keys!!.size
+
+        val outOfSet = cast(elements + 1)
+        map.remove(outOfSet)
+        assertFalse(map.containsKey(outOfSet))
+        assertEquals(initialSize, map.keys!!.size)
+
+        map.put(key1, value2)
+        assertEquals(initialSize, map.keys!!.size)
+
+        map.remove(key1)
+        assertEquals(initialSize, map.keys!!.size)
+        map.put(key1, value2)
+
+        map.put(outOfSet, value1)
+        assertEquals(initialSize, map.keys!!.size)
+    }
+
+    @Test
+    fun testHashCodeEquals() {
+        val l0 = newInstance()
+        assertEquals(0, l0.hashCode())
+        assertEquals(l0, newInstance())
+
+        val l1 = IntIntHashMap.from(newArray(key1, key2, key3), newvArray(value1, value2, value3))
+        val l2 = IntIntHashMap.from(newArray(key2, key1, key3), newvArray(value2, value1, value3))
+        val l3 = IntIntHashMap.from(newArray(key1, key2), newvArray(value2, value1))
+
+        assertEquals(l1.hashCode(), l2.hashCode())
+        assertEquals(l1, l2)
+
+        assertNotEquals(l1, l3)
+        assertNotEquals(l2, l3)
+    }
+
+    @Test
+    fun testBug_HPPC37() {
+        val l1 = IntIntHashMap.from(newArray(key1), newvArray(value1))
+        val l2 = IntIntHashMap.from(newArray(key2), newvArray(value1))
+
+        assertNotEquals(l1, l2)
+        assertNotEquals(l2, l1)
+    }
+
+    @Test
+    fun testAgainstHashMap() {
+        val rnd = Random(random().nextLong())
+        val other = HashMap<Int, Int>()
+
+        for (size in 1000..19000 step 4000) {
+            other.clear()
+            map.clear()
+
+            for (round in 0 until size * 20) {
+                var key = cast(rnd.nextInt(size))
+                if (rnd.nextInt(50) == 0) {
+                    key = 0
+                }
+
+                val value = vcast(rnd.nextInt())
+
+                val hadOldValue = map.containsKey(key)
+                if (rnd.nextBoolean()) {
+                    val previousValue: Int
+                    if (rnd.nextBoolean()) {
+                        val index = map.indexOf(key)
+                        previousValue = if (map.indexExists(index)) {
+                            map.indexReplace(index, value)
+                        } else {
+                            map.indexInsert(index, key, value)
+                            0
+                        }
+                    } else {
+                        previousValue = map.put(key, value)
+                    }
+                    assertEquals(other.put(key, value), if (previousValue == 0 && !hadOldValue) null else previousValue)
+
+                    assertEquals(value, map.get(key))
+                    assertEquals(value, map.indexGet(map.indexOf(key)))
+                    assertTrue(map.containsKey(key))
+                    assertTrue(map.indexExists(map.indexOf(key)))
+                } else {
+                    assertEquals(other.containsKey(key), map.containsKey(key))
+                    val previousValue = if (map.containsKey(key) && rnd.nextBoolean()) {
+                        map.indexRemove(map.indexOf(key))
+                    } else {
+                        map.remove(key)
+                    }
+                    assertEquals(other.remove(key), if (previousValue == 0 && !hadOldValue) null else previousValue)
+                }
+
+                assertEquals(other.size, map.size())
+            }
+        }
     }
 
     private fun assertSortedListEquals(array: IntArray, vararg elements: Int) {
