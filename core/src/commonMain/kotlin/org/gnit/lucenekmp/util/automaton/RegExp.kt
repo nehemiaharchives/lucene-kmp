@@ -1107,8 +1107,8 @@ class RegExp {
         } else {
             return makeCharClass(
                 flags,
-                starts.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray,
-                ends.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray
+                starts.map { it!! }.toIntArray(),
+                ends.map { it!! }.toIntArray()
             )
         }
     }
