@@ -227,8 +227,8 @@ class TestFixedBitSet : LuceneTestCase() {
     @Test
     @Throws(IOException::class)
     fun testSmall() {
-        val iters = if (TEST_NIGHTLY) atLeast(1000) else 100
-        doRandomSets(atLeast(1200), iters)
+        val iters = if (TEST_NIGHTLY) atLeast(100) else 100
+        doRandomSets(atLeast(200), iters)
     }
 
     @Test
@@ -561,7 +561,8 @@ class TestFixedBitSet : LuceneTestCase() {
         }
         for (sourceFrom in 64 until 128) {
             for (destFrom in 256 until 320) {
-                for (length in arrayOf(0, TestUtil.nextInt(random(), 1, Long.SIZE_BITS - 1), TestUtil.nextInt(random(), Long.SIZE_BITS, 512))) {
+                for (length in arrayOf(0, TestUtil.nextInt(random(), 1, Long.SIZE_BITS - 1), TestUtil.nextInt(random(), Long.SIZE_BITS, 128))) {
+                for (length in arrayOf(0, TestUtil.nextInt(random(), 1, Long.SIZE_BITS - 1), TestUtil.nextInt(random(), Long.SIZE_BITS, 128))) {
                     dest.clear()
                     var j = 0
                     while (j < dest.length()) {

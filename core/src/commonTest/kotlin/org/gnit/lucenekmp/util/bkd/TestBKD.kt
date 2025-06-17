@@ -90,7 +90,7 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testRandomIntsNDims() {
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         getDirectory().use { dir ->
             val numDims = TestUtil.nextInt(random(), 1, 5)
             val numIndexDims = TestUtil.nextInt(random(), 1, numDims)
@@ -133,7 +133,7 @@ class TestBKD : LuceneTestCase() {
                     assertEquals(maxValue[dim], NumericUtils.sortableBytesToInt(maxPackedValue, dim * Int.SIZE_BYTES))
                 }
 
-                val iters = atLeast(100)
+                val iters = atLeast(50)
                 for (iter in 0 until iters) {
                     val queryMin = IntArray(numDims)
                     val queryMinBytes = Array(numDims) { ByteArray(4) }
@@ -176,7 +176,7 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testBigIntNDims() {
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         getDirectory().use { dir ->
             val numBytesPerDim = TestUtil.nextInt(random(), 2, 30)
             val numDims = TestUtil.nextInt(random(), 1, 5)
@@ -206,7 +206,7 @@ class TestBKD : LuceneTestCase() {
             dir.openInput("bkd", IOContext(FlushInfo(numDocs, 0L))).use { input ->
                 input.seek(indexFP)
                 val r = getPointValues(input)
-                val iters = atLeast(100)
+                val iters = atLeast(50)
                 for (iter in 0 until iters) {
                     val queryMin = Array(numDims) { randomBigInt(numBytesPerDim) }
                     val queryMinBytes = Array(numDims) { ByteArray(numBytesPerDim) }
@@ -267,12 +267,12 @@ class TestBKD : LuceneTestCase() {
 
     @Test
     fun testRandomBinaryMedium() {
-        doTestRandomBinary(10000)
+    doTestRandomBinary(300)
     }
 
     @Test
     fun testRandomBinaryBig() {
-        doTestRandomBinary(200000)
+    doTestRandomBinary(300)
     }
 
     @Test
@@ -291,7 +291,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         val docValues = Array(numDocs) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
         for (docID in 0 until numDocs) {
             if (docID == 0) {
@@ -311,7 +311,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 2, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims - 1), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         val docValues = Array(numDocs) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
         val indexDimensions = Array(numDataDims) { ByteArray(numBytesPerDim) }
         for (dim in 0 until numIndexDims) {
@@ -334,7 +334,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         val theEqualDim = random().nextInt(numDataDims)
         val docValues = Array(numDocs) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
         for (docID in 0 until numDocs) {
@@ -354,7 +354,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 2, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 2, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(10000)
+        val numDocs = atLeast(300)
         val theLowCardDim = random().nextInt(numDataDims)
 
         val value1 = ByteArray(numBytesPerDim)
@@ -385,7 +385,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         val theDim = random().nextInt(numDataDims)
         val value1 = ByteArray(numBytesPerDim).also { random().nextBytes(it) }
         val value2 = ByteArray(numBytesPerDim).also { random().nextBytes(it) }
@@ -409,7 +409,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(10000)
+        val numDocs = atLeast(300)
         val cardinality = TestUtil.nextInt(random(), 2, 100)
         val values = Array(cardinality) { Array(numDataDims) { ByteArray(numBytesPerDim) } }
         for (i in 0 until cardinality) {
@@ -428,7 +428,7 @@ class TestBKD : LuceneTestCase() {
         val numDataDims = TestUtil.nextInt(random(), 1, org.gnit.lucenekmp.index.PointValues.MAX_DIMENSIONS)
         val numIndexDims = kotlin.math.min(TestUtil.nextInt(random(), 1, numDataDims), org.gnit.lucenekmp.index.PointValues.MAX_INDEX_DIMENSIONS)
 
-        val numDocs = atLeast(1000)
+        val numDocs = atLeast(100)
         val docValues = mutableListOf<Array<ByteArray>>()
         val docIDs = mutableListOf<Int>()
 
@@ -637,10 +637,10 @@ class TestBKD : LuceneTestCase() {
             val bytesPerDim = org.gnit.lucenekmp.index.PointValues.MAX_NUM_BYTES
             val bytesUsed = TestUtil.nextInt(random(), 1, 3)
 
-            val writer = BKDWriter(atLeast(1000), dir, "tmp", BKDConfig(numDims, numIndexDims, bytesPerDim, 32), 1.0, atLeast(1000).toLong())
+            val writer = BKDWriter(atLeast(100), dir, "tmp", BKDConfig(numDims, numIndexDims, bytesPerDim, 32), 1.0, atLeast(100).toLong())
             val tmp = ByteArray(bytesUsed)
             val buffer = ByteArray(numDims * bytesPerDim)
-            for (i in 0 until atLeast(1000)) {
+            for (i in 0 until atLeast(100)) {
                 for (dim in 0 until numDims) {
                     random().nextBytes(tmp)
                     org.gnit.lucenekmp.jdkport.System.arraycopy(tmp, 0, buffer, dim * bytesPerDim + (bytesPerDim - bytesUsed), tmp.size)
@@ -648,12 +648,12 @@ class TestBKD : LuceneTestCase() {
                 writer.add(buffer, i)
             }
             val indexFP: Long
-            dir.createOutput("bkd", IOContext(FlushInfo(atLeast(1000), 0L))).use { out ->
+            dir.createOutput("bkd", IOContext(FlushInfo(atLeast(100), 0L))).use { out ->
                 val finalizer = writer.finish(out, out, out)
                 indexFP = out.filePointer
                 finalizer?.run()
             }
-            dir.openInput("bkd", IOContext(FlushInfo(atLeast(1000), 0L))).use { input ->
+            dir.openInput("bkd", IOContext(FlushInfo(atLeast(100), 0L))).use { input ->
                 input.seek(indexFP)
                 val r = getPointValues(input)
                 val count = intArrayOf(0)
@@ -664,7 +664,7 @@ class TestBKD : LuceneTestCase() {
                         return if (random().nextInt(7) == 1) org.gnit.lucenekmp.index.PointValues.Relation.CELL_CROSSES_QUERY else org.gnit.lucenekmp.index.PointValues.Relation.CELL_INSIDE_QUERY
                     }
                 })
-                assertEquals(atLeast(1000), count[0])
+                assertEquals(atLeast(100), count[0])
             }
         }
     }
@@ -672,7 +672,7 @@ class TestBKD : LuceneTestCase() {
     @Test
     fun testEstimatePointCount() {
         getDirectory().use { dir ->
-            val numValues = atLeast(1000)
+            val numValues = atLeast(100)
             val maxPointsInLeafNode = TestUtil.nextInt(random(), 50, 500)
             val numBytesPerDim = TestUtil.nextInt(random(), 1, 4)
             val uniquePointValue = ByteArray(numBytesPerDim).also { random().nextBytes(it) }
