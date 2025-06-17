@@ -163,7 +163,7 @@ abstract class BaseDataOutputTestCase<T : DataOutput> : LuceneTestCase() {
             }
             return reply
         } catch (e: Exception) {
-            throw IOException(e)
+            throw IOException(e.toString())
         }
     }
 }
