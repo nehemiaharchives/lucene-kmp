@@ -178,6 +178,7 @@ class ArrayUtil {
          */
         inline fun <reified T> growExact(array: Array<T>, newLength: Int): Array<T> {
             if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
+            @Suppress("UNCHECKED_CAST")
             return array.copyOf(newLength) as Array<T>
         }
 
