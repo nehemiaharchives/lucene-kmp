@@ -450,6 +450,93 @@ class TestRegExpParsing {
         assertEquals("expected ']' at position 2", ex.message)
     }
 
+    @Test
+    fun testEscapedInvalidClass() {
+        val ex = assertFailsWith<IllegalArgumentException> { RegExp("[\\]") }
+        assertEquals("expected ']' at position 3", ex.message)
+    }
+
+    @Test
+    fun testInterval() {
+        val re = RegExp("<5-40>")
+        assertEquals("<5-40>", re.toString())
+        assertEquals("REGEXP_INTERVAL<5-40>\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertCleanNFA(actual)
+
+        val expected = Automata.makeDecimalInterval(5, 40, 0)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testBackwardsInterval() {
+        val re = RegExp("<40-5>")
+        assertEquals("<5-40>", re.toString())
+        assertEquals("REGEXP_INTERVAL<5-40>\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertCleanNFA(actual)
+
+        val expected = Automata.makeDecimalInterval(5, 40, 0)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testTruncatedInterval() {
+        assertFailsWith<IllegalArgumentException> { RegExp("<1-") }
+    }
+
+    @Test
+    fun testTruncatedInterval2() {
+        assertFailsWith<IllegalArgumentException> { RegExp("<1") }
+    }
+
+    @Test
+    fun testEmptyInterval() {
+        assertFailsWith<IllegalArgumentException> { RegExp("<->") }
+    }
+
+    @Test
+    fun testOptional() {
+        val re = RegExp("a?")
+        assertEquals("(\\a)?", re.toString())
+        assertEquals("REGEXP_OPTIONAL\n  REGEXP_CHAR char=a\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.optional(Automata.makeChar('a'.code))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testRepeat0() {
+        val re = RegExp("a*")
+        assertEquals("(\\a)*", re.toString())
+        assertEquals("REGEXP_REPEAT\n  REGEXP_CHAR char=a\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.repeat(Automata.makeChar('a'.code))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testRepeat1() {
+        val re = RegExp("a+")
+        assertEquals("(\\a){1,}", re.toString())
+        assertEquals("REGEXP_REPEAT_MIN min=1\n  REGEXP_CHAR char=a\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        assertEquals(3, actual.numStates)
+        AutomatonTestUtil.assertCleanDFA(actual)
+
+        val expected = Operations.repeat(Automata.makeChar('a'.code), 1)
+        assertSameLanguage(expected, actual)
+    }
+
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
         val detExpected = Operations.determinize(expected, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         val detActual = Operations.determinize(actual, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
