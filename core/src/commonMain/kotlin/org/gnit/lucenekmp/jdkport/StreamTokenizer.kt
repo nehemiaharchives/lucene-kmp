@@ -230,11 +230,14 @@ class StreamTokenizer private constructor() {
      * @param   hi    the high end of the range.
      */
     fun wordChars(low: Int, hi: Int) {
-        var low = low
-        var hi = hi
-        if (low < 0) low = 0
-        if (hi >= ctype.size) hi = ctype.size - 1
-        while (low <= hi) ctype[low++] = ctype[low++] or CT_ALPHA
+        var l = low
+        var h = hi
+        if (l < 0) l = 0
+        if (h >= ctype.size) h = ctype.size - 1
+        while (l <= h) {
+            ctype[l] = ctype[l] or CT_ALPHA
+            l++
+        }
     }
 
     /**
