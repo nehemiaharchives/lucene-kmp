@@ -383,6 +383,73 @@ class TestRegExpParsing {
         AutomatonTestUtil.assertMinimalDFA(actual)
     }
 
+    @Test
+    fun testTruncatedCharClass() {
+        assertFailsWith<IllegalArgumentException> { RegExp("[b-d") }
+    }
+
+    @Test
+    fun testBogusCharClass() {
+        assertFailsWith<IllegalArgumentException> { RegExp("[\\q]") }
+    }
+
+    @Test
+    fun testExcapedNotCharClass() {
+        val re = RegExp("[\\?]")
+        assertEquals("\\?", re.toString())
+        assertEquals("REGEXP_CHAR char=?\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeChar('?'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testExcapedSlashNotCharClass() {
+        val re = RegExp("[\\\\]")
+        assertEquals("\\\\", re.toString())
+        assertEquals("REGEXP_CHAR char=\\\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeChar('\\'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testEscapedDashCharClass() {
+        val re = RegExp("[\\-]")
+        assertEquals("REGEXP_CHAR char=-\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeChar('-'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testEmpty() {
+        val re = RegExp("#", RegExp.EMPTY)
+        assertEquals("#", re.toString())
+        assertEquals("REGEXP_EMPTY\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeEmpty()
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testEmptyClass() {
+        val ex = assertFailsWith<IllegalArgumentException> { RegExp("[]") }
+        assertEquals("expected ']' at position 2", ex.message)
+    }
+
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
         val detExpected = Operations.determinize(expected, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         val detActual = Operations.determinize(actual, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
