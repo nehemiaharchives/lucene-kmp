@@ -613,13 +613,9 @@ open class LongIntHashMap
     }
 
     override fun clone(): LongIntHashMap {
-        val cloned = LongIntHashMap()
-        cloned.keys = keys?.copyOf()
-        cloned.values = values?.copyOf()
-        cloned.hasEmptyKey = hasEmptyKey
-        cloned.iterationSeed = ITERATION_SEED.incrementAndFetch()
-        // Copy other necessary fields if your class has any
-        return cloned
+        // Use the copy constructor to ensure all internal state is correctly
+        // transferred to the cloned instance.
+        return LongIntHashMap(this)
     }
 
     /** Convert the contents of this map to a human-friendly string.  */
@@ -658,7 +654,7 @@ open class LongIntHashMap
      * Validate load factor range and return it. Override and suppress if you need insane load
      * factors.
      */
-    protected fun verifyLoadFactor(loadFactor: Double): Double {
+    protected open fun verifyLoadFactor(loadFactor: Double): Double {
         checkLoadFactor(
             loadFactor, MIN_LOAD_FACTOR.toDouble(), MAX_LOAD_FACTOR.toDouble()
         )
@@ -698,7 +694,7 @@ open class LongIntHashMap
      * Allocate new internal buffers. This method attempts to allocate and assign internal buffers
      * atomically (either allocations succeed or not).
      */
-    protected fun allocateBuffers(arraySize: Int) {
+    protected open fun allocateBuffers(arraySize: Int) {
         require(Int.bitCount(arraySize) == 1)
 
         // Ensure no change is done if we hit an OOM.
