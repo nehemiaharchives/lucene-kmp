@@ -525,117 +525,49 @@ class RegExp {
         var a: Automaton? = null
         when (kind) {
             Kind.REGEXP_UNION -> {
-<<<<<<< HEAD
                 list = mutableListOf()
                 findLeaves(exp1!!, Kind.REGEXP_UNION, list, automata, automaton_provider)
                 findLeaves(exp2!!, Kind.REGEXP_UNION, list, automata, automaton_provider)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                list = mutableListOf<Automaton>()
-                findLeaves(exp1, Kind.REGEXP_UNION, list!!, automata, automaton_provider)
-                findLeaves(exp2, Kind.REGEXP_UNION, list, automata, automaton_provider)
-=======
-                list = mutableListOf<Automaton>()
-                findLeaves(exp1!!, Kind.REGEXP_UNION, list!!, automata, automaton_provider)
-                findLeaves(exp2!!, Kind.REGEXP_UNION, list, automata, automaton_provider)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
                 a = Operations.union(list)
             }
 
             Kind.REGEXP_CONCATENATION -> {
-<<<<<<< HEAD
                 list = mutableListOf()
                 findLeaves(exp1!!, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
                 findLeaves(exp2!!, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                list = mutableListOf<Automaton>()
-                findLeaves(exp1, Kind.REGEXP_CONCATENATION, list!!, automata, automaton_provider)
-                findLeaves(exp2, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
-=======
-                list = mutableListOf<Automaton>()
-                findLeaves(exp1!!, Kind.REGEXP_CONCATENATION, list!!, automata, automaton_provider)
-                findLeaves(exp2!!, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
                 a = Operations.concatenate(list)
             }
 
             Kind.REGEXP_INTERSECTION -> a =
                 Operations.intersection(
-<<<<<<< HEAD
                     exp1!!.toAutomaton(automata, automaton_provider),
                     exp2!!.toAutomaton(automata, automaton_provider)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                    exp1.toAutomaton(automata, automaton_provider)!!,
-                    exp2.toAutomaton(automata, automaton_provider)!!
-=======
-                    exp1!!.toAutomaton(automata, automaton_provider)!!,
-                    exp2!!.toAutomaton(automata, automaton_provider)!!
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
                 )
 
-<<<<<<< HEAD
             Kind.REGEXP_OPTIONAL -> a = Operations.optional(exp1!!.toAutomaton(automata, automaton_provider))
             Kind.REGEXP_REPEAT -> a = Operations.repeat(exp1!!.toAutomaton(automata, automaton_provider))
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-            Kind.REGEXP_OPTIONAL -> a = Operations.optional(exp1.toAutomaton(automata, automaton_provider)!!)
-            Kind.REGEXP_REPEAT -> a = Operations.repeat(exp1.toAutomaton(automata, automaton_provider)!!)
-=======
-            Kind.REGEXP_OPTIONAL -> a = Operations.optional(exp1!!.toAutomaton(automata, automaton_provider)!!)
-            Kind.REGEXP_REPEAT -> a = Operations.repeat(exp1!!.toAutomaton(automata, automaton_provider)!!)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             Kind.REGEXP_REPEAT_MIN -> {
-<<<<<<< HEAD
                 a = exp1!!.toAutomaton(automata, automaton_provider)
                 a = Operations.repeat(a, min)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.repeat(a!!, min)
-=======
-                a = exp1!!.toAutomaton(automata, automaton_provider)
-                a = Operations.repeat(a!!, min)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             }
 
             Kind.REGEXP_REPEAT_MINMAX -> {
-<<<<<<< HEAD
                 a = exp1!!.toAutomaton(automata, automaton_provider)
                 a = Operations.repeat(a, min, max)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.repeat(a!!, min, max)
-=======
-                a = exp1!!.toAutomaton(automata, automaton_provider)
-                a = Operations.repeat(a!!, min, max)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             }
 
             Kind.REGEXP_COMPLEMENT -> {
                 // we don't support arbitrary complement, just "negated character class"
                 // this is just a list of characters (e.g. "a") or ranges (e.g. "b-d")
-<<<<<<< HEAD
                 a = exp1!!.toAutomaton(automata, automaton_provider)
                 a = Operations.complement(a, Int.Companion.MAX_VALUE)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.complement(a!!, Int.Companion.MAX_VALUE)
-=======
-                a = exp1!!.toAutomaton(automata, automaton_provider)
-                a = Operations.complement(a!!, Int.Companion.MAX_VALUE)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             }
 
             Kind.REGEXP_DEPRECATED_COMPLEMENT -> {
                 // to ease transitions for users only, support arbitrary complement
                 // but bounded by DEFAULT_DETERMINIZE_WORK_LIMIT: must not be configurable.
-<<<<<<< HEAD
                 a = exp1!!.toAutomaton(automata, automaton_provider)
                 a = Operations.complement(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.complement(a!!, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
-=======
-                a = exp1!!.toAutomaton(automata, automaton_provider)
-                a = Operations.complement(a!!, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             }
 
             Kind.REGEXP_CHAR -> a = if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
@@ -651,13 +583,7 @@ class RegExp {
             Kind.REGEXP_STRING -> a = if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
                 toCaseInsensitiveString()
             } else {
-<<<<<<< HEAD
                 Automata.makeString(s!!)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                a = Automata.makeString(s)
-=======
-                a = Automata.makeString(s!!)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             }
 
             Kind.REGEXP_ANYSTRING -> a = Automata.makeAnyString()
@@ -1339,6 +1265,7 @@ class RegExp {
     @Throws(IllegalArgumentException::class)
     fun parseCharExp(): Int {
         match('\\'.code)
+<<<<<<< HEAD
         if (peek("u")) {
             next() // consume 'u'
             var code = 0
@@ -1351,6 +1278,21 @@ class RegExp {
             }
             return code
         }
+||||||| parent of 79ff59d (Handle unicode escapes in RegExp)
+=======
+        if (peek("u")) {
+            next() // consume 'u'
+            var code = 0
+            for (i in 0 until 4) {
+                require(more()) { "unexpected end-of-string" }
+                val ch = next()
+                val digit = java.lang.Character.digit(ch, 16)
+                require(digit != -1) { "invalid unicode escape" }
+                code = (code shl 4) or digit
+            }
+            return code
+        }
+>>>>>>> 79ff59d (Handle unicode escapes in RegExp)
         return next()
     }
 
@@ -1477,44 +1419,16 @@ class RegExp {
             ) return makeString(flags, exp1, exp2)
             val rexp1: RegExp
             val rexp2: RegExp
-<<<<<<< HEAD
             if (exp1.kind == Kind.REGEXP_CONCATENATION && (exp1.exp2!!.kind == Kind.REGEXP_CHAR || exp1.exp2.kind == Kind.REGEXP_STRING)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-            if (exp1.kind == Kind.REGEXP_CONCATENATION && (exp1.exp2.kind == Kind.REGEXP_CHAR || exp1.exp2.kind == Kind.REGEXP_STRING)
-=======
-            if (exp1.kind == Kind.REGEXP_CONCATENATION && (exp1.exp2!!.kind == Kind.REGEXP_CHAR || exp1.exp2!!.kind == Kind.REGEXP_STRING)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
                 && (exp2.kind == Kind.REGEXP_CHAR || exp2.kind == Kind.REGEXP_STRING)
             ) {
-<<<<<<< HEAD
                 rexp1 = exp1.exp1!!
                 rexp2 = makeString(flags, exp1.exp2, exp2)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                rexp1 = exp1.exp1
-                rexp2 = makeString(flags, exp1.exp2, exp2)
-=======
-                rexp1 = exp1.exp1!!
-                rexp2 = makeString(flags, exp1.exp2!!, exp2)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             } else if ((exp1.kind == Kind.REGEXP_CHAR || exp1.kind == Kind.REGEXP_STRING)
-<<<<<<< HEAD
                 && exp2.kind == Kind.REGEXP_CONCATENATION && (exp2.exp1!!.kind == Kind.REGEXP_CHAR || exp2.exp1.kind == Kind.REGEXP_STRING)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                && exp2.kind == Kind.REGEXP_CONCATENATION && (exp2.exp1.kind == Kind.REGEXP_CHAR || exp2.exp1.kind == Kind.REGEXP_STRING)
-=======
-                && exp2.kind == Kind.REGEXP_CONCATENATION && (exp2.exp1!!.kind == Kind.REGEXP_CHAR || exp2.exp1!!.kind == Kind.REGEXP_STRING)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             ) {
-<<<<<<< HEAD
                 rexp1 = makeString(flags, exp1, exp2.exp1)
                 rexp2 = exp2.exp2!!
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-                rexp1 = makeString(flags, exp1, exp2.exp1)
-                rexp2 = exp2.exp2
-=======
-                rexp1 = makeString(flags, exp1, exp2.exp1!!)
-                rexp2 = exp2.exp2!!
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             } else {
                 rexp1 = exp1
                 rexp2 = exp2
@@ -1523,16 +1437,8 @@ class RegExp {
         }
 
         private fun makeString(flags: Int, exp1: RegExp, exp2: RegExp): RegExp {
-<<<<<<< HEAD
             val b = StringBuilder()
             if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s!!)
-||||||| parent of fe80a3d (Fix UTF32ToUTF8 test and native compilation)
-            val b: StringBuilder = StringBuilder()
-            if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s)
-=======
-            val b: StringBuilder = StringBuilder()
-            if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s!!)
->>>>>>> fe80a3d (Fix UTF32ToUTF8 test and native compilation)
             else b.appendCodePoint(exp1.c)
             if (exp2.kind == Kind.REGEXP_STRING) b.append(exp2.s!!)
             else b.appendCodePoint(exp2.c)
