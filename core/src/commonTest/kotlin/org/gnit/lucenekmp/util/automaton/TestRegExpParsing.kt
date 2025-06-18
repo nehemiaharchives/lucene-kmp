@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util.automaton
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 
 class TestRegExpParsing {
@@ -137,6 +138,103 @@ class TestRegExpParsing {
         AutomatonTestUtil.assertMinimalDFA(actual)
 
         val expected = Automata.makeCharSet(intArrayOf('Σ'.code, 'σ'.code, 'ς'.code))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testNegatedChar() {
+        val re = RegExp("[^c]")
+        assertEquals("(.&~(\\c))", re.toString())
+        assertEquals(
+            """REGEXP_INTERSECTION
+  REGEXP_ANYCHAR
+  REGEXP_COMPLEMENT
+    REGEXP_CHAR char=c
+""",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.union(
+            mutableListOf(
+                Automata.makeCharRange(0, 'b'.code),
+                Automata.makeCharRange('d'.code, 0x10FFFF)
+            )
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testNegatedClass() {
+        val re = RegExp("[^c-da]")
+        assertEquals(
+            """REGEXP_INTERSECTION
+  REGEXP_ANYCHAR
+  REGEXP_COMPLEMENT
+    REGEXP_CHAR_CLASS starts=[U+0063 U+0061] ends=[U+0064 U+0061]
+""",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+    }
+
+    @Test
+    fun testCharRange() {
+        val re = RegExp("[b-d]")
+        assertEquals("[\\b-\\d]", re.toString())
+        assertEquals("REGEXP_CHAR_RANGE from=b to=d\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeCharRange('b'.code, 'd'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testNegatedCharRange() {
+        val re = RegExp("[^b-d]")
+        assertEquals("(.&~([\\b-\\d]))", re.toString())
+        assertEquals(
+            """REGEXP_INTERSECTION
+  REGEXP_ANYCHAR
+  REGEXP_COMPLEMENT
+    REGEXP_CHAR_RANGE from=b to=d
+""",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.union(
+            mutableListOf(
+                Automata.makeCharRange(0, 'a'.code),
+                Automata.makeCharRange('e'.code, 0x10FFFF)
+            )
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testIllegalCharRange() {
+        assertFailsWith<IllegalArgumentException> { RegExp("[z-a]") }
+    }
+
+    @Test
+    fun testCharClassDigit() {
+        val re = RegExp("[\\d]")
+        assertEquals("[\\0-\\9]", re.toString())
+        assertEquals("REGEXP_CHAR_RANGE from=0 to=9\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeCharRange('0'.code, '9'.code)
         assertSameLanguage(expected, actual)
     }
 
