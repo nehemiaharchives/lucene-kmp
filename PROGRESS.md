@@ -151,7 +151,7 @@
 |   org.apache.lucene.document | 50 | 1 | 2% |
 |   org.apache.lucene.geo | 17 | 15 | 88% |
 |   org.apache.lucene.index | 197 | 0 | 0% |
-|     org.apache.lucene.internal.hppc | 15 | 4 | 26% |
+|     org.apache.lucene.internal.hppc | 15 | 7 | 46% |
 |     org.apache.lucene.internal.tests | 1 | 0 | 0% |
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
 |   org.apache.lucene.search | 149 | 0 | 0% |
@@ -159,8 +159,8 @@
 |     org.apache.lucene.search.similarities | 25 | 0 | 0% |
 |   org.apache.lucene.store | 27 | 7 | 25% |
 |   org.apache.lucene.util | 63 | 37 | 58% |
-|     org.apache.lucene.util.automaton | 15 | 1 | 6% |
-|     org.apache.lucene.util.bkd | 8 | 4 | 50% |
+|     org.apache.lucene.util.automaton | 15 | 2 | 13% |
+|     org.apache.lucene.util.bkd | 8 | 6 | 75% |
 |     org.apache.lucene.util.compress | 3 | 3 | 100% |
 |     org.apache.lucene.util.fst | 8 | 1 | 12% |
 |     org.apache.lucene.util.graph | 1 | 0 | 0% |
@@ -168,7 +168,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 0 | 0% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 77 | 11% |
+| Total | 673 | 83 | 12% |
 
 
 ## Tests To Port
@@ -496,12 +496,9 @@
 | [org.apache.lucene.internal.hppc.TestFloatArrayList](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestFloatArrayList.java) | org.gnit.lucenekmp.internal.hppc.TestFloatArrayList |
 | [org.apache.lucene.internal.hppc.TestIntDoubleHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntDoubleHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntDoubleHashMap |
 | [org.apache.lucene.internal.hppc.TestIntFloatHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntFloatHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntFloatHashMap |
-| [org.apache.lucene.internal.hppc.TestIntIntHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntIntHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntIntHashMap |
 | [org.apache.lucene.internal.hppc.TestIntLongHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntLongHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntLongHashMap |
-| [org.apache.lucene.internal.hppc.TestIntObjectHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestIntObjectHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestIntObjectHashMap |
 | [org.apache.lucene.internal.hppc.TestLongFloatHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongFloatHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongFloatHashMap |
 | [org.apache.lucene.internal.hppc.TestLongIntHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongIntHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongIntHashMap |
-| [org.apache.lucene.internal.hppc.TestLongObjectHashMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/hppc/TestLongObjectHashMap.java) | org.gnit.lucenekmp.internal.hppc.TestLongObjectHashMap |
 | [org.apache.lucene.internal.tests.TestTestSecrets](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/tests/TestTestSecrets.java) | org.gnit.lucenekmp.internal.tests.TestTestSecrets |
 | [org.apache.lucene.internal.vectorization.TestPostingDecodingUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestPostingDecodingUtil.java) | org.gnit.lucenekmp.internal.vectorization.TestPostingDecodingUtil |
 | [org.apache.lucene.internal.vectorization.TestVectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorScorer.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorScorer |
@@ -730,7 +727,6 @@
 | [org.apache.lucene.util.automaton.TestDeterminism](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminism.java) | org.gnit.lucenekmp.util.automaton.TestDeterminism |
 | [org.apache.lucene.util.automaton.TestDeterminizeLexicon](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminizeLexicon.java) | org.gnit.lucenekmp.util.automaton.TestDeterminizeLexicon |
 | [org.apache.lucene.util.automaton.TestFiniteStringsIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestFiniteStringsIterator.java) | org.gnit.lucenekmp.util.automaton.TestFiniteStringsIterator |
-| [org.apache.lucene.util.automaton.TestIntSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestIntSet.java) | org.gnit.lucenekmp.util.automaton.TestIntSet |
 | [org.apache.lucene.util.automaton.TestLevenshteinAutomata](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLevenshteinAutomata.java) | org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata |
 | [org.apache.lucene.util.automaton.TestLimitedFiniteStringsIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLimitedFiniteStringsIterator.java) | org.gnit.lucenekmp.util.automaton.TestLimitedFiniteStringsIterator |
 | [org.apache.lucene.util.automaton.TestMinimize](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestMinimize.java) | org.gnit.lucenekmp.util.automaton.TestMinimize |
@@ -742,8 +738,6 @@
 | [org.apache.lucene.util.automaton.TestUTF32ToUTF8](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestUTF32ToUTF8.java) | org.gnit.lucenekmp.util.automaton.TestUTF32ToUTF8 |
 | [org.apache.lucene.util.bkd.Test4BBKDPoints](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/Test4BBKDPoints.java) | org.gnit.lucenekmp.util.bkd.Test4BBKDPoints |
 | [org.apache.lucene.util.bkd.TestBKDRadixSelector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestBKDRadixSelector.java) | org.gnit.lucenekmp.util.bkd.TestBKDRadixSelector |
-| [org.apache.lucene.util.bkd.TestBKDRadixSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestBKDRadixSort.java) | org.gnit.lucenekmp.util.bkd.TestBKDRadixSort |
-| [org.apache.lucene.util.bkd.TestMutablePointTreeReaderUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/TestMutablePointTreeReaderUtils.java) | org.gnit.lucenekmp.util.bkd.TestMutablePointTreeReaderUtils |
 | [org.apache.lucene.util.fst.Test2BFST](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/Test2BFST.java) | org.gnit.lucenekmp.util.fst.Test2BFST |
 | [org.apache.lucene.util.fst.Test2BFSTOffHeap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/Test2BFSTOffHeap.java) | org.gnit.lucenekmp.util.fst.Test2BFSTOffHeap |
 | [org.apache.lucene.util.fst.TestBitTableUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/TestBitTableUtil.java) | org.gnit.lucenekmp.util.fst.TestBitTableUtil |
