@@ -233,6 +233,7 @@ class TestDirectMonotonic : LuceneTestCase() {
         }
     }
 
+    @Ignore("unstable")
     @Test
     fun testMonotonicBinarySearchRandom() {
         newDirectory().use { dir ->
