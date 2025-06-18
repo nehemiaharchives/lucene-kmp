@@ -238,6 +238,151 @@ class TestRegExpParsing {
         assertSameLanguage(expected, actual)
     }
 
+    @Test
+    fun testCharClassNonDigit() {
+        val re = RegExp("[\\D]")
+        assertEquals(
+            "REGEXP_CHAR_CLASS starts=[U+0000 U+003A] ends=[U+002F U+10FFFF]\n",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.minus(
+            Automata.makeAnyChar(),
+            Automata.makeCharRange('0'.code, '9'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCharClassWhitespace() {
+        val re = RegExp("[\\s]")
+        assertEquals(
+            "REGEXP_CHAR_CLASS starts=[U+0009 U+000D U+0020] ends=[U+000A U+000D U+0020]\n",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.union(
+            mutableListOf(
+                Automata.makeChar(' '.code),
+                Automata.makeChar('\n'.code),
+                Automata.makeChar('\r'.code),
+                Automata.makeChar('\t'.code)
+            )
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCharClassNonWhitespace() {
+        val re = RegExp("[\\S]")
+        assertEquals(
+            "REGEXP_CHAR_CLASS starts=[U+0000 U+000B U+000E U+0021] ends=[U+0008 U+000C U+001F U+10FFFF]\n",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        var expected = Automata.makeAnyChar()
+        expected = Operations.minus(
+            expected,
+            Automata.makeChar(' '.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        expected = Operations.minus(
+            expected,
+            Automata.makeChar('\n'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        expected = Operations.minus(
+            expected,
+            Automata.makeChar('\r'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        expected = Operations.minus(
+            expected,
+            Automata.makeChar('\t'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCharClassWord() {
+        val re = RegExp("[\\w]")
+        assertEquals("[\\0-\\9\\A-\\Z\\_\\a-\\z]", re.toString())
+        assertEquals(
+            "REGEXP_CHAR_CLASS starts=[U+0030 U+0041 U+005F U+0061] ends=[U+0039 U+005A U+005F U+007A]\n",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.union(
+            mutableListOf(
+                Automata.makeCharRange('a'.code, 'z'.code),
+                Automata.makeCharRange('A'.code, 'Z'.code),
+                Automata.makeCharRange('0'.code, '9'.code),
+                Automata.makeChar('_'.code)
+            )
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCharClassNonWord() {
+        val re = RegExp("[\\W]")
+        assertEquals(
+            "REGEXP_CHAR_CLASS starts=[U+0000 U+003A U+005B U+0060 U+007B] ends=[U+002F U+0040 U+005E U+0060 U+10FFFF]\n",
+            re.toStringTree()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        var expected = Automata.makeAnyChar()
+        expected = Operations.minus(
+            expected,
+            Automata.makeCharRange('a'.code, 'z'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        expected = Operations.minus(
+            expected,
+            Automata.makeCharRange('A'.code, 'Z'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        expected = Operations.minus(
+            expected,
+            Automata.makeCharRange('0'.code, '9'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        expected = Operations.minus(
+            expected,
+            Automata.makeChar('_'.code),
+            Operations.DEFAULT_DETERMINIZE_WORK_LIMIT
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testJumboCharClass() {
+        val re = RegExp("[0-5a\\sbc-d]")
+        assertEquals(
+            "REGEXP_CHAR_CLASS starts=[U+0030 U+0061 U+0009 U+000D U+0020 U+0062 U+0063] ends=[U+0035 U+0061 U+000A U+000D U+0020 U+0062 U+0064]\n",
+            re.toStringTree()
+        )
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+    }
+
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
         val detExpected = Operations.determinize(expected, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         val detActual = Operations.determinize(actual, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
