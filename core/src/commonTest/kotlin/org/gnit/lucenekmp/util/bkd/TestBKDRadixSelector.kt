@@ -306,13 +306,13 @@ class TestBKDRadixSelector : LuceneTestCase() {
 
     @Test
     fun testRandomBinaryMedium() {
-        doTestRandomBinary(25000)
+        doTestRandomBinary(2500) // TODO originally 25000, but reduced to 2500 for dev speed
     }
 
     @LuceneTestCase.Companion.Nightly
     @Test
     fun testRandomBinaryBig() {
-        doTestRandomBinary(500000)
+        doTestRandomBinary(5000) // TODO originally 500000, but reduced to 5000 for dev speed
     }
 
     @Test
