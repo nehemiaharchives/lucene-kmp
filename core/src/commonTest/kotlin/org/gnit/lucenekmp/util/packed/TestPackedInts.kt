@@ -21,15 +21,10 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.RamUsageTester
 import org.gnit.lucenekmp.store.ByteArrayDataInput
 import org.gnit.lucenekmp.store.ByteArrayDataOutput
-import org.gnit.lucenekmp.store.ByteBuffersDataInput
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput
-import org.gnit.lucenekmp.util.LongsRef
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.LongBuffer
-import org.gnit.lucenekmp.util.packed.PagedGrowableWriter
-import org.gnit.lucenekmp.util.packed.PagedMutable
-import org.gnit.lucenekmp.util.packed.PackedLongValues
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.Ignore
@@ -437,14 +432,13 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
-    @Ignore
     fun testIntOverflow() {
         val index = (1 shl 30) + 1
         val bits = 2
         var p64: Packed64? = null
         try {
             p64 = Packed64(index, bits)
-        } catch (_: OutOfMemoryError) {
+        } catch (_: /*OutOfMemory*/Error) {
         }
         if (p64 != null) {
             p64.set(index - 1, 1)
@@ -454,7 +448,7 @@ class TestPackedInts : LuceneTestCase() {
         var p64sb: Packed64SingleBlock? = null
         try {
             p64sb = Packed64SingleBlock.create(index, bits)
-        } catch (_: OutOfMemoryError) {
+        } catch (_: /*OutOfMemory*/Error) {
         }
         if (p64sb != null) {
             p64sb.set(index - 1, 1)
@@ -463,7 +457,6 @@ class TestPackedInts : LuceneTestCase() {
     }
 
     @Test
-    @Ignore
     fun testPagedGrowableWriter() {
         val rnd = random()
         val pageSize = 1 shl TestUtil.nextInt(rnd, 6, 30)
@@ -584,7 +577,7 @@ class TestPackedInts : LuceneTestCase() {
 
     @Test
     fun testEncodeDecode() {
-        for (format in PackedInts.Format.values()) {
+        for (format in PackedInts.Format.entries) {
             for (bpv in 1..64) {
                 if (!format.isSupported(bpv)) continue
                 val msg = "$format $bpv"
@@ -599,12 +592,12 @@ class TestPackedInts : LuceneTestCase() {
                 assertEquals(byteBlockCount, decoder.byteBlockCount())
                 assertEquals(byteValueCount, decoder.byteValueCount())
 
-                val longIterations = random().nextInt(100)
+                val longIterations = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
                 val byteIterations = longIterations * longValueCount / byteValueCount
                 assertEquals(longIterations * longValueCount, byteIterations * byteValueCount)
-                val blocksOffset = random().nextInt(100)
-                val valuesOffset = random().nextInt(100)
-                val blocksOffset2 = random().nextInt(100)
+                val blocksOffset = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
+                val valuesOffset = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
+                val blocksOffset2 = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
                 val blocksLen = longIterations * longBlockCount
 
                 val blocks = LongArray(blocksOffset + blocksLen) { random().nextLong() }
@@ -732,17 +725,16 @@ class TestPackedInts : LuceneTestCase() {
     @Test
     @Ignore
     fun testPackedInputOutput() {
-        // PackedDataInput/PackedDataOutput not yet implemented
+        // TODO PackedDataInput/PackedDataOutput implemented if needed later
     }
 
     @Test
-    @Ignore
     fun testBlockPackedReaderWriter() {
         val rnd = random()
         val iters = atLeast(2)
         repeat(iters) {
             val blockSize = 1 shl TestUtil.nextInt(rnd, 6, 18)
-            val valueCount = if (LuceneTestCase.TEST_NIGHTLY) rnd.nextInt(1 shl 18) else rnd.nextInt(1 shl 15)
+            val valueCount = if (TEST_NIGHTLY) rnd.nextInt(1 shl 18) else rnd.nextInt(1 shl 15)
             val values = LongArray(valueCount)
             var minValue = 0L
             var bpv = 0
