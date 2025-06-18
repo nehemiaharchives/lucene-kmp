@@ -155,7 +155,7 @@ class TestTessellator : LuceneTestCase() {
     @Test
     fun testInvalidPolygonIntersects() {
         val wkt = "POLYGON((0 0, 1 1, 0 1, 1 0, 0 0))"
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
 
         run {
             val ex = expectThrows(IllegalArgumentException::class) {
@@ -217,7 +217,7 @@ class TestTessellator : LuceneTestCase() {
                 "6.0385632 52.0923458, 6.0385416 52.0922588, 6.0385012 52.0922528, 6.0383203 52.0923097, " +
                 "6.037857 52.0923747, 6.0377263 52.0924189))"
         )
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
         run {
             val ex = expectThrows(IllegalArgumentException::class) { Tessellator.tessellate(polygon, true) }
             assertEquals("Polygon ring self-intersection at lat=52.0924189 lon=6.0377263", ex!!.message)
@@ -253,7 +253,7 @@ class TestTessellator : LuceneTestCase() {
     @Test
     fun testInvalidPolygonCollinear() {
         val wkt = "POLYGON ((18.9401790919516 -33.9681188869036, 18.9401790919516 -33.9681188869036, 18.9401790919517 -33.9681188869036, 18.9401790919517 -33.9681188869036, 18.9401790919516 -33.9681188869036))"
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
         val ex = expectThrows(IllegalArgumentException::class) { Tessellator.tessellate(polygon, true) }
         assertEquals("at least three non-collinear points required", ex!!.message)
     }
@@ -432,7 +432,7 @@ class TestTessellator : LuceneTestCase() {
                 "14.1993717 40.8277752, 14.1992074 40.8278304, 14.1990929 40.8278688, 14.1989635 40.8279122, 14.1988594 40.8276864, 14.1989238 40.8274753), (14.1993717 40.8277752, 14.1993975 40.8277665, 14.1995864 40.8276576, 14.1994599 40.8275746," +
                 " 14.1993761 40.8275525, 14.1993451 40.8275478, 14.1993073 40.8276704, 14.1993717 40.8277752), (14.1990593 40.8275004, 14.1989907 40.8276889, 14.1990929 40.8278688, 14.1992074 40.8278304, 14.1991335 40.8276763, 14.1991793 40.8275226, 14.1990593 40.8275004))"
         )
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
         val ex = expectThrows(IllegalArgumentException::class) { Tessellator.tessellate(polygon, true) }
         assertEquals(
             "Polygon ring self-intersection at lat=40.8278688 lon=14.1990929",
@@ -503,7 +503,7 @@ class TestTessellator : LuceneTestCase() {
                 " 130.6765321 33.4549107, 130.6765257 33.4549105, 130.6765238 33.454949, 130.6765515 33.45495, 130.6765512 33.4549572, 130.6765808 33.4549583, 130.67658 33.4549747)," +
                 " (130.6765844 33.4549234, 130.6765847 33.4549188, 130.6765847 33.4549188, 130.6765844 33.4549234))"
         )
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
         expectThrows(IllegalArgumentException::class) {
             Tessellator.tessellate(polygon, random().nextBoolean())
         }
@@ -516,7 +516,7 @@ class TestTessellator : LuceneTestCase() {
                 " 33.3275354 -8.9353756, 33.3275342 -8.9353464, 33.3275184 -8.935347, 33.3275167 -8.9353066, 33.3275381 -8.9353057, 33.3275375 -8.9352901, 33.3275598 -8.9352892, 33.3275594 -8.9352808, 33.3275981 -8.9352792, 33.3275991 -8.9353026)," +
                 " (33.3275601 -8.9353046, 33.3275599 -8.9352988, 33.3275601 -8.9353046, 33.3275601 -8.9353046))"
         )
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
         expectThrows(IllegalArgumentException::class) {
             Tessellator.tessellate(polygon, random().nextBoolean())
         }
@@ -536,7 +536,7 @@ class TestTessellator : LuceneTestCase() {
                 "(6.9735097 51.6245538,6.9736199 51.624605,6.9736853 51.6246203,6.9737516 51.6246231,6.9738024 51.6246107,6.9738324 51.6245878,6.9738425 51.6245509,6.9738332 51.6245122,6.9738039 51.6244869,6.9737616 51.6244687,6.9737061 51.6244625,6.9736445 51.6244749,6.9735736 51.6245046,6.9735097 51.6245538))," +
                 "((6.9731576 51.6249947,6.9731361 51.6250664,6.9731161 51.6251037,6.9731022 51.6250803,6.9731277 51.62502,6.9731576 51.6249947)))"
         )
-        val polygons = SimpleWKTShapeParser.parseMulti(wkt)
+        val polygons = SimpleWKTShapeParser.parse(wkt) as Array<Polygon>
         checkMultiPolygon(polygons, 0.0)
     }
 
@@ -681,12 +681,12 @@ class TestTessellator : LuceneTestCase() {
 
     // helper functions ported from Java
     private fun checkPolygon(wkt: String) {
-        val polygon = SimpleWKTShapeParser.parse(wkt)
+        val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
         checkPolygon(polygon, 0.0)
     }
 
     private fun checkMultiPolygon(wkt: String, delta: Double = 0.0) {
-        val polygons = SimpleWKTShapeParser.parseMulti(wkt)
+        val polygons = SimpleWKTShapeParser.parse(wkt) as Array<Polygon>
         checkMultiPolygon(polygons, delta)
     }
 
