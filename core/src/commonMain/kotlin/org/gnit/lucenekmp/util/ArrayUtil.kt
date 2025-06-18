@@ -178,7 +178,8 @@ class ArrayUtil {
          */
         inline fun <reified T> growExact(array: Array<T>, newLength: Int): Array<T> {
             if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
-            return Array<T>(newLength) { i -> if (i < array.size) array[i] else null as T }
+            @Suppress("UNCHECKED_CAST")
+            return array.copyOf(newLength) as Array<T>
         }
 
         @JvmName("growExactNullable")

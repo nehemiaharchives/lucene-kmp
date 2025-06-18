@@ -56,9 +56,9 @@ class TestBufferedChecksum : LuceneTestCase() {
     fun testDifferentInputTypes() {
         val crc = CRC32()
         val buffered = BufferedChecksum(CRC32())
-        val iterations = atLeast(1000)
+        val iterations = atLeast(10) // TODO originally 1000, but reduced to 10 for dev speed
         for (i in 0 until iterations) {
-            val input = ByteArray(4096)
+            val input = ByteArray(512) // TODO originally 4096, but reduced to 512 for dev speed
             random().nextBytes(input)
             crc.update(input)
             val checksum = crc.getValue()

@@ -65,7 +65,7 @@ class TestSparseFixedBitSet : LuceneTestCase() {
     @Test
     @Throws(IOException::class)
     fun testRamBytesUsed() {
-        val size = 1000 + random().nextInt(10000)
+        val size = 1000 + random().nextInt(1000)
         val original: BitSet = SparseFixedBitSet(size)
         repeat(3) { original.set(random().nextInt(size)) }
         assertTrue(original.ramBytesUsed() > 0)

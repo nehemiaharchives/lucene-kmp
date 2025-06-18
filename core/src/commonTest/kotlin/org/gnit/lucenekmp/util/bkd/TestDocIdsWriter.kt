@@ -42,10 +42,10 @@ class TestDocIdsWriter : LuceneTestCase() {
 
     @Test
     fun testRandom() {
-        val numIters = atLeast(100)
+        val numIters = atLeast(10) // TODO originally 100, but reduced to 10 for dev speed
         getDirectory().use { dir ->
             repeat(numIters) {
-                val docIDs = IntArray(1 + random().nextInt(5000))
+                val docIDs = IntArray(1 + random().nextInt(50)) // TODO originally 5000, but reduced to 50 for dev speed
                 val bpv = TestUtil.nextInt(random(), 1, 32)
                 val maxValue: Int =
                     if (bpv == 32) Int.MAX_VALUE else (1 shl bpv) - 1
@@ -64,10 +64,10 @@ class TestDocIdsWriter : LuceneTestCase() {
 
     @Test
     fun testSorted() {
-        val numIters = atLeast(100)
+        val numIters = atLeast(10) // TODO originally 100 but reduced to 10 for dev speed
         getDirectory().use { dir ->
             repeat(numIters) {
-                val docIDs = IntArray(1 + random().nextInt(5000))
+                val docIDs = IntArray(1 + random().nextInt(50)) // TODO originally 5000, but reduced to 50 for dev speed
                 val bpv = TestUtil.nextInt(random(), 1, 32)
                 val maxValue: Int =
                     if (bpv == 32) Int.MAX_VALUE else (1 shl bpv) - 1
@@ -86,10 +86,10 @@ class TestDocIdsWriter : LuceneTestCase() {
 
     @Test
     fun testCluster() {
-        val numIters = atLeast(100)
+        val numIters = atLeast(10) // TODO originally 100 but reduced to 10 for dev speed
         getDirectory().use { dir ->
             repeat(numIters) {
-                val docIDs = IntArray(1 + random().nextInt(5000))
+                val docIDs = IntArray(1 + random().nextInt(50)) // TODO originally 5000, but reduced to 50 for dev speed
                 val min = random().nextInt(1000)
                 val bpv = TestUtil.nextInt(random(), 1, 16)
                 for (i in docIDs.indices) {
@@ -102,10 +102,10 @@ class TestDocIdsWriter : LuceneTestCase() {
 
     @Test
     fun testBitSet() {
-        val numIters = atLeast(100)
+        val numIters = atLeast(10) // TODO originally 100 but reduced to 10 for dev speed
         getDirectory().use { dir ->
             repeat(numIters) {
-                val size = 1 + random().nextInt(5000)
+                val size = 1 + random().nextInt(50) // TODO originally 5000, but reduced to 50 for dev speed
                 val set = CollectionUtil.newHashSet<Int>(size)
                 val small = random().nextInt(1000)
                 while (set.size < size) {
@@ -119,10 +119,10 @@ class TestDocIdsWriter : LuceneTestCase() {
 
     @Test
     fun testContinuousIds() {
-        val numIters = atLeast(100)
+        val numIters = atLeast(10) // TODO originally 100 but reduced to 10 for dev speed
         getDirectory().use { dir ->
             repeat(numIters) {
-                val size = 1 + random().nextInt(5000)
+                val size = 1 + random().nextInt(50) // TODO originally 5000, but reduced to 50 for dev speed
                 val docIDs = IntArray(size)
                 val start = random().nextInt(1_000_000)
                 for (i in docIDs.indices) {

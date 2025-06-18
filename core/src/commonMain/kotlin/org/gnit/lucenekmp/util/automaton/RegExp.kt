@@ -441,7 +441,7 @@ class RegExp {
         flags = syntax_flags or match_flags
         originalString = s
         val e: RegExp
-        if (s.length == 0) e = makeString(flags, "")
+        if (s.isEmpty()) e = makeString(flags, "")
         else {
             e = parseUnionExp()
             require(pos >= originalString.length) { "end-of-string expected at position $pos" }
@@ -570,18 +570,18 @@ class RegExp {
                 a = Operations.complement(a!!, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
             }
 
-            Kind.REGEXP_CHAR -> if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
-                a = Automata.makeCharSet(toCaseInsensitiveChar(c))
+            Kind.REGEXP_CHAR -> a = if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
+                Automata.makeCharSet(toCaseInsensitiveChar(c))
             } else {
-                a = Automata.makeChar(c)
+                Automata.makeChar(c)
             }
 
             Kind.REGEXP_CHAR_RANGE -> a = Automata.makeCharRange(from!![0], to!![0])
             Kind.REGEXP_CHAR_CLASS -> a = Automata.makeCharClass(from!!, to!!)
             Kind.REGEXP_ANYCHAR -> a = Automata.makeAnyChar()
             Kind.REGEXP_EMPTY -> a = Automata.makeEmpty()
-            Kind.REGEXP_STRING -> if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
-                a = toCaseInsensitiveString()
+            Kind.REGEXP_STRING -> a = if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
+                toCaseInsensitiveString()
             } else {
                 a = Automata.makeString(s!!)
             }
@@ -599,7 +599,7 @@ class RegExp {
                         throw IllegalArgumentException(e)
                     }
                 }
-                requireNotNull(aa) { "'" + s + "' not found" }
+                requireNotNull(aa) { "'" + s!! + "' not found" }
                 a = aa
             }
 
@@ -642,7 +642,7 @@ class RegExp {
     }
 
     private fun toCaseInsensitiveString(): Automaton {
-        val list: MutableList<Automaton> = mutableListOf<Automaton>()
+        val list: MutableList<Automaton> = mutableListOf()
 
         val iter: CharIterator = s!!.codePointSequence().iterator() as CharIterator
         while (iter.hasNext()) {
@@ -669,7 +669,7 @@ class RegExp {
 
     /** Constructs string from parsed regular expression.  */
     override fun toString(): String {
-        val b: StringBuilder = StringBuilder()
+        val b = StringBuilder()
         toStringBuilder(b)
         return b.toString()
     }
@@ -748,9 +748,9 @@ class RegExp {
 
             Kind.REGEXP_ANYCHAR -> b.append(".")
             Kind.REGEXP_EMPTY -> b.append("#")
-            Kind.REGEXP_STRING -> b.append("\"").append(s).append("\"")
+            Kind.REGEXP_STRING -> b.append("\"").append(s!!).append("\"")
             Kind.REGEXP_ANYSTRING -> b.append("@")
-            Kind.REGEXP_AUTOMATON -> b.append("<").append(s).append(">")
+            Kind.REGEXP_AUTOMATON -> b.append("<").append(s!!).append(">")
             Kind.REGEXP_INTERVAL -> {
                 val s1 = min.toString()
                 val s2 = max.toString()
@@ -857,7 +857,7 @@ class RegExp {
                 b.append(indent)
                 b.append(kind)
                 b.append(" string=")
-                b.append(s)
+                b.append(s!!)
                 b.append('\n')
             }
 
@@ -920,7 +920,7 @@ class RegExp {
     val identifiers: MutableSet<String?>
         /** Returns set of automaton identifiers that occur in this regular expression.  */
         get() {
-            val set: MutableSet<String?> = mutableSetOf<String?>()
+            val set: MutableSet<String?> = mutableSetOf()
             getIdentifiers(set)
             return set
         }
@@ -972,12 +972,12 @@ class RegExp {
     }
 
     @Throws(IllegalArgumentException::class)
-    /*fun parseUnionExp(): RegExp {
-        return iterativeParseExp(
-            java.util.function.Supplier { this.parseInterExp() },
-            java.util.function.BooleanSupplier { match('|'.code) },
-            MakeRegexGroup { flags: Int, exp1: RegExp?, exp2: RegExp? -> Companion.makeUnion(flags, exp1!!, exp2!!) })
-    }*/
+            /*fun parseUnionExp(): RegExp {
+                return iterativeParseExp(
+                    java.util.function.Supplier { this.parseInterExp() },
+                    java.util.function.BooleanSupplier { match('|'.code) },
+                    MakeRegexGroup { flags: Int, exp1: RegExp?, exp2: RegExp? -> Companion.makeUnion(flags, exp1!!, exp2!!) })
+            }*/
     fun parseUnionExp(): RegExp =
         iterativeParseExp(this::parseInterExp, { match('|'.code) }, RegExp::makeUnion)
 
@@ -1022,7 +1022,7 @@ class RegExp {
             else if (match('{'.code)) {
                 var start = pos
                 while (peek("0123456789")) next()
-                require(start != pos) { "integer expected at position " + pos }
+                require(start != pos) { "integer expected at position $pos" }
                 val n = originalString!!.substring(start, pos).toInt()
                 var m = -1
                 if (match(','.code)) {
@@ -1030,10 +1030,10 @@ class RegExp {
                     while (peek("0123456789")) next()
                     if (start != pos) m = originalString.substring(start, pos).toInt()
                 } else m = n
-                require(match('}'.code)) { "expected '}' at position " + pos }
-                require(!(m != -1 && n > m)) { "invalid repetition range(out of order): " + n + ".." + m }
-                if (m == -1) e = makeRepeat(flags, e, n)
-                else e = makeRepeat(flags, e, n, m)
+                require(match('}'.code)) { "expected '}' at position $pos" }
+                require(!(m != -1 && n > m)) { "invalid repetition range(out of order): $n..$m" }
+                e = if (m == -1) makeRepeat(flags, e, n)
+                else makeRepeat(flags, e, n, m)
             }
         }
         return e
@@ -1041,8 +1041,8 @@ class RegExp {
 
     @Throws(IllegalArgumentException::class)
     fun parseComplExp(): RegExp {
-        if (check(DEPRECATED_COMPLEMENT) && match('~'.code)) return makeDeprecatedComplement(flags, parseComplExp())
-        else return parseCharClassExp()
+        return if (check(DEPRECATED_COMPLEMENT) && match('~'.code)) makeDeprecatedComplement(flags, parseComplExp())
+        else parseCharClassExp()
     }
 
     @Throws(IllegalArgumentException::class)
@@ -1052,25 +1052,34 @@ class RegExp {
             if (match('^'.code)) negate = true
             var e = parseCharClasses()
             if (negate) e = makeIntersection(flags, makeAnyChar(flags), makeComplement(flags, e))
-            require(match(']'.code)) { "expected ']' at position " + pos }
+            require(match(']'.code)) { "expected ']' at position $pos" }
             return e
         } else return parseSimpleExp()
     }
 
     @Throws(IllegalArgumentException::class)
     fun parseCharClasses(): RegExp {
-        val starts: MutableList<Int?> = mutableListOf<Int?>()
-        val ends: MutableList<Int?> = mutableListOf<Int?>()
+        val starts: MutableList<Int?> = mutableListOf()
+        val ends: MutableList<Int?> = mutableListOf()
 
         do {
             // look for escape
             if (match('\\'.code)) {
                 if (peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
-                    // special "escape" or invalid escape
-                    expandPreDefined(starts, ends)
+                    if (peek("u")) {
+                        // rewind one char to let parseCharExp handle unicode escape
+                        pos--
+                        val c = parseCharExp()
+                        starts.add(c)
+                        ends.add(c)
+                    } else {
+                        // special "escape" or invalid escape
+                        expandPreDefined(starts, ends)
+                    }
                 } else {
-                    // escaped character, don't parse it
-                    val c = next()
+                    // escaped character
+                    pos--
+                    val c = parseCharExp()
                     starts.add(c)
                     ends.add(c)
                 }
@@ -1098,14 +1107,14 @@ class RegExp {
 
         // not sure why we bother optimizing nodes, same automaton...
         // definitely saves time vs fixing toString()-based tests.
-        if (starts.size == 1) {
-            if (starts.get(0) == ends.get(0)) {
-                return makeChar(flags, starts.get(0)!!)
+        return if (starts.size == 1) {
+            if (starts[0] == ends[0]) {
+                makeChar(flags, starts[0]!!)
             } else {
-                return makeCharRange(flags, starts.get(0)!!, ends.get(0)!!)
+                makeCharRange(flags, starts[0]!!, ends[0]!!)
             }
         } else {
-            return makeCharClass(
+            makeCharClass(
                 flags,
                 starts.map { it!! }.toIntArray(),
                 ends.map { it!! }.toIntArray()
@@ -1180,14 +1189,20 @@ class RegExp {
 
     fun matchPredefinedCharacterClass(): RegExp? {
         // See https://docs.oracle.com/javase/tutorial/essential/regex/pre_char_classes.html
+        if (pos < originalString!!.length - 1 &&
+            originalString[pos] == '\\' && originalString[pos + 1] == 'u'
+        ) {
+            // Unicode escape; let caller handle via parseCharExp
+            return null
+        }
         if (match('\\'.code) && peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
-            val starts: MutableList<Int?> = mutableListOf<Int?>()
-            val ends: MutableList<Int?> = mutableListOf<Int?>()
+            val starts: MutableList<Int?> = mutableListOf()
+            val ends: MutableList<Int?> = mutableListOf()
             expandPreDefined(starts, ends)
             return makeCharClass(
                 flags,
-                starts.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray,
-                ends.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray
+                starts.map { obj: Int? -> obj!! }.toTypedArray() as IntArray,
+                ends.map { obj: Int? -> obj!! }.toTypedArray() as IntArray
             )
         }
 
@@ -1226,9 +1241,8 @@ class RegExp {
                     val smax = s.substring(i + 1)
                     var imin = smin.toInt()
                     var imax = smax.toInt()
-                    val digits: Int
-                    if (smin.length == smax.length) digits = smin.length
-                    else digits = 0
+                    val digits: Int = if (smin.length == smax.length) smin.length
+                    else 0
                     if (imin > imax) {
                         val t = imin
                         imin = imax
@@ -1251,6 +1265,18 @@ class RegExp {
     @Throws(IllegalArgumentException::class)
     fun parseCharExp(): Int {
         match('\\'.code)
+        if (peek("u")) {
+            next() // consume 'u'
+            var code = 0
+            repeat(4) {
+                require(more()) { "unexpected end-of-string" }
+                val ch = next().toChar()
+                val digit = ch.digitToIntOrNull(16) ?: -1
+                require(digit != -1) { "invalid unicode escape" }
+                code = (code shl 4) or digit
+            }
+            return code
+        }
         return next()
     }
 
@@ -1395,10 +1421,10 @@ class RegExp {
         }
 
         private fun makeString(flags: Int, exp1: RegExp, exp2: RegExp): RegExp {
-            val b: StringBuilder = StringBuilder()
-            if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s)
+            val b = StringBuilder()
+            if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s!!)
             else b.appendCodePoint(exp1.c)
-            if (exp2.kind == Kind.REGEXP_STRING) b.append(exp2.s)
+            if (exp2.kind == Kind.REGEXP_STRING) b.append(exp2.s!!)
             else b.appendCodePoint(exp2.c)
             return makeString(flags, b.toString())
         }

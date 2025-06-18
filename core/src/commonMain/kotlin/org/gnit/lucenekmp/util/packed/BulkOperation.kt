@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.util.packed
 
 import kotlin.math.ceil
 import org.gnit.lucenekmp.util.packed.PackedInts.Format.PACKED
+import org.gnit.lucenekmp.util.packed.PackedInts.Format.PACKED_SINGLE_BLOCK
 
 
 /** Efficient sequential read/write of packed integers.  */
@@ -153,21 +154,10 @@ internal abstract class BulkOperation : PackedInts.Decoder, PackedInts.Encoder {
         )*/
 
         fun of(format: PackedInts.Format, bitsPerValue: Int): BulkOperation {
-            when (format) {
-                PACKED -> {
-                    checkNotNull(packedBulkOps[bitsPerValue - 1])
-                    return packedBulkOps[bitsPerValue - 1]
-                }
-
-
-                /*
-                Deprecated;
-
-                PACKED_SINGLE_BLOCK -> {
-                    checkNotNull(packedSingleBlockBulkOps[bitsPerValue - 1])
-                    return packedSingleBlockBulkOps[bitsPerValue - 1]
-                }*/
-
+            return when (format) {
+                PACKED -> packedBulkOps[bitsPerValue - 1]
+                    ?: throw IllegalArgumentException("Unsupported bitsPerValue $bitsPerValue")
+                PACKED_SINGLE_BLOCK -> BulkOperationPackedSingleBlock(bitsPerValue)
                 else -> throw AssertionError()
             }
         }
