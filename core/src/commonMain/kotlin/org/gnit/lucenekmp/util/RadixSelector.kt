@@ -39,10 +39,12 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
 
             override fun compare(i: Int, j: Int): Int {
                 for (o in d..<maxLength) {
-                    val b1 = byteAt(i, o)
-                    val b2 = byteAt(j, o)
+                    val b1 = byteAt(i, o).toInt()
+                    val b2 = byteAt(j, o).toInt()
                     if (b1 != b2) {
-                        return b1 - b2
+                        val ub1 = if (b1 == -1) -1 else (b1 and 0xff)
+                        val ub2 = if (b2 == -1) -1 else (b2 and 0xff)
+                        return ub1 - ub2
                     } else if (b1 == -1) {
                         break
                     }
@@ -57,16 +59,17 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
                     if (b == -1) {
                         break
                     }
-                    pivot.append(b.toByte())
+                    pivot.append((b and 0xff).toByte())
                 }
             }
 
             override fun comparePivot(j: Int): Int {
                 for (o in 0..<pivot.length()) {
-                    val b1 = pivot.byteAt(o).toInt() and 0xFF
-                    val b2 = byteAt(j, d + o)
-                    if (b1 != b2) {
-                        return b1 - b2
+                    val b1 = pivot.byteAt(o).toInt() and 0xff
+                    val b2 = byteAt(j, d + o).toInt()
+                    val ub2 = if (b2 == -1) -1 else (b2 and 0xff)
+                    if (b1 != ub2) {
+                        return b1 - ub2
                     }
                 }
                 if (d + pivot.length() == maxLength) {
@@ -149,7 +152,8 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
 
     /** Return a number for the k-th character between 0 and [.HISTOGRAM_SIZE].  */
     private fun getBucket(i: Int, k: Int): Int {
-        return byteAt(i, k) + 1
+        val b = byteAt(i, k).toInt()
+        return if (b == -1) 0 else (b and 0xff) + 1
     }
 
     /**
@@ -173,8 +177,8 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
         var commonPrefixLength = min(commonPrefix.size, maxLength - k)
         var j = 0
         while (j < commonPrefixLength) {
-            val b = byteAt(from, k + j)
-            commonPrefix[j] = b
+            val b = byteAt(from, k + j).toInt()
+            commonPrefix[j] = if (b == -1) -1 else (b and 0xff)
             if (b == -1) {
                 commonPrefixLength = j + 1
                 break
@@ -193,12 +197,13 @@ abstract class RadixSelector protected constructor(private val maxLength: Int) :
         var i: Int = from + 1
         outer@ while (i < to) {
             for (j in 0..<commonPrefixLength) {
-                val b = byteAt(i, k + j)
-                if (b != commonPrefix[j]) {
+                val b = byteAt(i, k + j).toInt()
+                val ub = if (b == -1) -1 else (b and 0xff)
+                if (ub != commonPrefix[j]) {
                     commonPrefixLength = j
                     if (commonPrefixLength == 0) { // we have no common prefix
                         histogram[commonPrefix[0] + 1] = i - from
-                        histogram[b + 1] = 1
+                        histogram[ub + 1] = 1
                         break@outer
                     }
                     break

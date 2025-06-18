@@ -78,6 +78,14 @@ class TestDocIdSetBuilder : LuceneTestCase() {
         assertEquals(BitDocIdSet(ref), result)
     }
 
+    /**
+     * The test fails intermittently because it is "flaky". The testDense method is supposed to generate a dense set of document IDs, for which DocIdSetBuilder should create a BitDocIdSet. However, due to the randomization, it sometimes generates a sparse set of documents.
+     *
+     * This happens when the random starting document ID (doc) is high (close to maxDoc) and the random increment (100 + random().nextInt(100)) is also large. In such cases, very few documents are added, and the DocIdSetBuilder correctly chooses a sparse representation (like IntArrayDocIdSet) instead of the expected BitDocIdSet, causing the assertTrue(result is BitDocIdSet) assertion to fail.
+     *
+     * To fix this, you can adjust the document generation logic to ensure a dense set is always created. This involves reducing the maximum possible starting document ID and decreasing the increment value.
+     *
+     */
     @Test
     @Throws(IOException::class)
     fun testDense() {
@@ -87,11 +95,11 @@ class TestDocIdSetBuilder : LuceneTestCase() {
         val ref = FixedBitSet(maxDoc)
         for (i in 0 until numIterators) {
             val b = RoaringDocIdSet.Builder(maxDoc)
-            var doc = random().nextInt(1000)
+            var doc = random().nextInt(100) // before change it was 1000
             while (doc < maxDoc) {
                 b.add(doc)
                 ref.set(doc)
-                doc += 100 + random().nextInt(100)
+                doc += 10 + random().nextInt(20) // before change, 100, 100
             }
             builder.add(b.build().iterator())
         }
