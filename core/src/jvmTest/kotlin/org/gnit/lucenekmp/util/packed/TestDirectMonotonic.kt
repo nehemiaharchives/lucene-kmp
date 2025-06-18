@@ -116,10 +116,14 @@ class TestDirectMonotonic : LuceneTestCase() {
         val dir = newDirectory()
         val blockShift = TestUtil.nextInt(random(), DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
         val numValues = TestUtil.nextInt(random(), 1, 1 shl 20)
-        val min = random().nextLong()
+        var min = random().nextLong()
         val inc = random().nextInt(1 shl random().nextInt(20))
-        val actualValues = ArrayList<Long>()
-        for (i in 0 until numValues) actualValues.add(min + inc * i)
+        val maxInc = inc.toLong() * (numValues - 1).toLong()
+        if (maxInc > 0 && min > Long.MAX_VALUE - maxInc) {
+            min = Long.MAX_VALUE - maxInc
+        }
+        val actualValues = ArrayList<Long>(numValues)
+        for (i in 0 until numValues) actualValues.add(min + inc.toLong() * i)
         val dataLength: Long
         dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
             dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
@@ -201,7 +205,12 @@ class TestDirectMonotonic : LuceneTestCase() {
             var previous = rnd.nextLong()
             if (numValues > 0) actualValues.add(previous)
             for (i in 1 until numValues) {
-                previous += rnd.nextInt(1 shl rnd.nextInt(20))
+                val inc = rnd.nextInt(1 shl rnd.nextInt(20))
+                if (inc > 0 && previous > Long.MAX_VALUE - inc) {
+                    previous = Long.MAX_VALUE
+                } else {
+                    previous += inc
+                }
                 actualValues.add(previous)
             }
             val dataLength: Long
