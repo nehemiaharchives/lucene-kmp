@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.RamUsageTester
 import org.gnit.lucenekmp.jdkport.BitSet
 import kotlin.random.Random
+import kotlin.math.max
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -180,7 +181,8 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         set.set(42)
         val copy = copyOf(set, 256)
         val from = TestUtil.nextInt(Random, 0, 20)
-        // use a fixed lower bound of 43 to ensure that all set bits are within
+        val minTo = max(from + 23, 43)
+        val to = TestUtil.nextInt(Random, minTo, 256)
         // the destination bit set's range
         val to = TestUtil.nextInt(Random, 43, 256)
         val offset = TestUtil.nextInt(Random, 0, from)
