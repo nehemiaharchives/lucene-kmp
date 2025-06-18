@@ -1189,12 +1189,22 @@ class RegExp {
 
     fun matchPredefinedCharacterClass(): RegExp? {
         // See https://docs.oracle.com/javase/tutorial/essential/regex/pre_char_classes.html
+<<<<<<< HEAD
         if (pos < originalString!!.length - 1 &&
             originalString[pos] == '\\' && originalString[pos + 1] == 'u'
         ) {
             // Unicode escape; let caller handle via parseCharExp
             return null
         }
+||||||| parent of 2f5c71e (Fix unicode escape parsing)
+=======
+        if (pos < originalString!!.length - 1 &&
+            originalString!![pos] == '\\' && originalString!![pos + 1] == 'u'
+        ) {
+            // Unicode escape; let caller handle via parseCharExp
+            return null
+        }
+>>>>>>> 2f5c71e (Fix unicode escape parsing)
         if (match('\\'.code) && peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
             val starts: MutableList<Int?> = mutableListOf()
             val ends: MutableList<Int?> = mutableListOf()

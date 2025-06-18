@@ -37,9 +37,51 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
+                implementation(project(":core"))
                 implementation(libs.kotlin.test)
             }
         }
+
+        // below is additional source set configurations other than default hierarchy
+
+        // shared source for jvm and android
+        val jvmAndroidMain by creating {
+            dependsOn(commonMain)
+            // dependencies which are used both by jvm and android will be here
+            dependencies {
+                implementation(libs.logback)
+            }
+        }
+        jvmMain.get().dependsOn(jvmAndroidMain)
+        androidMain.get().dependsOn(jvmAndroidMain)
+
+        val jvmAndroidTest by creating {
+            dependsOn(commonTest)
+            // test dependencies which are used both by jvm and android will be here
+        }
+        jvmTest.get().dependsOn(jvmAndroidTest)
+        androidUnitTest.get().dependsOn(jvmAndroidTest)
+
+        // shared source for ios and linux
+        val nativeMain by creating {
+            dependsOn(commonMain)
+            // dependencies which are used both by ios and linux will be here
+        }
+        iosArm64Main.get().dependsOn(nativeMain)
+        iosX64Main.get().dependsOn(nativeMain)
+        iosSimulatorArm64Main.get().dependsOn(nativeMain)
+
+        linuxX64Main.get().dependsOn(nativeMain)
+
+        val nativeTest by creating {
+            dependsOn(commonTest)
+            // test dependencies which are used both by ios and linux will be here
+        }
+        iosArm64Test.get().dependsOn(nativeTest)
+        iosX64Test.get().dependsOn(nativeTest)
+        iosSimulatorArm64Test.get().dependsOn(nativeTest)
+
+        linuxX64Test.get().dependsOn(nativeTest)
     }
 }
 
