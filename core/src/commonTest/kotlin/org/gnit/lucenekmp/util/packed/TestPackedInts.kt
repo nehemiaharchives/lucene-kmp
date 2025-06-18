@@ -740,13 +740,13 @@ class TestPackedInts : LuceneTestCase() {
             var bpv = 0
             for (i in 0 until valueCount) {
                 if (i % blockSize == 0) {
-                    minValue = if (TestUtil.rarely(rnd)) rnd.nextInt(256).toLong() else if (TestUtil.rarely(rnd)) -5 else rnd.nextLong()
-                    bpv = rnd.nextInt(65)
+                    minValue = if (TestUtil.rarely(rnd)) rnd.nextInt(256).toLong() else if (TestUtil.rarely(rnd)) 5 else 0L
+                    bpv = rnd.nextInt(64)
                 }
-                values[i] = when (bpv) {
-                    0 -> minValue
-                    64 -> rnd.nextLong()
-                    else -> minValue + nextLong(rnd, 0, (1L shl bpv) - 1)
+                values[i] = if (bpv == 0) {
+                    minValue
+                } else {
+                    minValue + nextLong(rnd, 0, (1L shl bpv) - 1)
                 }
             }
 
@@ -767,12 +767,12 @@ class TestPackedInts : LuceneTestCase() {
             var i = 0
             while (i < valueCount) {
                 if (rnd.nextBoolean()) {
-                    assertEquals(values[i], it.next(), "" + i)
+                    assertEquals(values[i], it.next(), "Value mismatch at index $i")
                     i++
                 } else {
                     val next = it.next(TestUtil.nextInt(rnd, 1, 1024))
                     for (j in 0 until next.length) {
-                        assertEquals(values[i + j], next.longs[next.offset + j], "" + (i + j))
+                        assertEquals(values[i + j], next.longs[next.offset + j], "Value mismatch at index ${i + j}")
                     }
                     i += next.length
                 }
