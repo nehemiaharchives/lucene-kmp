@@ -18,7 +18,7 @@ import kotlin.math.min
  * once this is done internal data-structures point to the current offset of each stream that can be
  * written to.
  */
-internal abstract class TermsHashPerField(
+abstract class TermsHashPerField(
     private val streamCount: Int,
     private val intPool: IntBlockPool,
     val bytePool: ByteBlockPool,

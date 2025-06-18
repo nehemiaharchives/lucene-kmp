@@ -388,11 +388,11 @@ class RegExp {
     val kind: Kind
 
     /** Child expressions held by a container type expression  */
-    val exp1: RegExp
-    val exp2: RegExp
+    val exp1: RegExp?
+    val exp2: RegExp?
 
     /** String expression  */
-    val s: String
+    val s: String?
 
     /** Character expression  */
     val c: Int
@@ -441,7 +441,7 @@ class RegExp {
         flags = syntax_flags or match_flags
         originalString = s
         val e: RegExp
-        if (s.length == 0) e = makeString(flags, "")
+        if (s.isEmpty()) e = makeString(flags, "")
         else {
             e = parseUnionExp()
             require(pos >= originalString.length) { "end-of-string expected at position $pos" }
@@ -474,9 +474,9 @@ class RegExp {
         this.originalString = null
         this.kind = kind
         this.flags = flags
-        this.exp1 = exp1!!
-        this.exp2 = exp2!!
-        this.s = s!!
+        this.exp1 = exp1
+        this.exp2 = exp2
+        this.s = s
         this.c = c
         this.min = min
         this.max = max
@@ -525,81 +525,81 @@ class RegExp {
         var a: Automaton? = null
         when (kind) {
             Kind.REGEXP_UNION -> {
-                list = mutableListOf<Automaton>()
-                findLeaves(exp1, Kind.REGEXP_UNION, list!!, automata, automaton_provider)
-                findLeaves(exp2, Kind.REGEXP_UNION, list, automata, automaton_provider)
+                list = mutableListOf()
+                findLeaves(exp1!!, Kind.REGEXP_UNION, list, automata, automaton_provider)
+                findLeaves(exp2!!, Kind.REGEXP_UNION, list, automata, automaton_provider)
                 a = Operations.union(list)
             }
 
             Kind.REGEXP_CONCATENATION -> {
-                list = mutableListOf<Automaton>()
-                findLeaves(exp1, Kind.REGEXP_CONCATENATION, list!!, automata, automaton_provider)
-                findLeaves(exp2, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
+                list = mutableListOf()
+                findLeaves(exp1!!, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
+                findLeaves(exp2!!, Kind.REGEXP_CONCATENATION, list, automata, automaton_provider)
                 a = Operations.concatenate(list)
             }
 
             Kind.REGEXP_INTERSECTION -> a =
                 Operations.intersection(
-                    exp1.toAutomaton(automata, automaton_provider)!!,
-                    exp2.toAutomaton(automata, automaton_provider)!!
+                    exp1!!.toAutomaton(automata, automaton_provider),
+                    exp2!!.toAutomaton(automata, automaton_provider)
                 )
 
-            Kind.REGEXP_OPTIONAL -> a = Operations.optional(exp1.toAutomaton(automata, automaton_provider)!!)
-            Kind.REGEXP_REPEAT -> a = Operations.repeat(exp1.toAutomaton(automata, automaton_provider)!!)
+            Kind.REGEXP_OPTIONAL -> a = Operations.optional(exp1!!.toAutomaton(automata, automaton_provider))
+            Kind.REGEXP_REPEAT -> a = Operations.repeat(exp1!!.toAutomaton(automata, automaton_provider))
             Kind.REGEXP_REPEAT_MIN -> {
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.repeat(a!!, min)
+                a = exp1!!.toAutomaton(automata, automaton_provider)
+                a = Operations.repeat(a, min)
             }
 
             Kind.REGEXP_REPEAT_MINMAX -> {
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.repeat(a!!, min, max)
+                a = exp1!!.toAutomaton(automata, automaton_provider)
+                a = Operations.repeat(a, min, max)
             }
 
             Kind.REGEXP_COMPLEMENT -> {
                 // we don't support arbitrary complement, just "negated character class"
                 // this is just a list of characters (e.g. "a") or ranges (e.g. "b-d")
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.complement(a!!, Int.Companion.MAX_VALUE)
+                a = exp1!!.toAutomaton(automata, automaton_provider)
+                a = Operations.complement(a, Int.Companion.MAX_VALUE)
             }
 
             Kind.REGEXP_DEPRECATED_COMPLEMENT -> {
                 // to ease transitions for users only, support arbitrary complement
                 // but bounded by DEFAULT_DETERMINIZE_WORK_LIMIT: must not be configurable.
-                a = exp1.toAutomaton(automata, automaton_provider)
-                a = Operations.complement(a!!, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+                a = exp1!!.toAutomaton(automata, automaton_provider)
+                a = Operations.complement(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
             }
 
-            Kind.REGEXP_CHAR -> if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
-                a = Automata.makeCharSet(toCaseInsensitiveChar(c))
+            Kind.REGEXP_CHAR -> a = if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
+                Automata.makeCharSet(toCaseInsensitiveChar(c))
             } else {
-                a = Automata.makeChar(c)
+                Automata.makeChar(c)
             }
 
             Kind.REGEXP_CHAR_RANGE -> a = Automata.makeCharRange(from!![0], to!![0])
             Kind.REGEXP_CHAR_CLASS -> a = Automata.makeCharClass(from!!, to!!)
             Kind.REGEXP_ANYCHAR -> a = Automata.makeAnyChar()
             Kind.REGEXP_EMPTY -> a = Automata.makeEmpty()
-            Kind.REGEXP_STRING -> if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
-                a = toCaseInsensitiveString()
+            Kind.REGEXP_STRING -> a = if (check(ASCII_CASE_INSENSITIVE or CASE_INSENSITIVE)) {
+                toCaseInsensitiveString()
             } else {
-                a = Automata.makeString(s)
+                Automata.makeString(s!!)
             }
 
             Kind.REGEXP_ANYSTRING -> a = Automata.makeAnyString()
             Kind.REGEXP_AUTOMATON -> {
                 var aa: Automaton? = null
                 if (automata != null) {
-                    aa = automata.get(s)
+                    aa = automata[s]
                 }
                 if (aa == null && automaton_provider != null) {
                     try {
-                        aa = automaton_provider.getAutomaton(s)
+                        aa = automaton_provider.getAutomaton(s!!)
                     } catch (e: IOException) {
                         throw IllegalArgumentException(e)
                     }
                 }
-                requireNotNull(aa) { "'" + s + "' not found" }
+                requireNotNull(aa) { "'" + s!! + "' not found" }
                 a = aa
             }
 
@@ -633,18 +633,18 @@ class RegExp {
         } else {
             val altCase =
                 if (Character.isLowerCase(codepoint)) Character.toUpperCase(codepoint) else Character.toLowerCase(codepoint)
-            if (altCase != codepoint) {
-                return intArrayOf(altCase, codepoint)
+            return if (altCase != codepoint) {
+                intArrayOf(altCase, codepoint)
             } else {
-                return intArrayOf(codepoint)
+                intArrayOf(codepoint)
             }
         }
     }
 
     private fun toCaseInsensitiveString(): Automaton {
-        val list: MutableList<Automaton> = mutableListOf<Automaton>()
+        val list: MutableList<Automaton> = mutableListOf()
 
-        val iter: CharIterator = s.codePointSequence().iterator() as CharIterator
+        val iter: CharIterator = s!!.codePointSequence().iterator() as CharIterator
         while (iter.hasNext()) {
             val points = toCaseInsensitiveChar(iter.next().code)
             list.add(Automata.makeCharSet(points))
@@ -660,8 +660,8 @@ class RegExp {
         automaton_provider: AutomatonProvider?
     ) {
         if (exp.kind == kind) {
-            findLeaves(exp.exp1, kind, list, automata, automaton_provider)
-            findLeaves(exp.exp2, kind, list, automata, automaton_provider)
+            findLeaves(exp.exp1!!, kind, list, automata, automaton_provider)
+            findLeaves(exp.exp2!!, kind, list, automata, automaton_provider)
         } else {
             list.add(exp.toAutomaton(automata, automaton_provider))
         }
@@ -669,7 +669,7 @@ class RegExp {
 
     /** Constructs string from parsed regular expression.  */
     override fun toString(): String {
-        val b: StringBuilder = StringBuilder()
+        val b = StringBuilder()
         toStringBuilder(b)
         return b.toString()
     }
@@ -678,52 +678,52 @@ class RegExp {
         when (kind) {
             Kind.REGEXP_UNION -> {
                 b.append("(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append("|")
-                exp2.toStringBuilder(b)
+                exp2!!.toStringBuilder(b)
                 b.append(")")
             }
 
             Kind.REGEXP_CONCATENATION -> {
-                exp1.toStringBuilder(b)
-                exp2.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
+                exp2!!.toStringBuilder(b)
             }
 
             Kind.REGEXP_INTERSECTION -> {
                 b.append("(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append("&")
-                exp2.toStringBuilder(b)
+                exp2!!.toStringBuilder(b)
                 b.append(")")
             }
 
             Kind.REGEXP_OPTIONAL -> {
                 b.append("(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append(")?")
             }
 
             Kind.REGEXP_REPEAT -> {
                 b.append("(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append(")*")
             }
 
             Kind.REGEXP_REPEAT_MIN -> {
                 b.append("(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append("){").append(min).append(",}")
             }
 
             Kind.REGEXP_REPEAT_MINMAX -> {
                 b.append("(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append("){").append(min).append(",").append(max).append("}")
             }
 
             Kind.REGEXP_COMPLEMENT, Kind.REGEXP_DEPRECATED_COMPLEMENT -> {
                 b.append("~(")
-                exp1.toStringBuilder(b)
+                exp1!!.toStringBuilder(b)
                 b.append(")")
             }
 
@@ -748,9 +748,9 @@ class RegExp {
 
             Kind.REGEXP_ANYCHAR -> b.append(".")
             Kind.REGEXP_EMPTY -> b.append("#")
-            Kind.REGEXP_STRING -> b.append("\"").append(s).append("\"")
+            Kind.REGEXP_STRING -> b.append("\"").append(s!!).append("\"")
             Kind.REGEXP_ANYSTRING -> b.append("@")
-            Kind.REGEXP_AUTOMATON -> b.append("<").append(s).append(">")
+            Kind.REGEXP_AUTOMATON -> b.append("<").append(s!!).append(">")
             Kind.REGEXP_INTERVAL -> {
                 val s1 = min.toString()
                 val s2 = max.toString()
@@ -788,15 +788,15 @@ class RegExp {
                 b.append(indent)
                 b.append(kind)
                 b.append('\n')
-                exp1.toStringTree(b, "$indent  ")
-                exp2.toStringTree(b, "$indent  ")
+                exp1!!.toStringTree(b, "$indent  ")
+                exp2!!.toStringTree(b, "$indent  ")
             }
 
             Kind.REGEXP_OPTIONAL, Kind.REGEXP_REPEAT, Kind.REGEXP_COMPLEMENT, Kind.REGEXP_DEPRECATED_COMPLEMENT -> {
                 b.append(indent)
                 b.append(kind)
                 b.append('\n')
-                exp1.toStringTree(b, "$indent  ")
+                exp1!!.toStringTree(b, "$indent  ")
             }
 
             Kind.REGEXP_REPEAT_MIN -> {
@@ -805,7 +805,7 @@ class RegExp {
                 b.append(" min=")
                 b.append(min)
                 b.append('\n')
-                exp1.toStringTree(b, "$indent  ")
+                exp1!!.toStringTree(b, "$indent  ")
             }
 
             Kind.REGEXP_REPEAT_MINMAX -> {
@@ -816,7 +816,7 @@ class RegExp {
                 b.append(" max=")
                 b.append(max)
                 b.append('\n')
-                exp1.toStringTree(b, "$indent  ")
+                exp1!!.toStringTree(b, "$indent  ")
             }
 
             Kind.REGEXP_CHAR -> {
@@ -857,7 +857,7 @@ class RegExp {
                 b.append(indent)
                 b.append(kind)
                 b.append(" string=")
-                b.append(s)
+                b.append(s!!)
                 b.append('\n')
             }
 
@@ -920,7 +920,7 @@ class RegExp {
     val identifiers: MutableSet<String?>
         /** Returns set of automaton identifiers that occur in this regular expression.  */
         get() {
-            val set: MutableSet<String?> = mutableSetOf<String?>()
+            val set: MutableSet<String?> = mutableSetOf()
             getIdentifiers(set)
             return set
         }
@@ -928,11 +928,11 @@ class RegExp {
     fun getIdentifiers(set: MutableSet<String?>) {
         when (kind) {
             Kind.REGEXP_UNION, Kind.REGEXP_CONCATENATION, Kind.REGEXP_INTERSECTION -> {
-                exp1.getIdentifiers(set)
-                exp2.getIdentifiers(set)
+                exp1!!.getIdentifiers(set)
+                exp2!!.getIdentifiers(set)
             }
 
-            Kind.REGEXP_OPTIONAL, Kind.REGEXP_REPEAT, Kind.REGEXP_REPEAT_MIN, Kind.REGEXP_REPEAT_MINMAX, Kind.REGEXP_COMPLEMENT, Kind.REGEXP_DEPRECATED_COMPLEMENT -> exp1.getIdentifiers(
+            Kind.REGEXP_OPTIONAL, Kind.REGEXP_REPEAT, Kind.REGEXP_REPEAT_MIN, Kind.REGEXP_REPEAT_MINMAX, Kind.REGEXP_COMPLEMENT, Kind.REGEXP_DEPRECATED_COMPLEMENT -> exp1!!.getIdentifiers(
                 set
             )
 
@@ -972,12 +972,12 @@ class RegExp {
     }
 
     @Throws(IllegalArgumentException::class)
-    /*fun parseUnionExp(): RegExp {
-        return iterativeParseExp(
-            java.util.function.Supplier { this.parseInterExp() },
-            java.util.function.BooleanSupplier { match('|'.code) },
-            MakeRegexGroup { flags: Int, exp1: RegExp?, exp2: RegExp? -> Companion.makeUnion(flags, exp1!!, exp2!!) })
-    }*/
+            /*fun parseUnionExp(): RegExp {
+                return iterativeParseExp(
+                    java.util.function.Supplier { this.parseInterExp() },
+                    java.util.function.BooleanSupplier { match('|'.code) },
+                    MakeRegexGroup { flags: Int, exp1: RegExp?, exp2: RegExp? -> Companion.makeUnion(flags, exp1!!, exp2!!) })
+            }*/
     fun parseUnionExp(): RegExp =
         iterativeParseExp(this::parseInterExp, { match('|'.code) }, RegExp::makeUnion)
 
@@ -1022,7 +1022,7 @@ class RegExp {
             else if (match('{'.code)) {
                 var start = pos
                 while (peek("0123456789")) next()
-                require(start != pos) { "integer expected at position " + pos }
+                require(start != pos) { "integer expected at position $pos" }
                 val n = originalString!!.substring(start, pos).toInt()
                 var m = -1
                 if (match(','.code)) {
@@ -1030,10 +1030,10 @@ class RegExp {
                     while (peek("0123456789")) next()
                     if (start != pos) m = originalString.substring(start, pos).toInt()
                 } else m = n
-                require(match('}'.code)) { "expected '}' at position " + pos }
-                require(!(m != -1 && n > m)) { "invalid repetition range(out of order): " + n + ".." + m }
-                if (m == -1) e = makeRepeat(flags, e, n)
-                else e = makeRepeat(flags, e, n, m)
+                require(match('}'.code)) { "expected '}' at position $pos" }
+                require(!(m != -1 && n > m)) { "invalid repetition range(out of order): $n..$m" }
+                e = if (m == -1) makeRepeat(flags, e, n)
+                else makeRepeat(flags, e, n, m)
             }
         }
         return e
@@ -1041,8 +1041,8 @@ class RegExp {
 
     @Throws(IllegalArgumentException::class)
     fun parseComplExp(): RegExp {
-        if (check(DEPRECATED_COMPLEMENT) && match('~'.code)) return makeDeprecatedComplement(flags, parseComplExp())
-        else return parseCharClassExp()
+        return if (check(DEPRECATED_COMPLEMENT) && match('~'.code)) makeDeprecatedComplement(flags, parseComplExp())
+        else parseCharClassExp()
     }
 
     @Throws(IllegalArgumentException::class)
@@ -1052,25 +1052,34 @@ class RegExp {
             if (match('^'.code)) negate = true
             var e = parseCharClasses()
             if (negate) e = makeIntersection(flags, makeAnyChar(flags), makeComplement(flags, e))
-            require(match(']'.code)) { "expected ']' at position " + pos }
+            require(match(']'.code)) { "expected ']' at position $pos" }
             return e
         } else return parseSimpleExp()
     }
 
     @Throws(IllegalArgumentException::class)
     fun parseCharClasses(): RegExp {
-        val starts: MutableList<Int?> = mutableListOf<Int?>()
-        val ends: MutableList<Int?> = mutableListOf<Int?>()
+        val starts: MutableList<Int?> = mutableListOf()
+        val ends: MutableList<Int?> = mutableListOf()
 
         do {
             // look for escape
             if (match('\\'.code)) {
                 if (peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
-                    // special "escape" or invalid escape
-                    expandPreDefined(starts, ends)
+                    if (peek("u")) {
+                        // rewind one char to let parseCharExp handle unicode escape
+                        pos--
+                        val c = parseCharExp()
+                        starts.add(c)
+                        ends.add(c)
+                    } else {
+                        // special "escape" or invalid escape
+                        expandPreDefined(starts, ends)
+                    }
                 } else {
-                    // escaped character, don't parse it
-                    val c = next()
+                    // escaped character
+                    pos--
+                    val c = parseCharExp()
                     starts.add(c)
                     ends.add(c)
                 }
@@ -1098,17 +1107,17 @@ class RegExp {
 
         // not sure why we bother optimizing nodes, same automaton...
         // definitely saves time vs fixing toString()-based tests.
-        if (starts.size == 1) {
-            if (starts.get(0) == ends.get(0)) {
-                return makeChar(flags, starts.get(0)!!)
+        return if (starts.size == 1) {
+            if (starts[0] == ends[0]) {
+                makeChar(flags, starts[0]!!)
             } else {
-                return makeCharRange(flags, starts.get(0)!!, ends.get(0)!!)
+                makeCharRange(flags, starts[0]!!, ends[0]!!)
             }
         } else {
-            return makeCharClass(
+            makeCharClass(
                 flags,
-                starts.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray,
-                ends.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray
+                starts.map { obj: Int? -> obj!! }.toTypedArray() as IntArray,
+                ends.map { obj: Int? -> obj!! }.toTypedArray() as IntArray
             )
         }
     }
@@ -1180,14 +1189,20 @@ class RegExp {
 
     fun matchPredefinedCharacterClass(): RegExp? {
         // See https://docs.oracle.com/javase/tutorial/essential/regex/pre_char_classes.html
+        if (pos < originalString!!.length - 1 &&
+            originalString[pos] == '\\' && originalString[pos + 1] == 'u'
+        ) {
+            // Unicode escape; let caller handle via parseCharExp
+            return null
+        }
         if (match('\\'.code) && peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
-            val starts: MutableList<Int?> = mutableListOf<Int?>()
-            val ends: MutableList<Int?> = mutableListOf<Int?>()
+            val starts: MutableList<Int?> = mutableListOf()
+            val ends: MutableList<Int?> = mutableListOf()
             expandPreDefined(starts, ends)
             return makeCharClass(
                 flags,
-                starts.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray,
-                ends.map { obj: Int? -> obj!!.toInt() }.toTypedArray() as IntArray
+                starts.map { obj: Int? -> obj!! }.toTypedArray() as IntArray,
+                ends.map { obj: Int? -> obj!! }.toTypedArray() as IntArray
             )
         }
 
@@ -1226,9 +1241,8 @@ class RegExp {
                     val smax = s.substring(i + 1)
                     var imin = smin.toInt()
                     var imax = smax.toInt()
-                    val digits: Int
-                    if (smin.length == smax.length) digits = smin.length
-                    else digits = 0
+                    val digits: Int = if (smin.length == smax.length) smin.length
+                    else 0
                     if (imin > imax) {
                         val t = imin
                         imin = imax
@@ -1251,6 +1265,18 @@ class RegExp {
     @Throws(IllegalArgumentException::class)
     fun parseCharExp(): Int {
         match('\\'.code)
+        if (peek("u")) {
+            next() // consume 'u'
+            var code = 0
+            repeat(4) {
+                require(more()) { "unexpected end-of-string" }
+                val ch = next().toChar()
+                val digit = ch.digitToIntOrNull(16) ?: -1
+                require(digit != -1) { "invalid unicode escape" }
+                code = (code shl 4) or digit
+            }
+            return code
+        }
         return next()
     }
 
@@ -1377,16 +1403,16 @@ class RegExp {
             ) return makeString(flags, exp1, exp2)
             val rexp1: RegExp
             val rexp2: RegExp
-            if (exp1.kind == Kind.REGEXP_CONCATENATION && (exp1.exp2.kind == Kind.REGEXP_CHAR || exp1.exp2.kind == Kind.REGEXP_STRING)
+            if (exp1.kind == Kind.REGEXP_CONCATENATION && (exp1.exp2!!.kind == Kind.REGEXP_CHAR || exp1.exp2.kind == Kind.REGEXP_STRING)
                 && (exp2.kind == Kind.REGEXP_CHAR || exp2.kind == Kind.REGEXP_STRING)
             ) {
-                rexp1 = exp1.exp1
+                rexp1 = exp1.exp1!!
                 rexp2 = makeString(flags, exp1.exp2, exp2)
             } else if ((exp1.kind == Kind.REGEXP_CHAR || exp1.kind == Kind.REGEXP_STRING)
-                && exp2.kind == Kind.REGEXP_CONCATENATION && (exp2.exp1.kind == Kind.REGEXP_CHAR || exp2.exp1.kind == Kind.REGEXP_STRING)
+                && exp2.kind == Kind.REGEXP_CONCATENATION && (exp2.exp1!!.kind == Kind.REGEXP_CHAR || exp2.exp1.kind == Kind.REGEXP_STRING)
             ) {
                 rexp1 = makeString(flags, exp1, exp2.exp1)
-                rexp2 = exp2.exp2
+                rexp2 = exp2.exp2!!
             } else {
                 rexp1 = exp1
                 rexp2 = exp2
@@ -1395,10 +1421,10 @@ class RegExp {
         }
 
         private fun makeString(flags: Int, exp1: RegExp, exp2: RegExp): RegExp {
-            val b: StringBuilder = StringBuilder()
-            if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s)
+            val b = StringBuilder()
+            if (exp1.kind == Kind.REGEXP_STRING) b.append(exp1.s!!)
             else b.appendCodePoint(exp1.c)
-            if (exp2.kind == Kind.REGEXP_STRING) b.append(exp2.s)
+            if (exp2.kind == Kind.REGEXP_STRING) b.append(exp2.s!!)
             else b.appendCodePoint(exp2.c)
             return makeString(flags, b.toString())
         }

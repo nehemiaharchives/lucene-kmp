@@ -13,7 +13,7 @@ import org.gnit.lucenekmp.util.ByteBlockPool
  * the bytes in each slice until we hit the end of that slice at which point we read the forwarding
  * address of the next slice and then jump to it.
  */
-internal class ByteSliceReader : DataInput() {
+class ByteSliceReader : DataInput() {
     var pool: ByteBlockPool? = null
     var bufferUpto: Int = 0
     lateinit var buffer: ByteArray

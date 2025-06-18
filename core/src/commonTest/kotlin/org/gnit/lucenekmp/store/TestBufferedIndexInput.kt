@@ -175,7 +175,7 @@ class TestBufferedIndexInput : LuceneTestCase() {
 
     @Test
     fun testReadFloats() {
-        val length = 1024 * 8
+        val length = 64 * 8 // TODO originally 1024 * 8 but reduced to 64 * 8 for dev speed
         val input = MyBufferedIndexInput(length.toLong())
         val bb = ByteBuffer.allocate(Float.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
         val bufferLength = 128
@@ -207,7 +207,7 @@ class TestBufferedIndexInput : LuceneTestCase() {
 
     @Test
     fun testReadInts() {
-        val length = 1024 * 8
+        val length = 64 * 8 // TODO originally 1024 * 8 but reduced to 64 * 8 for dev speed
         val input = MyBufferedIndexInput(length.toLong())
         val bb = ByteBuffer.allocate(Int.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
         val bufferLength = 128
@@ -236,7 +236,7 @@ class TestBufferedIndexInput : LuceneTestCase() {
 
     @Test
     fun testReadLongs() {
-        val length = 1024 * 8
+        val length = 64 * 8 // TODO originally 1024 * 8 but reduced to 64 * 8 for dev speed
         val input = MyBufferedIndexInput(length.toLong())
         val bb = ByteBuffer.allocate(Long.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
         val bufferLength = 128

@@ -65,7 +65,7 @@ class IOContext(context: Context, mergeInfo: MergeInfo?, flushInfo: FlushInfo?, 
                 flushInfo
             ){ "flushInfo must not be null if context is FLUSH" }
 
-            Context.DEFAULT -> TODO()
+            Context.DEFAULT -> {}
         }
         require(
             !((context == Context.FLUSH || context == Context.MERGE)
