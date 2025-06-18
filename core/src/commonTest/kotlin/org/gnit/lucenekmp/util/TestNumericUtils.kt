@@ -7,6 +7,7 @@ import com.ionspin.kotlin.bignum.integer.Sign
 import org.gnit.lucenekmp.jdkport.valueOf
 import org.gnit.lucenekmp.jdkport.floatToIntBits
 import org.gnit.lucenekmp.jdkport.doubleToLongBits
+import org.gnit.lucenekmp.jdkport.signum
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -487,7 +488,7 @@ class TestNumericUtils : LuceneTestCase() {
             val rightValue = random().nextInt()
             NumericUtils.intToSortableBytes(rightValue, right.bytes, right.offset)
 
-            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+            assertEquals(Int.signum(leftValue.compareTo(rightValue)), Int.signum(left.compareTo(right)))
         }
     }
 
@@ -502,7 +503,7 @@ class TestNumericUtils : LuceneTestCase() {
             val rightValue = random().nextLong()
             NumericUtils.longToSortableBytes(rightValue, right.bytes, right.offset)
 
-            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+            assertEquals(Int.signum(leftValue.compareTo(rightValue)), Int.signum(left.compareTo(right)))
         }
     }
 
@@ -517,7 +518,7 @@ class TestNumericUtils : LuceneTestCase() {
             val rightValue = Float.fromBits(random().nextInt())
             NumericUtils.intToSortableBytes(NumericUtils.floatToSortableInt(rightValue), right.bytes, right.offset)
 
-            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+            assertEquals(Int.signum(leftValue.compareTo(rightValue)), Int.signum(left.compareTo(right)))
         }
     }
 
@@ -532,7 +533,7 @@ class TestNumericUtils : LuceneTestCase() {
             val rightValue = Double.fromBits(random().nextLong())
             NumericUtils.longToSortableBytes(NumericUtils.doubleToSortableLong(rightValue), right.bytes, right.offset)
 
-            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+            assertEquals(Int.signum(leftValue.compareTo(rightValue)), Int.signum(left.compareTo(right)))
         }
     }
 
@@ -550,7 +551,7 @@ class TestNumericUtils : LuceneTestCase() {
             val right = BytesRef(ByteArray(maxLength))
             NumericUtils.bigIntToSortableBytes(rightValue, maxLength, right.bytes, right.offset)
 
-            assertEquals(Integer.signum(leftValue.compareTo(rightValue)), Integer.signum(left.compareTo(right)))
+            assertEquals(Int.signum(leftValue.compareTo(rightValue)), Int.signum(left.compareTo(right)))
         }
     }
 
