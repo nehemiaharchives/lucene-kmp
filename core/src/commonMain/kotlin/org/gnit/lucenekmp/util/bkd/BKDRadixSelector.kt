@@ -6,7 +6,6 @@ import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.util.BytesRef
-import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import org.gnit.lucenekmp.util.IntroSelector
 import org.gnit.lucenekmp.util.IntroSorter
 import org.gnit.lucenekmp.util.MSBRadixSorter

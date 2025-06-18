@@ -25,8 +25,6 @@ import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.util.NumericUtils
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
-import org.gnit.lucenekmp.util.BytesRef
-import org.gnit.lucenekmp.util.bkd.OfflinePointWriter
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.random.Random
@@ -35,7 +33,6 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.Ignore
 
 /**
  * Simplified port of Lucene's TestBKDRadixSelector.
@@ -361,7 +358,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         dir.close()
     }
 
-    @Ignore
     @Test
     fun testRandomAllDocsEquals() {
         val values = random().nextInt(15000) + 1
@@ -380,7 +376,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         dir.close()
     }
 
-    @Ignore
     @Test
     fun testRandomFewDifferentValues() {
         val config = getRandomConfig()
@@ -402,7 +397,6 @@ class TestBKDRadixSelector : LuceneTestCase() {
         dir.close()
     }
 
-    @Ignore
     @Test
     fun testRandomDataDimDiffValues() {
         val config = getRandomConfig()
