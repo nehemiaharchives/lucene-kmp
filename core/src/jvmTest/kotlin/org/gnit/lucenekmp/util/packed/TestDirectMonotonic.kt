@@ -226,8 +226,19 @@ class TestDirectMonotonic : LuceneTestCase() {
             dir.openInput("meta", IOContext.READONCE).use { metaIn ->
                 dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                     val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
-                    val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength), merging)
-                    for (i in 0 until numValues) assertEquals(actualValues[i], values.get(i.toLong()))
+                    val values = DirectMonotonicReader.getInstance(
+                        meta,
+                        dataIn.randomAccessSlice(0, dataLength),
+                        merging
+                    )
+                    for (i in 0 until numValues) {
+                        assertEquals(
+                            actualValues[i],
+                            values.get(i.toLong()),
+                            "mismatch at i=$i blockShift=$blockShift numValues=$numValues iter=$iter merging=$merging"
+                        )
+                    }
+                    assertEquals(0L, dataIn.filePointer)
                 }
             }
 
