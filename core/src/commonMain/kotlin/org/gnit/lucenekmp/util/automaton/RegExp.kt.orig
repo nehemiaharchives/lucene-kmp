@@ -1189,12 +1189,22 @@ class RegExp {
 
     fun matchPredefinedCharacterClass(): RegExp? {
         // See https://docs.oracle.com/javase/tutorial/essential/regex/pre_char_classes.html
+<<<<<<< HEAD
         if (pos < originalString!!.length - 1 &&
             originalString[pos] == '\\' && originalString[pos + 1] == 'u'
         ) {
             // Unicode escape; let caller handle via parseCharExp
             return null
         }
+||||||| parent of 2f5c71e (Fix unicode escape parsing)
+=======
+        if (pos < originalString!!.length - 1 &&
+            originalString!![pos] == '\\' && originalString!![pos + 1] == 'u'
+        ) {
+            // Unicode escape; let caller handle via parseCharExp
+            return null
+        }
+>>>>>>> 2f5c71e (Fix unicode escape parsing)
         if (match('\\'.code) && peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
             val starts: MutableList<Int?> = mutableListOf()
             val ends: MutableList<Int?> = mutableListOf()
@@ -1265,7 +1275,6 @@ class RegExp {
     @Throws(IllegalArgumentException::class)
     fun parseCharExp(): Int {
         match('\\'.code)
-<<<<<<< HEAD
         if (peek("u")) {
             next() // consume 'u'
             var code = 0
@@ -1278,21 +1287,6 @@ class RegExp {
             }
             return code
         }
-||||||| parent of 79ff59d (Handle unicode escapes in RegExp)
-=======
-        if (peek("u")) {
-            next() // consume 'u'
-            var code = 0
-            for (i in 0 until 4) {
-                require(more()) { "unexpected end-of-string" }
-                val ch = next()
-                val digit = java.lang.Character.digit(ch, 16)
-                require(digit != -1) { "invalid unicode escape" }
-                code = (code shl 4) or digit
-            }
-            return code
-        }
->>>>>>> 79ff59d (Handle unicode escapes in RegExp)
         return next()
     }
 
