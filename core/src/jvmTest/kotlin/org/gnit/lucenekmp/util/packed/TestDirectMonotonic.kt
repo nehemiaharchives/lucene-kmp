@@ -9,6 +9,7 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.LongValues
 import kotlin.random.Random
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -18,6 +19,10 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class TestDirectMonotonic : LuceneTestCase() {
+    companion object {
+        private val DIR_COUNTER = AtomicInteger()
+    }
+
     private lateinit var fs: FakeFileSystem
 
     @BeforeTest
@@ -32,7 +37,7 @@ class TestDirectMonotonic : LuceneTestCase() {
     }
 
     private fun newDirectory(): Directory {
-        val path = "/dir-${Random.nextInt()}".toPath()
+        val path = "/dir-${DIR_COUNTER.getAndIncrement()}".toPath()
         fs.createDirectories(path)
         return NIOFSDirectory(path, FSLockFactory.default, fs)
     }
