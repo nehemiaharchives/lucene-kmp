@@ -537,6 +537,154 @@ class TestRegExpParsing {
         assertSameLanguage(expected, actual)
     }
 
+    @Test
+    fun testRepeatN() {
+        val re = RegExp("a{5}")
+        assertEquals("(\\a){5,5}", re.toString())
+        assertEquals("REGEXP_REPEAT_MINMAX min=5 max=5\n  REGEXP_CHAR char=a\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.repeat(Automata.makeChar('a'.code), 5, 5)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testRepeatNPlus() {
+        val re = RegExp("a{5,}")
+        assertEquals("(\\a){5,}", re.toString())
+        assertEquals("REGEXP_REPEAT_MIN min=5\n  REGEXP_CHAR char=a\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        assertEquals(7, actual.numStates)
+        AutomatonTestUtil.assertCleanDFA(actual)
+
+        val expected = Operations.repeat(Automata.makeChar('a'.code), 5)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testRepeatMN() {
+        val re = RegExp("a{5,8}")
+        assertEquals("(\\a){5,8}", re.toString())
+        assertEquals("REGEXP_REPEAT_MINMAX min=5 max=8\n  REGEXP_CHAR char=a\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.repeat(Automata.makeChar('a'.code), 5, 8)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testTruncatedRepeat() {
+        assertFailsWith<IllegalArgumentException> { RegExp("a{5,8") }
+    }
+
+    @Test
+    fun testBogusRepeat() {
+        assertFailsWith<IllegalArgumentException> { RegExp("a{Z}") }
+    }
+
+    @Test
+    fun testString() {
+        val re = RegExp("boo")
+        assertEquals("\"boo\"", re.toString())
+        assertEquals("REGEXP_STRING string=boo\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeString("boo")
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testCaseInsensitiveString() {
+        val re = RegExp("boo", RegExp.NONE, RegExp.ASCII_CASE_INSENSITIVE)
+        assertEquals("\"boo\"", re.toString())
+        assertEquals("REGEXP_STRING string=boo\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val c1 = Operations.union(mutableListOf(Automata.makeChar('b'.code), Automata.makeChar('B'.code)))
+        val c2 = Operations.union(mutableListOf(Automata.makeChar('o'.code), Automata.makeChar('O'.code)))
+
+        val expected = Operations.concatenate(mutableListOf(c1, c2, c2))
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testExplicitString() {
+        val re = RegExp("\"boo\"")
+        assertEquals("\"boo\"", re.toString())
+        assertEquals("REGEXP_STRING string=boo\n", re.toStringTree())
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeString("boo")
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testNotTerminatedString() {
+        assertFailsWith<IllegalArgumentException> { RegExp("\"boo") }
+    }
+
+    @Test
+    fun testConcatenation() {
+        val re = RegExp("[b-c][e-f]")
+        assertEquals("[\\b-\\c][\\e-\\f]", re.toString())
+        assertEquals(
+            """REGEXP_CONCATENATION
+  REGEXP_CHAR_RANGE from=b to=c
+  REGEXP_CHAR_RANGE from=e to=f""".trimIndent(),
+            re.toStringTree().trimEnd()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.concatenate(
+            mutableListOf(Automata.makeCharRange('b'.code, 'c'.code), Automata.makeCharRange('e'.code, 'f'.code))
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testIntersection() {
+        val re = RegExp("[b-f]&[e-f]")
+        assertEquals("([\\b-\\f]&[\\e-\\f])", re.toString())
+        assertEquals(
+            """REGEXP_INTERSECTION
+  REGEXP_CHAR_RANGE from=b to=f
+  REGEXP_CHAR_RANGE from=e to=f""".trimIndent(),
+            re.toStringTree().trimEnd()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.intersection(
+            Automata.makeCharRange('b'.code, 'f'.code),
+            Automata.makeCharRange('e'.code, 'f'.code)
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testTruncatedIntersection() {
+        assertFailsWith<IllegalArgumentException> { RegExp("a&") }
+    }
+
+    @Test
+    fun testTruncatedIntersectionParens() {
+        assertFailsWith<IllegalArgumentException> { RegExp("(a)&(") }
+    }
+
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
         val detExpected = Operations.determinize(expected, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
         val detActual = Operations.determinize(actual, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
