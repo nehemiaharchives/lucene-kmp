@@ -140,4 +140,36 @@ object GeoTestUtil {
         val lon = nextLongitude()
         return Point(lat, lon)
     }
+
+    fun nextBoxNotCrossingDateline(): org.gnit.lucenekmp.geo.Rectangle {
+        return nextBoxInternal(false)
+    }
+
+    private fun nextBoxInternal(canCrossDateLine: Boolean): org.gnit.lucenekmp.geo.Rectangle {
+        var lat0 = nextLatitude()
+        var lat1 = nextLatitude()
+        while (lat0 == lat1) {
+            lat1 = nextLatitude()
+        }
+
+        var lon0 = nextLongitude()
+        var lon1 = nextLongitude()
+        while (lon0 == lon1) {
+            lon1 = nextLongitude()
+        }
+
+        if (lat1 < lat0) {
+            val x = lat0
+            lat0 = lat1
+            lat1 = x
+        }
+
+        if (!canCrossDateLine && lon1 < lon0) {
+            val x = lon0
+            lon0 = lon1
+            lon1 = x
+        }
+
+        return org.gnit.lucenekmp.geo.Rectangle(lat0, lat1, lon0, lon1)
+    }
 }

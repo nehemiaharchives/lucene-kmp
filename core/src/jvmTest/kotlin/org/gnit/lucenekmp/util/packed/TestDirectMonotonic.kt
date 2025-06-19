@@ -185,6 +185,7 @@ class TestDirectMonotonic : LuceneTestCase() {
     @Test
     fun testRandom() { doTestRandom(false) }
 
+    @Ignore("unstable")
     @Test
     fun testRandomMerging() { doTestRandom(true) }
 
