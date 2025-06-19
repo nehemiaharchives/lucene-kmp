@@ -49,20 +49,20 @@ object ReaderUtil {
      * Returns index of the searcher/reader for document `n` in the array used to construct
      * this searcher/reader.
      */
-    fun subIndex(n: Int, leaves: MutableList<LeafReaderContext?>): Int {
+    fun subIndex(n: Int, leaves: MutableList<LeafReaderContext>): Int {
         // find searcher/reader for doc n:
         val size = leaves.size
         var lo = 0 // search starts array
         var hi = size - 1 // for first element less than n, return its index
         while (hi >= lo) {
             var mid = (lo + hi) ushr 1
-            val midValue = leaves.get(mid)!!.docBase
+            val midValue = leaves[mid].docBase
             if (n < midValue) {
                 hi = mid - 1
             } else if (n > midValue) {
                 lo = mid + 1
             } else { // found a match
-                while (mid + 1 < size && leaves.get(mid + 1)!!.docBase == midValue) {
+                while (mid + 1 < size && leaves[mid + 1].docBase == midValue) {
                     mid++ // scan to last match
                 }
                 return mid

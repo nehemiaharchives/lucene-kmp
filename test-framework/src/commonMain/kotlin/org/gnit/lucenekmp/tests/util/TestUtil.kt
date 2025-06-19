@@ -20,6 +20,7 @@ package org.gnit.lucenekmp.tests.util
 //import java.util.zip.ZipInputStream
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
+import com.ionspin.kotlin.bignum.integer.Sign
 import okio.FileSystem
 import okio.IOException
 import okio.Path
@@ -60,11 +61,13 @@ import org.gnit.lucenekmp.jdkport.PrintStream
 import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.appendCodePoint
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.codePointAt
 import org.gnit.lucenekmp.jdkport.doubleToRawLongBits
 import org.gnit.lucenekmp.jdkport.floatToRawIntBits
 import org.gnit.lucenekmp.jdkport.fromCharArray
 import org.gnit.lucenekmp.jdkport.isNaN
+import org.gnit.lucenekmp.jdkport.valueOf
 import org.gnit.lucenekmp.search.FieldDoc
 import org.gnit.lucenekmp.search.ScoreDoc
 import org.gnit.lucenekmp.search.TopDocs
@@ -161,7 +164,7 @@ class TestUtil {
          * false.
          *
          */
-        /*fun <T> checkIterator(iterator: MutableIterator<T>, expectedSize: Long, allowNull: Boolean) {
+        fun <T> checkIterator(iterator: MutableIterator<T>, expectedSize: Long, allowNull: Boolean) {
             for (i in 0..<expectedSize) {
                 val hasNext = iterator.hasNext()
                 assert(hasNext)
@@ -184,7 +187,7 @@ class TestUtil {
             } catch (expected: NoSuchElementException) {
                 // ok
             }
-        }*/
+        }
 
         /**
          * Checks that the provided iterator is well-formed.
@@ -545,31 +548,31 @@ class TestUtil {
 
 
         /** start and end are BOTH inclusive  */
-        /*fun nextLong(r: Random, start: Long, end: Long): Long {
+        fun nextLong(r: Random, start: Long, end: Long): Long {
             assert(end >= start) { "start=$start,end=$end" }
             val range: BigInteger =
                 BigInteger.valueOf(end).add(BigInteger.valueOf(1))
                     .subtract(BigInteger.valueOf(start))
             if (range.compareTo(BigInteger.valueOf(Int.Companion.MAX_VALUE.toLong())) <= 0) {
-                return start + r.nextInt(range.toInt())
+                return start + r.nextInt(range.intValue())
             } else {
                 // probably not evenly distributed when range is large, but OK for tests
                 val augend: BigInteger =
-                    BigDecimal(range).multiply(BigDecimal(r.nextDouble())).toBigInteger()
-                val result = BigInteger.valueOf(start).add(augend).toLong()
+                    BigDecimal.fromBigInteger(range).multiply(BigDecimal.fromDouble(r.nextDouble())).toBigInteger()
+                val result = BigInteger.valueOf(start).add(augend).longValue()
                 assert(result >= start)
                 assert(result <= end)
                 return result
             }
-        }*/
+        }
 
         /** Returns a randomish big integer with `1 .. maxBytes` storage.  */
-        /*fun nextBigInteger(random: Random, maxBytes: Int): BigInteger {
+        fun nextBigInteger(random: Random, maxBytes: Int): BigInteger {
             val length: Int = nextInt(random, 1, maxBytes)
             val buffer = ByteArray(length)
             random.nextBytes(buffer)
-            return BigInteger(buffer)
-        }*/
+            return BigInteger.fromByteArray(buffer, Sign.POSITIVE)
+        }
 
         fun randomSimpleString(r: Random, maxLength: Int): String {
             return randomSimpleString(r, 0, maxLength)
@@ -655,9 +658,9 @@ class TestUtil {
          * Returns a String that's "regexpish" (contains lots of operators typically found in regular
          * expressions) If you call this enough times, you might get a valid regex!
          */
-        /*fun randomRegexpishString(r: Random): String {
+        fun randomRegexpishString(r: Random): String {
             return randomRegexpishString(r, 20)
-        }*/
+        }
 
         /**
          * Maximum recursion bound for '+' and '*' replacements in [.randomRegexpishString].
@@ -689,17 +692,17 @@ class TestUtil {
          * @param maxLength A hint about maximum length of the regexpish string. It may be exceeded by a
          * few characters.
          */
-        /*fun randomRegexpishString(r: Random, maxLength: Int): String {
-            val regexp: StringBuilder = StringBuilder(maxLength)
+        fun randomRegexpishString(r: Random, maxLength: Int): String {
+            val regexp = StringBuilder(maxLength)
             for (i in nextInt(r, 0, maxLength) downTo 1) {
                 if (r.nextBoolean()) {
                     regexp.append(RandomNumbers.randomIntBetween(r, 'a'.code, 'z'.code).toChar())
                 } else {
-                    regexp.append(RandomPicks.randomFrom<String>(r, ops))
+                    regexp.append(RandomPicks.randomFrom(r, ops))
                 }
             }
             return regexp.toString()
-        }*/
+        }
 
         val HTML_CHAR_ENTITIES: Array<String> = arrayOf<String>(
             "AElig",
@@ -1718,7 +1721,7 @@ class TestUtil {
             return sb.toString()
         }*/
 
-        /*fun randomSubString(random: Random, wordLength: Int, simple: Boolean): String {
+        fun randomSubString(random: Random, wordLength: Int, simple: Boolean): String {
             if (wordLength == 0) {
                 return ""
             }
@@ -1774,7 +1777,7 @@ class TestUtil {
             } else {
                 return sb.toString()
             }
-        }*/
+        }
 
         /**
          * For debugging: tries to include br.utf8ToString(), but if that fails (because it's not valid
@@ -1918,5 +1921,5 @@ class TestUtil {
             return Random.Default
         }
 
-    }// end of companion object
+    }
 }

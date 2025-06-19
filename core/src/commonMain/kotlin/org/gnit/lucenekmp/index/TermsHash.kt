@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.util.IntBlockPool
  * this class, eg [FreqProxTermsWriter] and [TermVectorsConsumer], write their own byte
  * streams under each term.
  */
-internal abstract class TermsHash(
+abstract class TermsHash(
     intBlockAllocator: IntBlockPool.Allocator,
     byteBlockAllocator: ByteBlockPool.Allocator,
     val bytesUsed: Counter,
@@ -31,7 +31,7 @@ internal abstract class TermsHash(
         }
     }
 
-    fun abort() {
+    open fun abort() {
         try {
             reset()
         } finally {
@@ -47,7 +47,7 @@ internal abstract class TermsHash(
     }
 
     @Throws(IOException::class)
-    fun flush(
+    open fun flush(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
         sortMap: Sorter.DocMap,
@@ -68,12 +68,12 @@ internal abstract class TermsHash(
     ): TermsHashPerField
 
     @Throws(IOException::class)
-    fun finishDocument(docID: Int) {
+    open fun finishDocument(docID: Int) {
         nextTermsHash?.finishDocument(docID)
     }
 
     @Throws(IOException::class)
-    fun startDocument() {
+    open fun startDocument() {
         nextTermsHash?.startDocument()
     }
 }

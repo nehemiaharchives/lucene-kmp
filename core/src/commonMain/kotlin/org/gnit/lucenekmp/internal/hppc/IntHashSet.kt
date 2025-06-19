@@ -18,6 +18,10 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.cast
 
+private inline fun assertOrThrow(value: Boolean, lazyMessage: () -> Any) {
+    if (!value) throw AssertionError(lazyMessage())
+}
+
 
 /**
  * A hash set of `int`s, implemented using open addressing with linear probing for
@@ -503,8 +507,8 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
      * existing key.
      */
     fun indexGet(index: Int): Int {
-        require(index >= 0) { "The index must point at an existing key." }
-        require(index <= mask || (index == mask + 1 && hasEmptyKey))
+        assertOrThrow(index >= 0) { "The index must point at an existing key." }
+        assertOrThrow(index <= mask || (index == mask + 1 && hasEmptyKey)) { "" }
 
         return keys!![index]
     }
@@ -523,9 +527,9 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
      * existing key.
      */
     fun indexReplace(index: Int, equivalentKey: Int): Int {
-        require(index >= 0) { "The index must point at an existing key." }
-        require(index <= mask || (index == mask + 1 && hasEmptyKey))
-        require((keys!![index]) == (equivalentKey))
+        assertOrThrow(index >= 0) { "The index must point at an existing key." }
+        assertOrThrow(index <= mask || (index == mask + 1 && hasEmptyKey)) { "" }
+        assertOrThrow((keys!![index]) == (equivalentKey)) { "" }
 
         val previousValue = keys!![index]
         keys!![index] = equivalentKey
@@ -544,15 +548,15 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
      */
     fun indexInsert(index: Int, key: Int) {
         var index = index
-        require(index < 0) { "The index must not point at an existing key." }
+        assertOrThrow(index < 0) { "The index must not point at an existing key." }
 
         index = index.inv()
         if (((key) == 0)) {
-            require(index == mask + 1)
-            require((keys!![index]) == 0)
+            assertOrThrow(index == mask + 1) { "" }
+            assertOrThrow((keys!![index]) == 0) { "" }
             hasEmptyKey = true
         } else {
-            require((keys!![index]) == 0)
+            assertOrThrow((keys!![index]) == 0) { "" }
 
             if (assigned == resizeAt) {
                 allocateThenInsertThenRehash(index, key)
@@ -574,8 +578,8 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
      * existing key.
      */
     fun indexRemove(index: Int) {
-        require(index >= 0) { "The index must point at an existing key." }
-        require(index <= mask || (index == mask + 1 && hasEmptyKey))
+        assertOrThrow(index >= 0) { "The index must point at an existing key." }
+        assertOrThrow(index <= mask || (index == mask + 1 && hasEmptyKey)) { "" }
 
         if (index > mask) {
             hasEmptyKey = false

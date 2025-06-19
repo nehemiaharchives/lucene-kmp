@@ -78,7 +78,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
     fun setLocationValue(latitude: Double, longitude: Double) {
         val bytes: ByteArray
 
-        if (fieldsData == null) {
+        if (!isFieldsDataInitialized()) {
             bytes = ByteArray(8)
             fieldsData = BytesRef(bytes)
         } else {

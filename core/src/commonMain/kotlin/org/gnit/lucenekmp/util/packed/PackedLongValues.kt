@@ -106,7 +106,7 @@ open class PackedLongValues internal constructor(
         val pageShift: Int = checkBlockSize(pageSize, MIN_PAGE_SIZE, MAX_PAGE_SIZE)
         val pageMask: Int = pageSize - 1
         val acceptableOverheadRatio: Float = acceptableOverheadRatio
-        var pending: LongArray
+        var pending: LongArray?
         var size: Long
 
         var values: Array<PackedInts.Reader>
@@ -122,7 +122,7 @@ open class PackedLongValues internal constructor(
             size = 0
             ramBytesUsed =
                 (baseRamBytesUsed()
-                        + RamUsageEstimator.sizeOf(pending)
+                        + RamUsageEstimator.sizeOf(pending!!)
                         + RamUsageEstimator.shallowSizeOf(values))
         }
 
@@ -132,7 +132,7 @@ open class PackedLongValues internal constructor(
          */
         open fun build(): PackedLongValues {
             finish()
-            pending = LongArray(0)
+            pending = null
             val values: Array<PackedInts.Reader> = ArrayUtil.copyOfSubArray(this.values, 0, valuesOff)
             val ramBytesUsed: Long =
                 PackedLongValues.Companion.BASE_RAM_BYTES_USED + RamUsageEstimator.sizeOf(values as Array<Accountable?>)
@@ -154,8 +154,8 @@ open class PackedLongValues internal constructor(
 
         /** Add a new element to this builder.  */
         fun add(l: Long): Builder {
-            checkNotNull(pending) { "Cannot be reused after build()" }
-            if (pendingOff == pending.size) {
+            val buf = checkNotNull(pending) { "Cannot be reused after build()" }
+            if (pendingOff == buf.size) {
                 // check size
                 if (values.size == valuesOff) {
                     val newLength: Int = ArrayUtil.oversize(valuesOff + 1, 8)
@@ -163,7 +163,7 @@ open class PackedLongValues internal constructor(
                 }
                 pack()
             }
-            pending[pendingOff++] = l
+            buf[pendingOff++] = l
             size += 1
             return this
         }
@@ -178,7 +178,8 @@ open class PackedLongValues internal constructor(
         }
 
         private fun pack() {
-            pack(pending, pendingOff, valuesOff, acceptableOverheadRatio)
+            val buf = checkNotNull(pending)
+            pack(buf, pendingOff, valuesOff, acceptableOverheadRatio)
             ramBytesUsed += values[valuesOff].ramBytesUsed()
             valuesOff += 1
             // reset pending buffer

@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build-jvm:
@@ -162,7 +166,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Full Build
-        run: ./gradlew build -x testDebugUnitTest -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverCachedVerify -x koverVerify
+        run: ./gradlew build -x testDebugUnitTest -x koverGenerateArtifactJvm -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverCachedVerify -x koverVerify
 
       - name: Generate Coverage Report
         run: ./gradlew koverXmlReport

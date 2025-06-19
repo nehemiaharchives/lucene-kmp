@@ -33,7 +33,7 @@ import kotlin.reflect.cast
  * @lucene.internal
  */
 @OptIn(ExperimentalAtomicApi::class)
-class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
+open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
     Iterable<IntIntHashMap.IntIntCursor>, Accountable, Cloneable<IntIntHashMap> {
     /** The array holding keys.  */
     var keys: IntArray? = null
@@ -460,7 +460,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
             slot = seed and mask
         }
 
-        override fun fetch(): IntIntCursor {
+        override fun fetch(): IntIntCursor? {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -481,7 +481,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -582,7 +582,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
             slot = seed and mask
         }
 
-        override fun fetch(): IntCursor {
+        override fun fetch(): IntCursor? {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 index++
@@ -600,7 +600,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 

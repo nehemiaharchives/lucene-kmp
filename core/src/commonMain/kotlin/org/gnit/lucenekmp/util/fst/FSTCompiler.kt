@@ -1060,7 +1060,8 @@ class FSTCompiler<T> private constructor(
                         + numArcs)
             }
             if (numArcs == arcs.size) {
-                val newArcs: Array<Arc<T>> = ArrayUtil.grow(arcs)
+                @Suppress("UNCHECKED_CAST")
+                val newArcs = ArrayUtil.grow(arcs as Array<Arc<T>?>, arcs.size + 1) as Array<Arc<T>>
                 for (arcIdx in numArcs..<newArcs.size) {
                     newArcs[arcIdx] = Arc()
                 }

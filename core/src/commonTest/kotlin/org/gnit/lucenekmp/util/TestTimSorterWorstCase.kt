@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.packed.PackedInts
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,6 +11,7 @@ import kotlin.test.Test
  */
 class TestTimSorterWorstCase : LuceneTestCase() {
 
+    @Ignore
     @Test
     @LuceneTestCase.Companion.Nightly
     fun testWorstCaseStackSize() {

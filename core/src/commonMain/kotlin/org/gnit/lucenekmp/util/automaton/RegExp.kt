@@ -7,7 +7,6 @@ import org.gnit.lucenekmp.jdkport.codePointAt
 import org.gnit.lucenekmp.jdkport.codePointSequence
 import kotlin.jvm.JvmOverloads
 
-
 /**
  * Regular Expression extension to `Automaton`.
  *
@@ -972,12 +971,12 @@ class RegExp {
     }
 
     @Throws(IllegalArgumentException::class)
-    /*fun parseUnionExp(): RegExp {
-        return iterativeParseExp(
-            java.util.function.Supplier { this.parseInterExp() },
-            java.util.function.BooleanSupplier { match('|'.code) },
-            MakeRegexGroup { flags: Int, exp1: RegExp?, exp2: RegExp? -> Companion.makeUnion(flags, exp1!!, exp2!!) })
-    }*/
+            /*fun parseUnionExp(): RegExp {
+                return iterativeParseExp(
+                    java.util.function.Supplier { this.parseInterExp() },
+                    java.util.function.BooleanSupplier { match('|'.code) },
+                    MakeRegexGroup { flags: Int, exp1: RegExp?, exp2: RegExp? -> Companion.makeUnion(flags, exp1!!, exp2!!) })
+            }*/
     fun parseUnionExp(): RegExp =
         iterativeParseExp(this::parseInterExp, { match('|'.code) }, RegExp::makeUnion)
 
@@ -1066,11 +1065,20 @@ class RegExp {
             // look for escape
             if (match('\\'.code)) {
                 if (peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
-                    // special "escape" or invalid escape
-                    expandPreDefined(starts, ends)
+                    if (peek("u")) {
+                        // rewind one char to let parseCharExp handle unicode escape
+                        pos--
+                        val c = parseCharExp()
+                        starts.add(c)
+                        ends.add(c)
+                    } else {
+                        // special "escape" or invalid escape
+                        expandPreDefined(starts, ends)
+                    }
                 } else {
-                    // escaped character, don't parse it
-                    val c = next()
+                    // escaped character
+                    pos--
+                    val c = parseCharExp()
                     starts.add(c)
                     ends.add(c)
                 }
@@ -1180,6 +1188,12 @@ class RegExp {
 
     fun matchPredefinedCharacterClass(): RegExp? {
         // See https://docs.oracle.com/javase/tutorial/essential/regex/pre_char_classes.html
+        if (pos < originalString!!.length - 1 &&
+            originalString[pos] == '\\' && originalString[pos + 1] == 'u'
+        ) {
+            // Unicode escape; let caller handle via parseCharExp
+            return null
+        }
         if (match('\\'.code) && peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
             val starts: MutableList<Int> = mutableListOf()
             val ends: MutableList<Int> = mutableListOf()
@@ -1250,6 +1264,18 @@ class RegExp {
     @Throws(IllegalArgumentException::class)
     fun parseCharExp(): Int {
         match('\\'.code)
+        if (peek("u")) {
+            next() // consume 'u'
+            var code = 0
+            repeat(4) {
+                require(more()) { "unexpected end-of-string" }
+                val ch = next().toChar()
+                val digit = ch.digitToIntOrNull(16) ?: -1
+                require(digit != -1) { "invalid unicode escape" }
+                code = (code shl 4) or digit
+            }
+            return code
+        }
         return next()
     }
 

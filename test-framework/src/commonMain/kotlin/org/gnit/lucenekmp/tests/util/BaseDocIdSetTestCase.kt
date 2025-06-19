@@ -95,7 +95,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
     }
 
     /** Assert that the content of the DocIdSet is the same as the content of the BitSet. */
-    fun assertEqualsDocSet(numBits: Int, ds1: BitSet, ds2: T) {
+    open fun assertEqualsDocSet(numBits: Int, ds1: BitSet, ds2: T) {
         val random = Random.Default
         var it2: DocIdSetIterator? = ds2.iterator()
         if (it2 == null) {

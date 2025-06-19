@@ -273,8 +273,8 @@ internal class SimpleGeoJSONPolygonParser(val input: String) {
     }
 
     @Throws(ParseException::class)
-    private fun parseArray(path: String): MutableList<Any> {
-        val result: MutableList<Any> = ArrayList()
+    private fun parseArray(path: String): MutableList<Any?> {
+        val result: MutableList<Any?> = ArrayList()
         scan('[')
         while (upto < input.length) {
             var ch = peek()
@@ -314,7 +314,7 @@ internal class SimpleGeoJSONPolygonParser(val input: String) {
                 )
             }
 
-            result.add(o!!)
+            result.add(o)
         }
 
         throw newParseException("hit EOF while reading array")

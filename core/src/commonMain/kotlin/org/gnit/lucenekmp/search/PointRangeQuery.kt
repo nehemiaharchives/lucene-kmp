@@ -46,11 +46,13 @@ abstract class PointRangeQuery protected constructor(
     val field: String
     val numDims: Int
     val bytesPerDim: Int
-    var lowerPoint: ByteArray
-        get() = lowerPoint.copyOf()
+    var lowerPoint: ByteArray = lowerPoint
+        private set
+        get() = field.copyOf()
 
-    var upperPoint: ByteArray
-        get() = upperPoint.copyOf()
+    var upperPoint: ByteArray = upperPoint
+        private set
+        get() = field.copyOf()
 
     /**
      * Expert: create a multidimensional range query for point values.
@@ -76,9 +78,6 @@ abstract class PointRangeQuery protected constructor(
         }
         this.numDims = numDims
         this.bytesPerDim = lowerPoint.size / numDims
-
-        this.lowerPoint = lowerPoint
-        this.upperPoint = upperPoint
     }
 
     override fun visit(visitor: QueryVisitor) {

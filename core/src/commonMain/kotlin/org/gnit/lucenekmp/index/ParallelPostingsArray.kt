@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.index
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.util.ArrayUtil
 
-internal open class ParallelPostingsArray(val size: Int) {
+open class ParallelPostingsArray(val size: Int) {
     val textStarts: IntArray = IntArray(size) // maps term ID to the terms's text start in the bytesHash
     val addressOffset: IntArray = IntArray(size) // maps term ID to current stream address
     val byteStarts: IntArray = IntArray(size) // maps term ID to stream start offset in the byte pool

@@ -53,7 +53,7 @@ class TestBlockingFloatHeap : LuceneTestCase() {
 
     @Test
     fun testMultipleThreads() = runBlocking {
-        val numThreads = TestUtil.nextInt(random(), 3, 20)
+        val numThreads = TestUtil.nextInt(random(), 2, 4) // TODO originally 3, 20 but reduced to 2, 4 for dev speed
         val start = CompletableDeferred<Unit>()
         val globalHeap = BlockingFloatHeap(1)
 

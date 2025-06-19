@@ -32,7 +32,7 @@ import kotlin.reflect.cast
  * @lucene.internal
  */
 @OptIn(ExperimentalAtomicApi::class)
-class IntObjectHashMap<VType>
+open class IntObjectHashMap<VType>
 @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
     Iterable<IntObjectHashMap.IntObjectCursor<VType>>, Accountable, Cloneable<IntObjectHashMap<VType>> {
     /** The array holding keys.  */
@@ -435,7 +435,7 @@ class IntObjectHashMap<VType>
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntObjectCursor<VType?> {
+        protected override fun fetch(): IntObjectCursor<VType?>? {
             val mask = this@IntObjectHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -456,7 +456,7 @@ class IntObjectHashMap<VType>
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 
@@ -499,7 +499,7 @@ class IntObjectHashMap<VType>
             slot = seed and mask
         }
 
-        protected override fun fetch(): IntCursor {
+        protected override fun fetch(): IntCursor? {
             val mask = this@IntObjectHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -518,7 +518,7 @@ class IntObjectHashMap<VType>
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 

@@ -4,6 +4,9 @@ import org.gnit.lucenekmp.jdkport.Checksum
 import org.gnit.lucenekmp.util.putIntLE
 import org.gnit.lucenekmp.util.putLongLE
 import org.gnit.lucenekmp.util.putShortLE
+import kotlin.collections.minusAssign
+import kotlin.collections.plusAssign
+import kotlin.compareTo
 import kotlin.jvm.JvmOverloads
 import kotlin.math.min
 
@@ -32,7 +35,7 @@ class BufferedChecksum @JvmOverloads constructor(private val `in`: Checksum, buf
                 flush()
             }
             /*java.lang.System.arraycopy(b, off, buffer, upto, len)*/
-            buffer.copyInto(
+            b.copyInto(
                 destination = buffer,
                 destinationOffset = upto,
                 startIndex = off,
@@ -120,29 +123,43 @@ class BufferedChecksum @JvmOverloads constructor(private val `in`: Checksum, buf
         var off = offset
         var remaining = len
 
-        // First, if there's data already in the buffer, try to fill the remaining capacity.
+        // If the buffer is not empty, process longs one by one until it is flushed.
         if (upto > 0) {
-            val availableCapacityInLong = min((buffer.size - upto) / Long.SIZE_BYTES, remaining)
-            repeat(availableCapacityInLong) {
+            while (remaining > 0) {
                 updateLong(vals[off])
                 off++
                 remaining--
+                // updateLong may have flushed the buffer. If so, upto is 0 and we can switch to bulk processing.
+                if (upto == 0) {
+                    break
+                }
             }
-            if (remaining == 0) return
+            if (remaining == 0) {
+                return
+            }
         }
 
-        // Now, write remaining longs in bulk.
+        // Now that upto is 0, we can process full buffer chunks directly.
         val capacityInLong = buffer.size / Long.SIZE_BYTES
-        while (remaining > 0) {
-            flush() // flush the buffer so that upto becomes 0
-            val l = min(capacityInLong, remaining)
-            // "Bulk" write l longs into the buffer at once.
-            for (i in 0 until l) {
-                buffer.putLongLE(i * Long.SIZE_BYTES, vals[off + i])
+        if (capacityInLong > 0) {
+            val longBuffer = org.gnit.lucenekmp.jdkport.ByteBuffer.wrap(buffer)
+                .order(org.gnit.lucenekmp.jdkport.ByteOrder.LITTLE_ENDIAN).asLongBuffer()
+
+            while (remaining >= capacityInLong) {
+                longBuffer.position(0)
+                for (i in 0 until capacityInLong) {
+                    longBuffer.put(vals[off + i])
+                }
+                // Directly update the underlying checksum, bypassing the buffer state for this chunk.
+                `in`.update(buffer, 0, capacityInLong * Long.SIZE_BYTES)
+                off += capacityInLong
+                remaining -= capacityInLong
             }
-            upto = l * Long.SIZE_BYTES
-            off += l
-            remaining -= l
+        }
+
+        // Process any remaining longs using the standard buffering mechanism.
+        for (i in 0 until remaining) {
+            updateLong(vals[off + i])
         }
     }
 

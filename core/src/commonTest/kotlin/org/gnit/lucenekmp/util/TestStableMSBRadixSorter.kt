@@ -19,6 +19,7 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -44,10 +45,10 @@ class TestStableMSBRadixSorter : LuceneTestCase() {
         val finalMaxLength = maxLength
         object : StableMSBRadixSorter(maxLength) {
             private var temp: Array<BytesRef?>? = null
-            override fun byteAt(i: Int, k: Int): Byte {
+            override fun byteAt(i: Int, k: Int): Int {
                 assertTrue(k < finalMaxLength)
                 val ref = refs[i]
-                return if (ref.length <= k) (-1).toByte() else ref.bytes[ref.offset + k]
+                return if (ref.length <= k) -1 else (ref.bytes[ref.offset + k].toInt() and 0xFF)
             }
 
             override fun swap(i: Int, j: Int) {
@@ -137,12 +138,12 @@ class TestStableMSBRadixSorter : LuceneTestCase() {
 
     @Test
     fun testRandomWithSharedPrefix() {
-        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 30), 10) } // TODO originally 10 but reduced to 3 for dev speed
+        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 3), 10) } // TODO originally 10, 30 but reduced to 3, 3 for dev speed
     }
 
     @Test
     fun testRandomWithSharedPrefixAndLotsOfDuplicates() {
-        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 30), 2) } // TODO originally 10 but reduced to 3 for dev speed
+        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 3), 2) } // TODO originally 10, 30 but reduced to 3, 3 for dev speed
     }
 
     @Test

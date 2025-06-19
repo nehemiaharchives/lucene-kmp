@@ -17,6 +17,8 @@ import org.gnit.lucenekmp.util.automaton.StatePair
 import org.gnit.lucenekmp.util.automaton.TooComplexToDeterminizeException
 import org.gnit.lucenekmp.util.automaton.Transition
 import org.gnit.lucenekmp.util.fst.Util
+import org.gnit.lucenekmp.jdkport.assert
+import kotlin.experimental.ExperimentalNativeApi
 
 object AutomatonTestUtil {
   /** Default maximum number of states that {@link Operations#determinize} should create. */
@@ -632,4 +634,114 @@ private fun assert(
   if (!condition) {
     throw AssertionError(message())
   }
+}
+
+@OptIn(ExperimentalNativeApi::class)
+class RandomAcceptedStrings(private val a: Automaton) {
+    private val leadsToAccept = mutableMapOf<Transition, Boolean>()
+    private val transitions: Array<Array<Transition>> = a.sortedTransitions
+
+    init {
+        if (a.numStates == 0) {
+            throw IllegalArgumentException("this automaton accepts nothing")
+        }
+        val allArriving = mutableMapOf<Int, MutableList<ArrivingTransition>>()
+        val q = ArrayDeque<Int>()
+        val seen = HashSet<Int>()
+        val numStates = a.numStates
+        for (s in 0 until numStates) {
+            for (t in transitions[s]) {
+                val tl = allArriving.getOrPut(t.dest) { mutableListOf() }
+                tl.add(ArrivingTransition(s, t))
+            }
+            if (a.isAccept(s)) {
+                q.add(s)
+                seen.add(s)
+            }
+        }
+        while (q.isNotEmpty()) {
+            val s = q.removeFirst()
+            val arriving = allArriving[s]
+            if (arriving != null) {
+                for (at in arriving) {
+                    val from = at.from
+                    if (!seen.contains(from)) {
+                        q.add(from)
+                        seen.add(from)
+                        leadsToAccept[at.t] = true
+                    }
+                }
+            }
+        }
+    }
+
+    fun getRandomAcceptedString(r: Random): IntArray {
+        var codePoints = IntArray(0)
+        var codepointCount = 0
+        var s = 0
+        while (true) {
+            if (a.isAccept(s)) {
+                if (a.getNumTransitions(s) == 0) {
+                    break
+                } else if (r.nextBoolean()) {
+                    break
+                }
+            }
+            if (a.getNumTransitions(s) == 0) {
+                throw RuntimeException("this automaton has dead states")
+            }
+            val cheat = r.nextBoolean()
+            val t: Transition = if (cheat) {
+                val toAccept = mutableListOf<Transition>()
+                for (t0 in transitions[s]) {
+                    if (leadsToAccept.containsKey(t0)) {
+                        toAccept.add(t0)
+                    }
+                }
+                if (toAccept.isEmpty()) {
+                    transitions[s][r.nextInt(transitions[s].size)]
+                } else {
+                    toAccept[r.nextInt(toAccept.size)]
+                }
+            } else {
+                transitions[s][r.nextInt(transitions[s].size)]
+            }
+            codePoints = ArrayUtil.grow(codePoints, codepointCount + 1)
+            codePoints[codepointCount++] = getRandomCodePoint(r, t.min, t.max)
+            s = t.dest
+        }
+        return ArrayUtil.copyOfSubArray(codePoints, 0, codepointCount)
+    }
+
+    private fun getRandomCodePoint(r: Random, min: Int, max: Int): Int {
+        val code: Int
+        if (max < UnicodeUtil.UNI_SUR_HIGH_START || min > UnicodeUtil.UNI_SUR_HIGH_END) {
+            code = min + r.nextInt(max - min + 1)
+        } else if (min >= UnicodeUtil.UNI_SUR_HIGH_START) {
+            if (max > UnicodeUtil.UNI_SUR_LOW_END) {
+                code = 1 + UnicodeUtil.UNI_SUR_LOW_END + r.nextInt(max - UnicodeUtil.UNI_SUR_LOW_END)
+            } else {
+                throw IllegalArgumentException("transition accepts only surrogates: min=$min max=$max")
+            }
+        } else if (max <= UnicodeUtil.UNI_SUR_LOW_END) {
+            if (min < UnicodeUtil.UNI_SUR_HIGH_START) {
+                code = min + r.nextInt(UnicodeUtil.UNI_SUR_HIGH_START - min)
+            } else {
+                throw IllegalArgumentException("transition accepts only surrogates: min=$min max=$max")
+            }
+        } else {
+            val gap1 = UnicodeUtil.UNI_SUR_HIGH_START - min
+            val gap2 = max - UnicodeUtil.UNI_SUR_LOW_END
+            val c = r.nextInt(gap1 + gap2)
+            code = if (c < gap1) {
+                min + c
+            } else {
+                UnicodeUtil.UNI_SUR_LOW_END + c - gap1 + 1
+            }
+        }
+        assert(code >= min && code <= max && (code < UnicodeUtil.UNI_SUR_HIGH_START || code > UnicodeUtil.UNI_SUR_LOW_END))
+        return code
+    }
+
+    private class ArrivingTransition(val from: Int, val t: Transition)
 }

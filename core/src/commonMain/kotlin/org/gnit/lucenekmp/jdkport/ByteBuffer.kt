@@ -678,11 +678,12 @@ open class ByteBuffer private constructor(
 
     /** Creates a new buffer that shares this buffer’s content but has independent position, limit, and mark. */
     fun duplicate(): ByteBuffer {
-        val copy = array.copyOf()
-        val dup = ByteBuffer(copy, capacity)
+        val dup = ByteBuffer(array, capacity)
         dup.position = this.position
         dup.limit = this.limit
-        dup.order(this.order())
+        dup.bigEndian = this.bigEndian
+        dup.nativeByteOrder = this.nativeByteOrder
+        dup._readOnly = this._readOnly
         return dup
     }
 
