@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util.automaton
-    import kotlin.test.Test
+
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
@@ -24,7 +25,8 @@ import org.gnit.lucenekmp.util.automaton.RegExp
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.random.Random
-    class TestAutomaton {
+
+class TestAutomaton {
     fun testBasic() {
         val a = Automaton()
         val start = a.createState()
