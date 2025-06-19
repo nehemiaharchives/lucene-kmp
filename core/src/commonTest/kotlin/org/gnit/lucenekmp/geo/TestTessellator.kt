@@ -853,6 +853,7 @@ class TestTessellator : LuceneTestCase() {
         """.trimIndent()
         checkPolygon(wkt)
     }
+
     // helper functions ported from Java
     private fun checkPolygon(wkt: String) {
         val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
