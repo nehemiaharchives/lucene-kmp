@@ -9,7 +9,11 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.LongValues
 import kotlin.random.Random
-import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
+import kotlin.math.ln
+import kotlin.math.roundToInt
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -19,8 +23,9 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class TestDirectMonotonic : LuceneTestCase() {
+    @OptIn(ExperimentalAtomicApi::class)
     companion object {
-        private val DIR_COUNTER = AtomicInteger()
+        private val DIR_COUNTER = AtomicInt(0)
     }
 
     private lateinit var fs: FakeFileSystem
@@ -36,8 +41,9 @@ class TestDirectMonotonic : LuceneTestCase() {
         Files.resetFileSystem()
     }
 
+    @OptIn(ExperimentalAtomicApi::class)
     private fun newDirectory(): Directory {
-        val path = "/dir-${DIR_COUNTER.getAndIncrement()}".toPath()
+        val path = "/dir-${DIR_COUNTER.incrementAndFetch()}".toPath()
         fs.createDirectories(path)
         return NIOFSDirectory(path, FSLockFactory.default, fs)
     }
@@ -160,7 +166,7 @@ class TestDirectMonotonic : LuceneTestCase() {
         val blockShift = TestUtil.nextInt(
             random(),
             DirectMonotonicWriter.MIN_BLOCK_SHIFT,
-            Math.toIntExact(Math.round(Math.log(numValues.toDouble()) / Math.log(2.0))) - 1
+            ((kotlin.math.ln(numValues.toDouble()) / kotlin.math.ln(2.0)).roundToInt()) - 1
         )
         val dataLength: Long
         dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
@@ -197,6 +203,9 @@ class TestDirectMonotonic : LuceneTestCase() {
         val rnd = random()
         val iters = atLeast(rnd, 3)
         for (iter in 0 until iters) {
+            Files.resetFileSystem()
+            fs = FakeFileSystem()
+            Files.setFileSystem(fs)
             val dir = newDirectory()
             val blockShift = TestUtil.nextInt(rnd, DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
             val maxNumValues = 1 shl 20
@@ -247,7 +256,7 @@ class TestDirectMonotonic : LuceneTestCase() {
         }
     }
 
-    @Ignore("unstable")
+    @Ignore
     @Test
     fun testMonotonicBinarySearchRandom() {
         newDirectory().use { dir ->
