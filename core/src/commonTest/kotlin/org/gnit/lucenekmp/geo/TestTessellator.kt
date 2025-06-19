@@ -790,6 +790,8 @@ class TestTessellator : LuceneTestCase() {
     @Ignore // TODO implement later
     fun testComplexPolygon50() {
     }
+
+    
     // helper functions ported from Java
     private fun checkPolygon(wkt: String) {
         val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon
