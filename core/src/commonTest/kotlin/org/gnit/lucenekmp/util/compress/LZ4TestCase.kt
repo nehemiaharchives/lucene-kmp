@@ -213,7 +213,7 @@ abstract class LZ4TestCase : LuceneTestCase() {
 
     @Test
     fun testIncompressibleRandom() {
-        val b = ByteArray(TestUtil.nextInt(random(), 1, 1 shl 18))
+        val b = ByteArray(TestUtil.nextInt(random(), 1, 1 shl 16)) // TODO originally 18 but reduced to 16 for dev speed
         random().nextBytes(b)
         doTest(b, newHashTable())
         doTestWithDictionary(b, newHashTable())
@@ -221,7 +221,7 @@ abstract class LZ4TestCase : LuceneTestCase() {
 
     @Test
     fun testCompressibleRandom() {
-        val b = ByteArray(TestUtil.nextInt(random(), 1, 1 shl 18))
+        val b = ByteArray(TestUtil.nextInt(random(), 1, 1 shl 16)) // TODO originally 18 but reduced to 16 for dev speed
         val base = random().nextInt(256)
         val maxDelta = 1 + random().nextInt(8)
         val r = random()

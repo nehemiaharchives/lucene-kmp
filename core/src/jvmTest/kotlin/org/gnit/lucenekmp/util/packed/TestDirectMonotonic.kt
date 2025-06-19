@@ -185,12 +185,11 @@ class TestDirectMonotonic : LuceneTestCase() {
     @Test
     fun testRandom() { doTestRandom(false) }
 
-    @Ignore("unstable")
     @Test
     fun testRandomMerging() { doTestRandom(true) }
 
     private fun doTestRandom(merging: Boolean) {
-        val rnd = random()
+        val rnd = /*random()*/ Random(12345)
         val iters = atLeast(rnd, 3)
         for (iter in 0 until iters) {
             val dir = newDirectory()

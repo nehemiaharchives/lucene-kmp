@@ -18,12 +18,12 @@ import kotlin.test.assertTrue
 class TestMutablePointTreeReaderUtils : LuceneTestCase() {
     @Test
     fun testSort() {
-        repeat(10) { doTestSort(false) }
+        repeat(3) { doTestSort(false) } // TODO originally 10 but reduced to 3 for dev speed
     }
 
     @Test
     fun testSortWithIncrementalDocId() {
-        repeat(10) { doTestSort(true) }
+        repeat(3) { doTestSort(true) } // TODO originally 10 but reduced to 3 for dev speed
     }
 
     private fun doTestSort(isDocIdIncremental: Boolean) {

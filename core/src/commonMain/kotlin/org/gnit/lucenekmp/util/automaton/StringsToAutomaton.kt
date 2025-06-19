@@ -5,7 +5,6 @@ import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefIterator
 import org.gnit.lucenekmp.util.UnicodeUtil
-import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.UnicodeUtil.Companion.UTF8CodePoint
 import org.gnit.lucenekmp.util.automaton.Automaton.Builder
@@ -70,27 +69,25 @@ private constructor() {
         override fun hashCode(): Int {
             var hash = if (is_final) 1 else 0
 
-            hash = hash xor hash * 31 + this.labels.size
-            for (c in this.labels) hash = hash xor hash * 31 + c
+            hash = hash * 31 + this.labels.size
+            for (c in this.labels) hash = hash * 31 + c
 
             /*
-       * Compare the right-language of this state using reference-identity of
-       * outgoing states. This is possible because states are interned (stored
-       * in registry) and traversed in post-order, so any outgoing transitions
-       * are already interned.
-       */
-            /*
-             * TODO skipping this for now, as it is not needed in the current implementation
+             * Compare the right-language of this state using reference-identity of
+             * outgoing states. This is possible because states are interned (stored
+             * in registry) and traversed in post-order, so any outgoing transitions
+             * are already interned.
+             */
             for (s in this.states) {
-                hash = hash xor java.lang.System.identityHashCode(s)
-            }*/
+                hash = hash * 31 + s.hashCode()
+            }
 
             return hash
         }
 
         /** Return `true` if this state has any children (outgoing transitions).  */
         fun hasChildren(): Boolean {
-            return labels.size > 0
+            return labels.isNotEmpty()
         }
 
         /**
@@ -98,15 +95,43 @@ private constructor() {
          * target state for this transition.
          */
         fun newState(label: Int): State {
-            require(
-                Arrays.binarySearch(labels, label) < 0
-            ) { "State already has transition labeled: $label" }
+            val index = Arrays.binarySearch(labels, label)
+            require(index < 0) { "State already has transition labeled: $label" }
 
-            labels = ArrayUtil.growExact(labels, labels.size + 1)
-            states = ArrayUtil.growExact(states, states.size + 1)
+            val insertIndex = -(index + 1)
 
-            labels[labels.size - 1] = label
-            return State().also { states[states.size - 1] = it }
+            val newLabels = IntArray(labels.size + 1)
+            val newStates = arrayOfNulls<State?>(states.size + 1)
+
+            // copy before insertion point
+            labels.copyInto(destination = newLabels, destinationOffset = 0, startIndex = 0, endIndex = insertIndex)
+            states.copyInto(destination = newStates, destinationOffset = 0, startIndex = 0, endIndex = insertIndex)
+
+            // insert new element
+            newLabels[insertIndex] = label
+            val s = State()
+            newStates[insertIndex] = s
+
+            // copy after insertion point
+            if (insertIndex < labels.size) {
+                labels.copyInto(
+                    destination = newLabels,
+                    destinationOffset = insertIndex + 1,
+                    startIndex = insertIndex,
+                    endIndex = labels.size
+                )
+                states.copyInto(
+                    destination = newStates,
+                    destinationOffset = insertIndex + 1,
+                    startIndex = insertIndex,
+                    endIndex = states.size
+                )
+            }
+
+            this.labels = newLabels
+            @Suppress("UNCHECKED_CAST")
+            this.states = newStates as Array<State>
+            return s
         }
 
         /** Return the most recent transitions's target state.  */
@@ -120,15 +145,14 @@ private constructor() {
          */
         fun lastChild(label: Int): State? {
             val index = labels.size - 1
-            var s: State? = null
             if (index >= 0 && labels[index] == label) {
-                s = states[index]
+                return states[index]
             }
-            require(s === getState(label))
-            return s
+            return null
         }
 
-        /** Replace the last added outgoing transition's target state with the given state.  */
+        /**
+         * Replace the last added outgoing transition's target state with the given state.  */
         fun replaceLastChild(state: State?) {
             require(hasChildren()) { "No outgoing transitions." }
             states[states.size - 1] = state!!
@@ -186,8 +210,8 @@ private constructor() {
         stateRegistry = null
 
         // Convert:
-        val a: Builder = Builder()
-        convert(a, root, mutableMapOf<State?, Int?>())
+        val a = Builder()
+        convert(a, root, mutableMapOf())
         return a.finish()
     }
 
@@ -212,16 +236,16 @@ private constructor() {
         var pos: Int = current.offset
         val max: Int = current.offset + current.length
         var next: State? = null
-        var state: State? = root
+        var state: State = root
         if (asBinary) {
-            while (pos < max && (state!!.lastChild(bytes[pos].toInt() and 0xff).also { next = it }) != null) {
-                state = next
+            while (pos < max && (state.getState(bytes[pos].toInt() and 0xff).also { next = it }) != null) {
+                state = next!!
                 pos++
             }
         } else {
             while (pos < max) {
                 codePoint = UnicodeUtil.codePointAt(bytes, pos, codePoint)
-                next = state!!.lastChild(codePoint.codePoint)
+                next = state.getState(codePoint.codePoint)
                 if (next == null) {
                     break
                 }
@@ -230,18 +254,18 @@ private constructor() {
             }
         }
 
-        if (state!!.hasChildren()) replaceOrRegister(state)
+        if (state.hasChildren()) replaceOrRegister(state)
 
         // Add suffix
         if (asBinary) {
             while (pos < max) {
-                state = state!!.newState(bytes[pos].toInt() and 0xff)
+                state = state.newState(bytes[pos].toInt() and 0xff)
                 pos++
             }
         } else {
             while (pos < max) {
                 codePoint = UnicodeUtil.codePointAt(bytes, pos, codePoint)
-                state = state!!.newState(codePoint.codePoint)
+                state = state.newState(codePoint.codePoint)
                 pos += codePoint.numBytes
             }
         }
@@ -257,7 +281,7 @@ private constructor() {
 
         if (child.hasChildren()) replaceOrRegister(child)
 
-        val registered: State? = stateRegistry!!.get(child)
+        val registered: State? = stateRegistry!![child]
         if (registered != null) {
             state.replaceLastChild(registered)
         } else {
@@ -270,7 +294,7 @@ private constructor() {
         private fun convert(
             a: Builder, s: State, visited: MutableMap<State?, Int?>
         ): Int {
-            var converted: Int? = visited.get(s)
+            var converted: Int? = visited[s]
             if (converted != null) {
                 return converted
             }

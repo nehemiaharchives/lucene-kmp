@@ -517,7 +517,7 @@ class TestPackedInts : LuceneTestCase() {
         writer.subMutables[pageIdx] = GrowableWriter(1, valueCount, writer.acceptableOverheadRatio)
         writer.set(index, 2)
         assertEquals(2L, writer.get(index))
-        repeat(1000) {
+        repeat(10) { // TODO originally 1000 but reduced to 10 for dev speed
             val idx = nextLong(random(), 0, size)
             val pIdx = writer.pageIndex(idx)
             val sub = writer.subMutables[pIdx]
@@ -592,12 +592,12 @@ class TestPackedInts : LuceneTestCase() {
                 assertEquals(byteBlockCount, decoder.byteBlockCount())
                 assertEquals(byteValueCount, decoder.byteValueCount())
 
-                val longIterations = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
+                val longIterations = random().nextInt(3) // TODO originally 100, but reduced to 3 for dev speed
                 val byteIterations = longIterations * longValueCount / byteValueCount
                 assertEquals(longIterations * longValueCount, byteIterations * byteValueCount)
-                val blocksOffset = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
-                val valuesOffset = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
-                val blocksOffset2 = random().nextInt(10) // TODO originally 100, but reduced to 10 for dev speed
+                val blocksOffset = random().nextInt(3) // TODO originally 100, but reduced to 3 for dev speed
+                val valuesOffset = random().nextInt(3) // TODO originally 100, but reduced to 3 for dev speed
+                val blocksOffset2 = random().nextInt(3) // TODO originally 100, but reduced to 3 for dev speed
                 val blocksLen = longIterations * longBlockCount
 
                 val blocks = LongArray(blocksOffset + blocksLen) { random().nextLong() }

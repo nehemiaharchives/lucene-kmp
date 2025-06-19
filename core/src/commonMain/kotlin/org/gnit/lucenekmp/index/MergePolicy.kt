@@ -75,7 +75,7 @@ abstract class MergePolicy
     protected var maxCFSSegmentSize: Long = DEFAULT_MAX_CFS_SEGMENT_SIZE
 ) {
 
-    protected var noCFSRatio: Double = noCFSRatio
+    var noCFSRatio: Double = noCFSRatio
         /**
          * If a merged segment will be more than this percentage of the total size of the index, leave the
          * segment as non-compound file even if compound file is enabled. Set to 1.0 to always use CFS

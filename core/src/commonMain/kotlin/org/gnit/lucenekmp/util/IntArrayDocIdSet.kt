@@ -66,8 +66,10 @@ internal class IntArrayDocIdSet(docs: IntArray, length: Int) : DocIdSet() {
 
             val from = i - 1
             val to = VectorUtil.findNextGEQ(docs, upTo, from, length)
-            for (i in from..<to) {
-                bitSet.set(docs[i] - offset)
+            var idx = from
+            while (idx < to) {
+                bitSet.set(docs[idx] - offset)
+                idx++
             }
             doc = docs[to]
             i = to + 1

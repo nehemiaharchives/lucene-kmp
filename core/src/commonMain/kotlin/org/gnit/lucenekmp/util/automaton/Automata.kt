@@ -178,8 +178,8 @@ object Automata {
         if (x.length == n) {
             builder.setAccept(s, true)
         } else {
-            val c = x.get(n)
-            builder.addTransition(s, atMost(builder, x, n.toChar().code + 1), c.code)
+            val c = x[n]
+            builder.addTransition(s, atMost(builder, x, n + 1), c.code)
             if (c > '0') {
                 builder.addTransition(s, anyOfRightLength(builder, x, n + 1), '0'.code, (c.code - 1).toChar().code)
             }
