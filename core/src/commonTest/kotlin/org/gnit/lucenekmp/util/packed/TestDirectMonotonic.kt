@@ -203,9 +203,6 @@ class TestDirectMonotonic : LuceneTestCase() {
         val rnd = random()
         val iters = atLeast(rnd, 3)
         for (iter in 0 until iters) {
-            Files.resetFileSystem()
-            fs = FakeFileSystem()
-            Files.setFileSystem(fs)
             val dir = newDirectory()
             val blockShift = TestUtil.nextInt(rnd, DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
             val maxNumValues = 1 shl 20
