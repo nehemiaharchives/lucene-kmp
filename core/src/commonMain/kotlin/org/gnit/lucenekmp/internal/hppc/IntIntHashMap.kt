@@ -447,7 +447,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
     }
 
     /** An iterator implementation for [.iterator].  */
-    private inner class EntryIterator : AbstractIterator<IntIntCursor?>() {
+    private inner class EntryIterator : AbstractIterator<IntIntCursor>() {
         private val cursor: IntIntCursor
         private val increment: Int
         private var index = 0
@@ -460,7 +460,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
             slot = seed and mask
         }
 
-        override fun fetch(): IntIntCursor? {
+        override fun fetch(): IntIntCursor {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -481,7 +481,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
                 return cursor
             }
 
-            return done()
+            return done()!!
         }
     }
 
@@ -502,7 +502,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
     }
 
     /** An iterator over the set of assigned keys.  */
-    private inner class KeysIterator : AbstractIterator<IntCursor?>() {
+    private inner class KeysIterator : AbstractIterator<IntCursor>() {
         private val cursor: IntCursor
         private val increment: Int
         private var index = 0
@@ -515,7 +515,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
             slot = seed and mask
         }
 
-        override fun fetch(): IntCursor? {
+        override fun fetch(): IntCursor {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -534,7 +534,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
                 return cursor
             }
 
-            return done()
+            return done()!!
         }
     }
 
@@ -569,7 +569,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
     }
 
     /** An iterator over the set of assigned values.  */
-    private inner class ValuesIterator : AbstractIterator<IntCursor?>() {
+    private inner class ValuesIterator : AbstractIterator<IntCursor>() {
         private val cursor: IntCursor
         private val increment: Int
         private var index = 0
@@ -582,7 +582,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
             slot = seed and mask
         }
 
-        override fun fetch(): IntCursor? {
+        override fun fetch(): IntCursor {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 index++
@@ -600,7 +600,7 @@ open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFa
                 return cursor
             }
 
-            return done()
+            return done()!!
         }
     }
 
