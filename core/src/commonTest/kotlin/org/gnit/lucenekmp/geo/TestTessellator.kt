@@ -791,7 +791,69 @@ class TestTessellator : LuceneTestCase() {
     fun testComplexPolygon50() {
     }
 
-    
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon51() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon52() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon53() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon54() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon55() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon56() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon57() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon58() {
+    }
+
+    @Test
+    @Ignore // TODO implement later
+    fun testComplexPolygon59() {
+    }
+
+    @Test
+    fun testComplexPolygon60() {
+        val wkt = """
+        POLYGON((0 0, 5 1, 10 0, 11 5, 10 10,5 11, 0 10, 1 5, 0 0),
+        (1 5, 1 7, 2 7, 1 5), (1 5, 4 8, 5 8, 1 5),
+        (1 5, 3 6, 7 7, 1 5), (1 5, 2 3, 1 3, 1 5),
+        (1 5, 3 4, 4 4, 1 5), (1 5, 5 6, 6 6, 1 5),
+        (11 5, 10 3, 10 4, 11 5), (11 5,8 3, 8 4, 11 5),
+        (11 5,5 4, 5 5, 11 5), (11 5, 4.5 3, 4 3, 11 5),
+        (11 5, 8 6, 9 7, 11 5), (11 5, 10 8, 10 7, 11 5),
+        (5 11, 2 10, 3 10, 5 11), (5 11, 3 9, 4 9, 5 11),
+        (5 11, 5.5  8, 6 7, 5 11), (5 11, 8 8, 9 8, 5 11),
+        (5 1, 2 0.5, 3 1, 5 1), (5 1, 8 0.5, 7 2, 5 1),
+        (5 1, 3 2, 3 3, 5 1), (5 1, 5 2, 6 2, 5 1))
+        """.trimIndent()
+        checkPolygon(wkt)
+    }
+
     // helper functions ported from Java
     private fun checkPolygon(wkt: String) {
         val polygon = SimpleWKTShapeParser.parse(wkt) as Polygon

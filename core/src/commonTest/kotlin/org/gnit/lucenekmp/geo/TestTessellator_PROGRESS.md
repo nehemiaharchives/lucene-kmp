@@ -57,4 +57,4 @@
 [] testComplexPolygon57()
 [] testComplexPolygon58()
 [] testComplexPolygon59()
-[] testComplexPolygon60()
+[x] testComplexPolygon60()
