@@ -73,8 +73,7 @@ class BitSet : Cloneable<BitSet> {
      */
     private fun recalculateWordsInUse() {
         // Traverse the bitset until a used word is found
-        var i: Int
-        i = wordsInUse - 1
+        var i: Int = wordsInUse - 1
         while (i >= 0) {
             if (words[i] != 0L) break
             i--
@@ -102,7 +101,7 @@ class BitSet : Cloneable<BitSet> {
      */
     constructor(nbits: Int) {
         // nbits can't be negative; size 0 is OK
-        if (nbits < 0) throw Exception("nbits < 0: " + nbits)
+        if (nbits < 0) throw Exception("nbits < 0: $nbits")
 
         initWords(nbits)
         sizeIsSticky = true
@@ -144,11 +143,11 @@ class BitSet : Cloneable<BitSet> {
      */
     fun toByteArray(): ByteArray {
         // Find actual highest set bit
-        var highest = wordsInUse - 1
+        val highest = wordsInUse - 1
         if (highest < 0) return ByteArray(0)
 
         // Find position of the highest non-zero bit
-        var lastWord = words[highest]
+        val lastWord = words[highest]
         var lastByte = 8
         while (lastByte > 0 && (lastWord ushr ((lastByte - 1) * 8) and 0xFFL) == 0L) {
             lastByte--
@@ -223,7 +222,7 @@ class BitSet : Cloneable<BitSet> {
      * @since  1.4
      */
     fun flip(bitIndex: Int) {
-        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: " + bitIndex)
+        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: $bitIndex")
 
         val wordIndex = wordIndex(bitIndex)
         expandTo(wordIndex)
@@ -284,7 +283,7 @@ class BitSet : Cloneable<BitSet> {
      * @since  1.0
      */
     fun set(bitIndex: Int) {
-        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: " + bitIndex)
+        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: $bitIndex")
 
         val wordIndex = wordIndex(bitIndex)
         expandTo(wordIndex)
@@ -373,7 +372,7 @@ class BitSet : Cloneable<BitSet> {
      * @since  1.0
      */
     fun clear(bitIndex: Int) {
-        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: " + bitIndex)
+        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: $bitIndex")
 
         val wordIndex = wordIndex(bitIndex)
         if (wordIndex >= wordsInUse) return
@@ -450,8 +449,8 @@ class BitSet : Cloneable<BitSet> {
      * @return the value of the bit with the specified index
      * @throws IndexOutOfBoundsException if the specified index is negative
      */
-    fun get(bitIndex: Int): Boolean {
-        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: " + bitIndex)
+    operator fun get(bitIndex: Int): Boolean {
+        if (bitIndex < 0) throw IndexOutOfBoundsException("bitIndex < 0: $bitIndex")
 
         checkInvariants()
 
@@ -540,7 +539,7 @@ class BitSet : Cloneable<BitSet> {
      * @since  1.4
      */
     fun nextSetBit(fromIndex: Int): Int {
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex < 0: " + fromIndex)
+        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex < 0: $fromIndex")
 
         checkInvariants()
 
@@ -568,7 +567,7 @@ class BitSet : Cloneable<BitSet> {
     fun nextClearBit(fromIndex: Int): Int {
         // Neither spec nor implementation handle bitsets of maximal length.
         // See 4816253.
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex < 0: " + fromIndex)
+        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex < 0: $fromIndex")
 
         checkInvariants()
 
@@ -609,7 +608,7 @@ class BitSet : Cloneable<BitSet> {
         if (fromIndex < 0) {
             if (fromIndex == -1) return -1
             throw IndexOutOfBoundsException(
-                "fromIndex < -1: " + fromIndex
+                "fromIndex < -1: $fromIndex"
             )
         }
 
@@ -644,7 +643,7 @@ class BitSet : Cloneable<BitSet> {
         if (fromIndex < 0) {
             if (fromIndex == -1) return -1
             throw IndexOutOfBoundsException(
-                "fromIndex < -1: " + fromIndex
+                "fromIndex < -1: $fromIndex"
             )
         }
 
@@ -1207,8 +1206,8 @@ class BitSet : Cloneable<BitSet> {
      * The choice of word size is determined purely by performance concerns.
      */
         private const val ADDRESS_BITS_PER_WORD = 6
-        private val BITS_PER_WORD = 1 shl ADDRESS_BITS_PER_WORD
-        private val BIT_INDEX_MASK = BITS_PER_WORD - 1
+        private const val BITS_PER_WORD = 1 shl ADDRESS_BITS_PER_WORD
+        private const val BIT_INDEX_MASK = BITS_PER_WORD - 1
 
         /* Used to shift left or right for a partial word mask */
         private const val WORD_MASK = -0x1L

@@ -515,7 +515,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
             slot = seed and mask
         }
 
-        override fun fetch(): IntCursor {
+        override fun fetch(): IntCursor? {
             val mask = this@IntIntHashMap.mask
             while (index <= mask) {
                 val existing: Int
@@ -534,7 +534,7 @@ class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor:
                 return cursor
             }
 
-            return done()!!
+            return done()
         }
     }
 

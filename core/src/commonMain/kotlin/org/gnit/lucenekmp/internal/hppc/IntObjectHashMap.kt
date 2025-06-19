@@ -19,7 +19,6 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.cast
 
-
 /**
  * A hash map of `int` to `Object`, implemented using open addressing with
  * linear probing for collision resolution. Supports null values.
@@ -35,7 +34,7 @@ import kotlin.reflect.cast
 @OptIn(ExperimentalAtomicApi::class)
 class IntObjectHashMap<VType>
 @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
-    Iterable<IntObjectHashMap.IntObjectCursor<VType?>>, Accountable, Cloneable<IntObjectHashMap<VType>> {
+    Iterable<IntObjectHashMap.IntObjectCursor<VType>>, Accountable, Cloneable<IntObjectHashMap<VType>> {
     /** The array holding keys.  */
     var keys: IntArray? = null
 
@@ -389,10 +388,10 @@ class IntObjectHashMap<VType>
     fun ensureCapacity(expectedElements: Int) {
         if (expectedElements > resizeAt || keys == null) {
             val prevKeys = this.keys
-            val prevValues = this.values as Array<VType?>
+            val prevValues = this.values
             allocateBuffers(minBufferSize(expectedElements, loadFactor))
             if (prevKeys != null && !this.isEmpty) {
-                rehash(prevKeys, prevValues)
+                rehash(prevKeys, prevValues as Array<VType?>)
             }
         }
     }
@@ -406,11 +405,11 @@ class IntObjectHashMap<VType>
         return BitMixer.mixPhi(iterationSeed).also { iterationSeed = it }
     }
 
-    override fun iterator(): Iterator<IntObjectCursor<VType?>> {
-        return this.EntryIterator() as Iterator<IntObjectCursor<VType?>>
+    override fun iterator(): Iterator<IntObjectCursor<VType>> {
+        return this.EntryIterator() as Iterator<IntObjectCursor<VType>>
     }
 
-    public override fun ramBytesUsed(): Long {
+    override fun ramBytesUsed(): Long {
         return BASE_RAM_BYTES_USED + RamUsageEstimator.sizeOf(keys!!) + sizeOfValues()
     }
 
@@ -669,14 +668,14 @@ class IntObjectHashMap<VType>
 
         // Ensure no change is done if we hit an OOM.
         val prevKeys = this.keys
-        val prevValues = this.values as Array<VType?>
+        val prevValues = this.values
         try {
             val emptyElementSlot = 1
             this.keys = (IntArray(arraySize + emptyElementSlot))
             this.values = kotlin.arrayOfNulls<Any>(arraySize + emptyElementSlot)
         } catch (e: Error) {
             this.keys = prevKeys
-            this.values = prevValues as Array<Any?>?
+            this.values = prevValues
             throw BufferAllocationException(
                 "Not enough memory to allocate buffers for rehashing: %,d -> %,d",
                 e, this.mask + 1, arraySize

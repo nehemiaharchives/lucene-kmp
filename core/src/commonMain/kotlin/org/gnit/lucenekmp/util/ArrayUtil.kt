@@ -178,7 +178,10 @@ class ArrayUtil {
          */
         inline fun <reified T> growExact(array: Array<T>, newLength: Int): Array<T> {
             if (newLength < array.size) throw IndexOutOfBoundsException("newLength ($newLength) < array.size (${array.size})")
-            return Array<T>(newLength) { i -> if (i < array.size) array[i] else null as T }
+            val newArray = Array(newLength) { i -> if (i < array.size) array[i] else null }
+
+            @Suppress("UNCHECKED_CAST")
+            return newArray as Array<T>
         }
 
         @JvmName("growExactNullable")
@@ -257,7 +260,7 @@ class ArrayUtil {
          * exponentially
          */
         fun grow(array: FloatArray, minSize: Int): FloatArray {
-            if(minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?" )
+            if (minSize < 0) throw Exception("size must be positive (got $minSize): likely integer overflow?")
             if (array.size < minSize) {
                 val copy = FloatArray(oversize(minSize, Float.SIZE_BYTES))
                 array.copyInto(copy, 0, 0, array.size)
@@ -557,7 +560,7 @@ class ArrayUtil {
          * @param fromIndex start index (inclusive)
          * @param toIndex end index (exclusive)
          */
-        fun <T: Comparable<T>> timSort(a: Array<T>, fromIndex: Int, toIndex: Int) {
+        fun <T : Comparable<T>> timSort(a: Array<T>, fromIndex: Int, toIndex: Int) {
             if (toIndex - fromIndex <= 1) return
             timSort(a, fromIndex, toIndex, naturalOrder() /*java.util.Comparator.naturalOrder<T>()*/)
         }

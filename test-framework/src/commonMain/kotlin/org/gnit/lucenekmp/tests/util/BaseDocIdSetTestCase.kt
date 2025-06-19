@@ -3,10 +3,8 @@ package org.gnit.lucenekmp.tests.util
 import org.gnit.lucenekmp.search.DocIdSet
 import org.gnit.lucenekmp.search.DocIdSetIterator
 import org.gnit.lucenekmp.util.FixedBitSet
-import org.gnit.lucenekmp.util.RamUsageTester
 import org.gnit.lucenekmp.jdkport.BitSet
 import kotlin.random.Random
-import kotlin.math.max
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -161,7 +159,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
 
             it1.intoBitSet(to, actual, from)
             val expected = FixedBitSet(to - from)
-            val it2 = copy.iterator()!!
+            val it2 = copy.iterator()
             var doc = it2.advance(from)
             while (doc < to) {
                 expected.set(doc - from)
@@ -181,13 +179,10 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         set.set(42)
         val copy = copyOf(set, 256)
         val from = TestUtil.nextInt(Random, 0, 20)
-        val minTo = max(from + 23, 43)
-        val to = TestUtil.nextInt(Random, minTo, 256)
-        // the destination bit set's range
         val to = TestUtil.nextInt(Random, 43, 256)
         val offset = TestUtil.nextInt(Random, 0, from)
         val dest1 = FixedBitSet(42 - offset + 1)
-        val it1 = copy.iterator()!!
+        val it1 = copy.iterator()
         it1.advance(from)
         it1.intoBitSet(to, dest1, offset)
         for (i in 0 until dest1.length()) {
@@ -195,12 +190,12 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         }
 
         val dest2 = FixedBitSet(42 - offset)
-        val it2 = copy.iterator()!!
+        val it2 = copy.iterator()
         it2.advance(from)
         expectThrows(Throwable::class) { it2.intoBitSet(to, dest2, offset) }
 
         val dest3 = FixedBitSet(42 - offset + 1)
-        val it3 = copy.iterator()!!
+        val it3 = copy.iterator()
         it3.advance(from)
         expectThrows(Throwable::class) { it3.intoBitSet(to, dest3, 21) }
     }

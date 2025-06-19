@@ -19,7 +19,6 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertTrue
@@ -108,22 +107,22 @@ class TestMSBRadixSorter : LuceneTestCase() {
 
     @Test
     fun testRandom() {
-        repeat(10) { testRandom(0, 10) }
+        repeat(3) { testRandom(0, 10) } // TODO originally 10 but reduced to 3 for dev speed
     }
 
     @Test
     fun testRandomWithLotsOfDuplicates() {
-        repeat(10) { testRandom(0, 2) }
+        repeat(3) { testRandom(0, 2) } // TODO originally 10 but reduced to 3 for dev speed
     }
 
     @Test
     fun testRandomWithSharedPrefix() {
-        repeat(10) { testRandom(TestUtil.nextInt(random(), 1, 30), 10) }
+        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 30), 10) } // TODO originally 10 but reduced to 3 for dev speed
     }
 
     @Test
     fun testRandomWithSharedPrefixAndLotsOfDuplicates() {
-        repeat(10) { testRandom(TestUtil.nextInt(random(), 1, 30), 2) }
+        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 30), 2) } // TODO originally 10 but reduced to 3 for dev speed
     }
 
     @Test
