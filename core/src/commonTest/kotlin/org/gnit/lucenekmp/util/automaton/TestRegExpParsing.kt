@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFailsWith
+import okio.IOException
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 
 class TestRegExpParsing {
@@ -683,6 +684,110 @@ class TestRegExpParsing {
     @Test
     fun testTruncatedIntersectionParens() {
         assertFailsWith<IllegalArgumentException> { RegExp("(a)&(") }
+    }
+
+    @Test
+    fun testUnion() {
+        val re = RegExp("[b-c]|[e-f]")
+        assertEquals("([\\b-\\c]|[\\e-\\f])", re.toString())
+        assertEquals(
+            """REGEXP_UNION
+  REGEXP_CHAR_RANGE from=b to=c
+  REGEXP_CHAR_RANGE from=e to=f""".trimIndent(),
+            re.toStringTree().trimEnd()
+        )
+
+        val actual = re.toAutomaton()!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Operations.union(
+            mutableListOf(
+                Automata.makeCharRange('b'.code, 'c'.code),
+                Automata.makeCharRange('e'.code, 'f'.code)
+            )
+        )
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testTruncatedUnion() {
+        assertFailsWith<IllegalArgumentException> { RegExp("a|") }
+    }
+
+    @Test
+    fun testTruncatedUnionParens() {
+        assertFailsWith<IllegalArgumentException> { RegExp("(a)|(") }
+    }
+
+    @Test
+    fun testAutomaton() {
+        val myProvider = object : AutomatonProvider {
+            override fun getAutomaton(name: String): Automaton {
+                return Automata.makeChar('z'.code)
+            }
+        }
+        val re = RegExp("<myletter>", RegExp.ALL)
+        assertEquals("<myletter>", re.toString())
+        assertEquals("REGEXP_AUTOMATON\n", re.toStringTree())
+        assertEquals(setOf<String?>("myletter"), re.identifiers)
+
+        val actual = re.toAutomaton(myProvider)!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeChar('z'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testAutomatonMap() {
+        val re = RegExp("<myletter>", RegExp.ALL)
+        assertEquals("<myletter>", re.toString())
+        assertEquals("REGEXP_AUTOMATON\n", re.toStringTree())
+        assertEquals(setOf<String?>("myletter"), re.identifiers)
+
+        val actual = re.toAutomaton(
+            mutableMapOf<String?, Automaton?>("myletter" to Automata.makeChar('z'.code))
+        )!!
+        AutomatonTestUtil.assertMinimalDFA(actual)
+
+        val expected = Automata.makeChar('z'.code)
+        assertSameLanguage(expected, actual)
+    }
+
+    @Test
+    fun testAutomatonIOException() {
+        val myProvider = object : AutomatonProvider {
+            override fun getAutomaton(name: String): Automaton {
+                throw IOException("fake ioexception")
+            }
+        }
+        val re = RegExp("<myletter>", RegExp.ALL)
+        assertEquals("<myletter>", re.toString())
+        assertEquals("REGEXP_AUTOMATON\n", re.toStringTree())
+        assertEquals(setOf<String?>("myletter"), re.identifiers)
+
+        assertFailsWith<IllegalArgumentException> { re.toAutomaton(myProvider) }
+    }
+
+    @Test
+    fun testAutomatonNotFound() {
+        val re = RegExp("<bogus>", RegExp.ALL)
+        assertEquals("<bogus>", re.toString())
+        assertEquals("REGEXP_AUTOMATON\n", re.toStringTree())
+
+        assertFailsWith<IllegalArgumentException> {
+            re.toAutomaton(mutableMapOf<String?, Automaton?>("myletter" to Automata.makeChar('z'.code)))
+        }
+    }
+
+    @Test
+    fun testIllegalSyntaxFlags() {
+        assertFailsWith<IllegalArgumentException> { RegExp("bogus", Int.MAX_VALUE) }
+    }
+
+    @Test
+    fun testIllegalMatchFlags() {
+        assertFailsWith<IllegalArgumentException> { RegExp("bogus", RegExp.ALL, 1) }
     }
 
     private fun assertSameLanguage(expected: Automaton, actual: Automaton) {
