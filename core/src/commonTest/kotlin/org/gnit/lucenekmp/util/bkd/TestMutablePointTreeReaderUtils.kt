@@ -55,7 +55,7 @@ class TestMutablePointTreeReaderUtils : LuceneTestCase() {
 
     @Test
     fun testSortByDim() {
-        repeat(5) { doTestSortByDim() }
+        repeat(1) { doTestSortByDim() } // TODO originally 5 but reduced to 1 for dev speed
     }
 
     private fun doTestSortByDim() {

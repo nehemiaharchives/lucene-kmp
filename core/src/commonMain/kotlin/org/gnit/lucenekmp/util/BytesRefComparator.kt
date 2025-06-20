@@ -42,11 +42,12 @@ abstract class BytesRefComparator
     companion object {
         /** Comparing ByteRefs in natual order.  */
         val NATURAL: BytesRefComparator = object : BytesRefComparator(Int.Companion.MAX_VALUE) {
+
             override fun byteAt(ref: BytesRef, i: Int): Int {
                 if (ref.length <= i) {
                     return -1
                 }
-                return (ref.bytes[ref.offset + i] and 0xFF.toByte()).toInt()
+                return ref.bytes[ref.offset + i].toInt() and 0xFF
             }
 
             override fun compare(o1: BytesRef, o2: BytesRef, k: Int): Int {

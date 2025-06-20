@@ -272,6 +272,17 @@ class Character {
          */
         const val MAX_SURROGATE: Char = MAX_LOW_SURROGATE
 
+        /**
+         * General category "Nd" in the Unicode specification.
+         * @since   1.1
+         */
+        const val DECIMAL_DIGIT_NUMBER: Byte = 9
+
+        /**
+         * General category "Co" in the Unicode specification.
+         * @since   1.1
+         */
+        const val PRIVATE_USE: Byte = 18
 
         fun charCount(codePoint: Int): Int {
             return if (codePoint >= MIN_SUPPLEMENTARY_CODE_POINT) 2 else 1

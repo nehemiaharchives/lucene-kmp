@@ -1265,10 +1265,14 @@ class RegExp {
     fun parseCharExp(): Int {
         match('\\'.code)
         if (peek("u")) {
+            // Check if there are at least 5 characters left: 'u' + 4 hex digits
+            if (pos + 5 > originalString!!.length) {
+                throw IllegalArgumentException("invalid character class \\u")
+            }
             next() // consume 'u'
             var code = 0
             repeat(4) {
-                require(more()) { "unexpected end-of-string" }
+                require(more()) { "invalid character class \\u" }
                 val ch = next().toChar()
                 val digit = ch.digitToIntOrNull(16) ?: -1
                 require(digit != -1) { "invalid unicode escape" }

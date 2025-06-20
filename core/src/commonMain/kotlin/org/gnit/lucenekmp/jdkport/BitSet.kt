@@ -301,7 +301,7 @@ class BitSet : Cloneable<BitSet> {
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since  1.4
      */
-    fun set(bitIndex: Int, value: Boolean) {
+    operator fun set(bitIndex: Int, value: Boolean) {
         if (value) set(bitIndex)
         else clear(bitIndex)
     }

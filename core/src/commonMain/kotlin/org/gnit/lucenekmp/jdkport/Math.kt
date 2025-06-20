@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-
 object Math {
 
     /**

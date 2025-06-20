@@ -55,13 +55,12 @@ internal abstract class CharacterData {
                 return CharacterDataLatin1.instance
             } else {
                 return when (ch ushr 16) {
-                    /* TODO implement if needed, for example, when unit tests which calls of() failed
                     0 -> CharacterData00.instance
                     1 -> CharacterData01.instance
                     2 -> CharacterData02.instance
                     3 -> CharacterData03.instance
                     14 -> CharacterData0E.instance
-                    15, 16 -> CharacterDataPrivateUse.instance*/
+                    15, 16 -> CharacterDataPrivateUse.instance
                     else -> CharacterDataUndefined.instance
                 }
             }
