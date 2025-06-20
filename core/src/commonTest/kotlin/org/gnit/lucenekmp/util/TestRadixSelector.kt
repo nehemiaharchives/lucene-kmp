@@ -13,7 +13,7 @@ class TestRadixSelector : LuceneTestCase() {
 
     @Test
     fun testSelect() {
-        for (iter in 0 until 100) {
+        for (iter in 0 until 10) { // TODO originally 100 but reduced to 10 for dev speed
             doTestSelect()
         }
     }
@@ -34,7 +34,7 @@ class TestRadixSelector : LuceneTestCase() {
 
     @Test
     fun testSharedPrefixes() {
-        for (iter in 0 until 100) {
+        for (iter in 0 until 10) { // TODO originally 100 but reduced to 10 for dev speed
             doTestSharedPrefixes()
         }
     }

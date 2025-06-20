@@ -74,10 +74,10 @@ object Operations {
         var stateOffset = 0
         val t = Transition()
         for (i in list.indices) {
-            val a = list.get(i)
+            val a = list[i]
             val numStates: Int = a.numStates
 
-            val nextA = if (i == list.size - 1) null else list.get(i + 1)
+            val nextA = if (i == list.size - 1) null else list[i + 1]
 
             for (s in 0..<numStates) {
                 var numTransitions = a.initTransition(s, t)
@@ -103,7 +103,7 @@ object Operations {
                             if (followA.isAccept(0)) {
                                 // Keep chaining if followA accepts empty string
                                 followOffset += followA.numStates
-                                followA = if (upto == list.size - 1) null else list.get(upto + 1)
+                                followA = if (upto == list.size - 1) null else list[upto + 1]
                                 upto++
                             } else {
                                 break
@@ -194,7 +194,7 @@ object Operations {
             return a
         }
 
-        val builder: Automaton.Builder = Builder()
+        val builder = Builder()
         // Create the initial state, which is accepted
         builder.createState()
         builder.setAccept(0, true)
@@ -262,7 +262,7 @@ object Operations {
         if (count == 0) {
             return repeat(a)
         }
-        val `as`: MutableList<Automaton> = mutableListOf<Automaton>()
+        val `as`: MutableList<Automaton> = mutableListOf()
         while (count-- > 0) {
             `as`.add(a)
         }
@@ -289,7 +289,7 @@ object Operations {
             b = Automaton()
             b.copy(a)
         } else {
-            val `as`: MutableList<Automaton> = mutableListOf<Automaton>()
+            val `as`: MutableList<Automaton> = mutableListOf()
             for (i in 0..<min) {
                 `as`.add(a)
             }
@@ -297,7 +297,7 @@ object Operations {
         }
 
         var prevAcceptStates: IntHashSet = toSet(b, 0)
-        val builder: Builder = Builder()
+        val builder = Builder()
         builder.copy(b)
         for (i in min..<max) {
             val numStates: Int = builder.numStates
@@ -314,7 +314,7 @@ object Operations {
     private fun toSet(a: Automaton, offset: Int): IntHashSet {
         val numStates: Int = a.numStates
         val isAccept: BitSet = a.acceptStates
-        val result: IntHashSet = IntHashSet()
+        val result = IntHashSet()
         var upto = 0
         while (upto < numStates && (isAccept.nextSetBit(upto).also { upto = it }) != -1) {
             result.add(offset + upto)
@@ -388,12 +388,12 @@ object Operations {
         val transitions2: Array<Array<Transition>> = a2.sortedTransitions
         val c = Automaton()
         c.createState()
-        val worklist: ArrayDeque<StatePair> = ArrayDeque<StatePair>()
-        val newstates: MutableMap<StatePair?, StatePair?> = mutableMapOf<StatePair?, StatePair?>()
-        var p: StatePair = StatePair(0, 0, 0)
+        val worklist: ArrayDeque<StatePair> = ArrayDeque()
+        val newstates: MutableMap<StatePair?, StatePair?> = mutableMapOf()
+        var p = StatePair(0, 0, 0)
         worklist.add(p)
         newstates.put(p, p)
-        while (worklist.size > 0) {
+        while (worklist.isNotEmpty()) {
             p = worklist.removeFirst()
             c.setAccept(p.s, a1.isAccept(p.s1) && a2.isAccept(p.s2))
             val t1 = transitions1[p.s1]
@@ -401,20 +401,20 @@ object Operations {
             var n1 = 0
             var b2 = 0
             while (n1 < t1.size) {
-                while (b2 < t2.size && t2[b2]!!.max < t1[n1]!!.min) b2++
+                while (b2 < t2.size && t2[b2].max < t1[n1].min) b2++
                 var n2 = b2
-                while (n2 < t2.size && t1[n1]!!.max >= t2[n2]!!.min) {
-                    if (t2[n2]!!.max >= t1[n1]!!.min) {
-                        val q: StatePair = StatePair(t1[n1]!!.dest, t2[n2]!!.dest)
-                        var r: StatePair? = newstates.get(q)
+                while (n2 < t2.size && t1[n1].max >= t2[n2].min) {
+                    if (t2[n2].max >= t1[n1].min) {
+                        val q = StatePair(t1[n1].dest, t2[n2].dest)
+                        var r: StatePair? = newstates[q]
                         if (r == null) {
                             q.s = c.createState()
                             worklist.add(q)
                             newstates.put(q, q)
                             r = q
                         }
-                        val min = if (t1[n1]!!.min > t2[n2]!!.min) t1[n1]!!.min else t2[n2]!!.min
-                        val max = if (t1[n1]!!.max < t2[n2]!!.max) t1[n1]!!.max else t2[n2]!!.max
+                        val min = if (t1[n1].min > t2[n2].min) t1[n1].min else t2[n2].min
+                        val max = if (t1[n1].max < t2[n2].max) t1[n1].max else t2[n2].max
                         c.addTransition(p.s, r.s, min, max)
                     }
                     n2++
@@ -530,19 +530,19 @@ object Operations {
         }
 
         // subset construction
-        val b: Automaton.Builder = Builder()
+        val b = Builder()
 
         // System.out.println("DET:");
         // a.writeDot("/l/la/lucene/core/detin.dot");
 
         // Same initial values and state will always have the same hashCode
-        val initialset: FrozenIntSet = FrozenIntSet(intArrayOf(0), (BitMixer.mix(0) + 1).toLong(), 0)
+        val initialset = FrozenIntSet(intArrayOf(0), (BitMixer.mix(0) + 1).toLong(), 0)
 
         // Create state 0:
         b.createState()
 
-        val worklist: ArrayDeque<FrozenIntSet> = ArrayDeque<FrozenIntSet>()
-        val newstate: MutableMap<IntSet?, Int?> = mutableMapOf<IntSet?, Int?>()
+        val worklist: ArrayDeque<FrozenIntSet> = ArrayDeque()
+        val newstate: MutableMap<IntSet?, Int?> = mutableMapOf()
 
         worklist.add(initialset)
 
@@ -553,7 +553,7 @@ object Operations {
         val points = PointTransitionSet()
 
         // like HashMap<Integer,Integer>, maps state to its count
-        val statesSet: StateSet = StateSet(5)
+        val statesSet = StateSet(5)
 
         val t = Transition()
 
@@ -563,7 +563,7 @@ object Operations {
         // maximum "effort":
         val effortLimit = workLimit * 10L
 
-        while (worklist.size > 0) {
+        while (worklist.isNotEmpty()) {
             // TODO (LUCENE-9983): these int sets really do not need to be sorted, and we are paying
             // a high (unecessary) price for that!  really we just need a low-overhead Map<int,int>
             // that implements equals/hash based only on the keys (ignores the values).  fixing this
@@ -580,7 +580,7 @@ object Operations {
 
             // Collate all outgoing transitions by min/1+max:
             for (i in 0..<s.values.size) {
-                val s0: Int = s.values[i]!!
+                val s0: Int = s.values[i]
                 val numTransitions = a.getNumTransitions(s0)
                 a.initTransition(s0, t)
                 for (j in 0..<numTransitions) {
@@ -607,7 +607,7 @@ object Operations {
                 if (statesSet.size() > 0) {
                     require(lastPoint != -1)
 
-                    var q = newstate.get(statesSet)
+                    var q = newstate[statesSet]
                     if (q == null) {
                         q = b.createState()
                         val p: FrozenIntSet = statesSet.freeze(q)
@@ -686,8 +686,8 @@ object Operations {
             return false
         }
 
-        val workList: ArrayDeque<Int?> = ArrayDeque<Int?>()
-        val seen: BitSet = BitSet(a.numStates)
+        val workList: ArrayDeque<Int?> = ArrayDeque()
+        val seen = BitSet(a.numStates)
         workList.add(0)
         seen.set(0)
 
@@ -700,7 +700,7 @@ object Operations {
             val count = a.initTransition(state, t)
             for (i in 0..<count) {
                 a.getNextTransition(t)
-                if (seen.get(t.dest) == false) {
+                if (seen[t.dest] == false) {
                     workList.add(t.dest)
                     seen.set(t.dest)
                 }
@@ -821,7 +821,7 @@ object Operations {
     /** Returns bitset marking states reachable from the initial state.  */
     private fun getLiveStatesFromInitial(a: Automaton): BitSet {
         val numStates: Int = a.numStates
-        val live: BitSet = BitSet(numStates)
+        val live = BitSet(numStates)
         if (numStates == 0) {
             return live
         }
@@ -835,7 +835,7 @@ object Operations {
             val count = a.initTransition(s, t)
             for (i in 0..<count) {
                 a.getNextTransition(t)
-                if (live.get(t.dest) == false) {
+                if (live[t.dest] == false) {
                     live.set(t.dest)
                     workList.add(t.dest)
                 }
@@ -847,7 +847,7 @@ object Operations {
 
     /** Returns bitset marking states that can reach an accept state.  */
     private fun getLiveStatesToAccept(a: Automaton): BitSet {
-        val builder: Automaton.Builder = Builder()
+        val builder = Builder()
 
         // NOTE: not quite the same thing as what reverse() does:
         val t = Transition()
@@ -864,8 +864,8 @@ object Operations {
         }
         val a2 = builder.finish()
 
-        val workList: ArrayDeque<Int?> = ArrayDeque<Int?>()
-        val live: BitSet = BitSet(numStates)
+        val workList: ArrayDeque<Int?> = ArrayDeque()
+        val live = BitSet(numStates)
         val acceptBits: BitSet = a.acceptStates
         var s = 0
         while (s < numStates && (acceptBits.nextSetBit(s).also { s = it }) != -1) {
@@ -879,7 +879,7 @@ object Operations {
             val count = a2.initTransition(s, t)
             for (i in 0..<count) {
                 a2.getNextTransition(t)
-                if (live.get(t.dest) == false) {
+                if (live[t.dest] == false) {
                     live.set(t.dest)
                     workList.add(t.dest)
                 }
@@ -905,7 +905,7 @@ object Operations {
         val result = Automaton()
         // System.out.println("liveSet: " + liveSet + " numStates=" + numStates);
         for (i in 0..<numStates) {
-            if (liveSet.get(i)) {
+            if (liveSet[i]) {
                 map[i] = result.createState()
                 result.setAccept(map[i], a.isAccept(i))
             }
@@ -914,12 +914,12 @@ object Operations {
         val t = Transition()
 
         for (i in 0..<numStates) {
-            if (liveSet.get(i)) {
+            if (liveSet[i]) {
                 val numTransitions = a.initTransition(i, t)
                 // filter out transitions to dead states:
                 for (j in 0..<numTransitions) {
                     a.getNextTransition(t)
-                    if (liveSet.get(t.dest)) {
+                    if (liveSet[t.dest]) {
                         result.addTransition(map[i], map[t.dest], t.min, t.max)
                     }
                 }
@@ -945,7 +945,7 @@ object Operations {
 
         val acceptStates: BitSet = a.acceptStates
         for (i in 0..<numStates) {
-            if (acceptStates.get(i) && a.getNumTransitions(i) == 0) {
+            if (acceptStates[i] && a.getNumTransitions(i) == 0) {
                 acceptStatesWithNoTransition =
                     ArrayUtil.grow(acceptStatesWithNoTransition, 1 + numAcceptStatesWithNoTransition)
                 acceptStatesWithNoTransition[numAcceptStatesWithNoTransition++] = i
@@ -968,7 +968,7 @@ object Operations {
             while (result.numStates <= remappedS) {
                 result.createState()
             }
-            if (acceptStates.get(s)) {
+            if (acceptStates[s]) {
                 result.setAccept(remappedS, true)
             }
         }
@@ -1021,11 +1021,11 @@ object Operations {
         if (isEmpty(a)) {
             return ""
         }
-        val builder: StringBuilder = StringBuilder()
+        val builder = StringBuilder()
         val scratch = Transition()
-        val visited: FixedBitSet = FixedBitSet(a.numStates)
-        var current: FixedBitSet = FixedBitSet(a.numStates)
-        var next: FixedBitSet = FixedBitSet(a.numStates)
+        val visited = FixedBitSet(a.numStates)
+        var current = FixedBitSet(a.numStates)
+        var next = FixedBitSet(a.numStates)
         current.set(0) // start with initial state
         algorithm@ while (true) {
             var label = -1
@@ -1044,7 +1044,7 @@ object Operations {
                         label = scratch.min
                     }
                     // either a range of labels, or label that doesn't match all the other paths this round
-                    if (scratch.min !== scratch.max || scratch.min !== label) {
+                    if (scratch.min != scratch.max || scratch.min != label) {
                         break@algorithm
                     }
                     // mark target state for next iteration
@@ -1079,9 +1079,9 @@ object Operations {
      */
     fun getCommonPrefixBytesRef(a: Automaton): BytesRef {
         val prefix = getCommonPrefix(a)
-        val builder: BytesRefBuilder = BytesRefBuilder()
+        val builder = BytesRefBuilder()
         for (i in 0..<prefix.length) {
-            val ch = prefix.get(i)
+            val ch = prefix[i]
             check(ch.code <= 255) { "automaton is not binary" }
             builder.append(ch.code.toByte())
         }
@@ -1137,7 +1137,7 @@ object Operations {
         if (ref.length <= 1) return
         val num: Int = ref.length shr 1
         for (i in ref.offset..<(ref.offset + num)) {
-            val b: Byte = ref.bytes[i]!!
+            val b: Byte = ref.bytes[i]
             ref.bytes[i] = ref.bytes[ref.offset * 2 + ref.length - i - 1]
             ref.bytes[ref.offset * 2 + ref.length - i - 1] = b
         }
@@ -1152,7 +1152,7 @@ object Operations {
         val numStates: Int = a.numStates
 
         // Build a new automaton with all edges reversed
-        val builder: Builder = Builder()
+        val builder = Builder()
 
         // Initial node; we'll add epsilon transitions in the end:
         builder.createState()
@@ -1251,7 +1251,7 @@ object Operations {
      * @param a the Automaton to be sorted
      * @return the topologically sorted array of state ids
      */
-    fun topoSortStates(a: Automaton): IntArray? {
+    fun topoSortStates(a: Automaton): IntArray {
         if (a.numStates == 0) {
             return IntArray(0)
         }
@@ -1291,9 +1291,9 @@ object Operations {
      * @throws IllegalArgumentException if the input automaton has a cycle.
      */
     private fun topoSortStates(a: Automaton, states: IntArray): Int {
-        val onStack: BitSet = BitSet(a.numStates)
-        val visited: BitSet = BitSet(a.numStates)
-        val stack: ArrayDeque<Int> = ArrayDeque<Int>()
+        val onStack = BitSet(a.numStates)
+        val visited = BitSet(a.numStates)
+        val stack: ArrayDeque<Int> = ArrayDeque()
         stack.push(0) // Assuming that the initial state is 0.
         var upto = 0
         val t = Transition()
@@ -1305,13 +1305,13 @@ object Operations {
             var pushed = false
             for (i in 0..<count) {
                 a.getNextTransition(t)
-                if (!visited.get(t.dest)) {
+                if (!visited[t.dest]) {
                     visited.set(t.dest)
                     stack.push(t.dest) // Push the next unvisited state onto the stack
                     onStack.set(state)
                     pushed = true
                     break // Exit the loop, we'll continue from here in the next iteration
-                } else require(!onStack.get(t.dest)) { "Input automaton has a cycle." }
+                } else require(!onStack[t.dest]) { "Input automaton has a cycle." }
             }
 
             // If we haven't pushed any new state onto the stack, we're done with this state
@@ -1370,9 +1370,9 @@ object Operations {
 
     internal class PointTransitionSet {
         var count: Int = 0
-        var points: Array<PointTransitions?> = kotlin.arrayOfNulls<PointTransitions?>(5)
+        var points: Array<PointTransitions?> = kotlin.arrayOfNulls(5)
 
-        private val map: IntObjectHashMap<PointTransitions?> = IntObjectHashMap()
+        private val map: IntObjectHashMap<PointTransitions> = IntObjectHashMap()
         private var useHash = false
 
         private fun next(point: Int): PointTransitions {
@@ -1407,7 +1407,7 @@ object Operations {
         private fun find(point: Int): PointTransitions? {
             if (useHash) {
                 val pi = point
-                var p: PointTransitions? = map.get(pi)
+                var p: PointTransitions? = map[pi]
                 if (p == null) {
                     p = next(point)
                     map.put(pi, p)
@@ -1443,7 +1443,7 @@ object Operations {
 
         fun sort() {
             // Tim sort performs well on already sorted arrays:
-            if (count > 1) ArrayUtil.timSort<PointTransitions>(a = points as Array<PointTransitions>, fromIndex = 0, toIndex = count)
+            if (count > 1) ArrayUtil.timSort(a = points as Array<PointTransitions>, fromIndex = 0, toIndex = count)
         }
 
         fun add(t: Transition) {

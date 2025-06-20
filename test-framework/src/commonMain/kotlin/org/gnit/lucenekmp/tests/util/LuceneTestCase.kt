@@ -164,7 +164,7 @@ open class LuceneTestCase {
          * </pre>
          */
         fun random(): Random {
-            return Random
+            return Random.Default
         }
 
         // line 820 of LuceneTestCase.java

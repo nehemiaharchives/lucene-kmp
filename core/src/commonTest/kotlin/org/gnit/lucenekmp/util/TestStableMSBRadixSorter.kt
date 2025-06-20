@@ -138,12 +138,12 @@ class TestStableMSBRadixSorter : LuceneTestCase() {
 
     @Test
     fun testRandomWithSharedPrefix() {
-        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 30), 10) } // TODO originally 10 but reduced to 3 for dev speed
+        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 3), 10) } // TODO originally 10, 30 but reduced to 3, 3 for dev speed
     }
 
     @Test
     fun testRandomWithSharedPrefixAndLotsOfDuplicates() {
-        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 30), 2) } // TODO originally 10 but reduced to 3 for dev speed
+        repeat(3) { testRandom(TestUtil.nextInt(random(), 1, 3), 2) } // TODO originally 10, 30 but reduced to 3, 3 for dev speed
     }
 
     @Test

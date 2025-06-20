@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.tests.util.automaton
 
 import org.gnit.lucenekmp.internal.hppc.IntArrayList
-import org.gnit.lucenekmp.internal.hppc.IntCursor
 import org.gnit.lucenekmp.internal.hppc.IntHashSet
 import org.gnit.lucenekmp.jdkport.BitSet
 import org.gnit.lucenekmp.util.automaton.Automaton

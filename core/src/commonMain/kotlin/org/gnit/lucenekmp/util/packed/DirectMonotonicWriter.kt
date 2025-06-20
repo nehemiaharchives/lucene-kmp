@@ -1,11 +1,13 @@
 package org.gnit.lucenekmp.util.packed
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.doubleToLongBits
 import org.gnit.lucenekmp.jdkport.floatToIntBits
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.ArrayUtil
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.round
 
 /**
  * Write monotonically-increasing sequences of integers. This writer splits data into blocks and
@@ -34,9 +36,7 @@ class DirectMonotonicWriter internal constructor(
     @Throws(IOException::class)
     private fun flush() {
         require(bufferSize != 0)
-
-        val avgInc = ((buffer[bufferSize - 1] - buffer[0]).toDouble() / max(1, bufferSize - 1)).toFloat()
-
+        val avgInc: Double = ((buffer[bufferSize - 1] - buffer[0]).toDouble() / max(1, bufferSize - 1))
         var min = Long.Companion.MAX_VALUE
         for (i in 0..<bufferSize) {
             val expected = (avgInc * i.toLong()).toLong()
@@ -54,7 +54,7 @@ class DirectMonotonicWriter internal constructor(
         }
 
         meta.writeLong(min)
-        meta.writeInt(Float.floatToIntBits(avgInc))
+        meta.writeInt(Float.floatToIntBits(avgInc.toFloat()))
         meta.writeLong(data.filePointer - baseDataPointer)
         if (maxDelta == 0L) {
             meta.writeByte(0.toByte())

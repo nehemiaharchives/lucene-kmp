@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.BitSet
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.test.Test
@@ -10,17 +11,17 @@ import kotlin.test.fail
 
 class TestLongBitSet : LuceneTestCase() {
 
-    private fun doGet(a: java.util.BitSet, b: LongBitSet) {
+    private fun doGet(a: BitSet, b: LongBitSet) {
         assertEquals(a.cardinality().toLong(), b.cardinality())
         val max = b.length()
         for (i in 0 until max) {
-            if (a.get(i.toInt()) != b.get(i)) {
-                fail("mismatch: BitSet=[" + i + "]=" + a.get(i.toInt()))
+            if (a[i.toInt()] != b.get(index = i)) {
+                fail("mismatch: BitSet=[" + i + "]=" + a[i.toInt()])
             }
         }
     }
 
-    private fun doNextSetBit(a: java.util.BitSet, b: LongBitSet) {
+    private fun doNextSetBit(a: BitSet, b: LongBitSet) {
         assertEquals(a.cardinality().toLong(), b.cardinality())
         var aa = -1
         var bb: Long = -1
@@ -31,13 +32,13 @@ class TestLongBitSet : LuceneTestCase() {
         } while (aa >= 0)
     }
 
-    private fun doPrevSetBit(a: java.util.BitSet, b: LongBitSet) {
+    private fun doPrevSetBit(a: BitSet, b: LongBitSet) {
         assertEquals(a.cardinality().toLong(), b.cardinality())
         var aa = a.size() + random().nextInt(100)
         var bb: Long = aa.toLong()
         do {
             aa--
-            while (aa >= 0 && !a.get(aa)) {
+            while (aa >= 0 && !a[aa]) {
                 aa--
             }
             bb = when {
@@ -52,20 +53,19 @@ class TestLongBitSet : LuceneTestCase() {
 
     @Throws(Exception::class)
     private fun doRandomSets(maxSize: Int, iter: Int, mode: Int) {
-        var a0: java.util.BitSet? = null
+        var a0: BitSet? = null
         var b0: LongBitSet? = null
 
         for (i in 0 until iter) {
-            val sz = TestUtil.nextInt(random(), 2, maxSize)
-            val a = java.util.BitSet(sz)
+            val sz = TestUtil.Companion.nextInt(random(), 2, maxSize)
+            val a = BitSet(sz)
             val b = LongBitSet(sz.toLong())
 
             if (sz > 0) {
                 val nOper = random().nextInt(sz)
                 for (j in 0 until nOper) {
-                    var idx: Int
 
-                    idx = random().nextInt(sz)
+                    var idx: Int = random().nextInt(sz)
                     a.set(idx)
                     b.set(idx.toLong())
 
@@ -92,19 +92,17 @@ class TestLongBitSet : LuceneTestCase() {
             }
 
             doGet(a, b)
-
-            var fromIndex: Int
             var toIndex: Int
-            fromIndex = random().nextInt(sz / 2)
+            var fromIndex: Int = random().nextInt(sz / 2)
             toIndex = fromIndex + random().nextInt(sz - fromIndex)
-            var aa = a.clone() as java.util.BitSet
+            var aa = a.clone()
             aa.flip(fromIndex, toIndex)
             var bb = b.clone()
             bb.flip(fromIndex.toLong(), toIndex.toLong())
 
             fromIndex = random().nextInt(sz / 2)
             toIndex = fromIndex + random().nextInt(sz - fromIndex)
-            aa = a.clone() as java.util.BitSet
+            aa = a.clone()
             aa.clear(fromIndex, toIndex)
             bb = b.clone()
             bb.clear(fromIndex.toLong(), toIndex.toLong())
@@ -114,7 +112,7 @@ class TestLongBitSet : LuceneTestCase() {
 
             fromIndex = random().nextInt(sz / 2)
             toIndex = fromIndex + random().nextInt(sz - fromIndex)
-            aa = a.clone() as java.util.BitSet
+            aa = a.clone()
             aa.set(fromIndex, toIndex)
             bb = b.clone()
             bb.set(fromIndex.toLong(), toIndex.toLong())
@@ -122,29 +120,29 @@ class TestLongBitSet : LuceneTestCase() {
             doNextSetBit(aa, bb)
             doPrevSetBit(aa, bb)
 
-            if (b0 != null && b0!!.length() <= b.length()) {
+            if (b0 != null && b0.length() <= b.length()) {
                 assertEquals(a.cardinality().toLong(), b.cardinality())
 
-                val a_and = a.clone() as java.util.BitSet
-                a_and.and(a0)
-                val a_or = a.clone() as java.util.BitSet
+                val a_and = a.clone()
+                a_and.and(a0!!)
+                val a_or = a.clone()
                 a_or.or(a0)
-                val a_xor = a.clone() as java.util.BitSet
+                val a_xor = a.clone()
                 a_xor.xor(a0)
-                val a_andn = a.clone() as java.util.BitSet
+                val a_andn = a.clone()
                 a_andn.andNot(a0)
 
                 val b_and = b.clone()
                 assertEquals(b, b_and)
-                b_and.and(b0!!)
+                b_and.and(b0)
                 val b_or = b.clone()
-                b_or.or(b0!!)
+                b_or.or(b0)
                 val b_xor = b.clone()
-                b_xor.xor(b0!!)
+                b_xor.xor(b0)
                 val b_andn = b.clone()
-                b_andn.andNot(b0!!)
+                b_andn.andNot(b0)
 
-                assertEquals(a0!!.cardinality().toLong(), b0!!.cardinality())
+                assertEquals(a0.cardinality().toLong(), b0.cardinality())
                 assertEquals(a_or.cardinality().toLong(), b_or.cardinality())
 
                 assertEquals(a_and.cardinality().toLong(), b_and.cardinality())
@@ -183,7 +181,7 @@ class TestLongBitSet : LuceneTestCase() {
                 assertTrue(b2 == b1)
             }
         }
-        assertFalse(b1.equals(Any()))
+        assertFalse(b1 == Any())
     }
 
     @Test
@@ -253,8 +251,8 @@ class TestLongBitSet : LuceneTestCase() {
         return bs
     }
 
-    private fun makeBitSet(a: IntArray): java.util.BitSet {
-        val bs = java.util.BitSet()
+    private fun makeBitSet(a: IntArray): BitSet {
+        val bs = BitSet()
         for (e in a) {
             bs.set(e)
         }
@@ -344,4 +342,3 @@ class TestLongBitSet : LuceneTestCase() {
         assertTrue(LongBitSet.bits2words(LongBitSet.MAX_NUM_BITS) > 0)
     }
 }
-

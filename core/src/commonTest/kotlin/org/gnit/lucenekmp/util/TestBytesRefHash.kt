@@ -1,15 +1,20 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.BitSet
+import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.CountDownLatch
+import org.gnit.lucenekmp.jdkport.AtomicInteger
+import org.gnit.lucenekmp.jdkport.TreeSet
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
-import org.gnit.lucenekmp.jdkport.Character
 import kotlin.test.BeforeTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 private val STRING_CODEPOINT_COMPARATOR = Comparator<String> { a, b ->
     var i1 = 0
@@ -17,10 +22,10 @@ private val STRING_CODEPOINT_COMPARATOR = Comparator<String> { a, b ->
     val len1 = a.length
     val len2 = b.length
     while (i1 < len1 && i2 < len2) {
-        val cp1 = Character.codePointAt(a, i1)
-        i1 += Character.charCount(cp1)
-        val cp2 = Character.codePointAt(b, i2)
-        i2 += Character.charCount(cp2)
+        val cp1 = Character.Companion.codePointAt(a, i1)
+        i1 += Character.Companion.charCount(cp1)
+        val cp2 = Character.Companion.codePointAt(b, i2)
+        i2 += Character.Companion.charCount(cp2)
         if (cp1 != cp2) {
             return@Comparator cp1 - cp2
         }
@@ -56,7 +61,7 @@ class TestBytesRefHash : LuceneTestCase() {
             for (i in 0 until 797) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 val count = hash.size()
@@ -82,7 +87,7 @@ class TestBytesRefHash : LuceneTestCase() {
             for (i in 0 until 797) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 val count = hash.size()
@@ -114,18 +119,18 @@ class TestBytesRefHash : LuceneTestCase() {
         for (j in 0 until num) {
             var numEntries = 0
             val size = 797
-            val bits = java.util.BitSet(size)
+            val bits = BitSet(size)
             for (i in 0 until size) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 val key = hash.add(ref.get())
                 if (key < 0) {
-                    assertTrue(bits.get((-key) - 1))
+                    assertTrue(bits[(-key) - 1])
                 } else {
-                    assertFalse(bits.get(key))
+                    assertFalse(bits[key])
                     bits.set(key)
                     numEntries++
                 }
@@ -145,17 +150,16 @@ class TestBytesRefHash : LuceneTestCase() {
         }
     }
 
-    // TODO: investigate failures of this test on Kotlin port
-    // @Test
+    @Test
     fun testSort() {
         val ref = BytesRefBuilder()
         val num = atLeast(2)
         for (j in 0 until num) {
-            val strings = java.util.TreeSet<String>(STRING_CODEPOINT_COMPARATOR)
+            val strings = TreeSet(STRING_CODEPOINT_COMPARATOR)
             for (i in 0 until 797) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 hash.add(ref.get())
@@ -188,7 +192,7 @@ class TestBytesRefHash : LuceneTestCase() {
             for (i in 0 until 797) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 val count = hash.size()
@@ -223,7 +227,7 @@ class TestBytesRefHash : LuceneTestCase() {
             for (i in 0 until 797) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 val count = hash.size()
@@ -248,6 +252,55 @@ class TestBytesRefHash : LuceneTestCase() {
         }
     }
 
+    // TODO rewrite this using kotlin coroutines Job instead of Thread
+    @Ignore
+    @Test
+    fun testConcurrentAccessToBytesRefHash() {
+        /*val pool = ByteBlockPool(ByteBlockPool.DirectAllocator())
+        val hash = BytesRefHash(pool)
+        val numStrings = 797
+        val strings = ArrayList<String>(numStrings)
+        for (i in 0 until numStrings) {
+            val str = TestUtil.Companion.randomUnicodeString(random(), 1000)
+            hash.add(newBytesRef(str))
+            strings.add(str)
+        }
+        val hashSize = hash.size()
+        val notFound = AtomicInteger(0)
+        val notEquals = AtomicInteger(0)
+        val wrongSize = AtomicInteger(0)
+        val numThreads = atLeast(3)
+        val latch = CountDownLatch(numThreads)
+        val threads = Array(numThreads) { i ->
+            val loops = atLeast(100)
+            Thread({
+                val scratch = BytesRef()
+                latch.countDown()
+                latch.await()
+                for (k in 0 until loops) {
+                    val find = newBytesRef(strings[k % strings.size])
+                    val id = hash.find(find)
+                    if (id < 0) {
+                        notFound.incrementAndGet()
+                    } else {
+                        val get = hash.get(id, scratch)
+                        if (!get.bytesEquals(find)) {
+                            notEquals.incrementAndGet()
+                        }
+                    }
+                    if (hash.size() != hashSize) {
+                        wrongSize.incrementAndGet()
+                    }
+                }
+            }, "t$i")
+        }
+        threads.forEach { it.start() }
+        threads.forEach { it.join() }
+        assertEquals(0, notFound.get())
+        assertEquals(0, notEquals.get())
+        assertEquals(0, wrongSize.get())*/
+    }
+
     @Test
     fun testLargeValue() {
         val sizes = intArrayOf(
@@ -263,7 +316,7 @@ class TestBytesRefHash : LuceneTestCase() {
             if (i < sizes.size - 1) {
                 assertEquals(i, hash.add(ref))
             } else {
-                kotlin.test.assertFailsWith<BytesRefHash.MaxBytesLengthExceededException> { hash.add(ref) }
+                assertFailsWith<BytesRefHash.MaxBytesLengthExceededException> { hash.add(ref) }
             }
         }
     }
@@ -280,7 +333,7 @@ class TestBytesRefHash : LuceneTestCase() {
             for (i in 0 until 797) {
                 var str: String
                 do {
-                    str = TestUtil.randomUnicodeString(random(), 1000)
+                    str = TestUtil.Companion.randomUnicodeString(random(), 1000)
                 } while (str.isEmpty())
                 ref.copyChars(str)
                 val count = hash.size()
