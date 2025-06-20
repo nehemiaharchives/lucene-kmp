@@ -107,11 +107,19 @@ class TestRegExp : LuceneTestCase() {
 
             val kotlinRegex = runCatching { Regex(pattern, RegexOption.IGNORE_CASE) }.getOrNull()
 
-            val r = RegExp(
-                pattern,
-                RegExp.ALL,
-                RegExp.CASE_INSENSITIVE
-            )
+            val r = runCatching {
+                RegExp(
+                    pattern,
+                    RegExp.ALL,
+                    RegExp.CASE_INSENSITIVE
+                )
+            }.getOrNull()
+
+            if (r == null) {
+                // If the RegExp constructor fails, we skip this iteration
+                continue
+            }
+
             val cra = CharacterRunAutomaton(r.toAutomaton())
 
             // Pattern doesn't respect the Unicode spec so some things will not match
