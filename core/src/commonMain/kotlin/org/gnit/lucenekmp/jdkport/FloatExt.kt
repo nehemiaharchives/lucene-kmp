@@ -94,7 +94,7 @@ fun Float.Companion.floatToRawIntBits(value: Float): Int {
  * If [value] is NaN, this function returns 0x7fc00000 (the canonical NaN value).
  */
 fun Float.Companion.floatToIntBits(value: Float): Int {
-    return if (value.isNaN()) 0x7fc00000 else value.toBits()
+    return if (value.isNaN()) 0x7fc00000 else value.toRawBits()
 }
 
 fun Float.Companion.intBitsToFloat(bits: Int): Float {

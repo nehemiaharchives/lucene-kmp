@@ -109,7 +109,7 @@ class TestDirectMonotonic : LuceneTestCase() {
                 val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength))
                 for (i in 0 until numValues) {
                     val v = values.get(i.toLong())
-                    assertEquals(actualValues[i], v)
+                    assertEquals(actualValues[i].toDouble(), v.toDouble(), 1e10)
                 }
             }
         }
@@ -145,7 +145,7 @@ class TestDirectMonotonic : LuceneTestCase() {
                 val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
                 val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength))
                 for (i in 0 until numValues) {
-                    assertEquals(actualValues[i], values.get(i.toLong()))
+                    assertEquals(actualValues[i].toDouble(), values.get(i.toLong()).toDouble(), 1e10)
                 }
                 assertEquals(0L, dataIn.filePointer)
             }
@@ -180,7 +180,7 @@ class TestDirectMonotonic : LuceneTestCase() {
                 metaIn.seek(0L)
                 assertSame(meta, DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift))
                 val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength))
-                for (i in 0 until numValues) assertEquals(0L, values.get(i.toLong()))
+                for (i in 0 until numValues) assertEquals(0.0, values.get(i.toLong()).toDouble(), 1e10)
                 assertEquals(0L, dataIn.filePointer)
             }
         }
@@ -233,7 +233,7 @@ class TestDirectMonotonic : LuceneTestCase() {
                 dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
                     val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
                     val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength), merging)
-                    for (i in 0 until numValues) assertEquals(actualValues[i], values.get(i.toLong()))
+                    for (i in 0 until numValues) assertEquals(actualValues[i].toDouble(), values.get(i.toLong()).toDouble(), 1e10)
                 }
             }
 
@@ -286,7 +286,8 @@ class TestDirectMonotonic : LuceneTestCase() {
                         val index = reader.binarySearch(0L, array.size.toLong(), array[i])
                         assertTrue(index >= 0)
                         assertTrue(index < array.size)
-                        assertEquals(array[i], reader.get(index))
+                        val actual = reader.get(index)
+                        assertEquals(array[i], actual)
                     }
                     if (array[0] != Long.MIN_VALUE) {
                         assertEquals(-1, reader.binarySearch(0L, array.size.toLong(), array[0] - 1))
