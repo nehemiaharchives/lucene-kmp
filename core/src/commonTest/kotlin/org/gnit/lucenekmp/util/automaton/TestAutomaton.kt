@@ -1734,7 +1734,7 @@ class TestAutomaton : LuceneTestCase() {
         val a = Automata.makeNonEmptyBinary()
         AutomatonTestUtil.assertMinimalDFA(a)
         assertFalse(Operations.run(a, intsRef("")))
-        assertTrue(Operations.run(a, intsRef(randomUnicodeString(random(), 10))))
+        assertTrue(Operations.run(a, intsRef(TestUtil.randomRealisticUnicodeString(random(), 1, 10))))
     }
 
     @Test
