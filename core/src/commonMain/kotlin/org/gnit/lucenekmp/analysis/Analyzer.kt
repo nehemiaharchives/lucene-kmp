@@ -272,7 +272,7 @@ abstract class Analyzer
      * @param fieldName IndexableField name being indexed.
      * @return position increment gap, added to the next token emitted from [     ][.tokenStream]. This value must be `>= 0`.
      */
-    fun getPositionIncrementGap(fieldName: String?): Int {
+    open fun getPositionIncrementGap(fieldName: String?): Int {
         return 0
     }
 
@@ -284,7 +284,7 @@ abstract class Analyzer
      * @return offset gap, added to the next token emitted from [.tokenStream].
      * This value must be `>= 0`.
      */
-    fun getOffsetGap(fieldName: String?): Int {
+    open fun getOffsetGap(fieldName: String?): Int {
         return 1
     }
 
