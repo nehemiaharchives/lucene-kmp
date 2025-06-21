@@ -24,15 +24,10 @@ set -euxo pipefail
 OPT_DIR="/opt"                #/opt is fine in most cases such as chatgpt.com/codex
 
 JDK_VERSION="24.0.1_9"
-KONAN_VERSION="2.1.21"
-KONAN_PLATFORM="linux-x86_64"   # this container is Linux/amd64
-LLVM_ARCHIVE="llvm-16.0.0-x86_64-linux-essentials-80.tar.gz"
-LLDB_ARCHIVE="lldb-4-linux.tar.gz"
-GCC_ARCHIVE="x86_64-unknown-linux-gnu-gcc-8.3.0-glibc-2.19-kernel-4.9-2.tar.gz"
-LIBFFI_ARCHIVE="libffi-3.2.1-2-linux-x86-64.tar.gz"
 
 # Base URL for Gradle cache tarballs (GitHub Release)
-RELEASE_BASE_URL="https://github.com/nehemiaharchives/lucene-kmp-gc/releases/download/1.0"
+RELEASE_VERSION="1.2"
+RELEASE_BASE_URL="https://github.com/nehemiaharchives/lucene-kmp-gc/releases/download/${RELEASE_VERSION}"
 
 # -----------------------------------------------------------------------------
 # 1  Install JDK 24 (Temurin)
@@ -76,7 +71,7 @@ rm /tmp/cmdline-tools.zip
 ( yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses --sdk_root="$SDK_ROOT" >/dev/null 2>&1 ) || true
 
 # -----------------------------------------------------------------------------
-# 4  Download API 34 platform + Build-Tools 34.0.0
+# 4  Download API Platform + Build-Tools
 # -----------------------------------------------------------------------------
 PLATFORM_ZIP="https://dl.google.com/android/repository/platform-34-ext7_r03.zip"
 BUILD_ZIP="https://dl.google.com/android/repository/build-tools_r34-linux.zip"
@@ -100,7 +95,10 @@ KONAN_DIR="$HOME/.konan"
 mkdir -p "$KONAN_DIR"
 
 # 5a – compiler bundle
-KONAN_ARCHIVE="kotlin-native-prebuilt-${KONAN_PLATFORM}-${KONAN_VERSION}.tar.gz"
+KONAN_VERSION="2.2.0-RC3"
+KONAN_PLATFORM="linux-x86_64"   # this container is Linux/amd64
+KONAN_PREBUILT_DIR="kotlin-native-prebuilt-${KONAN_PLATFORM}-${KONAN_VERSION}"
+KONAN_ARCHIVE="$KONAN_PREBUILT_DIR.tar.gz"
 KONAN_URL="https://github.com/JetBrains/kotlin/releases/download/v${KONAN_VERSION}/${KONAN_ARCHIVE}"
 
 curl -fL "$KONAN_URL" -o /tmp/${KONAN_ARCHIVE}
@@ -112,10 +110,20 @@ rm /tmp/${KONAN_ARCHIVE}
 DEPS_DIR="$KONAN_DIR/dependencies"
 mkdir -p "$DEPS_DIR"
 
-LLVM_URL="https://download.jetbrains.com/kotlin/native/resources/llvm/16.0.0-x86_64-linux/${LLVM_ARCHIVE}"
-LLDB_URL="https://download.jetbrains.com/kotlin/native/${LLDB_ARCHIVE}"
-GCC_URL="https://download.jetbrains.com/kotlin/native/${GCC_ARCHIVE}"
-LIBFFI_URL="https://download.jetbrains.com/kotlin/native/${LIBFFI_ARCHIVE}"
+LLVM_DIR="llvm-19-x86_64-linux-essentials-100"
+LLDB_DIR="lldb-4-linux"
+GCC_DIR="x86_64-unknown-linux-gnu-gcc-8.3.0-glibc-2.19-kernel-4.9-2"
+LIBFFI_DIR="libffi-3.2.1-2-linux-x86-64"
+
+LLVM_ARCHIVE="$LLVM_DIR.tar.gz"
+LLDB_ARCHIVE="$LLDB_DIR.tar.gz"
+GCC_ARCHIVE="$GCC_DIR.tar.gz"
+LIBFFI_ARCHIVE="$LIBFFI_DIR.tar.gz"
+
+LLVM_URL="https://download.jetbrains.com/kotlin/native/resources/llvm/19-x86_64-linux/$LLVM_ARCHIVE"
+LLDB_URL="https://download.jetbrains.com/kotlin/native/$LLDB_ARCHIVE"
+GCC_URL="https://download.jetbrains.com/kotlin/native/$GCC_ARCHIVE"
+LIBFFI_URL="https://download.jetbrains.com/kotlin/native/$LIBFFI_ARCHIVE"
 
 curl -fL "$LLVM_URL" -o /tmp/${LLVM_ARCHIVE}
  tar -xzf /tmp/${LLVM_ARCHIVE} -C "$DEPS_DIR"
@@ -135,10 +143,10 @@ rm /tmp/${LIBFFI_ARCHIVE}
 
 # 5c – Populate .extracted so DependencyProcessor skips network fetches
 cat > "$DEPS_DIR/.extracted" <<EOF
-x86_64-unknown-linux-gnu-gcc-8.3.0-glibc-2.19-kernel-4.9-2
-lldb-4-linux
-llvm-16.0.0-x86_64-linux-essentials-80
-libffi-3.2.1-2-linux-x86-64
+$GCC_DIR
+$LLDB_DIR
+$LLVM_DIR
+$LIBFFI_DIR
 EOF
 
 # -----------------------------------------------------------------------------
@@ -188,7 +196,7 @@ fi
 mkdir -p "$HOME/.gradle"
 cat >> "$HOME/.gradle/gradle.properties" <<EOF
 kotlin.native.distribution.download=false
-kotlin.native.home=$KONAN_DIR/kotlin-native-prebuilt-${KONAN_PLATFORM}-${KONAN_VERSION}
+kotlin.native.home=$KONAN_DIR/$KONAN_PREBUILT_DIR
 EOF
 
 # -----------------------------------------------------------------------------
@@ -197,12 +205,13 @@ EOF
 java -version
 javac -version
 
-[[ -f "$SDK_ROOT/platforms/android-34/android.jar" ]]                                                            || { echo "❌  android-34 platform missing" >&2; exit 1; }
-[[ -x "$SDK_ROOT/build-tools/34.0.0/aapt2" ]]                                                                    || { echo "❌  Build-Tools 34.0.0 missing" >&2; exit 1; }
-[[ -d "$KONAN_DIR/kotlin-native-prebuilt-${KONAN_PLATFORM}-${KONAN_VERSION}" ]]                                  || { echo "❌  Kotlin/Native bundle missing" >&2; exit 1; }
-[[ -x "$DEPS_DIR/llvm-16.0.0-x86_64-linux-essentials-80/bin/clang-16" ]]                                         || { echo "❌  LLVM dependencies missing" >&2; exit 1; }
-[[ -x "$DEPS_DIR/x86_64-unknown-linux-gnu-gcc-8.3.0-glibc-2.19-kernel-4.9-2/bin/x86_64-unknown-linux-gnu-gcc" ]] || { echo "❌  GCC dependencies missing" >&2; exit 1; }
-[[ -d "$DEPS_DIR/libffi-3.2.1-2-linux-x86-64/lib" ]]                                                             || { echo "❌  libffi dependencies missing" >&2; exit 1; }
+[[ -f "$SDK_ROOT/platforms/android-34/android.jar" ]]          || { echo "❌  android-34 platform missing" >&2; exit 1; }
+[[ -x "$SDK_ROOT/build-tools/34.0.0/aapt2" ]]                  || { echo "❌  Build-Tools 34.0.0 missing" >&2; exit 1; }
+[[ -d "$KONAN_DIR/$KONAN_PREBUILT_DIR" ]]                      || { echo "❌  Kotlin/Native bundle missing" >&2; exit 1; }
+[[ -x "$DEPS_DIR/$LLVM_DIR/bin/clang-19" ]]                    || { echo "❌  LLVM dependencies missing" >&2; exit 1; }
+[[ -x "$DEPS_DIR/$LLDB_DIR/bin/lldb" ]]                        || { echo "❌  LLDB dependencies missing" >&2; exit 1; }
+[[ -x "$DEPS_DIR/$GCC_DIR/bin/x86_64-unknown-linux-gnu-gcc" ]] || { echo "❌  GCC dependencies missing" >&2; exit 1; }
+[[ -d "$DEPS_DIR/$LIBFFI_DIR/lib" ]]                           || { echo "❌  libffi dependencies missing" >&2; exit 1; }
 
 echo "✅  All Android and Kotlin/Native components present — you can now run ./gradlew build --offline"
 ./gradlew --offline compileKotlinJvm
