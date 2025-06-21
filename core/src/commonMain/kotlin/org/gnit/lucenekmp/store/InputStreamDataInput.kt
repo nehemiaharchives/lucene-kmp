@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.jdkport.InputStream
 
 
 /** A [DataInput] wrapping a plain [InputStream].  */
-class InputStreamDataInput(private val `is`: InputStream) : DataInput(), AutoCloseable {
+open class InputStreamDataInput(private val `is`: InputStream) : DataInput(), AutoCloseable {
 
     @Throws(IOException::class)
     override fun readByte(): Byte {
