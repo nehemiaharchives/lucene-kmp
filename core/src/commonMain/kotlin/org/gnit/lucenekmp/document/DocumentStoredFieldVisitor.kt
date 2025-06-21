@@ -54,7 +54,7 @@ class DocumentStoredFieldVisitor : StoredFieldVisitor {
 
     @Throws(IOException::class)
     override fun stringField(fieldInfo: FieldInfo, value: String) {
-        val ft: FieldType = FieldType(TextField.TYPE_STORED)
+        val ft = FieldType(TextField.TYPE_STORED)
         ft.setStoreTermVectors(fieldInfo.hasTermVectors())
         ft.setOmitNorms(fieldInfo.omitsNorms())
         ft.setIndexOptions(fieldInfo.indexOptions)

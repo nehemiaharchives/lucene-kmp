@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import okio.IOException
 import org.gnit.lucenekmp.store.Directory
 
 /**
@@ -55,11 +54,11 @@ protected constructor() : Comparable<IndexCommit?> {
 
     /** Two IndexCommits are equal if both their Directory and versions are equal.  */
     override fun equals(other: Any?): Boolean {
-        if (other is IndexCommit) {
-            return other.directory === this.directory
-                    && other.generation == this.generation
+        return if (other is IndexCommit) {
+            (other.directory === this.directory
+                    && other.generation == this.generation)
         } else {
-            return false
+            false
         }
     }
 

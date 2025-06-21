@@ -32,7 +32,7 @@ internal class SortedNumericDocValuesRangeQuery(
 ) : Query() {
 
     override fun equals(obj: Any?): Boolean {
-        if (sameClassAs(obj) == false) {
+        if (!sameClassAs(obj)) {
             return false
         }
         val that = obj as SortedNumericDocValuesRangeQuery

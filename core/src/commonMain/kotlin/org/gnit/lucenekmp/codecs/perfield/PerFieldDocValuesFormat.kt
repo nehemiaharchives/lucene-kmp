@@ -52,9 +52,8 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
     }
 
     private inner class FieldsWriter(state: SegmentWriteState) : DocValuesConsumer() {
-        private val formats: MutableMap<DocValuesFormat, ConsumerAndSuffix> =
-            HashMap<DocValuesFormat, ConsumerAndSuffix>()
-        private val suffixes: MutableMap<String, Int> = HashMap<String, Int>()
+        private val formats: MutableMap<DocValuesFormat, ConsumerAndSuffix> = HashMap()
+        private val suffixes: MutableMap<String, Int> = HashMap()
 
         private val segmentWriteState: SegmentWriteState = state
 
@@ -85,8 +84,7 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
 
         @Throws(IOException::class)
         override fun merge(mergeState: MergeState) {
-            val consumersToField: MutableMap<DocValuesConsumer, MutableCollection<String>> =
-                mutableMapOf<DocValuesConsumer, MutableCollection<String>>()
+            val consumersToField: MutableMap<DocValuesConsumer, MutableCollection<String>> = mutableMapOf()
 
             // Group each consumer by the fields it handles
             for (fi in mergeState.mergeFieldInfos!!) {
@@ -97,7 +95,7 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
                 val consumer: DocValuesConsumer = getInstance(fi, true)
                 var fieldsForConsumer = consumersToField[consumer]
                 if (fieldsForConsumer == null) {
-                    fieldsForConsumer = ArrayList<String>()
+                    fieldsForConsumer = ArrayList()
                     consumersToField.put(consumer, fieldsForConsumer)
                 }
                 fieldsForConsumer.add(fi.name)
@@ -127,7 +125,7 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
             var format: DocValuesFormat? = null
             if (field.docValuesGen != -1L) {
                 var formatName: String? = null
-                if (ignoreCurrentFormat == false) {
+                if (!ignoreCurrentFormat) {
                     formatName = field.getAttribute(PER_FIELD_FORMAT_KEY)
                 }
                 // this means the field never existed in that segment, yet is applied updates
@@ -203,12 +201,11 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
 
     private class FieldsReader : DocValuesProducer {
         private val fields: IntObjectHashMap<DocValuesProducer> = IntObjectHashMap()
-        private val formats: MutableMap<String, DocValuesProducer> = HashMap<String, DocValuesProducer>()
+        private val formats: MutableMap<String, DocValuesProducer> = HashMap()
 
         // clone for merge
         constructor(other: FieldsReader) {
-            val oldToNew: MutableMap<DocValuesProducer, DocValuesProducer> =
-                mutableMapOf<DocValuesProducer, DocValuesProducer>()
+            val oldToNew: MutableMap<DocValuesProducer, DocValuesProducer> = mutableMapOf()
             // First clone all formats
             for (ent in other.formats.entries) {
                 val values: DocValuesProducer = ent.value.mergeInstance
@@ -266,13 +263,13 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
 
         @Throws(IOException::class)
         override fun getBinary(field: FieldInfo): BinaryDocValues {
-            val producer: DocValuesProducer? = fields.get(field.number)
+            val producer: DocValuesProducer? = fields[field.number]
             return producer!!.getBinary(field)
         }
 
         @Throws(IOException::class)
         override fun getSorted(field: FieldInfo): SortedDocValues {
-            val producer: DocValuesProducer? = fields.get(field.number)
+            val producer: DocValuesProducer? = fields[field.number]
             return producer!!.getSorted(field)
         }
 

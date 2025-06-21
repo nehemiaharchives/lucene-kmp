@@ -414,7 +414,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      * @see IndexReaderContext.leaves
      */
     fun leaves(): MutableList<LeafReaderContext> {
-        return this.context!!.leaves() as MutableList<LeafReaderContext>
+        return this.context.leaves()
     }
 
     /**

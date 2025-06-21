@@ -82,7 +82,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setStored
      */
-    public override fun stored(): Boolean {
+    override fun stored(): Boolean {
         return this.stored
     }
 
@@ -106,7 +106,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setTokenized
      */
-    public override fun tokenized(): Boolean {
+    override fun tokenized(): Boolean {
         return this.tokenized
     }
 
@@ -130,7 +130,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setStoreTermVectors
      */
-    public override fun storeTermVectors(): Boolean {
+    override fun storeTermVectors(): Boolean {
         return this.storeTermVectors
     }
 
@@ -154,7 +154,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setStoreTermVectorOffsets
      */
-    public override fun storeTermVectorOffsets(): Boolean {
+    override fun storeTermVectorOffsets(): Boolean {
         return this.storeTermVectorOffsets
     }
 
@@ -179,7 +179,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setStoreTermVectorPositions
      */
-    public override fun storeTermVectorPositions(): Boolean {
+    override fun storeTermVectorPositions(): Boolean {
         return this.storeTermVectorPositions
     }
 
@@ -203,7 +203,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setStoreTermVectorPayloads
      */
-    public override fun storeTermVectorPayloads(): Boolean {
+    override fun storeTermVectorPayloads(): Boolean {
         return this.storeTermVectorPayloads
     }
 
@@ -227,7 +227,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setOmitNorms
      */
-    public override fun omitNorms(): Boolean {
+    override fun omitNorms(): Boolean {
         return this.omitNorms
     }
 
@@ -251,7 +251,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setIndexOptions
      */
-    public override fun indexOptions(): IndexOptions {
+    override fun indexOptions(): IndexOptions {
         return this.indexOptions
     }
 
@@ -314,15 +314,15 @@ class FieldType : IndexableFieldType {
         this.dimensionNumBytes = dimensionNumBytes
     }
 
-    public override fun pointDimensionCount(): Int {
+    override fun pointDimensionCount(): Int {
         return dimensionCount
     }
 
-    public override fun pointIndexDimensionCount(): Int {
+    override fun pointIndexDimensionCount(): Int {
         return indexDimensionCount
     }
 
-    public override fun pointNumBytes(): Int {
+    override fun pointNumBytes(): Int {
         return dimensionNumBytes
     }
 
@@ -333,19 +333,19 @@ class FieldType : IndexableFieldType {
         checkIfFrozen()
         require(numDimensions > 0) { "vector numDimensions must be > 0; got $numDimensions" }
         this.vectorDimension = numDimensions
-        this.vectorSimilarityFunction = requireNotNull<VectorSimilarityFunction>(similarity)
-        this.vectorEncoding = requireNotNull<VectorEncoding>(encoding)
+        this.vectorSimilarityFunction = requireNotNull(similarity)
+        this.vectorEncoding = requireNotNull(encoding)
     }
 
-    public override fun vectorDimension(): Int {
+    override fun vectorDimension(): Int {
         return vectorDimension
     }
 
-    public override fun vectorEncoding(): VectorEncoding {
+    override fun vectorEncoding(): VectorEncoding {
         return vectorEncoding
     }
 
-    public override fun vectorSimilarityFunction(): VectorSimilarityFunction {
+    override fun vectorSimilarityFunction(): VectorSimilarityFunction {
         return vectorSimilarityFunction
     }
 
@@ -366,7 +366,7 @@ class FieldType : IndexableFieldType {
     fun putAttribute(key: String, value: String): String? {
         checkIfFrozen()
         if (attributes == null) {
-            attributes = mutableMapOf<String, String>()
+            attributes = mutableMapOf()
         }
         return attributes!!.put(key, value)
     }
@@ -378,7 +378,7 @@ class FieldType : IndexableFieldType {
             result.append("stored")
         }
         if (indexOptions !== IndexOptions.NONE) {
-            if (result.length > 0) result.append(",")
+            if (result.isNotEmpty()) result.append(",")
             result.append("indexed")
             if (tokenized()) {
                 result.append(",tokenized")
@@ -404,7 +404,7 @@ class FieldType : IndexableFieldType {
             }
         }
         if (dimensionCount != 0) {
-            if (result.length > 0) {
+            if (result.isNotEmpty()) {
                 result.append(",")
             }
             result.append("pointDimensionCount=")
@@ -415,7 +415,7 @@ class FieldType : IndexableFieldType {
             result.append(dimensionNumBytes)
         }
         if (docValuesType !== DocValuesType.NONE) {
-            if (result.length > 0) {
+            if (result.isNotEmpty()) {
                 result.append(",")
             }
             result.append("docValuesType=")
@@ -433,7 +433,7 @@ class FieldType : IndexableFieldType {
      *
      * @see .setDocValuesType
      */
-    public override fun docValuesType(): DocValuesType {
+    override fun docValuesType(): DocValuesType {
         return docValuesType
     }
 
@@ -452,7 +452,7 @@ class FieldType : IndexableFieldType {
         docValuesType = type
     }
 
-    public override fun docValuesSkipIndexType(): DocValuesSkipIndexType {
+    override fun docValuesSkipIndexType(): DocValuesSkipIndexType {
         return docValuesSkipIndex
     }
 
@@ -473,8 +473,8 @@ class FieldType : IndexableFieldType {
         result = prime * result + dimensionCount
         result = prime * result + indexDimensionCount
         result = prime * result + dimensionNumBytes
-        result = prime * result + (if (docValuesType == null) 0 else docValuesType.hashCode())
-        result = prime * result + (if (docValuesSkipIndex == null) 0 else docValuesSkipIndex.hashCode())
+        result = prime * result + docValuesType.hashCode()
+        result = prime * result + docValuesSkipIndex.hashCode()
         result = prime * result + indexOptions.hashCode()
         result = prime * result + (if (omitNorms) 1231 else 1237)
         result = prime * result + (if (storeTermVectorOffsets) 1231 else 1237)

@@ -109,7 +109,7 @@ object CodecUtil {
         out.writeBytes(id, 0, id.size)
         val suffixBytes = BytesRef(suffix)
         require(!(suffixBytes.length != suffix.length || suffixBytes.length >= 256)) { "suffix must be simple ASCII, less than 256 characters in length [got $suffix]" }
-        out.writeByte(suffixBytes.length as Byte)
+        out.writeByte(suffixBytes.length.toByte())
         out.writeBytes(suffixBytes.bytes, suffixBytes.offset, suffixBytes.length)
     }
 

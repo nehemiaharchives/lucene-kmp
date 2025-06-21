@@ -525,11 +525,11 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
             // totalTermFreq is just total number of positions(or payloads, or offsets)
             // associated with current term.
             require(state.totalTermFreq != -1L)
-            if (state.totalTermFreq > BLOCK_SIZE) {
+            lastPosBlockOffset = if (state.totalTermFreq > BLOCK_SIZE) {
                 // record file offset for last pos in last block
-                lastPosBlockOffset = posOut!!.filePointer - posStartFP
+                posOut!!.filePointer - posStartFP
             } else {
-                lastPosBlockOffset = -1
+                -1
             }
             if (posBufferUpto > 0) {
                 require(posBufferUpto < BLOCK_SIZE)

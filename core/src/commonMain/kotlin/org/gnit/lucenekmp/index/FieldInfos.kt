@@ -275,7 +275,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     )
 
     class FieldNumbers(softDeletesFieldName: String?, parentFieldName: String?) {
-        private val numberToName: IntObjectHashMap<String>
+        private val numberToName: IntObjectHashMap<String> = IntObjectHashMap()
         private val fieldProperties: MutableMap<String, FieldProperties>
 
         // TODO: we should similarly catch an attempt to turn
@@ -290,7 +290,6 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         internal val parentFieldName: String?
 
         init {
-            this.numberToName = IntObjectHashMap()
             this.fieldProperties = mutableMapOf<String, FieldProperties>()
             this.softDeletesFieldName = softDeletesFieldName
             this.parentFieldName = parentFieldName
@@ -570,21 +569,21 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
                 fieldName,
                 newFieldNumber,
                 false,
-                false,
-                false,
-                IndexOptions.NONE,
-                dvType,
-                DocValuesSkipIndexType.NONE,
-                -1,
-                mutableMapOf(),
-                0,
-                0,
-                0,
-                0,
-                VectorEncoding.FLOAT32,
-                VectorSimilarityFunction.EUCLIDEAN,
-                isSoftDeletesField,
-                isParentField
+                omitNorms = false,
+                storePayloads = false,
+                indexOptions = IndexOptions.NONE,
+                docValues = dvType,
+                docValuesSkipIndex = DocValuesSkipIndexType.NONE,
+                dvGen = -1,
+                attributes = mutableMapOf(),
+                pointDimensionCount = 0,
+                pointIndexDimensionCount = 0,
+                pointNumBytes = 0,
+                vectorDimension = 0,
+                vectorEncoding = VectorEncoding.FLOAT32,
+                vectorSimilarityFunction = VectorSimilarityFunction.EUCLIDEAN,
+                softDeletesField = isSoftDeletesField,
+                isParentField = isParentField
             )
         }
 

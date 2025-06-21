@@ -108,7 +108,7 @@ class IntPoint
          */
         fun pack(vararg point: Int): BytesRef {
             requireNotNull(point) { "point must not be null" }
-            require(point.size != 0) { "point must not be 0 dimensions" }
+            require(point.isNotEmpty()) { "point must not be 0 dimensions" }
             val packed = ByteArray(point.size * Int.SIZE_BYTES)
 
             for (dim in point.indices) {
@@ -246,7 +246,7 @@ class IntPoint
             val boxed = values.toTypedArray<Int>()
             val unboxed = IntArray(boxed.size)
             for (i in boxed.indices) {
-                unboxed[i] = boxed[i]!!
+                unboxed[i] = boxed[i]
             }
             return newSetQuery(field, *unboxed)
         }

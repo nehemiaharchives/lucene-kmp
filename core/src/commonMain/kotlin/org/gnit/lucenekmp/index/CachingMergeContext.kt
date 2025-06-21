@@ -18,7 +18,7 @@ internal class CachingMergeContext(val mergeContext: MergePolicy.MergeContext) :
         }
         numDeletesToMerge = mergeContext.numDeletesToMerge(info)
         cachedNumDeletesToMerge.put(info, numDeletesToMerge)
-        return numDeletesToMerge!!
+        return numDeletesToMerge
     }
 
     override fun numDeletedDocs(info: SegmentCommitInfo): Int {

@@ -56,11 +56,11 @@ protected constructor() : IndexReader() {
         buffer.append('(')
         val subReaders = checkNotNull(this.sequentialSubReaders)
         if (!subReaders.isEmpty()) {
-            buffer.append(subReaders.get(0))
+            buffer.append(subReaders[0])
             var i = 1
             val c = subReaders.size
             while (i < c) {
-                buffer.append(" ").append(subReaders.get(i))
+                buffer.append(" ").append(subReaders[i])
                 ++i
             }
         }

@@ -50,8 +50,8 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     open fun merge(mergeState: MergeState, norms: NormsProducer) {
-        val fields: MutableList<Fields> = mutableListOf<Fields>()
-        val slices: MutableList<ReaderSlice> = mutableListOf<ReaderSlice>()
+        val fields: MutableList<Fields> = mutableListOf()
+        val slices: MutableList<ReaderSlice> = mutableListOf()
 
         var docBase = 0
 

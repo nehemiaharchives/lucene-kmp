@@ -6,24 +6,18 @@ package org.gnit.lucenekmp.index
  * instances.
  */
 abstract class IndexReaderContext internal constructor(
-    parent: CompositeReaderContext,
-    ordInParent: Int,
-    docBaseInParent: Int
-) {
     /** The reader context for this reader's immediate parent, or null if none  */
-    val parent: CompositeReaderContext
-
+    val parent: CompositeReaderContext,
+    /** the ord for this reader in the parent, `0` if parent is null  */
+    val ordInParent: Int,
+    /** the doc base for this reader in the parent, `0` if parent is null  */
+    val docBaseInParent: Int
+) {
     /**
      * `true` if this context struct represents the top level reader within the hierarchical
      * context
      */
     val isTopLevel: Boolean
-
-    /** the doc base for this reader in the parent, `0` if parent is null  */
-    val docBaseInParent: Int
-
-    /** the ord for this reader in the parent, `0` if parent is null  */
-    val ordInParent: Int
 
     // An object that uniquely identifies this context without referencing
     // segments. The goal is to make it fine to have references to this
@@ -31,9 +25,6 @@ abstract class IndexReaderContext internal constructor(
     val identity: Any = Any()
 
     init {
-        this.parent = parent
-        this.docBaseInParent = docBaseInParent
-        this.ordInParent = ordInParent
         this.isTopLevel = parent == null
     }
 

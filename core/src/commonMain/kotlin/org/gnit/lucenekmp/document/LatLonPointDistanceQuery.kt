@@ -114,7 +114,7 @@ internal class LatLonPointDistanceQuery(field: String, latitude: Double, longitu
                 LatLonPoint.checkCompatible(fieldInfo)
 
                 // matching docids
-                val result =                    DocIdSetBuilder(reader.maxDoc(), values)
+                val result = DocIdSetBuilder(reader.maxDoc(), values)
                 val visitor: IntersectVisitor = getIntersectVisitor(result)
 
                 return object : ScorerSupplier() {
@@ -128,8 +128,7 @@ internal class LatLonPointDistanceQuery(field: String, latitude: Double, longitu
                             // If all docs have exactly one value and the cost is greater
                             // than half the leaf size then maybe we can make things faster
                             // by computing the set of documents that do NOT match the range
-                            val result: FixedBitSet =
-                                FixedBitSet(reader.maxDoc())
+                            val result = FixedBitSet(reader.maxDoc())
                             result.set(0, reader.maxDoc())
                             val cost = longArrayOf(reader.maxDoc().toLong())
                             values.intersect(getInverseIntersectVisitor(result, cost))
@@ -281,14 +280,14 @@ internal class LatLonPointDistanceQuery(field: String, latitude: Double, longitu
                     }
 
                     override fun visit(docID: Int, packedValue: ByteArray) {
-                        if (matches(packedValue) == false) {
+                        if (!matches(packedValue)) {
                             visit(docID)
                         }
                     }
 
                     @Throws(IOException::class)
                     override fun visit(iterator: DocIdSetIterator, packedValue: ByteArray) {
-                        if (matches(packedValue) == false) {
+                        if (!matches(packedValue)) {
                             visit(iterator)
                         }
                     }
@@ -299,15 +298,15 @@ internal class LatLonPointDistanceQuery(field: String, latitude: Double, longitu
                     ): Relation {
                         val relation: Relation =
                             relate(minPackedValue, maxPackedValue)
-                        when (relation) {
+                        return when (relation) {
                             Relation.CELL_INSIDE_QUERY ->                 // all points match, skip this subtree
-                                return Relation.CELL_OUTSIDE_QUERY
+                                Relation.CELL_OUTSIDE_QUERY
 
                             Relation.CELL_OUTSIDE_QUERY ->                 // none of the points match, clear all documents
-                                return Relation.CELL_INSIDE_QUERY
+                                Relation.CELL_INSIDE_QUERY
 
-                            Relation.CELL_CROSSES_QUERY -> return relation
-                            else -> return relation
+                            Relation.CELL_CROSSES_QUERY -> relation
+                            /*else -> relation*/  //'when' is exhaustive so 'else' is redundant here.
                         }
                     }
                 }

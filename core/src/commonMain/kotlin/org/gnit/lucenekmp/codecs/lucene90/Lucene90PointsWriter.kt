@@ -88,7 +88,7 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
 
             success = true
         } finally {
-            if (success == false) {
+            if (!success) {
                 IOUtils.closeWhileHandlingException(this)
             }
         }
@@ -168,16 +168,14 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
      * a bulk merge of the points.
      */
         for (reader in mergeState.pointsReaders) {
-            if (reader is Lucene90PointsReader == false) {
+            if (reader !is Lucene90PointsReader) {
                 // We can only bulk merge when all to-be-merged segments use our format:
                 super.merge(mergeState)
                 return
             }
         }
         for (reader in mergeState.pointsReaders) {
-            if (reader != null) {
-                reader.checkIntegrity()
-            }
+            reader?.checkIntegrity()
         }
 
         for (fieldInfo in mergeState.mergeFieldInfos!!) {
@@ -216,8 +214,8 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
                         maxMBSortInHeap,
                         totMaxSize
                     ).use { writer ->
-                        val pointValues: MutableList<PointValues> = ArrayList<PointValues>()
-                        val docMaps: MutableList<MergeState.DocMap> = ArrayList<MergeState.DocMap>()
+                        val pointValues: MutableList<PointValues> = ArrayList()
+                        val docMaps: MutableList<MergeState.DocMap> = ArrayList()
                         for (i in 0..<mergeState.pointsReaders.size) {
                             val reader: PointsReader? = mergeState.pointsReaders[i]
 

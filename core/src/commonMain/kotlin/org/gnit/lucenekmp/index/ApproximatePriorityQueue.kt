@@ -14,7 +14,7 @@ internal class ApproximatePriorityQueue<T> {
     // greater than or equal to 64 are densely populated
     // Items close to the beginning of this list are more likely to have a
     // higher weight.
-    private val slots: MutableList<T?> = ArrayList<T?>(Long.SIZE_BITS)
+    private val slots: MutableList<T?> = ArrayList(Long.SIZE_BITS)
 
     // A bitset where ones indicate that the corresponding index in `slots` is taken.
     private var usedSlots = 0L

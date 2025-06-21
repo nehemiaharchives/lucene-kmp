@@ -77,7 +77,7 @@ protected constructor() : KnnVectorValues() {
                 }
 
                 override fun vectorValue(targetOrd: Int): FloatArray {
-                    return vectors.get(targetOrd)
+                    return vectors[targetOrd]
                 }
 
                 override fun copy(): FloatVectorValues {

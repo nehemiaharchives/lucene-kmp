@@ -646,7 +646,7 @@ class Lucene99HnswVectorsWriter(
 
         fun distFuncToOrd(func: VectorSimilarityFunction): Int {
             for (i in 0..<SIMILARITY_FUNCTIONS.size) {
-                if (SIMILARITY_FUNCTIONS[i]!! == func) {
+                if (SIMILARITY_FUNCTIONS[i] == func) {
                     return i.toByte().toInt()
                 }
             }

@@ -11,24 +11,15 @@ import org.gnit.lucenekmp.index.FilterLeafReader.FilterTermsEnum
  *
  * @lucene.internal
  */
-class MappedMultiFields(mergeState: MergeState, multiFields: MultiFields) : FilterFields(multiFields) {
-    val mergeState: MergeState
-
-    /**
-     * Create a new MappedMultiFields for merging, based on the supplied mergestate and merged view of
-     * terms.
-     */
-    init {
-        this.mergeState = mergeState
-    }
+class MappedMultiFields(val mergeState: MergeState, multiFields: MultiFields) : FilterFields(multiFields) {
 
     @Throws(IOException::class)
     override fun terms(field: String?): Terms? {
         val terms: MultiTerms? = `in`.terms(field) as MultiTerms
-        if (terms == null) {
-            return null
+        return if (terms == null) {
+            null
         } else {
-            return MappedMultiTerms(field, mergeState, terms)
+            MappedMultiTerms(field, mergeState, terms)
         }
     }
 
@@ -67,15 +58,8 @@ class MappedMultiFields(mergeState: MergeState, multiFields: MultiFields) : Filt
             }
     }
 
-    private class MappedMultiTermsEnum(field: String, mergeState: MergeState, multiTermsEnum: MultiTermsEnum) :
+    private class MappedMultiTermsEnum(val field: String, val mergeState: MergeState, multiTermsEnum: MultiTermsEnum) :
         FilterTermsEnum(multiTermsEnum) {
-        val mergeState: MergeState
-        val field: String
-
-        init {
-            this.field = field
-            this.mergeState = mergeState
-        }
 
         @Throws(IOException::class)
         override fun docFreq(): Int {
@@ -89,15 +73,14 @@ class MappedMultiFields(mergeState: MergeState, multiFields: MultiFields) : Filt
 
         @Throws(IOException::class)
         override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
-            val mappingDocsAndPositionsEnum: MappingMultiPostingsEnum
-            if (reuse is MappingMultiPostingsEnum) {
+            val mappingDocsAndPositionsEnum: MappingMultiPostingsEnum = if (reuse is MappingMultiPostingsEnum) {
                 if (reuse.field.equals(this.field)) {
-                    mappingDocsAndPositionsEnum = reuse
+                    reuse
                 } else {
-                    mappingDocsAndPositionsEnum = MappingMultiPostingsEnum(field, mergeState)
+                    MappingMultiPostingsEnum(field, mergeState)
                 }
             } else {
-                mappingDocsAndPositionsEnum = MappingMultiPostingsEnum(field, mergeState)
+                MappingMultiPostingsEnum(field, mergeState)
             }
 
             val docsAndPositionsEnum: MultiPostingsEnum =

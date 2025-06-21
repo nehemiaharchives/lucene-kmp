@@ -111,7 +111,7 @@ class Lucene90PointsReader(private val readState: SegmentReadState) : PointsRead
             CodecUtil.retrieveChecksum(dataIn, dataLength)
             success = true
         } finally {
-            if (success == false) {
+            if (!success) {
                 IOUtils.closeWhileHandlingException(this)
             }
         }
@@ -127,7 +127,7 @@ class Lucene90PointsReader(private val readState: SegmentReadState) : PointsRead
         requireNotNull(fieldInfo) { "field=\"$fieldName\" is unrecognized" }
         require(fieldInfo.pointDimensionCount != 0) { "field=\"$fieldName\" did not index point values" }
 
-        return readers.get(fieldInfo.number)!!
+        return readers[fieldInfo.number]!!
     }
 
     @Throws(IOException::class)

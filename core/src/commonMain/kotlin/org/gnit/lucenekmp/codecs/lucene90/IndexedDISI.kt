@@ -565,7 +565,7 @@ class IndexedDISI internal constructor(
             }
             var totalCardinality = 0
             var blockCardinality = 0
-            val buffer: FixedBitSet = FixedBitSet(1 shl 16)
+            val buffer = FixedBitSet(1 shl 16)
             var jumps = IntArray(ArrayUtil.oversize(1, Int.SIZE_BYTES * 2))
             var prevBlock = -1
             var jumpBlockIndex = 0

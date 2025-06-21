@@ -28,23 +28,18 @@ import kotlin.math.max
  * Each packet is assigned a generation, and each flushed or merged segment is also assigned a
  * generation, so we can track which BufferedDeletes packets to apply to any given segment.
  */
-class BufferedUpdatesStream(infoStream: InfoStream) :
+class BufferedUpdatesStream(private val infoStream: InfoStream) :
     Accountable {
-    private val updates: MutableSet<FrozenBufferedUpdates> = HashSet<FrozenBufferedUpdates>()
+    private val updates: MutableSet<FrozenBufferedUpdates> = HashSet()
 
     // Starts at 1 so that SegmentInfos that have never had
     // deletes applied (whose bufferedDelGen defaults to 0)
     // will be correct:
     private var nextGen: Long = 1
-    private val finishedSegments: FinishedSegments
-    private val infoStream: InfoStream
+    private val finishedSegments: FinishedSegments = FinishedSegments(infoStream)
+
     @OptIn(ExperimentalAtomicApi::class)
     private val bytesUsed: AtomicLong = AtomicLong(0)
-
-    init {
-        this.infoStream = infoStream
-        this.finishedSegments = FinishedSegments(infoStream)
-    }
 
     // Appends a new packet of buffered deletes to the stream,
     // setting its generation:
@@ -105,14 +100,8 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
      */
     internal class ApplyDeletesResult(
         val anyDeletes: Boolean,
-        allDeleted: MutableList<SegmentCommitInfo>
-    ) {
         val allDeleted: MutableList<SegmentCommitInfo>
-
-        init {
-            this.allDeleted = allDeleted
-        }
-    }
+    )
 
     /**
      * Waits for all in-flight packets, which are already being resolved concurrently by indexing
@@ -121,13 +110,11 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
      */
     @Throws(IOException::class)
     fun waitApplyAll(writer: IndexWriter) {
-        /*assert(java.lang.Thread.holdsLock(writer) == false)*/ // jvm specific operation, need to do something for kotlin common
-        val waitFor: MutableSet<FrozenBufferedUpdates>
-
 
         // TODO implement synchronized in kotlin common
         //synchronized(this) {
-            waitFor = HashSet<FrozenBufferedUpdates>(updates)
+        /*assert(java.lang.Thread.holdsLock(writer) == false)*/ // jvm specific operation, need to do something for kotlin common
+        val waitFor = HashSet(updates)
         //}
 
         waitApply(waitFor, writer)
@@ -235,7 +222,7 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
             // Frozen packets are now resolved, concurrently, by the indexing threads that
             // create them, by adding a DocumentsWriter.ResolveUpdatesEvent to the events queue,
             // but if we get here and the packet is not yet resolved, we resolve it now ourselves:
-            if (writer.tryApply(packet) == false) {
+            if (!writer.tryApply(packet)) {
                 // if somebody else is currently applying it - move on to the next one and force apply below
                 pendingPackets.add(packet)
             }
@@ -262,27 +249,17 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
 
     /** Holds all per-segment internal state used while resolving deletions.  */
     class SegmentState(
-        rld: ReadersAndUpdates,
-        onClose: IOConsumer<ReadersAndUpdates>,
+        val rld: ReadersAndUpdates,
+        private val onClose: IOConsumer<ReadersAndUpdates>,
         info: SegmentCommitInfo
     ) : AutoCloseable {
-        val delGen: Long
-        val rld: ReadersAndUpdates
-        val reader: SegmentReader
-        val startDelCount: Int
-        private val onClose: IOConsumer<ReadersAndUpdates>
+        val delGen: Long = info.bufferedDeletesGen
+        val reader: SegmentReader = rld.getReader(IOContext.DEFAULT)
+        val startDelCount: Int = rld.delCount
 
         var termsEnum: TermsEnum? = null
         var postingsEnum: PostingsEnum? = null
         var term: BytesRef? = null
-
-        init {
-            this.rld = rld
-            reader = rld.getReader(IOContext.DEFAULT)
-            startDelCount = rld.delCount
-            delGen = info.bufferedDeletesGen
-            this.onClose = onClose
-        }
 
         override fun toString(): String {
             return "SegmentState(" + rld.info + ")"
@@ -311,7 +288,7 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
      * packets are concurrently resolved, and we can only write to disk the contiguous completed
      * packets.
      */
-    private class FinishedSegments(infoStream: InfoStream) {
+    private class FinishedSegments(private val infoStream: InfoStream) {
         /** Largest del gen, inclusive, for which all prior packets have finished applying.  */
         /*@get:Synchronized*/
         var completedDelGen: Long = 0
@@ -324,12 +301,6 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
         private val finishedDelGens: LongHashSet =
             LongHashSet()
 
-        private val infoStream: InfoStream
-
-        init {
-            this.infoStream = infoStream
-        }
-
         /*@Synchronized*/
         fun clear() {
             finishedDelGens.clear()
@@ -338,7 +309,7 @@ class BufferedUpdatesStream(infoStream: InfoStream) :
 
         /*@Synchronized*/
         fun stillRunning(delGen: Long): Boolean {
-            return delGen > completedDelGen && finishedDelGens.contains(delGen) == false
+            return delGen > completedDelGen && !finishedDelGens.contains(delGen)
         }
 
         /*@Synchronized*/

@@ -180,7 +180,7 @@ internal class Lucene90CompoundReader(private val directory: Directory, si: Segm
     }
 
     override val pendingDeletions: MutableSet<String>
-        get() = mutableSetOf<String>()
+        get() = mutableSetOf()
 
     @Throws(IOException::class)
     override fun checkIntegrity() {

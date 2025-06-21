@@ -158,7 +158,7 @@ protected constructor() : AutoCloseable {
                 override fun getNumeric(fieldInfo: FieldInfo): NumericDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong fieldInfo" }
 
-                    val subs: MutableList<NumericDocValuesSub> = mutableListOf<NumericDocValuesSub>()
+                    val subs: MutableList<NumericDocValuesSub> = mutableListOf()
                     require(mergeState.docMaps!!.size == mergeState.docValuesProducers.size)
                     for (i in 0..<mergeState.docValuesProducers.size) {
                         var values: NumericDocValues? = null
@@ -210,7 +210,7 @@ protected constructor() : AutoCloseable {
                 override fun getBinary(fieldInfo: FieldInfo): BinaryDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong fieldInfo" }
 
-                    val subs: MutableList<BinaryDocValuesSub> = mutableListOf<BinaryDocValuesSub>()
+                    val subs: MutableList<BinaryDocValuesSub> = mutableListOf()
 
                     var cost: Long = 0
                     for (i in 0..<mergeState.docValuesProducers.size) {
@@ -303,7 +303,7 @@ protected constructor() : AutoCloseable {
                     require(fieldInfo === mergeFieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
-                    val subs: MutableList<SortedNumericDocValuesSub> = mutableListOf<SortedNumericDocValuesSub>()
+                    val subs: MutableList<SortedNumericDocValuesSub> = mutableListOf()
                     var cost: Long = 0
                     var allSingletons = true
                     for (i in 0..<mergeState.docValuesProducers.size) {
@@ -332,7 +332,7 @@ protected constructor() : AutoCloseable {
                         // We specialize for that case since it makes it easier for codecs to optimize
                         // for single-valued fields.
                         val singleValuedSubs: MutableList<NumericDocValuesSub> =
-                            mutableListOf<NumericDocValuesSub>()
+                            mutableListOf()
                         for (sub in subs) {
                             val singleValuedValues: NumericDocValues =
                                 checkNotNull(DocValues.unwrapSingleton(sub.values))
@@ -489,7 +489,7 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     fun mergeSortedField(fieldInfo: FieldInfo, mergeState: MergeState) {
-        val toMerge: MutableList<SortedDocValues> = mutableListOf<SortedDocValues>()
+        val toMerge: MutableList<SortedDocValues> = mutableListOf()
         for (i in 0..<mergeState.docValuesProducers.size) {
             var values: SortedDocValues?? = null
             val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
@@ -509,7 +509,7 @@ protected constructor() : AutoCloseable {
         val dvs: Array<SortedDocValues> = toMerge.toTypedArray<SortedDocValues>()
 
         // step 1: iterate thru each sub and mark terms still in use
-        val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(dvs.size)
+        val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls(dvs.size)
         val weights = LongArray(liveTerms.size)
         for (sub in 0..<numReaders) {
             val dv: SortedDocValues = dvs[sub]
@@ -545,7 +545,7 @@ protected constructor() : AutoCloseable {
                     require(fieldInfoIn === fieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
-                    val subs: MutableList<SortedDocValuesSub> = mutableListOf<SortedDocValuesSub>()
+                    val subs: MutableList<SortedDocValuesSub> = mutableListOf()
                     for (i in 0..<mergeState.docValuesProducers.size) {
                         var values: SortedDocValues? = null
                         val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
@@ -596,7 +596,7 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     fun mergeSortedSetField(mergeFieldInfo: FieldInfo, mergeState: MergeState) {
-        val toMerge: MutableList<SortedSetDocValues> = mutableListOf<SortedSetDocValues>()
+        val toMerge: MutableList<SortedSetDocValues> = mutableListOf()
         for (i in 0..<mergeState.docValuesProducers.size) {
             var values: SortedSetDocValues? = null
             val docValuesProducer: DocValuesProducer? = mergeState.docValuesProducers[i]
@@ -613,7 +613,7 @@ protected constructor() : AutoCloseable {
         }
 
         // step 1: iterate thru each sub and mark terms still in use
-        val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
+        val liveTerms: Array<TermsEnum?> = kotlin.arrayOfNulls(toMerge.size)
         val weights = LongArray(liveTerms.size)
         for (sub in liveTerms.indices) {
             val dv: SortedSetDocValues = toMerge[sub]
@@ -648,7 +648,7 @@ protected constructor() : AutoCloseable {
                     require(fieldInfo === mergeFieldInfo) { "wrong FieldInfo" }
 
                     // We must make new iterators + DocIDMerger for each iterator:
-                    val subs: MutableList<SortedSetDocValuesSub> = mutableListOf<SortedSetDocValuesSub>()
+                    val subs: MutableList<SortedSetDocValuesSub> = mutableListOf()
 
                     var cost: Long = 0
                     var allSingletons = true
@@ -681,7 +681,7 @@ protected constructor() : AutoCloseable {
                         // We specialize for that case since it makes it easier for codecs to optimize
                         // for single-valued fields.
                         val singleValuedSubs: MutableList<SortedDocValuesSub> =
-                            mutableListOf<SortedDocValuesSub>()
+                            mutableListOf()
                         for (sub in subs) {
                             val singleValuedValues: SortedDocValues =
                                 checkNotNull(DocValues.unwrapSingleton(sub.values))
@@ -751,7 +751,7 @@ protected constructor() : AutoCloseable {
 
                         @Throws(IOException::class)
                         override fun termsEnum(): TermsEnum {
-                            val subs: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(toMerge.size)
+                            val subs: Array<TermsEnum?> = kotlin.arrayOfNulls(toMerge.size)
                             for (sub in subs.indices) {
                                 subs[sub] = toMerge[sub].termsEnum()
                             }
@@ -773,10 +773,10 @@ protected constructor() : AutoCloseable {
 
         @Throws(IOException::class)
         override fun accept(term: BytesRef): AcceptStatus {
-            if (liveTerms.get(ord())) {
-                return AcceptStatus.YES
+            return if (liveTerms.get(ord())) {
+                AcceptStatus.YES
             } else {
-                return AcceptStatus.NO
+                AcceptStatus.NO
             }
         }
     }
@@ -897,7 +897,7 @@ protected constructor() : AutoCloseable {
 
                 @Throws(IOException::class)
                 override fun termsEnum(): TermsEnum {
-                    val termsEnumSubs: Array<TermsEnum?> = kotlin.arrayOfNulls<TermsEnum>(subs.size)
+                    val termsEnumSubs: Array<TermsEnum?> = kotlin.arrayOfNulls(subs.size)
                     for (sub in termsEnumSubs.indices) {
                         termsEnumSubs[sub] = subs[sub].values.termsEnum()
                     }

@@ -26,9 +26,12 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  */
 @OptIn(ExperimentalAtomicApi::class)
 class FrozenBufferedUpdates(
-    infoStream: InfoStream,
+    // a segment private deletes. in that case is should
+    // only have Queries and doc values updates
+    private val infoStream: InfoStream,
     updates: BufferedUpdates,
-    privateSegment: SegmentCommitInfo
+    // non-null iff this frozen packet represents
+    val privateSegment: SegmentCommitInfo
 ) {
     // Terms, in sorted order:
     val deleteTerms: PrefixCodedTerms
@@ -52,15 +55,7 @@ class FrozenBufferedUpdates(
 
     private var delGen: Long = -1 // assigned by BufferedUpdatesStream once pushed
 
-    val privateSegment: SegmentCommitInfo // non-null iff this frozen packet represents
-
-    // a segment private deletes. in that case is should
-    // only have Queries and doc values updates
-    private val infoStream: InfoStream
-
     init {
-        this.infoStream = infoStream
-        this.privateSegment = privateSegment
         assert(
             privateSegment == null || updates.deleteTerms.isEmpty
         ) { "segment private packet should only have del queries" }
@@ -173,7 +168,7 @@ class FrozenBufferedUpdates(
                 continue
             }
             val isSegmentPrivateDeletes = privateSegment != null
-            if (fieldUpdates.isEmpty() == false) {
+            if (!fieldUpdates.isEmpty()) {
                 updateCount +=
                     applyDocValuesUpdates(segState, fieldUpdates, delGen, isSegmentPrivateDeletes)
             }
@@ -193,7 +188,7 @@ class FrozenBufferedUpdates(
 
     // Delete by query
     private suspend fun applyQueryDeletes(segStates: Array<BufferedUpdatesStream.SegmentState>): Long {
-        if (deleteQueries.size == 0) {
+        if (deleteQueries.isEmpty()) {
             return 0
         }
 
@@ -345,14 +340,14 @@ class FrozenBufferedUpdates(
     }
 
     override fun toString(): String {
-        var s = "delGen=" + delGen
+        var s = "delGen=$delGen"
         if (deleteTerms.size() != 0L) {
             s += " unique deleteTerms=" + deleteTerms.size()
         }
-        if (deleteQueries.size != 0) {
+        if (deleteQueries.isNotEmpty()) {
             s += " numDeleteQueries=" + deleteQueries.size
         }
-        if (fieldUpdates.size > 0) {
+        if (fieldUpdates.isNotEmpty()) {
             s += " fieldUpdates=$fieldUpdatesCount"
         }
         if (bytesUsed != 0) {
@@ -366,7 +361,7 @@ class FrozenBufferedUpdates(
     }
 
     fun any(): Boolean {
-        return deleteTerms.size() > 0 || deleteQueries.size > 0 || fieldUpdatesCount > 0
+        return deleteTerms.size() > 0 || deleteQueries.isNotEmpty() || fieldUpdatesCount > 0
     }
 
     /**
@@ -464,7 +459,7 @@ class FrozenBufferedUpdates(
         private fun assertSorted(term: BytesRef): Boolean {
             assert(sortedTerms)
             assert(
-                lastTerm == null || term.compareTo(lastTerm!!) >= 0
+                lastTerm == null || term >= lastTerm!!
             ) { "boom: " + term.utf8ToString() + " last: " + lastTerm!!.utf8ToString() }
             lastTerm = BytesRef.deepCopyOf(term)
             return true
@@ -540,7 +535,7 @@ class FrozenBufferedUpdates(
                         }
                         val binaryValue: BytesRef?
                         val longValue: Long
-                        if (bufferedUpdate.hasValue == false) {
+                        if (!bufferedUpdate.hasValue) {
                             longValue = -1
                             binaryValue = null
                         } else {
@@ -549,20 +544,18 @@ class FrozenBufferedUpdates(
                         }
                         if (dvUpdates == null) {
                             if (isNumeric) {
-                                if (value.hasSingleValue()) {
-                                    dvUpdates =
-                                        SingleValueNumericDocValuesFieldUpdates(
-                                            delGen, updateField, segState.reader.maxDoc(), value.getNumericValue(0)
-                                        )
+                                dvUpdates = if (value.hasSingleValue()) {
+                                    SingleValueNumericDocValuesFieldUpdates(
+                                        delGen, updateField, segState.reader.maxDoc(), value.getNumericValue(0)
+                                    )
                                 } else {
-                                    dvUpdates =
-                                        NumericDocValuesFieldUpdates(
-                                            delGen,
-                                            updateField,
-                                            value.getMinNumeric(),
-                                            value.getMaxNumeric(),
-                                            segState.reader.maxDoc()
-                                        )
+                                    NumericDocValuesFieldUpdates(
+                                        delGen,
+                                        updateField,
+                                        value.getMinNumeric(),
+                                        value.getMaxNumeric(),
+                                        segState.reader.maxDoc()
+                                    )
                                 }
                             } else {
                                 dvUpdates =
@@ -572,16 +565,16 @@ class FrozenBufferedUpdates(
                                         segState.reader.maxDoc()
                                     )
                             }
-                            resolvedUpdates.add(dvUpdates!!)
+                            resolvedUpdates.add(dvUpdates)
                         }
                         val docIdConsumer: (Int) -> Unit
                         val update: DocValuesFieldUpdates = dvUpdates
-                        if (bufferedUpdate.hasValue == false) {
-                            docIdConsumer = { doc: Int -> update.reset(doc) }
+                        docIdConsumer = if (!bufferedUpdate.hasValue) {
+                            { doc: Int -> update.reset(doc) }
                         } else if (isNumeric) {
-                            docIdConsumer = { doc: Int -> update.add(doc, longValue) }
+                            { doc: Int -> update.add(doc, longValue) }
                         } else {
-                            docIdConsumer = { doc: Int -> update.add(doc, binaryValue!!) }
+                            { doc: Int -> update.add(doc, binaryValue!!) }
                         }
                         val acceptDocs: Bits? = segState.rld.liveDocs
                         if (segState.rld.sortMap != null && segmentPrivateDeletes) {

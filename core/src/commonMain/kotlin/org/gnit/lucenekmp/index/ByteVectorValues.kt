@@ -22,7 +22,7 @@ protected constructor() : KnnVectorValues() {
     abstract fun vectorValue(ord: Int): ByteArray
 
     @Throws(IOException::class)
-    public abstract override fun copy(): ByteVectorValues
+    abstract override fun copy(): ByteVectorValues
 
     /**
      * Return a [VectorScorer] for the given query vector.
@@ -77,7 +77,7 @@ protected constructor() : KnnVectorValues() {
                 }
 
                 override fun vectorValue(targetOrd: Int): ByteArray {
-                    return vectors.get(targetOrd)
+                    return vectors[targetOrd]
                 }
 
                 override fun copy(): ByteVectorValues {

@@ -190,13 +190,12 @@ class ForUtil {
             }
 
             val remainingBitsPerInt = shift + bitsPerValue
-            val maskRemainingBitsPerInt: Int
-            if (primitiveSize == 8) {
-                maskRemainingBitsPerInt = MASKS8[remainingBitsPerInt]
+            val maskRemainingBitsPerInt: Int = if (primitiveSize == 8) {
+                MASKS8[remainingBitsPerInt]
             } else if (primitiveSize == 16) {
-                maskRemainingBitsPerInt = MASKS16[remainingBitsPerInt]
+                MASKS16[remainingBitsPerInt]
             } else {
-                maskRemainingBitsPerInt = MASKS32[remainingBitsPerInt]
+                MASKS32[remainingBitsPerInt]
             }
 
             var tmpIdx = 0

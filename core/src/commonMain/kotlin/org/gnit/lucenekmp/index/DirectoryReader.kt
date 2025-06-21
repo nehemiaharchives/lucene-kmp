@@ -31,27 +31,11 @@ import kotlin.jvm.JvmOverloads
  * your own (non-Lucene) objects instead.
  */
 abstract class DirectoryReader protected constructor(
-    directory: Directory,
+    /** The index directory.  */
+    protected val directory: Directory,
     segmentReaders: Array<out LeafReader>,
     leafSorter: Comparator<out LeafReader>?
 ) : BaseCompositeReader<LeafReader>(segmentReaders, leafSorter) {
-    /** The index directory.  */
-    protected val directory: Directory
-
-    /**
-     * Expert: Constructs a `DirectoryReader` on the given subReaders.
-     *
-     * @param segmentReaders the wrapped atomic index segment readers. This array is returned by
-     * [.getSequentialSubReaders] and used to resolve the correct subreader for docID-based
-     * methods. **Please note:** This array is **not** cloned and not protected for
-     * modification outside of this reader. Subclasses of `DirectoryReader` should take care
-     * to not allow modification of this internal array, e.g. [.doOpenIfChanged].
-     * @param leafSorter – a comparator for sorting leaf readers. If not `null`, this comparator
-     * is used for sorting leaf readers.
-     */
-    init {
-        this.directory = directory
-    }
 
     /** Returns the directory this index resides in.  */
     fun directory(): Directory {

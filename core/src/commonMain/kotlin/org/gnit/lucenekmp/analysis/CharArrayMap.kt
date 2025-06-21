@@ -147,7 +147,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
 
     override fun put(o: Any, value: V): V? {
         if (o is CharArray) {
-            return putCharArray(o as CharArray, value)
+            return putCharArray(o, value)
         }
         return put(o.toString(), value)
     }
@@ -438,7 +438,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
 
         override fun contains(o: MutableMap.MutableEntry<Any, V>): Boolean {
             if (o !is MutableMap.MutableEntry<*, *>) return false
-            val e = o as MutableMap.MutableEntry<Any, V>
+            val e = o
             val key = e.key
             val `val`: Any? = e.value
             val v: Any? = get(key)

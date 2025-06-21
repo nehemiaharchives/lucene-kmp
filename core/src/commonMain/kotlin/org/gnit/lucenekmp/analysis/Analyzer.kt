@@ -123,7 +123,7 @@ abstract class Analyzer
             components = createComponents(fieldName)
             reuseStrategy.setReusableComponents(this, fieldName, components)
         }
-        components!!.setReader(r)
+        components.setReader(r)
         return components.tokenStream
     }
 
@@ -160,7 +160,7 @@ abstract class Analyzer
             reuseStrategy.setReusableComponents(this, fieldName, components)
         }
 
-        components!!.setReader(r)
+        components.setReader(r)
         components.reusableStringReader = strReader
         return components.tokenStream
     }
@@ -186,7 +186,7 @@ abstract class Analyzer
                 StringReader(text).use { reader ->
                     val filterReader: Reader = initReaderForNormalization(fieldName, reader)
                     val buffer = CharArray(64)
-                    val builder: StringBuilder = StringBuilder()
+                    val builder = StringBuilder()
                     while (true) {
                         val read: Int = filterReader.read(buffer, 0, buffer.size)
                         if (read == -1) {

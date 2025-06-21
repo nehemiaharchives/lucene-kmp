@@ -110,10 +110,10 @@ abstract class DocIDMerger<T : DocIDMerger.Sub> private constructor() {
         }
 
         fun setQueueMinDocID() {
-            if (queue.size() > 0) {
-                queueMinDocID = queue.top().mappedDocID
+            queueMinDocID = if (queue.size() > 0) {
+                queue.top().mappedDocID
             } else {
-                queueMinDocID = NO_MORE_DOCS
+                NO_MORE_DOCS
             }
         }
 
@@ -147,10 +147,10 @@ abstract class DocIDMerger<T : DocIDMerger.Sub> private constructor() {
             }
 
             if (nextDoc == NO_MORE_DOCS) {
-                if (queue.size() == 0) {
-                    current = null
+                current = if (queue.size() == 0) {
+                    null
                 } else {
-                    current = queue.pop()
+                    queue.pop()
                 }
             } else if (queue.size() > 0) {
                 require(queueMinDocID == queue.top().mappedDocID)
@@ -171,10 +171,10 @@ abstract class DocIDMerger<T : DocIDMerger.Sub> private constructor() {
         fun <T : Sub> of(
             subs: MutableList<T>, maxCount: Int, indexIsSorted: Boolean
         ): DocIDMerger<T> {
-            if (indexIsSorted && maxCount > 1) {
-                return SortedDocIDMerger(subs, maxCount)
+            return if (indexIsSorted && maxCount > 1) {
+                SortedDocIDMerger(subs, maxCount)
             } else {
-                return SequentialDocIDMerger(subs)
+                SequentialDocIDMerger(subs)
             }
         }
 

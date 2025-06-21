@@ -213,7 +213,7 @@ internal class Lucene90NormsProducer(
     private fun getDataInput(field: FieldInfo, entry: NormsEntry): RandomAccessInput {
         var slice: RandomAccessInput? = null
         if (merging) {
-            slice = dataInputs!!.get(field.number)
+            slice = dataInputs!![field.number]
         }
         if (slice == null) {
             slice =
@@ -234,7 +234,7 @@ internal class Lucene90NormsProducer(
 
     @Throws(IOException::class)
     private fun getDisiInput(field: FieldInfo, entry: NormsEntry): IndexInput {
-        if (merging == false) {
+        if (!merging) {
             return IndexedDISI.createBlockSlice(
                 data,
                 "docs",
@@ -244,7 +244,7 @@ internal class Lucene90NormsProducer(
             )
         }
 
-        var `in`: IndexInput? = disiInputs!!.get(field.number)
+        var `in`: IndexInput? = disiInputs!![field.number]
         if (`in` == null) {
             `in` =
                 IndexedDISI.createBlockSlice(
@@ -322,7 +322,7 @@ internal class Lucene90NormsProducer(
     private fun getDisiJumpTable(field: FieldInfo, entry: NormsEntry): RandomAccessInput {
         var jumpTable: RandomAccessInput? = null
         if (merging) {
-            jumpTable = disiJumpTables!!.get(field.number)
+            jumpTable = disiJumpTables!![field.number]
         }
         if (jumpTable == null) {
             jumpTable =
@@ -341,7 +341,7 @@ internal class Lucene90NormsProducer(
 
     @Throws(IOException::class)
     override fun getNorms(field: FieldInfo): NumericDocValues {
-        val entry: NormsEntry = norms.get(field.number)!!
+        val entry: NormsEntry = norms[field.number]!!
         if (entry.docsWithFieldOffset == -2L) {
             // empty
             return DocValues.emptyNumeric()

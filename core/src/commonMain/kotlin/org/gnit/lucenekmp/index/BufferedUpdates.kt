@@ -31,9 +31,9 @@ class BufferedUpdates(val segmentName: String) : Accountable {
     val numFieldUpdates: AtomicInt = AtomicInt(0)
 
     val deleteTerms: DeletedTerms = DeletedTerms()
-    val deleteQueries: MutableMap<Query, Int> = mutableMapOf<Query, Int>()
+    val deleteQueries: MutableMap<Query, Int> = mutableMapOf()
 
-    val fieldUpdates: MutableMap<String, FieldUpdatesBuffer> = mutableMapOf<String, FieldUpdatesBuffer>()
+    val fieldUpdates: MutableMap<String, FieldUpdatesBuffer> = mutableMapOf()
 
     private val bytesUsed: Counter = Counter.newCounter(true)
     val fieldUpdatesBytesUsed: Counter = Counter.newCounter(true)
@@ -145,7 +145,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
     class DeletedTerms : Accountable {
         private val bytesUsed: Counter = Counter.newCounter()
         private val pool: ByteBlockPool = ByteBlockPool(DirectTrackingAllocator(bytesUsed))
-        private val deleteTerms: MutableMap<String, BytesRefIntMap> = HashMap<String, BytesRefIntMap>()
+        private val deleteTerms: MutableMap<String, BytesRefIntMap> = HashMap()
         private var termsSize = 0
 
         /**
@@ -181,7 +181,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
         }
 
         fun clear() {
-            pool.reset(false, false)
+            pool.reset(false, reuseFirst = false)
             bytesUsed.addAndGet(-bytesUsed.get())
             deleteTerms.clear()
             termsSize = 0
@@ -221,7 +221,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
             val deleteFields: MutableList<MutableMap.MutableEntry<String, BytesRefIntMap>> =
                 deleteTerms.entries.toMutableList()
             deleteFields.sortBy { it.key }
-            val scratch: Term = Term("", BytesRef())
+            val scratch = Term("", BytesRef())
             for (deleteFieldEntry in deleteFields) {
                 scratch.field = deleteFieldEntry.key
                 val terms: BytesRefIntMap = deleteFieldEntry.value
@@ -264,7 +264,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
 
         fun keySet(): MutableSet<BytesRef> {
             val scratch = BytesRef()
-            val set: MutableSet<BytesRef> = HashSet<BytesRef>()
+            val set: MutableSet<BytesRef> = HashSet()
             for (i in 0..<bytesRefHash.size()) {
                 bytesRefHash.get(i, scratch)
                 set.add(BytesRef.deepCopyOf(scratch))

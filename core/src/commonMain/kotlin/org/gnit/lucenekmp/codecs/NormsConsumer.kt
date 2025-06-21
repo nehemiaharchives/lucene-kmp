@@ -85,7 +85,7 @@ protected constructor() : AutoCloseable {
                 override fun getNorms(fieldInfo: FieldInfo): NumericDocValues {
                     require(fieldInfo === mergeFieldInfo) { "wrong fieldInfo" }
 
-                    val subs: MutableList<NumericDocValuesSub> = ArrayList<NumericDocValuesSub>()
+                    val subs: MutableList<NumericDocValuesSub> = ArrayList()
                     require(mergeState.docMaps!!.size == mergeState.docValuesProducers.size)
                     for (i in 0..<mergeState.docValuesProducers.size) {
                         var norms: NumericDocValues? = null

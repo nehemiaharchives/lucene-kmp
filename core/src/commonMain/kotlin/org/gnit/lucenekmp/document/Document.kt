@@ -20,7 +20,7 @@ import org.gnit.lucenekmp.util.BytesRef
 class Document
 /** Constructs a new document with no fields.  */
     : Iterable<IndexableField> {
-    private val fields: MutableList<IndexableField> = mutableListOf<IndexableField>()
+    private val fields: MutableList<IndexableField> = mutableListOf()
 
     override fun iterator(): MutableIterator<IndexableField> {
         return fields.iterator()
@@ -55,7 +55,7 @@ class Document
         val it: MutableIterator<IndexableField> = fields.iterator()
         while (it.hasNext()) {
             val field: IndexableField = it.next()
-            if (field.name().equals(name)) {
+            if (field.name() == name) {
                 it.remove()
                 return
             }
@@ -76,7 +76,7 @@ class Document
         val it: MutableIterator<IndexableField> = fields.iterator()
         while (it.hasNext()) {
             val field: IndexableField = it.next()
-            if (field.name().equals(name)) {
+            if (field.name() == name) {
                 it.remove()
             }
         }
@@ -91,9 +91,9 @@ class Document
      * @return a `BytesRef[]` of binary field values
      */
     fun getBinaryValues(name: String): Array<BytesRef> {
-        val result: MutableList<BytesRef> = mutableListOf<BytesRef>()
+        val result: MutableList<BytesRef> = mutableListOf()
         for (field in fields) {
-            if (field.name().equals(name)) {
+            if (field.name() == name) {
                 val bytes: BytesRef? = field.binaryValue()
                 if (bytes != null) {
                     result.add(bytes)
@@ -114,7 +114,7 @@ class Document
      */
     fun getBinaryValue(name: String): BytesRef? {
         for (field in fields) {
-            if (field.name().equals(name)) {
+            if (field.name() == name) {
                 val bytes: BytesRef? = field.binaryValue()
                 if (bytes != null) {
                     return bytes
@@ -130,7 +130,7 @@ class Document
      */
     fun getField(name: String?): IndexableField? {
         for (field in fields) {
-            if (field.name().equals(name)) {
+            if (field.name() == name) {
                 return field
             }
         }
@@ -145,9 +145,9 @@ class Document
      * @return a `Field[]` array
      */
     fun getFields(name: String): Array<IndexableField> {
-        val result: MutableList<IndexableField> = mutableListOf<IndexableField>()
+        val result: MutableList<IndexableField> = mutableListOf()
         for (field in fields) {
-            if (field.name().equals(name)) {
+            if (field.name() == name) {
                 result.add(field)
             }
         }
@@ -177,14 +177,14 @@ class Document
      * @return a `String[]` of field values
      */
     fun getValues(name: String): Array<String?> {
-        val result: MutableList<String> = mutableListOf<String>()
+        val result: MutableList<String> = mutableListOf()
         for (field in fields) {
-            if (field.name().equals(name) && field.stringValue() != null) {
+            if (field.name() == name && field.stringValue() != null) {
                 result.add(field.stringValue()!!)
             }
         }
 
-        if (result.size == 0) {
+        if (result.isEmpty()) {
             return NO_STRINGS
         }
 
@@ -200,7 +200,7 @@ class Document
      */
     fun get(name: String?): String? {
         for (field in fields) {
-            if (field.name().equals(name) && field.stringValue() != null) {
+            if (field.name() == name && field.stringValue() != null) {
                 return field.stringValue()
             }
         }
@@ -212,7 +212,7 @@ class Document
         val buffer = StringBuilder()
         buffer.append("Document<")
         for (i in fields.indices) {
-            val field: IndexableField = fields.get(i)
+            val field: IndexableField = fields[i]
             buffer.append(field.toString())
             if (i != fields.size - 1) {
                 buffer.append(" ")

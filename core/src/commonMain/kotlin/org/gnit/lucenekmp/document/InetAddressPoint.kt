@@ -254,7 +254,7 @@ class InetAddressPoint(name: String, point: InetAddress) : Field(name, TYPE) {
 
             val sortedValues = Array(values.size) { i -> encode(values[i]) }
 
-            Arrays.sort<ByteArray>(
+            Arrays.sort(
                 sortedValues,
                 Comparator { a: ByteArray, b: ByteArray ->
                     Arrays.compareUnsigned(

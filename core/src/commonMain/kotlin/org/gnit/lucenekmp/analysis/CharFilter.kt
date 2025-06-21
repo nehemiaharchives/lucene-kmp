@@ -46,7 +46,7 @@ abstract class CharFilter(input: Reader) : Reader() {
     fun correctOffset(currentOff: Int): Int {
         val corrected = correct(currentOff)
         return if (input is CharFilter)
-            (input as CharFilter).correctOffset(corrected)
+            input.correctOffset(corrected)
         else
             corrected
     }

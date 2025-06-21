@@ -88,86 +88,86 @@ class StoredValue {
 
     /** Set an integer value.  */
     fun setIntValue(value: Int) {
-        require(type == Type.INTEGER) { "Cannot set an integer on a " + type + " value" }
+        require(type == Type.INTEGER) { "Cannot set an integer on a $type value" }
         intValue = value
     }
 
     /** Set a long value.  */
     fun setLongValue(value: Long) {
-        require(type == Type.LONG) { "Cannot set a long on a " + type + " value" }
+        require(type == Type.LONG) { "Cannot set a long on a $type value" }
         longValue = value
     }
 
     /** Set a float value.  */
     fun setFloatValue(value: Float) {
-        require(type == Type.FLOAT) { "Cannot set a float on a " + type + " value" }
+        require(type == Type.FLOAT) { "Cannot set a float on a $type value" }
         floatValue = value
     }
 
     /** Set a double value.  */
     fun setDoubleValue(value: Double) {
-        require(type == Type.DOUBLE) { "Cannot set a double on a " + type + " value" }
+        require(type == Type.DOUBLE) { "Cannot set a double on a $type value" }
         doubleValue = value
     }
 
     /** Set a binary value.  */
     fun setBinaryValue(value: BytesRef) {
-        require(type == Type.BINARY) { "Cannot set a binary value on a " + type + " value" }
+        require(type == Type.BINARY) { "Cannot set a binary value on a $type value" }
         binaryValue = value
     }
 
     /** Set a data input value.  */
     fun setDataInputValue(value: StoredFieldDataInput) {
-        require(type == Type.DATA_INPUT) { "Cannot set a data input value on a " + type + " value" }
+        require(type == Type.DATA_INPUT) { "Cannot set a data input value on a $type value" }
         dataInput = value
     }
 
     /** Set a string value.  */
     fun setStringValue(value: String) {
-        require(type == Type.STRING) { "Cannot set a string value on a " + type + " value" }
+        require(type == Type.STRING) { "Cannot set a string value on a $type value" }
         stringValue = value
     }
 
     /** Retrieve an integer value.  */
     fun getIntValue(): Int {
-        require(type == Type.INTEGER) { "Cannot get an integer on a " + type + " value" }
+        require(type == Type.INTEGER) { "Cannot get an integer on a $type value" }
         return intValue
     }
 
     /** Retrieve a long value.  */
     fun getLongValue(): Long {
-        require(type == Type.LONG) { "Cannot get a long on a " + type + " value" }
+        require(type == Type.LONG) { "Cannot get a long on a $type value" }
         return longValue
     }
 
     /** Retrieve a float value.  */
     fun getFloatValue(): Float {
-        require(type == Type.FLOAT) { "Cannot get a float on a " + type + " value" }
+        require(type == Type.FLOAT) { "Cannot get a float on a $type value" }
         return floatValue
     }
 
     /** Retrieve a double value.  */
     fun getDoubleValue(): Double {
-        require(type == Type.DOUBLE) { "Cannot get a double on a " + type + " value" }
+        require(type == Type.DOUBLE) { "Cannot get a double on a $type value" }
         return doubleValue
     }
 
     /** Retrieve a binary value.  */
     fun getBinaryValue(): BytesRef? {
-        require(type == Type.BINARY) { "Cannot get a binary value on a " + type + " value" }
+        require(type == Type.BINARY) { "Cannot get a binary value on a $type value" }
         return binaryValue
     }
 
     val dataInputValue: StoredFieldDataInput?
         /** Retrieve a data input value.  */
         get() {
-            require(type == Type.DATA_INPUT) { "Cannot get a data input value on a " + type + " value" }
+            require(type == Type.DATA_INPUT) { "Cannot get a data input value on a $type value" }
             return dataInput
         }
 
     /** Retrieve a string value.  */
     fun getStringValue(): String? {
-        require(type == Type.STRING) { "Cannot get a string value on a " + type + " value" }
+        require(type == Type.STRING) { "Cannot get a string value on a $type value" }
         return stringValue
     }
 }

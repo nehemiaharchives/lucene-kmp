@@ -7,8 +7,18 @@ package org.gnit.lucenekmp.index
  * threads accessing this object.
  */
 class FieldInfo(
-    name: String,
-    number: Int,
+    /**
+     * Returns name of this field
+     *
+     * @return name
+     */
+    val name: String,
+    /**
+     * Returns the field number
+     *
+     * @return field number
+     */
+    val number: Int,
     storeTermVector: Boolean,
     omitNorms: Boolean,
     storePayloads: Boolean,
@@ -26,21 +36,6 @@ class FieldInfo(
     softDeletesField: Boolean,
     isParentField: Boolean
 ) {
-    /**
-     * Returns name of this field
-     *
-     * @return name
-     */
-    /** Field's name  */
-    val name: String
-
-    /**
-     * Returns the field number
-     *
-     * @return field number
-     */
-    /** Internal field number  */
-    val number: Int
 
     /**
      * Returns [DocValuesType] of the docValues; this is `DocValuesType.NONE` if the field
@@ -123,8 +118,6 @@ class FieldInfo(
      * @lucene.experimental
      */
     init {
-        this.name = requireNotNull<String>(name)
-        this.number = number
         this.docValuesType =
             requireNotNull<DocValuesType>(
                 docValues
@@ -405,7 +398,7 @@ class FieldInfo(
 
     /** Get a codec attribute value, or null if it does not exist  */
     fun getAttribute(key: String?): String? {
-        return attributes.get(key)
+        return attributes[key]
     }
 
     /**

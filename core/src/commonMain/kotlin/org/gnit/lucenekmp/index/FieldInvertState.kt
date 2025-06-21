@@ -68,7 +68,7 @@ class FieldInvertState
     var attributeSource: AttributeSource?
     // TODO: better name?
         /** Sets attributeSource to a new instance.  */
-        set(attributeSource: AttributeSource?) {
+        set(attributeSource) {
             if (this.attributeSource !== attributeSource) {
                 this.attributeSource = attributeSource
                 if (attributeSource == null) {
