@@ -64,6 +64,9 @@ kotlin {
 
         // shared source for ios and linux
         val nativeMain by creating {
+
+            compilerOptions.suppressWarnings = true
+
             dependsOn(commonMain)
             // dependencies which are used both by ios and linux will be here
         }

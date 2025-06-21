@@ -72,6 +72,9 @@ kotlin {
 
         // shared source for ios and linux
         val nativeMain by creating {
+
+            compilerOptions.suppressWarnings = true
+
             dependsOn(commonMain)
             // dependencies which are used both by ios and linux will be here
         }
@@ -93,12 +96,17 @@ kotlin {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi")
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    compilerOptions{
+        optIn.addAll(
+            "kotlin.ExperimentalStdlibApi",
+        )
+        //suppressWarnings = true
+        freeCompilerArgs.addAll(
+            "-Xexpect-actual-classes",
+        )
     }
 }
-
 
 android {
     namespace = "org.jetbrains.kotlinx.multiplatform.library.template"
