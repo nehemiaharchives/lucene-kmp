@@ -1,6 +1,6 @@
 # required ported classes:
-* test-framework/src/commonMain/kotlin/org/gnit/lucenekmp/tests/store/MockDirectoryWrapper.kt
-* other/classes/needed/Foo.kt
+* test-framework/src/commonMain/kotlin/org/gnit/lucenekmp/tests/util/fst/FSTTester.kt
+* core/src/commonMain/kotlin/org/gnit/lucenekmp/util/fst/PairOutputs.kt
 
 [x] testSimpleDepth()
 [x] testBinarySearch()
@@ -8,3 +8,26 @@
 [x] testReadCeilArcPackedArray()
 [x] testReadCeilArcArrayWithGaps()
 [x] testReadCeilArcList()
+[ ] testBasicFSA()
+[ ] testRandomWords()
+[ ] testBigSet()
+[ ] testRealTerms()
+[ ] testSingleString()
+[ ] testDuplicateFSAString()
+[ ] testTrivial()
+[ ] testSimple()
+[ ] testPrimaryKeys()
+[ ] testRandomTermLookup()
+[ ] testExpandedCloseToRoot()
+[ ] testFinalOutputOnEndState()
+[ ] testInternalFinalState()
+[ ] testSaveDifferentMetaOut()
+[ ] testNonFinalStopNode()
+[ ] testShortestPaths()
+[ ] testRejectNoLimits()
+[ ] testShortestPathsWFST()
+[ ] testShortestPathsRandom()
+[ ] testShortestPathsWFSTRandom()
+[ ] testLargeOutputsOnArrayArcs()
+[ ] testIllegallyModifyRootArc()
+
