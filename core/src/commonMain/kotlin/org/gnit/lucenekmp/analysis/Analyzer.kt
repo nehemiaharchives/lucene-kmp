@@ -385,11 +385,11 @@ abstract class Analyzer
          * @return Currently stored value or `null` if no value is stored
          * @throws AlreadyClosedException if the Analyzer is closed.
          */
-        protected fun getStoredValue(analyzer: Analyzer): Any {
+        protected fun getStoredValue(analyzer: Analyzer): Any? {
             if (analyzer.storedValue == null) {
                 throw AlreadyClosedException("this Analyzer is closed")
             }
-            return analyzer.storedValue!!.get()!!
+            return analyzer.storedValue!!.get()
         }
 
         /**
@@ -402,7 +402,7 @@ abstract class Analyzer
             if (analyzer.storedValue == null) {
                 throw AlreadyClosedException("this Analyzer is closed")
             }
-            analyzer.storedValue!!.set(storedValue!!)
+            analyzer.storedValue!!.set(storedValue)
         }
     }
 
@@ -450,8 +450,8 @@ abstract class Analyzer
     companion object {
         /** A predefined [ReuseStrategy] that reuses the same components for every field.  */
         val GLOBAL_REUSE_STRATEGY: ReuseStrategy = object : ReuseStrategy() {
-            override fun getReusableComponents(analyzer: Analyzer, fieldName: String): TokenStreamComponents {
-                return getStoredValue(analyzer) as TokenStreamComponents
+            override fun getReusableComponents(analyzer: Analyzer, fieldName: String): TokenStreamComponents? {
+                return getStoredValue(analyzer) as? TokenStreamComponents
             }
 
             override fun setReusableComponents(
@@ -466,17 +466,17 @@ abstract class Analyzer
          * TokenStreamComponent per field name.
          */
         val PER_FIELD_REUSE_STRATEGY: ReuseStrategy = object : ReuseStrategy() {
-            override fun getReusableComponents(analyzer: Analyzer, fieldName: String): TokenStreamComponents {
-                val componentsPerField : MutableMap<String, TokenStreamComponents> =
-                    getStoredValue(analyzer) as MutableMap<String, TokenStreamComponents>
-                return componentsPerField[fieldName]!!
+            override fun getReusableComponents(analyzer: Analyzer, fieldName: String): TokenStreamComponents? {
+                val componentsPerField =
+                    getStoredValue(analyzer) as? MutableMap<String, TokenStreamComponents>
+                return componentsPerField?.get(fieldName)
             }
 
             override fun setReusableComponents(
                 analyzer: Analyzer, fieldName: String, components: TokenStreamComponents
             ) {
-                var componentsPerField: MutableMap<String, TokenStreamComponents> =
-                    getStoredValue(analyzer) as MutableMap<String, TokenStreamComponents>
+                var componentsPerField =
+                    getStoredValue(analyzer) as? MutableMap<String, TokenStreamComponents>
                 if (componentsPerField == null) {
                     componentsPerField = mutableMapOf()
                     setStoredValue(analyzer, componentsPerField)
