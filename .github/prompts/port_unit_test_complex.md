@@ -4,6 +4,7 @@
 * create test class under core/src/commonTest/kotlin/ dir. do not put under other targets such as core/src/jvmTest because this project is kotlin common.
 * During porting progress when you realize some small (less than 1000 lines of code) dependency classes are used in Java lucene but not yet ported in kotlin common lucene-kmp, port them first.
 * if the dependencies are larger than 1000 lines of code, mark the testFunction() @Ignore with empty test implementation contains //TODO implement after FooDependency class is ported
+* PROGRESS.md is automatically generated from progress.main.kts so do not modify.
 
 # dependencies which is not yet ported from java to kotlin common
 * org.gnit.lucenekmp.package.name.Foo.kt
