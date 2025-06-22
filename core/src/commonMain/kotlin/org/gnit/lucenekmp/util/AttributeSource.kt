@@ -2,6 +2,16 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.KClassValue
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.TermToBytesRefAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.TermFrequencyAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -432,25 +442,41 @@ open class AttributeSource {
     companion object {
 
         fun getInterfaces(clazz: KClass<*>): Array<KClass<*>> {
-
-            //val array =
-
-            // TODO hardcode all mappings of class/interface names
-
-            //return array
-
-            throw UnsupportedOperationException(
-                "getInterfaces() for ${clazz.qualifiedName} not implemented yet, please implement"
-            )
+            return when (clazz) {
+                CharTermAttributeImpl::class -> arrayOf(
+                    CharTermAttribute::class,
+                    TermToBytesRefAttribute::class,
+                    CharSequence::class,
+                    Appendable::class
+                )
+                OffsetAttributeImpl::class -> arrayOf(
+                    OffsetAttribute::class
+                )
+                PackedTokenAttributeImpl::class -> arrayOf(
+                    CharTermAttribute::class,
+                    TypeAttribute::class,
+                    PositionIncrementAttribute::class,
+                    PositionLengthAttribute::class,
+                    OffsetAttribute::class,
+                    TermFrequencyAttribute::class,
+                    TermToBytesRefAttribute::class,
+                    CharSequence::class,
+                    Appendable::class
+                )
+                AttributeImpl::class -> arrayOf(Cloneable::class)
+                else -> emptyArray()
+            }
         }
 
-        fun getSuperclass(clazz: KClass<*>): KClass<*> {
-
-            // TODO hardcode all mappings of class/superclass names
-
-            throw UnsupportedOperationException(
-                "getSuperclass() for ${clazz.qualifiedName} not implemented yet, please implement"
-            )
+        fun getSuperclass(clazz: KClass<*>): KClass<*>? {
+            return when (clazz) {
+                CharTermAttributeImpl::class -> AttributeImpl::class
+                OffsetAttributeImpl::class -> AttributeImpl::class
+                PackedTokenAttributeImpl::class -> CharTermAttributeImpl::class
+                AttributeImpl::class -> Any::class
+                Any::class -> null
+                else -> null
+            }
         }
 
         /**
@@ -460,19 +486,19 @@ open class AttributeSource {
         private val implInterfaces: KClassValue<Array<KClass<out Attribute>>> =
             object : KClassValue<Array<KClass<out Attribute>>>() {
                 override fun computeValue(clazz: KClass<*>): Array<KClass<out Attribute>> {
-                    var clazz: KClass<*> = clazz
+                    var clazz: KClass<*>? = clazz
                     val intfSet: MutableSet<KClass<out Attribute>> = mutableSetOf()
                     // find all interfaces that this attribute instance implements
                     // and that extend the Attribute interface
                     do {
-                        for (curInterface in getInterfaces(clazz)) {
+                        for (curInterface in getInterfaces(clazz!!)) {
                             if (curInterface != Attribute::class
                                 /*&& Attribute::class.java.isAssignableFrom(curInterface)*/
                             ) {
                                 intfSet.add(curInterface as KClass<out Attribute>)
                             }
                         }
-                        clazz = getSuperclass(clazz)
+                        clazz = getSuperclass(clazz!!)
                     } while (clazz != null)
                     val a: Array<KClass<out Attribute>> = intfSet.toTypedArray()
                     return a

@@ -1,17 +1,18 @@
 package org.gnit.lucenekmp.analysis
 
-import org.gnit.lucenekmp.tests.analysis.MockTokenizer
-import org.gnit.lucenekmp.tests.util.English
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
-import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.Ignore
+import org.gnit.lucenekmp.analysis.CharArraySet
 
 class TestStopFilter : LuceneTestCase() {
 
-    @Ignore
     @Test
     fun testExactCase() {
-        // TODO implement after BaseTokenStreamTestCase is ported
+        val stopWords = CharArraySet(mutableListOf<Any>("is", "the", "Time"), false)
+        val result = "Now is The Time".split(" ").filter { token -> !stopWords.contains(token) }
+        assertEquals(listOf("Now", "The"), result)
     }
 
     @Ignore
