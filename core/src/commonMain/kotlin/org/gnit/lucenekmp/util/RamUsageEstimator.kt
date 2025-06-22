@@ -330,7 +330,7 @@ class RamUsageEstimator {
             if (o == null) {
                 return 0
             }
-            val size: Long
+            var size: Long
             if (o is Accountable) {
                 size = (o as Accountable).ramBytesUsed()
             } else if (o is String) {
@@ -356,7 +356,12 @@ class RamUsageEstimator {
             } else if (o is ShortArray) {
                 size = sizeOf(o)
             } else if (o is Array<*>) {
-                size = sizeOf(o as Array<String>)
+                size = shallowSizeOf(o as Array<Any>)
+                if (depth < MAX_DEPTH) {
+                    for (elem in o) {
+                        size += sizeOfObject(elem, depth + 1, defSize)
+                    }
+                }
             } else if (o is Query) {
                 size = sizeOf(o as Query, defSize)
             } else if (o is Map<*, *>) {
