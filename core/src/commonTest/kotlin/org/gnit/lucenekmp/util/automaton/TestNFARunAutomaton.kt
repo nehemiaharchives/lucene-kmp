@@ -1,4 +1,3 @@
-
 package org.gnit.lucenekmp.util.automaton
 
 import org.gnit.lucenekmp.tests.util.LuceneTestCase

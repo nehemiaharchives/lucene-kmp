@@ -1,4 +1,4 @@
-# util package tests
+# porting unit tests
 
 ## overall project description
 I'm porting apache lucene from java to platform agnostic kotlin common to make multiplatform library which suppports Android, iOS, and JVM(server).
