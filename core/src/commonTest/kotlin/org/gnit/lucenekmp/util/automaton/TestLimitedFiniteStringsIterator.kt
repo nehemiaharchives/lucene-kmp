@@ -10,6 +10,7 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.IntsRefBuilder
+import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.fst.Util
 
 class TestLimitedFiniteStringsIterator : LuceneTestCase() {
@@ -68,8 +69,17 @@ class TestLimitedFiniteStringsIterator : LuceneTestCase() {
     fun testSize() {
         val a = Operations.union(mutableListOf(Automata.makeString("foo"), Automata.makeString("bar")))
         val iterator = LimitedFiniteStringsIterator(a, -1)
-        val actual = TestFiniteStringsIterator.getFiniteStrings(iterator)
+        val actual = getFiniteStrings(iterator)
         assertEquals(2, actual.size)
         assertEquals(2, iterator.size())
+    }
+
+    private fun getFiniteStrings(iterator: FiniteStringsIterator): List<IntsRef> {
+        val result = ArrayList<IntsRef>()
+        var finiteString: IntsRef?
+        while (iterator.next().also { finiteString = it } != null) {
+            result.add(IntsRef.deepCopyOf(finiteString!!))
+        }
+        return result
     }
 }
