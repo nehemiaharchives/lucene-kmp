@@ -24,6 +24,20 @@ class OffsetAttributeImpl : AttributeImpl(), OffsetAttribute {
         end = 0
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is OffsetAttributeImpl) {
+            return other.start == start && other.end == end
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var code = start
+        code = code * 31 + end
+        return code
+    }
+
     override fun reflectWith(reflector: AttributeReflector) {
         reflector.reflect(OffsetAttribute::class, "startOffset", start)
         reflector.reflect(OffsetAttribute::class, "endOffset", end)
