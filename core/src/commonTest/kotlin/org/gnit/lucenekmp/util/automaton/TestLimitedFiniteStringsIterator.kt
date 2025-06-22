@@ -9,20 +9,10 @@ import kotlin.test.fail
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
-import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.IntsRefBuilder
 import org.gnit.lucenekmp.util.fst.Util
 
 class TestLimitedFiniteStringsIterator : LuceneTestCase() {
-
-    private fun getFiniteStrings(iterator: FiniteStringsIterator): MutableList<IntsRef> {
-        val result = mutableListOf<IntsRef>()
-        var s: IntsRef?
-        while (iterator.next().also { s = it } != null) {
-            result.add(IntsRef.deepCopyOf(s!!))
-        }
-        return result
-    }
     @Test
     fun testRandomFiniteStrings() {
         val iters = atLeast(100)
@@ -78,7 +68,7 @@ class TestLimitedFiniteStringsIterator : LuceneTestCase() {
     fun testSize() {
         val a = Operations.union(mutableListOf(Automata.makeString("foo"), Automata.makeString("bar")))
         val iterator = LimitedFiniteStringsIterator(a, -1)
-        val actual = getFiniteStrings(iterator)
+        val actual = TestFiniteStringsIterator.getFiniteStrings(iterator)
         assertEquals(2, actual.size)
         assertEquals(2, iterator.size())
     }
