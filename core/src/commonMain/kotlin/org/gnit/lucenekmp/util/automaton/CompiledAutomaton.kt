@@ -46,10 +46,10 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
     }
 
     /** If simplify is true this will be the "simplified" type; else, this is NORMAL  */
-    var type: AUTOMATON_TYPE
+    var type: AUTOMATON_TYPE = AUTOMATON_TYPE.NORMAL
 
     /** For [AUTOMATON_TYPE.SINGLE] this is the singleton term.  */
-    var term: BytesRef?
+    var term: BytesRef? = null
 
     /**
      * Matcher for quickly determining if a byte[] is accepted. only valid for [ ][AUTOMATON_TYPE.NORMAL].
@@ -117,6 +117,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
         }
 
         // simplify requires a DFA
+        var simplified = false
         if (simplify && automaton.isDeterministic) {
 
             // Test whether the automaton is a "simple" form and
@@ -133,57 +134,58 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
                 this.finite = true
                 sinkState = -1
                 nfaRunAutomaton = null
-
-            }
-
-            val isTotal: kotlin.Boolean
-
-            // NOTE: only approximate, because automaton may not be minimal:
-            if (isBinary) {
-                isTotal = Operations.isTotal(automaton, 0, 0xff)
+                simplified = true
             } else {
-                isTotal = Operations.isTotal(automaton)
-            }
+                val isTotal: kotlin.Boolean
 
-            if (isTotal) {
-                // matches all possible strings
-                type = CompiledAutomaton.AUTOMATON_TYPE.ALL
-                term = null
-                commonSuffixRef = null
-                runAutomaton = null
-                this.automaton = null
-                this.finite = false
-                sinkState = -1
-                nfaRunAutomaton = null
-
-            }
-
-            val singleton: IntsRef? = Operations.getSingleton(automaton)
-
-            if (singleton != null) {
-                // matches a fixed string
-                type = CompiledAutomaton.AUTOMATON_TYPE.SINGLE
-                commonSuffixRef = null
-                runAutomaton = null
-                this.automaton = null
-                this.finite = true
-
-                if (isBinary) {
-                    term = StringHelper.intsRefToBytesRef(singleton)
+                // NOTE: only approximate, because automaton may not be minimal:
+                isTotal = if (isBinary) {
+                    Operations.isTotal(automaton, 0, 0xff)
                 } else {
-                    term =
-                        BytesRef(
-                            UnicodeUtil.newString(singleton.ints, singleton.offset, singleton.length)
-                        )
+                    Operations.isTotal(automaton)
                 }
-                sinkState = -1
-                nfaRunAutomaton = null
 
+                if (isTotal) {
+                    // matches all possible strings
+                    type = CompiledAutomaton.AUTOMATON_TYPE.ALL
+                    term = null
+                    commonSuffixRef = null
+                    runAutomaton = null
+                    this.automaton = null
+                    this.finite = false
+                    sinkState = -1
+                    nfaRunAutomaton = null
+                    simplified = true
+                } else {
+                    val singleton: IntsRef? = Operations.getSingleton(automaton)
+
+                    if (singleton != null) {
+                        // matches a fixed string
+                        type = CompiledAutomaton.AUTOMATON_TYPE.SINGLE
+                        commonSuffixRef = null
+                        runAutomaton = null
+                        this.automaton = null
+                        this.finite = true
+
+                        term = if (isBinary) {
+                            StringHelper.intsRefToBytesRef(singleton)
+                        } else {
+                            BytesRef(
+                                UnicodeUtil.newString(singleton.ints, singleton.offset, singleton.length)
+                            )
+                        }
+                        sinkState = -1
+                        nfaRunAutomaton = null
+                        simplified = true
+                    }
+                }
             }
         }
 
-        type = CompiledAutomaton.AUTOMATON_TYPE.NORMAL
-        term = null
+        if (!simplified) {
+            type = CompiledAutomaton.AUTOMATON_TYPE.NORMAL
+            term = null
+        }
 
         this.finite = finite
 
@@ -290,7 +292,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
                 // if (DEBUG) System.out.println("  push maxLabel=" + (char) lastTransition.max + " idx=" +
                 // idx);
                 // System.out.println("  add trans dest=" + scratch.dest + " label=" + (char) scratch.max);
-                term.setByteAt(idx, transition.max as kotlin.Byte)
+                term.setByteAt(idx, transition.max.toByte())
                 state = transition.dest
                 idx++
             }
@@ -356,7 +358,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
 
         var idx = 0
         while (true) {
-            var label: Int = (input.bytes[input.offset + idx] and 0xff.toByte()).toInt()
+            var label: Int = input.bytes[input.offset + idx].toInt() and 0xff
             var nextState: Int = runAutomaton!!.step(state, label)
 
             // if (DEBUG) System.out.println("  cycle label=" + (char) label + " nextState=" + nextState);
@@ -405,7 +407,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
                                 idx--
                                 // if (DEBUG) System.out.println("  pop ord=" + (idx+1) + " label=" + (char) label +
                                 // " first trans.min=" + (char) transitions[0].min);
-                                label = (input.bytes[input.offset + idx] and 0xff.toByte()).toInt()
+                                label = input.bytes[input.offset + idx].toInt() and 0xff
                             }
                         } else {
                             // if (DEBUG) System.out.println("  stop pop ord=" + idx + " first trans.min=" +
