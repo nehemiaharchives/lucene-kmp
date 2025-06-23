@@ -12,25 +12,29 @@ import kotlin.math.min
  */
 class IntSequenceOutputs private constructor() : Outputs<IntsRef>() {
     override fun common(output1: IntsRef, output2: IntsRef): IntsRef {
-        if (output1 === NO_OUTPUT || output2 === NO_OUTPUT) return NO_OUTPUT
-        val len = min(output1.length, output2.length)
-        var pos = -1
-        for (i in 0 until len) {
-            if (output1.ints[output1.offset + i] != output2.ints[output2.offset + i]) {
-                pos = i
-                break
-            }
+        val len1 = output1.length
+        val len2 = output2.length
+        val limit = min(len1, len2)
+        var idx = 0
+        while (idx < limit &&
+            output1.ints[output1.offset + idx] == output2.ints[output2.offset + idx]) {
+            idx++
         }
-        if (pos == -1) {
-            if (output1.length <= output2.length) return output1 else return output2
+
+        return when {
+            idx == 0 -> NO_OUTPUT
+            idx == len1 && idx == len2 -> output1
+            idx == len1 -> output1
+            idx == len2 -> output2
+            else -> IntsRef(output1.ints, output1.offset, idx)
         }
-        return if (pos == 0) NO_OUTPUT else IntsRef(output1.ints, output1.offset, pos)
     }
 
     override fun subtract(output: IntsRef, inc: IntsRef): IntsRef {
         if (inc === NO_OUTPUT) return output
-        require(output.length >= inc.length)
         if (inc.length == output.length) return NO_OUTPUT
+        require(inc.length < output.length) { "inc.length=${inc.length} vs output.length=${output.length}" }
+        require(inc.length > 0)
         return IntsRef(output.ints, output.offset + inc.length, output.length - inc.length)
     }
 
@@ -65,6 +69,9 @@ class IntSequenceOutputs private constructor() : Outputs<IntsRef>() {
 
     override fun skipOutput(input: DataInput) {
         val len = input.readVInt()
+        if (len == 0) {
+            return
+        }
         for (i in 0 until len) {
             input.readVInt()
         }
@@ -81,8 +88,8 @@ class IntSequenceOutputs private constructor() : Outputs<IntsRef>() {
 
     companion object {
         private val NO_OUTPUT = IntsRef()
-        val singleton = IntSequenceOutputs()
         private val BASE_NUM_BYTES = RamUsageEstimator.shallowSizeOf(NO_OUTPUT)
+        val singleton: IntSequenceOutputs = IntSequenceOutputs()
     }
 }
 
