@@ -19,6 +19,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlin.test.Test
+import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -172,6 +173,12 @@ abstract class HnswGraphTestCase<T> : LuceneTestCase() {
         }
         val overlap = totalMatches.toDouble() / (100.0 * topK)
         assertTrue(overlap > 0.9, "overlap=$overlap")
+    }
+
+    @Ignore
+    @Test
+    open fun testRandomReadWriteAndMerge() {
+        // TODO implement after IndexWriter is fully ported
     }
 }
 

@@ -1,6 +1,5 @@
 ## dependencies which is not yet ported from java to kotlin common
 * org.gnit.lucenekmp.util.NamedThreadFactory.kt
-* org.gnit.lucenekmp.index.IndexWriterConfig.kt
 
 ## java test methos porting progress to kotiln common test functions
 [] testRandomReadWriteAndMerge()
