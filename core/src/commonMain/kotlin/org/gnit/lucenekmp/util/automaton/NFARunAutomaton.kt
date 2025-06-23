@@ -111,7 +111,7 @@ class NFARunAutomaton(private val automaton: Automaton, private val alphabetSize
      * return the ordinal of given DFA state, generate a new ordinal if the given DFA state is a new
      * one
      */
-    private fun findDState(dState: DState): Int {
+    private fun findDState(dState: DState?): Int {
         if (dState == null) {
             return MISSING
         }
@@ -210,7 +210,7 @@ class NFARunAutomaton(private val automaton: Automaton, private val alphabetSize
 
         // this field is lazily init'd when first time caller wants to add a new transition
         internal var transitions: IntArray? = null
-        private val hashCode: Int
+        private val hash: Int
         internal val isAccept: Boolean
         private val stepTransition = Transition()
         private var minimalTransition: Transition? = null
@@ -220,23 +220,23 @@ class NFARunAutomaton(private val automaton: Automaton, private val alphabetSize
         init {
             require(nfaStates != null && nfaStates.size > 0)
             this.nfaStates = nfaStates
-            var hashCode = nfaStates.size
+            var hash = nfaStates.size
             var isAccept = false
             for (s in nfaStates) {
-                hashCode += BitMixer.mix(s)
+                hash += BitMixer.mix(s)
                 if (automaton.isAccept(s)) {
                     isAccept = true
                 }
             }
             this.isAccept = isAccept
-            this.hashCode = hashCode
+            this.hash = hash
         }
 
         fun nextState(charClass: Int): Int {
             initTransitions()
             require(charClass < transitions!!.size)
             if (transitions!![charClass] == NOT_COMPUTED) {
-                assignTransition(charClass, findDState(step(points[charClass])!!))
+                assignTransition(charClass, findDState(step(points[charClass])))
                 // we could potentially update more than one char classes
                 if (minimalTransition != null) {
                     // to the left
@@ -404,14 +404,13 @@ class NFARunAutomaton(private val automaton: Automaton, private val alphabetSize
         }
 
         override fun hashCode(): Int {
-            return hashCode
+            return hash
         }
 
         override fun equals(o: Any?): Boolean {
-            if (this == o) return true
-            if (o == null || this::class != o::class) return false
-            val dState = o as DState
-            return hashCode == dState.hashCode && nfaStates.contentEquals(dState.nfaStates)
+            if (this === o) return true
+            if (o !is DState) return false
+            return hash == o.hash && nfaStates.contentEquals(o.nfaStates)
         }
 
         public override fun ramBytesUsed(): Long {

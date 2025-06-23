@@ -1,11 +1,10 @@
-
-    package org.gnit.lucenekmp.util.automaton
+package org.gnit.lucenekmp.util.automaton
 
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RamUsageTester
 import kotlin.test.Test
-import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import kotlin.test.Ignore
+import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.jdkport.Character
 import kotlin.test.assertEquals
@@ -14,7 +13,6 @@ import kotlin.random.Random
 
 class TestNFARunAutomaton : LuceneTestCase() {
 
-    @Ignore
     @Test
     fun testRamUsageEstimation() {
         val regExp = RegExp(AutomatonTestUtil.randomRegexp(random()), RegExp.NONE)
@@ -25,7 +23,6 @@ class TestNFARunAutomaton : LuceneTestCase() {
         assertEquals(actual.toDouble(), estimation.toDouble(), actual.toDouble() * 0.3)
     }
 
-    @Ignore
     @Test
     fun testWithRandomRegex() {
         var count = 0
@@ -55,7 +52,6 @@ class TestNFARunAutomaton : LuceneTestCase() {
         }
     }
 
-    @Ignore
     @Test
     fun testRandomAccessTransition() {
         var nfa = RegExp(AutomatonTestUtil.randomRegexp(random()), RegExp.NONE).toAutomaton()
@@ -65,6 +61,12 @@ class TestNFARunAutomaton : LuceneTestCase() {
         val runAutomaton1 = NFARunAutomaton(nfa)
         val runAutomaton2 = NFARunAutomaton(nfa)
         assertRandomAccessTransition(runAutomaton1, runAutomaton2, 0, HashSet())
+    }
+
+    @Ignore
+    @Test
+    fun testRandomAutomatonQuery() {
+        // TODO implement after IndexWriter ported
     }
 
     private fun assertRandomAccessTransition(
