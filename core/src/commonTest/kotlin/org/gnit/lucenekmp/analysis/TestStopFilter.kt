@@ -1,12 +1,12 @@
 package org.gnit.lucenekmp.analysis
 
-import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.analysis.BaseTokenStreamTestCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.Ignore
 import org.gnit.lucenekmp.analysis.CharArraySet
 
-class TestStopFilter : LuceneTestCase() {
+class TestStopFilter : BaseTokenStreamTestCase() {
 
     @Test
     fun testExactCase() {
