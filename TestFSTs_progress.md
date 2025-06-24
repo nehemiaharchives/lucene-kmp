@@ -1,6 +1,7 @@
 # required ported classes:
 * test-framework/src/commonMain/kotlin/org/gnit/lucenekmp/tests/util/fst/FSTTester.kt
 * core/src/commonMain/kotlin/org/gnit/lucenekmp/util/fst/PairOutputs.kt
+* core/src/commonMain/kotlin/org/gnit/lucenekmp/document/StringField.kt
 
 [x] testSimpleDepth()
 [x] testBinarySearch()
@@ -15,9 +16,9 @@
 [x] testSingleString()
 [x] testDuplicateFSAString()
 [ ] testTrivial()
-[ ] testSimple()
-[ ] testPrimaryKeys()
-[ ] testRandomTermLookup()
+[x] testSimple()
+[x] testPrimaryKeys()
+[x] testRandomTermLookup()
 [ ] testExpandedCloseToRoot()
 [ ] testFinalOutputOnEndState()
 [ ] testInternalFinalState()

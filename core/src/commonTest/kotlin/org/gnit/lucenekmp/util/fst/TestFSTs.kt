@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.util.fst.*
 import org.gnit.lucenekmp.tests.util.fst.FSTTester
 import org.gnit.lucenekmp.tests.util.fst.FSTTesterUtil
 import kotlin.random.Random
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -113,5 +114,44 @@ class TestFSTs : LuceneTestCase() {
         assertEquals(1, count)
         assertNotNull(Util.get(fst, newBytesRef("foobar")))
         assertNull(Util.get(fst, newBytesRef("foobaz")))
+    }
+
+    @Test
+    fun testSimple() {
+        val outputs = PositiveIntOutputs.singleton
+        val compiler = FSTCompiler.Builder(FST.INPUT_TYPE.BYTE1, outputs).build()
+        val a = newBytesRef("a")
+        val b = newBytesRef("b")
+        val c = newBytesRef("c")
+        compiler.add(Util.toIntsRef(a, IntsRefBuilder()), 17L)
+        compiler.add(Util.toIntsRef(b, IntsRefBuilder()), 42L)
+        compiler.add(Util.toIntsRef(c, IntsRefBuilder()), 13824324872317238L)
+        val fst = FST.fromFSTReader(compiler.compile(), compiler.getFSTReader())!!
+        assertEquals(13824324872317238L, Util.get(fst, c))
+        assertEquals(42L, Util.get(fst, b))
+        assertEquals(17L, Util.get(fst, a))
+        val fstEnum = BytesRefFSTEnum(fst)
+        var seekResult = fstEnum.seekFloor(a)
+        assertNotNull(seekResult)
+        assertEquals(17L, seekResult.output)
+        seekResult = fstEnum.seekFloor(newBytesRef("aa"))
+        assertNotNull(seekResult)
+        assertEquals(17L, seekResult.output)
+        seekResult = fstEnum.seekCeil(newBytesRef("aa"))
+        assertNotNull(seekResult)
+        assertEquals(b, seekResult.input)
+        assertEquals(42L, seekResult.output)
+    }
+
+    @Ignore
+    @Test
+    fun testPrimaryKeys() {
+        // TODO: requires indexing classes not yet ported
+    }
+
+    @Ignore
+    @Test
+    fun testRandomTermLookup() {
+        // TODO: requires indexing classes not yet ported
     }
 }
