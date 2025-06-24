@@ -93,7 +93,7 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
     }
 
     /** New instance copying elements from another collection.  */
-    constructor(collection: MutableCollection<Int?>) : this(collection.size) {
+    constructor(collection: MutableCollection<Int>) : this(collection.size) {
         addAll(collection)
     }
 
@@ -171,10 +171,10 @@ class IntHashSet @JvmOverloads constructor(expectedElements: Int, loadFactor: Do
         return count
     }
 
-    fun addAll(collection: MutableCollection<Int?>): Int {
+    fun addAll(collection: MutableCollection<Int>): Int {
         var count = 0
         for (element in collection) {
-            if (add(element!!)) {
+            if (add(element)) {
                 count++
             }
         }

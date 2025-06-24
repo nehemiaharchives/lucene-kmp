@@ -12,7 +12,7 @@ class PhrasePositions(
     // unique across all PhrasePositions instances
     val ord: Int,
     // for repetitions initialization
-    val terms: Array<Term>
+    val terms: Array<out Term>?
 ) {
     var position: Int = 0 // position in doc
     var count: Int = 0 // remaining pos in this doc

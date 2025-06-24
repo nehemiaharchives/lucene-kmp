@@ -22,7 +22,7 @@ abstract class PhraseWeight protected constructor(
      * @lucene.internal
      */
     init {
-        var stats: SimScorer = getStats(searcher)
+        var stats: SimScorer? = getStats(searcher)
         if (stats == null) { // Means no terms or scores are not needed
             stats =
                 object : SimScorer() {
@@ -35,18 +35,18 @@ abstract class PhraseWeight protected constructor(
     }
 
     @Throws(IOException::class)
-    protected abstract fun getStats(searcher: IndexSearcher): SimScorer
+    protected abstract fun getStats(searcher: IndexSearcher): SimScorer?
 
     @Throws(IOException::class)
     protected abstract fun getPhraseMatcher(
         context: LeafReaderContext,
         scorer: SimScorer,
         exposeOffsets: Boolean
-    ): PhraseMatcher
+    ): PhraseMatcher?
 
     @Throws(IOException::class)
     override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
-        val matcher: PhraseMatcher = getPhraseMatcher(context, stats, false)
+        val matcher: PhraseMatcher? = getPhraseMatcher(context, stats, false)
         if (matcher == null) return null
         val norms: NumericDocValues? =
             if (scoreMode.needsScores()) context.reader().getNormValues(field) else null
@@ -59,7 +59,7 @@ abstract class PhraseWeight protected constructor(
         context: LeafReaderContext,
         doc: Int
     ): Explanation {
-        val matcher: PhraseMatcher = getPhraseMatcher(context, stats, false)
+        val matcher: PhraseMatcher? = getPhraseMatcher(context, stats, false)
         if (matcher == null || matcher.approximation().advance(doc) != doc) {
             return Explanation.noMatch("no matching terms")
         }
@@ -101,11 +101,11 @@ abstract class PhraseWeight protected constructor(
         return MatchesUtils.forField(
             field
         ) {
-            val matcher: PhraseMatcher = getPhraseMatcher(context, stats, true)
+            val matcher: PhraseMatcher? = getPhraseMatcher(context, stats, true)
             if (matcher == null || matcher.approximation().advance(doc) != doc) {
                 null
             }
-            matcher.reset()
+            matcher!!.reset()
             if (!matcher.nextMatch()) {
                 null
             }
