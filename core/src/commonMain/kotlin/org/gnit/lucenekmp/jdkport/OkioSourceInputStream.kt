@@ -27,7 +27,9 @@ class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
      */
     override fun read(): Int {
         return try {
-            source.readByte().toInt()
+            // readByte() blocks until a byte is available or the source is exhausted.
+            // We must convert the signed Byte to an unsigned Int in the range 0-255.
+            source.readByte().toInt() and 0xFF
         } catch (e: EOFException) {
             -1
         }
@@ -63,22 +65,40 @@ class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
             -1
         }
 
-        if (bytesRead > 0) {
-            logger.debug { "KIOSourceInputStream.read() filled bytes: " +
-                    b.slice(off until off + bytesRead)
-                        .joinToString(", ") { it.toUByte().toString() }
-            }
+        // If source.read returns -1, it could be a premature EOF from BufferedSource.
+        // Fall back to a single-byte read, which correctly blocks until a true EOF.
 
-            // Print byte values as integers for clarity
-            logger.debug { "Byte values as integers: " +
-                    b.slice(off until off + bytesRead)
-                        .joinToString(", ") { it.toInt().toString() }
+        if (bytesRead != -1) {
+            if (bytesRead > 0) {
+                logger.debug { "KIOSourceInputStream.read() filled bytes: " +
+                        b.slice(off until off + bytesRead)
+                            .joinToString(", ") { it.toUByte().toString() }
+                }
+
+                // Print byte values as integers for clarity
+                logger.debug { "Byte values as integers: " +
+                        b.slice(off until off + bytesRead)
+                            .joinToString(", ") { it.toInt().toString() }
+                }
+            }else{
+                logger.debug { "KIOSourceInputStream.read() returned $bytesRead (no bytes read)" }
             }
-        }else{
-            logger.debug { "KIOSourceInputStream.read() returned $bytesRead (no bytes read)" }
+            return bytesRead
         }
 
-        return if (bytesRead <= 0) -1 else bytesRead
+        // bytesRead is -1. This could be a premature EOF from BufferedSource if its
+        // internal buffer was empty and the underlying source returned 0 bytes.
+        // To distinguish a real EOF from a temporary lack of data, we check if the
+        // source is truly exhausted. Note that `exhausted()` may block and try to
+        // read from the underlying source, which is the desired behavior here.
+        logger.debug { "source.read returned -1, checking if source is truly exhausted." }
+        return if (source.exhausted()) {
+            logger.debug { "Source is exhausted. Returning -1 for EOF." }
+            -1 // Real EOF
+        } else {
+            logger.debug { "Source is not exhausted. Returning 0 as no bytes are currently available." }
+            0 // Not a real EOF. No data available right now.
+        }
     }
 
     /**
