@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TestFSTs : LuceneTestCase() {
     @Test
@@ -184,7 +185,7 @@ class TestFSTs : LuceneTestCase() {
                     while (c <= to) {
                         b.append(c)
                         generate(out, b, from, if (c == to) to else from, depth - 1)
-                        b.deleteCharAt(b.length - 1)
+                        b.deleteAt(b.length - 1)
                         c++
                     }
                 }
@@ -226,7 +227,8 @@ class TestFSTs : LuceneTestCase() {
         s.generate(out, b, 'a', 'i', 10)
         val input = out.toTypedArray()
         input.sort()
-        val fst = s.compile(input)!!
+        // cast to allow null sentinel if needed
+        val fst = s.compile(input as Array<String?>)!!
         val arc = fst.getFirstArc(FST.Arc())
         s.verifyStateAndBelow(fst, arc, 1)
     }
