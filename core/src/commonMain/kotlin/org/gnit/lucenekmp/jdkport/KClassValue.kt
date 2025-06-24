@@ -167,7 +167,7 @@ protected constructor() {
      * This is a separate method, so compilers can process it independently.
      */
     private fun getFromBackup(cache: Array<Entry<*>?>, type: KClass<*>): T {
-        val e: Entry<T> = ClassValueMap.probeBackupLocations<T>(cache, this)!!
+        val e = ClassValueMap.probeBackupLocations<T>(cache, this)
         if (e != null) return e.value()
         return getFromHashMap(type)
     }

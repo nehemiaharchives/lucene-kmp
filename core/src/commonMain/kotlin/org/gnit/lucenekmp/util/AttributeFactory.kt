@@ -25,16 +25,12 @@ abstract class AttributeFactory {
     abstract fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl
 
     private class DefaultAttributeFactory : AttributeFactory() {
-        private val constructors: KClassValue<MethodHandle> =
-            object : KClassValue<MethodHandle>() {
-                override fun computeValue(attClass: KClass<*>): MethodHandle {
-                    return findAttributeImplCtor(findImplClass(attClass.asSubclass(Attribute::class as KClass<*>) as KClass<Attribute>))
-                }
-            }
-
         override fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl {
+            val ctor = findAttributeImplCtor(
+                findImplClass(attClass.asSubclass(Attribute::class as KClass<*>) as KClass<Attribute>)
+            )
             try {
-                return constructors.get(attClass).invokeExact()
+                return ctor.invokeExact()
             } catch (e: Error) {
                 throw e
             } catch (e: RuntimeException) {
