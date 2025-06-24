@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 656 | 91% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 659 | 92% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -19,7 +19,7 @@
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 120 | 86% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 138 | 123 | 89% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 2 | 2 | 100% | [x] |
@@ -103,14 +103,11 @@
 | [org.apache.lucene.index.TrackingTmpOutputDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/TrackingTmpOutputDirectoryWrapper.java) | org.gnit.lucenekmp.index.TrackingTmpOutputDirectoryWrapper |
 | [org.apache.lucene.index.VectorValuesConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/VectorValuesConsumer.java) | org.gnit.lucenekmp.index.VectorValuesConsumer |
 | [org.apache.lucene.search.CollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/CollectorManager.java) | org.gnit.lucenekmp.search.CollectorManager |
-| [org.apache.lucene.search.ExactPhraseMatcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/ExactPhraseMatcher.java) | org.gnit.lucenekmp.search.ExactPhraseMatcher |
 | [org.apache.lucene.search.FieldValueHitQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FieldValueHitQueue.java) | org.gnit.lucenekmp.search.FieldValueHitQueue |
 | [org.apache.lucene.search.LRUQueryCache](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/LRUQueryCache.java) | org.gnit.lucenekmp.search.LRUQueryCache |
 | [org.apache.lucene.search.MaxScoreAccumulator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/MaxScoreAccumulator.java) | org.gnit.lucenekmp.search.MaxScoreAccumulator |
 | [org.apache.lucene.search.MultiLeafFieldComparator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/MultiLeafFieldComparator.java) | org.gnit.lucenekmp.search.MultiLeafFieldComparator |
-| [org.apache.lucene.search.PhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/PhraseQuery.java) | org.gnit.lucenekmp.search.PhraseQuery |
 | [org.apache.lucene.search.ScoreCachingWrappingScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/ScoreCachingWrappingScorer.java) | org.gnit.lucenekmp.search.ScoreCachingWrappingScorer |
-| [org.apache.lucene.search.SloppyPhraseMatcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SloppyPhraseMatcher.java) | org.gnit.lucenekmp.search.SloppyPhraseMatcher |
 | [org.apache.lucene.search.TermInSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermInSetQuery.java) | org.gnit.lucenekmp.search.TermInSetQuery |
 | [org.apache.lucene.search.TimeLimitingBulkScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TimeLimitingBulkScorer.java) | org.gnit.lucenekmp.search.TimeLimitingBulkScorer |
 | [org.apache.lucene.search.TopFieldCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TopFieldCollector.java) | org.gnit.lucenekmp.search.TopFieldCollector |
