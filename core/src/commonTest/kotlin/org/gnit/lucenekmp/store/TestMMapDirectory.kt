@@ -60,7 +60,7 @@ class TestMMapDirectory : BaseDirectoryTestCase() {
     }
 
     private class IndicesOpenTask(val names: List<String>, val dir: Directory) : Callable<Unit?> {
-        @Ignore // not executed until MMapDirectory ported
+        // not executed until MMapDirectory ported
         override fun call(): Unit? {
             // TODO implement after MMapDirectory class is ported
             return null
@@ -130,7 +130,6 @@ class TestMMapDirectory : BaseDirectoryTestCase() {
         // TODO implement after MMapDirectory class is ported
     }
 
-    @Ignore // TODO implement after MMapDirectory class is fully ported
     fun testPrefetchWithSegments(maxChunkSize: Int) {
         // TODO implement after MMapDirectory class is ported
     }
