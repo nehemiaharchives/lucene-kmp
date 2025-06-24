@@ -154,4 +154,80 @@ class TestFSTs : LuceneTestCase() {
     fun testRandomTermLookup() {
         // TODO: requires indexing classes not yet ported
     }
+
+    @Test
+    fun testExpandedCloseToRoot() {
+        class SyntheticData {
+            fun compile(lines: Array<String?>): FST<Any>? {
+                val outputs = NoOutputs.singleton
+                val nothing = outputs.noOutput
+                val fstCompiler =
+                    FSTCompiler.Builder(FST.INPUT_TYPE.BYTE1, outputs).build()
+                var line = 0
+                val scratchIntsRef = IntsRefBuilder()
+                while (line < lines.size) {
+                    val w = lines[line++] ?: break
+                    fstCompiler.add(
+                        Util.toIntsRef(newBytesRef(w), scratchIntsRef),
+                        nothing
+                    )
+                }
+                return FST.fromFSTReader(fstCompiler.compile(), fstCompiler.getFSTReader())
+            }
+
+            fun generate(out: MutableList<String>, b: StringBuilder, from: Char, to: Char, depth: Int) {
+                if (depth == 0 || from == to) {
+                    val seq = b.toString() + "_" + out.size + "_end"
+                    out.add(seq)
+                } else {
+                    var c = from
+                    while (c <= to) {
+                        b.append(c)
+                        generate(out, b, from, if (c == to) to else from, depth - 1)
+                        b.deleteCharAt(b.length - 1)
+                        c++
+                    }
+                }
+            }
+
+            fun verifyStateAndBelow(fst: FST<Any>, arc: FST.Arc<Any>, depth: Int): Int {
+                if (FST.targetHasArcs(arc)) {
+                    var childCount = 0
+                    val reader = fst.getBytesReader()
+                    var a = fst.readFirstTargetArc(arc, FST.Arc(), reader)
+                    while (true) {
+                        val expanded = fst.isExpandedTarget(a, reader)
+                        val children = verifyStateAndBelow(fst, FST.Arc<Any>().copyFrom(a), depth + 1)
+                        assertEquals(
+                            (depth <= FSTCompiler.FIXED_LENGTH_ARC_SHALLOW_DEPTH &&
+                                children >= FSTCompiler.FIXED_LENGTH_ARC_SHALLOW_NUM_ARCS) ||
+                                children >= FSTCompiler.FIXED_LENGTH_ARC_DEEP_NUM_ARCS,
+                            expanded
+                        )
+                        childCount++
+                        if (a.isLast) break
+                        a = fst.readNextArc(a, reader)
+                    }
+                    return childCount
+                }
+                return 0
+            }
+        }
+
+        assertTrue(
+            FSTCompiler.FIXED_LENGTH_ARC_SHALLOW_NUM_ARCS <
+                FSTCompiler.FIXED_LENGTH_ARC_DEEP_NUM_ARCS
+        )
+        assertTrue(FSTCompiler.FIXED_LENGTH_ARC_SHALLOW_DEPTH >= 0)
+
+        val s = SyntheticData()
+        val out = ArrayList<String>()
+        val b = StringBuilder()
+        s.generate(out, b, 'a', 'i', 10)
+        val input = out.toTypedArray()
+        input.sort()
+        val fst = s.compile(input)!!
+        val arc = fst.getFirstArc(FST.Arc())
+        s.verifyStateAndBelow(fst, arc, 1)
+    }
 }

@@ -19,7 +19,7 @@
 [x] testSimple()
 [x] testPrimaryKeys()
 [x] testRandomTermLookup()
-[ ] testExpandedCloseToRoot()
+[x] testExpandedCloseToRoot()
 [ ] testFinalOutputOnEndState()
 [ ] testInternalFinalState()
 [ ] testSaveDifferentMetaOut()
