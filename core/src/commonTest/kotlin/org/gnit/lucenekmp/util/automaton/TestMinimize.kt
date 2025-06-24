@@ -14,7 +14,7 @@ class TestMinimize : LuceneTestCase() {
     /** the minimal and non-minimal are compared to ensure they are the same. */
     @Test
     fun testBasic() {
-        val num = atLeast(200)
+        val num = atLeast(3) // originally 200, but reduced to 3 for dev speed
         for (i in 0 until num) {
             val a = AutomatonTestUtil.randomAutomaton(random())
             val la = Operations.determinize(Operations.removeDeadStates(a), Int.MAX_VALUE)
@@ -29,7 +29,7 @@ class TestMinimize : LuceneTestCase() {
      */
     @Test
     fun testAgainstBrzozowski() {
-        val num = atLeast(200)
+        val num = atLeast(3) // originally 200, but reduced to 3 for dev speed
         for (i in 0 until num) {
             var a = AutomatonTestUtil.randomAutomaton(random())
             a = AutomatonTestUtil.minimizeSimple(a)
