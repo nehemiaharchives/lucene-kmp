@@ -60,7 +60,7 @@ class CloseableThreadLocal<T> : AutoCloseable {
         return value
     }
 
-    fun set(`object`: T) {
+    fun set(`object`: T?) {
         /*t.set(java.lang.ref.WeakReference<T>(`object`))
 
         synchronized(hardRefs) {
