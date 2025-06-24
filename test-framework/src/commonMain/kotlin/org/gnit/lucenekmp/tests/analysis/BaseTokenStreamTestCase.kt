@@ -85,8 +85,8 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
             ts.reset()
             var i = 0
             while (ts.incrementToken()) {
-                assert(i < output.size) { "TokenStream has more tokens than expected" }
-                assert(checkClearAtt.getAndResetClearCalled()) { "clearAttributes() was not called" }
+                kotlin.test.assertTrue(i < output.size, "TokenStream has more tokens than expected")
+                kotlin.test.assertTrue(checkClearAtt.getAndResetClearCalled(), "clearAttributes() was not called")
                 termAtt?.let { kotlin.test.assertEquals(output[i], it.toString(), "term $i") }
                 startOffsets?.let { kotlin.test.assertEquals(it[i], offsetAtt!!.startOffset(), "startOffset $i") }
                 endOffsets?.let { kotlin.test.assertEquals(it[i], offsetAtt!!.endOffset(), "endOffset $i") }
