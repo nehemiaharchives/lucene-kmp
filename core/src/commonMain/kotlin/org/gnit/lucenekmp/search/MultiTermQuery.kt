@@ -34,7 +34,7 @@ import kotlin.reflect.cast
  */
 abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Query() {
     /** Returns the field name for this query  */
-    val field: String = requireNotNull<String>(field){"field must not be null"}
+    open val field: String = requireNotNull<String>(field){"field must not be null"}
 
     /**
      * @return the rewrite method used to build the final query
@@ -199,7 +199,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
         return getTermsEnum(terms, AttributeSource())
     }
 
-    val termsCount: Long
+    open val termsCount: Long
         /**
          * Return the number of unique terms contained in this query, if known up-front. If not known, -1
          * will be returned.
