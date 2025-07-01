@@ -12,11 +12,70 @@ import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
+import io.github.classgraph.MethodInfo
 import io.github.classgraph.ScanResult
 import java.io.File
 import kotlin.text.replace
 
 val javaLuceneCommitId = "ec75fcad5a4208c7b9e35e870229d9b703cda8f3"
+
+// Method analysis data classes for smart Java/Kotlin comparison
+data class MethodSignature(
+    val name: String,
+    val parameterTypes: List<String>,
+    val returnType: String,
+    val isStatic: Boolean = false,
+    val isAbstract: Boolean = false,
+    val isSynthetic: Boolean = false
+) {
+    /** Normalized signature for comparison across languages */
+    val normalizedSignature: String 
+        get() = "${name}(${parameterTypes.joinToString(",")}):${returnType}"
+}
+
+enum class MethodCategory {
+    CORE,       // Core business logic methods
+    PROPERTY,   // Property accessors (getters/setters)
+    GENERATED,  // Auto-generated methods (synthetic, compiler-generated)
+    UTILITY     // Helper/utility methods
+}
+
+data class MethodAnalysis(
+    val signature: MethodSignature,
+    val category: MethodCategory,
+    val isImplemented: Boolean = false,
+    val notes: String = ""
+)
+
+data class MethodComparisonResult(
+    val javaMethod: MethodAnalysis?,
+    val kotlinMethod: MethodAnalysis?,
+    val isMatched: Boolean,
+    val matchType: MatchType,
+    val semanticEquivalence: Double // 0.0 to 1.0
+)
+
+enum class MatchType {
+    EXACT_MATCH,        // Identical signatures
+    SEMANTIC_MATCH,     // Different signatures but same functionality
+    PROPERTY_MATCH,     // Java getter/setter <-> Kotlin property
+    MISSING_IN_KOTLIN,  // Method exists in Java but not in Kotlin
+    EXTRA_IN_KOTLIN,    // Method exists in Kotlin but not in Java
+    NO_MATCH           // No equivalent found
+}
+
+data class ClassComparison(
+    val javaClass: ClassInfo,
+    val kotlinClass: ClassInfo?,
+    val javaMethods: List<MethodAnalysis>,
+    val kotlinMethods: List<MethodAnalysis>,
+    val methodComparisons: List<MethodComparisonResult>,
+    val semanticCompletionPercent: Double,
+    val coreMethodsCompletionPercent: Double,
+    val propertyMethodsCompletionPercent: Double,
+    val missingCoreMethods: List<MethodAnalysis>,
+    val missingPropertyMethods: List<MethodAnalysis>
+)
 
 // priority‑1 API lists
 private val coreWrite = setOf(
@@ -121,6 +180,295 @@ class ProgressPrintStream(val term: Terminal, val markDown: StringBuilder) {
 }
 
 class ClassInfoWithDepth(val classInfo: ClassInfo, val depth: Int)
+
+// Method normalization and analysis functions
+fun normalizeMethodSignature(methodInfo: MethodInfo): MethodSignature {
+    val paramTypes = methodInfo.parameterInfo.map { param ->
+        normalizeTypeName(param.typeDescriptor.toString())
+    }
+    val returnType = normalizeTypeName(methodInfo.typeDescriptor.resultType.toString())
+    
+    return MethodSignature(
+        name = methodInfo.name,
+        parameterTypes = paramTypes,
+        returnType = returnType,
+        isStatic = methodInfo.isStatic,
+        isAbstract = methodInfo.isAbstract,
+        isSynthetic = methodInfo.isSynthetic
+    )
+}
+
+fun normalizeTypeName(typeName: String): String {
+    // Normalize common type differences between Java and Kotlin
+    return typeName
+        .replace("java.lang.String", "String")
+        .replace("java.lang.Object", "Any")
+        .replace("java.lang.Integer", "Int")
+        .replace("java.lang.Long", "Long")
+        .replace("java.lang.Boolean", "Boolean")
+        .replace("java.lang.Double", "Double")
+        .replace("java.lang.Float", "Float")
+        .replace("java.util.List", "List")
+        .replace("java.util.Set", "Set")
+        .replace("java.util.Map", "Map")
+        .replace("org.apache.lucene.", "org.gnit.lucenekmp.")
+}
+
+fun categorizeMethod(methodInfo: MethodInfo): MethodCategory {
+    val methodName = methodInfo.name
+    val paramCount = methodInfo.parameterInfo.size
+    
+    return when {
+        // Synthetic or compiler-generated methods
+        methodInfo.isSynthetic -> MethodCategory.GENERATED
+        methodName.startsWith("access$") -> MethodCategory.GENERATED
+        methodName.contains("$") -> MethodCategory.GENERATED
+        
+        // Property accessors (getters/setters)
+        (methodName.startsWith("get") && paramCount == 0 && methodName.length > 3) -> MethodCategory.PROPERTY
+        (methodName.startsWith("set") && paramCount == 1 && methodName.length > 3) -> MethodCategory.PROPERTY
+        (methodName.startsWith("is") && paramCount == 0 && methodName.length > 2) -> MethodCategory.PROPERTY
+        
+        // Utility methods (common patterns)
+        methodName in setOf("toString", "hashCode", "equals", "clone") -> MethodCategory.UTILITY
+        methodName.startsWith("checkConsistency") -> MethodCategory.UTILITY
+        methodName.endsWith("Impl") -> MethodCategory.UTILITY
+        
+        // Everything else is considered core business logic
+        else -> MethodCategory.CORE
+    }
+}
+
+fun analyzeMethodsInClass(classInfo: ClassInfo): List<MethodAnalysis> {
+    return classInfo.methodInfo
+        .filter { !it.isConstructor } // Exclude constructors from comparison
+        .map { methodInfo ->
+            MethodAnalysis(
+                signature = normalizeMethodSignature(methodInfo),
+                category = categorizeMethod(methodInfo),
+                isImplemented = true
+            )
+        }
+}
+
+fun findSemanticMatches(javaMethods: List<MethodAnalysis>, kotlinMethods: List<MethodAnalysis>): List<MethodComparisonResult> {
+    val results = mutableListOf<MethodComparisonResult>()
+    val matchedKotlinMethods = mutableSetOf<MethodAnalysis>()
+    
+    // First pass: Find exact matches
+    for (javaMethod in javaMethods) {
+        val exactMatch = kotlinMethods.find { kotlinMethod ->
+            kotlinMethod !in matchedKotlinMethods && 
+            javaMethod.signature.normalizedSignature == kotlinMethod.signature.normalizedSignature
+        }
+        
+        if (exactMatch != null) {
+            matchedKotlinMethods.add(exactMatch)
+            results.add(MethodComparisonResult(
+                javaMethod = javaMethod,
+                kotlinMethod = exactMatch,
+                isMatched = true,
+                matchType = MatchType.EXACT_MATCH,
+                semanticEquivalence = 1.0
+            ))
+        }
+    }
+    
+    // Second pass: Find semantic matches (similar names, same category)
+    for (javaMethod in javaMethods) {
+        if (results.any { it.javaMethod == javaMethod }) continue // Already matched
+        
+        val semanticMatch = kotlinMethods.find { kotlinMethod ->
+            kotlinMethod !in matchedKotlinMethods && 
+            javaMethod.category == kotlinMethod.category &&
+            calculateNameSimilarity(javaMethod.signature.name, kotlinMethod.signature.name) > 0.7
+        }
+        
+        if (semanticMatch != null) {
+            matchedKotlinMethods.add(semanticMatch)
+            val similarity = calculateNameSimilarity(javaMethod.signature.name, semanticMatch.signature.name)
+            results.add(MethodComparisonResult(
+                javaMethod = javaMethod,
+                kotlinMethod = semanticMatch,
+                isMatched = true,
+                matchType = MatchType.SEMANTIC_MATCH,
+                semanticEquivalence = similarity
+            ))
+        }
+    }
+    
+    // Third pass: Handle property-style matches
+    for (javaMethod in javaMethods) {
+        if (results.any { it.javaMethod == javaMethod }) continue // Already matched
+        if (javaMethod.category != MethodCategory.PROPERTY) continue
+        
+        val propertyMatch = findPropertyMatch(javaMethod, kotlinMethods.filter { it !in matchedKotlinMethods })
+        if (propertyMatch != null) {
+            matchedKotlinMethods.add(propertyMatch)
+            results.add(MethodComparisonResult(
+                javaMethod = javaMethod,
+                kotlinMethod = propertyMatch,
+                isMatched = true,
+                matchType = MatchType.PROPERTY_MATCH,
+                semanticEquivalence = 0.8 // Properties are semantically equivalent but syntactically different
+            ))
+        }
+    }
+    
+    // Fourth pass: Mark unmatched Java methods as missing
+    for (javaMethod in javaMethods) {
+        if (!results.any { it.javaMethod == javaMethod }) {
+            results.add(MethodComparisonResult(
+                javaMethod = javaMethod,
+                kotlinMethod = null,
+                isMatched = false,
+                matchType = MatchType.MISSING_IN_KOTLIN,
+                semanticEquivalence = 0.0
+            ))
+        }
+    }
+    
+    // Fifth pass: Mark unmatched Kotlin methods as extra
+    for (kotlinMethod in kotlinMethods) {
+        if (kotlinMethod !in matchedKotlinMethods) {
+            results.add(MethodComparisonResult(
+                javaMethod = null,
+                kotlinMethod = kotlinMethod,
+                isMatched = false,
+                matchType = MatchType.EXTRA_IN_KOTLIN,
+                semanticEquivalence = 0.0
+            ))
+        }
+    }
+    
+    return results
+}
+
+fun calculateNameSimilarity(name1: String, name2: String): Double {
+    // Simple Levenshtein distance-based similarity
+    val maxLen = maxOf(name1.length, name2.length)
+    if (maxLen == 0) return 1.0
+    
+    val distance = levenshteinDistance(name1.lowercase(), name2.lowercase())
+    return 1.0 - (distance.toDouble() / maxLen)
+}
+
+fun levenshteinDistance(s1: String, s2: String): Int {
+    val dp = Array(s1.length + 1) { IntArray(s2.length + 1) }
+    
+    for (i in 0..s1.length) dp[i][0] = i
+    for (j in 0..s2.length) dp[0][j] = j
+    
+    for (i in 1..s1.length) {
+        for (j in 1..s2.length) {
+            dp[i][j] = if (s1[i-1] == s2[j-1]) {
+                dp[i-1][j-1]
+            } else {
+                1 + minOf(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+            }
+        }
+    }
+    
+    return dp[s1.length][s2.length]
+}
+
+fun findPropertyMatch(javaMethod: MethodAnalysis, availableKotlinMethods: List<MethodAnalysis>): MethodAnalysis? {
+    val javaName = javaMethod.signature.name
+    
+    // Handle getter patterns: getXxx() -> xxx (property) or xxx() (method)
+    if (javaName.startsWith("get") && javaName.length > 3) {
+        val propertyName = javaName.substring(3).lowercase()
+        return availableKotlinMethods.find { kotlinMethod ->
+            kotlinMethod.signature.name.lowercase() == propertyName ||
+            kotlinMethod.signature.name.lowercase() == javaName.lowercase()
+        }
+    }
+    
+    // Handle setter patterns: setXxx(value) -> xxx = value (property assignment)
+    if (javaName.startsWith("set") && javaName.length > 3) {
+        val propertyName = javaName.substring(3).lowercase()
+        return availableKotlinMethods.find { kotlinMethod ->
+            kotlinMethod.signature.name.lowercase() == propertyName
+        }
+    }
+    
+    // Handle boolean getter patterns: isXxx() -> xxx (property) or isXxx() (method)
+    if (javaName.startsWith("is") && javaName.length > 2) {
+        val propertyName = javaName.substring(2).lowercase()
+        return availableKotlinMethods.find { kotlinMethod ->
+            kotlinMethod.signature.name.lowercase() == propertyName ||
+            kotlinMethod.signature.name.lowercase() == javaName.lowercase()
+        }
+    }
+    
+    return null
+}
+
+fun performClassComparison(javaClass: ClassInfo, kotlinClass: ClassInfo?): ClassComparison {
+    val javaMethods = analyzeMethodsInClass(javaClass)
+    val kotlinMethods = if (kotlinClass != null) analyzeMethodsInClass(kotlinClass) else emptyList()
+    
+    val methodComparisons = findSemanticMatches(javaMethods, kotlinMethods)
+    
+    // Calculate completion percentages by category
+    val coreJavaMethods = javaMethods.filter { it.category == MethodCategory.CORE }
+    val propertyJavaMethods = javaMethods.filter { it.category == MethodCategory.PROPERTY }
+    
+    val matchedCoreMethods = methodComparisons.filter { 
+        it.javaMethod?.category == MethodCategory.CORE && it.isMatched 
+    }
+    val matchedPropertyMethods = methodComparisons.filter { 
+        it.javaMethod?.category == MethodCategory.PROPERTY && it.isMatched 
+    }
+    
+    val coreCompletionPercent = if (coreJavaMethods.isNotEmpty()) {
+        (matchedCoreMethods.size * 100.0) / coreJavaMethods.size
+    } else 100.0
+    
+    val propertyCompletionPercent = if (propertyJavaMethods.isNotEmpty()) {
+        (matchedPropertyMethods.size * 100.0) / propertyJavaMethods.size
+    } else 100.0
+    
+    // Semantic completion considers weighted importance of different method categories
+    val coreWeight = 0.7
+    val propertyWeight = 0.2
+    val utilityWeight = 0.1
+    
+    val utilityJavaMethods = javaMethods.filter { it.category == MethodCategory.UTILITY }
+    val matchedUtilityMethods = methodComparisons.filter { 
+        it.javaMethod?.category == MethodCategory.UTILITY && it.isMatched 
+    }
+    val utilityCompletionPercent = if (utilityJavaMethods.isNotEmpty()) {
+        (matchedUtilityMethods.size * 100.0) / utilityJavaMethods.size
+    } else 100.0
+    
+    val semanticCompletionPercent = (
+        coreCompletionPercent * coreWeight +
+        propertyCompletionPercent * propertyWeight +
+        utilityCompletionPercent * utilityWeight
+    )
+    
+    val missingCoreMethods = methodComparisons
+        .filter { it.matchType == MatchType.MISSING_IN_KOTLIN && it.javaMethod?.category == MethodCategory.CORE }
+        .mapNotNull { it.javaMethod }
+    
+    val missingPropertyMethods = methodComparisons
+        .filter { it.matchType == MatchType.MISSING_IN_KOTLIN && it.javaMethod?.category == MethodCategory.PROPERTY }
+        .mapNotNull { it.javaMethod }
+    
+    return ClassComparison(
+        javaClass = javaClass,
+        kotlinClass = kotlinClass,
+        javaMethods = javaMethods,
+        kotlinMethods = kotlinMethods,
+        methodComparisons = methodComparisons,
+        semanticCompletionPercent = semanticCompletionPercent,
+        coreMethodsCompletionPercent = coreCompletionPercent,
+        propertyMethodsCompletionPercent = propertyCompletionPercent,
+        missingCoreMethods = missingCoreMethods,
+        missingPropertyMethods = missingPropertyMethods
+    )
+}
 
 class Progress : CliktCommand() {
 
@@ -431,7 +779,7 @@ class Progress : CliktCommand() {
         // Collect class and method data
         val luceneTableRows = mutableListOf<List<Any>>()
 
-        // Create progress table using javaPr1Classes and kmpClasses
+        // Create progress table using javaPr1Classes and kmpClasses with smart comparison
         javaPr1Classes.entries.sortedBy { it.key }.forEach { (javaFqn, javaClassWithDepth) ->
             val javaClassInfo = javaClassWithDepth.classInfo
             val depthToPrint = "Depth ${javaClassWithDepth.depth}"
@@ -440,15 +788,14 @@ class Progress : CliktCommand() {
 
             val classPorted = if (kmpClassInfo != null) "[x]" else "[]"
 
-            val javaMethods = javaClassInfo.methodInfo.size
-            val kmpMethods = kmpClassInfo?.methodInfo?.size ?: 0
-
-            val methodProgressPercent = if (kmpClassInfo != null && javaMethods > 0) {
-                (kmpMethods * 100) / javaMethods
-            } else {
-                0
-            }
-
+            // Perform smart method comparison
+            val classComparison = performClassComparison(javaClassInfo, kmpClassInfo)
+            
+            val javaMethods = classComparison.javaMethods.size
+            val kmpMethods = classComparison.kotlinMethods.size
+            
+            // Use semantic completion percentage instead of simple ratio
+            val methodProgressPercent = classComparison.semanticCompletionPercent.toInt()
             val methodProgress = "${methodProgressPercent}%"
 
             // Only add rows where method progress is less than 100%
@@ -489,7 +836,7 @@ class Progress : CliktCommand() {
         // Collect unit test class and method data
         val unitTestTableRows = mutableListOf<List<Any>>()
 
-        // Create progress table using javaUnitTestClasses and kmpUnitTestClasses
+        // Create progress table using javaUnitTestClasses and kmpUnitTestClasses with smart comparison
         javaUnitTestClasses.entries.sortedBy { it.key }.forEach { (javaFqn, javaClassWithDepth) ->
             val javaClassInfo = javaClassWithDepth.classInfo
             val depthToPrint = "Depth ${javaClassWithDepth.depth}"
@@ -498,15 +845,14 @@ class Progress : CliktCommand() {
 
             val classPorted = if (kmpClassInfo != null) "[x]" else "[]"
 
-            val javaMethods = javaClassInfo.methodInfo.size
-            val kmpMethods = kmpClassInfo?.methodInfo?.size ?: 0
-
-            val methodProgressPercent = if (kmpClassInfo != null && javaMethods > 0) {
-                (kmpMethods * 100) / javaMethods
-            } else {
-                0
-            }
-
+            // Perform smart method comparison for unit test classes
+            val classComparison = performClassComparison(javaClassInfo, kmpClassInfo)
+            
+            val javaMethods = classComparison.javaMethods.size
+            val kmpMethods = classComparison.kotlinMethods.size
+            
+            // Use semantic completion percentage instead of simple ratio
+            val methodProgressPercent = classComparison.semanticCompletionPercent.toInt()
             val methodProgress = "${methodProgressPercent}%"
 
             // Only add rows where method progress is less than 100%
