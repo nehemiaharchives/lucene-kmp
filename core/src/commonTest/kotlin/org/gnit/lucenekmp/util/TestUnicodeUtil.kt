@@ -2,11 +2,14 @@ package org.gnit.lucenekmp.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.util.automaton.Automaton
+import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
+import org.gnit.lucenekmp.util.automaton.FiniteStringsIterator
 import kotlin.random.Random
 import kotlin.test.*
-import kotlin.sequences.toList
 
 /*
  * Some of this code came from the excellent Unicode
@@ -161,4 +164,143 @@ class TestUnicodeUtil : LuceneTestCase() {
         }
     }
 
+    @Test
+    fun testUTF8CodePointAt() {
+        val num: Int = atLeast(50000)
+        var reuse: UnicodeUtil.UTF8CodePoint? = null
+        for (i in 0..<num) {
+            val s: String =
+                TestUtil.randomUnicodeString(random())
+            val utf8 = ByteArray(UnicodeUtil.maxUTF8Length(s.length))
+            val utf8Len: Int = UnicodeUtil.UTF16toUTF8(s, 0, s.length, utf8)
+
+            val expected: IntArray = s.codePointsSeq().toList().toIntArray()
+            var pos = 0
+            var expectedUpto = 0
+            while (pos < utf8Len) {
+                reuse = UnicodeUtil.codePointAt(utf8, pos, reuse)
+                assertEquals(expected[expectedUpto].toLong(), reuse.codePoint.toLong())
+                expectedUpto++
+                pos += reuse.numBytes
+            }
+            assertEquals(utf8Len.toLong(), pos.toLong())
+            assertEquals(expected.size.toLong(), expectedUpto.toLong())
+        }
+    }
+
+    @Test
+    fun testUTF8SpanMultipleBytes() {
+        val b: Automaton.Builder = Automaton.Builder()
+        // start state:
+        val s1: Int = b.createState()
+
+        // single end accept state:
+        val s2: Int = b.createState()
+        b.setAccept(s2, true)
+
+        // utf8 codepoint length range from [1,2]
+        b.addTransition(s1, s2, 0x7F, 0x80)
+        // utf8 codepoint length range from [2,3]
+        b.addTransition(s1, s2, 0x7FF, 0x800)
+        // utf8 codepoint length range from [3,4]
+        b.addTransition(s1, s2, 0xFFFF, 0x10000)
+
+        val a: Automaton = b.finish()
+
+        val c = CompiledAutomaton(a)
+        val it = FiniteStringsIterator(c.automaton!!)
+        var termCount = 0
+        var r: IntsRef? = it.next()
+        while (r != null) {
+            termCount++
+            r = it.next()
+        }
+        assertEquals(6, termCount.toLong())
+    }
+
+    @Test
+    fun testNewString() {
+        val codePoints = intArrayOf(
+            Character.toCodePoint(
+                Character.MIN_HIGH_SURROGATE,
+                Character.MAX_LOW_SURROGATE
+            ),
+            Character.toCodePoint(
+                Character.MAX_HIGH_SURROGATE,
+                Character.MIN_LOW_SURROGATE
+            ),
+            Character.MAX_HIGH_SURROGATE.code,
+            'A'.code,
+            -1,
+        )
+
+        val cpString =
+            (""
+                    + Character.MIN_HIGH_SURROGATE
+                    + Character.MAX_LOW_SURROGATE
+                    + Character.MAX_HIGH_SURROGATE
+                    + Character.MIN_LOW_SURROGATE
+                    + Character.MAX_HIGH_SURROGATE
+                    + 'A')
+
+        val tests = arrayOf<IntArray>(
+            intArrayOf(0, 1, 0, 2),
+            intArrayOf(0, 2, 0, 4),
+            intArrayOf(1, 1, 2, 2),
+            intArrayOf(1, 2, 2, 3),
+            intArrayOf(1, 3, 2, 4),
+            intArrayOf(2, 2, 4, 2),
+            intArrayOf(2, 3, 0, -1),
+            intArrayOf(4, 5, 0, -1),
+            intArrayOf(3, -1, 0, -1)
+        )
+
+        for (i in tests.indices) {
+            val t = tests[i]
+            val s = t[0]
+            val c = t[1]
+            val rs = t[2]
+            val rc = t[3]
+
+            try {
+                val str: String = UnicodeUtil.newString(codePoints, s, c)
+                assertFalse(rc == -1)
+                assertEquals(cpString.substring(rs, rs + rc), str)
+                continue
+            } catch (e1: IndexOutOfBoundsException) {
+                // Ignored.
+            } catch (e1: IllegalArgumentException) {
+            }
+            assertTrue(rc == -1)
+        }
+    }
+
+    @Ignore
+    @Test
+    fun testUTF8UTF16CharsRef() {
+        val num: Int = atLeast(3989)
+        for (i in 0..<num) {
+            val unicode: String =
+                TestUtil.randomRealisticUnicodeString(random())
+            val ref: BytesRef = newBytesRef(unicode)
+            val cRef = CharsRefBuilder()
+            cRef.copyUTF8Bytes(ref)
+            assertEquals(cRef.toString(), unicode)
+        }
+    }
+
+    @Test
+    fun testCalcUTF16toUTF8Length() {
+        val num: Int = atLeast(5000)
+        for (i in 0..<num) {
+            val unicode: String =
+                TestUtil.randomUnicodeString(random())
+            val utf8 = ByteArray(UnicodeUtil.maxUTF8Length(unicode.length))
+            val len: Int = UnicodeUtil.UTF16toUTF8(unicode, 0, unicode.length, utf8)
+            assertEquals(
+                len.toLong(),
+                UnicodeUtil.calcUTF16toUTF8Length(unicode, 0, unicode.length).toLong()
+            )
+        }
+    }
 }
