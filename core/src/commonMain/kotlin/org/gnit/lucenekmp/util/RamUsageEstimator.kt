@@ -1,5 +1,8 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.DecimalFormat
+import org.gnit.lucenekmp.jdkport.Field
+import org.gnit.lucenekmp.jdkport.PrivilegedAction
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.QueryVisitor
 import kotlin.jvm.JvmName
@@ -99,16 +102,15 @@ class RamUsageEstimator {
          * Return the shallow size of the provided [Integer] object. Ignores the possibility that
          * this object is part of the VM IntegerCache
          */
-        fun sizeOf(ignored: Int?): Long {
+        fun sizeOf(ignored: Int): Long {
             return INTEGER_SIZE.toLong()
         }
-
 
         /**
          * Return the shallow size of the provided [Long] object. Ignores the possibility that this
          * object is part of the VM LongCache
          */
-        fun sizeOf(ignored: Long?): Long {
+        fun sizeOf(ignored: Long): Long {
             return LONG_SIZE.toLong()
         }
 
@@ -348,9 +350,9 @@ class RamUsageEstimator {
             } else if (o is IntArray) {
                 size = sizeOf(o)
             } else if (o is Int) {
-                size = sizeOf(o as Int?)
+                size = sizeOf(o)
             } else if (o is Long) {
-                size = sizeOf(o as Long?)
+                size = sizeOf(o)
             } else if (o is LongArray) {
                 size = sizeOf(o)
             } else if (o is ShortArray) {
@@ -502,11 +504,11 @@ class RamUsageEstimator {
         }
 
         // Extracted to a method to give the SuppressForbidden annotation the smallest possible scope
-        // TODO too complicated. skip.
-        /*@SuppressForbidden(reason = "security manager")
+        //@SuppressForbidden(reason = "security manager")
         private fun <T> doPrivileged(action: PrivilegedAction<T>): T {
-            return AccessController.doPrivileged<T>(action)
-        }*/
+            /*return AccessController.doPrivileged<T>(action)*/
+            TODO() // This is a placeholder for the actual implementation, as Kotlin does not have a direct equivalent of AccessController.
+        }
 
 
         /** Return shallow size of any `array`.  */
@@ -532,21 +534,24 @@ class RamUsageEstimator {
          * This method returns the maximum representation size of an object. `sizeSoFar` is the
          * object's size measured so far. `f` is the field being probed.
          *
-         *
          * The returned offset will be the maximum of whatever was measured so far and `f`
          * field's offset and representation size (unaligned).
          */
-        // TODO not possible with kotlin common code, need walk around
-        /*fun adjustForField(sizeSoFar: Long, f: java.lang.reflect.Field): Long {
-            val type: java.lang.Class<*> = f.getType()
+        fun adjustForField(sizeSoFar: Long, f: Field): Long {
+            /*val type: java.lang.Class<*> = f.getType()
             val fsize = if (type.isPrimitive()) primitiveSizes[type]!! else NUM_BYTES_OBJECT_REF
-            return sizeSoFar + fsize
-        }*/
+            return sizeSoFar + fsize*/
+            TODO() // not possible with kotlin common code, need walk around
+        }
+
+        fun humanReadableUnits(bytes: Long): String {
+            return humanReadableUnits(bytes, DecimalFormat)
+        }
 
         /**
          * Returns [bytes] in human-readable units (GB, MB, KB or bytes).
          */
-        fun humanReadableUnits(bytes: Long): String {
+        fun humanReadableUnits(bytes: Long, df: DecimalFormat): String {
             val ONE_KB = 1024L
             val ONE_MB = ONE_KB * 1024L
             val ONE_GB = ONE_MB * 1024L

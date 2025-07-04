@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import kotlin.jvm.JvmRecord
-
 /**
  * Subreader slice from a parent composite reader.
  *
@@ -10,7 +8,6 @@ import kotlin.jvm.JvmRecord
  * @param readerIndex Sub-reader index for this slice.
  * @lucene.internal
  */
-@JvmRecord
 data class ReaderSlice(val start: Int, val length: Int, val readerIndex: Int) {
     companion object {
         /** Zero-length `ReaderSlice` array.  */

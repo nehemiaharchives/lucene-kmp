@@ -3,11 +3,10 @@ package org.gnit.lucenekmp.jdkport
 import okio.IOException
 
 /**
- * ported from java.io.Reader
- *
  * A minimal multiplatform abstraction for reading characters.
  * This class mimics many of the core methods of java.io.Reader, but only those that you really need.
  */
+@Ported(from = "java.io.Reader")
 abstract class Reader: Readable, AutoCloseable {
     companion object {
         protected const val TRANSFER_BUFFER_SIZE: Int = 8192

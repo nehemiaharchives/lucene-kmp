@@ -2,10 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import okio.IOException
 
-
 /**
- * port of java.io.PrintStream
- *
  * caution: only minimum functionality which is called by lucene is implemented
  *
  * A {@code PrintStream} adds functionality to another output stream,
@@ -36,6 +33,7 @@ import okio.IOException
  * @since      1.0
  * @see Charset#defaultCharset()
  */
+@Ported(from = "java.io.PrintStream")
 open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream) : FilterOutputStream(out) {
 
     private var trouble = false

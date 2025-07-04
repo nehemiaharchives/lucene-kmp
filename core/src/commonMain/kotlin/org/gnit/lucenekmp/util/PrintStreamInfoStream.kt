@@ -44,9 +44,9 @@ open class PrintStreamInfoStream @OptIn(ExperimentalAtomicApi::class) constructo
         }*/
     }
 
-    /*@get:org.apache.lucene.util.SuppressForbidden(reason = "System.out/err detection")
+    /*@get:org.apache.lucene.util.SuppressForbidden(reason = "System.out/err detection")*/
     val isSystemStream: Boolean
-        get() = stream === java.lang.System.out || stream === java.lang.System.err*/
+        get() = /*stream === java.lang.System.out || stream === java.lang.System.err*/ TODO() // not possible in KMP
 
     @OptIn(ExperimentalTime::class)
     protected val timestamp: String

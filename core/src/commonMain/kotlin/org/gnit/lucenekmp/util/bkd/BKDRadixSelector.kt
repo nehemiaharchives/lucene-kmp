@@ -569,7 +569,6 @@ class BKDRadixSelector(// BKD tree configuration
     }
 
     /** Sliced reference to points in an PointWriter.  */
-    @JvmRecord
     data class PathSlice(val writer: PointWriter, val start: Long, val count: Long)
     companion object {
         // size of the histogram

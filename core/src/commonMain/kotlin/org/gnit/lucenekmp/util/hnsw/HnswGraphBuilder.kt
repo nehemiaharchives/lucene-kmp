@@ -13,6 +13,8 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
 /**
@@ -128,10 +130,11 @@ open class HnswGraphBuilder protected constructor(
         get() = hnsw
 
     /** add vectors in range [minOrd, maxOrd)  */
+    @OptIn(ExperimentalTime::class)
     @Throws(IOException::class)
     protected fun addVectors(minOrd: Int, maxOrd: Int) {
         check(!frozen) { "This HnswGraphBuilder is frozen and cannot be updated" }
-        val start = TimeSource.Monotonic.markNow()
+        val start = Clock.System.now().toEpochMilliseconds()
         var t = start
         if (infoStream.isEnabled(HNSW_COMPONENT)) {
             infoStream.message(HNSW_COMPONENT, "addVectors [$minOrd $maxOrd)")
@@ -246,15 +249,16 @@ open class HnswGraphBuilder protected constructor(
         addGraphNode(node, scorer)
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun printGraphBuildStatus(
         node: Int,
-        start: TimeSource.Monotonic.ValueTimeMark,
-        t: TimeSource.Monotonic.ValueTimeMark
-    ): TimeSource.Monotonic.ValueTimeMark {
-        val now = TimeSource.Monotonic.markNow()
+        start: Long,
+        t: Long
+    ): Long {
+        val now = Clock.System.now().toEpochMilliseconds()
         infoStream.message(
             HNSW_COMPONENT,
-            "built $node in ${(now - t).inWholeMilliseconds}/${(now - start).inWholeMilliseconds} ms"
+            "built $node in ${now - t} ms/${now - start} ms"
         )
         return now
     }

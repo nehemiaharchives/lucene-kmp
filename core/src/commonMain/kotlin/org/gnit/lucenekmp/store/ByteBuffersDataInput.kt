@@ -469,6 +469,10 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
         return 1 shl blockBits
     }
 
+    fun isLoaded(): Boolean {
+        TODO() // had to inherit from RandomAccessInput
+    }
+
     companion object {
         private fun isPowerOfTwo(v: Int): Boolean {
             return (v and (v - 1)) == 0

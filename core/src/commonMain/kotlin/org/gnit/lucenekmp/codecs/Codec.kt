@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.codecs
 
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101Codec
+import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.util.NamedSPILoader
 import org.gnit.lucenekmp.util.NamedSPILoader.NamedSPI
 
@@ -28,14 +29,15 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
      * available codecs until needed.
      */
     private object Holder {
-        /*private val LOADER: NamedSPILoader<Codec> = NamedSPILoader(Codec::class)
+        private val LOADER: NamedSPILoader<Codec> = NamedSPILoader(Codec::class)
 
         val loader: NamedSPILoader<Codec>
             get() {
-                checkNotNull(Holder.LOADER) {("You tried to lookup a Codec by name before all Codecs could be initialized. "
+                /*checkNotNull(Holder.LOADER) {("You tried to lookup a Codec by name before all Codecs could be initialized. "
                         + "This likely happens if you call Codec#forName from a Codec's ctor.")}
-                return Holder.LOADER
-            }*/
+                return Holder.LOADER*/
+                TODO() // ClassLoader needs to be implemented for this
+            }
 
         // using hardcoded default codec because we cannot use NamedSPILoader in Kotlin Multiplatform
         var defaultCodec: Codec = /*Holder.LOADER.lookup("Lucene101")*/ Lucene101Codec()
@@ -101,12 +103,10 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
         }
 
         /** returns a list of all available codec names  */
-        /*
-        NOT_TODO Will not implemented because ClassLoader is not available in Kotlin Multiplatform
-
         fun availableCodecs(): MutableSet<String> {
-            return Holder.loader.availableServices()
-        }*/
+            //return Holder.loader.availableServices()
+            TODO() // ClassLoader needs to be implemented for this
+        }
 
         /**
          * Reloads the codec list from the given [ClassLoader]. Changes to the codecs are visible
@@ -119,12 +119,10 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
          * *This method is expensive and should only be called for discovery of new codecs on the
          * given classpath/classloader!*
          */
-        /*
-        NOT_TODO Will not implemented because ClassLoader is not available in Kotlin Multiplatform
-
-        fun reloadCodecs(classloader: java.lang.ClassLoader) {
-            Holder.loader.reload(classloader)
-        }*/
+        fun reloadCodecs(classloader: ClassLoader) {
+            //Holder.loader.reload(classloader)
+            TODO() // ClassLoader needs to be implemented for this
+        }
 
         var default: Codec
             /** expert: returns the default codec used for newly created [IndexWriterConfig]s.  */

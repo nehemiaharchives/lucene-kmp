@@ -480,7 +480,7 @@ object Operations {
      *
      * @param list List of automata to be unioned.
      */
-    fun union(list: MutableList<Automaton>): Automaton {
+    fun union(list: Collection<Automaton>): Automaton {
         val result = Automaton()
 
         // Create initial state:

@@ -1,10 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import kotlin.jvm.JvmRecord
-
-
 /** A clause in a BooleanQuery.  */
-@JvmRecord
 data class BooleanClause(val query: Query, val occur: Occur) {
     /** Specifies how clauses are to occur in matching documents.  */
     enum class Occur {

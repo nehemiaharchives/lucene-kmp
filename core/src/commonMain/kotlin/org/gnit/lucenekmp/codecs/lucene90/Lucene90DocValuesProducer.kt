@@ -39,7 +39,6 @@ import org.gnit.lucenekmp.util.LongValues
 import org.gnit.lucenekmp.util.compress.LZ4
 import org.gnit.lucenekmp.util.packed.DirectMonotonicReader
 import org.gnit.lucenekmp.util.packed.DirectReader
-import kotlin.jvm.JvmRecord
 import kotlin.math.max
 import kotlin.math.min
 import okio.IOException
@@ -333,7 +332,6 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
         data.close()
     }
 
-    @JvmRecord
     private data class DocValuesSkipperEntry(
         val offset: Long,
         val length: Long,

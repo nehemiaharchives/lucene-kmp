@@ -13,9 +13,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-   }
+    }
 }
 
 rootProject.name = "lucene-kmp"
 include(":core")
-include("test-framework")
+include(":test-framework")
+
+include("progress")

@@ -4,6 +4,7 @@ import okio.IOException
 import kotlin.math.min
 
 // A simple re-implementation of java.nio.ByteBuffer using a ByteArray as the backing store.
+@Ported(from = "java.nio.ByteBuffer")
 open class ByteBuffer private constructor(
     private val array: ByteArray,
     /** The fixed capacity of this ByteBuffer. */

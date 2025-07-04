@@ -300,7 +300,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
         return null
     }
 
-    private class FieldEntry(
+    private data class FieldEntry(
         val similarityFunction: VectorSimilarityFunction,
         val vectorEncoding: VectorEncoding,
         val vectorIndexOffset: Long,
@@ -309,23 +309,13 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
         val numLevels: Int,
         val dimension: Int,
         val size: Int,
-        val nodesByLevel: Array<IntArray?>,  // for each level the start offsets in vectorIndex file from where to read neighbours
-        offsetsMeta: DirectMonotonicReader.Meta,
-        offsetsOffset: Long,
-        offsetsBlockShift: Int,
-        offsetsLength: Long
-    ) {
-        val offsetsMeta: DirectMonotonicReader.Meta
-        val offsetsOffset: Long
-        val offsetsBlockShift: Int
+        val nodesByLevel: Array<IntArray>,
+        // for each level the start offsets in vectorIndex file from where to read neighbours
+        val offsetsMeta: DirectMonotonicReader.Meta,
+        val offsetsOffset: Long,
+        val offsetsBlockShift: Int,
         val offsetsLength: Long
-
-        init {
-            this.offsetsMeta = offsetsMeta
-            this.offsetsOffset = offsetsOffset
-            this.offsetsBlockShift = offsetsBlockShift
-            this.offsetsLength = offsetsLength
-        }
+    ) {
 
         companion object {
             @Throws(IOException::class)
@@ -347,7 +337,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                     input.readVInt()
                 val numLevels: Int /* TODO: class org.jetbrains.kotlin.nj2k.types.JKJavaNullPrimitiveType */ =
                     input.readVInt()
-                val nodesByLevel = kotlin.arrayOfNulls<IntArray>(numLevels)
+                val nodesByLevel = kotlin.arrayOfNulls<IntArray>(numLevels) as Array<IntArray>
                 var numberOfOffsets: Long = 0
                 val offsetsOffset: Long
                 val offsetsBlockShift: Int
@@ -358,9 +348,9 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                         val numNodesOnLevel: Int = input.readVInt()
                         numberOfOffsets += numNodesOnLevel.toLong()
                         nodesByLevel[level] = IntArray(numNodesOnLevel)
-                        nodesByLevel[level]!![0] = input.readVInt()
+                        nodesByLevel[level][0] = input.readVInt()
                         for (i in 1..<numNodesOnLevel) {
-                            nodesByLevel[level]!![i] = nodesByLevel[level]!![i - 1] + input.readVInt()
+                            nodesByLevel[level][i] = nodesByLevel[level][i - 1] + input.readVInt()
                         }
                     } else {
                         numberOfOffsets += size
@@ -399,9 +389,9 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
     /** Read the nearest-neighbors graph from the index input  */
     private class OffHeapHnswGraph(entry: FieldEntry, vectorIndex: IndexInput) : HnswGraph() {
         val dataIn: IndexInput = vectorIndex.slice("graph-data", entry.vectorIndexOffset, entry.vectorIndexLength)
-        val nodesByLevel: Array<IntArray?> = entry.nodesByLevel
+        val nodesByLevel: Array<IntArray> = entry.nodesByLevel
         val numLevels: Int = entry.numLevels
-        val entryNode: Int = if (numLevels > 1) nodesByLevel[numLevels - 1]!![0] else 0
+        val entryNode: Int = if (numLevels > 1) nodesByLevel[numLevels - 1][0] else 0
         val size: Int = entry.size
         var arcCount: Int = 0
         var arcUpTo: Int = 0
@@ -424,7 +414,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
             graphLevelNodeIndexOffsets[0] = 0
             for (i in 1..<numLevels) {
                 // nodesByLevel is `null` for the zeroth level as we know its size
-                val nodeCount = if (nodesByLevel[i - 1] == null) size else nodesByLevel[i - 1]!!.size
+                val nodeCount = if (nodesByLevel[i - 1] == null) size else nodesByLevel[i - 1].size
                 graphLevelNodeIndexOffsets[i] = graphLevelNodeIndexOffsets[i - 1] + nodeCount
             }
         }
@@ -435,7 +425,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                 if (level == 0)
                     targetOrd
                 else
-                    Arrays.binarySearch(nodesByLevel[level]!!, 0, nodesByLevel[level]!!.size, targetOrd)
+                    Arrays.binarySearch(nodesByLevel[level], 0, nodesByLevel[level].size, targetOrd)
             require(
                 targetIndex >= 0
             ) { "seek level=$level target=$targetOrd not found: $targetIndex" }
@@ -489,7 +479,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
             return if (level == 0) {
                 ArrayNodesIterator(size())
             } else {
-                ArrayNodesIterator(nodesByLevel[level]!!, nodesByLevel[level]!!.size)
+                ArrayNodesIterator(nodesByLevel[level], nodesByLevel[level].size)
             }
         }
     }

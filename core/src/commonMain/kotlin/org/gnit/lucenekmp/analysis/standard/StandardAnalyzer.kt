@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.analysis.standard
 
-import org.gnit.lucenekmp.analysis.Analyzer.TokenStreamComponents
 import org.gnit.lucenekmp.analysis.CharArraySet
 import org.gnit.lucenekmp.analysis.LowerCaseFilter
 import org.gnit.lucenekmp.analysis.StopFilter

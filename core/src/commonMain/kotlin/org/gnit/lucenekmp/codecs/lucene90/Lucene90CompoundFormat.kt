@@ -10,7 +10,6 @@ import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.PriorityQueue
-import kotlin.jvm.JvmRecord
 
 /**
  * Lucene 9.0 compound file format
@@ -77,7 +76,6 @@ class Lucene90CompoundFormat
         }
     }
 
-    @JvmRecord
     private data class SizedFile(val name: String, val length: Long)
 
     private class SizedFileQueue(maxSize: Int) : PriorityQueue<SizedFile>(maxSize) {

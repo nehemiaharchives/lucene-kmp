@@ -4,6 +4,7 @@ package org.gnit.lucenekmp.codecs
 import okio.IOException
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
+import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.util.NamedSPILoader
 
 
@@ -106,11 +107,9 @@ abstract class PostingsFormat protected constructor(override val name: String) :
          * *This method is expensive and should only be called for discovery of new postings formats
          * on the given classpath/classloader!*
          */
-        /*
-        //TODO will not implemented for now
-
-        fun reloadPostingsFormats(classloader: java.lang.ClassLoader) {
-            Holder.loader.reload(classloader)
-        }*/
+        fun reloadPostingsFormats(classloader: ClassLoader) {
+            //Holder.loader.reload(classloader)
+            TODO() //ClassLoader should be implemented to make this work
+        }
     }
 }

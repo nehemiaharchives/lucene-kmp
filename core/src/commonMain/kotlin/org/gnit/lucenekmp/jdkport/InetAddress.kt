@@ -1,10 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
 /**
- * port of java.net.InetAddress
- *
  * minimum implementation to support usage in lucene
  */
+@Ported(from = "java.net.InetAddress")
 abstract class InetAddress {
 
     /* Used to store the serializable fields of InetAddress */

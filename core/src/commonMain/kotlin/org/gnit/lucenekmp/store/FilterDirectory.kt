@@ -15,6 +15,11 @@ abstract class FilterDirectory
     /** Return the wrapped [Directory].  */
     val `in`: Directory
 ) : Directory() {
+
+    fun getDelegate(): Directory {
+        return `in`
+    }
+
     @Throws(IOException::class)
     override fun listAll(): Array<String> {
         return `in`.listAll()

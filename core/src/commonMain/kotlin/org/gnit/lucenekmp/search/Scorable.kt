@@ -57,6 +57,5 @@ abstract class Scorable {
      * @param relationship An arbitrary string relating this scorer to the parent.
      * @lucene.experimental
      */
-    @JvmRecord
     data class ChildScorable(val child: Scorable, val relationship: String)
 }

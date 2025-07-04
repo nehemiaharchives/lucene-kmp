@@ -248,7 +248,7 @@ abstract class NumericComparator<T : Number> protected constructor(
             val threshold = iteratorCost ushr 3
 
             if (PointValues.isEstimatedPointCountGreaterThanOrEqualTo(
-                    visitor, this.pointTree!!, threshold
+                    visitor, getPointTree()!!, threshold
                 )
             ) {
                 // the new range is not selective enough to be worth materializing, it doesn't reduce number
@@ -265,6 +265,14 @@ abstract class NumericComparator<T : Number> protected constructor(
             competitiveIterator = result.build().iterator()
             iteratorCost = competitiveIterator.cost()
             updateSkipInterval(true)
+        }
+
+        @Throws(IOException::class)
+        private fun getPointTree(): PointTree? {
+            if (pointTree == null) {
+                pointTree = pointValues!!.pointTree
+            }
+            return pointTree
         }
 
         private fun updateSkipInterval(success: Boolean) {

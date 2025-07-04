@@ -11,8 +11,6 @@ import org.gnit.lucenekmp.internal.hppc.IntObjectHashMap
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.util.CollectionUtil
-import kotlin.jvm.JvmRecord
-
 
 /**
  * Collection of [FieldInfo]s (accessible by number or by name).
@@ -243,27 +241,23 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         return if (fieldNumber >= byNumber.size) null else byNumber[fieldNumber]
     }
 
-    @JvmRecord
     private data class FieldDimensions(
         val dimensionCount: Int,
         val indexDimensionCount: Int,
         val dimensionNumBytes: Int
     )
 
-    @JvmRecord
     private data class FieldVectorProperties(
         val numDimensions: Int,
         val vectorEncoding: VectorEncoding,
         val similarityFunction: VectorSimilarityFunction
     )
 
-    @JvmRecord
     private data class IndexOptionsProperties(val storeTermVectors: Boolean, val omitNorms: Boolean)
 
     // We use this to enforce that a given field never
     // changes DV type, even across segments / IndexWriter
     // sessions:
-    @JvmRecord
     private data class FieldProperties(
         val number: Int,
         val indexOptions: IndexOptions,

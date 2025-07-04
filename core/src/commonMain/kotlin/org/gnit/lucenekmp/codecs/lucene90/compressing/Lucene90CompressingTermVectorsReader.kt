@@ -278,7 +278,6 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         return blockState.docBase <= docID && docID < blockState.docBase + blockState.chunkDocs
     }
 
-    @JvmRecord
     private data class BlockState(val startPointer: Long, val docBase: Int, val chunkDocs: Int)
 
     @Throws(IOException::class)

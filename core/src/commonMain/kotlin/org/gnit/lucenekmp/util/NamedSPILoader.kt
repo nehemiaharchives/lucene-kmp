@@ -4,7 +4,6 @@ import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.jdkport.ServiceLoader
 import org.gnit.lucenekmp.jdkport.getClassLoader
 import kotlin.concurrent.Volatile
-import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
 
@@ -13,7 +12,7 @@ import kotlin.reflect.KClass
  *
  * @lucene.internal
  */
-class NamedSPILoader<S : NamedSPILoader.NamedSPI> @JvmOverloads constructor(
+class NamedSPILoader<S : NamedSPILoader.NamedSPI>(
     clazz: KClass<S>,
     classloader: ClassLoader? = null
 ) : Iterable<S> {

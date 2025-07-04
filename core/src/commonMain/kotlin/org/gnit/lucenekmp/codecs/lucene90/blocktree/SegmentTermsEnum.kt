@@ -18,6 +18,7 @@ import org.gnit.lucenekmp.util.fst.FST.BytesReader
 import org.gnit.lucenekmp.util.fst.Util
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.jdkport.PrintStream
 import org.gnit.lucenekmp.jdkport.System
 import kotlin.experimental.and
 import kotlin.math.min
@@ -833,9 +834,9 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
     /**
      * drop in replacement for java.io.PrintStream
      */
-    private class PrintStream {
+    /*private class PrintStream {
         fun println(msg: Any? = "") = kotlin.io.println(msg)
-    }
+    }*/
 
     @Suppress("unused")
     @Throws(IOException::class)

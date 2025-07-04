@@ -1,8 +1,5 @@
 package org.gnit.lucenekmp.search
 
-import kotlin.jvm.JvmRecord
-
-
 /**
  * Description of the total number of hits of a query. The total hit count can't generally be
  * computed accurately without visiting all matches, which is costly for queries that match lots of
@@ -15,7 +12,6 @@ import kotlin.jvm.JvmRecord
  * equal to [Relation.EQUAL_TO], or a lower bound of the total hit count, in which case
  * [.relation] is equal to [Relation.GREATER_THAN_OR_EQUAL_TO].
  */
-@JvmRecord
 data class TotalHits(val value: Long, val relation: Relation) {
     /** How the [TotalHits.value] should be interpreted.  */
     enum class Relation {

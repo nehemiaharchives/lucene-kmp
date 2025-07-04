@@ -353,7 +353,7 @@ open class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<
     }
 
     /** Compare index-aligned elements against another [IntArrayList].  */
-    internal fun equalElements(other: IntArrayList): Boolean {
+    fun equalElements(other: IntArrayList): Boolean {
         val max = size()
         if (other.size() != max) {
             return false
@@ -373,7 +373,7 @@ open class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<
         return this.toArray().contentToString()
     }
 
-    public override fun ramBytesUsed(): Long {
+    override fun ramBytesUsed(): Long {
         return BASE_RAM_BYTES_USED + RamUsageEstimator.sizeOf(buffer)
     }
 
@@ -418,7 +418,7 @@ open class IntArrayList(expectedElements: Int) : Iterable<IntCursor>, Cloneable<
             this.buffer = buffer
         }
 
-        protected override fun fetch(): IntCursor? {
+        override fun fetch(): IntCursor? {
             if (cursor.index + 1 == size) return done()
 
             cursor.value = buffer[++cursor.index]

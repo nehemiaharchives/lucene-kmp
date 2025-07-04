@@ -70,15 +70,16 @@ class CloseableThreadLocal<T> : AutoCloseable {
         value = `object`
     }
 
-    /*private fun maybePurge() {
-        if (countUntilPurge.getAndDecrement() == 0) {
+    private fun maybePurge() {
+        /*if (countUntilPurge.getAndDecrement() == 0) {
             purge()
-        }
-    }*/
+        }*/
+        TODO()
+    }
 
     // Purge dead threads
-    /*private fun purge() {
-        synchronized(hardRefs) {
+    private fun purge() {
+        /*synchronized(hardRefs) {
             var stillAliveCount = 0
             val it: MutableIterator<java.lang.Thread> = hardRefs!!.keys.iterator()
             while (it.hasNext()) {
@@ -95,8 +96,9 @@ class CloseableThreadLocal<T> : AutoCloseable {
                 nextCount = 1000000
             }
             countUntilPurge.set(nextCount)
-        }
-    }*/
+        }*/
+        TODO()  // impossible to implement in Kotlin common. JVM specific.
+    }
 
     override fun close() {
         // Clear the hard refs; then, the only remaining refs to

@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util.fst
 
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.RamUsageEstimator
@@ -31,7 +32,35 @@ class PairOutputs<A, B>(private val outputs1: Outputs<A>, private val outputs2: 
         if (b2 == outputs2.noOutput) b2 = outputs2.noOutput
         return if (a2 == outputs1.noOutput && b2 == outputs2.noOutput) {
             NO_OUTPUT
-        } else Pair(a2, b2)
+        } else {
+            val p = Pair(a2, b2)
+            assert(valid(p))
+            p
+        }
+    }
+
+    // for assert
+    private fun valid(pair: Pair<A, B>): Boolean {
+        val noOutput1 = pair.output1 == outputs1.noOutput
+        val noOutput2 = pair.output2 == outputs2.noOutput
+
+        if (noOutput1 && pair.output1 !== outputs1.noOutput) {
+            return false
+        }
+
+        if (noOutput2 && pair.output2 !== outputs2.noOutput) {
+            return false
+        }
+
+        if (noOutput1 && noOutput2) {
+            if (pair !== NO_OUTPUT) {
+                return false
+            } else {
+                return true
+            }
+        } else {
+            return true
+        }
     }
 
     override fun common(output1: Pair<A, B>, output2: Pair<A, B>): Pair<A, B> {

@@ -5,8 +5,6 @@ import kotlin.concurrent.Volatile
 
 
 /**
- * port of java.io.Writer
- *
  * Abstract class for writing to character streams.  The only methods that a
  * subclass must implement are write(char[], int, int), flush(), and close().
  * Most subclasses, however, will override some of the methods defined here in
@@ -34,6 +32,7 @@ import kotlin.concurrent.Volatile
  * @author      Mark Reinhold
  * @since       1.1
  */
+@Ported(from = "java.io.Writer")
 abstract class Writer : Appendable, AutoCloseable, Flushable {
     /**
      * Temporary buffer used to hold writes of strings and single characters

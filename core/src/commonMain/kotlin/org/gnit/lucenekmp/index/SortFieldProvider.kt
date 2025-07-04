@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.index
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.search.SortField
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
@@ -71,9 +72,9 @@ abstract class SortFieldProvider protected constructor(override val name: String
          * SortFieldProviders on the given classpath/classloader!*
          */
         // TODO java.lang.ClassLoader can not be used in platform agnostic kotlin common, needs to walk around
-        /*fun reloadSortFieldProviders(classLoader: java.lang.ClassLoader) {
+        fun reloadSortFieldProviders(classLoader: ClassLoader) {
             Holder.loader.reload(classLoader)
-        }*/
+        }
 
         /** Writes a SortField to a DataOutput  */
         @Throws(IOException::class)

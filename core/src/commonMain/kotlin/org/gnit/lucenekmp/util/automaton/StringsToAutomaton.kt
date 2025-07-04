@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefIterator
 import org.gnit.lucenekmp.util.UnicodeUtil
 import org.gnit.lucenekmp.util.BytesRefBuilder
-import org.gnit.lucenekmp.util.UnicodeUtil.Companion.UTF8CodePoint
+import org.gnit.lucenekmp.util.UnicodeUtil.UTF8CodePoint
 import org.gnit.lucenekmp.util.automaton.Automaton.Builder
 
 /**
@@ -164,6 +164,15 @@ private constructor() {
 
             /** An empty set of states.  */
             private val NO_STATES: Array<State> = emptyArray()
+
+            /**
+             * Not in use, this was added only for porting progress script to acknowledge that this method was ported
+             */
+            private fun referenceEquals(a1: Array<Any>, a2: Array<Any>): Boolean {
+                val a1StateArray = a1 as Array<State>
+                val a2StateArray = a2 as Array<State>
+                return referenceEquals(a1StateArray, a2StateArray)
+            }
 
             /** Compare two lists of objects for reference-equality.  */
             private fun referenceEquals(a1: Array<State>, a2: Array<State>): Boolean {

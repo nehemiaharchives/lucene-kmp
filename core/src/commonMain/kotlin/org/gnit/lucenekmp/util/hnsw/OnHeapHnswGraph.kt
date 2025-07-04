@@ -318,7 +318,6 @@ class OnHeapHnswGraph internal constructor(M: Int, numNodes: Int) : HnswGraph(),
                 + ")")
     }
 
-    @JvmRecord
     private data class EntryNode(val node: Int, val level: Int)
     companion object {
         private const val INIT_SIZE = 128

@@ -36,7 +36,6 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
         fun add(iterator: DocIdSetIterator)
     }
 
-    @JvmRecord
     private data class FixedBitSetAdder(val bitSet: FixedBitSet) : BulkAdder {
         override fun add(doc: Int) {
             bitSet!!.set(doc)
@@ -69,7 +68,6 @@ class DocIdSetBuilder internal constructor(private val maxDoc: Int, docCount: In
         }
     }
 
-    @JvmRecord
     private data class BufferAdder(val buffer: Buffer) : BulkAdder {
         override fun add(doc: Int) {
             buffer.array[buffer.length++] = doc

@@ -245,6 +245,5 @@ object HnswUtil {
      * @param start the lowest-numbered node in the component
      * @param size the number of nodes in the component
      */
-    @JvmRecord
     data class Component(val start: Int, val size: Int)
 }

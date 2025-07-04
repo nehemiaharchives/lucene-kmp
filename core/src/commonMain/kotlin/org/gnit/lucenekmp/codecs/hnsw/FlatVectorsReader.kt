@@ -31,6 +31,9 @@ abstract class FlatVectorsReader
     /**
      * @return the [FlatVectorsScorer] for this reader.
      */
+    fun getFlatVectorScorer(): FlatVectorsScorer {
+        return vectorScorer
+    }
 
     @Throws(IOException::class)
     override fun search(field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits) {

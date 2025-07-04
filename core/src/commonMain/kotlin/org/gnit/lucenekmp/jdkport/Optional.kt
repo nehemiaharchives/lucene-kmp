@@ -1,9 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-
 /**
- * porterd from java.util.Optional
- *
  * A container object which may or may not contain a non-`null` value.
  * If a value is present, `isPresent()` returns `true`. If no
  * value is present, the object is considered *empty* and
@@ -33,7 +30,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <T> the type of value
  * @since 1.8
 </T> */
-
+@Ported(from = "java.util.Optional")
 class Optional<T> private constructor(value: T?) {
     /**
      * If non-null, the value; if null, indicates no value is present

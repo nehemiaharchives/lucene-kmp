@@ -12,7 +12,6 @@ import kotlin.jvm.JvmRecord
  * @param bytesPerDim How many bytes each value in each dimension takes.
  * @param maxPointsInLeafNode max points allowed on a Leaf block
  */
-@JvmRecord
 data class BKDConfig(val numDims: Int, val numIndexDims: Int, val bytesPerDim: Int, val maxPointsInLeafNode: Int) {
     /** numDims * bytesPerDim  */
     fun packedBytesLength(): Int {

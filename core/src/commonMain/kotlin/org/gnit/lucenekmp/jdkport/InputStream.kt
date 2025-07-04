@@ -30,6 +30,7 @@ import kotlin.math.min
  *
  * @since   1.0
  */
+@Ported(from = "java.io.InputStream")
 abstract class InputStream
 /**
  * Constructor for subclasses to call.

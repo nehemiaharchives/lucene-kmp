@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.jvm.Transient
 
-
 /**
  * A [NavigableSet] implementation based on a [TreeMap].
  * The elements are ordered using their [natural][Comparable], or by a [Comparator] provided at set creation
@@ -82,6 +81,7 @@ import kotlin.jvm.Transient
  *
  * @since   1.2
 </E> */
+@Ported(from = "java.util.TreeSet")
 class TreeSet<E> internal constructor(m: NavigableMap<E, Any>) : AbstractMutableSet<E>(), NavigableSet<E>/*,
     Cloneable*/ { // implement Cloneable if really needed
     /**

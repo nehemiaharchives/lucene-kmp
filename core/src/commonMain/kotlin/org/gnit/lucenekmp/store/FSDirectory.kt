@@ -378,13 +378,17 @@ abstract class FSDirectory protected constructor(path: Path, lockFactory: LockFa
             return NIOFSDirectory(path, lockFactory)
         }
 
+        fun listAll(dir: Path): Array<String> {
+            return listAll(dir, emptySet())
+        }
+
         /**
          * Lists all files (including subdirectories) in the directory.
          *
          * @throws IOException if there was an I/O error during listing
          */
         @Throws(IOException::class)
-        private fun listAll(dir: Path, skipNames: Set<String> = emptySet<String>()): Array<String> {
+        private fun listAll(dir: Path, skipNames: Set<String>): Array<String> {
             val entries: MutableList<String> = ArrayList()
 
             /*Files.newDirectoryStream(dir).use { stream ->

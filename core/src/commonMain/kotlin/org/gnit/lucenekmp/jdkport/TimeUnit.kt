@@ -42,6 +42,7 @@ private const val DAY_SCALE = 24L * HOUR_SCALE
  * @since 1.5
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.TimeUnit")
 enum class TimeUnit(/*
      * Instances cache conversion ratios and saturation cutoffs for
      * the units up through SECONDS. Other cases compute them, in

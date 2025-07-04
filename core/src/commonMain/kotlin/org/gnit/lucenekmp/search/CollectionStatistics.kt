@@ -58,7 +58,6 @@ import kotlin.jvm.JvmRecord
  * exceeds [.sumTotalTermFreq]. @see Terms#getSumDocFreq()
  * @lucene.experimental
  */
-@JvmRecord
 data class CollectionStatistics(
     val field: String?,
     val maxDoc: Long,

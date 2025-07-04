@@ -589,7 +589,7 @@ object Util {
     }
 
     /** Compares first by the provided comparator, and then tie breaks by path.input.  */
-    private class TieBreakByInputComparator<T>(val comparator: Comparator<T>) :
+    private data class TieBreakByInputComparator<T>(val comparator: Comparator<T>) :
         Comparator<FSTPath<T>> {
         override fun compare(a: FSTPath<T>, b: FSTPath<T>): Int {
             val cmp: Int = comparator.compare(a.output, b.output)
@@ -599,7 +599,6 @@ object Util {
                 cmp
             }
         }
-
     }
 
     /** Utility class to find top N shortest paths from start point(s).  */

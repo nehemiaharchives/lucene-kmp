@@ -451,7 +451,6 @@ object PackedInts {
     }
 
     /** Simple class that holds a format and a number of bits per value.  */
-    @JvmRecord
     data class FormatAndBits(val format: Format, val bitsPerValue: Int)
 
     /** A decoder for packed integers.  */

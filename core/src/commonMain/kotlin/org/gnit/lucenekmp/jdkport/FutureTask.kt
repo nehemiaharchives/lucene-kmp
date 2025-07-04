@@ -14,6 +14,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 /**
  * Function interface to replace java.util.concurrent.Executor
  */
+@Ported(from = "java.util.concurrent.Executor")
 fun interface Executor {
     fun execute(command: Runnable)
 }
@@ -28,6 +29,7 @@ fun interface Callable<T> {
 /**
  * Interface to replace java.util.concurrent.Future
  */
+@Ported(from = "java.util.concurrent.Future")
 interface Future<T> {
     /** Attempts to cancel execution of this task.
      * @param mayInterruptIfRunning (ignored in this implementation; tasks are cooperatively cancelled)

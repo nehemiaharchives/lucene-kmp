@@ -4,6 +4,7 @@ package org.gnit.lucenekmp.jdkport
  * A minimal multiplatform dummy port of java.nio.charset.Charset.
  * This implementation supports only UTF-8.
  */
+@Ported(from = "java.nio.charset.Charset")
 abstract class Charset protected constructor(
     private val canonicalName: String,
     private val aliases: Set<String> = emptySet()

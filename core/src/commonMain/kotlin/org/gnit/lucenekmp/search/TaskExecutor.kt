@@ -9,6 +9,7 @@ import org.gnit.lucenekmp.jdkport.Future
 import org.gnit.lucenekmp.jdkport.FutureTask
 import org.gnit.lucenekmp.jdkport.RejectedExecutionException
 import org.gnit.lucenekmp.jdkport.RunnableFuture
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.atomics.AtomicInt
@@ -158,14 +159,14 @@ class TaskExecutor(executor: Executor) {
                     exc = IOUtils.useOrSuppress(exc, e)
                 }
             }
-            require(assertAllFuturesCompleted(futures)) { "Some tasks are still running" }
+            assert(assertAllFuturesCompleted(futures)) { "Some tasks are still running" }
             if (exc != null) {
                 throw IOUtils.rethrowAlways(exc)
             }
             return results
         }
 
-        private fun <T> assertAllFuturesCompleted(futures: MutableList<RunnableFuture<T>>): Boolean {
+        private fun <T> assertAllFuturesCompleted(futures: Collection<Future<T>>): Boolean {
             return futures.all { it.isDone() }
         }
 

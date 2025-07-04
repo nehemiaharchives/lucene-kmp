@@ -124,7 +124,6 @@ open class TopDocs(
         }
     }
 
-    @JvmRecord
     private data class ShardIndexAndDoc(val shardIndex: Int, val doc: Int)
 
     companion object {

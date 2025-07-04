@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.jdkport.assert
+
 /**
  * Simplified port of Lucene's RollingBuffer.
  * Acts like a growable T[] with reuse of instances.
@@ -34,6 +36,11 @@ abstract class RollingBuffer<T : RollingBuffer.Resettable> {
         count = 0
     }
 
+    // For assert:
+    private fun inBounds(pos: Int): Boolean {
+        return pos < nextPos && pos >= nextPos - count
+    }
+
     private fun getIndex(pos: Int): Int {
         var index = nextWrite - (nextPos - pos)
         if (index < 0) index += buffer.size
@@ -58,6 +65,7 @@ abstract class RollingBuffer<T : RollingBuffer.Resettable> {
             nextPos++
             count++
         }
+        assert(inBounds(pos))
         val index = getIndex(pos)
         return buffer[index]!!
     }

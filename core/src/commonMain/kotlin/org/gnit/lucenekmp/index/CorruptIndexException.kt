@@ -4,21 +4,22 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
-import kotlin.jvm.JvmOverloads
-
 
 /** This exception is thrown when Lucene detects an inconsistency in the index.  */
 class CorruptIndexException
-/** Create exception with a message only  */ @JvmOverloads constructor(
+/** Create exception with a message only  */ constructor(
     /** Returns the original exception message without the corrupted file description.  */
     originalMessage: String,
     /** Returns a description of the file that was corrupted  */
-    resourceDescription: String, cause: Throwable? = null
+    val resourceDescription: String, cause: Throwable? = null
 ) : IOException(
     Objects.toString(
         originalMessage
     ) + " (resource=" + resourceDescription + ")", cause
 ) {
+
+    val originalMessage: String = originalMessage
+
     /** Create exception with a message only  */
     constructor(message: String, input: DataInput) : this(message, input, null)
 

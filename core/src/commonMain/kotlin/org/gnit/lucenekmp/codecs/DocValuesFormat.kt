@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.codecs
 import okio.IOException
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
+import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.util.NamedSPILoader
 
 
@@ -103,11 +104,9 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
          * *This method is expensive and should only be called for discovery of new docvalues
          * formats on the given classpath/classloader!*
          */
-        /*
-        NOT_TODO Will not implemented because ClassLoader is not available in Kotlin Multiplatform
-
-        fun reloadDocValuesFormats(classloader: java.lang.ClassLoader) {
-            Holder.loader.reload(classloader)
-        }*/
+        fun reloadDocValuesFormats(classloader: ClassLoader) {
+            //Holder.loader.reload(classloader)
+            TODO() // ClassLoader needs to be implemented to make it work
+        }
     }
 }

@@ -24,7 +24,7 @@ object IOUtils {
     /** UTF-8 charset string.  */
     const val UTF_8: String = "UTF-8"
 
-    internal fun <T: Throwable> useOrSuppress(first: T?, second: T): T {
+    fun <T: Throwable> useOrSuppress(first: T?, second: T): T {
         if (first == null) {
             return second
         } else {

@@ -41,6 +41,7 @@ import kotlin.experimental.or
  *
  * @since   1.0
  */
+@Ported(from = "java.io.StreamTokenizer")
 class StreamTokenizer private constructor() {
     /* Only one of these will be non-null */
     private var reader: Reader? = null
