@@ -34,7 +34,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build JVM
-        run: ./gradlew jvmMainClasses jvmTest
+        run: ./gradlew :core:jvmMainClasses :core:jvmTest
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -75,7 +75,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Android
-        run: ./gradlew assembleRelease testReleaseUnitTest
+        run: ./gradlew :core:assembleRelease :core:testReleaseUnitTest
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -121,7 +121,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Build iOS
-        run: ./gradlew iosX64Test iosX64MainKlibrary iosArm64MainKlibrary iosSimulatorArm64MainKlibrary
+        run: ./gradlew :core:iosX64Test :core:iosX64MainKlibrary :core:iosArm64MainKlibrary :core:iosSimulatorArm64MainKlibrary
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -168,10 +168,10 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Full Build
-        run: ./gradlew build -x testDebugUnitTest -x koverGenerateArtifactJvm -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverCachedVerify -x koverVerify
+        run: ./gradlew :core:build -x testDebugUnitTest -x koverGenerateArtifactJvm -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverCachedVerify -x koverVerify
 
       - name: Generate Coverage Report
-        run: ./gradlew koverXmlReport
+        run: ./gradlew :core:koverXmlReport
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
