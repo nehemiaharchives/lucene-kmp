@@ -25,15 +25,13 @@ class TestProgress {
     @Test
     fun testAnalyzeSingleClass() {
         val fqn = "${javaBasePackage}.codecs.lucene90.blocktree.IntersectTermsEnumFrame"
-        val moduleName = "core"
-        progress.analyzeClass(moduleName, fqn)
+        progress.analyzeClass(fqn)
     }
 
-    @Test
+    /*@Test
     fun testAnalyzeSingleModule() {
-        val moduleName = "core"
-        progress.analyzeAllClasses(moduleName)
-    }
+        progress.analyzeAllClasses()
+    }*/
 
     @Test
     fun testEndsWithDollarSignAndDigit(){
@@ -57,7 +55,7 @@ class TestProgress {
     @Test
     fun testIsSuspendFunction() {
         val fqn = "${kmpBasePackage}.util.hnsw.BlockingFloatHeap"
-        val javaClass = progress.getKmpClass("core", fqn)
+        val javaClass = progress.getKmpClass(fqn)
         val methods = javaClass.methodInfo
 
         println("Methods in $fqn:")
@@ -110,7 +108,7 @@ class TestProgress {
     @Test
     fun testReconstructSuspendSignature() {
         val fqn = "${kmpBasePackage}.util.hnsw.BlockingFloatHeap"
-        val javaClass = progress.getKmpClass("core", fqn)
+        val javaClass = progress.getKmpClass(fqn)
         val methods = javaClass.methodInfo
 
         // Test suspend offer methods

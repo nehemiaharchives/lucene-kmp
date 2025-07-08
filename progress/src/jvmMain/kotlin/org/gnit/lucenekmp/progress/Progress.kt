@@ -19,30 +19,36 @@ enum class MethodStatus(val printedName: String) {
 const val javaBasePackage = "org.apache.lucene"
 const val kmpBasePackage = "org.gnit.lucenekmp"
 
+enum class SourceType(val lowerCaseName: String) {
+    MAIN("main"),
+    TEST("test")
+}
+
 class Progress() {
     val homeDir: String = System.getenv("HOME") ?: System.getProperty("user.home")
     val lucenePortProjectRoot = "$homeDir/code/lp"
     val javaDir = "$lucenePortProjectRoot/lucene"
     val kmpDir = "$lucenePortProjectRoot/lucene-kmp"
 
-    fun javaClassPath(moduleName: String, isTest: Boolean = false): String {
-        val mainOrTest = if (isTest) "test" else "main"
+    fun javaClassPath(moduleName: String, sourceType: SourceType): String {
+        val mainOrTest = sourceType.lowerCaseName
         return "$javaDir/lucene/$moduleName/build/classes/java/$mainOrTest"
     }
 
-    fun kmpClassPath(moduleName: String, isTest: Boolean = false): String {
-        val mainOrTest = if (isTest) "test" else "main"
+    fun kmpClassPath(moduleName: String, sourceType: SourceType): String {
+        val mainOrTest = sourceType.lowerCaseName
         return "$kmpDir/$moduleName/build/classes/kotlin/jvm/$mainOrTest"
     }
 
     val javaScanResultCache: MutableMap<String, ScanResult> = mutableMapOf()
 
-    fun javaScanResult(javaClassPath: String): ScanResult {
-        var scanResult = javaScanResultCache[javaClassPath]
+    fun javaScanResult(javaClassPathList: List<String>): ScanResult {
+        val javaClassPathKey = javaClassPathList.joinToString(separator = ":")
+        var scanResult = javaScanResultCache[javaClassPathKey]
 
         if (scanResult == null) {
-            scanResult = ClassGraph().enableAllInfo().overrideClasspath(javaClassPath).scan()
-            javaScanResultCache[javaClassPath] = scanResult
+            scanResult = ClassGraph().enableAllInfo().overrideClasspath(javaClassPathList).scan()
+            javaScanResultCache[javaClassPathKey] = scanResult
         }
 
         return scanResult
@@ -50,12 +56,13 @@ class Progress() {
 
     val kmpScanResultCache: MutableMap<String, ScanResult> = mutableMapOf()
 
-    fun kmpScanResult(kmpClassPath: String): ScanResult {
-        var scanResult = kmpScanResultCache[kmpClassPath]
+    fun kmpScanResult(kmpClassPathList: List<String>): ScanResult {
+        val kmpClassPathKey = kmpClassPathList.joinToString(separator = ":")
+        var scanResult = kmpScanResultCache[kmpClassPathKey]
 
         if (scanResult == null) {
-            scanResult = ClassGraph().enableAllInfo().overrideClasspath(kmpClassPath).scan()
-            kmpScanResultCache[kmpClassPath] = scanResult
+            scanResult = ClassGraph().enableAllInfo().overrideClasspath(kmpClassPathList).scan()
+            kmpScanResultCache[kmpClassPathKey] = scanResult
         }
 
         return scanResult
@@ -98,6 +105,7 @@ class Progress() {
         "java.lang.Class" to "kotlin.reflect.KClass",
         "java.lang.Thread" to "kotlinx.coroutines.Job",
 
+        "java.util.Random" to "kotlin.random.Random",
         "java.util.SplittableRandom" to "kotlin.random.Random",
 
         "java.nio.file.Path" to "okio.Path",
@@ -107,9 +115,18 @@ class Progress() {
         "org.apache.lucene.util.automaton.RegExp\$MakeRegexGroup" to "kotlin.jvm.functions.Function3",
     )
 
+    val kmpClassPathList = listOf(
+        kmpClassPath("core", SourceType.MAIN),
+        kmpClassPath("core", SourceType.TEST),
+    )
+
+    val javaClassPathList = listOf(
+        javaClassPath("core", SourceType.MAIN),
+        javaClassPath("core", SourceType.TEST),
+    )
+
     init {
-        val kmpClassPath = kmpClassPath("core")
-        val allKmpClasses = kmpScanResult(kmpClassPath).allClasses
+        val allKmpClasses = kmpScanResult(kmpClassPathList).allClasses
         val allJdkPortClasses =
             allKmpClasses.filter { it.name.startsWith("$kmpBasePackage.jdkport") && !it.name.endsWith("Kt") }
         allJdkPortClasses.forEach { jdkPortClass ->
@@ -133,21 +150,19 @@ class Progress() {
         return toBeReplaced
     }
 
-    fun getJavaClass(moduleName: String, javaFqn: String): ClassInfo {
-        val javaClassPath = javaClassPath(moduleName)
-        val allJavaClasses = javaScanResult(javaClassPath).allClasses
+    fun getJavaClass(javaFqn: String): ClassInfo {
+        val allJavaClasses = javaScanResult(javaClassPathList).allClasses
         return allJavaClasses.first { it.name == javaFqn }
     }
 
-    fun getKmpClass(moduleName: String, kmpFqn: String): ClassInfo {
-        val kmpClassPath = kmpClassPath(moduleName)
-        val allKmpClasses = kmpScanResult(kmpClassPath).allClasses
+    fun getKmpClass(kmpFqn: String): ClassInfo {
+        val allKmpClasses = kmpScanResult(kmpClassPathList).allClasses
         return allKmpClasses.first { it.name == kmpFqn }
     }
 
-    fun analyzeClass(moduleName: String, javaFqn: String) {
-        val javaClass = getJavaClass(moduleName, javaFqn)
-        val kmpClass = getKmpClass(moduleName, javaFqn.replace(javaBasePackage, kmpBasePackage))
+    fun analyzeClass(javaFqn: String) {
+        val javaClass = getJavaClass(javaFqn)
+        val kmpClass = getKmpClass(javaFqn.replace(javaBasePackage, kmpBasePackage))
 
         val javaMethodInfos = javaClass.methodInfo
         val javaInnerClasses = javaClass.innerClasses
@@ -236,7 +251,7 @@ class Progress() {
             val status = when {
                 javaMethod != null && kmpMethod != null -> MethodStatus.PORTED
 
-                // special cases
+                // special cases core/main
                 javaClass.name == "org.apache.lucene.store.RandomAccessInput" && javaMethod?.name == "isLoaded" -> MethodStatus.IGNORED
                 javaClass.name == "org.apache.lucene.search.SloppyPhraseMatcher" && javaMethod?.name == "ppTermsBitSets" -> MethodStatus.PORTED // HashMap / LinkedHashMap difference remains
                 javaClass.name == "org.apache.lucene.search.SloppyPhraseMatcher" && javaMethod?.name == "repeatingPPs" -> MethodStatus.PORTED // HashMap / LinkedHashMap difference remains
@@ -251,6 +266,8 @@ class Progress() {
                 javaClass.name == "org.apache.lucene.codecs.lucene99.Lucene99HnswVectorsReader\$FieldEntry" && javaMethod?.name == "M" -> MethodStatus.PORTED // as field val M
                 javaClass.name == "org.apache.lucene.analysis.standard.StandardAnalyzer" && javaMethod?.name == "getStopwordSet" -> MethodStatus.PORTED // as field val stopwords which turns into getStopwords()
                 javaClass.name == "org.apache.lucene.analysis.StopwordAnalyzerBase" && javaMethod?.name == "getStopwordSet" -> MethodStatus.PORTED // as field val stopwords which turns into getStopwords()
+
+                // special cases core/test
 
                 // general cases
                 (javaMethod != null && javaMethod.name in ignoredMethodNames) && kmpMethod == null -> MethodStatus.IGNORED
@@ -304,12 +321,9 @@ class Progress() {
         }
     }
 
-    fun analyzeAllClasses(moduleName: String) {
-        val javaClassPath = javaClassPath(moduleName)
-        val allJavaClasses = javaScanResult(javaClassPath).allClasses
-
-        val kmpClassPath = kmpClassPath(moduleName)
-        val allKmpClasses = kmpScanResult(kmpClassPath).allClasses
+    fun analyzeAllClasses() {
+        val allJavaClasses = javaScanResult(javaClassPathList).allClasses
+        val allKmpClasses = kmpScanResult(kmpClassPathList).allClasses
 
         /**
          * we need to port these but we first port their dependencies, so we skip them for now
@@ -330,7 +344,7 @@ class Progress() {
             .forEach { javaClass ->
             val kmpFqn = javaClass.name.replace(javaBasePackage, kmpBasePackage)
             if (allKmpClasses.any { it.name == kmpFqn }) {
-                analyzeClass(moduleName, javaClass.name)
+                analyzeClass(javaClass.name)
             } else {
                 // println("KMP class not found for Java class: ${javaClass.name}")
             }
@@ -416,7 +430,6 @@ fun reconstructSuspendSignature(methodInfo: io.github.classgraph.MethodInfo): St
 }
 
 fun main() {
-
     val progress = Progress()
-
+    progress.analyzeAllClasses()
 }
