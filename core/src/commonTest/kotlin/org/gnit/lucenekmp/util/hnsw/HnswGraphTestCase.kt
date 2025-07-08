@@ -2,25 +2,21 @@ package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.util.Bits
-import org.gnit.lucenekmp.util.BitSet
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.VectorUtil
 import org.gnit.lucenekmp.codecs.hnsw.DefaultFlatVectorScorer
 import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.index.VectorSimilarityFunction
-import org.gnit.lucenekmp.search.KnnCollector
-import org.gnit.lucenekmp.search.TopDocs
-import org.gnit.lucenekmp.search.TopKnnCollector
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.search.DocIdSetIterator
+import org.gnit.lucenekmp.search.VectorScorer
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.Ignore
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
@@ -90,16 +86,26 @@ abstract class HnswGraphTestCase<T> : LuceneTestCase() {
     /** Returns vectors evenly distributed around the upper unit semicircle. */
     protected inner class CircularFloatVectorValues(private val size: Int) : FloatVectorValues() {
         private val value = FloatArray(2)
+
         private var doc = -1
+
         override fun copy() = CircularFloatVectorValues(size)
+
         override fun dimension() = 2
+
         override fun size() = size
+
+        fun vectorValue() = vectorValue(doc)
+
         fun docID() = doc
+
         fun nextDoc() = advance(doc + 1)
+
         fun advance(target: Int): Int {
             doc = if (target in 0 until size) target else DocIdSetIterator.NO_MORE_DOCS
             return doc
         }
+
         override fun vectorValue(ord: Int): FloatArray = this@HnswGraphTestCase.unitVector2d(ord.toDouble() / size, value)
     }
 
@@ -107,20 +113,34 @@ abstract class HnswGraphTestCase<T> : LuceneTestCase() {
     protected inner class CircularByteVectorValues(private val size: Int) : ByteVectorValues() {
         private val value = FloatArray(2)
         private val bValue = ByteArray(2)
+
         private var doc = -1
+
         override fun copy() = CircularByteVectorValues(size)
+
         override fun dimension() = 2
+
         override fun size() = size
+
+        fun vectorValue() = vectorValue(doc)
+
         fun docID() = doc
+
         fun nextDoc() = advance(doc + 1)
+
         fun advance(target: Int): Int {
             doc = if (target in 0 until size) target else DocIdSetIterator.NO_MORE_DOCS
             return doc
         }
+
         override fun vectorValue(ord: Int): ByteArray {
             this@HnswGraphTestCase.unitVector2d(ord.toDouble() / size, value)
             for (i in value.indices) bValue[i] = (value[i] * 127).toInt().toByte()
             return bValue
+        }
+
+        override fun scorer(target: ByteArray): VectorScorer {
+            throw UnsupportedOperationException()
         }
     }
 
