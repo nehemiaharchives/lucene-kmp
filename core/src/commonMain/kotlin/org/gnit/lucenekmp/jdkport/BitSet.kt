@@ -5,8 +5,6 @@ import kotlin.math.min
 
 
 /**
- * port of java.util.BitSet
- *
  * This class implements a vector of bits that grows as needed. Each
  * component of the bit set has a `boolean` value. The
  * bits of a `BitSet` are indexed by nonnegative integers.
@@ -40,6 +38,7 @@ import kotlin.math.min
  * @author  Martin Buchholz
  * @since   1.0
  */
+@Ported(from = "java.util.BitSet")
 class BitSet : Cloneable<BitSet> {
     /**
      * The internal field corresponding to the serialField "bits".

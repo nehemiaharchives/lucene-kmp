@@ -17,18 +17,17 @@
 package org.gnit.lucenekmp.util
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.bitCount
 import org.gnit.lucenekmp.search.DocIdSetIterator
+import org.gnit.lucenekmp.tests.util.BaseBitSetTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
-import org.gnit.lucenekmp.util.BitSetIterator
-import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestSparseFixedBitSet : LuceneTestCase() {
+class TestSparseFixedBitSet : BaseBitSetTestCase<SparseFixedBitSet>() {
 
-    @Throws(IOException::class)
-    private fun copyOf(bs: BitSet, length: Int): SparseFixedBitSet {
+    override fun copyOf(bs: BitSet, length: Int): SparseFixedBitSet {
         val set = SparseFixedBitSet(length)
         var doc = bs.nextSetBit(0)
         while (doc != DocIdSetIterator.NO_MORE_DOCS) {
@@ -38,6 +37,85 @@ class TestSparseFixedBitSet : LuceneTestCase() {
         return set
     }
 
+    override fun assertEquals(
+        set1: BitSet,
+        set2: SparseFixedBitSet,
+        maxDoc: Int
+    ) {
+        super.assertEquals(set1, set2, maxDoc)
+        // check invariants of the sparse set
+        var nonZeroLongCount = 0
+        for (i in set2.indices.indices) {
+            val n: Int = Long.bitCount(set2.indices[i])
+            if (n != 0) {
+                nonZeroLongCount += n
+                for (j in n..<set2.bits[i]!!.size) {
+                    assertEquals(0, set2.bits[i]!![j])
+                }
+            }
+        }
+        assertEquals(nonZeroLongCount.toLong(), set2.nonZeroLongCount.toLong())
+    }
+
+    @Test
+    override fun testCardinality() {
+        super.testCardinality()
+    }
+
+    @Test
+    override fun testPrevSetBit() {
+        super.testPrevSetBit()
+    }
+
+    @Test
+    override fun testNextSetBit() {
+        super.testNextSetBit()
+    }
+
+    @Test
+    override fun testNextSetBitInRange() {
+        super.testNextSetBitInRange()
+    }
+
+    @Test
+    override fun testSet() {
+        super.testSet()
+    }
+
+    @Test
+    override fun testGetAndSet() {
+        super.testGetAndSet()
+    }
+
+    @Test
+    override fun testClear() {
+        super.testClear()
+    }
+
+    @Test
+    override fun testClearRange() {
+        super.testClearRange()
+    }
+
+    @Test
+    override fun testClearAll() {
+        super.testClearAll()
+    }
+
+    @Test
+    override fun testOrSparse() {
+        super.testOrSparse()
+    }
+
+    @Test
+    override fun testOrDense() {
+        super.testOrDense()
+    }
+
+    @Test
+    override fun testOrRandom() {
+        super.testOrRandom()
+    }
 
     @Test
     fun testApproximateCardinality() {

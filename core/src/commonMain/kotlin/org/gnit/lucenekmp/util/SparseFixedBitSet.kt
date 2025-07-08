@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.util
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.bitCount
 import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
@@ -246,14 +247,8 @@ class SparseFixedBitSet(length: Int) : BitSet() {
             this.bits[i4096] = null
         } else {
             val length = Long.bitCount(index)
-            val bitArray = bits[i4096]
-            /*java.lang.System.arraycopy(bitArray, o + 1, bitArray, o, length - o)*/
-            bitArray!!.copyInto(
-                destination = bitArray,
-                destinationOffset = o,
-                startIndex = o + 1,
-                endIndex = length
-            )
+            val bitArray = bits[i4096]!!
+            System.arraycopy(bitArray, o + 1, bitArray, o, length - o)
             bitArray[length] = 0L
         }
         nonZeroLongCount -= 1
