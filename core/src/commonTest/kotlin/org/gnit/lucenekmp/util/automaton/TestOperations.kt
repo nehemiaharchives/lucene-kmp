@@ -636,7 +636,7 @@ class TestOperations : LuceneTestCase() {
     }
 
     @Test
-    fun testDualRepeat() {
+    fun testDuelRepeat() {
         val iters: Int = atLeast(10) // TODO originally 1_000 but reduced to 10 for dev speed
         for (iter in 0..<iters) {
             val a: Automaton =
@@ -756,7 +756,7 @@ class TestOperations : LuceneTestCase() {
     }
 
     @Test
-    fun testDualOptional() {
+    fun testDuelOptional() {
         val iters: Int = atLeast(10) // TODO originally 1_000 but reduced to 10 for dev speed
         for (iter in 0..<iters) {
             val a: Automaton =
