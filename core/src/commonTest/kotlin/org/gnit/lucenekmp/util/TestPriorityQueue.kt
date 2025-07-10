@@ -1,23 +1,32 @@
 package org.gnit.lucenekmp.util
 
+import okio.ArrayIndexOutOfBoundsException
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.test.Test
+import kotlin.test.*
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 @Suppress("BoxedPrimitiveEquality")
 class TestPriorityQueue : LuceneTestCase() {
 
-    private class IntegerQueue(count: Int) : PriorityQueue<Int>(count) {
+    private open class IntegerQueue(count: Int) : PriorityQueue<Int>(count) {
         override fun lessThan(a: Int, b: Int): Boolean {
             return a < b
         }
 
+        fun checkValidity() {
+            val heapArray: Array<Int?> = heapArray
+            for (i in 1..size()) {
+                val parent = i ushr 1
+                if (parent > 1) {
+                    if (!lessThan(heapArray[parent]!!, heapArray[i]!!)) {
+                        assertEquals(heapArray[parent], heapArray[i])
+                    }
+                }
+            }
+        }
     }
 
     @Test
@@ -55,6 +64,35 @@ class TestPriorityQueue : LuceneTestCase() {
         assertEquals(expected, indexes.toSet())
     }
 
+    @Test
+    fun testPQ() {
+        testPQ(
+            atLeast(10000),
+            random()
+        )
+    }
+
+    fun testPQ(count: Int, gen: Random) {
+        val pq: PriorityQueue<Int> = IntegerQueue(count)
+        var sum = 0
+        var sum2 = 0
+
+        for (i in 0..<count) {
+            val next: Int = gen.nextInt()
+            sum += next
+            pq.add(next)
+        }
+
+        var last = Int.Companion.MIN_VALUE
+        for (i in 0..<count) {
+            val next: Int? = pq.pop()
+            assertTrue(next!! >= last)
+            last = next
+            sum2 += last
+        }
+
+        assertEquals(sum.toLong(), sum2.toLong())
+    }
 
     @Test
     fun testClear() {
@@ -102,12 +140,120 @@ class TestPriorityQueue : LuceneTestCase() {
     }
 
     @Test
+    fun testAddAllToEmptyQueue() {
+        val random: Random = random()
+        val size = 10
+        val list: MutableList<Int> = ArrayList()
+        for (i in 0..<size) {
+            list.add(random.nextInt())
+        }
+        val pq = IntegerQueue(size)
+        pq.addAll(list)
+
+        pq.checkValidity()
+        assertOrderedWhenDrained(pq, list)
+    }
+
+    @Test
+    fun testAddAllToPartiallyFilledQueue() {
+        val pq = IntegerQueue(20)
+        val oneByOne: MutableList<Int> = ArrayList()
+        val bulkAdded: MutableList<Int> = ArrayList()
+        val random: Random = random()
+        for (i in 0..9) {
+            bulkAdded.add(random.nextInt())
+
+            val x: Int = random.nextInt()
+            pq.add(x)
+            oneByOne.add(x)
+        }
+
+        pq.addAll(bulkAdded)
+        pq.checkValidity()
+
+        oneByOne.addAll(bulkAdded) // Gather all "reference" data.
+        assertOrderedWhenDrained(pq, oneByOne)
+    }
+
+    @Test
+    fun testAddAllDoesNotFitIntoQueue() {
+        val pq = IntegerQueue(20)
+        val list: MutableList<Int> = ArrayList()
+        val random: Random = random()
+        for (i in 0..10) {
+            list.add(random.nextInt())
+            pq.add(random.nextInt())
+        }
+
+        assertFailsWith(
+            exceptionClass = ArrayIndexOutOfBoundsException::class,
+            message = "Cannot add 11 elements to a queue with remaining capacity: 9",
+        ) {
+            pq.addAll(list)
+        }
+    }
+
+    @Test
+    fun testRemovalsAndInsertions() {
+        val random: Random = random()
+        val numDocsInPQ: Int = TestUtil.nextInt(random, 1, 100)
+        val pq = IntegerQueue(numDocsInPQ)
+        var lastLeast: Int? = null
+
+        // Basic insertion of new content
+        val sds: ArrayList<Int> = ArrayList(numDocsInPQ)
+        for (i in 0..<numDocsInPQ * 10) {
+            val newEntry: Int = abs(random.nextInt())
+            sds.add(newEntry)
+            val evicted: Int? = pq.insertWithOverflow(newEntry)
+            pq.checkValidity()
+            if (evicted != null) {
+                assertTrue(sds.remove(evicted))
+                if (evicted !== newEntry) {
+                    assertSame(evicted, lastLeast)
+                }
+            }
+            val newLeast: Int = pq.top()
+            if ((lastLeast != null) && (newLeast !== newEntry) && (newLeast !== lastLeast)) {
+                // If there has been a change of least entry and it wasn't our new
+                // addition we expect the scores to increase
+                assertTrue(newLeast <= newEntry)
+                assertTrue(newLeast >= lastLeast)
+            }
+            lastLeast = newLeast
+        }
+
+        // Try many random additions to existing entries - we should always see
+        // increasing scores in the lowest entry in the PQ
+        for (p in 0..499999) {
+            val element = (random.nextFloat() * (sds.size - 1)).toInt()
+            val objectToRemove: Int = sds[element]
+            assertSame(sds.removeAt(element), objectToRemove)
+            assertTrue(pq.remove(objectToRemove))
+            pq.checkValidity()
+            val newEntry: Int = abs(random.nextInt())
+            sds.add(newEntry)
+            assertNull(pq.insertWithOverflow(newEntry))
+            pq.checkValidity()
+            val newLeast: Int = pq.top()
+            if ((objectToRemove !== lastLeast) && (lastLeast != null) && (newLeast !== newEntry)) {
+                // If there has been a change of least entry and it wasn't our new
+                // addition or the loss of our randomly removed entry we expect the
+                // scores to increase
+                assertTrue(newLeast <= newEntry)
+                assertTrue(newLeast >= lastLeast)
+            }
+            lastLeast = newLeast
+        }
+    }
+
+    @Test
     fun testIteratorEmpty() {
         val queue = IntegerQueue(3)
 
         val it = queue.iterator()
         assertFalse(it.hasNext())
-        expectThrows<NoSuchElementException>(NoSuchElementException::class) {
+        expectThrows(NoSuchElementException::class) {
             it.next()
         }
     }
@@ -121,7 +267,7 @@ class TestPriorityQueue : LuceneTestCase() {
         assertTrue(it.hasNext())
         assertEquals(1, it.next())
         assertFalse(it.hasNext())
-        expectThrows<NoSuchElementException>(NoSuchElementException::class) {
+        expectThrows(NoSuchElementException::class) {
             it.next()
         }
     }
@@ -138,15 +284,41 @@ class TestPriorityQueue : LuceneTestCase() {
         assertTrue(it.hasNext())
         assertEquals(2, it.next())
         assertFalse(it.hasNext())
-        expectThrows<NoSuchElementException>(NoSuchElementException::class) {
+        expectThrows(NoSuchElementException::class) {
             it.next()
         }
     }
 
+    @Test
+    fun testIteratorRandom() {
+        val maxSize: Int =
+            TestUtil.nextInt(random(), 1, 20)
+        val queue = IntegerQueue(maxSize)
+        val iters: Int = atLeast(100)
+        val expected: MutableList<Int> = ArrayList()
+        for (iter in 0..<iters) {
+            if (queue.size() == 0 || (queue.size() < maxSize && random()
+                    .nextBoolean())
+            ) {
+                val value: Int = random().nextInt(10)
+                queue.add(value)
+                expected.add(value)
+            } else {
+                expected.remove(queue.pop())
+            }
+            val actual: MutableList<Int> = ArrayList()
+            for (value in queue) {
+                actual.add(value)
+            }
+            CollectionUtil.introSort(expected)
+            CollectionUtil.introSort(actual)
+            assertEquals(expected, actual)
+        }
+    }
 
     @Test
     fun testMaxIntSize() {
-        expectThrows<IllegalArgumentException>(IllegalArgumentException::class) {
+        expectThrows(IllegalArgumentException::class) {
             object : PriorityQueue<Boolean>(Int.MAX_VALUE) {
                 override fun lessThan(a: Boolean, b: Boolean): Boolean {
                     return true
@@ -155,5 +327,16 @@ class TestPriorityQueue : LuceneTestCase() {
         }
     }
 
+    private fun assertOrderedWhenDrained(
+        pq: IntegerQueue,
+        referenceDataList: MutableList<Int>
+    ) {
+        referenceDataList.sorted()
+        var i = 0
+        while (pq.size() > 0) {
+            assertEquals(pq.pop(), referenceDataList[i])
+            i++
+        }
+    }
 }
 
