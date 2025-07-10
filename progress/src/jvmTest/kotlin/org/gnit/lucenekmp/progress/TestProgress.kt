@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.codecs.lucene90.blocktree.IntersectTermsEnumFrame"
+        val fqn = "${javaBasePackage}.util.TestVectorUtil"
         progress.analyzeClass(fqn)
     }
 
@@ -32,6 +32,99 @@ class TestProgress {
     fun testAnalyzeSingleModule() {
         progress.analyzeAllClasses()
     }*/
+
+    @Test
+    fun testKasKotlinDefaultParameterVariant(){
+        // Get actual classes for TestVectorUtil
+        val javaFqn = "${javaBasePackage}.util.TestVectorUtil"
+        val kmpFqn = "${kmpBasePackage}.util.TestVectorUtil"
+
+        val javaClass = progress.getJavaClass(javaFqn)
+        val kmpClass = progress.getKmpClass(kmpFqn)
+
+        // Get method info
+        val javaMethodInfos = javaClass.methodInfo
+        val kmpMethodInfos = kmpClass.methodInfo
+
+        // Create KMP method map similar to analyzeClass
+        val kmpMethodMap = kmpMethodInfos.associateBy { methodInfo ->
+            "${methodInfo.name}(${methodInfo.parameterInfo.joinToString(",") { param -> param.typeDescriptor.toString() }})"
+                .let { signature ->
+                    with(progress) {
+                        signature.normalizeBoxedTypeName()
+                    }
+                }
+        }
+
+        // Test the randomVector case - Java has overloaded method, Kotlin has default parameter
+
+        // Java randomVector() with no parameters - should find Kotlin equivalent with default
+        val javaRandomVectorNoParams = javaMethodInfos.find {
+            it.name == "randomVector" && it.parameterInfo.isEmpty()
+        }
+        assertNotNull(javaRandomVectorNoParams, "Java randomVector() method should exist")
+
+        val javaSignatureNoParams = "randomVector()"
+        assertTrue(
+            hasKotlinDefaultParameterVariant(kmpMethodMap, javaSignatureNoParams),
+            "Should detect Kotlin default parameter variant for randomVector()"
+        )
+
+        // Java randomVector(int) with parameter - should also find Kotlin equivalent
+        val javaRandomVectorWithParam = javaMethodInfos.find {
+            it.name == "randomVector" && it.parameterInfo.size == 1
+        }
+        assertNotNull(javaRandomVectorWithParam, "Java randomVector(int) method should exist")
+
+        val javaSignatureWithParam = "randomVector(int)"
+        // This should NOT be detected as needing default parameter variant since it matches directly
+        assertFalse(
+            hasKotlinDefaultParameterVariant(kmpMethodMap, javaSignatureWithParam),
+            "Should not detect default parameter variant for randomVector(int) as it has direct match"
+        )
+
+        // Test with randomVectorBytes case (the actual Kotlin implementation)
+        val javaRandomVectorBytesNoParams = javaMethodInfos.find {
+            it.name == "randomVectorBytes" && it.parameterInfo.isEmpty()
+        }
+
+        if (javaRandomVectorBytesNoParams != null) {
+            val javaBytesSignatureNoParams = "randomVectorBytes()"
+            assertTrue(
+                hasKotlinDefaultParameterVariant(kmpMethodMap, javaBytesSignatureNoParams),
+                "Should detect Kotlin default parameter variant for randomVectorBytes()"
+            )
+        }
+
+        // Test a method that should NOT have default parameter variant
+        val javaBasicDotProduct = javaMethodInfos.find {
+            it.name == "testBasicDotProduct" && it.parameterInfo.isEmpty()
+        }
+
+        if (javaBasicDotProduct != null) {
+            val basicDotProductSignature = "testBasicDotProduct()"
+            assertFalse(
+                hasKotlinDefaultParameterVariant(kmpMethodMap, basicDotProductSignature),
+                "Should not detect default parameter variant for testBasicDotProduct()"
+            )
+        }
+
+        // Print debug info to verify our understanding
+        println("Java randomVector methods:")
+        javaMethodInfos.filter { it.name == "randomVector" }.forEach { method ->
+            println("  ${method.name}(${method.parameterInfo.joinToString(",") { it.typeDescriptor.toString() }})")
+        }
+
+        println("Kotlin randomVector methods:")
+        kmpMethodInfos.filter { it.name == "randomVector" }.forEach { method ->
+            println("  ${method.name}(${method.parameterInfo.joinToString(",") { it.typeDescriptor.toString() }})")
+        }
+
+        println("Kotlin randomVectorBytes methods:")
+        kmpMethodInfos.filter { it.name == "randomVectorBytes" }.forEach { method ->
+            println("  ${method.name}(${method.parameterInfo.joinToString(",") { it.typeDescriptor.toString() }})")
+        }
+    }
 
     @Test
     fun testEndsWithDollarSignAndDigit(){

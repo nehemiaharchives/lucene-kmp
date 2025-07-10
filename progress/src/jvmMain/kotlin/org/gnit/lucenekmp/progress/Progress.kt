@@ -4,6 +4,7 @@ import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
+import io.github.classgraph.MethodInfo
 import io.github.classgraph.ScanResult
 
 // Method status enumeration for tracking porting progress
@@ -251,6 +252,9 @@ class Progress() {
             val status = when {
                 javaMethod != null && kmpMethod != null -> MethodStatus.PORTED
 
+                // Handle Kotlin default parameters case
+                javaMethod != null && kmpMethod == null && hasKotlinDefaultParameterVariant(kmpMethodMap, javaSignature) -> MethodStatus.PORTED
+
                 // special cases core/main
                 javaClass.name == "org.apache.lucene.store.RandomAccessInput" && javaMethod?.name == "isLoaded" -> MethodStatus.IGNORED
                 javaClass.name == "org.apache.lucene.search.SloppyPhraseMatcher" && javaMethod?.name == "ppTermsBitSets" -> MethodStatus.PORTED // HashMap / LinkedHashMap difference remains
@@ -349,6 +353,22 @@ class Progress() {
                 // println("KMP class not found for Java class: ${javaClass.name}")
             }
         }
+    }
+}
+
+// Add this helper function to detect Kotlin default parameter methods
+fun hasKotlinDefaultParameterVariant(kmpMethodMap: Map<String, MethodInfo>, baseSignature: String): Boolean {
+    // Extract method name from signature like "methodName(params)"
+    val methodName = baseSignature.substringBefore("(")
+
+    // Look for overloaded versions with additional parameters that have default values
+    return kmpMethodMap.keys.any { kmpSignature ->
+        val kmpMethodName = kmpSignature.substringBefore("(")
+        val kmpParams = kmpSignature.substringAfter("(").substringBefore(")")
+        val baseParams = baseSignature.substringAfter("(").substringBefore(")")
+
+        // Check if this is the same method name with more parameters
+        kmpMethodName == methodName && kmpParams.isNotEmpty() && baseParams.isEmpty()
     }
 }
 
