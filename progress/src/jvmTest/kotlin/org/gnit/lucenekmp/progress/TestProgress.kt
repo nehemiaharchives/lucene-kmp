@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.util.automaton.TestStringsToAutomaton"
+        val fqn = "${javaBasePackage}.util.TestRoaringDocIdSet"
         progress.analyzeClass(fqn)
     }
 

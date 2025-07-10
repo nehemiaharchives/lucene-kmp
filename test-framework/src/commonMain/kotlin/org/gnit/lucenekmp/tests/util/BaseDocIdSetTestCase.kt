@@ -15,24 +15,24 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
     abstract fun copyOf(bs: BitSet, length: Int): T
 
     /** Test length=0. */
-    fun testNoBit() {
+    open fun testNoBit() {
         val bs = BitSet()
         val copy = copyOf(bs, 1)
-        assertEqualsDocSet(1, bs, copy)
+        assertEquals(1, bs, copy)
     }
 
     /** Test length=1. */
-    fun test1Bit() {
+    open fun test1Bit() {
         val bs = BitSet(1)
         if (Random.Default.nextBoolean()) {
             bs.set(0)
         }
         val copy = copyOf(bs, 1)
-        assertEqualsDocSet(1, bs, copy)
+        assertEquals(1, bs, copy)
     }
 
     /** Test length=2. */
-    fun test2Bits() {
+    open fun test2Bits() {
         val bs = BitSet(2)
         if (Random.Default.nextBoolean()) {
             bs.set(0)
@@ -41,26 +41,26 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
             bs.set(1)
         }
         val copy = copyOf(bs, 2)
-        assertEqualsDocSet(2, bs, copy)
+        assertEquals(2, bs, copy)
     }
 
     /** Compare the content of the set against a BitSet. */
-    fun testAgainstBitSet() {
+    open fun testAgainstBitSet() {
         val random = Random.Default
         val numBits = TestUtil.nextInt(random, 100, 1 shl 20)
         for (percentSet in arrayOf(0f, 0.0001f, random.nextFloat(), 0.9f, 1f)) {
             val set = randomSet(numBits, percentSet)
             val copy = copyOf(set, numBits)
-            assertEqualsDocSet(numBits, set, copy)
+            assertEquals(numBits, set, copy)
         }
         var set = BitSet(numBits)
         set.set(0)
         var copy = copyOf(set, numBits)
-        assertEqualsDocSet(numBits, set, copy)
+        assertEquals(numBits, set, copy)
         set.clear(0)
         set.set(random.nextInt(numBits))
         copy = copyOf(set, numBits)
-        assertEqualsDocSet(numBits, set, copy)
+        assertEquals(numBits, set, copy)
         var iterations = 0
         val maxIterations = if (TEST_NIGHTLY) Int.MAX_VALUE else 10
         var inc = 2
@@ -73,13 +73,13 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
                 d += inc
             }
             copy = copyOf(set, numBits)
-            assertEqualsDocSet(numBits, set, copy)
+            assertEquals(numBits, set, copy)
             inc += TestUtil.nextInt(random, 1, 100)
         }
     }
 
     /** Test ram usage estimation. */
-    fun testRamBytesUsed() {
+    open fun testRamBytesUsed() {
         val random = Random.Default
         val iters = 100
         repeat(iters) {
@@ -95,7 +95,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
     }
 
     /** Assert that the content of the DocIdSet is the same as the content of the BitSet. */
-    open fun assertEqualsDocSet(numBits: Int, ds1: BitSet, ds2: T) {
+    open fun assertEquals(numBits: Int, ds1: BitSet, ds2: T) {
         val random = Random.Default
         var it2: DocIdSetIterator? = ds2.iterator()
         if (it2 == null) {
@@ -142,7 +142,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
     private fun ramBytesUsed(set: DocIdSet, length: Int): Long {
         return set.ramBytesUsed()
     }
-    fun testIntoBitSet() {
+    open fun testIntoBitSet() {
         val random = Random.Default
         val numBits = TestUtil.nextInt(random, 100, 1 shl 20)
         for (percentSet in arrayOf(0f, 0.0001f, random.nextFloat(), 0.9f, 1f)) {
@@ -173,7 +173,7 @@ abstract class BaseDocIdSetTestCase<T : DocIdSet> : LuceneTestCase() {
         }
     }
 
-    fun testIntoBitSetBoundChecks() {
+    open fun testIntoBitSetBoundChecks() {
         val set = BitSet()
         set.set(20)
         set.set(42)
