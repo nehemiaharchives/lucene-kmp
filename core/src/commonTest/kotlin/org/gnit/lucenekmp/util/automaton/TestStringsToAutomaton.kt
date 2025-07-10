@@ -1,14 +1,16 @@
 package org.gnit.lucenekmp.util.automaton
 
+import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
+import org.gnit.lucenekmp.tests.util.automaton.MinimizationOperations
+import org.gnit.lucenekmp.util.ArrayUtil
+import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.util.BytesRefIterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.gnit.lucenekmp.tests.util.LuceneTestCase
-import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
-import org.gnit.lucenekmp.tests.util.automaton.MinimizationOperations
-import org.gnit.lucenekmp.util.BytesRef
-import org.gnit.lucenekmp.util.BytesRefIterator
-import org.gnit.lucenekmp.util.automaton.Automata
 
 class TestStringsToAutomaton : LuceneTestCase() {
     @Test
@@ -33,7 +35,7 @@ class TestStringsToAutomaton : LuceneTestCase() {
 
     @Test
     fun testRandomMinimized() {
-        val iters = if (LuceneTestCase.TEST_NIGHTLY) 20 else 5
+        val iters = if (TEST_NIGHTLY) 20 else 5
         repeat(iters) {
             val buildBinary = random().nextBoolean()
             val size = random().nextInt(2, 50)
@@ -56,6 +58,72 @@ class TestStringsToAutomaton : LuceneTestCase() {
                 MinimizationOperations.minimize(Operations.union(automata), Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
             val actual = build(sortedTerms, buildBinary)
             assertSameAutomaton(expected, actual)
+        }
+    }
+
+    @Test
+    fun testRandomUnicodeOnly() {
+        testRandom(false)
+    }
+
+    @Test
+    fun testRandomBinary() {
+        testRandom(true)
+    }
+
+    @Test
+    fun testLargeTerms() {
+        val b10k = ByteArray(10000)
+        Arrays.fill(b10k, 'a'.code.toByte())
+        val e: IllegalArgumentException =
+            expectThrows(IllegalArgumentException::class) {
+                build(mutableSetOf(BytesRef(b10k)), false)
+            }!!
+        assertTrue(
+            e.message!!
+                .startsWith(
+                    ("This builder doesn't allow terms that are larger than "
+                            + Automata.MAX_STRING_UNION_TERM_LENGTH
+                            + " UTF-8 bytes")
+                )
+        )
+
+        val b1k: ByteArray = ArrayUtil.copyOfSubArray(b10k, 0, 1000)
+        build(
+            mutableSetOf(BytesRef(b1k)),
+            false
+        ) // no exception
+    }
+
+    private fun testRandom(allowBinary: Boolean) {
+        val iters = /*if (RandomizedTest.isNightly) 50 else */10
+        for (i in 0..<iters) {
+            val size: Int = random().nextInt(50, 200)  // TODO originally 500, 2000 but reducing to 50, 200 for dev speed
+            val terms: MutableSet<BytesRef> = HashSet(size)
+            for (j in 0..<size) {
+                if (allowBinary && random().nextInt(10) < 2) {
+                    // Sometimes random bytes term that isn't necessarily valid unicode
+                    terms.add(
+                        newBytesRef(
+                            TestUtil.randomBinaryTerm(
+                                random()
+                            )
+                        )
+                    )
+                } else {
+                    terms.add(
+                        newBytesRef(
+                            TestUtil.randomRealisticUnicodeString(
+                                random()
+                            )
+                        )
+                    )
+                }
+            }
+
+            val sorted: MutableList<BytesRef> = terms.sorted().toMutableList()
+            val a: Automaton = build(sorted, allowBinary)
+            checkAutomaton(sorted, a, allowBinary)
         }
     }
 

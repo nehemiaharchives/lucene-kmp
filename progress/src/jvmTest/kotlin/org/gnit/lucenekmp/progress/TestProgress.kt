@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.util.TestVectorUtil"
+        val fqn = "${javaBasePackage}.util.automaton.TestStringsToAutomaton"
         progress.analyzeClass(fqn)
     }
 
