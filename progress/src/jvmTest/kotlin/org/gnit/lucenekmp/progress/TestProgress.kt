@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.geo.TestPolygon"
+        val fqn = "${javaBasePackage}.geo.TestTessellator"
         progress.analyzeClass(fqn)
     }
 
@@ -34,7 +34,79 @@ class TestProgress {
     }*/
 
     @Test
-    fun testKasKotlinDefaultParameterVariant(){
+    fun testHasKotlinDefaultParameterVariantWithTestTessellator(){
+        // Get actual classes for TestTessellator
+        val javaFqn = "${javaBasePackage}.geo.TestTessellator"
+        val kmpFqn = "${kmpBasePackage}.geo.TestTessellator"
+
+        val javaClass = progress.getJavaClass(javaFqn)
+        val kmpClass = progress.getKmpClass(kmpFqn)
+
+        // Get method info
+        val javaMethodInfos = javaClass.methodInfo
+        val kmpMethodInfos = kmpClass.methodInfo
+
+        // Create KMP method map similar to analyzeClass
+        val kmpMethodMap = kmpMethodInfos.associateBy { methodInfo ->
+            "${methodInfo.name}(${methodInfo.parameterInfo.joinToString(",") { param -> param.typeDescriptor.toString() }})"
+                .let { signature ->
+                    with(progress) {
+                        signature.normalizeBoxedTypeName()
+                    }
+                }
+        }
+
+        // Test the checkMultiPolygon case - Java has overloaded method, Kotlin has default parameter
+
+        // Java checkMultiPolygon() with String parameter - should find Kotlin equivalent with default
+        val javaCheckMultiPolygonString = javaMethodInfos.find {
+            it.name == "checkMultiPolygon" && it.parameterInfo.size == 1 &&
+            it.parameterInfo[0].typeDescriptor.toString().contains("String")
+        }
+        assertNotNull(javaCheckMultiPolygonString, "Java checkMultiPolygon(String) method should exist")
+
+        val javaSignatureString = "checkMultiPolygon(java.lang.String)"
+
+        // This should detect Kotlin default parameter variant
+        assertTrue(
+            hasKotlinDefaultParameterVariant(kmpMethodMap, javaSignatureString),
+            "Should detect Kotlin default parameter variant for checkMultiPolygon(String)"
+        )
+
+        // Java checkMultiPolygon() with Polygon array and delta parameter - should also find Kotlin equivalent
+        val javaCheckMultiPolygonWithParams = javaMethodInfos.find {
+            it.name == "checkMultiPolygon" && it.parameterInfo.size == 2 &&
+            it.parameterInfo[0].typeDescriptor.toString().contains("Polygon") &&
+            it.parameterInfo[1].typeDescriptor.toString() == "double"
+        }
+        assertNotNull(javaCheckMultiPolygonWithParams, "Java checkMultiPolygon(Polygon[], double) method should exist")
+
+        val javaSignatureWithParams = "checkMultiPolygon([Lorg.apache.lucene.geo.Polygon;,double)"
+        // This should NOT be detected as needing default parameter variant since it matches directly
+        assertFalse(
+            hasKotlinDefaultParameterVariant(kmpMethodMap, javaSignatureWithParams),
+            "Should not detect default parameter variant for checkMultiPolygon(Polygon[], double) as it has direct match"
+        )
+
+        // Print debug info to verify our understanding
+        println("Java checkMultiPolygon methods:")
+        javaMethodInfos.filter { it.name == "checkMultiPolygon" }.forEach { method ->
+            println("  ${method.name}(${method.parameterInfo.joinToString(",") { it.typeDescriptor.toString() }})")
+        }
+
+        println("Kotlin checkMultiPolygon methods:")
+        kmpMethodInfos.filter { it.name == "checkMultiPolygon" }.forEach { method ->
+            println("  ${method.name}(${method.parameterInfo.joinToString(",") { it.typeDescriptor.toString() }})")
+        }
+
+        println("KMP method map keys containing 'checkMultiPolygon':")
+        kmpMethodMap.keys.filter { it.contains("checkMultiPolygon") }.forEach { key ->
+            println("  $key")
+        }
+    }
+
+    @Test
+    fun testHasKotlinDefaultParameterVariantWithTestVectorUtil(){
         // Get actual classes for TestVectorUtil
         val javaFqn = "${javaBasePackage}.util.TestVectorUtil"
         val kmpFqn = "${kmpBasePackage}.util.TestVectorUtil"

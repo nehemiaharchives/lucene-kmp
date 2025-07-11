@@ -358,17 +358,30 @@ class Progress() {
 
 // Add this helper function to detect Kotlin default parameter methods
 fun hasKotlinDefaultParameterVariant(kmpMethodMap: Map<String, MethodInfo>, baseSignature: String): Boolean {
-    // Extract method name from signature like "methodName(params)"
+    // Extract method name and parameters from signature like "methodName(params)"
     val methodName = baseSignature.substringBefore("(")
+    val baseParams = baseSignature.substringAfter("(").substringBefore(")")
+    val baseParamList = if (baseParams.isEmpty()) emptyList() else baseParams.split(",")
 
-    // Look for overloaded versions with additional parameters that have default values
+    // Look for Kotlin methods with the same name that have more parameters
     return kmpMethodMap.keys.any { kmpSignature ->
         val kmpMethodName = kmpSignature.substringBefore("(")
         val kmpParams = kmpSignature.substringAfter("(").substringBefore(")")
-        val baseParams = baseSignature.substringAfter("(").substringBefore(")")
+        val kmpParamList = if (kmpParams.isEmpty()) emptyList() else kmpParams.split(",")
 
-        // Check if this is the same method name with more parameters
-        kmpMethodName == methodName && kmpParams.isNotEmpty() && baseParams.isEmpty()
+        // Check if this is the same method name with more parameters than the base
+        if (kmpMethodName == methodName && kmpParamList.size > baseParamList.size) {
+            // Check if the first N parameters match (where N is the number of base parameters)
+            val baseParamCount = baseParamList.size
+            val kmpFirstNParams = kmpParamList.take(baseParamCount)
+
+            // Parameters should match (allowing for type normalization)
+            kmpFirstNParams.zip(baseParamList).all { (kmpParam, baseParam) ->
+                kmpParam.trim() == baseParam.trim()
+            }
+        } else {
+            false
+        }
     }
 }
 
