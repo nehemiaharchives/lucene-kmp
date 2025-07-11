@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.geo.TestXYPolygon"
+        val fqn = "${javaBasePackage}.store.TestBufferedChecksum"
         progress.analyzeClass(fqn)
     }
 
