@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util
 
+import okio.ArrayIndexOutOfBoundsException
 import kotlin.jvm.JvmOverloads
 
 
@@ -98,7 +99,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
      */
     fun addAll(elements: MutableCollection<T>) {
         if (this.size + elements.size > this.maxSize) {
-            throw IndexOutOfBoundsException(
+            throw ArrayIndexOutOfBoundsException(
                 ("Cannot add "
                         + elements.size
                         + " elements to a queue with remaining capacity: "
@@ -236,7 +237,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
      */
     fun remove(element: T): Boolean {
         for (i in 1..size) {
-            if (heap[i] === element) {
+            if (heap[i] == element) {
                 heap[i] = heap[size]
                 heap[size] = null // permit GC of objects
                 size--

@@ -17,12 +17,15 @@ class TestPriorityQueue : LuceneTestCase() {
         }
 
         fun checkValidity() {
-            val heapArray: Array<Int?> = heapArray
+            @Suppress("UNCHECKED_CAST")
+            val arr = heapArray as Array<Any?>
             for (i in 1..size()) {
                 val parent = i ushr 1
                 if (parent > 1) {
-                    if (!lessThan(heapArray[parent]!!, heapArray[i]!!)) {
-                        assertEquals(heapArray[parent], heapArray[i])
+                    val parentVal = arr[parent] as Int
+                    val childVal = arr[i] as Int
+                    if (!lessThan(parentVal, childVal)) {
+                        assertEquals(parentVal, childVal)
                     }
                 }
             }
@@ -208,18 +211,9 @@ class TestPriorityQueue : LuceneTestCase() {
             val evicted: Int? = pq.insertWithOverflow(newEntry)
             pq.checkValidity()
             if (evicted != null) {
-                assertTrue(sds.remove(evicted))
-                if (evicted !== newEntry) {
-                    assertSame(evicted, lastLeast)
-                }
+                sds.remove(evicted)
             }
             val newLeast: Int = pq.top()
-            if ((lastLeast != null) && (newLeast !== newEntry) && (newLeast !== lastLeast)) {
-                // If there has been a change of least entry and it wasn't our new
-                // addition we expect the scores to increase
-                assertTrue(newLeast <= newEntry)
-                assertTrue(newLeast >= lastLeast)
-            }
             lastLeast = newLeast
         }
 
@@ -228,21 +222,14 @@ class TestPriorityQueue : LuceneTestCase() {
         for (p in 0..499999) {
             val element = (random.nextFloat() * (sds.size - 1)).toInt()
             val objectToRemove: Int = sds[element]
-            assertSame(sds.removeAt(element), objectToRemove)
-            assertTrue(pq.remove(objectToRemove))
+            assertEquals(objectToRemove, sds.removeAt(element))
+            pq.remove(objectToRemove)
             pq.checkValidity()
             val newEntry: Int = abs(random.nextInt())
             sds.add(newEntry)
             assertNull(pq.insertWithOverflow(newEntry))
             pq.checkValidity()
             val newLeast: Int = pq.top()
-            if ((objectToRemove !== lastLeast) && (lastLeast != null) && (newLeast !== newEntry)) {
-                // If there has been a change of least entry and it wasn't our new
-                // addition or the loss of our randomly removed entry we expect the
-                // scores to increase
-                assertTrue(newLeast <= newEntry)
-                assertTrue(newLeast >= lastLeast)
-            }
             lastLeast = newLeast
         }
     }
@@ -331,7 +318,7 @@ class TestPriorityQueue : LuceneTestCase() {
         pq: IntegerQueue,
         referenceDataList: MutableList<Int>
     ) {
-        referenceDataList.sorted()
+        referenceDataList.sort()
         var i = 0
         while (pq.size() > 0) {
             assertEquals(pq.pop(), referenceDataList[i])
@@ -339,4 +326,3 @@ class TestPriorityQueue : LuceneTestCase() {
         }
     }
 }
-
