@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.geo.TestTessellator"
+        val fqn = "${javaBasePackage}.geo.TestXYPolygon"
         progress.analyzeClass(fqn)
     }
 
