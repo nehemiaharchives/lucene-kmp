@@ -24,7 +24,7 @@ class TestProgress {
 
     @Test
     fun testAnalyzeSingleClass() {
-        val fqn = "${javaBasePackage}.store.TestBufferedChecksum"
+        val fqn = "${javaBasePackage}.store.TestByteBuffersDataOutput"
         progress.analyzeClass(fqn)
     }
 

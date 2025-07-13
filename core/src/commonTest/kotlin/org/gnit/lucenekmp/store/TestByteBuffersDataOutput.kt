@@ -16,44 +16,24 @@
  */
 package org.gnit.lucenekmp.store
 
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.incrementAndFetch
-import kotlin.random.Random
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import okio.IOException
 import org.gnit.lucenekmp.jdkport.ByteBuffer
-import org.gnit.lucenekmp.store.ByteArrayDataInput
 import org.gnit.lucenekmp.jdkport.get
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
+import kotlin.random.Random
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class TestByteBuffersDataOutput : LuceneTestCase() {
+class TestByteBuffersDataOutput : BaseDataOutputTestCase<ByteBuffersDataOutput>() {
 
-    private fun addRandomData(out: ByteBuffersDataOutput, rnd: Random, count: Int) {
-        repeat(count) {
-            when (rnd.nextInt(7)) {
-                0 -> out.writeByte(rnd.nextInt().toByte())
-                1 -> {
-                    val bytes = ByteArray(TestUtil.nextInt(rnd, 0, 100))
-                    rnd.nextBytes(bytes)
-                    out.writeBytes(bytes, bytes.size)
-                }
-                2 -> out.writeInt(rnd.nextInt())
-                3 -> out.writeLong(rnd.nextLong())
-                4 -> out.writeShort(rnd.nextInt().toShort())
-                5 -> out.writeVInt(rnd.nextInt())
-                else -> {
-                    val s = TestUtil.randomUnicodeString(rnd, 20)
-                    out.writeString(s)
-                }
-            }
-        }
-    }
     @OptIn(ExperimentalAtomicApi::class)
     @Test
     fun testReuse() {
@@ -293,6 +273,9 @@ class TestByteBuffersDataOutput : LuceneTestCase() {
         assertEquals(out.ramBytesUsed(), computeRamBytesUsed(out))
     }
 
+    @Test
+    override fun testRandomizedWrites() = super.testRandomizedWrites()
+
     private fun computeRamBytesUsed(out: ByteBuffersDataOutput): Long {
         if (out.size() == 0L) return 0L
         val buffers = out.toBufferList()
@@ -301,6 +284,14 @@ class TestByteBuffersDataOutput : LuceneTestCase() {
             sum += bb.capacity.toLong()
         }
         return sum + buffers.size * RamUsageEstimator.NUM_BYTES_OBJECT_REF
+    }
+
+    override fun newInstance(): ByteBuffersDataOutput {
+        return ByteBuffersDataOutput()
+    }
+
+    override fun toBytes(instance: ByteBuffersDataOutput): ByteArray {
+        return instance.toArrayCopy()
     }
 }
 

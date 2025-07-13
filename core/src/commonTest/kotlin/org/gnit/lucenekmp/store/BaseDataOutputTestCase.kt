@@ -8,7 +8,6 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.IOConsumer
 import kotlin.random.Random
-import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import okio.IOException
@@ -20,9 +19,8 @@ abstract class BaseDataOutputTestCase<T : DataOutput> : LuceneTestCase() {
 
     protected abstract fun toBytes(instance: T): ByteArray
 
-    @Test
     @Throws(IOException::class)
-    fun testRandomizedWrites() {
+    open fun testRandomizedWrites() {
         val dst = newInstance()
         val baos = ByteArrayOutputStream()
         val ref: DataOutput = OutputStreamDataOutput(baos)
