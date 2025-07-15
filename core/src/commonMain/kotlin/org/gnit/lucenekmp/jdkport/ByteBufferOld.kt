@@ -6,7 +6,7 @@ import kotlin.math.min
 // A simple re-implementation of java.nio.ByteBufferOld using a ByteArray as the backing store.
 @Ported(from = "java.nio.ByteBuffer")
 open class ByteBufferOld private constructor(
-    private val array: ByteArray,
+    private val hb: ByteArray,
     /** The fixed capacity of this ByteBufferOld. */
     val capacity: Int
 ) : Comparable<ByteBufferOld> {
@@ -67,7 +67,7 @@ open class ByteBufferOld private constructor(
      * Returns byte array that backs this buffer.
      */
     fun array(): ByteArray {
-        return array
+        return hb
     }
 
     /**
@@ -157,7 +157,7 @@ open class ByteBufferOld private constructor(
     /** Relative get: reads the byte at the current position then increments it. */
     fun get(): Byte {
         if (position >= limit) throw BufferUnderflowException("Not enough bytes to read at position $position with limit $limit")
-        val b = array[position]
+        val b = hb[position]
         position++
         return b
     }
@@ -166,7 +166,7 @@ open class ByteBufferOld private constructor(
     fun get(index: Int): Byte {
         if (index !in 0 until limit)
             throw IndexOutOfBoundsException("Index ($index) out of bounds (0..${limit - 1})")
-        return array[index]
+        return hb[index]
     }
 
     /**
@@ -256,15 +256,15 @@ open class ByteBufferOld private constructor(
             )
         }
         return if (bigEndian) {
-            ((array[index].toInt() and 0xFF) shl 24) or
-            ((array[index + 1].toInt() and 0xFF) shl 16) or
-            ((array[index + 2].toInt() and 0xFF) shl 8) or
-            (array[index + 3].toInt() and 0xFF)
+            ((hb[index].toInt() and 0xFF) shl 24) or
+            ((hb[index + 1].toInt() and 0xFF) shl 16) or
+            ((hb[index + 2].toInt() and 0xFF) shl 8) or
+            (hb[index + 3].toInt() and 0xFF)
         } else {
-            (array[index].toInt() and 0xFF) or
-            ((array[index + 1].toInt() and 0xFF) shl 8) or
-            ((array[index + 2].toInt() and 0xFF) shl 16) or
-            ((array[index + 3].toInt() and 0xFF) shl 24)
+            (hb[index].toInt() and 0xFF) or
+            ((hb[index + 1].toInt() and 0xFF) shl 8) or
+            ((hb[index + 2].toInt() and 0xFF) shl 16) or
+            ((hb[index + 3].toInt() and 0xFF) shl 24)
         }
     }
 
@@ -313,12 +313,12 @@ open class ByteBufferOld private constructor(
             )
         }
         return if (bigEndian) {
-            val hi = array[index].toInt() and 0xFF
-            val lo = array[index + 1].toInt() and 0xFF
+            val hi = hb[index].toInt() and 0xFF
+            val lo = hb[index + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         } else {
-            val lo = array[index].toInt() and 0xFF
-            val hi = array[index + 1].toInt() and 0xFF
+            val lo = hb[index].toInt() and 0xFF
+            val hi = hb[index + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         }
     }
@@ -341,12 +341,12 @@ open class ByteBufferOld private constructor(
         if (remaining() < 2)
             throw BufferUnderflowException("Not enough bytes remaining to read a short (need 2, have ${remaining()})")
         val value = if (bigEndian) {
-            val hi = array[position].toInt() and 0xFF
-            val lo = array[position + 1].toInt() and 0xFF
+            val hi = hb[position].toInt() and 0xFF
+            val lo = hb[position + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         } else {
-            val lo = array[position].toInt() and 0xFF
-            val hi = array[position + 1].toInt() and 0xFF
+            val lo = hb[position].toInt() and 0xFF
+            val hi = hb[position + 1].toInt() and 0xFF
             ((hi shl 8) or lo).toShort()
         }
         position += 2
@@ -357,7 +357,7 @@ open class ByteBufferOld private constructor(
     fun put(b: Byte): ByteBufferOld {
         checkWritable()
         if (position >= limit) throw BufferOverflowException("Not enough space to write at position $position with limit $limit")
-        array[position] = b
+        hb[position] = b
         position++
         return this
     }
@@ -367,7 +367,7 @@ open class ByteBufferOld private constructor(
         checkWritable()
         if (index !in 0 until limit)
             throw IndexOutOfBoundsException("Index ($index) out of bounds (0..${limit - 1})")
-        array[index] = b
+        hb[index] = b
         return this
     }
 
@@ -465,11 +465,11 @@ open class ByteBufferOld private constructor(
             throw BufferOverflowException("Not enough space to write 2 bytes at position $position with limit $limit")
         }
         if (order() == ByteOrder.BIG_ENDIAN) {
-            array[position] = (value.toInt() shr 8).toByte()
-            array[position + 1] = value.toByte()
+            hb[position] = (value.toInt() shr 8).toByte()
+            hb[position + 1] = value.toByte()
         } else {
-            array[position] = value.toByte()
-            array[position + 1] = (value.toInt() shr 8).toByte()
+            hb[position] = value.toByte()
+            hb[position + 1] = (value.toInt() shr 8).toByte()
         }
         position += 2
         return this
@@ -502,15 +502,15 @@ open class ByteBufferOld private constructor(
             throw BufferOverflowException("Not enough space to write 4 bytes at position $position with limit $limit")
         }
         if (order() == ByteOrder.BIG_ENDIAN) {
-            array[position] = (value shr 24).toByte()
-            array[position + 1] = (value shr 16).toByte()
-            array[position + 2] = (value shr 8).toByte()
-            array[position + 3] = value.toByte()
+            hb[position] = (value shr 24).toByte()
+            hb[position + 1] = (value shr 16).toByte()
+            hb[position + 2] = (value shr 8).toByte()
+            hb[position + 3] = value.toByte()
         } else {
-            array[position] = value.toByte()
-            array[position + 1] = (value shr 8).toByte()
-            array[position + 2] = (value shr 16).toByte()
-            array[position + 3] = (value shr 24).toByte()
+            hb[position] = value.toByte()
+            hb[position + 1] = (value shr 8).toByte()
+            hb[position + 2] = (value shr 16).toByte()
+            hb[position + 3] = (value shr 24).toByte()
         }
         position += 4
         return this
@@ -562,23 +562,23 @@ open class ByteBufferOld private constructor(
             throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
         }
         return if (order() == ByteOrder.BIG_ENDIAN) {
-            ((array[index].toLong() and 0xFF) shl 56) or
-            ((array[index + 1].toLong() and 0xFF) shl 48) or
-            ((array[index + 2].toLong() and 0xFF) shl 40) or
-            ((array[index + 3].toLong() and 0xFF) shl 32) or
-            ((array[index + 4].toLong() and 0xFF) shl 24) or
-            ((array[index + 5].toLong() and 0xFF) shl 16) or
-            ((array[index + 6].toLong() and 0xFF) shl 8) or
-            (array[index + 7].toLong() and 0xFF)
+            ((hb[index].toLong() and 0xFF) shl 56) or
+            ((hb[index + 1].toLong() and 0xFF) shl 48) or
+            ((hb[index + 2].toLong() and 0xFF) shl 40) or
+            ((hb[index + 3].toLong() and 0xFF) shl 32) or
+            ((hb[index + 4].toLong() and 0xFF) shl 24) or
+            ((hb[index + 5].toLong() and 0xFF) shl 16) or
+            ((hb[index + 6].toLong() and 0xFF) shl 8) or
+            (hb[index + 7].toLong() and 0xFF)
         } else {
-            (array[index].toLong() and 0xFF) or
-            ((array[index + 1].toLong() and 0xFF) shl 8) or
-            ((array[index + 2].toLong() and 0xFF) shl 16) or
-            ((array[index + 3].toLong() and 0xFF) shl 24) or
-            ((array[index + 4].toLong() and 0xFF) shl 32) or
-            ((array[index + 5].toLong() and 0xFF) shl 40) or
-            ((array[index + 6].toLong() and 0xFF) shl 48) or
-            ((array[index + 7].toLong() and 0xFF) shl 56)
+            (hb[index].toLong() and 0xFF) or
+            ((hb[index + 1].toLong() and 0xFF) shl 8) or
+            ((hb[index + 2].toLong() and 0xFF) shl 16) or
+            ((hb[index + 3].toLong() and 0xFF) shl 24) or
+            ((hb[index + 4].toLong() and 0xFF) shl 32) or
+            ((hb[index + 5].toLong() and 0xFF) shl 40) or
+            ((hb[index + 6].toLong() and 0xFF) shl 48) or
+            ((hb[index + 7].toLong() and 0xFF) shl 56)
         }
     }
 
@@ -605,23 +605,23 @@ open class ByteBufferOld private constructor(
             throw BufferOverflowException("Not enough space to write 8 bytes at position $position with limit $limit")
         }
         if (order() == ByteOrder.BIG_ENDIAN) {
-            array[position] = (value shr 56).toByte()
-            array[position + 1] = (value shr 48).toByte()
-            array[position + 2] = (value shr 40).toByte()
-            array[position + 3] = (value shr 32).toByte()
-            array[position + 4] = (value shr 24).toByte()
-            array[position + 5] = (value shr 16).toByte()
-            array[position + 6] = (value shr 8).toByte()
-            array[position + 7] = value.toByte()
+            hb[position] = (value shr 56).toByte()
+            hb[position + 1] = (value shr 48).toByte()
+            hb[position + 2] = (value shr 40).toByte()
+            hb[position + 3] = (value shr 32).toByte()
+            hb[position + 4] = (value shr 24).toByte()
+            hb[position + 5] = (value shr 16).toByte()
+            hb[position + 6] = (value shr 8).toByte()
+            hb[position + 7] = value.toByte()
         } else {
-            array[position] = value.toByte()
-            array[position + 1] = (value shr 8).toByte()
-            array[position + 2] = (value shr 16).toByte()
-            array[position + 3] = (value shr 24).toByte()
-            array[position + 4] = (value shr 32).toByte()
-            array[position + 5] = (value shr 40).toByte()
-            array[position + 6] = (value shr 48).toByte()
-            array[position + 7] = (value shr 56).toByte()
+            hb[position] = value.toByte()
+            hb[position + 1] = (value shr 8).toByte()
+            hb[position + 2] = (value shr 16).toByte()
+            hb[position + 3] = (value shr 24).toByte()
+            hb[position + 4] = (value shr 32).toByte()
+            hb[position + 5] = (value shr 40).toByte()
+            hb[position + 6] = (value shr 48).toByte()
+            hb[position + 7] = (value shr 56).toByte()
         }
         position += 8
         return this
@@ -679,7 +679,7 @@ open class ByteBufferOld private constructor(
 
     /** Creates a new buffer that shares this buffer’s content but has independent position, limit, and mark. */
     fun duplicate(): ByteBufferOld {
-        val dup = ByteBufferOld(array, capacity)
+        val dup = ByteBufferOld(hb, capacity)
         dup.position = this.position
         dup.limit = this.limit
         dup.bigEndian = this.bigEndian
@@ -691,7 +691,7 @@ open class ByteBufferOld private constructor(
     /** Creates a new buffer that is a view of this buffer's content between position and limit. */
     fun slice(): ByteBufferOld {
         val remaining = remaining()
-        val sliceArray = array.copyOfRange(position, limit)
+        val sliceArray = hb.copyOfRange(position, limit)
         val bb = ByteBufferOld(sliceArray, capacity = remaining)
         bb.clear()
         bb.limit = remaining
@@ -881,7 +881,7 @@ open class ByteBufferOld private constructor(
         val rem = remaining()
         if (rem > 0) {
             for (i in 0 until rem) {
-                array[i] = array[position + i]
+                hb[i] = hb[position + i]
             }
         }
         position = rem

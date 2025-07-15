@@ -229,7 +229,7 @@ class TestByteBuffersDataOutput : BaseDataOutputTestCase<ByteBuffersDataOutput>(
         val dst = ByteBuffersDataOutput()
         dst.writeBytes(ByteArray(100))
         for (bb in dst.toBufferList()) {
-            assertTrue(bb.isReadOnly())
+            assertTrue(bb.isReadOnly)
         }
     }
 
@@ -237,12 +237,12 @@ class TestByteBuffersDataOutput : BaseDataOutputTestCase<ByteBuffersDataOutput>(
     fun testToWriteableBufferListReturnsOriginalBuffers() {
         val dst = ByteBuffersDataOutput()
         for (bb in dst.toWriteableBufferList()) {
-            assertTrue(!bb.isReadOnly())
+            assertTrue(!bb.isReadOnly)
             assertTrue(bb.hasArray())
         }
         dst.writeBytes(ByteArray(100))
         for (bb in dst.toWriteableBufferList()) {
-            assertTrue(!bb.isReadOnly())
+            assertTrue(!bb.isReadOnly)
             assertTrue(bb.hasArray())
         }
     }
