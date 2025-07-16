@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-internal open class HeapByteBuffer
+open class HeapByteBuffer
 
     : ByteBuffer {
     // For speed these fields are actually declared in X-Buffer;
@@ -94,7 +94,7 @@ internal open class HeapByteBuffer
 
     // TODO implement HeapByteBufferR
     override fun asReadOnlyBuffer(): ByteBuffer {
-        return HeapByteBuffer/*R*/(
+        return HeapByteBufferR(
             hb,
             this.markValue(),
             this.position(),
@@ -227,39 +227,77 @@ internal open class HeapByteBuffer
             bigEndian
         )*/
 
-    /*override fun getChar(i: Int): Char {
-        return Buffer.SCOPED_MEMORY_ACCESS.getCharUnaligned(
+    override fun getChar(): Char {
+        if (remaining() < 2)
+            throw BufferUnderflowException("Not enough bytes remaining to read a char (need 2, have ${remaining()})")
+        val value = getChar(position)
+        position += 2
+        return value
+    }
+
+    override fun getChar(i: Int): Char {
+        /*  return Buffer.SCOPED_MEMORY_ACCESS.getCharUnaligned(
             session(),
             hb,
             byteOffset(checkIndex(i, 2).toLong()),
-            bigEndian
-        )
-    }*/
+            bigEndian)
+        */
 
+        if (i < 0 || limit - i < 2) {
+            throw IndexOutOfBoundsException("Index $i out of bounds: need 2 bytes from index (limit: $limit)")
+        }
+        return if (order() == ByteOrder.BIG_ENDIAN) {
+            val hi = hb[ix(i)].toInt() and 0xFF
+            val lo = hb[ix(i + 1)].toInt() and 0xFF
+            ((hi shl 8) or lo).toChar()
+        } else {
+            val lo = hb[ix(i)].toInt() and 0xFF
+            val hi = hb[ix(i + 1)].toInt() and 0xFF
+            ((hi shl 8) or lo).toChar()
+        }
+    }
 
-    /*override fun putChar(x: Char): ByteBuffer {
-        Buffer.SCOPED_MEMORY_ACCESS.putCharUnaligned(
-            session(),
-            hb,
-            byteOffset(nextPutIndex(2).toLong()),
-            x,
-            bigEndian
-        )
+    override fun putChar(value: Char): ByteBuffer {
+        /*
+        SCOPED_MEMORY_ACCESS.putCharUnaligned(session(), hb, byteOffset(nextPutIndex(2)), x, bigEndian);
+        return this;
+        */
+        checkWritable()
+        if (remaining() < 2) {
+            throw BufferOverflowException("Not enough space to write 2 bytes at position $position with limit $limit")
+        }
+        if (order() == ByteOrder.BIG_ENDIAN) {
+            hb[position] = (value.code shr 8).toByte()
+            hb[position + 1] = value.code.toByte()
+        } else {
+            hb[position] = value.code.toByte()
+            hb[position + 1] = (value.code shr 8).toByte()
+        }
+        position += 2
         return this
-    }*/
+    }
 
-    /*override fun putChar(i: Int, x: Char): ByteBuffer {
-        Buffer.SCOPED_MEMORY_ACCESS.putCharUnaligned(
-            session(),
-            hb,
-            byteOffset(checkIndex(i, 2).toLong()),
-            x,
-            bigEndian
-        )
+    override fun putChar(index: Int, value: Char): ByteBuffer {
+
+        /*SCOPED_MEMORY_ACCESS.putCharUnaligned(session(), hb, byteOffset(checkIndex(i, 2)), x, bigEndian);
+        return this;*/
+
+        checkWritable()
+        if (index < 0 || limit - index < 2) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 2 bytes from index (limit: $limit)")
+        }
+        if (order() == ByteOrder.BIG_ENDIAN) {
+            hb[ix(index)] = (value.code shr 8).toByte()
+            hb[ix(index + 1)] = value.code.toByte()
+        } else {
+            hb[ix(index)] = value.code.toByte()
+            hb[ix(index + 1)] = (value.code shr 8).toByte()
+        }
         return this
-    }*/
+    }
 
-    /*override fun asCharBuffer(): CharBuffer {
+    override fun asCharBuffer(): CharBuffer {
+        /*
         val pos: Int = position()
         val size: Int = (limit() - pos) shr 1
         val addr: Long = address + pos
@@ -281,7 +319,9 @@ internal open class HeapByteBuffer
                 size,
                 addr, segment
             )) as CharBuffer)
-    }*/
+        */
+        throw UnsupportedOperationException("asCharBuffer is not yet implemented")
+    }
 
 
     /*override val short: Short
@@ -357,16 +397,20 @@ internal open class HeapByteBuffer
         return this
     }
 
-    /*override fun putShort(i: Int, x: Short): ByteBuffer {
-        Buffer.SCOPED_MEMORY_ACCESS.putShortUnaligned(
-            session(),
-            hb,
-            byteOffset(checkIndex(i, 2).toLong()),
-            x,
-            bigEndian
-        )
+    override fun putShort(index: Int, value: Short): ByteBuffer {
+        checkWritable()
+        if (index < 0 || limit - index < 2) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 2 bytes from index (limit: $limit)")
+        }
+        if (order() == ByteOrder.BIG_ENDIAN) {
+            hb[ix(index)] = (value.toInt() shr 8).toByte()
+            hb[ix(index + 1)] = value.toByte()
+        } else {
+            hb[ix(index)] = value.toByte()
+            hb[ix(index + 1)] = (value.toInt() shr 8).toByte()
+        }
         return this
-    }*/
+    }
 
     /*override fun asShortBuffer(): ShortBuffer {
         val pos: Int = position()
@@ -438,7 +482,7 @@ internal open class HeapByteBuffer
             session(),
             hb,
             byteOffset(nextPutIndex(4).toLong()),
-            value,
+            y,
             bigEndian
         )
         return this*/
@@ -463,7 +507,8 @@ internal open class HeapByteBuffer
         return this
     }
 
-    /*override fun putInt(i: Int, x: Int): ByteBuffer {
+    override fun putInt(index: Int, value: Int): ByteBuffer {
+        /*
         Buffer.SCOPED_MEMORY_ACCESS.putIntUnaligned(
             session(),
             hb,
@@ -472,7 +517,25 @@ internal open class HeapByteBuffer
             bigEndian
         )
         return this
-    }*/
+        */
+
+        checkWritable()
+        if (index < 0 || limit - index < 4) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 4 bytes from index (limit: $limit)")
+        }
+        if (order() == ByteOrder.BIG_ENDIAN) {
+            hb[ix(index)] = (value shr 24).toByte()
+            hb[ix(index + 1)] = (value shr 16).toByte()
+            hb[ix(index + 2)] = (value shr 8).toByte()
+            hb[ix(index + 3)] = value.toByte()
+        } else {
+            hb[ix(index)] = value.toByte()
+            hb[ix(index + 1)] = (value shr 8).toByte()
+            hb[ix(index + 2)] = (value shr 16).toByte()
+            hb[ix(index + 3)] = (value shr 24).toByte()
+        }
+        return this
+    }
 
     override fun asIntBuffer(): IntBuffer {
         /*val pos: Int = position()
@@ -604,6 +667,44 @@ internal open class HeapByteBuffer
         return this
     }*/
 
+    override fun putLong(index: Int, value: Long): ByteBuffer {
+        /*
+        // JDK reference:
+        Buffer.SCOPED_MEMORY_ACCESS.putLongUnaligned(
+            session(),
+            hb,
+            byteOffset(checkIndex(i, 8).toLong()),
+            x,
+            bigEndian
+        )
+        return this
+        */
+        checkWritable()
+        if (index < 0 || limit - index < 8) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
+        }
+        if (order() == ByteOrder.BIG_ENDIAN) {
+            hb[ix(index)] = (value shr 56).toByte()
+            hb[ix(index + 1)] = (value shr 48).toByte()
+            hb[ix(index + 2)] = (value shr 40).toByte()
+            hb[ix(index + 3)] = (value shr 32).toByte()
+            hb[ix(index + 4)] = (value shr 24).toByte()
+            hb[ix(index + 5)] = (value shr 16).toByte()
+            hb[ix(index + 6)] = (value shr 8).toByte()
+            hb[ix(index + 7)] = value.toByte()
+        } else {
+            hb[ix(index)] = value.toByte()
+            hb[ix(index + 1)] = (value shr 8).toByte()
+            hb[ix(index + 2)] = (value shr 16).toByte()
+            hb[ix(index + 3)] = (value shr 24).toByte()
+            hb[ix(index + 4)] = (value shr 32).toByte()
+            hb[ix(index + 5)] = (value shr 40).toByte()
+            hb[ix(index + 6)] = (value shr 48).toByte()
+            hb[ix(index + 7)] = (value shr 56).toByte()
+        }
+        return this
+    }
+
     override fun asLongBuffer(): LongBuffer {
         /*val pos: Int = position()
         val size: Int = (limit() - pos) shr 3
@@ -645,7 +746,6 @@ internal open class HeapByteBuffer
         return longBuffer
     }
 
-
     /*override val float: Float
         // float
         get() {
@@ -658,6 +758,14 @@ internal open class HeapByteBuffer
             return Float.intBitsToFloat(x)
         }*/
 
+    override fun getFloat(): Float {
+        if (remaining() < 4)
+            throw BufferUnderflowException("Not enough bytes remaining to read a float (need 4, have ${remaining()})")
+        val value = getInt(position)
+        position += 4
+        return Float.fromBits(value)
+    }
+
     /*override fun getFloat(i: Int): Float {
         val x: Int = Buffer.SCOPED_MEMORY_ACCESS.getIntUnaligned(
             session(),
@@ -667,9 +775,28 @@ internal open class HeapByteBuffer
         )
         return Float.intBitsToFloat(x)
     }*/
+    override fun getFloat(index: Int): Float {
+        /*
+        // JDK reference:
+        public float getFloat(int i) {
+            int x = Buffer.SCOPED_MEMORY_ACCESS.getIntUnaligned(
+                session(),
+                hb,
+                byteOffset(checkIndex(i, 4).toLong()),
+                bigEndian
+            );
+            return Float.intBitsToFloat(x);
+        }
+        */
+        if (index < 0 || limit - index < 4) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 4 bytes from index (limit: $limit)")
+        }
+        val intBits = getInt(index)
+        return Float.fromBits(intBits)
+    }
 
-
-    /*override fun putFloat(x: Float): ByteBuffer {
+    override fun putFloat(value: Float): ByteBuffer {
+        /*
         val y = Float.floatToRawIntBits(x)
         Buffer.SCOPED_MEMORY_ACCESS.putIntUnaligned(
             session(),
@@ -679,9 +806,14 @@ internal open class HeapByteBuffer
             bigEndian
         )
         return this
-    }*/
+        */
+        val intBits = value.toRawBits()
+        putInt(intBits)
+        return this
+    }
 
-    /*override fun putFloat(i: Int, x: Float): ByteBuffer {
+    override fun putFloat(i: Int, x: Float): ByteBuffer {
+        /*
         val y = Float.floatToRawIntBits(x)
         Buffer.SCOPED_MEMORY_ACCESS.putIntUnaligned(
             session(),
@@ -691,7 +823,15 @@ internal open class HeapByteBuffer
             bigEndian
         )
         return this
-    }*/
+        */
+        checkWritable()
+        if (i < 0 || limit - i < 4) {
+            throw IndexOutOfBoundsException("Index $i out of bounds: need 4 bytes from index (limit: $limit)")
+        }
+        val intBits = x.toRawBits()
+        putInt(i, intBits)
+        return this
+    }
 
     override fun asFloatBuffer(): FloatBuffer {
         /*val pos: Int = position()
@@ -735,6 +875,7 @@ internal open class HeapByteBuffer
                             ((slice.get().toInt() and 0xFF) shl 8) or
                             (slice.get().toInt() and 0xFF)
                 }
+
                 else -> {
                     (slice.get().toInt() and 0xFF) or
                             ((slice.get().toInt() and 0xFF) shl 8) or
@@ -749,7 +890,6 @@ internal open class HeapByteBuffer
         return floatBuffer
     }
 
-
     /*override val double: Double
         // double
         get() {
@@ -762,7 +902,16 @@ internal open class HeapByteBuffer
             return Double.longBitsToDouble(x)
         }*/
 
-    /*override fun getDouble(i: Int): Double {
+    override fun getDouble(): Double {
+        if (remaining() < 8)
+            throw BufferUnderflowException("Not enough bytes remaining to read a double (need 8, have ${remaining()})")
+        val value = getLong(position)
+        position += 8
+        return Double.fromBits(value)
+    }
+
+    override fun getDouble(index: Int): Double {
+        /*
         val x: Long = Buffer.SCOPED_MEMORY_ACCESS.getLongUnaligned(
             session(),
             hb,
@@ -770,32 +919,54 @@ internal open class HeapByteBuffer
             bigEndian
         )
         return Double.longBitsToDouble(x)
-    }*/
+        */
+        if (index < 0 || limit - index < 8) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
+        }
+        val longBits = getLong(index)
+        return Double.fromBits(longBits)
+    }
 
+    override fun putDouble(value: Double): ByteBuffer {
+        /*  val y = Double.doubleToRawLongBits(x)
+            Buffer.SCOPED_MEMORY_ACCESS.putLongUnaligned(
+                session(),
+                hb,
+                byteOffset(nextPutIndex(8).toLong()),
+                y,
+                bigEndian
+            )
+            return this
+        */
 
-    /*override fun putDouble(x: Double): ByteBuffer {
-        val y = Double.doubleToRawLongBits(x)
-        Buffer.SCOPED_MEMORY_ACCESS.putLongUnaligned(
-            session(),
-            hb,
-            byteOffset(nextPutIndex(8).toLong()),
-            y,
-            bigEndian
-        )
+        checkWritable()
+        if (remaining() < 8) {
+            throw BufferOverflowException("Not enough space to write 8 bytes at position $position with limit $limit")
+        }
+        val longBits = value.toRawBits()
+        putLong(longBits)
         return this
-    }*/
+    }
 
-    /*override fun putDouble(i: Int, x: Double): ByteBuffer {
-        val y = Double.doubleToRawLongBits(x)
-        Buffer.SCOPED_MEMORY_ACCESS.putLongUnaligned(
-            session(),
-            hb,
-            byteOffset(checkIndex(i, 8).toLong()),
-            y,
-            bigEndian
-        )
+    override fun putDouble(i: Int, x: Double): ByteBuffer {
+        /*  val y = Double.doubleToRawLongBits(x)
+            Buffer.SCOPED_MEMORY_ACCESS.putLongUnaligned(
+                session(),
+                hb,
+                byteOffset(checkIndex(i, 8).toLong()),
+                y,
+                bigEndian
+            )
+            return this
+        */
+        checkWritable()
+        if (i < 0 || limit - i < 8) {
+            throw IndexOutOfBoundsException("Index $i out of bounds: need 8 bytes from index (limit: $limit)")
+        }
+        val longBits = x.toRawBits()
+        putLong(i, longBits)
         return this
-    }*/
+    }
 
     /*override fun asDoubleBuffer(): DoubleBuffer {
         val pos: Int = position()

@@ -1500,6 +1500,9 @@ abstract class ByteBuffer
      * @see .alignedSlice
      * @since 9
      */
+
+    // not implemented because kmp does not support jdk memory access
+
     /*fun alignmentOffset(index: Int, unitSize: Int): Int {
         require(index >= 0) { "Index less than zero: $index" }
         require(!(unitSize < 1 || (unitSize and (unitSize - 1)) != 0)) { "Unit size not a power of two: $unitSize" }
@@ -1560,6 +1563,9 @@ abstract class ByteBuffer
      * @see .slice
      * @since 9
      */
+
+    // not implemented because kmp does not support jdk memory access
+
     /*fun alignedSlice(unitSize: Int): ByteBuffer {
         val pos: Int = position()
         val lim: Int = limit()
@@ -1599,7 +1605,7 @@ abstract class ByteBuffer
      * If there are fewer than two bytes
      * remaining in this buffer
      */
-    //abstract val char: Char
+    abstract fun getChar(): Char
 
     /**
      * Relative *put* method for writing a char
@@ -1622,7 +1628,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putChar(value: Char): ByteBuffer
+    abstract fun putChar(value: Char): ByteBuffer
 
     /**
      * Absolute *get* method for reading a char value.
@@ -1641,7 +1647,7 @@ abstract class ByteBuffer
      * or not smaller than the buffer's limit,
      * minus one
      */
-    //abstract fun getChar(index: Int): Char
+    abstract fun getChar(index: Int): Char
 
     /**
      * Absolute *put* method for writing a char
@@ -1667,7 +1673,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putChar(index: Int, value: Char): ByteBuffer
+    abstract fun putChar(index: Int, value: Char): ByteBuffer
 
     /**
      * Creates a view of this byte buffer as a char buffer.
@@ -1688,7 +1694,7 @@ abstract class ByteBuffer
      *
      * @return  A new char buffer
      */
-    //abstract fun asCharBuffer(): CharBuffer
+    abstract fun asCharBuffer(): CharBuffer
 
 
     /**
@@ -1773,7 +1779,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putShort(index: Int, value: Short): ByteBuffer
+    abstract fun putShort(index: Int, value: Short): ByteBuffer
 
     /**
      * Creates a view of this byte buffer as a short buffer.
@@ -1880,7 +1886,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putInt(index: Int, value: Int): ByteBuffer
+    abstract fun putInt(index: Int, value: Int): ByteBuffer
 
     /**
      * Creates a view of this byte buffer as an int buffer.
@@ -1986,7 +1992,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putLong(index: Int, value: Long): ByteBuffer
+    abstract fun putLong(index: Int, value: Long): ByteBuffer
 
     /**
      * Creates a view of this byte buffer as a long buffer.
@@ -2024,7 +2030,7 @@ abstract class ByteBuffer
      * If there are fewer than four bytes
      * remaining in this buffer
      */
-    //abstract fun getFloat(): Float
+    abstract fun getFloat(): Float
 
     /**
      * Relative *put* method for writing a float
@@ -2047,7 +2053,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putFloat(value: Float): ByteBuffer
+    abstract fun putFloat(value: Float): ByteBuffer
 
     /**
      * Absolute *get* method for reading a float value.
@@ -2066,7 +2072,7 @@ abstract class ByteBuffer
      * or not smaller than the buffer's limit,
      * minus three
      */
-    //abstract fun getFloat(index: Int): Float
+    abstract fun getFloat(index: Int): Float
 
     /**
      * Absolute *put* method for writing a float
@@ -2092,7 +2098,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putFloat(index: Int, value: Float): ByteBuffer
+    abstract fun putFloat(index: Int, value: Float): ByteBuffer
 
     /**
      * Creates a view of this byte buffer as a float buffer.
@@ -2130,7 +2136,7 @@ abstract class ByteBuffer
      * If there are fewer than eight bytes
      * remaining in this buffer
      */
-    //abstract val double: Double
+    abstract fun getDouble(): Double
 
     /**
      * Relative *put* method for writing a double
@@ -2153,7 +2159,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putDouble(value: Double): ByteBuffer
+    abstract fun putDouble(value: Double): ByteBuffer
 
     /**
      * Absolute *get* method for reading a double value.
@@ -2172,7 +2178,7 @@ abstract class ByteBuffer
      * or not smaller than the buffer's limit,
      * minus seven
      */
-    //abstract fun getDouble(index: Int): Double
+    abstract fun getDouble(index: Int): Double
 
     /**
      * Absolute *put* method for writing a double
@@ -2198,7 +2204,7 @@ abstract class ByteBuffer
      * @throws  ReadOnlyBufferException
      * If this buffer is read-only
      */
-    //abstract fun putDouble(index: Int, value: Double): ByteBuffer
+    abstract fun putDouble(index: Int, value: Double): ByteBuffer
 
     /**
      * Creates a view of this byte buffer as a double buffer.
