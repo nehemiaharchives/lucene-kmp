@@ -194,7 +194,7 @@ class ByteBufferTest {
     @Test
     fun testToString() {
         val buffer = ByteBuffer.wrap(byteArrayOf(1, 2, 3))
-        assertEquals("ByteBuffer[pos=0 lim=3 cap=3]", buffer.toString())
+        assertEquals("org.gnit.lucenekmp.jdkport.HeapByteBuffer[pos=0 lim=3 cap=3]", buffer.toString())
     }
 
     @Test
