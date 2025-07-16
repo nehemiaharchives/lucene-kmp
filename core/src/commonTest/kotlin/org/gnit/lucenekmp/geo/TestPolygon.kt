@@ -8,6 +8,14 @@ import kotlin.test.assertTrue
 
 class TestPolygon : LuceneTestCase() {
 
+    fun testPolygonNullPolyLats(){
+        // this test does not need to be implemented because of kotlin null safety
+    }
+
+    fun testPolygonNullPolyLons(){
+        // this test does not need to be implemented because of kotlin null safety
+    }
+
     @Test
     fun testPolygonLine() {
         val e = expectThrows(IllegalArgumentException::class) {

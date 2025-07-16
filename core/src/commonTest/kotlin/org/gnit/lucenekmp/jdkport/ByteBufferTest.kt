@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import okio.IOException
 
 class ByteBufferTest {
 
@@ -194,7 +193,7 @@ class ByteBufferTest {
     @Test
     fun testToString() {
         val buffer = ByteBuffer.wrap(byteArrayOf(1, 2, 3))
-        assertEquals("ByteBuffer[pos=0 lim=3 cap=3]", buffer.toString())
+        assertEquals("org.gnit.lucenekmp.jdkport.HeapByteBuffer[pos=0 lim=3 cap=3]", buffer.toString())
     }
 
     @Test
@@ -359,6 +358,7 @@ class ByteBufferTest {
 
         // Test little endian
         buffer.order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals(ByteOrder.LITTLE_ENDIAN, buffer.order(), "Order should be LITTLE_ENDIAN")
         longBuffer = buffer.asLongBuffer()
         assertEquals(0x0807060504030201L, longBuffer.get(0))
     }
@@ -645,23 +645,23 @@ class ByteBufferTest {
         val dstInvalid = ByteArray(5)
         buffer.position(0)
         // Kotlin/JVM throws IndexOutOfBoundsException for array access violations.
-        // The `require` in ByteBuffer.kt might intend IllegalArgumentException for parameter validation.
+        // The `require` in ByteBuffer.kt might intend IndexOutOfBoundsException for parameter validation.
         // Let's test for what the current implementation likely throws or what `require` implies.
         // Given that `dst.size - offset < length` would be `5 - 3 < 3` (false, 2 < 3), this is an invalid combo.
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for invalid offset/length (offset + length > dst.size)") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for invalid offset/length (offset + length > dst.size)") {
             buffer.get(dstInvalid, 3, 3) // offset 3, length 3 into a size 5 array
         }
         // offset < 0
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative offset") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative offset") {
             buffer.get(dstInvalid, -1, 2)
         }
-        // length < 0 (ByteBuffer.kt has explicit check for this, should be IllegalArgumentException)
+        // length < 0 (ByteBuffer.kt has explicit check for this, should be IndexOutOfBoundsException)
         // However, underlying array copy may throw IOBE first if offset is also bad.
         // Let's assume a valid offset for this specific check if possible, or be aware of interaction.
-        // The `require(length >= 0)` in the common code suggests IllegalArgumentException.
+        // The `require(length >= 0)` in the common code suggests IndexOutOfBoundsException.
         // However, the actual array copy `arraycopy(hb, srcOffset, dst, offset, length)` might throw first.
         // For now, let's stick to IndexOutOfBounds as it's a common outcome for array issues.
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative length") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative length") {
             buffer.get(dstInvalid, 0, -1)
         }
         assertEquals(0, buffer.position, "Position should not change after failed get due to invalid args")
@@ -731,13 +731,13 @@ class ByteBufferTest {
         buffer.clear()
         val srcInvalid = ByteArray(5)
         // Similar to bulk get, expect IndexOutOfBounds or IllegalArgumentException
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for invalid offset/length (offset + length > src.size)") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for invalid offset/length (offset + length > src.size)") {
             buffer.put(srcInvalid, 3, 3) // offset 3, length 3 from a size 5 array
         }
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative offset") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative offset") {
             buffer.put(srcInvalid, -1, 2)
         }
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative length") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative length") {
             buffer.put(srcInvalid, 0, -1)
         }
         assertEquals(0, buffer.position, "Position should not change after failed put due to invalid args")
@@ -845,8 +845,8 @@ class ByteBufferTest {
         assertEquals(currentLimit, buffer.limit, "Limit should remain unchanged after rewind")
 
         // Assert that mark is discarded (invalidated, check ByteBuffer.kt behavior, usually -1)
-        // Attempting to reset to a discarded mark should throw IOException
-        assertFailsWith<IOException>("Resetting after rewind should throw IOException as mark is discarded") {
+        // Attempting to reset to a discarded mark should throw InvalidMarkException
+        assertFailsWith<InvalidMarkException>("Resetting after rewind should throw InvalidMarkException as mark is discarded") {
             buffer.reset()
         }
 
@@ -868,7 +868,7 @@ class ByteBufferTest {
         buffer.rewind() // pos=0, lim=3, mark discarded
         assertEquals(0, buffer.position, "Position after flip and rewind")
         assertEquals(limitAfterFlip, buffer.limit, "Limit after flip and rewind")
-        assertFailsWith<IOException>("Resetting after flip and rewind should throw IOException") {
+        assertFailsWith<InvalidMarkException>("Resetting after flip and rewind should throw InvalidMarkException") {
             buffer.reset()
         }
     }

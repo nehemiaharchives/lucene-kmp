@@ -1,21 +1,16 @@
 package org.gnit.lucenekmp.store
 
 import okio.IOException
-import org.gnit.lucenekmp.jdkport.ByteBuffer
-import org.gnit.lucenekmp.jdkport.ByteOrder
-import org.gnit.lucenekmp.jdkport.Character
-import org.gnit.lucenekmp.jdkport.Math
-import org.gnit.lucenekmp.jdkport.UncheckedIOException
-import org.gnit.lucenekmp.jdkport.getLast
-import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
-import org.gnit.lucenekmp.jdkport.pollFirst
-import kotlin.jvm.JvmOverloads
-import kotlin.math.max
-import kotlin.math.min
+import org.gnit.lucenekmp.jdkport.*
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.UnicodeUtil
+import org.gnit.lucenekmp.util.UnicodeUtil.UTF16toUTF8
+import kotlin.jvm.JvmOverloads
+import kotlin.math.max
+import kotlin.math.min
+
 
 /** A [DataOutput] storing data in a list of [ByteBuffer]s.  */
 class ByteBuffersDataOutput @JvmOverloads constructor(
@@ -350,44 +345,27 @@ class ByteBuffersDataOutput @JvmOverloads constructor(
         ) { "Block reuse must not be null." }
     }
 
-    override fun writeString(s: String) {
+    /*override fun writeString(s: String) {
+        super.writeString(s)
+    }*/
 
-        if (s.isEmpty()) {
-            writeVInt(0)
-            return
-        }
-
-        // Calculate UTF-8 byte length
-        val byteLen = UnicodeUtil.calcUTF16toUTF8Length(s, 0, s.length)
-        writeVInt(byteLen)
-
-        if (currentBlock.remaining() >= byteLen) {
-            // Have enough space, directly encode into buffer
-            // Create a temporary byte array
-            val bytes = ByteArray(byteLen)
-            UnicodeUtil.UTF16toUTF8(s, 0, s.length, bytes)
-
-            // Write the bytes to the buffer
-            currentBlock.put(bytes)
-        } else {
-            // Not enough space, need to handle buffer expansion
-            // Create a temporary byte array
-            val bytes = ByteArray(byteLen)
-            UnicodeUtil.UTF16toUTF8(s, 0, s.length, bytes)
-
-            // Write bytes in chunks
-            var bytesWritten = 0
-            while (bytesWritten < byteLen) {
-                val remaining = currentBlock.remaining()
-                if (remaining == 0) {
-                    // Get new buffer
-                    appendBlock()
-                }
-
-                val bytesToWrite = minOf(remaining, byteLen - bytesWritten)
-                currentBlock.put(bytes, bytesWritten, bytesToWrite)
-                bytesWritten += bytesToWrite
+    override fun writeString(v: String) {
+        try {
+            val charCount = v.length
+            val byteLen = UnicodeUtil.calcUTF16toUTF8Length(v, 0, charCount)
+            writeVInt(byteLen)
+            val currentBlock: ByteBuffer? = this.currentBlock
+            if (currentBlock!!.hasArray() && currentBlock.remaining() >= byteLen) {
+                val startingPos: Int = currentBlock.position
+                UTF16toUTF8(
+                    v, 0, charCount, currentBlock.array(), currentBlock.arrayOffset() + startingPos
+                )
+                currentBlock.position(startingPos + byteLen)
+            } else {
+                writeLongString(byteLen, v)
             }
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
         }
     }
 

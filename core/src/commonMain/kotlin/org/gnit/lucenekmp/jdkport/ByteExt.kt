@@ -55,3 +55,6 @@ fun Byte.Companion.toUnsignedLong(x: Byte): Long {
     return (x.toLong()) and 0xffL
 }
 
+fun Byte.Companion.compare(x: Byte, y: Byte): Int {
+    return x - y
+}

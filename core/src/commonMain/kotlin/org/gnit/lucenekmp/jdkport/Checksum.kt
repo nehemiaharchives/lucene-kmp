@@ -4,10 +4,9 @@ import okio.Buffer
 import kotlin.math.min
 
 /**
- * ported from java.util.zip.Checksum
- *
  * An interface representing a data checksum.
  */
+@Ported(from = "java.util.zip.Checksum")
 interface Checksum {
     /**
      * Updates the current checksum with the specified byte.
