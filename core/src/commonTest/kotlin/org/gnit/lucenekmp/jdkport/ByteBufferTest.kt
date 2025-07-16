@@ -845,8 +845,8 @@ class ByteBufferTest {
         assertEquals(currentLimit, buffer.limit, "Limit should remain unchanged after rewind")
 
         // Assert that mark is discarded (invalidated, check ByteBuffer.kt behavior, usually -1)
-        // Attempting to reset to a discarded mark should throw IOException
-        assertFailsWith<IOException>("Resetting after rewind should throw IOException as mark is discarded") {
+        // Attempting to reset to a discarded mark should throw InvalidMarkException
+        assertFailsWith<InvalidMarkException>("Resetting after rewind should throw InvalidMarkException as mark is discarded") {
             buffer.reset()
         }
 
@@ -868,7 +868,7 @@ class ByteBufferTest {
         buffer.rewind() // pos=0, lim=3, mark discarded
         assertEquals(0, buffer.position, "Position after flip and rewind")
         assertEquals(limitAfterFlip, buffer.limit, "Limit after flip and rewind")
-        assertFailsWith<IOException>("Resetting after flip and rewind should throw IOException") {
+        assertFailsWith<InvalidMarkException>("Resetting after flip and rewind should throw InvalidMarkException") {
             buffer.reset()
         }
     }
