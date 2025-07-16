@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import okio.IOException
 
 class ByteBufferTest {
 
@@ -359,6 +358,7 @@ class ByteBufferTest {
 
         // Test little endian
         buffer.order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals(ByteOrder.LITTLE_ENDIAN, buffer.order(), "Order should be LITTLE_ENDIAN")
         longBuffer = buffer.asLongBuffer()
         assertEquals(0x0807060504030201L, longBuffer.get(0))
     }

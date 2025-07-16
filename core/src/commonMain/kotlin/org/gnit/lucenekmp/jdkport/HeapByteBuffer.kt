@@ -606,6 +606,7 @@ open class HeapByteBuffer
         if (index < 0 || limit - index < 8) {
             throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
         }
+        // suspected bug code:
         return if (order() == ByteOrder.BIG_ENDIAN) {
             ((hb[index].toLong() and 0xFF) shl 56) or
                     ((hb[index + 1].toLong() and 0xFF) shl 48) or
@@ -616,6 +617,7 @@ open class HeapByteBuffer
                     ((hb[index + 6].toLong() and 0xFF) shl 8) or
                     (hb[index + 7].toLong() and 0xFF)
         } else {
+            println("little endian detected. getLong: $index, ${hb[index]}, ${hb[index + 1]}, ${hb[index + 2]}, ${hb[index + 3]}, ${hb[index + 4]}, ${hb[index + 5]}, ${hb[index + 6]}, ${hb[index + 7]}")
             (hb[index].toLong() and 0xFF) or
                     ((hb[index + 1].toLong() and 0xFF) shl 8) or
                     ((hb[index + 2].toLong() and 0xFF) shl 16) or
@@ -738,11 +740,15 @@ open class HeapByteBuffer
         val longBuffer = LongBuffer.allocate(longCapacity)
         longBuffer.clear()
         longBuffer.order = this.order()
+        println("order of longBuffer: ${longBuffer.order}")
+        println("longBuffer before fill: $longBuffer, get(0): ${longBuffer.get(0)}")
         for (i in 0 until longCapacity) {
             val value = slice.getLong()
             longBuffer.put(value)
         }
+        println("longBuffer after fill: $longBuffer, get(0): ${longBuffer.get(0)}")
         longBuffer.flip()
+        println("longBuffer after flip: $longBuffer, get(0): ${longBuffer.get(0)}")
         return longBuffer
     }
 
@@ -812,7 +818,7 @@ open class HeapByteBuffer
         return this
     }
 
-    override fun putFloat(i: Int, x: Float): ByteBuffer {
+    override fun putFloat(index: Int, value: Float): ByteBuffer {
         /*
         val y = Float.floatToRawIntBits(x)
         Buffer.SCOPED_MEMORY_ACCESS.putIntUnaligned(
@@ -825,11 +831,11 @@ open class HeapByteBuffer
         return this
         */
         checkWritable()
-        if (i < 0 || limit - i < 4) {
-            throw IndexOutOfBoundsException("Index $i out of bounds: need 4 bytes from index (limit: $limit)")
+        if (index < 0 || limit - index < 4) {
+            throw IndexOutOfBoundsException("Index $index out of bounds: need 4 bytes from index (limit: $limit)")
         }
-        val intBits = x.toRawBits()
-        putInt(i, intBits)
+        val intBits = value.toRawBits()
+        putInt(index, intBits)
         return this
     }
 
