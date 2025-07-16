@@ -645,23 +645,23 @@ class ByteBufferTest {
         val dstInvalid = ByteArray(5)
         buffer.position(0)
         // Kotlin/JVM throws IndexOutOfBoundsException for array access violations.
-        // The `require` in ByteBuffer.kt might intend IllegalArgumentException for parameter validation.
+        // The `require` in ByteBuffer.kt might intend IndexOutOfBoundsException for parameter validation.
         // Let's test for what the current implementation likely throws or what `require` implies.
         // Given that `dst.size - offset < length` would be `5 - 3 < 3` (false, 2 < 3), this is an invalid combo.
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for invalid offset/length (offset + length > dst.size)") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for invalid offset/length (offset + length > dst.size)") {
             buffer.get(dstInvalid, 3, 3) // offset 3, length 3 into a size 5 array
         }
         // offset < 0
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative offset") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative offset") {
             buffer.get(dstInvalid, -1, 2)
         }
-        // length < 0 (ByteBuffer.kt has explicit check for this, should be IllegalArgumentException)
+        // length < 0 (ByteBuffer.kt has explicit check for this, should be IndexOutOfBoundsException)
         // However, underlying array copy may throw IOBE first if offset is also bad.
         // Let's assume a valid offset for this specific check if possible, or be aware of interaction.
-        // The `require(length >= 0)` in the common code suggests IllegalArgumentException.
+        // The `require(length >= 0)` in the common code suggests IndexOutOfBoundsException.
         // However, the actual array copy `arraycopy(hb, srcOffset, dst, offset, length)` might throw first.
         // For now, let's stick to IndexOutOfBounds as it's a common outcome for array issues.
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative length") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative length") {
             buffer.get(dstInvalid, 0, -1)
         }
         assertEquals(0, buffer.position, "Position should not change after failed get due to invalid args")
