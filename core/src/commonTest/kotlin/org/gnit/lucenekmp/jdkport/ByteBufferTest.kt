@@ -731,13 +731,13 @@ class ByteBufferTest {
         buffer.clear()
         val srcInvalid = ByteArray(5)
         // Similar to bulk get, expect IndexOutOfBounds or IllegalArgumentException
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for invalid offset/length (offset + length > src.size)") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for invalid offset/length (offset + length > src.size)") {
             buffer.put(srcInvalid, 3, 3) // offset 3, length 3 from a size 5 array
         }
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative offset") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative offset") {
             buffer.put(srcInvalid, -1, 2)
         }
-        assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative length") {
+        assertFailsWith<IndexOutOfBoundsException>("Should throw IndexOutOfBoundsException for negative length") {
             buffer.put(srcInvalid, 0, -1)
         }
         assertEquals(0, buffer.position, "Position should not change after failed put due to invalid args")
