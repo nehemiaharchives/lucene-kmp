@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 660 | 92% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 665 | 93% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,7 +15,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 129 | 76% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 134 | 79% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -96,12 +96,7 @@
 | [org.apache.lucene.index.SortedNumericDocValuesWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SortedNumericDocValuesWriter.java) | org.gnit.lucenekmp.index.SortedNumericDocValuesWriter |
 | [org.apache.lucene.index.SortedSetDocValuesWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SortedSetDocValuesWriter.java) | org.gnit.lucenekmp.index.SortedSetDocValuesWriter |
 | [org.apache.lucene.index.SortingCodecReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SortingCodecReader.java) | org.gnit.lucenekmp.index.SortingCodecReader |
-| [org.apache.lucene.index.SortingStoredFieldsConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SortingStoredFieldsConsumer.java) | org.gnit.lucenekmp.index.SortingStoredFieldsConsumer |
-| [org.apache.lucene.index.SortingTermVectorsConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SortingTermVectorsConsumer.java) | org.gnit.lucenekmp.index.SortingTermVectorsConsumer |
-| [org.apache.lucene.index.StoredFieldsConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/StoredFieldsConsumer.java) | org.gnit.lucenekmp.index.StoredFieldsConsumer |
 | [org.apache.lucene.index.TieredMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java) | org.gnit.lucenekmp.index.TieredMergePolicy |
-| [org.apache.lucene.index.TrackingTmpOutputDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/TrackingTmpOutputDirectoryWrapper.java) | org.gnit.lucenekmp.index.TrackingTmpOutputDirectoryWrapper |
-| [org.apache.lucene.index.VectorValuesConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/VectorValuesConsumer.java) | org.gnit.lucenekmp.index.VectorValuesConsumer |
 | [org.apache.lucene.search.CollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/CollectorManager.java) | org.gnit.lucenekmp.search.CollectorManager |
 | [org.apache.lucene.search.FieldValueHitQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FieldValueHitQueue.java) | org.gnit.lucenekmp.search.FieldValueHitQueue |
 | [org.apache.lucene.search.LRUQueryCache](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/LRUQueryCache.java) | org.gnit.lucenekmp.search.LRUQueryCache |
