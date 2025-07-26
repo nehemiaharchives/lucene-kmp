@@ -1,7 +1,7 @@
 [versions]
-agp = "8.10.1"
-kotlin = "2.2.0-RC3"
-okio = "3.13.0"
+agp = "8.11.1"
+kotlin = "2.2.0"
+okio = "3.15.0"
 android-minSdk = "24"
 android-compileSdk = "36"
 kotlin-coroutines = "1.10.2"
@@ -21,5 +21,5 @@ logback = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.32.0" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
 kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
