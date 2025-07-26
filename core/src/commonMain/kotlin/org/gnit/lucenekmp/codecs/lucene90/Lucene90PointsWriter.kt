@@ -14,6 +14,7 @@ import org.gnit.lucenekmp.index.PointValues.PointTree
 import org.gnit.lucenekmp.index.PointValues.IntersectVisitor
 import org.gnit.lucenekmp.index.PointValues.Relation
 import org.gnit.lucenekmp.index.SegmentWriteState
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.IORunnable
 import org.gnit.lucenekmp.util.IOUtils
@@ -35,7 +36,7 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
 
     /** Full constructor  */
     init {
-        require(writeState.fieldInfos.hasPointValues())
+        assert(writeState.fieldInfos!!.hasPointValues())
         this.writeState = writeState
         this.maxPointsInLeafNode = maxPointsInLeafNode
         this.maxMBSortInHeap = maxMBSortInHeap

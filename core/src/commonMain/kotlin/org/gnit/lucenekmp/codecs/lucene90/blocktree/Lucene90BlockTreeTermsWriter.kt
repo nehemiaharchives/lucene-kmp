@@ -40,6 +40,7 @@ import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
 import kotlin.experimental.and
 import kotlin.math.max
@@ -260,7 +261,7 @@ class Lucene90BlockTreeTermsWriter(
 
         var lastField: String? = null
         for (field in fields) {
-            require(lastField == null || lastField < field)
+            assert(lastField == null || lastField < field)
             lastField = field
 
             // if (DEBUG) System.out.println("\nBTTW.write seg=" + segment + " field=" + field);
@@ -329,12 +330,12 @@ class Lucene90BlockTreeTermsWriter(
             scratchBytes: ByteBuffersDataOutput,
             scratchIntsRef: IntsRefBuilder
         ) {
-            require(
+            assert(
                 (isFloor && blocks.size > 1) || (!isFloor && blocks.size == 1)
             ) { "isFloor=$isFloor blocks=$blocks" }
-            require(this == blocks[0])
+            assert(this == blocks[0])
 
-            require(scratchBytes.size() == 0L)
+            assert(scratchBytes.size() == 0L)
 
             // write the leading vLong in MSB order for better outputs sharing in the FST
             if (version >= Lucene90BlockTreeTermsReader.VERSION_MSB_VLONG_OUTPUT) {
@@ -346,13 +347,13 @@ class Lucene90BlockTreeTermsWriter(
                 scratchBytes.writeVInt(blocks.size - 1)
                 for (i in 1..<blocks.size) {
                     val sub = blocks[i]
-                    require(sub.floorLeadByte != -1)
+                    assert(sub.floorLeadByte != -1)
                     // if (DEBUG) {
                     //  System.out.println("    write floorLeadByte=" +
                     // Integer.toHexString(sub.floorLeadByte&0xff));
                     // }
                     scratchBytes.writeByte(sub.floorLeadByte.toByte())
-                    require(sub.fp > fp)
+                    assert(sub.fp > fp)
                     scratchBytes.writeVLong((sub.fp - fp) shl 1 or (if (sub.hasTerms) 1 else 0).toLong())
                 }
             }
@@ -389,7 +390,7 @@ class Lucene90BlockTreeTermsWriter(
             // }
             // indexBuilder.DEBUG = false;
             val bytes: ByteArray = scratchBytes.toArrayCopy()
-            require(bytes.isNotEmpty())
+            assert(bytes.isNotEmpty())
             fstCompiler.add(Util.toIntsRef(prefix, scratchIntsRef), BytesRef(bytes, 0, bytes.size))
             scratchBytes.reset()
 
@@ -405,7 +406,7 @@ class Lucene90BlockTreeTermsWriter(
 
             index = FST.fromFSTReader(fstCompiler.compile(), fstCompiler.getFSTReader())
 
-            require(subIndices == null)
+            assert(subIndices == null)
 
             /*
       Writer w = new OutputStreamWriter(new FileOutputStream("out.dot"));
@@ -492,7 +493,7 @@ class Lucene90BlockTreeTermsWriter(
         /** Writes the top count entries in pending, using prevTerm to compute the prefix.  */
         @Throws(IOException::class)
         fun writeBlocks(prefixLength: Int, count: Int) {
-            require(count > 0)
+            assert(count > 0)
 
             // if (DEBUG2) {
             //  BytesRef br = new BytesRef(lastTerm.bytes());
@@ -502,7 +503,7 @@ class Lucene90BlockTreeTermsWriter(
             // }
 
             // Root block better write all remaining pending entries:
-            require(prefixLength > 0 || count == pending.size)
+            assert(prefixLength > 0 || count == pending.size)
 
             var lastSuffixLeadLabel = -1
 
@@ -528,7 +529,7 @@ class Lucene90BlockTreeTermsWriter(
                         // Suffix is 0, i.e. prefix 'foo' and term is
                         // 'foo' so the term has empty string suffix
                         // in this block
-                        require(
+                        assert(
                             lastSuffixLeadLabel == -1
                         ) { "i=$i lastSuffixLeadLabel=$lastSuffixLeadLabel" }
                         suffixLeadLabel = -1
@@ -537,7 +538,7 @@ class Lucene90BlockTreeTermsWriter(
                     }
                 } else {
                     val block = ent as PendingBlock
-                    require(block.prefix.length > prefixLength)
+                    assert(block.prefix.length > prefixLength)
                     suffixLeadLabel = (block.prefix.bytes[block.prefix.offset + prefixLength] and 0xff.toByte()).toInt()
                 }
 
@@ -601,11 +602,11 @@ class Lucene90BlockTreeTermsWriter(
                 )
             }
 
-            require(!newBlocks.isEmpty())
+            assert(!newBlocks.isEmpty())
 
             val firstBlock = newBlocks[0]
 
-            require(firstBlock.isFloor || newBlocks.size == 1)
+            assert(firstBlock.isFloor || newBlocks.size == 1)
 
             firstBlock.compileIndex(newBlocks, scratchBytes, scratchIntsRef)
 
@@ -644,7 +645,7 @@ class Lucene90BlockTreeTermsWriter(
             hasTerms: Boolean,
             hasSubBlocks: Boolean
         ): PendingBlock {
-            require(end > start)
+            assert(end > start)
 
             val startFP: Long = termsOut.filePointer
 
@@ -696,11 +697,11 @@ class Lucene90BlockTreeTermsWriter(
                     StatsWriter(this.statsWriter, fieldInfo.indexOptions !== IndexOptions.DOCS)
                 for (i in start..<end) {
                     val ent = pending[i]
-                    require(ent.isTerm) { "i=$i" }
+                    assert(ent.isTerm) { "i=$i" }
 
                     val term = ent as PendingTerm
 
-                    require(StringHelper.startsWith(term.termBytes, prefix)) { "$term prefix=$prefix" }
+                    assert(StringHelper.startsWith(term.termBytes, prefix)) { "$term prefix=$prefix" }
                     val state: BlockTermState = term.state
                     val suffix = term.termBytes.size - prefixLength
 
@@ -715,7 +716,7 @@ class Lucene90BlockTreeTermsWriter(
                     // For leaf block we write suffix straight
                     suffixLengthsWriter.writeVInt(suffix)
                     suffixWriter.append(term.termBytes, prefixLength, suffix)
-                    require(floorLeadLabel == -1 || (term.termBytes[prefixLength].toInt() and 0xff) >= floorLeadLabel)
+                    assert(floorLeadLabel == -1 || (term.termBytes[prefixLength].toInt() and 0xff) >= floorLeadLabel)
 
                     // Write term stats, to separate byte[] blob:
                     statsWriter.add(state.docFreq, state.totalTermFreq)
@@ -735,12 +736,7 @@ class Lucene90BlockTreeTermsWriter(
                     if (ent.isTerm) {
                         val term = ent as PendingTerm
 
-                        require(
-                            StringHelper.startsWith(
-                                term.termBytes,
-                                prefix
-                            )
-                        ) { "$term prefix=$prefix" }
+                        assert(StringHelper.startsWith(term.termBytes,prefix)) { "$term prefix=$prefix" }
                         val state: BlockTermState = term.state
                         val suffix = term.termBytes.size - prefixLength
 
@@ -775,11 +771,11 @@ class Lucene90BlockTreeTermsWriter(
                         absolute = false
                     } else {
                         val block = ent as PendingBlock
-                        require(StringHelper.startsWith(block.prefix, prefix))
+                        assert(StringHelper.startsWith(block.prefix, prefix))
                         val suffix: Int = block.prefix.length - prefixLength
-                        require(StringHelper.startsWith(block.prefix, prefix))
+                        assert(StringHelper.startsWith(block.prefix, prefix))
 
-                        require(suffix > 0)
+                        assert(suffix > 0)
 
                         // For non-leaf block we borrow 1 bit to record
                         // if entry is term or sub-block:f
@@ -794,7 +790,7 @@ class Lucene90BlockTreeTermsWriter(
                         // ToStringUtils.bytesRefToString(suffixBytes) + " subFP=" + block.fp + " subCode=" +
                         // (startFP-block.fp) + " floor=" + block.isFloor);
                         // }
-                        require(
+                        assert(
                             floorLeadLabel == -1
                                     || (block.prefix.bytes[prefixLength] and 0xff.toByte()) >= floorLeadLabel
                         ) {
@@ -803,7 +799,7 @@ class Lucene90BlockTreeTermsWriter(
                                     + " suffixLead="
                                     + (block.prefix.bytes[prefixLength] and 0xff.toByte()))
                         }
-                        require(block.fp < startFP)
+                        assert(block.fp < startFP)
 
                         suffixLengthsWriter.writeVLong(startFP - block.fp)
                         subIndices.add(block.index!!)
@@ -811,7 +807,7 @@ class Lucene90BlockTreeTermsWriter(
                 }
                 statsWriter.finish()
 
-                require(subIndices.isNotEmpty())
+                assert(subIndices.isNotEmpty())
             }
 
             // Write suffixes byte[] blob to terms dict output, either uncompressed, compressed with LZ4
@@ -925,8 +921,8 @@ class Lucene90BlockTreeTermsWriter(
 
             val state: BlockTermState? = postingsWriter.writeTerm(text, termsEnum, docsSeen, norms)
             if (state != null) {
-                require(state.docFreq != 0)
-                require(
+                assert(state.docFreq != 0)
+                assert(
                     fieldInfo.indexOptions === IndexOptions.DOCS
                             || state.totalTermFreq >= state.docFreq
                 ) { "postingsWriter=$postingsWriter" }
@@ -962,7 +958,7 @@ class Lucene90BlockTreeTermsWriter(
                     text.offset + text.length
                 )
             if (prefixLength == -1) { // Only happens for the first term, if it is empty
-                require(lastTerm.length() == 0)
+                assert(lastTerm.length() == 0)
                 prefixLength = 0
             }
 
@@ -1012,11 +1008,9 @@ class Lucene90BlockTreeTermsWriter(
                 writeBlocks(0, pending.size)
 
                 // We better have one final "root" block:
-                require(
-                    pending.size == 1 && !pending[0].isTerm
-                ) { "pending.size()=" + pending.size + " pending=" + pending }
+                assert(pending.size == 1 && !pending[0].isTerm) { "pending.size()=" + pending.size + " pending=" + pending }
                 val root = pending[0] as PendingBlock
-                require(root.prefix.length == 0)
+                assert(root.prefix.length == 0)
                 val rootCode: BytesRef = checkNotNull(root.index!!.getEmptyOutput())
                 val metaOut = ByteBuffersDataOutput()
                 fields.add(metaOut)
@@ -1025,7 +1019,7 @@ class Lucene90BlockTreeTermsWriter(
                 metaOut.writeVLong(numTerms)
                 metaOut.writeVInt(rootCode.length)
                 metaOut.writeBytes(rootCode.bytes, rootCode.offset, rootCode.length)
-                require(fieldInfo.indexOptions !== IndexOptions.NONE)
+                assert(fieldInfo.indexOptions !== IndexOptions.NONE)
                 if (fieldInfo.indexOptions !== IndexOptions.DOCS) {
                     metaOut.writeVLong(sumTotalTermFreq)
                 }
@@ -1049,12 +1043,12 @@ class Lucene90BlockTreeTermsWriter(
         }
         */
             } else {
-                require(
+                assert(
                     sumTotalTermFreq == 0L
                             || fieldInfo.indexOptions === IndexOptions.DOCS && sumTotalTermFreq == -1L
                 )
-                require(sumDocFreq == 0L)
-                require(docsSeen.cardinality() == 0)
+                assert(sumDocFreq == 0L)
+                assert(docsSeen.cardinality() == 0)
             }
         }
 
@@ -1095,7 +1089,7 @@ class Lucene90BlockTreeTermsWriter(
         this.version = version
 
         this.maxDoc = state.segmentInfo.maxDoc()
-        this.fieldInfos = state.fieldInfos
+        this.fieldInfos = state.fieldInfos!!
         this.postingsWriter = postingsWriter
 
         val termsName: String =
@@ -1216,7 +1210,7 @@ class Lucene90BlockTreeTermsWriter(
         }
 
         fun encodeOutput(fp: Long, hasTerms: Boolean, isFloor: Boolean): Long {
-            require(fp < (1L shl 62))
+            assert(fp < (1L shl 62))
             return ((fp shl 2)
                     or (if (hasTerms) Lucene90BlockTreeTermsReader.OUTPUT_FLAG_HAS_TERMS else 0)
                 .toLong()
@@ -1232,7 +1226,7 @@ class Lucene90BlockTreeTermsWriter(
         @Throws(IOException::class)
         fun writeMSBVLong(l: Long, scratchBytes: DataOutput) {
             var l = l
-            require(l >= 0)
+            assert(l >= 0)
             // Keep zero bits on most significant byte to have more chance to get prefix bytes shared.
             // e.g. we expect 0x7FFF stored as [0x81, 0xFF, 0x7F] but not [0xFF, 0xFF, 0x40]
             val bytesNeeded: Int = (Long.SIZE_BITS - Long.numberOfLeadingZeros(l) - 1) / 7 + 1

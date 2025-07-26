@@ -140,7 +140,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
 
             // Assign field -> PostingsFormat
             for (field in indexedFieldNames) {
-                val fieldInfo: FieldInfo? = writeState.fieldInfos.fieldInfo(field)
+                val fieldInfo: FieldInfo? = writeState.fieldInfos!!.fieldInfo(field)
                 // TODO: This should check current format from the field attribute
                 val format: PostingsFormat = getPostingsFormatForField(field)
 

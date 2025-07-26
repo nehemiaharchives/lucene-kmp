@@ -25,7 +25,7 @@ class SegmentWriteState {
     val segmentInfo: SegmentInfo
 
     /** [FieldInfos] describing all fields in this segment.  */
-    val fieldInfos: FieldInfos
+    val fieldInfos: FieldInfos?
 
     /** Number of deleted documents set while flushing the segment.  */
     var delCountOnFlush: Int = 0
@@ -67,7 +67,7 @@ class SegmentWriteState {
         infoStream: InfoStream?,
         directory: Directory,
         segmentInfo: SegmentInfo,
-        fieldInfos: FieldInfos,
+        fieldInfos: FieldInfos?,
         segUpdates: BufferedUpdates?,
         context: IOContext
     ) : this(infoStream, directory, segmentInfo, fieldInfos, segUpdates, context, "")
@@ -81,7 +81,7 @@ class SegmentWriteState {
         infoStream: InfoStream?,
         directory: Directory,
         segmentInfo: SegmentInfo,
-        fieldInfos: FieldInfos,
+        fieldInfos: FieldInfos?,
         segUpdates: BufferedUpdates?,
         context: IOContext,
         segmentSuffix: String

@@ -141,7 +141,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
             )
             forDeltaUtil = ForDeltaUtil()
             pforUtil = PForUtil()
-            if (state.fieldInfos.hasProx()) {
+            if (state.fieldInfos!!.hasProx()) {
                 posDeltaBuffer = IntArray(BLOCK_SIZE)
                 val posFileName: String =
                     IndexFileNames.segmentFileName(
