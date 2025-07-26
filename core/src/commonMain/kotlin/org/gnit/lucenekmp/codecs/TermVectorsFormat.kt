@@ -13,7 +13,7 @@ protected constructor() {
     /** Returns a [TermVectorsReader] to read term vectors.  */
     @Throws(IOException::class)
     abstract fun vectorsReader(
-        directory: Directory, segmentInfo: SegmentInfo, fieldInfos: FieldInfos, context: IOContext
+        directory: Directory, segmentInfo: SegmentInfo, fieldInfos: FieldInfos?, context: IOContext
     ): TermVectorsReader
 
     /** Returns a [TermVectorsWriter] to write term vectors.  */

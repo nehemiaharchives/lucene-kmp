@@ -106,7 +106,7 @@ class Lucene90CompressingStoredFieldsFormat(
 
     @Throws(IOException::class)
     override fun fieldsReader(
-        directory: Directory, si: SegmentInfo, fn: FieldInfos, context: IOContext
+        directory: Directory, si: SegmentInfo, fn: FieldInfos?, context: IOContext
     ): StoredFieldsReader {
         return Lucene90CompressingStoredFieldsReader(
             directory, si, segmentSuffix, fn, context, formatName, compressionMode

@@ -23,7 +23,7 @@ internal open class StoredFieldsConsumer(
     private var lastDoc: Int = -1
 
     @Throws(IOException::class)
-    protected fun initStoredFieldsWriter() {
+    protected open fun initStoredFieldsWriter() {
         if (writer
             == null
         ) { // TODO can we allocate this in the ctor we call start document for every doc
@@ -72,7 +72,7 @@ internal open class StoredFieldsConsumer(
     }
 
     @Throws(IOException::class)
-    fun flush(state: SegmentWriteState, sortMap: Sorter.DocMap) {
+    open fun flush(state: SegmentWriteState, sortMap: Sorter.DocMap) {
         try {
             writer!!.finish(state.segmentInfo.maxDoc())
         } finally {
@@ -80,7 +80,7 @@ internal open class StoredFieldsConsumer(
         }
     }
 
-    fun abort() {
+    open fun abort() {
         IOUtils.closeWhileHandlingException(writer)
     }
 }

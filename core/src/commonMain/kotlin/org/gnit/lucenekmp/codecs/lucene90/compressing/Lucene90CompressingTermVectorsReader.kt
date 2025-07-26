@@ -61,7 +61,7 @@ import kotlin.jvm.JvmRecord
  * @lucene.experimental
  */
 class Lucene90CompressingTermVectorsReader : TermVectorsReader {
-    private val fieldInfos: FieldInfos
+    private val fieldInfos: FieldInfos?
     val indexReader: FieldsIndex
     val vectorsStream: IndexInput
     val version: Int
@@ -111,7 +111,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         d: Directory,
         si: SegmentInfo,
         segmentSuffix: String,
-        fn: FieldInfos,
+        fn: FieldInfos?,
         context: IOContext,
         formatName: String,
         compressionMode: CompressionMode
@@ -838,7 +838,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                         throw NoSuchElementException()
                     }
                     val fieldNum = fieldNums[fieldNumOffs[i++].toInt()]
-                    return fieldInfos.fieldInfo(fieldNum)!!.name
+                    return fieldInfos!!.fieldInfo(fieldNum)!!.name
                 }
 
                 override fun remove() {
@@ -849,7 +849,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
 
         @Throws(IOException::class)
         override fun terms(field: String?): Terms? {
-            val fieldInfo: FieldInfo? = fieldInfos.fieldInfo(field!!)
+            val fieldInfo: FieldInfo? = fieldInfos!!.fieldInfo(field!!)
             if (fieldInfo == null) {
                 return null
             }

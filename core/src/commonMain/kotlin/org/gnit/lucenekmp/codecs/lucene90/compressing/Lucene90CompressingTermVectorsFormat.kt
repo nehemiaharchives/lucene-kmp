@@ -64,7 +64,7 @@ open class Lucene90CompressingTermVectorsFormat(
 
     @Throws(IOException::class)
     override fun vectorsReader(
-        directory: Directory, segmentInfo: SegmentInfo, fieldInfos: FieldInfos, context: IOContext
+        directory: Directory, segmentInfo: SegmentInfo, fieldInfos: FieldInfos?, context: IOContext
     ): TermVectorsReader {
         return Lucene90CompressingTermVectorsReader(
             directory, segmentInfo, segmentSuffix, fieldInfos, context, formatName, compressionMode

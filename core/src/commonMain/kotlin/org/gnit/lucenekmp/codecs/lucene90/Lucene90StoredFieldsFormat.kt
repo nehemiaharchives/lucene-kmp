@@ -87,7 +87,7 @@ import kotlin.jvm.JvmOverloads
  *
  * @lucene.experimental
  */
-class Lucene90StoredFieldsFormat @JvmOverloads constructor(
+class Lucene90StoredFieldsFormat(
 
     /** Stored fields format with specified mode  */
     /** Stored fields format with default options  */
@@ -103,7 +103,7 @@ class Lucene90StoredFieldsFormat @JvmOverloads constructor(
 
     @Throws(IOException::class)
     override fun fieldsReader(
-        directory: Directory, si: SegmentInfo, fn: FieldInfos, context: IOContext
+        directory: Directory, si: SegmentInfo, fn: FieldInfos?, context: IOContext
     ): StoredFieldsReader {
         val value: String = si.getAttribute(MODE_KEY)
         checkNotNull(value) { "missing value for " + MODE_KEY + " for segment: " + si.name }

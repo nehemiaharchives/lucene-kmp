@@ -84,7 +84,7 @@ open class TermVectorsConsumer(
     }
 
     @Throws(IOException::class)
-    fun initTermVectorsWriter() {
+    open fun initTermVectorsWriter() {
         if (writer == null) {
             val context = IOContext(FlushInfo(lastDocID, bytesUsed.get()))
             writer = codec.termVectorsFormat().vectorsWriter(directory, info, context)

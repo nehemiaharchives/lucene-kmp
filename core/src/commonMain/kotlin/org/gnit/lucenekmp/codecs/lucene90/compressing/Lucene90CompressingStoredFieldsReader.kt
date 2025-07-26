@@ -64,7 +64,7 @@ import kotlin.math.min
  */
 class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
     val version: Int
-    private val fieldInfos: FieldInfos
+    private val fieldInfos: FieldInfos?
     private val indexReader: FieldsIndex
     val maxPointer: Long
     private val fieldsStream: IndexInput
@@ -111,7 +111,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
         d: Directory,
         si: SegmentInfo,
         segmentSuffix: String,
-        fn: FieldInfos,
+        fn: FieldInfos?,
         context: IOContext,
         formatName: String,
         compressionMode: CompressionMode
@@ -523,7 +523,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
         for (fieldIDX in 0..<doc.numStoredFields) {
             val infoAndBits: Long = doc.`in`.readVLong()
             val fieldNumber = (infoAndBits ushr TYPE_BITS).toInt()
-            val fieldInfo: FieldInfo = fieldInfos.fieldInfo(fieldNumber)!!
+            val fieldInfo: FieldInfo = fieldInfos!!.fieldInfo(fieldNumber)!!
 
             val bits = (infoAndBits and TYPE_MASK.toLong()).toInt()
             require(bits <= NUMERIC_DOUBLE) { "bits=" + Int.toHexString(bits) }

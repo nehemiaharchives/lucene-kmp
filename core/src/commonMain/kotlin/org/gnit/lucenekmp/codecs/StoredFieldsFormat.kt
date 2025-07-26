@@ -14,7 +14,7 @@ protected constructor() {
     /** Returns a [StoredFieldsReader] to load stored fields.  */
     @Throws(IOException::class)
     abstract fun fieldsReader(
-        directory: Directory, si: SegmentInfo, fn: FieldInfos, context: IOContext
+        directory: Directory, si: SegmentInfo, fn: FieldInfos?, context: IOContext
     ): StoredFieldsReader
 
     /** Returns a [StoredFieldsWriter] to write stored fields.  */
