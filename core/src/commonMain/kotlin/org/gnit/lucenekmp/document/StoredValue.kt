@@ -41,8 +41,25 @@ class StoredValue {
     private var floatValue = 0f
     private var doubleValue = 0.0
     private lateinit var dataInput: StoredFieldDataInput
-    private lateinit var binaryValue: BytesRef
-    private lateinit var stringValue: String
+    var binaryValue: BytesRef
+        get(): BytesRef {
+            require(type == Type.BINARY) { "Cannot get a binary value on a $type value" }
+            return binaryValue
+        }
+        set(value) {
+            require(type == Type.BINARY) { "Cannot set a binary value on a $type value" }
+            binaryValue = value
+        }
+
+    var stringValue: String
+        get(): String {
+            require(type == Type.STRING) { "Cannot get a string value on a $type value" }
+            return stringValue
+        }
+        set(value) {
+            require(type == Type.STRING) { "Cannot set a string value on a $type value" }
+            stringValue = value
+        }
 
     /** Ctor for integer values.  */
     constructor(value: Int) {
@@ -110,22 +127,10 @@ class StoredValue {
         doubleValue = value
     }
 
-    /** Set a binary value.  */
-    fun setBinaryValue(value: BytesRef) {
-        require(type == Type.BINARY) { "Cannot set a binary value on a $type value" }
-        binaryValue = value
-    }
-
     /** Set a data input value.  */
     fun setDataInputValue(value: StoredFieldDataInput) {
         require(type == Type.DATA_INPUT) { "Cannot set a data input value on a $type value" }
         dataInput = value
-    }
-
-    /** Set a string value.  */
-    fun setStringValue(value: String) {
-        require(type == Type.STRING) { "Cannot set a string value on a $type value" }
-        stringValue = value
     }
 
     /** Retrieve an integer value.  */
@@ -152,12 +157,6 @@ class StoredValue {
         return doubleValue
     }
 
-    /** Retrieve a binary value.  */
-    fun getBinaryValue(): BytesRef? {
-        require(type == Type.BINARY) { "Cannot get a binary value on a $type value" }
-        return binaryValue
-    }
-
     val dataInputValue: StoredFieldDataInput?
         /** Retrieve a data input value.  */
         get() {
@@ -165,9 +164,4 @@ class StoredValue {
             return dataInput
         }
 
-    /** Retrieve a string value.  */
-    fun getStringValue(): String? {
-        require(type == Type.STRING) { "Cannot get a string value on a $type value" }
-        return stringValue
-    }
 }

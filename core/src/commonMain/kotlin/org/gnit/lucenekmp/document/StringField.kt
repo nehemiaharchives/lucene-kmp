@@ -30,13 +30,13 @@ class StringField : Field {
     override fun setStringValue(value: String) {
         super.setStringValue(value)
         binaryValue = BytesRef(value)
-        storedValue?.setStringValue(value)
+        storedValue?.stringValue = value
     }
 
     override fun setBytesValue(value: BytesRef) {
         super.setBytesValue(value)
         binaryValue = value
-        storedValue?.setBinaryValue(value)
+        storedValue?.binaryValue = value
     }
 
     override fun storedValue(): StoredValue? = storedValue

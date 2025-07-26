@@ -60,7 +60,7 @@ class TextField : Field {
     override fun setStringValue(value: String) {
         super.setStringValue(value)
         if (storedValue != null) {
-            storedValue!!.setStringValue(value)
+            storedValue!!.stringValue = value
         }
     }
 
