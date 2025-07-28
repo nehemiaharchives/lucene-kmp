@@ -23,7 +23,7 @@ abstract class FilterCodecReader(
     protected val `in`: CodecReader
 ) : CodecReader() {
 
-    override val fieldsReader: StoredFieldsReader
+    override val fieldsReader: StoredFieldsReader?
         get() = `in`.fieldsReader
 
     override val termVectorsReader: TermVectorsReader?

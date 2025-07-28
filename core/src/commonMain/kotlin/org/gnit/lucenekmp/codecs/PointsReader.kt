@@ -27,7 +27,7 @@ protected constructor() : AutoCloseable {
      * Return [PointValues] for the given `field`. The behavior is undefined if the given
      * field doesn't have points enabled on its [FieldInfo].
      */
-    @Throws(IOException::class) abstract fun getValues(field: String): PointValues
+    @Throws(IOException::class) abstract fun getValues(field: String): PointValues?
 
     val mergeInstance: PointsReader
         /**

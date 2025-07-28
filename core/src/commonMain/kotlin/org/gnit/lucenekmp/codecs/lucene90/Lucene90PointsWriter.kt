@@ -107,7 +107,7 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
 
     @Throws(IOException::class)
     override fun writeField(fieldInfo: FieldInfo, reader: PointsReader) {
-        val values: PointTree = reader.getValues(fieldInfo.name).pointTree
+        val values: PointTree = reader.getValues(fieldInfo.name)!!.pointTree
 
         val config =
             BKDConfig(

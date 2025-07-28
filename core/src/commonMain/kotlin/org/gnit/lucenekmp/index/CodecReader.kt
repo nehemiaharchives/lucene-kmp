@@ -22,7 +22,7 @@ protected constructor() : LeafReader() {
      *
      * @lucene.internal
      */
-    abstract val fieldsReader: StoredFieldsReader
+    abstract val fieldsReader: StoredFieldsReader?
 
     /**
      * Expert: retrieve underlying TermVectorsReader
@@ -68,7 +68,7 @@ protected constructor() : LeafReader() {
 
     @Throws(IOException::class)
     override fun storedFields(): StoredFields {
-        val reader: StoredFields = this.fieldsReader
+        val reader: StoredFields = this.fieldsReader!!
         return object : StoredFields() {
             @Throws(IOException::class)
             override fun prefetch(docID: Int) {
@@ -288,7 +288,7 @@ protected constructor() : LeafReader() {
 
         // stored fields
         if (this.fieldsReader != null) {
-            this.fieldsReader.checkIntegrity()
+            this.fieldsReader!!.checkIntegrity()
         }
 
         // term vectors

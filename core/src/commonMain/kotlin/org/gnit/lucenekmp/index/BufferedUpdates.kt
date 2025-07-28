@@ -203,7 +203,7 @@ class BufferedUpdates(val segmentName: String) : Accountable {
             }.toMutableSet()
         }
 
-        interface DeletedTermConsumer<E : Exception> {
+        fun interface DeletedTermConsumer<E : Exception> {
             @Throws(Exception::class)
             fun accept(term: Term, docId: Int)
         }

@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.store.IndexOutput
 
 class TrackingTmpOutputDirectoryWrapper(`in`: Directory) :
     FilterDirectory(`in`) {
-    val fileNames: MutableMap<String, String> = mutableMapOf()
+    val fileNames: MutableMap<String, String> = HashMap()
 
     @Throws(IOException::class)
     override fun createOutput(

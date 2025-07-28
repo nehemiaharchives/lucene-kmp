@@ -191,8 +191,8 @@ abstract class DocIdSetIterator {
          * (exclusive).
          */
         fun range(minDoc: Int, maxDoc: Int): DocIdSetIterator {
-            require(minDoc < maxDoc) { "minDoc must be < maxDoc but got minDoc=" + minDoc + " maxDoc=" + maxDoc }
-            require(minDoc >= 0) { "minDoc must be >= 0 but got minDoc=" + minDoc }
+            require(minDoc < maxDoc) { "minDoc must be < maxDoc but got minDoc=$minDoc maxDoc=$maxDoc" }
+            require(minDoc >= 0) { "minDoc must be >= 0 but got minDoc=$minDoc" }
             return object : DocIdSetIterator() {
                 private var doc = -1
 
@@ -235,6 +235,6 @@ abstract class DocIdSetIterator {
          * When returned by [.nextDoc], [.advance] and [.docID] it means there
          * are no more docs in the iterator.
          */
-        val NO_MORE_DOCS: Int = Int.Companion.MAX_VALUE
+        const val NO_MORE_DOCS: Int = Int.Companion.MAX_VALUE
     }
 }
