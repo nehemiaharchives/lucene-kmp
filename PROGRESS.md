@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 676 | 94% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 678 | 94% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,7 +15,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 145 | 85% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 147 | 86% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -36,8 +36,8 @@
 ## Priority-1 API progress
 | Java class | Mapped class | Java Deps | KMP Deps Ported | KMP Deps To Port | % | Done |
 | --- | --- | --- | --- | --- | --- | --- |
-| [org.apache.lucene.index.IndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriter.java) | org.gnit.lucenekmp.index.IndexWriter | 78 | 69 | 9 | 88% | [ ] |
-| [org.apache.lucene.index.IndexWriterConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriterConfig.java) | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 11 | 4 | 73% | [ ] |
+| [org.apache.lucene.index.IndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriter.java) | org.gnit.lucenekmp.index.IndexWriter | 78 | 70 | 8 | 89% | [ ] |
+| [org.apache.lucene.index.IndexWriterConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriterConfig.java) | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 12 | 3 | 80% | [ ] |
 | [org.apache.lucene.store.FSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FSDirectory.java) | org.gnit.lucenekmp.store.FSDirectory | 8 | 8 | 0 | 100% | [x] |
 | [org.apache.lucene.analysis.Analyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/Analyzer.java) | org.gnit.lucenekmp.analysis.Analyzer | 10 | 10 | 0 | 100% | [x] |
 | [org.apache.lucene.document.Document](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/Document.java) | org.gnit.lucenekmp.document.Document | 2 | 2 | 0 | 100% | [x] |
@@ -57,7 +57,7 @@
 | [org.apache.lucene.search.BooleanClause](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanClause.java) | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | [org.apache.lucene.search.Sort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Sort.java) | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | [org.apache.lucene.search.SortField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SortField.java) | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 171 | 151 | 20 | 88% | [ ] |
+| TOTAL |  | 171 | 153 | 18 | 89% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
@@ -75,8 +75,6 @@
 | [org.apache.lucene.index.FilterMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/FilterMergePolicy.java) | org.gnit.lucenekmp.index.FilterMergePolicy |
 | [org.apache.lucene.index.FlushByRamOrCountsPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/FlushByRamOrCountsPolicy.java) | org.gnit.lucenekmp.index.FlushByRamOrCountsPolicy |
 | [org.apache.lucene.index.FlushPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/FlushPolicy.java) | org.gnit.lucenekmp.index.FlushPolicy |
-| [org.apache.lucene.index.IndexDeletionPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexDeletionPolicy.java) | org.gnit.lucenekmp.index.IndexDeletionPolicy |
-| [org.apache.lucene.index.IndexFileDeleter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexFileDeleter.java) | org.gnit.lucenekmp.index.IndexFileDeleter |
 | [org.apache.lucene.index.IndexWriterEventListener](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriterEventListener.java) | org.gnit.lucenekmp.index.IndexWriterEventListener |
 | [org.apache.lucene.index.IndexingChain](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexingChain.java) | org.gnit.lucenekmp.index.IndexingChain |
 | [org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/KeepOnlyLastCommitDeletionPolicy.java) | org.gnit.lucenekmp.index.KeepOnlyLastCommitDeletionPolicy |

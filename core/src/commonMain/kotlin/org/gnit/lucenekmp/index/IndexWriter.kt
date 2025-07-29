@@ -225,6 +225,48 @@ class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.Mer
         throw UnsupportedOperationException("forceApply is not implemented")
     }
 
+    fun ensureOpen(failIfClosing: Boolean) {
+        /*if (closed || (failIfClosing && closing)) {
+            throw org.apache.lucene.store.AlreadyClosedException("this IndexWriter is closed", tragedy.get())
+        }*/
+        throw UnsupportedOperationException("ensureOpen is not implemented")
+    }
+
+    fun getTragicException(): Throwable? {
+        /*return tragedy.get()*/
+        throw UnsupportedOperationException("getTragicException is not implemented")
+    }
+
+    /*@Synchronized*/
+    fun segString(infos: Iterable<SegmentCommitInfo>): String {
+        /*return StreamSupport.stream<org.apache.lucene.index.SegmentCommitInfo?>(infos.spliterator(), false)
+            .map<String?> { info: org.apache.lucene.index.SegmentCommitInfo -> this.segString(info) }
+            .collect(java.util.stream.Collectors.joining(" "))*/
+        throw UnsupportedOperationException("segString is not implemented")
+    }
+
+    /*@Synchronized*/
+    fun toLiveInfos(sis: SegmentInfos): SegmentInfos {
+        /*val newSIS: SegmentInfos =
+            SegmentInfos(sis.getIndexCreatedVersionMajor())
+        val liveSIS: MutableMap<org.apache.lucene.index.SegmentCommitInfo?, org.apache.lucene.index.SegmentCommitInfo?> =
+            HashMap<org.apache.lucene.index.SegmentCommitInfo?, org.apache.lucene.index.SegmentCommitInfo?>()
+        for (info in segmentInfos) {
+            liveSIS.put(info, info)
+        }
+        for (info in sis) {
+            var info: org.apache.lucene.index.SegmentCommitInfo? = info
+            val liveInfo: org.apache.lucene.index.SegmentCommitInfo? = liveSIS.get(info)
+            if (liveInfo != null) {
+                info = liveInfo
+            }
+            newSIS.add(info)
+        }
+
+        return newSIS*/
+        throw UnsupportedOperationException("toLiveInfos is not implemented")
+    }
+
     companion object{
 
         /**
@@ -252,6 +294,8 @@ class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.Mer
             }
             return fields1.asList() == fields2.asList().subList(0, fields1.size)
         }
+
+        const val WRITE_LOCK_NAME: String = "write.lock"
 
     }
 
