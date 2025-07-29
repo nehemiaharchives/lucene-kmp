@@ -21,16 +21,10 @@ import org.gnit.lucenekmp.util.Version
  * @see IndexWriter.addDocuments
  * @lucene.experimental
  */
-class LeafMetaData(createdVersionMajor: Int, minVersion: Version?, sort: Sort, val hasBlocks: Boolean) {
-    val createdVersionMajor: Int
-    val minVersion: Version?
-    val sort: Sort
+class LeafMetaData(val createdVersionMajor: Int, val minVersion: Version?, val sort: Sort?, val hasBlocks: Boolean) {
 
     /** Expert: Sole constructor. Public for use by custom [LeafReader] impls.  */
     init {
-        this.sort = sort
-        this.minVersion = minVersion
-        this.createdVersionMajor = createdVersionMajor
         require(!(createdVersionMajor > Version.LATEST.major)) { "createdVersionMajor is in the future: $createdVersionMajor" }
         require(createdVersionMajor >= 6) { "createdVersionMajor must be >= 6, got: $createdVersionMajor" }
         require(!(createdVersionMajor >= 7 && minVersion == null)) { "minVersion must be set when createdVersionMajor is >= 7" }
