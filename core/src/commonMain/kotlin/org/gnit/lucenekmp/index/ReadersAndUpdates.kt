@@ -134,7 +134,7 @@ class ReadersAndUpdates(
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
     fun addDVUpdate(update: DocValuesFieldUpdates) {
-        require(update.finished != false) { "call finish first" }
+        require(update.finished) { "call finish first" }
         var fieldUpdates: MutableList<DocValuesFieldUpdates>? =
             pendingDVUpdates.computeIfAbsent(update.field) { `_`: String -> ArrayList() }
         assert(assertNoDupGen(fieldUpdates!!, update))
@@ -219,7 +219,7 @@ class ReadersAndUpdates(
             checkNotNull(reader)
         }
         // force new liveDocs
-        val liveDocs: Bits? = pendingDeletes.getLiveDocs()
+        val liveDocs: Bits? = pendingDeletes.liveDocs
         if (liveDocs != null) {
             return SegmentReader(
                 info, reader!!, liveDocs, pendingDeletes.hardLiveDocs, pendingDeletes.numDocs(), true
@@ -256,7 +256,7 @@ class ReadersAndUpdates(
     /*@get:Synchronized*/
     val liveDocs: Bits?
         /** Returns a snapshot of the live docs.  */
-        get() = pendingDeletes.getLiveDocs()
+        get() = pendingDeletes.liveDocs
 
     /*@get:Synchronized*/
     val hardLiveDocs: Bits?
@@ -739,7 +739,7 @@ class ReadersAndUpdates(
         val newReader = SegmentReader(
             info,
             reader,
-            pendingDeletes.getLiveDocs(),
+            pendingDeletes.liveDocs,
             pendingDeletes.hardLiveDocs,
             pendingDeletes.numDocs(),
             true
@@ -796,7 +796,7 @@ class ReadersAndUpdates(
             || reader.segmentInfo.delGen != pendingDeletes.info.delGen
         ) {
             // beware of zombies:
-            checkNotNull(pendingDeletes.getLiveDocs())
+            checkNotNull(pendingDeletes.liveDocs)
             reader = createNewReaderWithLatestLiveDocs(reader)
         }
         assert(pendingDeletes.verifyDocCounts(reader))

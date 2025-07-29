@@ -10,18 +10,22 @@ import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.IOSupplier
 import org.gnit.lucenekmp.util.IOUtils
-import kotlin.jvm.JvmOverloads
-
 
 /** This class handles accounting and applying pending deletes for live segment readers  */
-class PendingDeletes @JvmOverloads constructor(
+open class PendingDeletes(
     val info: SegmentCommitInfo,
     liveDocs: Bits? = null,
-    liveDocsInitialized: Boolean = info.hasDeletions() == false
+    liveDocsInitialized: Boolean = !info.hasDeletions()
 ) {
 
     // Read-only live docs, null until live docs are initialized or if all docs are alive
-    private var liveDocs: Bits?
+    var liveDocs: Bits?
+        /** Returns a snapshot of the current live docs.  */
+        get(): Bits? {
+            // Prevent modifications to the returned live docs
+            writeableLiveDocs = null
+            return liveDocs
+        }
 
     // Writeable live docs, null if this instance is not ready to accept writes, in which
     // case getMutableBits needs to be called
@@ -69,7 +73,7 @@ class PendingDeletes @JvmOverloads constructor(
      * or if the document was already deleted.
      */
     @Throws(IOException::class)
-    fun delete(docID: Int): Boolean {
+    open fun delete(docID: Int): Boolean {
         assert(info.info.maxDoc() > 0)
         val mutableBits: FixedBitSet = checkNotNull(this.mutableBits)
         assert(
@@ -91,19 +95,12 @@ class PendingDeletes @JvmOverloads constructor(
         return didDelete
     }
 
-    /** Returns a snapshot of the current live docs.  */
-    fun getLiveDocs(): Bits? {
-        // Prevent modifications to the returned live docs
-        writeableLiveDocs = null
-        return liveDocs
-    }
-
-    val hardLiveDocs: Bits?
+    open val hardLiveDocs: Bits?
         /** Returns a snapshot of the hard live docs.  */
-        get() = getLiveDocs()
+        get() = liveDocs
 
     /** Returns the number of pending deletes that are not written to disk.  */
-    protected fun numPendingDeletes(): Int {
+    open fun numPendingDeletes(): Int {
         return pendingDeleteCount
     }
 
@@ -111,8 +108,8 @@ class PendingDeletes @JvmOverloads constructor(
      * Called once a new reader is opened for this segment ie. when deletes or updates are applied.
      */
     @Throws(IOException::class)
-    fun onNewReader(reader: CodecReader, info: SegmentCommitInfo) {
-        if (liveDocsInitialized == false) {
+    open fun onNewReader(reader: CodecReader, info: SegmentCommitInfo) {
+        if (!liveDocsInitialized) {
             assert(writeableLiveDocs == null)
             if (reader.hasDeletions()) {
                 // we only initialize this once either in the ctor or here
@@ -137,7 +134,7 @@ class PendingDeletes @JvmOverloads constructor(
         assert(bits.length() == expectedLength)
         var deletedCount = 0
         for (i in 0..<bits.length()) {
-            if (bits.get(i) == false) {
+            if (!bits.get(i)) {
                 deletedCount++
             }
         }
@@ -148,7 +145,7 @@ class PendingDeletes @JvmOverloads constructor(
     }
 
     /** Resets the pending docs  */
-    fun dropChanges() {
+    open fun dropChanges() {
         pendingDeleteCount = 0
     }
 
@@ -162,7 +159,7 @@ class PendingDeletes @JvmOverloads constructor(
 
     /** Writes the live docs to disk and returns `true` if any new docs were written.  */
     @Throws(IOException::class)
-    fun writeLiveDocs(dir: Directory): Boolean {
+    open fun writeLiveDocs(dir: Directory): Boolean {
         if (pendingDeleteCount == 0) {
             return false
         }
@@ -219,7 +216,7 @@ class PendingDeletes @JvmOverloads constructor(
      * deleted
      */
     @Throws(IOException::class)
-    fun isFullyDeleted(readerIOSupplier: IOSupplier<CodecReader>): Boolean {
+    open fun isFullyDeleted(readerIOSupplier: IOSupplier<CodecReader>): Boolean {
         return this.delCount == info.info.maxDoc()
     }
 
@@ -230,14 +227,14 @@ class PendingDeletes @JvmOverloads constructor(
      * @param iterator the values to apply
      */
     @Throws(IOException::class)
-    fun onDocValuesUpdate(
+    open fun onDocValuesUpdate(
         info: FieldInfo,
         iterator: DocValuesFieldUpdates.Iterator
     ) {
     }
 
     @Throws(IOException::class)
-    fun numDeletesToMerge(
+    open fun numDeletesToMerge(
         policy: MergePolicy,
         readerIOSupplier: IOSupplier<CodecReader>
     ): Int {
@@ -246,7 +243,7 @@ class PendingDeletes @JvmOverloads constructor(
 
     /** Returns true if the given reader needs to be refreshed in order to see the latest deletes  */
     fun needsRefresh(reader: CodecReader): Boolean {
-        return reader.liveDocs !== getLiveDocs() || reader.numDeletedDocs() != this.delCount
+        return reader.liveDocs !== liveDocs || reader.numDeletedDocs() != this.delCount
     }
 
     val delCount: Int
@@ -264,7 +261,7 @@ class PendingDeletes @JvmOverloads constructor(
     // Call only from assert!
     fun verifyDocCounts(reader: CodecReader): Boolean {
         var count = 0
-        val liveDocs: Bits? = getLiveDocs()
+        val liveDocs: Bits? = liveDocs
         if (liveDocs != null) {
             for (docID in 0..<info.info.maxDoc()) {
                 if (liveDocs.get(docID)) {
@@ -313,7 +310,7 @@ class PendingDeletes @JvmOverloads constructor(
      * otherwise this PendingDeletes is ready to accept deletes. A PendingDeletes can be initialized
      * by providing it a reader via [.onNewReader].
      */
-    fun mustInitOnDelete(): Boolean {
+    open fun mustInitOnDelete(): Boolean {
         return false
     }
 }
