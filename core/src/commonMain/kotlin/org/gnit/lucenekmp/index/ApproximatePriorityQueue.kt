@@ -54,7 +54,7 @@ internal class ApproximatePriorityQueue<T> {
      * have the highest weight, though this is not guaranteed. This method returns `null` if no
      * free entries are available.
      */
-    fun poll(predicate: (T?) -> Boolean /*java.util.function.Predicate<T?>*/): T? {
+    fun poll(predicate: (T) -> Boolean /*java.util.function.Predicate<T?>*/): T? {
         // Look at indexes 0..63 first, which are sparsely populated.
         var nextSlot = 0
         do {
@@ -62,7 +62,7 @@ internal class ApproximatePriorityQueue<T> {
             if (nextUsedSlot >= Long.SIZE_BITS) {
                 break
             }
-            val entry = slots[nextUsedSlot]
+            val entry = slots[nextUsedSlot]!!
             if (predicate(entry)) {
                 usedSlots = usedSlots and (1L shl nextUsedSlot).inv()
                 slots[nextUsedSlot] = null
@@ -79,7 +79,7 @@ internal class ApproximatePriorityQueue<T> {
         // to the end of the list.
         val lit = slots.listIterator(slots.size)
         while (lit.previousIndex() >= Long.SIZE_BITS) {
-            val entry = lit.previous()
+            val entry = lit.previous()!!
             if (predicate(entry)) {
                 lit.remove()
                 return entry
@@ -101,7 +101,7 @@ internal class ApproximatePriorityQueue<T> {
     val isEmpty: Boolean
         get() = usedSlots == 0L && slots.size == Long.SIZE_BITS
 
-    fun remove(o: T?): Boolean {
+    fun remove(o: T): Boolean {
         if (o == null) {
             throw NullPointerException()
         }

@@ -18,6 +18,19 @@ fun <E> ArrayDeque<E>.getFirst(): E {
 }
 
 /**
+ * Retrieves and removes the head of this queue,
+ * or returns {@code null} if this queue is empty.
+ *
+ * @return the head of this queue, or {@code null} if this queue is empty
+ */
+fun <E> ArrayDeque<E>.poll(): E? {
+    if (isEmpty()) {
+        return null
+    }
+    return removeFirst()
+}
+
+/**
  * Returns the last element of this deque.
  * @throws NoSuchElementException if this deque is empty
  */

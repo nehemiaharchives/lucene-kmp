@@ -15,7 +15,7 @@ import org.gnit.lucenekmp.util.InfoStream
  * Streams vector values for indexing to the given codec's vectors writer. The codec's vectors
  * writer is responsible for buffering and processing vectors.
  */
-internal class VectorValuesConsumer(
+class VectorValuesConsumer(
     private val codec: Codec,
     private val directory: Directory,
     private val segmentInfo: SegmentInfo,

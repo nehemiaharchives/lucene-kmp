@@ -10,12 +10,12 @@ package org.gnit.lucenekmp.jdkport
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 
-class ReentrantLock {
+class ReentrantLock: Lock {
 
     private val mutex = Mutex()
     private var holdCount = 0
 
-    fun tryLock(): Boolean {
+    override fun tryLock(): Boolean {
         val locked = mutex.tryLock()
         if (locked) {
             holdCount++
@@ -23,14 +23,19 @@ class ReentrantLock {
         return locked
     }
 
-    fun lock() {
+    override fun tryLock(timeout: Long, unit: TimeUnit): Boolean {
+        /*return sync.tryLockNanos(unit.toNanos(timeout))*/
+        throw NotImplementedError("Not yet implemented")
+    }
+
+    override fun lock() {
         runBlocking {
             mutex.lock()
         }
         holdCount++
     }
 
-    fun unlock() {
+    override fun unlock() {
         if (holdCount > 0) {
             holdCount--
             if (holdCount == 0) {
@@ -41,5 +46,13 @@ class ReentrantLock {
 
     fun isHeldByCurrentThread(): Boolean {
         return holdCount > 0
+    }
+
+    override fun newCondition(): Condition {
+        throw NotImplementedError("Not yet implemented")
+    }
+
+    override fun lockInterruptibly() {
+        throw NotImplementedError("Not yet implemented")
     }
 }

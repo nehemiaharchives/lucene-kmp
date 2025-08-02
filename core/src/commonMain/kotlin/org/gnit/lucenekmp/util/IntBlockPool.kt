@@ -20,7 +20,7 @@ class IntBlockPool
     abstract class Allocator protected constructor(protected val blockSize: Int) {
         abstract fun recycleIntBlocks(blocks: Array<IntArray>, start: Int, end: Int)
 
-        val intBlock: IntArray
+        open val intBlock: IntArray
             get() = IntArray(blockSize)
     }
 

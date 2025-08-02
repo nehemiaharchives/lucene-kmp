@@ -591,7 +591,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         }
     }
 
-    internal class Builder(globalFieldNumbers: FieldNumbers) {
+    class Builder(globalFieldNumbers: FieldNumbers) {
         private val byName: MutableMap<String, FieldInfo> = mutableMapOf()
         val globalFieldNumbers: FieldNumbers
         private var finished = false

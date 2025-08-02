@@ -31,7 +31,7 @@ class FrozenBufferedUpdates(
     private val infoStream: InfoStream,
     updates: BufferedUpdates,
     // non-null iff this frozen packet represents
-    val privateSegment: SegmentCommitInfo
+    val privateSegment: SegmentCommitInfo?
 ) {
     // Terms, in sorted order:
     val deleteTerms: PrefixCodedTerms

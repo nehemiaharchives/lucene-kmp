@@ -6,7 +6,7 @@ import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
 @OptIn(ExperimentalAtomicApi::class)
-fun AtomicInt.get() = this.load()
+fun AtomicInt.get(): Int = this.load()
 
 @OptIn(ExperimentalAtomicApi::class)
 fun AtomicInt.set(value: Int) = this.store(value)
@@ -39,6 +39,12 @@ fun AtomicInt.accumulateAndGet(
         haveNext = (prev == (get().also { prev = it }))
     }
 }
+
+@OptIn(ExperimentalAtomicApi::class)
+fun AtomicInt.incrementAndGet() = this.incrementAndFetch()
+
+@OptIn(ExperimentalAtomicApi::class)
+fun AtomicInt.decrementAndGet() = this.decrementAndFetch()
 
 /**
  * Possibly atomically sets the value to `newValue` if

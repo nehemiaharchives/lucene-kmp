@@ -4,6 +4,13 @@ import okio.IOException
 import org.gnit.lucenekmp.search.Sort
 import org.gnit.lucenekmp.search.SortField
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.IOContext
+import org.gnit.lucenekmp.store.TrackingDirectoryWrapper
+import org.gnit.lucenekmp.util.ArrayUtil
+import org.gnit.lucenekmp.util.ByteBlockPool
+import org.gnit.lucenekmp.util.IOConsumer
+import org.gnit.lucenekmp.util.InfoStream
+import org.gnit.lucenekmp.util.UnicodeUtil
 
 /**
  * An <code>IndexWriter</code> creates and maintains an index.
@@ -297,7 +304,26 @@ class IndexWriter/*: AutoCloseable, TwoPhaseCommit, Accountable, MergePolicy.Mer
 
         const val WRITE_LOCK_NAME: String = "write.lock"
 
+        val MAX_TERM_LENGTH: Int = ByteBlockPool.BYTE_BLOCK_SIZE - 2
+
+        val MAX_STORED_STRING_LENGTH: Int =
+            ArrayUtil.MAX_ARRAY_LENGTH / UnicodeUtil.MAX_UTF8_BYTES_PER_CHAR
+
+        fun setDiagnostics(info: SegmentInfo, source: String) {
+            throw UnsupportedOperationException("setDiagnostics is not implemented")
+        }
+
+        const val SOURCE_FLUSH: String = "flush"
+
+        @Throws(IOException::class)
+        fun createCompoundFile(
+            infoStream: InfoStream,
+            directory: TrackingDirectoryWrapper,
+            info: SegmentInfo,
+            context: IOContext,
+            deleteFiles: IOConsumer<MutableCollection<String>>
+        ) {
+            throw UnsupportedOperationException("createCompoundFile is not implemented")
+        }
     }
-
-
 }

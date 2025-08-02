@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.IOUtils
 
-internal open class StoredFieldsConsumer(
+open class StoredFieldsConsumer(
     val codec: Codec,
     val directory: Directory,
     val info: SegmentInfo

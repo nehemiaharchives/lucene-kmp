@@ -5,9 +5,10 @@ import org.gnit.lucenekmp.codecs.Codec
 /** Minimal version of Lucene's IndexWriterConfig.
  *  Only the parts required by tests are implemented.
  */
-class IndexWriterConfig {
-    var codec: Codec? = null
-    var mergePolicy: MergePolicy? = null
+open class IndexWriterConfig {
+    var codec: Codec = Codec.default
+
+    open var mergePolicy: MergePolicy? = null
 
     fun setCodec(codec: Codec): IndexWriterConfig {
         this.codec = codec
@@ -18,5 +19,15 @@ class IndexWriterConfig {
         this.mergePolicy = mergePolicy
         return this
     }
+
+    fun getRAMPerThreadHardLimitMB(): Int {
+        throw UnsupportedOperationException("Not implemented yet")
+    }
+
+    companion object{
+
+        const val DISABLE_AUTO_FLUSH: Int = -1
+    }
+
 
 }

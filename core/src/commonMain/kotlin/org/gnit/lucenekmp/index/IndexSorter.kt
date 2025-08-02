@@ -39,7 +39,7 @@ interface IndexSorter {
     }
 
     /** A comparator of doc IDs, used for sorting documents within a segment  */
-    interface DocComparator {
+    fun interface DocComparator {
         /**
          * Compare docID1 against docID2. The contract for the return value is the same as [ ][Comparator.compare].
          */

@@ -58,7 +58,7 @@ abstract class DocValuesUpdate protected constructor(
         return sizeInBytes
     }
 
-    protected abstract fun valueToString(): String
+    abstract fun valueToString(): String
 
     @Throws(IOException::class)
     abstract fun writeTo(output: DataOutput)
