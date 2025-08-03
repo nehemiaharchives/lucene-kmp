@@ -75,7 +75,7 @@ abstract class MergePolicy
     protected var maxCFSSegmentSize: Long = DEFAULT_MAX_CFS_SEGMENT_SIZE
 ) {
 
-    var noCFSRatio: Double = noCFSRatio
+    open var noCFSRatio: Double = noCFSRatio
         /**
          * If a merged segment will be more than this percentage of the total size of the index, leave the
          * segment as non-compound file even if compound file is enabled. Set to 1.0 to always use CFS
@@ -647,7 +647,7 @@ abstract class MergePolicy
      * @param readers CodecReader(s) to merge into the main index
      */
     @Throws(IOException::class)
-    fun findMerges(vararg readers: CodecReader): MergeSpecification {
+    open fun findMerges(vararg readers: CodecReader): MergeSpecification {
         val mergeSpec = MergeSpecification()
         mergeSpec.add(OneMerge(*readers))
         return mergeSpec
@@ -710,7 +710,7 @@ abstract class MergePolicy
      * which segments are already in a registered merge (see [     ][MergeContext.getMergingSegments]).
      */
     @Throws(IOException::class)
-    fun findFullFlushMerges(
+    open fun findFullFlushMerges(
         mergeTrigger: MergeTrigger, segmentInfos: SegmentInfos, mergeContext: MergeContext
     ): MergeSpecification? {
         // This returns natural merges that contain segments below the minimum size
@@ -744,7 +744,7 @@ abstract class MergePolicy
      * TotalIndexSize * [.getNoCFSRatio] otherwise `false`.
      */
     @Throws(IOException::class)
-    fun useCompoundFile(
+    open fun useCompoundFile(
         infos: SegmentInfos,
         mergedInfo: SegmentCommitInfo,
         mergeContext: MergeContext
@@ -771,7 +771,7 @@ abstract class MergePolicy
      * non-deleted documents.
      */
     @Throws(IOException::class)
-    protected fun size(info: SegmentCommitInfo, mergeContext: MergeContext): Long {
+    open fun size(info: SegmentCommitInfo, mergeContext: MergeContext): Long {
         val byteSize: Long = info.sizeInBytes()
         val delCount = mergeContext.numDeletesToMerge(info)
         assert(assertDelCount(delCount, info))
@@ -785,7 +785,7 @@ abstract class MergePolicy
      * Return the maximum size of segments to be included in full-flush merges by the default
      * implementation of [.findFullFlushMerges].
      */
-    protected fun maxFullFlushMergeSize(): Long {
+    open fun maxFullFlushMergeSize(): Long {
         return 0L
     }
 
@@ -815,7 +815,7 @@ abstract class MergePolicy
                 && useCompoundFile(infos, info, mergeContext) == info.info.useCompoundFile
     }
 
-    var maxCFSSegmentSizeMB: Double
+    open var maxCFSSegmentSizeMB: Double
         /** Returns the largest size allowed for a compound file segment  */
         get() = maxCFSSegmentSize / 1024.0 / 1024.0
         /**
@@ -836,7 +836,7 @@ abstract class MergePolicy
      * retention policies for soft deletes.
      */
     @Throws(IOException::class)
-    fun keepFullyDeletedSegment(readerIOSupplier: IOSupplier<CodecReader>): Boolean {
+    open fun keepFullyDeletedSegment(readerIOSupplier: IOSupplier<CodecReader>): Boolean {
         return false
     }
 
@@ -857,7 +857,7 @@ abstract class MergePolicy
      * @param readerSupplier a supplier that allows to obtain a [CodecReader] for this segment
      */
     @Throws(IOException::class)
-    fun numDeletesToMerge(
+    open fun numDeletesToMerge(
         info: SegmentCommitInfo,
         delCount: Int,
         readerSupplier: IOSupplier<CodecReader>
