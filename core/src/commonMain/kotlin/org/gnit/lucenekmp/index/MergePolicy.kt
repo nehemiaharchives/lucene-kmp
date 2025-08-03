@@ -17,7 +17,6 @@ import kotlinx.coroutines.withTimeout
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.ExecutionException
 import org.gnit.lucenekmp.jdkport.Executor
-import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.Optional
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TimeUnit
@@ -673,7 +672,7 @@ abstract class MergePolicy
         maxSegmentCount: Int,
         segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
         mergeContext: MergeContext
-    ): MergeSpecification
+    ): MergeSpecification?
 
     /**
      * Determine what set of merge operations is necessary in order to expunge all deletes from the
@@ -685,7 +684,7 @@ abstract class MergePolicy
     @Throws(IOException::class)
     abstract fun findForcedDeletesMerges(
         segmentInfos: SegmentInfos, mergeContext: MergeContext
-    ): MergeSpecification
+    ): MergeSpecification?
 
     /**
      * Identifies merges that we want to execute (synchronously) on commit. By default, this will

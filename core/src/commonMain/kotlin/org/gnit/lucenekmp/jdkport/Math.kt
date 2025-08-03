@@ -380,4 +380,51 @@ object Math {
     fun toDegrees(angrad: Double): Double {
         return angrad * RADIANS_TO_DEGREES
     }
+
+    /**
+     * Returns the smallest (closest to negative infinity)
+     * `int` value that is greater than or equal to the algebraic quotient.
+     * There is one special case: if the dividend is
+     * [Integer.MIN_VALUE] and the divisor is `-1`,
+     * then integer overflow occurs and
+     * the result is equal to `Integer.MIN_VALUE`.
+     *
+     *
+     * Normal integer division operates under the round to zero rounding mode
+     * (truncation).  This operation instead acts under the round toward
+     * positive infinity (ceiling) rounding mode.
+     * The ceiling rounding mode gives different results from truncation
+     * when the exact quotient is not an integer and is positive.
+     *
+     *  * If the signs of the arguments are different, the results of
+     * `ceilDiv` and the `/` operator are the same.  <br></br>
+     * For example, `ceilDiv(-4, 3) == -1` and `(-4 / 3) == -1`.
+     *  * If the signs of the arguments are the same, `ceilDiv`
+     * returns the smallest integer greater than or equal to the quotient
+     * while the `/` operator returns the largest integer less
+     * than or equal to the quotient.
+     * They differ if and only if the quotient is not an integer.<br></br>
+     * For example, `ceilDiv(4, 3) == 2`,
+     * whereas `(4 / 3) == 1`.
+     *
+     *
+     *
+     * @param x the dividend
+     * @param y the divisor
+     * @return the smallest (closest to negative infinity)
+     * `int` value that is greater than or equal to the algebraic quotient.
+     * @throws ArithmeticException if the divisor `y` is zero
+     * @see .ceilMod
+     * @see .ceil
+     * @since 18
+     */
+    fun ceilDiv(x: Int, y: Int): Int {
+        val q = x / y
+        // if the signs are the same and modulo not zero, round up
+        if ((x xor y) >= 0 && (q * y != x)) {
+            return q + 1
+        }
+        return q
+    }
+
 }

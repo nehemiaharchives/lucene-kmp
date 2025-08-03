@@ -51,11 +51,11 @@ class OneMergeWrappingMergePolicy(
         return wrapSpec(`in`.findFullFlushMerges(mergeTrigger, segmentInfos, mergeContext)!!)
     }
 
-    private fun wrapSpec(spec: MergeSpecification): MergeSpecification {
+    private fun wrapSpec(spec: MergeSpecification?): MergeSpecification {
         val wrapped: MergeSpecification? =
             if (spec == null) null else MergeSpecification()
         if (wrapped != null) {
-            for (merge in spec.merges) {
+            for (merge in spec!!.merges) {
                 wrapped.add(wrapOneMerge(merge))
             }
         }

@@ -35,7 +35,7 @@ open class FilterMergePolicy(
         maxSegmentCount: Int,
         segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
         mergeContext:MergeContext
-    ):MergeSpecification {
+    ):MergeSpecification? {
         return `in`.findForcedMerges(segmentInfos, maxSegmentCount, segmentsToMerge, mergeContext)
     }
 
@@ -43,7 +43,7 @@ open class FilterMergePolicy(
     override fun findForcedDeletesMerges(
         segmentInfos: SegmentInfos,
         mergeContext:MergeContext
-    ):MergeSpecification {
+    ):MergeSpecification? {
         return `in`.findForcedDeletesMerges(segmentInfos, mergeContext)
     }
 
