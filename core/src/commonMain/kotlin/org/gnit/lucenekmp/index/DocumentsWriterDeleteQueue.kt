@@ -1,9 +1,7 @@
 package org.gnit.lucenekmp.index
 
 import org.gnit.lucenekmp.jdkport.ReentrantLock
-import org.gnit.lucenekmp.jdkport.addAndGet
 import org.gnit.lucenekmp.jdkport.assert
-import org.gnit.lucenekmp.jdkport.getAndIncrement
 import org.gnit.lucenekmp.jdkport.setCharAt
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.store.AlreadyClosedException
