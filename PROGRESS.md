@@ -2,7 +2,7 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 714 | 695 | 97% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 714 | 698 | 97% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
@@ -15,7 +15,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 3 | 3 | 100% | [x] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 29 | 29 | 100% | [x] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 26 | 26 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 164 | 97% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 169 | 167 | 98% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 14 | 14 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -36,8 +36,8 @@
 ## Priority-1 API progress
 | Java class | Mapped class | Java Deps | KMP Deps Ported | KMP Deps To Port | % | Done |
 | --- | --- | --- | --- | --- | --- | --- |
-| [org.apache.lucene.index.IndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriter.java) | org.gnit.lucenekmp.index.IndexWriter | 78 | 74 | 4 | 94% | [ ] |
-| [org.apache.lucene.index.IndexWriterConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriterConfig.java) | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 13 | 2 | 86% | [ ] |
+| [org.apache.lucene.index.IndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriter.java) | org.gnit.lucenekmp.index.IndexWriter | 78 | 77 | 1 | 98% | [ ] |
+| [org.apache.lucene.index.IndexWriterConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriterConfig.java) | org.gnit.lucenekmp.index.IndexWriterConfig | 15 | 15 | 0 | 100% | [ ] |
 | [org.apache.lucene.store.FSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FSDirectory.java) | org.gnit.lucenekmp.store.FSDirectory | 8 | 8 | 0 | 100% | [x] |
 | [org.apache.lucene.analysis.Analyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/Analyzer.java) | org.gnit.lucenekmp.analysis.Analyzer | 10 | 10 | 0 | 100% | [x] |
 | [org.apache.lucene.document.Document](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/Document.java) | org.gnit.lucenekmp.document.Document | 2 | 2 | 0 | 100% | [x] |
@@ -57,16 +57,13 @@
 | [org.apache.lucene.search.BooleanClause](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanClause.java) | org.gnit.lucenekmp.search.BooleanClause | 0 | 0 | 0 | 100% | [ ] |
 | [org.apache.lucene.search.Sort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Sort.java) | org.gnit.lucenekmp.search.Sort | 0 | 0 | 0 | 100% | [x] |
 | [org.apache.lucene.search.SortField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SortField.java) | org.gnit.lucenekmp.search.SortField | 19 | 19 | 0 | 100% | [x] |
-| TOTAL |  | 171 | 158 | 13 | 92% | [ ] |
+| TOTAL |  | 171 | 161 | 10 | 94% | [ ] |
 
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
 | [org.apache.lucene.index.CheckIndex](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/CheckIndex.java) | org.gnit.lucenekmp.index.CheckIndex |
 | [org.apache.lucene.index.ConcurrentMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java) | org.gnit.lucenekmp.index.ConcurrentMergeScheduler |
-| [org.apache.lucene.index.IndexWriterEventListener](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/IndexWriterEventListener.java) | org.gnit.lucenekmp.index.IndexWriterEventListener |
-| [org.apache.lucene.index.MergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/MergeScheduler.java) | org.gnit.lucenekmp.index.MergeScheduler |
-| [org.apache.lucene.index.SegmentMerger](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SegmentMerger.java) | org.gnit.lucenekmp.index.SegmentMerger |
 | [org.apache.lucene.search.CollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/CollectorManager.java) | org.gnit.lucenekmp.search.CollectorManager |
 | [org.apache.lucene.search.FieldValueHitQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FieldValueHitQueue.java) | org.gnit.lucenekmp.search.FieldValueHitQueue |
 | [org.apache.lucene.search.LRUQueryCache](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/LRUQueryCache.java) | org.gnit.lucenekmp.search.LRUQueryCache |

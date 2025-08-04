@@ -50,7 +50,6 @@ protected constructor() : AutoCloseable {
     }
 
     /** Close this MergeScheduler.  */
-    @Throws(IOException::class)
     override fun close() {
         executor.shutdown()
     }

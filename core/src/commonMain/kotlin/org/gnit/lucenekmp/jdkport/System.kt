@@ -4,6 +4,7 @@ import dev.scottpierce.envvar.EnvVar
 import kotlin.jvm.JvmName
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
 
 
 /**
@@ -72,8 +73,7 @@ object System {
 
     @OptIn(ExperimentalTime::class)
     fun nanoTime(): Long {
-        val instant = Clock.System.now()
-        return instant.toEpochMilliseconds() * 1_000_000 + instant.nanosecondsOfSecond
+        return TimeSource.Monotonic.markNow().elapsedNow().inWholeNanoseconds
     }
 
     /**
