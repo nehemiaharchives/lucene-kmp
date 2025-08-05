@@ -87,9 +87,9 @@ class IndexingChain(
     init {
         val intBlockAllocator: IntBlockPool.Allocator = IntBlockAllocator(bytesUsed)
         this.indexWriterConfig = indexWriterConfig
-        assert(segmentInfo.getIndexSort() === indexWriterConfig.getIndexSort())
+        assert(segmentInfo.getIndexSort() === indexWriterConfig.indexSort)
         this.fieldInfosBuilder = fieldInfos
-        this.infoStream = indexWriterConfig.getInfoStream()
+        this.infoStream = indexWriterConfig.infoStream
         this.abortingExceptionConsumer = abortingExceptionConsumer
         this.vectorValuesConsumer =
             VectorValuesConsumer(
@@ -699,8 +699,8 @@ class IndexingChain(
         // we check consistency of its schema with schema for the whole index.
 
         val s = pf.schema
-        if (indexWriterConfig.getIndexSort() != null && s.docValuesType != DocValuesType.NONE) {
-            val indexSort: Sort = indexWriterConfig.getIndexSort()
+        if (indexWriterConfig.indexSort != null && s.docValuesType != DocValuesType.NONE) {
+            val indexSort: Sort = indexWriterConfig.indexSort!!
             validateIndexSortDVType(indexSort, pf.fieldName, s.docValuesType)
         }
         if (s.vectorDimension != 0) {
@@ -839,9 +839,9 @@ class IndexingChain(
                     fieldName,
                     indexCreatedVersionMajor,
                     schema,
-                    indexWriterConfig.getSimilarity(),
-                    indexWriterConfig.getInfoStream(),
-                    indexWriterConfig.getAnalyzer(),
+                    indexWriterConfig.similarity,
+                    indexWriterConfig.infoStream,
+                    indexWriterConfig.analyzer,
                     reserved
                 )
             pf.next = fieldHash[hashPos]

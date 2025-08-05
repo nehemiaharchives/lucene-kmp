@@ -48,7 +48,7 @@ abstract class FlushPolicy {
     /*@Synchronized*/
     protected fun init(indexWriterConfig: LiveIndexWriterConfig) {
         this.indexWriterConfig = indexWriterConfig
-        infoStream = indexWriterConfig.getInfoStream()
+        infoStream = indexWriterConfig.infoStream
     }
 
     /**

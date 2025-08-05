@@ -24,13 +24,13 @@ import kotlin.time.Instant
  *
  *
  * In addition to the [FlushPolicy] the flush control might set certain [ ] as flush pending iff a [DocumentsWriterPerThread] exceeds the
- * [IndexWriterConfig.getRAMPerThreadHardLimitMB] to prevent address space exhaustion.
+ * [IndexWriterConfig.rAMPerThreadHardLimitMB] to prevent address space exhaustion.
  */
 class DocumentsWriterFlushControl(
     private val documentsWriter: DocumentsWriter,
     private val config: LiveIndexWriterConfig
 ) : Accountable, AutoCloseable {
-    private val hardMaxBytesPerDWPT: Long = config.getRAMPerThreadHardLimitMB() * 1024L * 1024L
+    private val hardMaxBytesPerDWPT: Long = config.rAMPerThreadHardLimitMB * 1024L * 1024L
     private var activeBytes: Long = 0
 
     @Volatile
@@ -81,9 +81,9 @@ class DocumentsWriterFlushControl(
     private var flushByRAMWasDisabled = false // only with assert
     val stallControl: DocumentsWriterStallControl = DocumentsWriterStallControl()
     private val perThreadPool: DocumentsWriterPerThreadPool = documentsWriter.perThreadPool
-    private val flushPolicy: FlushPolicy = config.getFlushPolicy()
+    private val flushPolicy: FlushPolicy = config.flushPolicy
     private var closed = false
-    private val infoStream: InfoStream = config.getInfoStream()
+    private val infoStream: InfoStream = config.infoStream
 
     // TODO Syncronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
@@ -98,12 +98,12 @@ class DocumentsWriterFlushControl(
     }
 
     private fun stallLimitBytes(): Long {
-        val maxRamMB: Double = config.getRAMBufferSizeMB()
+        val maxRamMB: Double = config.rAMBufferSizeMB
         return if (maxRamMB != IndexWriterConfig.DISABLE_AUTO_FLUSH.toDouble()) (2 * (maxRamMB * 1024 * 1024)).toLong() else Long.Companion.MAX_VALUE
     }
 
     private fun assertMemory(): Boolean {
-        val maxRamMB: Double = config.getRAMBufferSizeMB()
+        val maxRamMB: Double = config.rAMBufferSizeMB
         // We can only assert if we have always been flushing by RAM usage; otherwise the assert will
         // false trip if e.g. the
         // flush-by-doc-count * doc size was large enough to use far more RAM than the sudden change to
@@ -188,9 +188,9 @@ class DocumentsWriterFlushControl(
      * RAM accounting.
      */
     private fun ramBufferGranularity(): Long {
-        var ramBufferSizeMB: Double = config.getRAMBufferSizeMB()
+        var ramBufferSizeMB: Double = config.rAMBufferSizeMB
         if (ramBufferSizeMB == IndexWriterConfig.DISABLE_AUTO_FLUSH.toDouble()) {
-            ramBufferSizeMB = config.getRAMPerThreadHardLimitMB().toDouble()
+            ramBufferSizeMB = config.rAMPerThreadHardLimitMB.toDouble()
         }
         // No more than ~0.1% of the RAM buffer size.
         var granularity = (ramBufferSizeMB * 1024.0).toLong()
@@ -204,7 +204,7 @@ class DocumentsWriterFlushControl(
         val delta: Long = perThread.commitLastBytesUsedDelta
         // in order to prevent contention in the case of many threads indexing small documents
         // we skip ram accounting unless the DWPT accumulated enough ram to be worthwhile
-        if (config.getMaxBufferedDocs() == IndexWriterConfig.DISABLE_AUTO_FLUSH
+        if (config.maxBufferedDocs == IndexWriterConfig.DISABLE_AUTO_FLUSH
             && delta < ramBufferGranularity()
         ) {
             // Skip accounting for now, we'll come back to it later when the delta is bigger

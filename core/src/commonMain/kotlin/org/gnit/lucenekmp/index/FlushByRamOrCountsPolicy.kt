@@ -20,12 +20,12 @@ internal open class FlushByRamOrCountsPolicy : FlushPolicy() {
         perThread: DocumentsWriterPerThread?
     ) {
         if (perThread != null && flushOnDocCount()
-            && perThread.numDocsInRAM >= indexWriterConfig!!.getMaxBufferedDocs()
+            && perThread.numDocsInRAM >= indexWriterConfig!!.maxBufferedDocs
         ) {
             // Flush this state by num docs
             control.setFlushPending(perThread)
         } else if (flushOnRAM()) { // flush by RAM
-            val limit = (indexWriterConfig!!.getRAMBufferSizeMB() * 1024.0 * 1024.0).toLong()
+            val limit = (indexWriterConfig!!.rAMBufferSizeMB * 1024.0 * 1024.0).toLong()
             val activeRam: Long = control.activeBytes()
             val deletesRam: Long = control.deleteBytesUsed
             if (deletesRam >= limit && activeRam >= limit && perThread != null) {
@@ -47,7 +47,7 @@ internal open class FlushByRamOrCountsPolicy : FlushPolicy() {
                 ("force apply deletes bytesUsed="
                         + control.deleteBytesUsed
                         + " vs ramBufferMB="
-                        + indexWriterConfig!!.getRAMBufferSizeMB())
+                        + indexWriterConfig!!.rAMBufferSizeMB)
             )
         }
     }
@@ -64,7 +64,7 @@ internal open class FlushByRamOrCountsPolicy : FlushPolicy() {
                         + " deleteBytes="
                         + control.deleteBytesUsed
                         + " vs ramBufferMB="
-                        + indexWriterConfig!!.getRAMBufferSizeMB())
+                        + indexWriterConfig!!.rAMBufferSizeMB)
             )
         }
         markLargestWriterPending(control, perThread)
@@ -86,13 +86,13 @@ internal open class FlushByRamOrCountsPolicy : FlushPolicy() {
      * Returns `true` if this [FlushPolicy] flushes on [ ][IndexWriterConfig.getMaxBufferedDocs], otherwise `false`.
      */
     protected fun flushOnDocCount(): Boolean {
-        return indexWriterConfig!!.getMaxBufferedDocs() != IndexWriterConfig.DISABLE_AUTO_FLUSH
+        return indexWriterConfig!!.maxBufferedDocs != IndexWriterConfig.DISABLE_AUTO_FLUSH
     }
 
     /**
      * Returns `true` if this [FlushPolicy] flushes on [ ][IndexWriterConfig.getRAMBufferSizeMB], otherwise `false`.
      */
     protected fun flushOnRAM(): Boolean {
-        return indexWriterConfig!!.getRAMBufferSizeMB() != IndexWriterConfig.DISABLE_AUTO_FLUSH.toDouble()
+        return indexWriterConfig!!.rAMBufferSizeMB != IndexWriterConfig.DISABLE_AUTO_FLUSH.toDouble()
     }
 }

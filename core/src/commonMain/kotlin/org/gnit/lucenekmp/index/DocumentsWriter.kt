@@ -91,7 +91,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     @Volatile
     private var closed = false
 
-    private val infoStream: InfoStream = config.getInfoStream()
+    private val infoStream: InfoStream = config.infoStream
 
     @OptIn(ExperimentalAtomicApi::class)
     private val numDocsInRAM: AtomicInteger = AtomicInteger(0)

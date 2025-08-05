@@ -117,7 +117,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         private set
     private val hasFlushed: SetOnce<Boolean> = SetOnce()
 
-    private val infoStream: InfoStream = indexWriterConfig.getInfoStream()// public for FlushPolicy
+    private val infoStream: InfoStream = indexWriterConfig.infoStream// public for FlushPolicy
 
     /** Returns the number of RAM resident documents in this [DocumentsWriterPerThread]  */
     var numDocsInRAM: Int = 0
@@ -376,8 +376,8 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         }
         val sortMap: Sorter.DocMap
         try {
-            val softDeletedDocs = if (indexWriterConfig.getSoftDeletesField() != null) {
-                indexingChain.getHasDocValues(indexWriterConfig.getSoftDeletesField())
+            val softDeletedDocs = if (indexWriterConfig.softDeletesField != null) {
+                indexingChain.getHasDocValues(indexWriterConfig.softDeletesField!!)
             } else {
                 null
             }
@@ -522,7 +522,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                 diagnostics = mutableMapOf<String, String>(),
                 id = StringHelper.randomId(),
                 attributes = mutableMapOf<String, String>(),
-                indexSort = indexWriterConfig.getIndexSort()
+                indexSort = indexWriterConfig.indexSort
             )
         assert(numDocsInRAM == 0)
         if (INFO_VERBOSE && infoStream.isEnabled("DWPT")) {
@@ -545,10 +545,10 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                 fieldInfos,
                 indexWriterConfig
             ) { throwable: Throwable -> this.onAbortingException(throwable) }
-        if (indexWriterConfig.getParentField() != null) {
+        if (indexWriterConfig.parentField != null) {
             this.parentField =
                 indexingChain.markAsReserved<NumericDocValuesField>(
-                    NumericDocValuesField(indexWriterConfig.getParentField(), -1)
+                    NumericDocValuesField(indexWriterConfig.parentField!!, -1)
                 )
         } else {
             this.parentField = null
@@ -602,7 +602,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
 
         var success = false
         try {
-            if (indexWriterConfig.getUseCompoundFile()) {
+            if (indexWriterConfig.useCompoundFile) {
                 val originalFiles: MutableSet<String> = newSegment.info.files()
                 // TODO: like addIndexes, we are relying on createCompoundFile to successfully cleanup...
                 IndexWriter.createCompoundFile(

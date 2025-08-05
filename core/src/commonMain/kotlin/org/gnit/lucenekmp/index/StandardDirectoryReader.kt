@@ -360,7 +360,7 @@ class StandardDirectoryReader internal constructor(
                     assert(info.info.dir === dir)
                     val reader: SegmentReader = readerFunction.apply(info)
                     if (reader.numDocs() > 0
-                        || writer.config!!.mergePolicy!!.keepFullyDeletedSegment { reader }
+                        || writer.config!!.mergePolicy.keepFullyDeletedSegment { reader }
                     ) {
                         // Steal the ref:
                         readers.add(reader)
