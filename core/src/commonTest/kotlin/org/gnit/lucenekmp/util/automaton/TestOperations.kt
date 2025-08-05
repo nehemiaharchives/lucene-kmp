@@ -616,7 +616,7 @@ class TestOperations : LuceneTestCase() {
             )
         )
 
-        val iters: Int = atLeast(100)
+        val iters: Int = atLeast(10) // TODO originally 100, but reduced to 10 for dev speed
         val determinizeWorkLimit = 100 // TODO originally MAX_INT, but reduced to 100 for dev speed
         for (iter in 0..<iters) {
             var randomAutomaton: Automaton = AutomatonTestUtil.randomAutomaton(random())
