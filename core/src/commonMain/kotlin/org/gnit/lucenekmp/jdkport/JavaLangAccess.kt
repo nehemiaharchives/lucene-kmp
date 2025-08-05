@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlinx.coroutines.Job
+
 object JavaLangAccess {
     /**
      * Decodes ASCII from the source byte array into the destination
@@ -52,4 +54,40 @@ object JavaLangAccess {
             dst[dstOff + i] = b.toInt().toChar()
         }
     }
+
+    var headStackableScope: StackableScope? = null
+
+    fun headStackableScope(job: Job?): StackableScope? {
+        // Imitate "top of stackable scope stack" by getting StackableScope from coroutine context
+        TODO("Not yet implemented")
+    }
+
+    /**
+     * Returns the ThreadContainer for a thread, may be null.
+     */
+    fun threadContainer(thread: Job): ThreadContainer? {
+        TODO("Not yet implemented")
+    }
+
+    /**
+     * Starts a thread in the given ThreadContainer.
+     */
+    fun start(thread: Job, container: ThreadContainer){
+        TODO("Not yet implemented")
+    }
+
+    private val jobRegistry: MutableSet<Job> = mutableSetOf()
+
+    fun registerJob(job: Job) {
+        jobRegistry.add(job)
+    }
+
+    fun unregisterJob(job: Job) {
+        jobRegistry.remove(job)
+    }
+
+    val allThreads: Array<Job>
+        get() = jobRegistry.filter { it.isActive }.toTypedArray()
+
+
 }

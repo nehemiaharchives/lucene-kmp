@@ -6,6 +6,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration
@@ -537,6 +538,19 @@ object Executors {
         return Callable {
             runnable.run()
             result
+        }
+    }
+
+    @OptIn(ExperimentalAtomicApi::class)
+    fun defaultThreadFactory():ThreadFactory {
+        return object : ThreadFactory {
+            private val count = AtomicInteger(1)
+            override fun newThread(r: Runnable): Job {
+                val threadName = "pool-thread-${count.fetchAndIncrement()}"
+                return GlobalScope.launch(CoroutineName(threadName)) {
+                    r.run()
+                }
+            }
         }
     }
 }

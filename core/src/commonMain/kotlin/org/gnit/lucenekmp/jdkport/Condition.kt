@@ -212,8 +212,7 @@ interface Condition {
      * @throws InterruptedException if the current thread is interrupted
      * (and interruption of thread suspension is supported)
      */
-    @Throws(InterruptedException::class)
-    fun await()
+    suspend fun await()
 
     /**
      * Causes the current thread to wait until it is signalled.
@@ -254,7 +253,7 @@ interface Condition {
      * thrown (such as [IllegalMonitorStateException]) and the
      * implementation must document that fact.
      */
-    fun awaitUninterruptibly()
+    suspend fun awaitUninterruptibly()
 
     /**
      * Causes the current thread to wait until it is signalled or interrupted,
@@ -354,8 +353,7 @@ interface Condition {
      * @throws InterruptedException if the current thread is interrupted
      * (and interruption of thread suspension is supported)
      */
-    @Throws(InterruptedException::class)
-    fun awaitNanos(nanosTimeout: Long): Long
+    suspend fun awaitNanos(nanosTimeout: Long): Long
 
     /**
      * Causes the current thread to wait until it is signalled or interrupted,
@@ -370,8 +368,7 @@ interface Condition {
      * @throws InterruptedException if the current thread is interrupted
      * (and interruption of thread suspension is supported)
      */
-    @Throws(InterruptedException::class)
-    fun await(time: Long, unit: TimeUnit): Boolean
+    suspend fun await(time: Long, unit: TimeUnit): Boolean
 
     /**
      * Causes the current thread to wait until it is signalled or interrupted,
@@ -455,8 +452,7 @@ interface Condition {
      * (and interruption of thread suspension is supported)
      */
     @OptIn(ExperimentalTime::class)
-    @Throws(InterruptedException::class)
-    fun awaitUntil(deadline: Instant): Boolean
+    suspend fun awaitUntil(deadline: Instant): Boolean
 
     /**
      * Wakes up one waiting thread.
@@ -475,7 +471,7 @@ interface Condition {
      * document this precondition and any actions taken if the lock is
      * not held. Typically, an exception such as [ ] will be thrown.
      */
-    fun signal()
+    suspend fun signal()
 
     /**
      * Wakes up all waiting threads.
@@ -494,5 +490,5 @@ interface Condition {
      * document this precondition and any actions taken if the lock is
      * not held. Typically, an exception such as [ ] will be thrown.
      */
-    fun signalAll()
+    suspend fun signalAll()
 }

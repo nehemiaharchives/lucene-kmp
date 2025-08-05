@@ -38,7 +38,7 @@ object TestSecrets {
 
     //private var indexPackageAccess: IndexPackageAccess? = null
 
-    //private var cmsAccess: ConcurrentMergeSchedulerAccess? = null
+    private var cmsAccess: ConcurrentMergeSchedulerAccess? = null
 
     private var segmentReaderAccess: SegmentReaderAccess? = null
 
@@ -93,10 +93,10 @@ object TestSecrets {
     }*/
 
     /** For internal initialization only.  */
-    /*fun setConcurrentMergeSchedulerAccess(cmsAccess: ConcurrentMergeSchedulerAccess) {
+    fun setConcurrentMergeSchedulerAccess(cmsAccess: ConcurrentMergeSchedulerAccess) {
         ensureNull(TestSecrets.cmsAccess)
         TestSecrets.cmsAccess = cmsAccess
-    }*/
+    }
 
     /** For internal initialization only.  */
     fun setSegmentReaderAccess(segmentReaderAccess: SegmentReaderAccess) {

@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.runBlocking
 
 
 /**
@@ -160,7 +161,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * or the security manager's `checkAccess` method
      * denies access.
      */
-    fun shutdownNow(): MutableList<Runnable>
+    suspend fun shutdownNow(): MutableList<Runnable>
 
     /**
      * Returns `true` if this executor has been shut down.
@@ -189,8 +190,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * `false` if the timeout elapsed before termination
      * @throws InterruptedException if interrupted while waiting
      */
-    @Throws(InterruptedException::class)
-    fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean
+    suspend fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean
 
     /**
      * Submits a value-returning task for execution and returns a
@@ -387,10 +387,10 @@ interface ExecutorService : Executor, AutoCloseable {
             var interrupted = false
             while (!terminated) {
                 try {
-                    terminated = awaitTermination(1L, TimeUnit.DAYS)
+                    terminated = runBlocking{ awaitTermination(1L, TimeUnit.DAYS) }
                 } catch (e: InterruptedException) {
                     if (!interrupted) {
-                        shutdownNow()
+                        runBlocking{ shutdownNow() }
                         interrupted = true
                     }
                 }

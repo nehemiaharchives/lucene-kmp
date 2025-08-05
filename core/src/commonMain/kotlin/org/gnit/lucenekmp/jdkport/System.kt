@@ -76,6 +76,11 @@ object System {
         return TimeSource.Monotonic.markNow().elapsedNow().inWholeNanoseconds
     }
 
+    @OptIn(ExperimentalTime::class)
+    fun currentTimeMillis(): Long {
+        return Clock.System.now().toEpochMilliseconds()
+    }
+
     /**
      * ported from java.lang.System.arraycopy()
      *

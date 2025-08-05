@@ -26,13 +26,12 @@ protected constructor() : AutoCloseable {
      * @param mergeSource the [IndexWriter] to obtain the merges from.
      * @param trigger the [MergeTrigger] that caused this merge to happen
      */
-    @Throws(IOException::class)
-    abstract fun merge(mergeSource: MergeSource, trigger: MergeTrigger)
+    abstract suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger)
 
     /**
      * Wraps the incoming [Directory] so that we can merge-throttle it using [ ].
      */
-    fun wrapForMerge(
+    open fun wrapForMerge(
         merge: OneMerge,
         `in`: Directory
     ): Directory {
@@ -45,7 +44,7 @@ protected constructor() : AutoCloseable {
      * returns a [SameThreadExecutorService] where all intra-merge actions occur in their
      * calling thread.
      */
-    fun getIntraMergeExecutor(merge: OneMerge): Executor {
+    open fun getIntraMergeExecutor(merge: OneMerge): Executor {
         return executor
     }
 
@@ -59,7 +58,7 @@ protected constructor() : AutoCloseable {
 
     /** IndexWriter calls this on init.  */
     @Throws(IOException::class)
-    fun initialize(infoStream: InfoStream, directory: Directory) {
+    open fun initialize(infoStream: InfoStream, directory: Directory) {
         this.infoStream = infoStream
     }
 

@@ -27,6 +27,7 @@ package org.gnit.lucenekmp.jdkport
  * @author Doug Lea
  * @param <E> the type of elements held in this queue
 </E> */
+@Ported(from = "java.util.AbstractQueue")
 abstract class AbstractQueue<E>
 /**
  * Constructor for use by subclasses.

@@ -1,8 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-/**
- * port of java.lang.ref.WeakReference
- */
+@Ported(from = "java.lang.ref.WeakReference")
 open class WeakReference<T> : Reference<T?> {
     /**
      * Creates a new weak reference that refers to the given object.  The new

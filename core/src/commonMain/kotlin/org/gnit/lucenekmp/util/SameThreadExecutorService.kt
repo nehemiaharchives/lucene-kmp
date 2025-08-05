@@ -22,7 +22,7 @@ class SameThreadExecutorService : AbstractExecutorService() {
         command.run()
     }
 
-    override fun shutdownNow(): MutableList<Runnable> {
+    override suspend fun shutdownNow(): MutableList<Runnable> {
         shutdown()
         return mutableListOf()
     }
@@ -40,8 +40,7 @@ class SameThreadExecutorService : AbstractExecutorService() {
         get() = shutdown == true
 
 
-    @Throws(InterruptedException::class)
-    override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
+    override suspend fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
         // See comment in isTerminated();
         return true
     }
