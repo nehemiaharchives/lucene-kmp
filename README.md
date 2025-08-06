@@ -42,8 +42,8 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
 * [x] org.apache.lucene.document.TextField
 
 ### Classes needed to port to perform minimum search:
-* [ ] org.apache.lucene.index.DirectoryReader
-* [ ] org.apache.lucene.index.StandardDirectoryReader
+* [x] org.apache.lucene.index.DirectoryReader
+* [x] org.apache.lucene.index.StandardDirectoryReader
 * [ ] org.apache.lucene.queryparser.classic.QueryParser
 * [ ] org.apache.lucene.search.IndexSearcher
 * [x] org.apache.lucene.store.FSLockFactory
