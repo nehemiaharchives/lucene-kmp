@@ -32,7 +32,7 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
 ## PROGRESS
 ### Classes needed to port to write minimum index:
 * [ ] org.apache.lucene.index.IndexWriter
-* [ ] org.apache.lucene.index.IndexWriterConfig
+* [x] org.apache.lucene.index.IndexWriterConfig
 * [x] org.apache.lucene.store.FSDirectory
 * [x] org.apache.lucene.analysis.Analyzer
 * [x] org.apache.lucene.document.Document
