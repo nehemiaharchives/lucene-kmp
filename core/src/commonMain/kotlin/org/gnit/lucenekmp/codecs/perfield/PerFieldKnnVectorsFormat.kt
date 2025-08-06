@@ -267,7 +267,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
             field: String,
             target: FloatArray,
             knnCollector: KnnCollector,
-            acceptDocs: Bits
+            acceptDocs: Bits?
         ) {
             val info: FieldInfo? = fieldInfos.fieldInfo(field)
             var reader: KnnVectorsReader? = null
@@ -282,7 +282,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
         }
 
         @Throws(IOException::class)
-        override fun search(field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits) {
+        override fun search(field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?) {
             val info: FieldInfo? = fieldInfos.fieldInfo(field)
             var reader: KnnVectorsReader? = null
 

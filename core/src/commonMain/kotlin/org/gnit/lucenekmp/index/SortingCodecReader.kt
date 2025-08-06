@@ -419,7 +419,7 @@ class SortingCodecReader private constructor(
                     field: String,
                     target: FloatArray,
                     knnCollector: KnnCollector,
-                    acceptDocs: Bits
+                    acceptDocs: Bits?
                 ) {
                     throw UnsupportedOperationException()
                 }
@@ -428,7 +428,7 @@ class SortingCodecReader private constructor(
                     field: String,
                     target: ByteArray,
                     knnCollector: KnnCollector,
-                    acceptDocs: Bits
+                    acceptDocs: Bits?
                 ) {
                     throw UnsupportedOperationException()
                 }

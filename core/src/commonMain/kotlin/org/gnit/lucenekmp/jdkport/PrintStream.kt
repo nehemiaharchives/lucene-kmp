@@ -37,7 +37,7 @@ import okio.IOException
 open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream) : FilterOutputStream(out) {
 
     private var trouble = false
-    private val charset: Charset
+    private var charset: Charset
     /**
      * Track both the text- and character-output streams, so that their buffers
      * can be flushed without flushing the entire stream.
@@ -45,10 +45,36 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
     private var textOut: BufferedWriter? = null
     private var charOut: OutputStreamWriter? = null
 
+    /**
+     * Creates a new print stream, with the specified OutputStream, line
+     * flushing and charset.  This convenience constructor creates the necessary
+     * intermediate [OutputStreamWriter][java.io.OutputStreamWriter],
+     * which will encode characters using the provided charset.
+     *
+     * @param  out        The output stream to which values and objects will be
+     * printed
+     * @param  autoFlush  Whether the output buffer will be flushed
+     * whenever a byte array is written, one of the
+     * `println` methods is invoked, or a newline
+     * character or byte (`'\n'`) is written
+     * @param  charset    A [charset][Charset]
+     *
+     * @since  10
+     */
+    constructor(out: OutputStream, autoFlush: Boolean, charset: Charset) : this(autoFlush = autoFlush, out = out) {
+        this.charOut = OutputStreamWriter(this, charset)
+        this.textOut = BufferedWriter(charOut!!)
+        this.charset = charset
+    }
+
     init {
         this.charset = if (out is PrintStream) out.charset else Charset.defaultCharset()
         this.charOut = OutputStreamWriter(this, charset)
         this.textOut = BufferedWriter(charOut!!)
+    }
+
+    open fun print(x: String?){
+        kotlin.io.print(x)
     }
 
     /**
@@ -67,9 +93,19 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
                 newLine()
             }*/
 
-            print(x)
+            kotlin.io.print(x)
             newLine()
         }
+    }
+
+    /**
+     * Terminates the current line by writing the line separator string.  The
+     * line separator string is defined by the system property
+     * {@code line.separator}, and is not necessarily a single newline
+     * character ({@code '\n'}).
+     */
+    open fun println(){
+        newLine()
     }
 
     // Used to optimize away back-to-back flushing and synchronization when

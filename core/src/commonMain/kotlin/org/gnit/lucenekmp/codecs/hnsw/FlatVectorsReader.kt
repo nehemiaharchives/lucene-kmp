@@ -36,12 +36,12 @@ abstract class FlatVectorsReader
     }
 
     @Throws(IOException::class)
-    override fun search(field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits) {
+    override fun search(field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?) {
         // don't scan stored field data. If we didn't index it, produce no search results
     }
 
     @Throws(IOException::class)
-    override fun search(field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits) {
+    override fun search(field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?) {
         // don't scan stored field data. If we didn't index it, produce no search results
     }
 

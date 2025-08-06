@@ -33,7 +33,7 @@ import kotlin.reflect.cast
  * @lucene.internal
  */
 @OptIn(ExperimentalAtomicApi::class)
-open class IntIntHashMap @JvmOverloads constructor(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
+open class IntIntHashMap(expectedElements: Int, loadFactor: Double = DEFAULT_LOAD_FACTOR.toDouble()) :
     Iterable<IntIntHashMap.IntIntCursor>, Accountable, Cloneable<IntIntHashMap> {
     /** The array holding keys.  */
     var keys: IntArray? = null

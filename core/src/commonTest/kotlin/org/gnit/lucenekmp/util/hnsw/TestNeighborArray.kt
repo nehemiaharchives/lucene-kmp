@@ -224,7 +224,7 @@ class TestNeighborArray : LuceneTestCase() {
         override fun ordToDoc(ord: Int): Int {
             throw UnsupportedOperationException()
         }
-        override fun getAcceptOrds(acceptDocs: Bits): Bits? {
+        override fun getAcceptOrds(acceptDocs: Bits?): Bits? {
             throw UnsupportedOperationException()
         }
     }

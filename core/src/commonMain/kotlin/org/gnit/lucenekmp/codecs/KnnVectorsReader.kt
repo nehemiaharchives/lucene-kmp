@@ -70,7 +70,7 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     abstract fun search(
-        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?
     )
 
     /**
@@ -101,7 +101,7 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     abstract fun search(
-        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?
     )
 
     open val mergeInstance: KnnVectorsReader

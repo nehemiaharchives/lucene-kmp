@@ -36,7 +36,7 @@ interface UpdateableRandomVectorScorer : RandomVectorScorer {
             return values.ordToDoc(ord)
         }
 
-        override fun getAcceptOrds(acceptDocs: Bits): Bits? {
+        override fun getAcceptOrds(acceptDocs: Bits?): Bits? {
             return values.getAcceptOrds(acceptDocs)
         }
 

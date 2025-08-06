@@ -876,7 +876,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
             field: String,
             target: FloatArray,
             knnCollector: KnnCollector,
-            acceptDocs: Bits
+            acceptDocs: Bits?
         ) {
             throw UnsupportedOperationException()
         }
@@ -886,7 +886,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
             field: String,
             target: ByteArray,
             knnCollector: KnnCollector,
-            acceptDocs: Bits
+            acceptDocs: Bits?
         ) {
             throw UnsupportedOperationException()
         }

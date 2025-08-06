@@ -113,13 +113,13 @@ abstract class KnnVectorsFormat protected constructor(name: String) : NamedSPI {
                     }
 
                     override fun search(
-                        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits
+                        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?
                     ) {
                         throw UnsupportedOperationException()
                     }
 
                     override fun search(
-                        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
+                        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?
                     ) {
                         throw UnsupportedOperationException()
                     }
