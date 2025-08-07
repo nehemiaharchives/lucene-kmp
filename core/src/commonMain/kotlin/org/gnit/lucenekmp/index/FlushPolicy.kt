@@ -46,7 +46,7 @@ abstract class FlushPolicy {
     /** Called by DocumentsWriter to initialize the FlushPolicy  */
     // TODO Synchronized is not supported in Kotlin Multiplatform, need to think what to do here
     /*@Synchronized*/
-    protected fun init(indexWriterConfig: LiveIndexWriterConfig) {
+    fun init(indexWriterConfig: LiveIndexWriterConfig) {
         this.indexWriterConfig = indexWriterConfig
         infoStream = indexWriterConfig.infoStream
     }

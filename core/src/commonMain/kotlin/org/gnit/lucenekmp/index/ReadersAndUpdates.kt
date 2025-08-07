@@ -568,7 +568,7 @@ class ReadersAndUpdates(
 
         var success = false
         try {
-            val codec: Codec = info.info.getCodec()
+            val codec: Codec = info.info.codec
 
             // reader could be null e.g. for a just merged segment (from
             // IndexWriter.commitMergedDeletes).

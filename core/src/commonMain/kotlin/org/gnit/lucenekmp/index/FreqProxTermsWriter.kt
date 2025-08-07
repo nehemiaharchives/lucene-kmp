@@ -43,7 +43,7 @@ class FreqProxTermsWriter(
                 val postings: DocIdSetIterator? =
                     iterator.nextTerm(term.field(), term.bytes())
                 if (postings != null) {
-                    assert(docId < DocIdSetIterator.Companion.NO_MORE_DOCS)
+                    assert(docId < DocIdSetIterator.NO_MORE_DOCS)
                     var doc: Int
                     while ((postings.nextDoc().also { doc = it }) < docId) {
                         if (state.liveDocs == null) {
@@ -108,7 +108,7 @@ class FreqProxTermsWriter(
                 }
         }
 
-        state.segmentInfo.getCodec().postingsFormat().fieldsConsumer(state).use { consumer ->
+        state.segmentInfo.codec.postingsFormat().fieldsConsumer(state).use { consumer ->
             consumer.write(fields, norms)
         }
     }

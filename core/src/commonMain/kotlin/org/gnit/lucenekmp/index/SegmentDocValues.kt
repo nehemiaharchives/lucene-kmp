@@ -40,7 +40,7 @@ class SegmentDocValues {
             IOContext.DEFAULT,
             segmentSuffix
         )
-        val dvFormat: DocValuesFormat = si.info.getCodec().docValuesFormat()
+        val dvFormat: DocValuesFormat = si.info.codec.docValuesFormat()
         return object :
             RefCount<DocValuesProducer>(dvFormat.fieldsProducer(srs)) {
 
@@ -68,7 +68,7 @@ class SegmentDocValues {
         var dvp: RefCount<DocValuesProducer>? = genDVProducers.get(gen)
         if (dvp == null) {
             dvp = newDocValuesProducer(si, dir, gen, infos)
-            checkNotNull(dvp)
+            //checkNotNull(dvp)
             genDVProducers.put(gen, dvp)
         } else {
             dvp.incRef()

@@ -175,7 +175,7 @@ internal class PendingSoftDeletes : PendingDeletes {
             } else {
                 // we are safe here since we don't have any doc values for the soft-delete field on disk
                 // no need to open a new reader
-                dvGeneration = if (fieldInfo == null) -1 else fieldInfo.docValuesGen
+                dvGeneration = fieldInfo?.docValuesGen ?: -1
             }
         }
     }
@@ -197,20 +197,20 @@ internal class PendingSoftDeletes : PendingDeletes {
             // updates always outside of CFS
             val toClose: AutoCloseable?
             if (segInfo.useCompoundFile) {
-                dir = segInfo.getCodec().compoundFormat().getCompoundReader(segInfo.dir, segInfo)
+                dir = segInfo.codec.compoundFormat().getCompoundReader(segInfo.dir, segInfo)
                 toClose = dir
             } else {
                 toClose = null
                 dir = segInfo.dir
             }
             try {
-                return segInfo.getCodec().fieldInfosFormat()
+                return segInfo.codec.fieldInfosFormat()
                     .read(dir, segInfo, "", IOContext.READONCE)
             } finally {
                 IOUtils.close(toClose)
             }
         } else {
-            val fisFormat: FieldInfosFormat = segInfo.getCodec().fieldInfosFormat()
+            val fisFormat: FieldInfosFormat = segInfo.codec.fieldInfosFormat()
             val segmentSuffix = info.fieldInfosGen.toString(Character.MAX_RADIX.coerceIn(2, 36))
             return fisFormat.read(dir, segInfo, segmentSuffix, IOContext.READONCE)
         }
@@ -259,14 +259,14 @@ internal class PendingSoftDeletes : PendingDeletes {
 
         @Throws(IOException::class)
         fun countSoftDeletes(
-            softDeletedDocs: DocIdSetIterator,
-            hardDeletes: Bits
+            softDeletedDocs: DocIdSetIterator?,
+            hardDeletes: Bits?
         ): Int {
             var count = 0
             if (softDeletedDocs != null) {
                 var doc: Int
                 while ((softDeletedDocs.nextDoc()
-                        .also { doc = it }) != DocIdSetIterator.NO_MORE_DOCS
+                        .also { doc = it }) != NO_MORE_DOCS
                 ) {
                     if (hardDeletes == null || hardDeletes.get(doc)) {
                         count++

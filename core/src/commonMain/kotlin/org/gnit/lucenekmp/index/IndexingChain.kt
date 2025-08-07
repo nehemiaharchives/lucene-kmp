@@ -87,7 +87,7 @@ class IndexingChain(
     init {
         val intBlockAllocator: IntBlockPool.Allocator = IntBlockAllocator(bytesUsed)
         this.indexWriterConfig = indexWriterConfig
-        assert(segmentInfo.getIndexSort() === indexWriterConfig.indexSort)
+        assert(segmentInfo.indexSort === indexWriterConfig.indexSort)
         this.fieldInfosBuilder = fieldInfos
         this.infoStream = indexWriterConfig.infoStream
         this.abortingExceptionConsumer = abortingExceptionConsumer
@@ -99,7 +99,7 @@ class IndexingChain(
                 infoStream
             )
 
-        if (segmentInfo.getIndexSort() == null) {
+        if (segmentInfo.indexSort == null) {
             storedFieldsConsumer =
                 StoredFieldsConsumer(indexWriterConfig.codec, directory, segmentInfo)
             termVectorsWriter =
@@ -205,7 +205,7 @@ class IndexingChain(
 
     @Throws(IOException::class)
     private fun maybeSortSegment(state: SegmentWriteState): Sorter.DocMap? {
-        val indexSort: Sort? = state.segmentInfo.getIndexSort()
+        val indexSort: Sort? = state.segmentInfo.indexSort
         if (indexSort == null) {
             return null
         }
@@ -339,7 +339,7 @@ class IndexingChain(
         }
 
         val norms = if (readState.fieldInfos.hasNorms()) {
-            state.segmentInfo.getCodec().normsFormat().normsProducer(readState)
+            state.segmentInfo.codec.normsFormat().normsProducer(readState)
         } else {
             null
         }
@@ -396,7 +396,7 @@ class IndexingChain(
                             if (pointsWriter == null) {
                                 // lazy init
                                 val fmt: PointsFormat =
-                                    state.segmentInfo.getCodec().pointsFormat()
+                                    state.segmentInfo.codec.pointsFormat()
                                 checkNotNull(fmt) {
                                     ("field=\""
                                             + perField.fieldInfo!!.name
@@ -450,7 +450,7 @@ class IndexingChain(
                         if (dvConsumer == null) {
                             // lazy init
                             val fmt: DocValuesFormat =
-                                state.segmentInfo.getCodec().docValuesFormat()
+                                state.segmentInfo.codec.docValuesFormat()
                             dvConsumer = fmt.fieldsConsumer(state)
                         }
                         perField.docValuesWriter!!.flush(state, sortMap, dvConsumer)
@@ -509,7 +509,7 @@ class IndexingChain(
         try {
             if (state.fieldInfos!!.hasNorms()) {
                 val normsFormat: NormsFormat =
-                    checkNotNull(state.segmentInfo.getCodec().normsFormat())
+                    checkNotNull(state.segmentInfo.codec.normsFormat())
                 normsConsumer = normsFormat.normsConsumer(state)
 
                 for (fi in state.fieldInfos) {

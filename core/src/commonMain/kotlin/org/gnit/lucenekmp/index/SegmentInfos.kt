@@ -251,8 +251,8 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
             // We do a separate loop up front so we can write the minSegmentVersion before
             // any SegmentInfo; this makes it cleaner to throw IndexFormatTooOldExc at read time:
             for (siPerCommit in this) {
-                val segmentVersion: Version = siPerCommit.info.getVersion()
-                if (minSegmentVersion == null || segmentVersion.onOrAfter(minSegmentVersion) == false) {
+                val segmentVersion: Version = siPerCommit.info.version
+                if (minSegmentVersion == null || !segmentVersion.onOrAfter(minSegmentVersion)) {
                     minSegmentVersion = segmentVersion
                 }
             }
@@ -278,10 +278,10 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                         + StringHelper.idToString(segmentID))
             }
             out.writeBytes(segmentID, segmentID.size)
-            out.writeString(si.getCodec().name)
+            out.writeString(si.codec.name)
 
             CodecUtil.writeBELong(out, siPerCommit.delGen)
-            val delCount: Int = siPerCommit.getDelCount()
+            val delCount: Int = siPerCommit.delCount
             check(!(delCount < 0 || delCount > si.maxDoc())) {
                 ("cannot write segment: invalid maxDoc segment="
                         + si.name
@@ -335,7 +335,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
             // deep clone, first recreate all collections:
             sis.segments = ArrayList(size())
             for (info in this) {
-                checkNotNull(info.info.getCodec())
+                checkNotNull(info.info.codec)
                 // dont directly access segments, use add method!!!
                 sis.add(info.clone())
             }
@@ -531,7 +531,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     /** Returns the committed segments_N filename.  */
     @Throws(IOException::class)
     fun finishCommit(dir: Directory): String {
-        check(pendingCommit != false) { "prepareCommit was not called" }
+        check(pendingCommit) { "prepareCommit was not called" }
         var successRenameAndSync = false
         val dest: String?
         try {
@@ -551,7 +551,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 dir.syncMetaData()
                 successRenameAndSync = true
             } finally {
-                if (successRenameAndSync == false) {
+                if (!successRenameAndSync) {
                     // at this point we already created the file but missed to sync directory let's also
                     // remove the
                     // renamed file
@@ -559,7 +559,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 }
             }
         } finally {
-            if (successRenameAndSync == false) {
+            if (!successRenameAndSync) {
                 // deletes pending_segments_N:
                 rollbackCommit(dir)
             }
@@ -677,7 +677,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
         val list: MutableList<SegmentCommitInfo> =
             ArrayList(size())
         for (info in this) {
-            checkNotNull(info.info.getCodec())
+            checkNotNull(info.info.codec)
             list.add(info.clone())
         }
         return list
@@ -802,9 +802,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
         fun getLastCommitGeneration(files: Array<String>): Long {
             var max: Long = -1
             for (file in files) {
-                if (file.startsWith(IndexFileNames.SEGMENTS)
-                    &&  // skipping this file here helps deliver the right exception when opening an old index
-                    file.startsWith(OLD_SEGMENTS_GEN) == false
+                if (file.startsWith(IndexFileNames.SEGMENTS) && !file.startsWith(OLD_SEGMENTS_GEN)
                 ) {
                     val gen = generationFromSegmentsFileName(file)
                     if (gen > max) {
@@ -823,7 +821,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
          */
         @Throws(IOException::class)
         fun getLastCommitGeneration(directory: Directory): Long {
-            return Companion.getLastCommitGeneration(directory.listAll())
+            return getLastCommitGeneration(directory.listAll())
         }
 
         /**
@@ -1020,7 +1018,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 val info: SegmentInfo =
                     codec.segmentInfoFormat()
                         .read(directory, segName, segmentID, IOContext.DEFAULT)
-                info.setCodec(codec)
+                info.codec = codec
                 totalDocs += info.maxDoc().toLong()
                 val delGen: Long = CodecUtil.readBELong(input)
                 val delCount: Int = CodecUtil.readBEInt(input)
@@ -1078,14 +1076,14 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                     val map: MutableMap<Int, MutableSet<String>> =
                         CollectionUtil.newHashMap(numDVFields)
                     for (i in 0..<numDVFields) {
-                        map.put(CodecUtil.readBEInt(input), input.readSetOfStrings())
+                        map[CodecUtil.readBEInt(input)] = input.readSetOfStrings()
                     }
                     dvUpdateFiles = /*java.util.Collections.unmodifiableMap<Int, MutableSet<String>>(map)*/ map.toMutableMap()
                 }
                 siPerCommit.docValuesUpdatesFiles = dvUpdateFiles
                 infos.add(siPerCommit)
 
-                val segmentVersion: Version = info.getVersion()
+                val segmentVersion: Version = info.version
 
                 if (!segmentVersion.onOrAfter(infos.minSegmentLuceneVersion!!)) {
                     throw CorruptIndexException(

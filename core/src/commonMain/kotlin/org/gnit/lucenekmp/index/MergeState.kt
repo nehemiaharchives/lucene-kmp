@@ -146,7 +146,7 @@ class MergeState {
         segmentInfo.setMaxDoc(numDocs)
 
         this.segmentInfo = segmentInfo
-        this.docMaps = buildDocMaps(readers, segmentInfo.getIndexSort())
+        this.docMaps = buildDocMaps(readers, segmentInfo.indexSort)
     }
 
     // Remap docIDs around deletions
@@ -258,7 +258,7 @@ class MergeState {
 
     companion object {
         private fun verifyIndexSort(readers: MutableList<CodecReader>, segmentInfo: SegmentInfo) {
-            val indexSort: Sort? = segmentInfo.getIndexSort()
+            val indexSort: Sort? = segmentInfo.indexSort
             if (indexSort == null) {
                 return
             }

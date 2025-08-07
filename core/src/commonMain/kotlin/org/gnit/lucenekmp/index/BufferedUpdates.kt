@@ -98,9 +98,9 @@ class BufferedUpdates(val segmentName: String) : Accountable {
                 update.field
             ) { FieldUpdatesBuffer(fieldUpdatesBytesUsed, update, docIDUpto) }
         if (update.hasValue) {
-            buffer.addUpdate(update.term, update.getValue(), docIDUpto)
+            buffer.addUpdate(update.term!!, update.getValue(), docIDUpto)
         } else {
-            buffer.addNoValue(update.term, docIDUpto)
+            buffer.addNoValue(update.term!!, docIDUpto)
         }
         numFieldUpdates.incrementAndFetch()
     }
@@ -112,9 +112,9 @@ class BufferedUpdates(val segmentName: String) : Accountable {
                 update.field
             ) { FieldUpdatesBuffer(fieldUpdatesBytesUsed, update, docIDUpto) }
         if (update.hasValue) {
-            buffer.addUpdate(update.term, update.getValue(), docIDUpto)
+            buffer.addUpdate(update.term!!, update.getValue(), docIDUpto)
         } else {
-            buffer.addNoValue(update.term, docIDUpto)
+            buffer.addNoValue(update.term!!, docIDUpto)
         }
         numFieldUpdates.incrementAndFetch()
     }

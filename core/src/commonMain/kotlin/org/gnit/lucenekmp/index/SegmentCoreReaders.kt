@@ -59,7 +59,7 @@ class SegmentCoreReaders(
     val coreFieldInfos: FieldInfos
 
     private val coreClosedListeners: MutableSet<ClosedListener> =
-        /*java.util.Collections.synchronizedSet*/mutableSetOf<ClosedListener>()
+        /*java.util.Collections.synchronizedSet*/mutableSetOf() // TODO implement if needed
     private val coreListenersMutex = Mutex()
 
     @OptIn(ExperimentalAtomicApi::class)
@@ -112,7 +112,7 @@ class SegmentCoreReaders(
         }
 
     init {
-        val codec: Codec = si.info.getCodec()
+        val codec: Codec = si.info.codec
         val cfsDir: Directory
         // confusing name: if (cfs) it's the cfsdir, otherwise it's the segment's directory.
         var success = false
@@ -153,30 +153,29 @@ class SegmentCoreReaders(
 
             fieldsReaderOrig =
                 si.info
-                    .getCodec()
+                    .codec
                     .storedFieldsFormat()
                     .fieldsReader(cfsDir, si.info, coreFieldInfos, context)
 
-            if (coreFieldInfos.hasTermVectors()) { // open term vector files only as needed
-                termVectorsReaderOrig =
-                    si.info
-                        .getCodec()
-                        .termVectorsFormat()
-                        .vectorsReader(cfsDir, si.info, coreFieldInfos, context)
+            termVectorsReaderOrig = if (coreFieldInfos.hasTermVectors()) { // open term vector files only as needed
+                si.info
+                    .codec
+                    .termVectorsFormat()
+                    .vectorsReader(cfsDir, si.info, coreFieldInfos, context)
             } else {
-                termVectorsReaderOrig = null
+                null
             }
 
-            if (coreFieldInfos.hasPointValues()) {
-                pointsReader = codec.pointsFormat().fieldsReader(segmentReadState)
+            pointsReader = if (coreFieldInfos.hasPointValues()) {
+                codec.pointsFormat().fieldsReader(segmentReadState)
             } else {
-                pointsReader = null
+                null
             }
 
-            if (coreFieldInfos.hasVectorValues()) {
-                knnVectorsReader = codec.knnVectorsFormat().fieldsReader(segmentReadState)
+            knnVectorsReader = if (coreFieldInfos.hasVectorValues()) {
+                codec.knnVectorsFormat().fieldsReader(segmentReadState)
             } else {
-                knnVectorsReader = null
+                null
             }
 
             success = true

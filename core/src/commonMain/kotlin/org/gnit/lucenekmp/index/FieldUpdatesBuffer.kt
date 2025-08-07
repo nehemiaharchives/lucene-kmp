@@ -58,7 +58,7 @@ class FieldUpdatesBuffer private constructor(
     init {
         this.bytesUsed.addAndGet(SELF_SHALLOW_SIZE)
         termValues = BytesRefArray(bytesUsed)
-        termValues.append(initialValue.term.bytes)
+        termValues.append(initialValue.term!!.bytes)
         fields = arrayOf<String?>(initialValue.term.field)
         bytesUsed.addAndGet(sizeOfString(initialValue.term.field))
         docsUpTo = intArrayOf(docUpTo)

@@ -44,7 +44,7 @@ internal class SegmentMerger(
         mergeState = MergeState(readers, segmentInfo, infoStream, intraMergeTaskExecutor)
         mergeStateCreationThread = Job() /*java.lang.Thread.currentThread()*/ // TODO Thread is not available in KMP so replacing with Job but not sure if this is correct
         directory = dir
-        this.codec = segmentInfo.getCodec()
+        this.codec = segmentInfo.codec
         this.context = context
         this.fieldInfosBuilder = FieldInfos.Builder(fieldNumbers)
         var minVersion: Version? = Version.LATEST
@@ -63,9 +63,9 @@ internal class SegmentMerger(
         ) { "The min version should be set by SegmentMerger for merged segments" }
         segmentInfo.minVersion = minVersion
         if (mergeState.infoStream.isEnabled("SM")) {
-            if (segmentInfo.getIndexSort() != null) {
+            if (segmentInfo.indexSort != null) {
                 mergeState.infoStream.message(
-                    "SM", "index sort during merge: " + segmentInfo.getIndexSort()
+                    "SM", "index sort during merge: " + segmentInfo.indexSort
                 )
             }
         }

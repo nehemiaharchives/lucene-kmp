@@ -12,10 +12,7 @@ import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.Lock
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.TimeUnit
-import org.gnit.lucenekmp.jdkport.addAndGet
 import org.gnit.lucenekmp.jdkport.assert
-import org.gnit.lucenekmp.jdkport.decrementAndGet
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
@@ -52,7 +49,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     private var abortingException: Throwable? = null
 
     private fun onAbortingException(throwable: Throwable) {
-        checkNotNull(throwable) { "aborting exception must not be null" }
+        //checkNotNull(throwable) { "aborting exception must not be null" }
         assert(abortingException == null) { "aborting exception has already been set" }
         abortingException = throwable
     }
@@ -184,7 +181,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                             doc = addParentField(doc, parentField)
                         }
                     } else require(
-                        !(segmentInfo.getIndexSort() != null && iterator.hasNext()
+                        !(segmentInfo.indexSort != null && iterator.hasNext()
                                 && indexMajorVersionCreated >= Version.LUCENE_10_0_0.major)
                     ) { "a parent field must be set in order to use document blocks with index sorting; see IndexWriterConfig#setParentField" }
 
@@ -492,7 +489,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
 
     @Throws(IOException::class)
     private fun maybeAbort(location: String, flushNotifications: FlushNotifications) {
-        if (abortingException != null && this.isAborted == false) {
+        if (abortingException != null && !this.isAborted) {
             // if we are already aborted don't do anything here
             try {
                 abort()
@@ -584,7 +581,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         sortMap: Sorter.DocMap,
         flushNotifications: FlushNotifications
     ) {
-        checkNotNull(flushedSegment)
+        //checkNotNull(flushedSegment)
         val newSegment: SegmentCommitInfo = flushedSegment.segmentInfo
 
         IndexWriter.setDiagnostics(
@@ -653,14 +650,14 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                 // carry the changes; there's no reason to use
                 // filesystem as intermediary here.
                 val info: SegmentCommitInfo = flushedSegment.segmentInfo
-                val codec: Codec = info.info.getCodec()
+                val codec: Codec = info.info.codec
                 val bits: FixedBitSet = if (sortMap == null) {
                     flushedSegment.liveDocs
                 } else {
                     sortLiveDocs(flushedSegment.liveDocs, sortMap)
                 }
                 codec.liveDocsFormat().writeLiveDocs(bits, directory, info, delCount, context)
-                newSegment.setDelCount(delCount)
+                newSegment.delCount = delCount
                 newSegment.advanceDelGen()
             }
 

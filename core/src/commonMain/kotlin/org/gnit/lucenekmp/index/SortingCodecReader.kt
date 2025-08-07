@@ -758,7 +758,7 @@ class SortingCodecReader private constructor(
         fun wrap(
             reader: CodecReader,
             docMap: Sorter.DocMap?,
-            sort: Sort
+            sort: Sort?
         ): CodecReader {
             val metaData: LeafMetaData = reader.metaData
             val newMetaData =

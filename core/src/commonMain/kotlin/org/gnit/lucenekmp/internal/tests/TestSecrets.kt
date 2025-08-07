@@ -5,8 +5,8 @@ import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.SegmentReader
 //import org.gnit.lucenekmp.internal.tests.ConcurrentMergeSchedulerAccess
 //import org.gnit.lucenekmp.internal.tests.FilterIndexInputAccess
-//import org.gnit.lucenekmp.internal.tests.IndexPackageAccess
-//import org.gnit.lucenekmp.internal.tests.IndexWriterAccess
+import org.gnit.lucenekmp.internal.tests.IndexPackageAccess
+import org.gnit.lucenekmp.internal.tests.IndexWriterAccess
 //import org.gnit.lucenekmp.store.FilterIndexInput
 
 /**
@@ -36,21 +36,22 @@ object TestSecrets {
         ensureInitialized.accept(FilterIndexInput::class)
     }*/
 
-    //private var indexPackageAccess: IndexPackageAccess? = null
+    private var indexPackageAccess: IndexPackageAccess? = null
 
     private var cmsAccess: ConcurrentMergeSchedulerAccess? = null
 
     private var segmentReaderAccess: SegmentReaderAccess? = null
 
-    //private var indexWriterAccess: IndexWriterAccess? = null
+    private var indexWriterAccess: IndexWriterAccess? = null
 
     //private var filterIndexInputAccess: FilterIndexInputAccess? = null
 
     /** Return the accessor to internal secrets for an [IndexReader].  */
-    /*fun getIndexPackageAccess(): IndexPackageAccess {
-        ensureCaller()
-        return requireNotNull<IndexPackageAccess>(indexPackageAccess)
-    }*/
+    fun getIndexPackageAccess(): IndexPackageAccess {
+
+        // ensureCaller() // TODO implement if needed
+        return requireNotNull(indexPackageAccess)
+    }
 
     /*val concurrentMergeSchedulerAccess: ConcurrentMergeSchedulerAccess
         *//** Return the accessor to internal secrets for an [ConcurrentMergeScheduler].  *//*
@@ -68,10 +69,11 @@ object TestSecrets {
     }*/
 
     /** Return the accessor to internal secrets for an [IndexWriter].  */
-    /*fun getIndexWriterAccess(): IndexWriterAccess {
-        ensureCaller()
+    fun getIndexWriterAccess(): IndexWriterAccess {
+
+        // ensureCaller() // TODO implement if needed
         return requireNotNull<IndexWriterAccess>(indexWriterAccess)
-    }*/
+    }
 
     /*val filterInputIndexAccess: FilterIndexInputAccess
         *//** Return the accessor to internal secrets for an [FilterIndexInput].  *//*
@@ -81,16 +83,16 @@ object TestSecrets {
         }*/
 
     /** For internal initialization only.  */
-    /*fun setIndexWriterAccess(indexWriterAccess: IndexWriterAccess) {
+    fun setIndexWriterAccess(indexWriterAccess: IndexWriterAccess) {
         ensureNull(TestSecrets.indexWriterAccess)
         TestSecrets.indexWriterAccess = indexWriterAccess
-    }*/
+    }
 
     /** For internal initialization only.  */
-    /*fun setIndexPackageAccess(indexPackageAccess: IndexPackageAccess) {
+    fun setIndexPackageAccess(indexPackageAccess: IndexPackageAccess) {
         ensureNull(TestSecrets.indexPackageAccess)
         TestSecrets.indexPackageAccess = indexPackageAccess
-    }*/
+    }
 
     /** For internal initialization only.  */
     fun setConcurrentMergeSchedulerAccess(cmsAccess: ConcurrentMergeSchedulerAccess) {

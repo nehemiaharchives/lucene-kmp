@@ -13,7 +13,7 @@ class SegmentCommitInfo(
     /** The [SegmentInfo] that we wrap.  */
     val info: SegmentInfo,
 // How many deleted docs in the segment:
-    private var delCount: Int,
+    delCount: Int,
     softDelCount: Int,
     delGen: Long,
     fieldInfosGen: Long,
@@ -22,6 +22,17 @@ class SegmentCommitInfo(
 ) {
     /** Id that uniquely identifies this segment commit.  */
     private var id: ByteArray?
+
+    var delCount: Int
+        /** Returns the number of deleted docs in the segment.  */
+        get() = delCount
+        set(value) {
+            require(!(value < 0 || value > info.maxDoc())) { "invalid delCount=" + value + " (maxDoc=" + info.maxDoc() + ")" }
+            require(
+                softDelCount + value <= info.maxDoc()
+            ) { "maxDoc=" + info.maxDoc() + ",delCount=" + value + ",softDelCount=" + softDelCount }
+            this.delCount = value
+        }
 
     // How many soft-deleted docs in the segment that are not also hard-deleted:
     private var softDelCount: Int
@@ -66,12 +77,12 @@ class SegmentCommitInfo(
         private set
 
     // Track the per-field DocValues update files
-    private val dvUpdatesFiles: MutableMap<Int, MutableSet<String>> = HashMap<Int, MutableSet<String>>()
+    private val dvUpdatesFiles: MutableMap<Int, MutableSet<String>> = HashMap()
 
     // TODO should we add .files() to FieldInfosFormat, like we have on
     // LiveDocsFormat
     // track the fieldInfos update files
-    private val fieldInfosFiles: MutableSet<String> = HashSet<String>()
+    private val fieldInfosFiles: MutableSet<String> = HashSet()
 
     @Volatile
     private var sizeInBytes: Long = -1
@@ -120,11 +131,11 @@ class SegmentCommitInfo(
             this.dvUpdatesFiles.clear()
             for (kv in dvUpdatesFiles.entries) {
                 // rename the set
-                val set: MutableSet<String> = HashSet<String>()
+                val set: MutableSet<String> = HashSet()
                 for (file in kv.value) {
                     set.add(info.namedForThisSegment(file))
                 }
-                this.dvUpdatesFiles.put(kv.key, set)
+                this.dvUpdatesFiles[kv.key] = set
             }
         }
 
@@ -241,7 +252,7 @@ class SegmentCommitInfo(
 
         // Must separately add any live docs files:
         if (hasDeletions()) {
-            info.getCodec().liveDocsFormat().files(this, files)
+            info.codec.liveDocsFormat().files(this, files)
         }
 
         // must separately add any field updates files
@@ -265,22 +276,9 @@ class SegmentCommitInfo(
         return fieldInfosGen != -1L
     }
 
-    /** Returns the number of deleted docs in the segment.  */
-    fun getDelCount(): Int {
-        return delCount
-    }
-
     /** Returns the number of only soft-deleted docs.  */
     fun getSoftDelCount(): Int {
         return softDelCount
-    }
-
-    fun setDelCount(delCount: Int) {
-        require(!(delCount < 0 || delCount > info.maxDoc())) { "invalid delCount=" + delCount + " (maxDoc=" + info.maxDoc() + ")" }
-        require(
-            softDelCount + delCount <= info.maxDoc()
-        ) { "maxDoc=" + info.maxDoc() + ",delCount=" + delCount + ",softDelCount=" + softDelCount }
-        this.delCount = delCount
     }
 
     fun setSoftDelCount(softDelCount: Int) {
@@ -332,7 +330,7 @@ class SegmentCommitInfo(
 
         // deep clone
         for (e in dvUpdatesFiles.entries) {
-            other.dvUpdatesFiles.put(e.key, HashSet<String>(e.value))
+            other.dvUpdatesFiles[e.key] = HashSet(e.value)
         }
 
         other.fieldInfosFiles.addAll(fieldInfosFiles)
@@ -341,7 +339,7 @@ class SegmentCommitInfo(
     }
 
     fun getDelCount(includeSoftDeletes: Boolean): Int {
-        return if (includeSoftDeletes) getDelCount() + getSoftDelCount() else getDelCount()
+        return if (includeSoftDeletes) delCount + getSoftDelCount() else delCount
     }
 
     private fun generationAdvanced() {

@@ -54,12 +54,12 @@ class Lucene90LiveDocsFormat
 
                 val fbs: FixedBitSet = readFixedBitSet(input, length)
 
-                if (fbs.length() - fbs.cardinality() != info.getDelCount()) {
+                if (fbs.length() - fbs.cardinality() != info.delCount) {
                     throw CorruptIndexException(
                         ("bits.deleted="
                                 + (fbs.length() - fbs.cardinality())
                                 + " info.delcount="
-                                + info.getDelCount()),
+                                + info.delCount),
                         input
                     )
                 }
@@ -98,12 +98,12 @@ class Lucene90LiveDocsFormat
             delCount = writeBits(output, bits)
             CodecUtil.writeFooter(output)
         }
-        if (delCount != info.getDelCount() + newDelCount) {
+        if (delCount != info.delCount + newDelCount) {
             throw CorruptIndexException(
                 ("bits.deleted="
                         + delCount
                         + " info.delcount="
-                        + info.getDelCount()
+                        + info.delCount
                         + " newdelcount="
                         + newDelCount),
                 name

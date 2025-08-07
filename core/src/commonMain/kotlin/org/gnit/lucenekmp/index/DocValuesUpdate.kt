@@ -16,13 +16,13 @@ import org.gnit.lucenekmp.util.BytesRef
 /** An in-place update to a DocValues field.  */
 abstract class DocValuesUpdate protected constructor(
     type: DocValuesType,
-    term: Term,
+    term: Term?,
     field: String,
     docIDUpTo: Int,
     hasValue: Boolean
 ) {
     val type: DocValuesType
-    val term: Term
+    val term: Term?
     val field: String
 
     // used in BufferedDeletes to apply this update only to a slice of docs. It's initialized to
@@ -50,7 +50,7 @@ abstract class DocValuesUpdate protected constructor(
 
     fun sizeInBytes(): Long {
         var sizeInBytes = RAW_SIZE_IN_BYTES.toLong()
-        sizeInBytes += term.field.length * Character.BYTES.toLong()
+        sizeInBytes += term!!.field.length * Character.BYTES.toLong()
         sizeInBytes += term.bytes.bytes.size
         sizeInBytes += field.length * Character.BYTES.toLong()
         sizeInBytes += valueSizeInBytes()
@@ -80,13 +80,13 @@ abstract class DocValuesUpdate protected constructor(
 
     /** An in-place update to a binary DocValues field  */
     class BinaryDocValuesUpdate private constructor(
-        term: Term,
+        term: Term?,
         field: String,
         private val value: BytesRef?,
         docIDUpTo: Int
     ) : DocValuesUpdate(DocValuesType.BINARY, term, field, docIDUpTo, value != null) {
 
-        constructor(term: Term, field: String, value: BytesRef) : this(term, field, value, BufferedUpdates.MAX_INT)
+        constructor(term: Term?, field: String, value: BytesRef) : this(term, field, value, BufferedUpdates.MAX_INT)
 
         fun prepareForApply(docIDUpTo: Int): BinaryDocValuesUpdate {
             if (docIDUpTo == this.docIDUpTo) {
@@ -133,22 +133,22 @@ abstract class DocValuesUpdate protected constructor(
     }
 
     /** An in-place update to a numeric DocValues field  */
-    class NumericDocValuesUpdate private constructor(
-        term: Term,
+    class NumericDocValuesUpdate(
+        term: Term?,
         field: String,
-        private val value: Long,
-        docIDUpTo: Int,
-        hasValue: Boolean
+        private val value: Long? = -1,
+        docIDUpTo: Int = BufferedUpdates.MAX_INT,
+        hasValue: Boolean = true
     ) : DocValuesUpdate(DocValuesType.NUMERIC, term, field, docIDUpTo, hasValue) {
-        constructor(term: Term, field: String, value: Long) : this(term, field, value, BufferedUpdates.MAX_INT, true)
+        /*constructor(term: Term?, field: String, value: Long) : this(term, field, value, BufferedUpdates.MAX_INT, true)*/
 
-        constructor(term: Term, field: String, value: Long?) : this(
+        /*constructor(term: Term, field: String, value: Long?) : this(
             term,
             field,
             value ?: -1,
             BufferedUpdates.MAX_INT,
             value != null
-        )
+        )*/
 
         fun prepareForApply(docIDUpTo: Int): NumericDocValuesUpdate {
             if (docIDUpTo == this.docIDUpTo) {
@@ -168,12 +168,12 @@ abstract class DocValuesUpdate protected constructor(
         @Throws(IOException::class)
         override fun writeTo(out: DataOutput) {
             require(hasValue)
-            out.writeZLong(value)
+            out.writeZLong(value!!)
         }
 
         fun getValue(): Long {
             require(hasValue) { "getValue should only be called if this update has a value" }
-            return value
+            return value!!
         }
 
         companion object {

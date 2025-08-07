@@ -545,7 +545,7 @@ open class ConcurrentMergeScheduler
                 break
             }
 
-            val merge: OneMerge = mergeSource.nextMerge
+            val merge: OneMerge? = mergeSource.nextMerge
             if (merge == null) {
                 if (verbose()) {
                     message("  no more merges pending; now return")

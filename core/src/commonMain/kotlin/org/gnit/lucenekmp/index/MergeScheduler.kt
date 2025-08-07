@@ -72,7 +72,7 @@ protected constructor() : AutoCloseable {
      * }
     </pre> *
      */
-    protected fun verbose(): Boolean {
+    fun verbose(): Boolean {
         return infoStream != null && infoStream!!.isEnabled("MS")
     }
 
@@ -80,7 +80,7 @@ protected constructor() : AutoCloseable {
      * Outputs the given message - this method assumes [.verbose] was called and returned
      * true.
      */
-    protected fun message(message: String) {
+    fun message(message: String) {
         infoStream!!.message("MS", message)
     }
 
@@ -94,7 +94,7 @@ protected constructor() : AutoCloseable {
          * The [MergeScheduler] calls this method to retrieve the next merge requested by the
          * MergePolicy
          */
-        val nextMerge: OneMerge
+        val nextMerge: OneMerge?
 
         /** Does finishing for a merge.  */
         fun onMergeFinished(merge: OneMerge)

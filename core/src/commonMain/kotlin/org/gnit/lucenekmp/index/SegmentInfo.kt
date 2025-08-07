@@ -46,7 +46,20 @@ class SegmentInfo(
     /** Id that uniquely identifies this segment.  */
     private val id: ByteArray
 
-    private var codec: Codec?
+    private var codecNullable: Codec? = null
+
+    var codec: Codec
+        /** Can only be called once.  */
+        set(codec) {
+            require(this.codecNullable == null)
+            requireNotNull(codec) { "codec must be non-null" }
+            this.codecNullable = codec
+        }
+
+        /** Return [Codec] that wrote this segment.  */
+        get(): Codec {
+            return codecNullable!!
+        }
 
     private var diagnostics: MutableMap<String, String>
 
@@ -58,14 +71,14 @@ class SegmentInfo(
     var attributes: MutableMap<String, String>
         private set
 
-    private val indexSort: Sort?
+    val indexSort: Sort?
 
     // Tracks the Lucene version this segment was created with, since 3.1. Null
     // indicates an older than 3.0 index, and it's used to detect a too old index.
     // The format expected is "x.y" - "2.x" for pre-3.0 indexes (or null), and
     // specific versions afterwards ("3.0.0", "3.1.0" etc.).
     // see o.a.l.util.Version.
-    private val version: Version
+    val version: Version
 
     // Tracks the minimum version that contributed documents to a segment. For
     // flush segments, that is the version that wrote it. For merged segments,
@@ -113,18 +126,6 @@ class SegmentInfo(
     /** Sets the hasBlocks property to true. This setting is viral and can't be unset.  */
     fun setHasBlocks() {
         hasBlocks = true
-    }
-
-    /** Can only be called once.  */
-    fun setCodec(codec: Codec) {
-        require(this.codec == null)
-        requireNotNull(codec) { "codec must be non-null" }
-        this.codec = codec
-    }
-
-    /** Return [Codec] that wrote this segment.  */
-    fun getCodec(): Codec {
-        return codec!!
     }
 
     /** Returns number of documents in this segment (deletions are not taken into account).  */
@@ -208,9 +209,9 @@ class SegmentInfo(
     }
 
     /** Returns the version of the code which wrote the segment.  */
-    fun getVersion(): Version {
+    /*fun getVersion(): Version {
         return version
-    }
+    }*/
 
     /** Return the id that uniquely identifies this segment.  */
     fun getId(): ByteArray {
@@ -227,14 +228,14 @@ class SegmentInfo(
      */
     init {
         require(dir !is TrackingDirectoryWrapper)
-        this.dir = requireNotNull<Directory>(dir)
-        this.version = requireNotNull<Version>(version)
+        this.dir = dir
+        this.version = version
         this.minVersion = minVersion
-        this.name = requireNotNull<String>(name)
+        this.name = name
         this.maxDoc = maxDoc
         this.useCompoundFile = isCompoundFile
         this.hasBlocks = hasBlocks
-        this.codec = codec
+        this.codec = requireNotNull(codec)
         this.diagnostics = HashMap<String, String>(diagnostics)
 
         this.id = id
@@ -311,9 +312,9 @@ class SegmentInfo(
     }
 
     /** Return the sort order of this segment, or null if the index has no sort.  */
-    fun getIndexSort(): Sort? {
+    /*fun getIndexSort(): Sort? {
         return indexSort
-    }
+    }*/
 
     companion object {
         // TODO: remove these from this class, for now this is the representation

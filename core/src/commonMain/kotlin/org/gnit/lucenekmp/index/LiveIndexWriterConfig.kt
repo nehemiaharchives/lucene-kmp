@@ -60,7 +60,7 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
 
     /** [OpenMode] that [IndexWriter] is opened with.  */
     @Volatile
-    protected open lateinit var openMode: OpenMode
+    open lateinit var openMode: OpenMode
 
     /**
      * Return the compatibility version to use for this index.
@@ -77,7 +77,7 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
 
     /** [MergeScheduler] to use for running merges.  */
     @Volatile
-    protected open lateinit var mergeScheduler: MergeScheduler
+    open lateinit var mergeScheduler: MergeScheduler
 
     /** [Codec] used to write new segments.  */
     @Volatile

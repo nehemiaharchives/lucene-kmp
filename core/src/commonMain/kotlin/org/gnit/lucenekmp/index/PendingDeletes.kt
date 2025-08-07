@@ -38,7 +38,7 @@ open class PendingDeletes(
         reader.liveDocs,
         true
     ) {
-        pendingDeleteCount = reader.numDeletedDocs() - info.getDelCount()
+        pendingDeleteCount = reader.numDeletedDocs() - info.delCount
     }
 
     init {
@@ -119,7 +119,7 @@ open class PendingDeletes(
                 liveDocs = reader.liveDocs
                 assert(
                     liveDocs == null
-                            || assertCheckLiveDocs(liveDocs!!, info.info.maxDoc(), info.getDelCount())
+                            || assertCheckLiveDocs(liveDocs!!, info.info.maxDoc(), info.delCount)
                 )
             }
             liveDocsInitialized = true
@@ -178,7 +178,7 @@ open class PendingDeletes(
         // until segments file is written:
         var success = false
         try {
-            val codec: Codec = info.info.getCodec()
+            val codec: Codec = info.info.codec
             codec
                 .liveDocsFormat()
                 .writeLiveDocs(
@@ -206,7 +206,7 @@ open class PendingDeletes(
         // then info's delGen remains pointing to the previous
         // (successfully written) del docs:
         info.advanceDelGen()
-        info.setDelCount(info.getDelCount() + pendingDeleteCount)
+        info.delCount += pendingDeleteCount
         dropChanges()
         return true
     }
@@ -249,7 +249,7 @@ open class PendingDeletes(
     val delCount: Int
         /** Returns the number of deleted docs in the segment.  */
         get() {
-            val delCount: Int = info.getDelCount() + info.getSoftDelCount() + numPendingDeletes()
+            val delCount: Int = info.delCount + info.getSoftDelCount() + numPendingDeletes()
             return delCount
         }
 
@@ -276,8 +276,8 @@ open class PendingDeletes(
         ) {
             ("info.maxDoc="
                     + info.info.maxDoc()
-                    + " info.getDelCount()="
-                    + info.getDelCount()
+                    + " info.delCount="
+                    + info.delCount
                     + " info.getSoftDelCount()="
                     + info.getSoftDelCount()
                     + " pendingDeletes="
@@ -299,8 +299,8 @@ open class PendingDeletes(
                     + info.info.maxDoc()
                     + " rld.pendingDeleteCount="
                     + numPendingDeletes()
-                    + " info.getDelCount()="
-                    + info.getDelCount())
+                    + " info.delCount="
+                    + info.delCount)
         }
         return true
     }

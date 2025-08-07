@@ -109,6 +109,10 @@ object Objects {
     fun equals(a: Any?, b: Any?): Boolean {
         return a === b || (a != null && a.equals(b))
     }
+
+    fun isNull(obj: Any?): Boolean {
+        return obj == null
+    }
 }
 
 

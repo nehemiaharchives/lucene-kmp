@@ -322,7 +322,7 @@ class StandardDirectoryReader internal constructor(
 
                         return reader
                     } finally {
-                        if (success == false) {
+                        if (!success) {
                             IOUtils.closeWhileHandlingException(*readers)
                         }
                     }
@@ -360,7 +360,7 @@ class StandardDirectoryReader internal constructor(
                     assert(info.info.dir === dir)
                     val reader: SegmentReader = readerFunction.apply(info)
                     if (reader.numDocs() > 0
-                        || writer.config!!.mergePolicy.keepFullyDeletedSegment { reader }
+                        || writer.config.mergePolicy.keepFullyDeletedSegment { reader }
                     ) {
                         // Steal the ref:
                         readers.add(reader)
@@ -379,7 +379,7 @@ class StandardDirectoryReader internal constructor(
                         readers.toTypedArray<SegmentReader>(),
                         writer,
                         segmentInfos,
-                        writer.config!!.leafSorter,
+                        writer.config.leafSorter,
                         applyAllDeletes,
                         writeAllDeletes
                     )
@@ -422,7 +422,7 @@ class StandardDirectoryReader internal constructor(
                 while (i < c) {
                     val sr: SegmentReader =
                         oldReaders[i] as SegmentReader
-                    segmentReaders.put(sr.segmentName, i)
+                    segmentReaders[sr.segmentName] = i
                     i++
                 }
             }
@@ -474,7 +474,7 @@ class StandardDirectoryReader internal constructor(
                                 if (commitInfo.hasDeletions())
                                     commitInfo
                                         .info
-                                        .getCodec()
+                                        .codec
                                         .liveDocsFormat()
                                         .readLiveDocs(
                                             commitInfo.info.dir,
@@ -489,7 +489,7 @@ class StandardDirectoryReader internal constructor(
                                     oldReader,
                                     liveDocs,
                                     liveDocs,
-                                    commitInfo.info.maxDoc() - commitInfo.getDelCount(),
+                                    commitInfo.info.maxDoc() - commitInfo.delCount,
                                     false
                                 )
                         } else {
@@ -522,7 +522,7 @@ class StandardDirectoryReader internal constructor(
                                         if (commitInfo.hasDeletions())
                                             commitInfo
                                                 .info
-                                                .getCodec()
+                                                .codec
                                                 .liveDocsFormat()
                                                 .readLiveDocs(
                                                     commitInfo.info.dir,
@@ -537,7 +537,7 @@ class StandardDirectoryReader internal constructor(
                                             oldReader,
                                             liveDocs,
                                             liveDocs,
-                                            commitInfo.info.maxDoc() - commitInfo.getDelCount(),
+                                            commitInfo.info.maxDoc() - commitInfo.delCount,
                                             false
                                         )
                                 }

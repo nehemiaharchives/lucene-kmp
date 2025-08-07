@@ -4,22 +4,6 @@ import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
- * Atomically adds the given value to the current value,
- * with memory effects as specified by {@link VarHandle#getAndAdd}.
- *
- * @param delta the value to add
- * @return the updated value
- */
-@OptIn(ExperimentalAtomicApi::class)
-fun AtomicLong.addAndGet(delta: Long): Long {
-    val currentValue = this.load()
-    val newValue = currentValue + delta
-    this.store(newValue)
-    return newValue
-}
-
-
-/**
  * Atomically updates (with memory effects as specified by {@link
  * VarHandle#compareAndSet}) the current value with the results of
  * applying the given function, returning the updated value. The

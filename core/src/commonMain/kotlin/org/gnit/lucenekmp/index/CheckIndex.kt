@@ -632,7 +632,7 @@ class CheckIndex(
             var delCount = 0
             for (info in lastCommit) {
                 maxDoc += info.info.maxDoc()
-                delCount += info.getDelCount()
+                delCount += info.delCount
             }
             infoStream!!.print("${100.0 * delCount / maxDoc}% total deletions; $maxDoc documents; $delCount deletions%n")
         }
@@ -642,7 +642,7 @@ class CheckIndex(
         var newest: Version? = null
         var oldSegs: String? = null
         for (si in lastCommit) {
-            val version: Version = si.info.getVersion()
+            val version: Version = si.info.version
             if (version == null) {
                 // pre-3.1 segment
                 oldSegs = "pre-3.1"
@@ -926,7 +926,7 @@ class CheckIndex(
         segInfoStat.name = info.info.name
         segInfoStat.maxDoc = info.info.maxDoc()
 
-        val version: Version = info.info.getVersion()
+        val version: Version = info.info.version
         if (info.info.maxDoc() <= 0) {
             throw CheckIndexException(" illegal number of documents: maxDoc=" + info.info.maxDoc())
         }
@@ -938,13 +938,13 @@ class CheckIndex(
         try {
             msg(infoStream, "    version=" + (version ?: "3.0"))
             msg(infoStream, "    id=" + StringHelper.idToString(info.info.getId()))
-            val codec: Codec = info.info.getCodec()
+            val codec: Codec = info.info.codec
             msg(infoStream, "    codec=$codec")
             segInfoStat.codec = codec
             msg(infoStream, "    compound=" + info.info.useCompoundFile)
             segInfoStat.compound = info.info.useCompoundFile
             msg(infoStream, "    numFiles=" + info.files().size)
-            val indexSort: Sort? = info.info.getIndexSort()
+            val indexSort: Sort? = info.info.indexSort
             if (indexSort != null) {
                 msg(infoStream, "    sort=$indexSort")
             }
@@ -1007,10 +1007,10 @@ class CheckIndex(
             toLoseDocCount = numDocs
 
             if (reader.hasDeletions()) {
-                if (numDocs != info.info.maxDoc() - info.getDelCount()) {
+                if (numDocs != info.info.maxDoc() - info.delCount) {
                     throw CheckIndexException(
                         ("delete count mismatch: info="
-                                + (info.info.maxDoc() - info.getDelCount())
+                                + (info.info.maxDoc() - info.delCount)
                                 + " vs reader="
                                 + numDocs)
                     )
@@ -1023,19 +1023,19 @@ class CheckIndex(
                                 + (info.info.maxDoc() - numDocs))
                     )
                 }
-                if (info.info.maxDoc() - numDocs != info.getDelCount()) {
+                if (info.info.maxDoc() - numDocs != info.delCount) {
                     throw CheckIndexException(
                         ("delete count mismatch: info="
-                                + info.getDelCount()
+                                + info.delCount
                                 + " vs reader="
                                 + (info.info.maxDoc() - numDocs))
                     )
                 }
             } else {
-                if (info.getDelCount() != 0) {
+                if (info.delCount != 0) {
                     throw CheckIndexException(
                         ("delete count mismatch: info="
-                                + info.getDelCount()
+                                + info.delCount
                                 + " vs reader="
                                 + (info.info.maxDoc() - numDocs))
                     )
@@ -1850,7 +1850,7 @@ class CheckIndex(
                 }
                 for (info in reader.fieldInfos) {
                     if (info.hasNorms()) {
-                        checkNumericDocValues(info.name, normsReader!!.getNorms(info), normsReader!!.getNorms(info))
+                        checkNumericDocValues(info.name, normsReader!!.getNorms(info), normsReader.getNorms(info))
                         ++status.totFields
                     }
                 }
@@ -3703,7 +3703,7 @@ class CheckIndex(
         ): DocValuesStatus {
             val startNS: Long = System.nanoTime()
 
-            val status: DocValuesStatus = DocValuesStatus()
+            val status = DocValuesStatus()
             try {
                 if (infoStream != null) {
                     infoStream.print("    test: docvalues...........")
@@ -4460,7 +4460,6 @@ class CheckIndex(
                                             postings,
                                             PostingsEnum.ALL.toInt()
                                         )
-                                        checkNotNull(postings)
 
                                         val termExists: Boolean
                                         if ((seekExactCounter++ and 0x01) == 0) {
@@ -4487,7 +4486,6 @@ class CheckIndex(
                                             postingsDocs,
                                             PostingsEnum.ALL.toInt()
                                         )
-                                        checkNotNull(postingsDocs)
 
                                         val advanceDoc: Int = postingsDocs.advance(j)
                                         if (advanceDoc != j) {

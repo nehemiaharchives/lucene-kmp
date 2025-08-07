@@ -96,7 +96,7 @@ class SegmentReader : CodecReader {
             LeafMetaData(
                 createdVersionMajor,
                 si.info.minVersion,
-                si.info.getIndexSort()!!,
+                si.info.indexSort!!,
                 si.info.hasBlocks
             )
 
@@ -107,7 +107,7 @@ class SegmentReader : CodecReader {
         segDocValues = SegmentDocValues()
 
         var success = false
-        val codec: Codec = si.info.getCodec()
+        val codec: Codec = si.info.codec
         try {
             if (si.hasDeletions()) {
                 // NOTE: the bitvector is stored using the regular directory, not cfs
@@ -115,11 +115,11 @@ class SegmentReader : CodecReader {
                     codec.liveDocsFormat().readLiveDocs(directory(), si, IOContext.READONCE)
                 hardLiveDocs = liveDocs!!
             } else {
-                assert(si.getDelCount() == 0)
+                assert(si.delCount == 0)
                 liveDocs = null
                 hardLiveDocs = liveDocs!!
             }
-            numDocs = si.info.maxDoc() - si.getDelCount()
+            numDocs = si.info.maxDoc() - si.delCount
 
             fieldInfos = initFieldInfos()
             docValuesProducer = initDocValuesProducer()
@@ -198,7 +198,7 @@ class SegmentReader : CodecReader {
             return core.coreFieldInfos
         } else {
             // updates always outside of CFS
-            val fisFormat: FieldInfosFormat = si.info.getCodec().fieldInfosFormat()
+            val fisFormat: FieldInfosFormat = si.info.codec.fieldInfosFormat()
             val segmentSuffix = si.fieldInfosGen.toString(Character.MAX_RADIX.coerceIn(2, 36))
             return fisFormat.read(si.info.dir, si.info, segmentSuffix, IOContext.READONCE)
         }
@@ -213,7 +213,7 @@ class SegmentReader : CodecReader {
             }
         } finally {
             if (docValuesProducer is SegmentDocValuesProducer) {
-                segDocValues.decRef((docValuesProducer as SegmentDocValuesProducer).dvGens)
+                segDocValues.decRef(docValuesProducer.dvGens)
             } else if (docValuesProducer != null) {
                 segDocValues.decRef(LongArrayList.from(-1L))
             }
@@ -272,7 +272,7 @@ class SegmentReader : CodecReader {
     override fun toString(): String {
         // SegmentInfo.toString takes dir and number of
         // *pending* deletions; so we reverse compute that here:
-        return si.toString(si.info.maxDoc() - numDocs - si.getDelCount())
+        return si.toString(si.info.maxDoc() - numDocs - si.delCount)
     }
 
     val segmentName: String

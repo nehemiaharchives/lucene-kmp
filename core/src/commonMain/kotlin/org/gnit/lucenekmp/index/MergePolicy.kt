@@ -204,7 +204,7 @@ abstract class MergePolicy
      *
      * @lucene.experimental
      */
-    class OneMerge {
+    open class OneMerge {
         val mergeCompleted = CompletableDeferred<Boolean>()
         var info: SegmentCommitInfo? = null // used by IndexWriter
         var registerDone: Boolean = false // used by IndexWriter
@@ -307,7 +307,7 @@ abstract class MergePolicy
          * @param segmentDropped true iff the merged segment was dropped since it was fully deleted
          */
         @Throws(IOException::class)
-        fun mergeFinished(success: Boolean, segmentDropped: Boolean) {
+        open fun mergeFinished(success: Boolean, segmentDropped: Boolean) {
         }
 
         /** Closes this merge and releases all merge readers  */
@@ -336,7 +336,7 @@ abstract class MergePolicy
          * **NOTE:** It is illegal to reorder doc IDs here, use [ ][.reorder] instead.
          */
         @Throws(IOException::class)
-        fun wrapForMerge(reader: CodecReader): CodecReader {
+        open fun wrapForMerge(reader: CodecReader): CodecReader {
             return reader
         }
 
@@ -356,7 +356,7 @@ abstract class MergePolicy
          * @lucene.experimental
          */
         @Throws(IOException::class)
-        fun reorder(
+        open fun reorder(
             reader: CodecReader,
             dir: Directory,
             executor: Executor
@@ -368,7 +368,7 @@ abstract class MergePolicy
          * Expert: Sets the [SegmentCommitInfo] of the merged segment. Allows sub-classes to e.g.
          * [add diagnostic][SegmentInfo.addDiagnostics] properties.
          */
-        fun setMergeInfo(info: SegmentCommitInfo) {
+        open fun setMergeInfo(info: SegmentCommitInfo) {
             this.info = info
         }
 
@@ -485,12 +485,12 @@ abstract class MergePolicy
 
         /** Called just before the merge is applied to IndexWriter's SegmentInfos  */
         @Throws(IOException::class)
-        fun onMergeComplete() {
+        open fun onMergeComplete() {
         }
 
         /** Sets the merge readers for this merge.  */
         @Throws(IOException::class)
-        fun initMergeReaders(readerFactory: IOFunction<SegmentCommitInfo, MergeReader>) {
+        open fun initMergeReaders(readerFactory: IOFunction<SegmentCommitInfo, MergeReader>) {
             assert(mergeReader.isEmpty()) { "merge readers must be empty" }
             assert(!mergeCompleted.isCompleted) { "merge is already done" }
             val readers: ArrayList<MergeReader> = ArrayList(segments.size)
@@ -869,7 +869,7 @@ abstract class MergePolicy
         mergeContext: MergeContext,
         infos: Iterable<SegmentCommitInfo>
     ): String = infos.joinToString(" ") { info ->
-        val delCount = mergeContext.numDeletedDocs(info) - info.getDelCount()
+        val delCount = mergeContext.numDeletedDocs(info) - info.delCount
         info.toString(delCount)
     }
 

@@ -83,7 +83,7 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         return this
     }
 
-    override lateinit var openMode: OpenMode
+    public override lateinit var openMode: OpenMode
 
     /**
      * Expert: set the compatibility version to use for this index. In case the index is created, it
@@ -116,6 +116,16 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         this.createdVersionMajor = indexCreatedVersionMajor
         return this
     }
+
+    /**
+     * Return the compatibility version to use for this index.
+     *
+     * @see IndexWriterConfig.setIndexCreatedVersionMajor
+     */
+    /*fun getIndexCreatedVersionMajor(): Int {
+        return createdVersionMajor
+    }*/
+
 
     /**
      * Expert: allows an optional [IndexDeletionPolicy] implementation to be specified. You can
@@ -189,7 +199,7 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         return this
     }
 
-    override lateinit var mergeScheduler: MergeScheduler
+    public override lateinit var mergeScheduler: MergeScheduler
 
     /**
      * Set the [Codec].

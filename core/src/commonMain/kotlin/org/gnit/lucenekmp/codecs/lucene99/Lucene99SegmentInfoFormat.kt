@@ -160,7 +160,7 @@ class Lucene99SegmentInfoFormat
 
     @Throws(IOException::class)
     private fun writeSegmentInfo(output: DataOutput, si: SegmentInfo) {
-        val version: Version = si.getVersion()
+        val version: Version = si.version
         require(version.major >= 7) { "invalid major version: should be >= 7 but got: " + version.major + " segment=" + si }
         // Write the Lucene version that created this segment, since 3.1
         output.writeInt(version.major)
@@ -193,7 +193,7 @@ class Lucene99SegmentInfoFormat
         output.writeSetOfStrings(files)
         output.writeMapOfStrings(si.attributes)
 
-        val indexSort: Sort? = si.getIndexSort()
+        val indexSort: Sort? = si.indexSort
         val numSortFields = indexSort?.sort?.size ?: 0
         output.writeVInt(numSortFields)
         for (i in 0..<numSortFields) {

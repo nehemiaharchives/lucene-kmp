@@ -12,10 +12,8 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.AtomicInteger
-import org.gnit.lucenekmp.jdkport.addAndGet
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.get
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicLong
@@ -407,7 +405,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     }
 
     suspend fun updateDocuments(
-        docs: Iterable<out Iterable<out IndexableField>>,
+        docs: Iterable<Iterable<IndexableField>>,
         delNode: DocumentsWriterDeleteQueue.Node<*>
     ): Long {
         val hasEvents = preUpdate()
