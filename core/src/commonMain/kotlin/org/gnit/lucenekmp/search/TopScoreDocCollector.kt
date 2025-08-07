@@ -17,9 +17,9 @@ import org.gnit.lucenekmp.util.PriorityQueue
  */
 class TopScoreDocCollector internal constructor(
     numHits: Int,
-    private val after: ScoreDoc,
+    private val after: ScoreDoc?,
     val totalHitsThreshold: Int,
-    val minScoreAcc: MaxScoreAccumulator
+    val minScoreAcc: MaxScoreAccumulator?
 ) : TopDocsCollector<ScoreDoc>(
     HitQueue(
         numHits,
@@ -63,7 +63,7 @@ class TopScoreDocCollector internal constructor(
     @Throws(IOException::class)
     override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
         val docBase: Int = context.docBase
-        val after: ScoreDoc = this.after
+        val after: ScoreDoc? = this.after
         val afterScore: Float
         val afterDoc: Int
         if (after == null) {
