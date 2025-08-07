@@ -23,7 +23,7 @@ abstract class TopFieldCollector private constructor(
     val numHits: Int,
     totalHitsThreshold: Int,
     val needsScores: Boolean,
-    minScoreAcc: MaxScoreAccumulator
+    minScoreAcc: MaxScoreAccumulator?
 ) : TopDocsCollector<Entry>(pq) {
     // TODO: one optimization we could do is to pre-fill
     // the queue with sentinel value that guaranteed to
@@ -38,7 +38,7 @@ abstract class TopFieldCollector private constructor(
         val reverseMul: Int
         override var scorer: Scorable? = null
             set(scorer) {
-                this.scorer = scorer
+                field = scorer
                 comparator.setScorer(scorer!!)
                 if (minScoreAcc == null) {
                     updateMinCompetitiveScore(scorer)
@@ -144,7 +144,7 @@ abstract class TopFieldCollector private constructor(
         val queue: FieldValueHitQueue<Entry>,
         numHits: Int,
         totalHitsThreshold: Int,
-        minScoreAcc: MaxScoreAccumulator
+        minScoreAcc: MaxScoreAccumulator?
     ) : TopFieldCollector(queue, numHits, totalHitsThreshold, sort.needsScores(), minScoreAcc) {
 
         override var weight: Weight? = null
@@ -190,7 +190,7 @@ abstract class TopFieldCollector private constructor(
         val after: FieldDoc,
         numHits: Int,
         totalHitsThreshold: Int,
-        minScoreAcc: MaxScoreAccumulator
+        minScoreAcc: MaxScoreAccumulator?
     ) : TopFieldCollector(queue, numHits, totalHitsThreshold, sort.needsScores(), minScoreAcc) {
 
         override var weight: Weight? = null
@@ -260,7 +260,7 @@ abstract class TopFieldCollector private constructor(
     var searchSortPartOfIndexSort: Boolean? = null // shows if Search Sort if a part of the Index Sort
 
     // an accumulator that maintains the maximum of the segment's minimum competitive scores
-    val minScoreAcc: MaxScoreAccumulator
+    val minScoreAcc: MaxScoreAccumulator?
 
     // the current local minimum competitive score already propagated to the underlying scorer
     var minCompetitiveScore: Float = 0f
