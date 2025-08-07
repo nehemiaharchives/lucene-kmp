@@ -63,7 +63,7 @@ internal class BlockMaxConjunctionBulkScorer(maxDoc: Int, scorers: MutableList<S
 
     @Throws(IOException::class)
     override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
-        collector.setScorer(scorable)
+        collector.scorer = scorable
 
         var windowMin: Int = max(lead1.docID(), min)
         while (windowMin < max) {

@@ -10,24 +10,27 @@ import okio.IOException
  */
 abstract class FilterLeafCollector
 /** Sole constructor.  */(protected val `in`: LeafCollector) : LeafCollector {
-    @Throws(IOException::class)
-    public override fun setScorer(scorer: Scorable) {
-        `in`.setScorer(scorer)
+    override var scorer: Scorable?
+        get() {
+            return `in`.scorer
+        }
+        set(scorer) {
+        `in`.scorer = scorer
     }
 
     @Throws(IOException::class)
-    public override fun collect(doc: Int) {
+    override fun collect(doc: Int) {
         `in`.collect(doc)
     }
 
     @Throws(IOException::class)
-    public override fun finish() {
+    override fun finish() {
         `in`.finish()
     }
 
     override fun toString(): String {
         var name: String = this::class.simpleName!!
-        if (name.length == 0) {
+        if (name.isEmpty()) {
             // an anonoymous subclass will have empty name?
             name = "FilterLeafCollector"
         }

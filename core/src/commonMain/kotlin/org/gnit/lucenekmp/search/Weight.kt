@@ -238,7 +238,7 @@ abstract class Weight
         @Throws(IOException::class)
         override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
             var min = min
-            collector.setScorer(scorer)
+            collector.scorer = scorer
             val competitiveIterator: DocIdSetIterator? = collector.competitiveIterator()
 
             if (competitiveIterator != null) {

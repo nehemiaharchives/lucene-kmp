@@ -65,7 +65,7 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
             return lead1.docID()
         }
 
-        collector.setScorer(scorable)
+        collector.scorer = scorable
 
         var otherIterators = this.others
         val collectorIterator = collector.competitiveIterator()

@@ -49,8 +49,7 @@ interface LeafCollector {
      * the current document (passed-in to [.collect]), should save the passed-in Scorer and
      * call scorer.score() when needed.
      */
-    @Throws(IOException::class)
-    fun setScorer(scorer: Scorable)
+    var scorer: Scorable?
 
     /**
      * Called once for every document matching a query, with the unbased document number.

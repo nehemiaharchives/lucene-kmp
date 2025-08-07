@@ -62,15 +62,17 @@ open class ConstantScoreQuery(val query: Query) : Query() {
 
         private fun wrapCollector(collector: LeafCollector): LeafCollector {
             return object : FilterLeafCollector(collector) {
-                @Throws(IOException::class)
-                override fun setScorer(scorer: Scorable) {
+                override var scorer: Scorable?
+                    get() {
+                        throw UnsupportedOperationException("Scorer should not be accessed in ConstantScoreQuery")
+                    }
+                    set(scorer) {
                     // we must wrap again here, but using the scorer passed in as parameter:
-                    `in`.setScorer(
-                        object : FilterScorable(scorer) {
-                            override fun score(): Float {
-                                return theScore
-                            }
-                        })
+                    `in`.scorer = object : FilterScorable(scorer!!) {
+                        override fun score(): Float {
+                            return theScore
+                        }
+                    }
                 }
             }
         }

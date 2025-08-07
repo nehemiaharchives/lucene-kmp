@@ -261,7 +261,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
         if (doc < windowMin) {
             doc = it.advance(windowMin)
         }
-        collector.setScorer(w.scorer)
+        collector.scorer = w.scorer
         while (doc < end) {
             if (acceptDocs == null || acceptDocs.get(doc)) {
                 collector.collect(doc)
@@ -271,7 +271,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
         w.doc = doc
 
         // reset the scorer that should be used for the general case
-        collector.setScorer(score)
+        collector.scorer = score
     }
 
     @Throws(IOException::class)
@@ -304,7 +304,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
 
     @Throws(IOException::class)
     override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
-        collector.setScorer(score)
+        collector.scorer = score
 
         var top = advance(min)
         while (top.doc < max) {

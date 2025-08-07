@@ -47,15 +47,13 @@ internal class DisjunctionMaxBulkScorer(scorers: MutableList<BulkScorer>) : Bulk
                 top.next =
                     top.scorer.score(
                         object : LeafCollector {
-                            private var scorer: Scorable? = null
-
-                            @Throws(IOException::class)
-                            override fun setScorer(scorer: Scorable) {
-                                this.scorer = scorer
-                                if (topLevelScorable.minCompetitiveScore != 0f) {
-                                    scorer.minCompetitiveScore = topLevelScorable.minCompetitiveScore
+                            override var scorer: Scorable? = null
+                                set(scorer) {
+                                    field = scorer
+                                    if (topLevelScorable.minCompetitiveScore != 0f) {
+                                        scorer!!.minCompetitiveScore = topLevelScorable.minCompetitiveScore
+                                    }
                                 }
-                            }
 
                             @Throws(IOException::class)
                             override fun collect(doc: Int) {
@@ -72,7 +70,7 @@ internal class DisjunctionMaxBulkScorer(scorers: MutableList<BulkScorer>) : Bulk
             } while (top.next < windowMax)
 
             // Then replay
-            collector.setScorer(topLevelScorable)
+            collector.scorer = topLevelScorable
             var windowDoc: Int = windowMatches.nextSetBit(0)
             while (windowDoc != DocIdSetIterator.NO_MORE_DOCS
             ) {

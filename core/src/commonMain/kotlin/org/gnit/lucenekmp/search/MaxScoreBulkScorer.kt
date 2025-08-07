@@ -67,7 +67,7 @@ internal class MaxScoreBulkScorer(private val maxDoc: Int, scorers: MutableList<
 
     @Throws(IOException::class)
     override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
-        collector.setScorer(scorable)
+        collector.scorer = scorable
 
         // This scorer computes outer windows based on impacts that are stored in the index. These outer
         // windows should be small enough to provide good upper bounds of scores, and big enough to make
@@ -358,7 +358,7 @@ internal class MaxScoreBulkScorer(private val maxDoc: Int, scorers: MutableList<
                 1
             }
 
-            val minWindowMax = min(Int.Companion.MAX_VALUE.toLong(), windowMin.toLong() + minWindowSize).toInt()
+            val minWindowMax = min(Int.MAX_VALUE.toLong(), windowMin.toLong() + minWindowSize).toInt()
             windowMax = max(windowMax, minWindowMax)
         }
 
@@ -433,7 +433,7 @@ internal class MaxScoreBulkScorer(private val maxDoc: Int, scorers: MutableList<
         }
         var maxScoreSum = 0.0
         firstEssentialScorer = 0
-        nextMinCompetitiveScore = Float.Companion.POSITIVE_INFINITY
+        nextMinCompetitiveScore = Float.POSITIVE_INFINITY
         for (i in allScorers.indices) {
             val w = scratch[i]
             val newMaxScoreSum = maxScoreSum + w.maxWindowScore

@@ -494,9 +494,9 @@ internal class BooleanScorerSupplier(
                         object : LeafCollector {
                             var fake: Score = Score()
 
-                            @Throws(IOException::class)
-                            override fun setScorer(scorer: Scorable) {
-                                collector.setScorer(fake)
+                            override var scorer: Scorable? = null
+                                set(scorer) {
+                                collector.scorer = fake
                             }
 
                             @Throws(IOException::class)

@@ -34,7 +34,7 @@ abstract class TopDocsCollector<T : ScoreDoc> protected constructor(
      * Populates the results array with the ScoreDoc instances. This can be overridden in case a
      * different ScoreDoc type should be returned.
      */
-    protected fun populateResults(results: Array<ScoreDoc?>, howMany: Int) {
+    protected open fun populateResults(results: Array<ScoreDoc>, howMany: Int) {
         for (i in howMany - 1 downTo 0) {
             results[i] = pq.pop()!!
         }
@@ -45,7 +45,7 @@ abstract class TopDocsCollector<T : ScoreDoc> protected constructor(
      * null it means there are no results to return, either because there were 0 calls to collect() or
      * because the arguments to topDocs were invalid.
      */
-    protected fun newTopDocs(results: Array<ScoreDoc>?, start: Int): TopDocs {
+    protected open fun newTopDocs(results: Array<ScoreDoc>?, start: Int): TopDocs {
         return if (results == null)
             EMPTY_TOPDOCS
         else
@@ -61,7 +61,7 @@ abstract class TopDocsCollector<T : ScoreDoc> protected constructor(
     }
 
     /** Returns the top docs that were collected by this collector.  */
-    fun topDocs(): TopDocs {
+    open fun topDocs(): TopDocs {
         // In case pq was populated with sentinel values, there might be less
         // results than pq.size(). Therefore return all results until either
         // pq.size() or totalHits.
@@ -115,7 +115,7 @@ abstract class TopDocsCollector<T : ScoreDoc> protected constructor(
 
         // We know that start < pqsize, so just fix howMany.
         howMany = min(size - start, howMany)
-        val results = kotlin.arrayOfNulls<ScoreDoc>(howMany)
+        val results = kotlin.arrayOfNulls<ScoreDoc>(howMany) as Array<ScoreDoc>
 
         // pq's pop() returns the 'least' element in the queue, therefore need
         // to discard the first ones, until we reach the requested range.
@@ -129,7 +129,7 @@ abstract class TopDocsCollector<T : ScoreDoc> protected constructor(
         // Get the requested results from pq.
         populateResults(results, howMany)
 
-        return newTopDocs(results as Array<ScoreDoc>, start)
+        return newTopDocs(results, start)
     }
 
     companion object {

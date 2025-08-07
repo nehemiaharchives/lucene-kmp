@@ -42,7 +42,7 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
     override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
         var min = min
         var max = max
-        collector.setScorer(scorable)
+        collector.scorer = scorable
         var iterators = this.iterators
         if (collector.competitiveIterator() != null) {
             iterators = ArrayList(iterators)

@@ -9,7 +9,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 
 /** Maintains the maximum score and its corresponding document id concurrently  */
-internal class MaxScoreAccumulator {
+class MaxScoreAccumulator {
     // scores are always positive
     @OptIn(ExperimentalAtomicApi::class)
     val acc: AtomicLong = AtomicLong(Long.MAX_VALUE) /*LongAccumulator =

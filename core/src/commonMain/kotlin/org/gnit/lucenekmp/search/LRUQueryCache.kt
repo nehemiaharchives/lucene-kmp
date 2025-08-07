@@ -858,9 +858,14 @@ open class LRUQueryCache(
             val count = IntArray(1)
             scorer.score(
                 object : LeafCollector {
-                    @Throws(IOException::class)
-                    override fun setScorer(scorer: Scorable) {
-                    }
+                    override var scorer: Scorable?
+                        get() {
+                            throw UnsupportedOperationException(
+                                "Scorer should not be set in this collector"
+                            )
+                        }
+                        set(scorer) {
+                        }
 
                     @Throws(IOException::class)
                     override fun collect(doc: Int) {
@@ -881,8 +886,13 @@ open class LRUQueryCache(
                 RoaringDocIdSet.Builder(maxDoc)
             scorer.score(
                 object : LeafCollector {
-                    @Throws(IOException::class)
-                    override fun setScorer(scorer: Scorable) {
+                    override var scorer: Scorable?
+                        get() {
+                            throw UnsupportedOperationException(
+                                "Scorer should not be set in this collector"
+                            )
+                        }
+                        set(scorer) {
                     }
 
                     @Throws(IOException::class)

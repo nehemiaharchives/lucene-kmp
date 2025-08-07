@@ -21,7 +21,7 @@ private constructor(
     // All these are required by this class's API - need to return arrays.
     // Therefore, even in the case of a single comparator, create an array
     // anyway.
-    protected val fields: Array<SortField>, size: Int) :
+    val fields: Array<SortField>, size: Int) :
     PriorityQueue<T>(size) {
     /** Extension of ScoreDoc to also store the [FieldComparator] slot.  */
     open class Entry(var slot: Int, doc: Int) : ScoreDoc(doc, Float.NaN) {
@@ -103,7 +103,7 @@ private constructor(
         return comparators
     }
 
-    protected val comparators: Array<FieldComparator<*>>
+    val comparators: Array<FieldComparator<*>>
     val reverseMul: IntArray
 
     // prevent instantiation and extension.
