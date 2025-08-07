@@ -147,6 +147,8 @@ abstract class TopFieldCollector private constructor(
         minScoreAcc: MaxScoreAccumulator
     ) : TopFieldCollector(queue, numHits, totalHitsThreshold, sort.needsScores(), minScoreAcc) {
 
+        override var weight: Weight? = null
+
         @Throws(IOException::class)
         override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
             // reset the minimum competitive score
@@ -190,6 +192,9 @@ abstract class TopFieldCollector private constructor(
         totalHitsThreshold: Int,
         minScoreAcc: MaxScoreAccumulator
     ) : TopFieldCollector(queue, numHits, totalHitsThreshold, sort.needsScores(), minScoreAcc) {
+
+        override var weight: Weight? = null
+
         var collectedHits: Int = 0
 
         init {

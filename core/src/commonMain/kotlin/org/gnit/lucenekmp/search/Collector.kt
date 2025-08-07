@@ -43,5 +43,5 @@ interface Collector {
     /**
      * Set the [Weight] that will be used to produce scorers that will feed [ ]s. This is typically useful to have access to [Weight.count] from [ ][Collector.getLeafCollector].
      */
-    fun setWeight(weight: Weight) {}
+    var weight: Weight?
 }

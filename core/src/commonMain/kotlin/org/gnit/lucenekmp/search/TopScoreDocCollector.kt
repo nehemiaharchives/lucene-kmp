@@ -27,6 +27,8 @@ class TopScoreDocCollector internal constructor(
     ) as PriorityQueue<ScoreDoc>
 ) {
 
+    override var weight: Weight? = null
+
     override fun topDocsSize(): Int {
         // Note: this relies on sentinel values having Integer.MAX_VALUE as a doc ID.
         val validTopHitCount = IntArray(1)
