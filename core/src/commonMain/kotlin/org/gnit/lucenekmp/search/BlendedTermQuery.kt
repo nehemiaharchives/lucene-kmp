@@ -38,9 +38,9 @@ class BlendedTermQuery private constructor(
     /** Sole constructor.  */
     {
         private var numTerms = 0
-        private var terms: Array<Term?> = kotlin.arrayOfNulls<Term>(0)
+        private var terms: Array<Term?> = kotlin.arrayOfNulls(0)
         private var boosts = FloatArray(0)
-        private var contexts: Array<TermStates?> = kotlin.arrayOfNulls<TermStates>(0)
+        private var contexts: Array<TermStates?> = kotlin.arrayOfNulls(0)
         private var rewriteMethod = DISJUNCTION_MAX_REWRITE
 
         /**
@@ -214,7 +214,7 @@ class BlendedTermQuery private constructor(
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         val contexts: Array<TermStates?> = ArrayUtil.copyArray(this.contexts)
         for (i in contexts.indices) {
-            if (contexts[i] == null || !contexts[i]!!.wasBuiltFor(indexSearcher.getTopReaderContext())
+            if (contexts[i] == null || !contexts[i]!!.wasBuiltFor(indexSearcher.topReaderContext)
             ) {
                 contexts[i] = TermStates.build(indexSearcher, terms[i], true)
             }
@@ -231,7 +231,7 @@ class BlendedTermQuery private constructor(
         }
 
         for (i in contexts.indices) {
-            contexts[i] = adjustFrequencies(indexSearcher.getTopReaderContext(), contexts[i]!!, df, ttf)
+            contexts[i] = adjustFrequencies(indexSearcher.topReaderContext, contexts[i]!!, df, ttf)
         }
 
         val termQueries = kotlin.arrayOfNulls<Query>(terms.size)
@@ -279,7 +279,7 @@ class BlendedTermQuery private constructor(
             val leaves: MutableList<LeafReaderContext> = readerContext.leaves()
             val newCtx = TermStates(readerContext)
             for (i in leaves.indices) {
-                val supplier: IOSupplier<TermState?>? = ctx.get(leaves.get(i))
+                val supplier: IOSupplier<TermState?>? = ctx.get(leaves[i])
                 if (supplier == null) {
                     continue
                 }

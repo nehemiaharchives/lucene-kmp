@@ -1,16 +1,16 @@
 package org.gnit.lucenekmp.index
 
 import org.gnit.lucenekmp.index.NumericDocValuesFieldUpdates.SingleValueNumericDocValuesFieldUpdates
-import org.gnit.lucenekmp.search.DocIdSetIterator;
-import org.gnit.lucenekmp.search.IndexSearcher;
-import org.gnit.lucenekmp.search.Query;
-import org.gnit.lucenekmp.search.ScoreMode;
-import org.gnit.lucenekmp.search.Scorer;
-import org.gnit.lucenekmp.search.Weight;
-import org.gnit.lucenekmp.util.Bits;
-import org.gnit.lucenekmp.util.BytesRef;
-import org.gnit.lucenekmp.util.InfoStream;
-import org.gnit.lucenekmp.util.RamUsageEstimator;
+import org.gnit.lucenekmp.search.DocIdSetIterator
+import org.gnit.lucenekmp.search.IndexSearcher
+import org.gnit.lucenekmp.search.Query
+import org.gnit.lucenekmp.search.ScoreMode
+import org.gnit.lucenekmp.search.Scorer
+import org.gnit.lucenekmp.search.Weight
+import org.gnit.lucenekmp.util.Bits
+import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.util.InfoStream
+import org.gnit.lucenekmp.util.RamUsageEstimator
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.jdkport.ReentrantLock
@@ -61,14 +61,11 @@ class FrozenBufferedUpdates(
         ) { "segment private packet should only have del queries" }
 
         val builder: PrefixCodedTerms.Builder = PrefixCodedTerms.Builder()
-        updates.deleteTerms.forEachOrdered<RuntimeException>(object :
-            BufferedUpdates.DeletedTerms.DeletedTermConsumer<RuntimeException> {
-            override fun accept(term: Term, docId: Int) {
-                builder.add(
-                    term
-                )
-            }
-        })
+        updates.deleteTerms.forEachOrdered<RuntimeException> { term, docId ->
+            builder.add(
+                term
+            )
+        }
         deleteTerms = builder.finish()
 
         deleteQueries = kotlin.arrayOfNulls<Query>(updates.deleteQueries.size) as Array<Query>
@@ -216,17 +213,17 @@ class FrozenBufferedUpdates(
                     checkNotNull(privateSegment)
                     limit = deleteQueryLimits[i]
                 } else {
-                    limit = Int.Companion.MAX_VALUE
+                    limit = Int.MAX_VALUE
                 }
                 val searcher = IndexSearcher(readerContext.reader())
-                searcher.setQueryCache(null)
+                searcher.queryCache = null
                 query = searcher.rewrite(query)
                 val weight: Weight =
                     searcher.createWeight(query, ScoreMode.COMPLETE_NO_SCORES, 1f)
                 val scorer: Scorer? = weight.scorer(readerContext)
                 if (scorer != null) {
                     val it: DocIdSetIterator = scorer.iterator()
-                    if (segState.rld.sortMap != null && limit != Int.Companion.MAX_VALUE) {
+                    if (segState.rld.sortMap != null && limit != Int.MAX_VALUE) {
                         checkNotNull(privateSegment)
                         // This segment was sorted on flush; we must apply seg-private deletes carefully in this
                         // case:
@@ -397,7 +394,7 @@ class FrozenBufferedUpdates(
 
         @Throws(IOException::class)
         private fun setField(field: String) {
-            if (this.field == null || this.field == field == false) {
+            if (this.field == null || this.field != field) {
                 this.field = field
 
                 val terms: Terms = provider.terms(field)
@@ -531,7 +528,7 @@ class FrozenBufferedUpdates(
                             assert(segmentPrivateDeletes)
                             limit = bufferedUpdate.docUpTo
                         } else {
-                            limit = Int.Companion.MAX_VALUE
+                            limit = Int.MAX_VALUE
                         }
                         val binaryValue: BytesRef?
                         val longValue: Long

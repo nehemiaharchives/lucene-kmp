@@ -14,7 +14,7 @@ abstract class PhraseWeight protected constructor(
     val scoreMode: ScoreMode
 ) : Weight(query) {
     val stats: SimScorer
-    val similarity: Similarity = searcher.getSimilarity()
+    val similarity: Similarity = searcher.similarity
 
     /**
      * Expert: Creates PhraseWeight instance

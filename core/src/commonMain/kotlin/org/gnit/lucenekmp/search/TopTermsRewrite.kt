@@ -41,7 +41,7 @@ abstract class TopTermsRewrite<B>
         val maxSize = min(size, this.maxSize)
         val stQueue: PriorityQueue<ScoreTerm> = PriorityQueue()
         collectTerms(
-            indexSearcher.getIndexReader(),
+            indexSearcher.indexReader,
             query,
             object : TermCollector() {
                 private val maxBoostAtt: MaxNonCompetitiveBoostAttribute =
@@ -107,7 +107,7 @@ abstract class TopTermsRewrite<B>
                         // add new entry in PQ, we must clone the term, else it may get overwritten!
                         st!!.bytes.copyBytes(bytes)
                         st!!.boost = boost
-                        visitedTerms.put(st!!.bytes.get(), st!!)
+                        visitedTerms[st!!.bytes.get()] = st!!
                         require(st!!.termState.docFreq() == 0)
                         st!!.termState.register(
                             state, readerContext!!.ord, termsEnum!!.docFreq(), termsEnum!!.totalTermFreq()

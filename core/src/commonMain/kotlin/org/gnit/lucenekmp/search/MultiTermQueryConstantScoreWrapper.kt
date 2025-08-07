@@ -46,7 +46,7 @@ internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
                     // other terms and just use the dense term's postings:
                     val docFreq = termsEnum.docFreq()
                     if (fieldDocCount == docFreq) {
-                        val termStates = TermStates(searcher.getTopReaderContext())
+                        val termStates = TermStates(searcher.topReaderContext)
                         termStates.register(
                             termsEnum.termState(), context.ord, docFreq, termsEnum.totalTermFreq()
                         )

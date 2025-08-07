@@ -53,7 +53,7 @@ abstract class AbstractKnnVectorQuery(
     }
 
     override fun rewrite(indexSearcher: IndexSearcher): Query {
-        val reader: IndexReader = indexSearcher.getIndexReader()
+        val reader: IndexReader = indexSearcher.indexReader
 
         val filterWeight: Weight?
         if (filter != null) {
@@ -70,7 +70,7 @@ abstract class AbstractKnnVectorQuery(
 
         val knnCollectorManager =
             TimeLimitingKnnCollectorManager(
-                getKnnCollectorManager(k, indexSearcher), indexSearcher.getTimeout()
+                getKnnCollectorManager(k, indexSearcher), indexSearcher.timeout
             )
         val taskExecutor: TaskExecutor = indexSearcher.getTaskExecutor()
         val leafReaderContexts: MutableList<LeafReaderContext> = reader.leaves()
@@ -86,7 +86,7 @@ abstract class AbstractKnnVectorQuery(
                 }
             })
         }
-        val perLeafResults: Array<TopDocs> = runBlocking { taskExecutor.invokeAll(tasks) }.toTypedArray()
+        val perLeafResults: Array<TopDocs> = runBlocking { taskExecutor.invokeAll(tasks) }.toTypedArray() as Array<TopDocs>
 
         // Merge sort the results
         val topK = mergeLeafResults(perLeafResults)
@@ -318,7 +318,7 @@ abstract class AbstractKnnVectorQuery(
     ) : Query() {
         override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
             check(
-                searcher.getIndexReader().context.id() === contextIdentity
+                searcher.indexReader.context.id() === contextIdentity
             ) { "This DocAndScore query was created by a different reader" }
             return object : Weight(this) {
                 override fun explain(context: LeafReaderContext, doc: Int): Explanation {

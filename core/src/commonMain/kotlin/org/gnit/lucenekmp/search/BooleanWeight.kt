@@ -12,7 +12,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         query
     ) {
     /** The Similarity implementation.  */
-    val similarity: Similarity = searcher.getSimilarity()
+    val similarity: Similarity = searcher.similarity
 
     internal class WeightedBooleanClause internal constructor(val clause: BooleanClause, val weight: Weight)
 
@@ -258,7 +258,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
             }
         }
         for (occur in Occur.entries) {
-            scorers.put(occur, ArrayList())
+            scorers[occur] = ArrayList()
         }
 
         for (wc in weightedClauses) {

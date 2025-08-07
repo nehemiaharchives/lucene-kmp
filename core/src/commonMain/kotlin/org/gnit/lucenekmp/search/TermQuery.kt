@@ -36,7 +36,7 @@ class TermQuery : Query {
             check(!(scoreMode.needsScores() && termStates == null)) {"termStates are required when scores are needed"}
             this.scoreMode = scoreMode
             this.termStates = termStates
-            this.similarity = searcher.getSimilarity()
+            this.similarity = searcher.similarity
 
             val collectionStats: CollectionStatistics
             val termStats: TermStatistics?
@@ -143,7 +143,7 @@ class TermQuery : Query {
 
                 @Throws(IOException::class) override fun bulkScorer(): BulkScorer? {
                     if (!scoreMode.needsScores()) {
-                        val iterator: DocIdSetIterator = get(Long.Companion.MAX_VALUE).iterator()
+                        val iterator: DocIdSetIterator = get(Long.MAX_VALUE).iterator()
                         val maxDoc: Int = context.reader().maxDoc()
                         return ConstantScoreScorerSupplier.fromIterator(iterator, 0f, scoreMode, maxDoc)
                             .bulkScorer()
@@ -263,7 +263,7 @@ class TermQuery : Query {
     }
 
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
-        val context: IndexReaderContext = searcher.getTopReaderContext()
+        val context: IndexReaderContext = searcher.topReaderContext
         val termState: TermStates = if (perReaderTermState == null || !perReaderTermState.wasBuiltFor(context)) {
             TermStates.build(searcher, term, scoreMode.needsScores())
         } else {

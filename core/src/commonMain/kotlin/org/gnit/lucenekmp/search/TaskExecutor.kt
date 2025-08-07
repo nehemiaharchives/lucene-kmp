@@ -61,7 +61,7 @@ class TaskExecutor(executor: Executor) {
      * @param <T> the return type of the task execution
     </T> */
     @OptIn(ExperimentalAtomicApi::class)
-    suspend fun <T> invokeAll(callables: MutableCollection<Callable<T?>>): MutableList<T> {
+    suspend fun <T> invokeAll(callables: MutableCollection<Callable<T>>): MutableList<T> {
         val futures: MutableList<RunnableFuture<T>> =
             mutableListOf()
         for (callable in callables) {
@@ -73,8 +73,7 @@ class TaskExecutor(executor: Executor) {
         // we fork execution count - 1 tasks to execute at least one task on the current thread to
         // minimize needless forking and blocking of the current thread
         if (count > 1) {
-            val work: Runnable =
-                Runnable {
+            val work = Runnable {
                     val id: Int = taskId.fetchAndIncrement()
                     if (id < count) {
                         futures[id].run()
@@ -96,7 +95,7 @@ class TaskExecutor(executor: Executor) {
                 break
             }
         }
-        return collectResults<T>(futures)
+        return collectResults(futures)
     }
 
     override fun toString(): String {
@@ -104,7 +103,7 @@ class TaskExecutor(executor: Executor) {
     }
 
     private class Task<T>(
-        callable: Callable<T?>,
+        callable: Callable<T>,
         private val futures: MutableList<RunnableFuture<T>>
     ) : FutureTask<T>(callable) {
 
@@ -121,7 +120,7 @@ class TaskExecutor(executor: Executor) {
 
         override fun setException(t: Throwable) {
             super.setException(t)
-            cancelAll<T>(futures)
+            cancelAll(futures)
         }
 
         @OptIn(ExperimentalAtomicApi::class)

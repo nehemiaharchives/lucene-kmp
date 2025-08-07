@@ -115,7 +115,7 @@ class FutureTaskTest {
     fun testRunAndReset() {
         runBlocking {
             // Create a custom FutureTask that exposes the protected runAndReset method
-            class TestFutureTask<V>(callable: Callable<V?>) : FutureTask<V>(callable) {
+            class TestFutureTask<V>(callable: Callable<V>) : FutureTask<V>(callable) {
                 fun publicRunAndReset(): Boolean = runAndReset()
             }
 

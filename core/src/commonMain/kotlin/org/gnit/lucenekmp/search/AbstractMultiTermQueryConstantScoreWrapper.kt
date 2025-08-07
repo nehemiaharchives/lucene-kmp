@@ -59,23 +59,11 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
     }
 
     protected class TermAndState(
-        term: BytesRef,
-        state: TermState,
-        docFreq: Int,
-        totalTermFreq: Long
-    ) {
-        val term: BytesRef
-        val state: TermState
-        val docFreq: Int
+        val term: BytesRef,
+        val state: TermState,
+        val docFreq: Int,
         val totalTermFreq: Long
-
-        init {
-            this.term = term
-            this.state = state
-            this.docFreq = docFreq
-            this.totalTermFreq = totalTermFreq
-        }
-    }
+    )
 
     protected class WeightOrDocIdSetIterator {
         val weight: Weight?
@@ -133,7 +121,7 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
         ): WeightOrDocIdSetIterator {
             val bq: BooleanQuery.Builder = BooleanQuery.Builder()
             for (t in collectedTerms) {
-                val termStates = TermStates(searcher.getTopReaderContext())
+                val termStates = TermStates(searcher.topReaderContext)
                 termStates.register(t.state, context.ord, t.docFreq, t.totalTermFreq)
                 bq.add(TermQuery(Term(q.field, t.term), termStates), BooleanClause.Occur.SHOULD)
             }
@@ -200,7 +188,7 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
 
             val fieldDocCount: Int = terms.docCount
             val termsEnum: TermsEnum = checkNotNull(q.getTermsEnum(terms))
-            val collectedTerms: MutableList<TermAndState> = mutableListOf<TermAndState>()
+            val collectedTerms: MutableList<TermAndState> = mutableListOf()
             val collectResult = collectTerms(fieldDocCount, termsEnum, collectedTerms)
 
             val cost: Long
@@ -242,13 +230,12 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
                 @Throws(IOException::class)
                 override fun get(leadCost: Long): Scorer {
                     val weightOrIterator = weightOrIteratorSupplier.apply(leadCost)
-                    val scorer: Scorer?
-                    if (weightOrIterator == null) {
-                        scorer = null
+                    val scorer: Scorer? = if (weightOrIterator == null) {
+                        null
                     } else if (weightOrIterator.weight != null) {
-                        scorer = weightOrIterator.weight.scorer(context)
+                        weightOrIterator.weight.scorer(context)
                     } else {
-                        scorer = scorerForIterator(weightOrIterator.iterator)
+                        scorerForIterator(weightOrIterator.iterator)
                     }
 
                     // It's against the API contract to return a null scorer from a non-null ScoreSupplier.
@@ -265,17 +252,15 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
                 @Throws(IOException::class)
                 override fun bulkScorer(): BulkScorer {
                     val weightOrIterator =
-                        weightOrIteratorSupplier.apply(Long.Companion.MAX_VALUE)
-                    val bulkScorer: BulkScorer?
-                    if (weightOrIterator == null) {
-                        bulkScorer = null
+                        weightOrIteratorSupplier.apply(Long.MAX_VALUE)
+                    val bulkScorer: BulkScorer? = if (weightOrIterator == null) {
+                        null
                     } else if (weightOrIterator.weight != null) {
-                        bulkScorer = weightOrIterator.weight.bulkScorer(context)
+                        weightOrIterator.weight.bulkScorer(context)
                     } else {
-                        bulkScorer =
-                            DefaultBulkScorer(
-                                ConstantScoreScorer(score(), scoreMode, weightOrIterator.iterator!!)
-                            )
+                        DefaultBulkScorer(
+                            ConstantScoreScorer(score(), scoreMode, weightOrIterator.iterator!!)
+                        )
                     }
 
                     // It's against the API contract to return a null scorer from a non-null ScoreSupplier.

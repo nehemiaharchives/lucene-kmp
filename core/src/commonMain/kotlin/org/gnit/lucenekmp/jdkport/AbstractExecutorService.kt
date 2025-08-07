@@ -77,7 +77,7 @@ abstract class AbstractExecutorService
      * cancellation of the underlying task
      * @since 1.6
     </T> */
-    fun <T> newTaskFor(callable: Callable<T?>): RunnableFuture<T> {
+    fun <T> newTaskFor(callable: Callable<T>): RunnableFuture<T> {
         return FutureTask(callable)
     }
 
@@ -98,7 +98,7 @@ abstract class AbstractExecutorService
      */
     override fun <T> submit(task: Runnable, result: T): Future<T> {
         /*if (task == null) throw java.lang.NullPointerException()*/
-        val ftask: RunnableFuture<T> = newTaskFor<T>(task, result)
+        val ftask: RunnableFuture<T> = newTaskFor(task, result)
         execute(ftask)
         return ftask
     }
@@ -107,7 +107,7 @@ abstract class AbstractExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    override fun <T> submit(task: Callable<T?>): Future<T> {
+    override fun <T> submit(task: Callable<T>): Future<T> {
         /*if (task == null) throw java.lang.NullPointerException()*/
         val ftask: RunnableFuture<T> = newTaskFor(task)
         execute(ftask)
@@ -118,15 +118,15 @@ abstract class AbstractExecutorService
      * the main mechanics of invokeAny.
      */
     private suspend fun <T> doInvokeAny(
-        tasks: MutableCollection<Callable<T?>>,
+        tasks: MutableCollection<Callable<T>>,
         timed: Boolean,
         nanos: Long
-    ): T? {
+    ): T {
         var nanos = nanos
         /*if (tasks == null) throw java.lang.NullPointerException()*/
         var ntasks = tasks.size
         require(ntasks != 0)
-        val futures: ArrayList<Future<T?>> =
+        val futures: ArrayList<Future<T>> =
             ArrayList(ntasks)
         val ecs: ExecutorCompletionService<T> =
             ExecutorCompletionService(this)
@@ -141,7 +141,7 @@ abstract class AbstractExecutorService
             // result, we can throw the last exception we got.
             var ee: ExecutionException? = null
             val deadline = if (timed) System.nanoTime() + nanos else 0L
-            val it: MutableIterator<Callable<T?>> = tasks.iterator()
+            val it: MutableIterator<Callable<T>> = tasks.iterator()
 
             // Start one task for sure; the rest incrementally
             futures.add(ecs.submit(it.next()))
@@ -149,7 +149,7 @@ abstract class AbstractExecutorService
             var active = 1
 
             while (true) {
-                var f: Future<T?>? = ecs.poll()
+                var f: Future<T>? = ecs.poll()
                 if (f == null) {
                     if (ntasks > 0) {
                         --ntasks
@@ -188,9 +188,9 @@ abstract class AbstractExecutorService
      * @throws ExecutionException         {@inheritDoc}
      * @throws RejectedExecutionException {@inheritDoc}
      */
-    override suspend fun <T> invokeAny(tasks: MutableCollection<Callable<T?>>): T? {
+    override suspend fun <T> invokeAny(tasks: MutableCollection<Callable<T>>): T? {
         try {
-            return doInvokeAny<T?>(tasks, false, 0)
+            return doInvokeAny(tasks, false, 0)
         } catch (cannotHappen: TimeoutException) {
             assert(false)
             return null
@@ -205,10 +205,10 @@ abstract class AbstractExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      */
     override suspend fun <T> invokeAny(
-        tasks: MutableCollection<Callable<T?>>,
+        tasks: MutableCollection<Callable<T>>,
         timeout: Long,
         unit: TimeUnit
-    ): T? {
+    ): T {
         return doInvokeAny<T>(tasks, true, unit.toNanos(timeout))
     }
 
@@ -217,7 +217,7 @@ abstract class AbstractExecutorService
      * @throws NullPointerException       {@inheritDoc}
      * @throws RejectedExecutionException {@inheritDoc}
      */
-    override suspend fun <T> invokeAll(tasks: MutableCollection<Callable<T?>>): MutableList<Future<T>> = coroutineScope {
+    override suspend fun <T> invokeAll(tasks: MutableCollection<Callable<T>>): MutableList<Future<T>> = coroutineScope {
         /*if (tasks == null) throw java.lang.NullPointerException()*/
         val futures: ArrayList<Future<T>> = ArrayList(tasks.size)
         try {
@@ -252,7 +252,7 @@ abstract class AbstractExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      */
     override suspend fun <T> invokeAll(
-        tasks: MutableCollection<Callable<T?>>,
+        tasks: MutableCollection<Callable<T>>,
         timeout: Long, unit: TimeUnit
     ): MutableList<Future<T>> = coroutineScope {
         /*if (tasks == null) throw java.lang.NullPointerException()*/

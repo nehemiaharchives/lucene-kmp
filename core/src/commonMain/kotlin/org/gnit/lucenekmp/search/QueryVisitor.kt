@@ -25,7 +25,7 @@ abstract class QueryVisitor {
      * @param automaton a supplier (lambda) for an automaton defining which terms match.
      * @lucene.experimental
      */
-    fun consumeTermsMatching(query: Query, field: String, automaton: () -> ByteRunAutomaton) {
+    open fun consumeTermsMatching(query: Query, field: String, automaton: () -> ByteRunAutomaton) {
         visitLeaf(query) // default implementation for backward compatibility
     }
 
@@ -34,7 +34,7 @@ abstract class QueryVisitor {
      *
      * @param query the query
      */
-    fun visitLeaf(query: Query?) {}
+    open fun visitLeaf(query: Query?) {}
 
     /**
      * Whether or not this field is of interest to the visitor
@@ -56,7 +56,7 @@ abstract class QueryVisitor {
      * @param occur the relationship between the parent and its children
      * @param parent the query visited
      */
-    fun getSubVisitor(occur: BooleanClause.Occur, parent: Query): QueryVisitor {
+    open fun getSubVisitor(occur: BooleanClause.Occur, parent: Query): QueryVisitor {
         if (occur === BooleanClause.Occur.MUST_NOT) {
             return EMPTY_VISITOR
         }

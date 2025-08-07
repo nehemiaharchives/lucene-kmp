@@ -217,7 +217,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * scheduled for execution
      * @throws NullPointerException if the task is null
     </T> */
-    fun <T> submit(task: Callable<T?>): Future<T>
+    fun <T> submit(task: Callable<T>): Future<T>
 
     /**
      * Submits a Runnable task for execution and returns a Future
@@ -268,7 +268,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * @throws RejectedExecutionException if any task cannot be
      * scheduled for execution
     </T> */
-    suspend fun <T> invokeAll(tasks: MutableCollection<Callable<T?>>): MutableList<Future<T>>
+    suspend fun <T> invokeAll(tasks: MutableCollection<Callable<T>>): MutableList<Future<T>>
 
     /**
      * Executes the given tasks, returning a list of Futures holding
@@ -299,7 +299,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * for execution
     </T> */
     suspend fun <T> invokeAll(
-        tasks: MutableCollection<Callable<T?>>,
+        tasks: MutableCollection<Callable<T>>,
         timeout: Long, unit: TimeUnit
     ): MutableList<Future<T>>
 
@@ -322,7 +322,7 @@ interface ExecutorService : Executor, AutoCloseable {
      * @throws RejectedExecutionException if tasks cannot be scheduled
      * for execution
     </T> */
-    suspend fun <T> invokeAny(tasks: MutableCollection<Callable<T?>>): T?
+    suspend fun <T> invokeAny(tasks: MutableCollection<Callable<T>>): T?
 
     /**
      * Executes the given tasks, returning the result
@@ -348,10 +348,10 @@ interface ExecutorService : Executor, AutoCloseable {
      * for execution
     </T> */
     suspend fun <T> invokeAny(
-        tasks: MutableCollection<Callable<T?>>,
+        tasks: MutableCollection<Callable<T>>,
         timeout: Long,
         unit: TimeUnit
-    ): T?
+    ): T
 
     /**
      * Initiates an orderly shutdown in which previously submitted tasks are

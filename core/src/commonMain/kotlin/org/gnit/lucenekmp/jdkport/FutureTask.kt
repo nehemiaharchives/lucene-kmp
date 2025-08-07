@@ -123,7 +123,7 @@ open class FutureTask<V> : RunnableFuture<V> {
     }
 
     /** The underlying callable; nulled out after running */
-    private var callable: Callable<V?>?
+    private var callable: Callable<V>? = null
 
     /**
      * Returns result or throws exception for completed task.
@@ -148,10 +148,10 @@ open class FutureTask<V> : RunnableFuture<V> {
      * @param callable the callable task
      * @throws NullPointerException if the callable is null
      */
-    constructor(callable: Callable<V?>) {
+    constructor(callable: Callable<V>) {
         this.callable = callable
-        if (callable == null)
-            throw NullPointerException()
+        /*if (callable == null)
+            throw NullPointerException()*/
     }
 
     /**
@@ -163,7 +163,7 @@ open class FutureTask<V> : RunnableFuture<V> {
      * @param result the result to return on successful completion. If
      * you don't need a particular result, consider using
      * constructions of the form:
-     * `Future<?> f = new FutureTask<Void>(runnable, null)`
+     * `Future<> f = new FutureTask<Void>(runnable, null)`
      * @throws NullPointerException if the runnable is null
      */
     constructor(runnable: Runnable, result: V?) : this(Executors.callable(runnable, result))
@@ -185,7 +185,7 @@ open class FutureTask<V> : RunnableFuture<V> {
 
         try {
             if (mayInterruptIfRunning) {
-                runner.load()?.cancel()
+                runner.load()!!.cancel()
                 state.store(INTERRUPTED)
             }
         } finally {
@@ -443,13 +443,15 @@ open class FutureTask<V> : RunnableFuture<V> {
     @OptIn(ExperimentalAtomicApi::class)
     private fun finishCompletion() {
         // assert state.load() > COMPLETING;
-        continuation?.let { cont ->
+        continuation.let { cont ->
             continuation = null
             val s = state.load()
-            if (s >= CANCELLED) {
-                cont.cancel()
-            } else {
-                cont.resume(report(s))
+            if(cont != null) {
+                if (s >= CANCELLED) {
+                    cont.cancel()
+                } else {
+                    cont.resume(report(s))
+                }
             }
         }
         done()
@@ -534,10 +536,17 @@ open class FutureTask<V> : RunnableFuture<V> {
 
 // Platform-agnostic equivalent of Executors.callable
 object Executors {
-    fun <T> callable(runnable: Runnable, result: T?): Callable<T?> {
+    fun <T> callable(runnable: Runnable, result: T?): Callable<T> {
         return Callable {
             runnable.run()
-            result
+            result as T
+        }
+    }
+
+    fun <T> callable(runnable: Runnable): Callable<T> {
+        return Callable {
+            runnable.run()
+            null as T // Return null if no result is expected
         }
     }
 

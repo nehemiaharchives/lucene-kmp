@@ -37,7 +37,7 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
 
                 // Handle the already-collected terms:
                 var reuse: PostingsEnum? = null
-                if (collectedTerms.isEmpty() == false) {
+                if (!collectedTerms.isEmpty()) {
                     val termsEnum2: TermsEnum = terms.iterator()
                     for (t in collectedTerms) {
                         termsEnum2.seekExact(t.term, t.state)
@@ -58,7 +58,7 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
                     // other terms and just use the dense term's postings:
                     val docFreq: Int = termsEnum.docFreq()
                     if (fieldDocCount == docFreq) {
-                        val termStates = TermStates(searcher.getTopReaderContext())
+                        val termStates = TermStates(searcher.topReaderContext)
                         termStates.register(
                             termsEnum.termState(), context.ord, docFreq, termsEnum.totalTermFreq()
                         )
@@ -84,7 +84,7 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
                     }
                 } while (termsEnum.next() != null)
 
-                val subs: MutableList<DisiWrapper> = mutableListOf<DisiWrapper>(/*highFrequencyTerms.size() + 1*/)
+                val subs: MutableList<DisiWrapper> = ArrayList(highFrequencyTerms.size() + 1)
                 for (disi in highFrequencyTerms) {
                     val s = wrapWithDummyScorer(this, disi)
                     subs.add(DisiWrapper(s, false))

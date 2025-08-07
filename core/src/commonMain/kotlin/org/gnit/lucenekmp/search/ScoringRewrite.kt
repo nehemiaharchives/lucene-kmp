@@ -31,7 +31,7 @@ abstract class ScoringRewrite<B> : TermCollectingRewrite<B>() {
 
     @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher, query: MultiTermQuery): Query {
-        val reader: IndexReader = indexSearcher.getIndexReader()
+        val reader: IndexReader = indexSearcher.indexReader
         val builder: B = topLevelBuilder
         val col: ParallelArraysTermCollector = this.ParallelArraysTermCollector()
         collectTerms(reader, query, col)

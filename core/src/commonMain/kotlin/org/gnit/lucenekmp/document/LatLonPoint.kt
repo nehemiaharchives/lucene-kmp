@@ -244,7 +244,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
                 val leftOpen: ByteArray = lower.copyOf()
                 // leave longitude open
                 NumericUtils.intToSortableBytes(
-                    Int.Companion.MIN_VALUE,
+                    Int.MIN_VALUE,
                     leftOpen,
                     Int.SIZE_BYTES
                 )
@@ -254,7 +254,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
                 val rightOpen: ByteArray = upper.copyOf()
                 // leave longitude open
                 NumericUtils.intToSortableBytes(
-                    Int.Companion.MAX_VALUE,
+                    Int.MAX_VALUE,
                     rightOpen,
                     Int.SIZE_BYTES
                 )
@@ -274,10 +274,10 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
         private fun newBoxInternal(field: String, min: ByteArray, max: ByteArray): Query {
             return object : PointRangeQuery(field, min, max, 2) {
                 override fun toString(dimension: Int, value: ByteArray): String {
-                    if (dimension == 0) {
-                        return GeoEncodingUtils.decodeLatitude(value, 0).toString()
+                    return if (dimension == 0) {
+                        GeoEncodingUtils.decodeLatitude(value, 0).toString()
                     } else if (dimension == 1) {
-                        return GeoEncodingUtils.decodeLongitude(value, 0).toString()
+                        GeoEncodingUtils.decodeLongitude(value, 0).toString()
                     } else {
                         throw AssertionError()
                     }
@@ -356,7 +356,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
         ): Query {
             val builder: BooleanQuery.Builder = BooleanQuery.Builder()
             for (geometry in latLonGeometries) {
-                if ((geometry is Point) == false) {
+                if (geometry !is Point) {
                     return MatchNoDocsQuery(
                         "Contains LatLonPoint.newGeometryQuery with non-point geometries"
                     )
@@ -428,7 +428,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
             val liveDocs: MutableList<Bits> =
                 ArrayList()
             var totalHits = 0
-            for (leaf in searcher.getIndexReader().leaves()) {
+            for (leaf in searcher.indexReader.leaves()) {
                 val points: PointValues? = leaf.reader().getPointValues(field)
                 if (points != null) {
                     totalHits += points.docCount

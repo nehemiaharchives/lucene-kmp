@@ -72,17 +72,17 @@ import kotlinx.coroutines.Runnable
 class ExecutorCompletionService<V> : CompletionService<V> {
     private val executor: Executor
     private val aes: AbstractExecutorService?
-    private val completionQueue: BlockingQueue<Future<V?>>
+    private val completionQueue: BlockingQueue<Future<V>>
 
     /**
      * FutureTask extension to enqueue upon completion.
      */
     private class QueueingFuture<V>(
-        task: RunnableFuture<V?>,
-        completionQueue: BlockingQueue<Future<V?>>
-    ) : FutureTask<Void?>(task, null) {
-        private val task: Future<V?>
-        private val completionQueue: BlockingQueue<Future<V?>>
+        task: RunnableFuture<V>,
+        completionQueue: BlockingQueue<Future<V>>
+    ) : FutureTask<Void>(task, null) {
+        private val task: Future<V>
+        private val completionQueue: BlockingQueue<Future<V>>
 
         init {
             this.task = task
@@ -94,14 +94,14 @@ class ExecutorCompletionService<V> : CompletionService<V> {
         }
     }
 
-    private fun newTaskFor(task: Callable<V?>): RunnableFuture<V?> {
-        if (aes == null) return FutureTask<V?>(task)
-        else return aes.newTaskFor<V?>(task)
+    private fun newTaskFor(task: Callable<V>): RunnableFuture<V> {
+        if (aes == null) return FutureTask(task)
+        else return aes.newTaskFor(task)
     }
 
-    private fun newTaskFor(task: Runnable, result: V?): RunnableFuture<V?> {
-        if (aes == null) return FutureTask<V?>(task, result)
-        else return aes.newTaskFor<V?>(task, result)
+    private fun newTaskFor(task: Runnable, result: V): RunnableFuture<V> {
+        if (aes == null) return FutureTask(task, result)
+        else return aes.newTaskFor(task, result)
     }
 
     /**
@@ -116,7 +116,7 @@ class ExecutorCompletionService<V> : CompletionService<V> {
         this.executor = executor
         this.aes =
             if (executor is AbstractExecutorService) executor as AbstractExecutorService else null
-        this.completionQueue = LinkedBlockingQueue<Future<V?>>()
+        this.completionQueue = LinkedBlockingQueue<Future<V>>()
     }
 
     /**
@@ -134,7 +134,7 @@ class ExecutorCompletionService<V> : CompletionService<V> {
      */
     constructor(
         executor: Executor,
-        completionQueue: BlockingQueue<Future<V?>>
+        completionQueue: BlockingQueue<Future<V>>
     ) {
         this.executor = executor
         this.aes =
@@ -146,9 +146,9 @@ class ExecutorCompletionService<V> : CompletionService<V> {
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    override fun submit(task: Callable<V?>): Future<V?> {
-        val f: RunnableFuture<V?> = newTaskFor(task)
-        executor.execute(QueueingFuture<V?>(f, completionQueue))
+    override fun submit(task: Callable<V>): Future<V> {
+        val f: RunnableFuture<V> = newTaskFor(task)
+        executor.execute(QueueingFuture(f, completionQueue))
         return f
     }
 
@@ -156,21 +156,21 @@ class ExecutorCompletionService<V> : CompletionService<V> {
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    override fun submit(task: Runnable, result: V?): Future<V?> {
-        val f: RunnableFuture<V?> = newTaskFor(task, result)
-        executor.execute(QueueingFuture<V?>(f, completionQueue))
+    override fun submit(task: Runnable, result: V): Future<V> {
+        val f: RunnableFuture<V> = newTaskFor(task, result)
+        executor.execute(QueueingFuture(f, completionQueue))
         return f
     }
 
-    override suspend fun take(): Future<V?> {
+    override suspend fun take(): Future<V> {
         return completionQueue.take()
     }
 
-    override fun poll(): Future<V?>? {
+    override fun poll(): Future<V>? {
         return completionQueue.poll()
     }
 
-    override suspend fun poll(timeout: Long, unit: TimeUnit): Future<V?>? {
+    override suspend fun poll(timeout: Long, unit: TimeUnit): Future<V>? {
         return completionQueue.poll(timeout, unit)
     }
 }

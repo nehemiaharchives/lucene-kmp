@@ -44,7 +44,7 @@ interface CompletionService<V> {
      * scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    fun submit(task: Callable<V?>): Future<V?>
+    fun submit(task: Callable<V>): Future<V>
 
     /**
      * Submits a Runnable task for execution and returns a Future
@@ -60,7 +60,7 @@ interface CompletionService<V> {
      * scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    fun submit(task: Runnable, result: V?): Future<V?>
+    fun submit(task: Runnable, result: V): Future<V>
 
     /**
      * Retrieves and removes the Future representing the next
@@ -69,7 +69,7 @@ interface CompletionService<V> {
      * @return the Future representing the next completed task
      * @throws InterruptedException if interrupted while waiting
      */
-    suspend fun take(): Future<V?>
+    suspend fun take(): Future<V>
 
     /**
      * Retrieves and removes the Future representing the next
@@ -78,7 +78,7 @@ interface CompletionService<V> {
      * @return the Future representing the next completed task, or
      * `null` if none are present
      */
-    fun poll(): Future<V?>?
+    fun poll(): Future<V>?
 
     /**
      * Retrieves and removes the Future representing the next
@@ -94,5 +94,5 @@ interface CompletionService<V> {
      * before one is present
      * @throws InterruptedException if interrupted while waiting
      */
-    suspend fun poll(timeout: Long, unit: TimeUnit): Future<V?>?
+    suspend fun poll(timeout: Long, unit: TimeUnit): Future<V>?
 }

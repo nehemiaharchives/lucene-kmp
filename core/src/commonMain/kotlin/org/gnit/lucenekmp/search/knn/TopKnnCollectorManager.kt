@@ -20,7 +20,7 @@ class TopKnnCollectorManager(k: Int, indexSearcher: IndexSearcher) : KnnCollecto
     private val globalScoreQueue: BlockingFloatHeap?
 
     init {
-        val isMultiSegments = indexSearcher.getIndexReader().leaves().size > 1
+        val isMultiSegments = indexSearcher.indexReader.leaves().size > 1
         this.k = k
         this.globalScoreQueue = if (isMultiSegments) BlockingFloatHeap(k) else null
     }

@@ -445,14 +445,14 @@ abstract class TopFieldCollector private constructor(
 
             val weight: Weight =
                 searcher.createWeight(searcher.rewrite(query), ScoreMode.COMPLETE, 1f)
-            val contexts: MutableList<LeafReaderContext> = searcher.getIndexReader().leaves()
+            val contexts: MutableList<LeafReaderContext> = searcher.indexReader.leaves()
             var currentContext: LeafReaderContext? = null
             var currentScorer: Scorer? = null
             for (scoreDoc in topDocs) {
                 if (currentContext == null
                     || scoreDoc.doc >= currentContext.docBase + currentContext.reader().maxDoc()
                 ) {
-                    Objects.checkIndex(scoreDoc.doc, searcher.getIndexReader().maxDoc())
+                    Objects.checkIndex(scoreDoc.doc, searcher.indexReader.maxDoc())
                     val newContextIndex: Int = ReaderUtil.subIndex(scoreDoc.doc, contexts)
                     currentContext = contexts[newContextIndex]
                     val scorerSupplier: ScorerSupplier? = weight.scorerSupplier(currentContext)

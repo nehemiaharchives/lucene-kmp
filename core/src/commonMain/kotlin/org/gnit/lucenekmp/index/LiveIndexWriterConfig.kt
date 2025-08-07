@@ -202,7 +202,7 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
         delPolicy = KeepOnlyLastCommitDeletionPolicy()
         commit = null
         useCompoundFile = IndexWriterConfig.DEFAULT_USE_COMPOUND_FILE_SYSTEM
-        openMode = IndexWriterConfig.OpenMode.CREATE_OR_APPEND
+        openMode = OpenMode.CREATE_OR_APPEND
         similarity = IndexSearcher.defaultSimilarity
         mergeScheduler = ConcurrentMergeScheduler()
         codec = Codec.default

@@ -175,7 +175,7 @@ open class TopDocs(
          * @lucene.experimental
          */
         fun merge(topN: Int, shardHits: Array<TopDocs>): TopDocs {
-            return Companion.merge(0, topN, shardHits)
+            return merge(0, topN, shardHits)
         }
 
         /**
