@@ -53,7 +53,7 @@ abstract class TopDocsCollector<T : ScoreDoc> protected constructor(
     }
 
     /** The number of valid PQ entries  */
-    protected fun topDocsSize(): Int {
+    protected open fun topDocsSize(): Int {
         // In case pq was populated with sentinel values, there might be less
         // results than pq.size(). Therefore return all results until either
         // pq.size() or totalHits.
