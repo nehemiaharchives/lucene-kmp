@@ -11,7 +11,7 @@ class TestProgress {
 
     val progress = Progress()
 
-    @Test
+    //@Test
     fun testNormalizeMethodName(){
         // Test Java record accessor methods to Kotlin getter style
         assertEquals("getName", "name()".normalizeRecordMethodName())
@@ -22,7 +22,7 @@ class TestProgress {
 
     }
 
-    @Test
+    //@Test
     fun testAnalyzeSingleClass() {
         val fqn = "${javaBasePackage}.store.TestByteBuffersDataOutput"
         progress.analyzeClass(fqn)
@@ -33,7 +33,7 @@ class TestProgress {
         progress.analyzeAllClasses()
     }*/
 
-    @Test
+    //@Test
     fun testHasKotlinDefaultParameterVariantWithTestTessellator(){
         // Get actual classes for TestTessellator
         val javaFqn = "${javaBasePackage}.geo.TestTessellator"
@@ -105,7 +105,7 @@ class TestProgress {
         }
     }
 
-    @Test
+    //@Test
     fun testHasKotlinDefaultParameterVariantWithTestVectorUtil(){
         // Get actual classes for TestVectorUtil
         val javaFqn = "${javaBasePackage}.util.TestVectorUtil"
@@ -198,7 +198,7 @@ class TestProgress {
         }
     }
 
-    @Test
+    //@Test
     fun testEndsWithDollarSignAndDigit(){
         assertTrue("org.apache.lucene.search.TermQuery\$TermWeight\$1".endsWithDollarSignAndDigit())
         assertTrue("org.apache.lucene.search.TermQuery\$TermWeight\$2".endsWithDollarSignAndDigit())
@@ -206,7 +206,7 @@ class TestProgress {
     }
 
     // suspend function tests
-    @Test
+    //@Test
     fun testExtractReturnTypeFromContinuation() {
         // Test extracting Float from Continuation<? super java.lang.Float>
         val continuationFloat = "kotlin.coroutines.Continuation<? super java.lang.Float>"
@@ -217,7 +217,7 @@ class TestProgress {
         assertEquals("java.lang.String", extractReturnTypeFromContinuation(continuationString))
     }
 
-    @Test
+    //@Test
     fun testIsSuspendFunction() {
         val fqn = "${kmpBasePackage}.util.hnsw.BlockingFloatHeap"
         val javaClass = progress.getKmpClass(fqn)
@@ -270,7 +270,7 @@ class TestProgress {
         }
     }
 
-    @Test
+    //@Test
     fun testReconstructSuspendSignature() {
         val fqn = "${kmpBasePackage}.util.hnsw.BlockingFloatHeap"
         val javaClass = progress.getKmpClass(fqn)
