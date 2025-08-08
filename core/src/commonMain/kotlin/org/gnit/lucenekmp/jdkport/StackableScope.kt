@@ -41,7 +41,7 @@ open class StackableScope(shared: Boolean) {
      * Returns the scope owner or null if not owned.
      */
     open fun owner(): Job? {
-        return owner!!
+    return owner
     }
 
     /**

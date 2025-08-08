@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.runBlocking
 
 object JavaLangAccess {
     /**
@@ -55,25 +57,45 @@ object JavaLangAccess {
         }
     }
 
-    var headStackableScope: StackableScope? = null
+    // Maintain a per-Job head of the StackableScope stack.
+    private val stackHeads: MutableMap<Job, StackableScope?> = mutableMapOf()
+
+    // Gets/sets the head for the current coroutine Job.
+    var headStackableScope: StackableScope?
+        get() {
+            val job = runBlocking { currentCoroutineContext()[Job] }
+            return if (job != null) stackHeads[job] else null
+        }
+        set(value) {
+            val job = runBlocking { currentCoroutineContext()[Job] }
+            if (job != null) {
+                if (value == null) stackHeads.remove(job) else stackHeads[job] = value
+            }
+        }
 
     fun headStackableScope(job: Job?): StackableScope? {
-        // Imitate "top of stackable scope stack" by getting StackableScope from coroutine context
-        TODO("Not yet implemented")
+        if (job == null) return null
+        return stackHeads[job]
     }
 
     /**
      * Returns the ThreadContainer for a thread, may be null.
      */
+    private val threadContainerMap: MutableMap<Job, ThreadContainer> = mutableMapOf()
+
     fun threadContainer(thread: Job): ThreadContainer? {
-        TODO("Not yet implemented")
+        return threadContainerMap[thread]
     }
 
     /**
      * Starts a thread in the given ThreadContainer.
      */
     fun start(thread: Job, container: ThreadContainer){
-        TODO("Not yet implemented")
+        // Record the container for this thread and register it for discovery.
+        threadContainerMap[thread] = container
+        registerJob(thread)
+        // Notify the container that the thread is starting.
+        container.onStart(thread)
     }
 
     private val jobRegistry: MutableSet<Job> = mutableSetOf()

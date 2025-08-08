@@ -15,6 +15,9 @@ class SharedThreadContainer
  */ private constructor(// name of container, used by toString
     private val name: String
 ) : ThreadContainer( /*shared*/true), AutoCloseable {
+    // explicit parent for shared containers
+    @Volatile
+    private var parentRef: ThreadContainer? = null
     // the virtual threads in the container, created lazily
     @Volatile
     private var virtualThreads: MutableSet<Job>? = null
@@ -35,23 +38,24 @@ class SharedThreadContainer
         return null
     }
 
+    override fun parent(): ThreadContainer? = parentRef
+
     override fun onStart(thread: Job) {
         // virtual threads needs to be tracked
         if (thread.isVirtual()) {
             var vthreads: MutableSet<Job>? = this.virtualThreads
             if (vthreads == null) {
-                vthreads = mutableSetOf<Job>()
-                //if (!VIRTUAL_THREADS.compareAndSet(this, null, vthreads)) {
-                    // lost the race
-                    vthreads = this.virtualThreads
-                //}
+        // lazily initialize the set
+        vthreads = mutableSetOf()
+        // publish to field (no CAS in this port)
+        this.virtualThreads = vthreads
             }
             vthreads!!.add(thread)
         }
     }
 
     override fun onExit(thread: Job) {
-        if (thread.isVirtual()) virtualThreads!!.remove(thread)
+    if (thread.isVirtual()) virtualThreads?.remove(thread)
     }
 
     override fun threads(): Sequence<Job> {
@@ -82,6 +86,7 @@ class SharedThreadContainer
      */
     override fun close() {
         if (!closed /*&& CLOSED.compareAndSet(this, false, true)*/) {
+            closed = true
             ThreadContainers.deregisterContainer(key!!)
         }
     }
@@ -104,6 +109,7 @@ class SharedThreadContainer
         fun create(parent: ThreadContainer, name: String): SharedThreadContainer {
             require(parent.owner() == null) { "parent has owner" }
             val container = SharedThreadContainer(name)
+            container.parentRef = parent
             // register the container to allow discovery by serviceability tools
             container.key = ThreadContainers.registerContainer(container)
             return container
@@ -122,5 +128,5 @@ class SharedThreadContainer
 // TODO implement more things if needed
 fun Job.isVirtual(): Boolean {
     // Check if the Job is a virtual thread
-    return true // Assuming isVirtualThread() is a method that checks if the Job is a virtual thread
+    return false // In this port, treat coroutines Jobs as platform threads by default
 }
