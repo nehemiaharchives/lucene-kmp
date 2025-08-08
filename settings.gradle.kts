@@ -18,6 +18,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "lucene-kmp"
 include(":core")
+include(":queryparser")
 include(":test-framework")
-
 include("progress")
