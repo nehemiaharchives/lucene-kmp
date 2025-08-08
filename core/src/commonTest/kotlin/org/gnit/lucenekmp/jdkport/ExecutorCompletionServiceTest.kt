@@ -71,8 +71,12 @@ class ExecutorCompletionServiceTest {
         try {
             val ecs = ExecutorCompletionService<Int>(concurrentExecutor(scope))
 
+            // Gate the task so its completion can't race the first poll
+            val gate = CompletableDeferred<Unit>()
             ecs.submit {
-                runBlocking { delay(80) }
+                runBlocking {
+                    gate.await()
+                }
                 7
             }
 
@@ -80,6 +84,7 @@ class ExecutorCompletionServiceTest {
             assertNull(ecs.poll(20, TimeUnit.MILLISECONDS))
 
             // Larger timeout should allow completion
+            gate.complete(Unit)
             val f = ecs.poll(200, TimeUnit.MILLISECONDS)
             assertNotNull(f)
             assertEquals(7, f.get())
