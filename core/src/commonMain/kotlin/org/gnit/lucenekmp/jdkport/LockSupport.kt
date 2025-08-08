@@ -1,15 +1,16 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlin.coroutines.resume
 
 /**
  * Basic thread blocking primitives for creating locks and other
@@ -117,6 +118,11 @@ object LockSupport {
     private val blockerMutex = Mutex()
     private val blockerRegistry = mutableMapOf<Job, Any?>()
 
+    // State for permit and waiters; guarded by stateMutex
+    private val stateMutex = Mutex()
+    private val permits = mutableMapOf<Job, Boolean>()
+    private val waiters = mutableMapOf<Job, CompletableDeferred<Unit>>()
+
     private suspend fun setBlocker(t: /*java.lang.Thread*/Job?, blocker: Any?) {
         /*U.putReferenceOpaque(t, PARKBLOCKER, arg)*/
         blockerMutex.withLock {
@@ -145,12 +151,7 @@ object LockSupport {
         setBlocker(job, blocker)
     }
 
-    // registry of parked coroutine continuations
-    private val parkRegistry = mutableMapOf<Job, kotlin.coroutines.Continuation<Unit>>()
-
-    private fun resumeParked(job: Job) {
-        parkRegistry.remove(job)?.resume(Unit)
-    }
+    // No direct continuation registry; we use Deferred waiters to model parking.
 
     /**
      * Makes available the permit for the given thread, if it
@@ -164,10 +165,36 @@ object LockSupport {
      * this operation has no effect
      */
     fun unpark(thread: /*java.lang.Thread*/ Job?) {
-        if (thread != null) {
-            // resume any suspended park on this Job
-            resumeParked(thread)
+        if (thread == null) return
+        var toComplete: CompletableDeferred<Unit>? = null
+        // Try to acquire the mutex without suspension; spin briefly if contended.
+        var attempts = 0
+        while (true) {
+            if (stateMutex.tryLock()) {
+                try {
+                    val waiter = waiters.remove(thread)
+                    if (waiter != null && !waiter.isCompleted) {
+                        toComplete = waiter
+                    } else {
+                        // No active waiter; set/keep single permit
+                        permits[thread] = true
+                    }
+                } finally {
+                    stateMutex.unlock()
+                }
+                break
+            } else {
+                // Light spin; attempts kept small to avoid CPU burn under heavy contention
+                attempts++
+                if (attempts > 1000) {
+                    // Give up spinning and optimistically set permit without lock; this is safe because
+                    // losing a race only means redundant permit that will be consumed on next park.
+                    // But we still need the map mutation to be safe; so keep spinning until lock acquired.
+                    attempts = 0
+                }
+            }
         }
+        toComplete?.complete(Unit)
     }
 
     /**
@@ -202,10 +229,26 @@ object LockSupport {
      */
     suspend fun park(blocker: Any?) {
         val t: Job = currentCoroutineContext()[Job]!!
+        // Fast-path: consume permit if available
+        if (stateMutex.withLock { if (permits.remove(t) == true) true else false }) {
+            return
+        }
+
+        // Register waiter and block until unpark completes it
+        val waiter = CompletableDeferred<Unit>()
+        stateMutex.withLock { waiters[t] = waiter }
         setBlocker(t, blocker)
         try {
-            suspendCancellableCoroutine<Unit> { cont ->
-                parkRegistry[t] = cont
+            try {
+                waiter.await()
+            } finally {
+                // Cleanup in case of cancellation or completion
+                stateMutex.withLock {
+                    val w = waiters[t]
+                    if (w === waiter) {
+                        waiters.remove(t)
+                    }
+                }
             }
         } finally {
             setBlocker(t, null)
@@ -248,14 +291,32 @@ object LockSupport {
      * @since 1.6
      */
     suspend fun parkNanos(blocker: Any?, nanos: Long) {
-        if (nanos > 0) {
-            val t: Job = currentCoroutineContext()[Job]!!
-            setBlocker(t, blocker)
+        if (nanos <= 0) return
+        val t: Job = currentCoroutineContext()[Job]!!
+        // Fast-path: consume permit if available
+        if (stateMutex.withLock { if (permits.remove(t) == true) true else false }) {
+            return
+        }
+        // Register waiter and await either unpark or timeout
+        val waiter = CompletableDeferred<Unit>()
+        stateMutex.withLock { waiters[t] = waiter }
+        setBlocker(t, blocker)
+        try {
+            val timeoutMs = (nanos / 1_000_000).coerceAtLeast(1)
             try {
-                delay(nanos / 1_000_000) // Convert nanoseconds to milliseconds for delay
+                withTimeout(timeoutMs) { waiter.await() }
+            } catch (_: TimeoutCancellationException) {
+                // timed out: just return
             } finally {
-                setBlocker(t, null)
+                stateMutex.withLock {
+                    val w = waiters[t]
+                    if (w === waiter) {
+                        waiters.remove(t)
+                    }
+                }
             }
+        } finally {
+            setBlocker(t, null)
         }
     }
 
@@ -297,9 +358,28 @@ object LockSupport {
     @OptIn(ExperimentalTime::class)
     suspend fun parkUntil(blocker: Any?, deadline: /*Long*/ Instant) {
         val t: /*java.lang.Thread*/ Job = /*java.lang.Thread.currentThread()*/ currentCoroutineContext()[Job]!!
+        val remainingMs = (deadline - Clock.System.now()).inWholeMilliseconds
+        if (remainingMs <= 0) return
+        // Fast-path: consume permit if available
+        if (stateMutex.withLock { if (permits.remove(t) == true) true else false }) {
+            return
+        }
+        val waiter = CompletableDeferred<Unit>()
+        stateMutex.withLock { waiters[t] = waiter }
         setBlocker(t, blocker)
         try {
-            parkUntil(deadline)
+            try {
+                withTimeout(remainingMs.coerceAtLeast(1)) { waiter.await() }
+            } catch (_: TimeoutCancellationException) {
+                // timed out
+            } finally {
+                stateMutex.withLock {
+                    val w = waiters[t]
+                    if (w === waiter) {
+                        waiters.remove(t)
+                    }
+                }
+            }
         } finally {
             setBlocker(t, null)
         }
@@ -392,15 +472,9 @@ object LockSupport {
      * @param nanos the maximum number of nanoseconds to wait
      */
     suspend fun parkNanos(nanos: Long) {
-        if (nanos > 0) {
-            /*if (java.lang.Thread.currentThread().isVirtual()) {
-                JLA.parkVirtualThread(nanos)
-            } else {
-                U.park(false, nanos)
-            }*/
-
-            delay(nanos / 1_000_000) // Convert nanoseconds to milliseconds for delay
-        }
+        if (nanos <= 0) return
+        // Delegate to blocker variant which handles permits/timeout
+        parkNanos(null, nanos)
     }
 
     /**
@@ -437,14 +511,8 @@ object LockSupport {
      */
     @OptIn(ExperimentalTime::class)
     suspend fun parkUntil(deadline: /*Long*/Instant) {
-        /*if (java.lang.Thread.currentThread().isVirtual()) {
-            val millis: Long = deadline - java.lang.System.currentTimeMillis()
-            JLA.parkVirtualThread(java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(millis))
-        } else {
-            U.park(true, deadline)
-        }*/
-
-        delay((deadline - Clock.System.now()).inWholeMilliseconds) // Convert to milliseconds for delay
+        // Delegate to blocker variant which handles permits/timeout
+        parkUntil(null, deadline)
     }
 
     /**
