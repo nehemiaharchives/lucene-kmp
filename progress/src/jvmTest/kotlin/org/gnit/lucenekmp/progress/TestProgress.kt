@@ -11,7 +11,7 @@ class TestProgress {
 
     val progress = Progress()
 
-    //@Test
+    @Test
     fun testNormalizeMethodName(){
         // Test Java record accessor methods to Kotlin getter style
         assertEquals("getName", "name()".normalizeRecordMethodName())
@@ -198,7 +198,7 @@ class TestProgress {
         }
     }
 
-    //@Test
+    @Test
     fun testEndsWithDollarSignAndDigit(){
         assertTrue("org.apache.lucene.search.TermQuery\$TermWeight\$1".endsWithDollarSignAndDigit())
         assertTrue("org.apache.lucene.search.TermQuery\$TermWeight\$2".endsWithDollarSignAndDigit())
@@ -206,7 +206,7 @@ class TestProgress {
     }
 
     // suspend function tests
-    //@Test
+    @Test
     fun testExtractReturnTypeFromContinuation() {
         // Test extracting Float from Continuation<? super java.lang.Float>
         val continuationFloat = "kotlin.coroutines.Continuation<? super java.lang.Float>"
