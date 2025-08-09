@@ -536,6 +536,27 @@ open class ThreadPoolExecutor(
         @Volatile
         var completedTasks: Long = 0
 
+        // Simple spin lock replacing AQS usage for task execution critical section to avoid coroutine suspension deadlock.
+        @OptIn(ExperimentalAtomicApi::class)
+        private val simpleLock = kotlin.concurrent.atomics.AtomicInt(0)
+
+        // Simple, non-inline wrapper to avoid exposing private field in public inline site.
+        @OptIn(ExperimentalAtomicApi::class)
+        fun <T> withSimpleLock(block: () -> T): T {
+            while (!simpleLock.compareAndSet(0, 1)) {
+                // spin; could add cooperative backoff if needed
+            }
+            // Emulate original AQS lock visibility for isLocked checks (state!=0)
+            val prevState = state
+            state = 1
+            try {
+                return block()
+            } finally {
+                state = 0 // back to unlocked (ignore prevState; should be 0 after first unlock())
+                simpleLock.store(0)
+            }
+        }
+
         // TODO: switch to AbstractQueuedLongSynchronizer and move
         // completedTasks into the lock word.
         /**
@@ -586,9 +607,7 @@ open class ThreadPoolExecutor(
             acquire(1)
         }
 
-        suspend fun tryLock(): Boolean {
-            return tryAcquire(1)
-        }
+    suspend fun tryLock(): Boolean = tryAcquire(1)
 
         fun unlock() {
             release(1)
@@ -1066,7 +1085,13 @@ open class ThreadPoolExecutor(
         try {
             while (task != null || (getTask().also { task = it }) != null) {
                 println("[DBG][runWorker] worker id=${w.hashCode()} executing taskClass=${task!!::class.simpleName}")
-                w.lock()
+                if (task is FutureTask<*>) {
+                    println("[DBG][runWorker] about to run FutureTask hash=${task.hashCode()}")
+                }
+                // Temporarily bypass worker lock (AQS) to diagnose hang
+                // println("[DBG][runWorker] attempting to lock worker id=${w.hashCode()}")
+                // w.lock()
+                // println("[DBG][runWorker] acquired lock worker id=${w.hashCode()}")
                 // If pool is stopping, ensure thread is interrupted;
                 // if not, ensure thread is not interrupted.  This
                 // requires a recheck in second case to deal with
@@ -1076,20 +1101,23 @@ open class ThreadPoolExecutor(
                                     runStateAtLeast(ctl.load(), STOP))) &&
                     !wt.isCancelled
                 ) wt.cancel()
-                try {
-                    beforeExecute(wt, task!!)
+                w.withSimpleLock {
+                    val current = task!!
                     try {
-                        task.run()
-                        println("[DBG][runWorker] worker id=${w.hashCode()} task run complete")
-                        afterExecute(task, null)
-                    } catch (ex: Throwable) {
-                        afterExecute(task, ex)
-                        throw ex
+                        beforeExecute(wt, current)
+                        try {
+                            current.run()
+                            println("[DBG][runWorker] worker id=${w.hashCode()} task run complete")
+                            if (current is FutureTask<*>) println("[DBG][runWorker] FutureTask run complete hash=${current.hashCode()}")
+                            afterExecute(current, null)
+                        } catch (ex: Throwable) {
+                            afterExecute(current, ex)
+                            throw ex
+                        }
+                    } finally {
+                        task = null
+                        w.completedTasks++
                     }
-                } finally {
-                    task = null
-                    w.completedTasks++
-                    w.unlock()
                 }
             }
             completedAbruptly = false

@@ -125,6 +125,9 @@ open class FutureTask<V> : RunnableFuture<V> {
     /** The underlying callable; nulled out after running */
     private var callable: Callable<V>? = null
 
+    // Logging support (platform agnostic)
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
+
     /**
      * Returns result or throws exception for completed task.
      *
@@ -354,7 +357,11 @@ open class FutureTask<V> : RunnableFuture<V> {
 
     @OptIn(ExperimentalAtomicApi::class)
     override fun run() {
+    println("[DBG][FutureTask.run] enter state=${state.load()} hasRunner=${runner.load()!=null} this=${this.hashCode()}")
+    logger.debug { "[FutureTask.run] enter state=${state.load()} hasRunner=${runner.load()!=null} hash=${this.hashCode()}" }
         if (state.load() != NEW || !runner.compareAndSet(null, Job())) {
+        println("[DBG][FutureTask.run] abort state=${state.load()} runnerWasSet=${runner.load()!=null} hash=${this.hashCode()}")
+        logger.debug { "[FutureTask.run] abort: state=${state.load()} runnerWasSet=${runner.load()!=null} hash=${this.hashCode()}" }
             return
         }
         val currentRunner = runner.load()!!
@@ -364,12 +371,18 @@ open class FutureTask<V> : RunnableFuture<V> {
                 var result: V? = null
                 var ran = false
                 try {
+            println("[DBG][FutureTask.run] invoking callable hash=${this.hashCode()}")
+            logger.debug { "[FutureTask.run] invoking callable hash=${this.hashCode()}" }
                     result = c.call()
                     ran = true
                 } catch (ex: Throwable) {
+            println("[DBG][FutureTask.run] exception ${ex::class.simpleName} msg=${ex.message} hash=${this.hashCode()}")
+            logger.debug { "[FutureTask.run] callable threw ${ex::class.simpleName}: ${ex.message} hash=${this.hashCode()}" }
                     setException(ex)
                 }
                 if (ran) {
+            println("[DBG][FutureTask.run] callable completed setting result hash=${this.hashCode()}")
+            logger.debug { "[FutureTask.run] callable completed, setting result hash=${this.hashCode()}" }
                     set(result as V)
                 }
             }
@@ -383,6 +396,8 @@ open class FutureTask<V> : RunnableFuture<V> {
             if (s >= INTERRUPTING) {
                 handlePossibleCancellationInterrupt(s)
             }
+            println("[DBG][FutureTask.run] exit finalState=$s hash=${this.hashCode()}")
+            logger.debug { "[FutureTask.run] exit finalState=$s hash=${this.hashCode()}" }
         }
     }
 
