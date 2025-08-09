@@ -50,7 +50,8 @@ abstract class SortFieldProvider protected constructor(override val name: String
     companion object {
         /** Looks up a SortFieldProvider by name  */
         fun forName(name: String): SortFieldProvider {
-            return Holder.loader.lookup(name)
+            //return Holder.loader.lookup(name)
+            throw UnsupportedOperationException("SortFieldProvider.forName is not implemented yet")
         }
 
         /** Lists all available SortFieldProviders  */

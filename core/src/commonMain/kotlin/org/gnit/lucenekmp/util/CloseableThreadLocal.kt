@@ -74,7 +74,7 @@ class CloseableThreadLocal<T> : AutoCloseable {
         /*if (countUntilPurge.getAndDecrement() == 0) {
             purge()
         }*/
-        TODO()
+        TODO("not implemented")  // impossible to implement in Kotlin common. JVM specific.
     }
 
     // Purge dead threads
@@ -97,7 +97,7 @@ class CloseableThreadLocal<T> : AutoCloseable {
             }
             countUntilPurge.set(nextCount)
         }*/
-        TODO()  // impossible to implement in Kotlin common. JVM specific.
+        TODO("not implemented")  // impossible to implement in Kotlin common. JVM specific.
     }
 
     override fun close() {

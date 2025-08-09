@@ -84,7 +84,8 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
     companion object {
         /** looks up a format by name  */
         fun forName(name: String): DocValuesFormat {
-            return Holder.loader.lookup(name)
+            //return Holder.loader.lookup(name)
+            throw UnsupportedOperationException("DocValuesFormat.forName is not implemented yet")
         }
 
         /** returns a list of all available format names  */

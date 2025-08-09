@@ -87,7 +87,8 @@ abstract class PostingsFormat protected constructor(override val name: String) :
 
         /** looks up a format by name  */
         fun forName(name: String): PostingsFormat {
-            return Holder.loader.lookup(name)
+            //return Holder.loader.lookup(name)
+            throw UnsupportedOperationException("PostingsFormat.forName is not implemented yet")
         }
 
         /** returns a list of all available format names  */

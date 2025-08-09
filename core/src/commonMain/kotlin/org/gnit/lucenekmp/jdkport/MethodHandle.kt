@@ -10,17 +10,15 @@ fun KClass<*>.getClassLoader(): ClassLoader {
 }
 
 fun <U : Any> KClass<U>.asSubclass(clazz: KClass<*>): KClass<U> {
-    // This is a no-op implementation for Kotlin Multiplatform
-    return this
+    TODO("Not yet implemented")
 }
 
 fun KClass<*>.isAssignableFrom(other: KClass<*>): Boolean {
-    // This is a no-op implementation for Kotlin Multiplatform
-    return this == other
+    TODO("Not yet implemented")
 }
 
 fun classForName(name: String, initialize: Boolean, loader: ClassLoader): KClass<*> {
-    return Any::class
+    TODO("Not yet implemented")
 }
 
 class MethodHandle() {
@@ -46,23 +44,20 @@ class MethodHandle() {
     }
 
     fun asType(NO_ARG_RETURNING_ATTRIBUTEIMPL: MethodType): MethodHandle {
-        // This is a no-op implementation for Kotlin Multiplatform
-        return MethodHandle()
+        TODO("Not yet implemented")
     }
 }
 
 class MethodHandles {
     class Lookup {
         fun findConstructor(clazz: KClass<*>, NO_ARG_CTOR: MethodType): MethodHandle {
-            // This is a no-op implementation for Kotlin Multiplatform
-            return MethodHandle()
+            TODO("Not yet implemented")
         }
     }
 
     companion object{
         fun publicLookup(): Lookup {
-            // This is a no-op implementation for Kotlin Multiplatform
-            return Lookup()
+            TODO("Not yet implemented")
         }
     }
 }
@@ -71,8 +66,7 @@ class MethodType {
     companion object {
 
         fun methodType(type: KClass<*>): MethodType {
-            // This is a no-op implementation for Kotlin Multiplatform
-            return MethodType()
+            TODO("Not yet implemented")
         }
     }
 }

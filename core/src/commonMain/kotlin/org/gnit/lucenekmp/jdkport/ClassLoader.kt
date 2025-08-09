@@ -6,6 +6,6 @@ package org.gnit.lucenekmp.jdkport
 @Ported(from = "kotlin.reflect.KClassLoader") // strangely not java.lang.ClassLoader
 class ClassLoader {
     fun getParent(): ClassLoader {
-        TODO()
+        TODO("Not yet implemented")
     }
 }

@@ -83,7 +83,8 @@ abstract class KnnVectorsFormat protected constructor(name: String) : NamedSPI {
 
         /** looks up a format by name  */
         fun forName(name: String): KnnVectorsFormat {
-            return Holder.loader.lookup(name)
+            //return Holder.loader.lookup(name)
+            throw UnsupportedOperationException("KnnVectorsFormat.forName is not implemented yet")
         }
 
         /** returns a list of all available format names  */
