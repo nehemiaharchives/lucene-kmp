@@ -54,14 +54,17 @@ class ThreadPoolExecutorTest {
 
     @Test
     fun submit_runnableAndCallable() = runBlocking {
-        // TODO this test hangs, never completes, need to fix, either the test or the implementation
         val exec = newExecutor()
         try {
-            val f1 = exec.submit(Runnable { /* no-op */ })
-            val f2 = exec.submit(Callable { 7 })
-            // get() should complete
-            f1.get()
-            assertEquals(7, f2.get())
+            println("[TEST] submit_runnableAndCallable: submitting tasks")
+            val f1 = exec.submit(Runnable { println("[TEST] submit_runnableAndCallable: runnable ran") })
+            val f2 = exec.submit(Callable { println("[TEST] submit_runnableAndCallable: callable ran"); 7 })
+            println("[TEST] submit_runnableAndCallable: submitted; awaiting f1")
+            withTimeout(2000) { f1.get() }
+            println("[TEST] submit_runnableAndCallable: f1 done awaiting f2")
+            val v = withTimeout(2000) { f2.get() }
+            println("[TEST] submit_runnableAndCallable: f2 done value=$v")
+            assertEquals(7, v)
         } finally {
             exec.shutdown()
             exec.awaitTermination(1, TimeUnit.SECONDS)
@@ -96,7 +99,6 @@ class ThreadPoolExecutorTest {
 
     @Test
     fun callerRunsPolicy_runsInCallerThreadWhenRejected() = runBlocking {
-        // TODO this test fails. needs to find out if there are problem in the test or in the implementation and fix it
 
         val queue = LinkedBlockingQueue<Runnable>(1)
         val exec = newExecutor(core = 1, max = 1, keepAliveMs = 10, queue = queue)
