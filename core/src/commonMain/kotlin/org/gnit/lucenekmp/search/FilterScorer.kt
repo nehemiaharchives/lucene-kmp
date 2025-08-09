@@ -10,7 +10,7 @@ import okio.IOException
  * versions that pass all requests to the contained scorer. Subclasses of `FilterScorer` may
  * further override some of these methods and may also provide additional methods and fields.
  */
-abstract class FilterScorer(protected val `in`: Scorer) : Scorer(), Unwrappable<Scorer> {
+abstract class FilterScorer(protected open val `in`: Scorer) : Scorer(), Unwrappable<Scorer> {
 
     @Throws(IOException::class)
     override fun score(): Float {

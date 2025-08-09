@@ -10,21 +10,10 @@ import okio.IOException
  *
  * @lucene.internal
  */
-class ImpactsDISI(private val `in`: DocIdSetIterator, maxScoreCache: MaxScoreCache) : DocIdSetIterator() {
-    private val maxScoreCache: MaxScoreCache
+class ImpactsDISI(private val `in`: DocIdSetIterator, private val maxScoreCache: MaxScoreCache) : DocIdSetIterator() {
     private var minCompetitiveScore = 0f
     private var upTo = NO_MORE_DOCS
-    private var maxScore = Float.Companion.MAX_VALUE
-
-    /**
-     * Sole constructor.
-     *
-     * @param `in` the iterator, typically an ImpactsEnum
-     * @param maxScoreCache the cache of maximum scores, typically computed from the same ImpactsEnum
-     */
-    init {
-        this.maxScoreCache = maxScoreCache
-    }
+    private var maxScore = Float.MAX_VALUE
 
     /** Get the [MaxScoreCache].  */
     fun getMaxScoreCache(): MaxScoreCache {
@@ -71,12 +60,10 @@ class ImpactsDISI(private val `in`: DocIdSetIterator, maxScoreCache: MaxScoreCac
             }
 
             val skipUpTo: Int = maxScoreCache.getSkipUpTo(minCompetitiveScore)
-            if (skipUpTo == -1) { // no further skipping
-                target = upTo + 1
-            } else if (skipUpTo == NO_MORE_DOCS) {
-                return NO_MORE_DOCS
-            } else {
-                target = skipUpTo + 1
+            target = when (skipUpTo) {
+                -1 -> upTo + 1 // no further skipping
+                NO_MORE_DOCS -> return NO_MORE_DOCS
+                else -> skipUpTo + 1
             }
             upTo = maxScoreCache.advanceShallow(target)
             maxScore = maxScoreCache.maxScoreForLevelZero

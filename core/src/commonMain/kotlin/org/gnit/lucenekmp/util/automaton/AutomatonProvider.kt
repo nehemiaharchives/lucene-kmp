@@ -16,5 +16,5 @@ interface AutomatonProvider {
      * @throws IOException if errors occur
      */
     @Throws(IOException::class)
-    fun getAutomaton(name: String): Automaton
+    fun getAutomaton(name: String): Automaton?
 }

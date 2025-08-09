@@ -38,6 +38,10 @@ kotlin {
                 // TODO add following after these modules
                 // implementation(project(":queries"))
                 // implementation(project(":sandbox"))
+
+                implementation(libs.okio)
+                implementation(libs.kotlinenvvar)
+                implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlin.logging)
             }
         }

@@ -37,6 +37,7 @@ kotlin {
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
                 implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlin.logging)
             }
         }

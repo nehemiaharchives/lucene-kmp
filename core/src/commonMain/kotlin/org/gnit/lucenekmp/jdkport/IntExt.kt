@@ -57,6 +57,62 @@ private fun toUnsignedString0(value: Int, shift: Int): String {
 
 private val digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
 
+fun Int.Companion.toStringWithRadix(i: Int, radix: Int): String{
+
+    var radixInUse = radix
+    var intInUse = i
+
+    if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) radixInUse = 10
+
+    /* Use the faster version */
+    if (i == 10) {
+        return i.toString()
+    }
+
+    if (COMPACT_STRINGS) {
+        val buf = ByteArray(33)
+        val negative = (intInUse < 0)
+        var charPos = 32
+
+        if (!negative) {
+            intInUse = -intInUse
+        }
+
+        while (intInUse <= -radixInUse) {
+            buf[charPos--] = Int.digits()[-(intInUse % radixInUse)].code.toByte()
+            intInUse = intInUse / radixInUse
+        }
+        buf[charPos] = Int.digits()[-i].code.toByte()
+
+        if (negative) {
+            buf[--charPos] = '-'.code.toByte()
+        }
+
+        return StringLatin1.newString(buf, charPos, (33 - charPos))
+    }
+    return Int.toStringUTF16(i, radixInUse)
+}
+
+fun Int.Companion.toStringUTF16(i: Int, radix: Int): String {
+    var intInUse: Int = i
+    val buf = ByteArray(33 * 2)
+    val negative = (intInUse < 0)
+    var charPos = 32
+    if (!negative) {
+        intInUse = -intInUse
+    }
+    while (intInUse <= -radix) {
+        StringUTF16.putChar(buf, charPos--, Int.digits()[-(intInUse % radix)].code)
+        intInUse = intInUse / radix
+    }
+    StringUTF16.putChar(buf, charPos, Int.digits()[-intInUse].code)
+
+    if (negative) {
+        StringUTF16.putChar(buf, --charPos, '-'.code)
+    }
+    return StringUTF16.newString(buf, charPos, (33 - charPos))
+}
+
 /**
  * Formats the unsigned integer [value] (using a base of 2^[shift]) into [buf] (LATIN1 version).
  * [len] is the total number of characters to write (leading zero‐padded if necessary).
@@ -280,6 +336,6 @@ fun Int.Companion.reverseBytes(i: Int): Int {
  * @since 1.5
  */
 fun Int.Companion.highestOneBit(i: Int): Int {
-    return i and (Int.Companion.MIN_VALUE ushr numberOfLeadingZeros(i))
+    return i and (Int.MIN_VALUE ushr numberOfLeadingZeros(i))
 }
 

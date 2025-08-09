@@ -112,6 +112,56 @@ object StringUTF16 {
         return latin1 // latin1 success
     }
 
+    /**
+     * {@return Compress the internal byte array (containing UTF16) into a compact strings byte array}
+     * If all the chars are LATIN1, it returns an array with len == count,
+     * otherwise, it contains UTF16 characters.
+     *
+     *
+     * Refer to the description of the algorithm in [.compress].
+     *
+     * @param val   a byte array with UTF16 coding
+     * @param off   starting offset
+     * @param count count of chars to be compressed, `count` > 0
+     */
+    fun compress(`val`: ByteArray, off: Int, count: Int): ByteArray {
+        val latin1 = ByteArray(count)
+        val ndx: Int = StringUTF16.compress(`val`, off, latin1, 0, count)
+        if (ndx != count) { // Switch to UTF16
+            val utf16: ByteArray =
+                Arrays.copyOfRange(`val`, off shl 1, newBytesLength(off + count))
+            // If the original character that was found to be non-latin1 is latin1 in the copy
+            // try to make a latin1 string from the copy
+            if (getChar(utf16, ndx).code > 0xff
+                || StringUTF16.compress(utf16, 0, latin1, 0, count) != count
+            ) {
+                return utf16
+            }
+        }
+        return latin1 // latin1 success
+    }
+
+    fun compress(src: ByteArray, srcOff: Int, dst: ByteArray, dstOff: Int, len: Int): Int {
+        // We need a range check here because 'getChar' has no checks
+        var srcOff = srcOff
+        var dstOff = dstOff
+        StringUTF16.checkBoundsOffCount(srcOff, len, src)
+        for (i in 0..<len) {
+            val c: Char = getChar(src, srcOff)
+            if (c.code > 0xff) {
+                return i // return index of non-latin1 char
+            }
+            dst[dstOff] = c.code.toByte()
+            srcOff++
+            dstOff++
+        }
+        return len
+    }
+
+    fun checkBoundsOffCount(offset: Int, count: Int, `val`: ByteArray) {
+        // TODO no operation for now, implement if needed
+    }
+
     // compressedCopy char[] -> byte[]
     fun compressCharToChar(src: CharArray, srcOff: Int, dst: ByteArray, dstOff: Int, len: Int): Int {
         var srcOff = srcOff
@@ -177,5 +227,23 @@ object StringUTF16 {
         for (i in 0..<len) {
             putChar(dst, dstOff++, src[srcOff++].toInt() and 0xff)
         }
+    }
+
+    fun newString(`val`: ByteArray, index: Int, len: Int): String {
+        if (len == 0) {
+            return ""
+        }
+        if (COMPACT_STRINGS) {
+            val res: ByteArray = StringUTF16.compress(`val`, index, len)
+            val coderByte: Byte = coderFromArrayLen(res, len)
+            val coder = if (coderByte == 0.toByte()) StandardCharsets.ISO_8859_1 else StandardCharsets.UTF_16BE
+            return String.fromByteArray(res, coder)
+        }
+        val last = index + len
+        return String.fromByteArray(Arrays.copyOfRange(`val`, index shl 1, last shl 1), StandardCharsets.UTF_16BE)
+    }
+
+    fun coderFromArrayLen(value: ByteArray, len: Int): Byte {
+        return ((len - value.size) ushr Int.SIZE_BITS - 1).toByte()
     }
 }

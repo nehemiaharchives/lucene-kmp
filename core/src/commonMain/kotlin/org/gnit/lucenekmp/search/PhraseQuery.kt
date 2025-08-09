@@ -142,7 +142,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
 
     /** Returns the field this query applies to  */
     val field: String?
-    private val terms: Array<Term>
+    val terms: Array<Term>
 
     /** Returns the relative positions of terms in this phrase.  */
     val positions: IntArray
@@ -186,9 +186,9 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
     constructor(field: String, vararg terms: BytesRef) : this(0, field, *terms)
 
     /** Returns the list of terms in this phrase.  */
-    fun getTerms(): Array<Term> {
+    /*fun getTerms(): Array<Term> {
         return terms
-    }
+    }*/
 
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (terms.size == 0) {

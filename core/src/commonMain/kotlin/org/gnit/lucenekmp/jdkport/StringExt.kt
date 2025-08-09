@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-
 /**
  * @param dstBegin the starting index in the destination array (inclusive)
  * @param dstEnd the ending index in the destination array (exclusive)

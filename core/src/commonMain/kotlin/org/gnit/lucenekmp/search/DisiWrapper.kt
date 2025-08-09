@@ -6,7 +6,7 @@ package org.gnit.lucenekmp.search
  *
  * @lucene.internal
  */
-class DisiWrapper(scorer: Scorer, impacts: Boolean) {
+open class DisiWrapper(scorer: Scorer, impacts: Boolean) {
     var iterator: DocIdSetIterator? = null
     val scorer: Scorer
     val scorable: Scorable?

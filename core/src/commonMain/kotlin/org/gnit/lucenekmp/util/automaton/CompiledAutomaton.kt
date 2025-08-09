@@ -15,8 +15,6 @@ import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.UnicodeUtil
-import kotlin.experimental.and
-
 
 /**
  * Immutable class holding compiled details for a given Automaton. The Automaton could either be
@@ -81,20 +79,20 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
     /**
      * Indicates if the automaton accepts a finite set of strings. Only valid for [ ][AUTOMATON_TYPE.NORMAL].
      */
-    var finite: kotlin.Boolean
+    var finite: Boolean
 
     /** Which state, if any, accepts all suffixes, else -1.  */
-    var sinkState: kotlin.Int = 0
+    var sinkState: Int = 0
 
     /** Create this, passing simplify=true, so that we try to simplify the automaton.  */
     constructor(automaton: Automaton) : this(automaton, false, true)
 
     /**
      * Create this. If simplify is true, we run possibly expensive operations to determine if the
-     * automaton is one the cases in [CompiledAutomaton.AUTOMATON_TYPE]. Set finite to true if
+     * automaton is one the cases in [AUTOMATON_TYPE]. Set finite to true if
      * the automaton is finite, otherwise set to false if infinite or you don't know.
      */
-    constructor(automaton: Automaton, finite: kotlin.Boolean, simplify: kotlin.Boolean) : this(
+    constructor(automaton: Automaton, finite: Boolean, simplify: Boolean) : this(
         automaton,
         finite,
         simplify,
@@ -105,7 +103,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
 
     /**
      * Create this. If simplify is true, we run possibly expensive operations to determine if the
-     * automaton is one the cases in [CompiledAutomaton.AUTOMATON_TYPE]. Set finite to true if
+     * automaton is one the cases in [AUTOMATON_TYPE]. Set finite to true if
      * the automaton is finite, otherwise set to false if infinite or you don't know.
      */
     init {
@@ -126,7 +124,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
 
             if (Operations.isEmpty(automaton)) {
                 // matches nothing
-                type = CompiledAutomaton.AUTOMATON_TYPE.NONE
+                type = AUTOMATON_TYPE.NONE
                 term = null
                 commonSuffixRef = null
                 runAutomaton = null
@@ -136,10 +134,9 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
                 nfaRunAutomaton = null
                 simplified = true
             } else {
-                val isTotal: kotlin.Boolean
 
                 // NOTE: only approximate, because automaton may not be minimal:
-                isTotal = if (isBinary) {
+                val isTotal: Boolean = if (isBinary) {
                     Operations.isTotal(automaton, 0, 0xff)
                 } else {
                     Operations.isTotal(automaton)
@@ -147,7 +144,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
 
                 if (isTotal) {
                     // matches all possible strings
-                    type = CompiledAutomaton.AUTOMATON_TYPE.ALL
+                    type = AUTOMATON_TYPE.ALL
                     term = null
                     commonSuffixRef = null
                     runAutomaton = null
@@ -161,7 +158,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
 
                     if (singleton != null) {
                         // matches a fixed string
-                        type = CompiledAutomaton.AUTOMATON_TYPE.SINGLE
+                        type = AUTOMATON_TYPE.SINGLE
                         commonSuffixRef = null
                         runAutomaton = null
                         this.automaton = null
@@ -183,44 +180,44 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
         }
 
         if (!simplified) {
-            type = CompiledAutomaton.AUTOMATON_TYPE.NORMAL
+            type = AUTOMATON_TYPE.NORMAL
             term = null
         }
 
         this.finite = finite
 
         var binary: Automaton
-        if (isBinary) {
+        binary = if (isBinary) {
             // Caller already built binary automaton themselves, e.g. PrefixQuery
             // does this since it can be provided with a binary (not necessarily
             // UTF8!) term:
-            binary = automaton
+            automaton
         } else {
             // Incoming automaton is unicode, and we must convert to UTF8 to match what's in the index:
-            binary = UTF32ToUTF8().convert(automaton)
+            UTF32ToUTF8().convert(automaton)
         }
 
         // compute a common suffix for infinite DFAs, this is an optimization for "leading wildcard"
         // so don't burn cycles on it if the DFA is finite, or largeish
-        if (this.finite || automaton.numStates + automaton.numTransitions > 1000) {
-            commonSuffixRef = null
+        commonSuffixRef = if (this.finite || automaton.numStates + automaton.numTransitions > 1000) {
+            null
         } else {
             val suffix: BytesRef = Operations.getCommonSuffixBytesRef(binary)
             if (suffix.length == 0) {
-                commonSuffixRef = null
+                null
             } else {
-                commonSuffixRef = suffix
+                suffix
             }
         }
 
-        if (automaton.isDeterministic == false && binary.isDeterministic == false) {
+        if (!automaton.isDeterministic && !binary.isDeterministic) {
             this.automaton = null
             this.runAutomaton = null
             this.sinkState = -1
             this.nfaRunAutomaton = NFARunAutomaton(binary, 0xff)
         } else {
             // We already had a DFA (or threw exception), according to mike UTF32toUTF8 won't "blow up"
-            binary = Operations.determinize(binary, kotlin.Int.Companion.MAX_VALUE)
+            binary = Operations.determinize(binary, Int.MAX_VALUE)
             runAutomaton = ByteRunAutomaton(binary, true)
 
             this.automaton = runAutomaton!!.automaton
@@ -228,22 +225,22 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
             // TODO: this is a bit fragile because if the automaton is not minimized there could be more
             // than 1 sink state but auto-prefix will fail
             // to run for those:
-            sinkState = CompiledAutomaton.Companion.findSinkState(this.automaton!!)
+            sinkState = findSinkState(this.automaton!!)
             nfaRunAutomaton = null
         }
     }
 
     // private static final boolean DEBUG = BlockTreeTermsWriter.DEBUG;
-    private fun addTail(state: kotlin.Int, term: BytesRefBuilder, idx: kotlin.Int, leadLabel: kotlin.Int): BytesRef {
+    private fun addTail(state: Int, term: BytesRefBuilder, idx: Int, leadLabel: Int): BytesRef {
         // System.out.println("addTail state=" + state + " term=" + term.utf8ToString() + " idx=" + idx
         // + " leadLabel=" + (char) leadLabel);
         // System.out.println(automaton.toDot());
         // Find biggest transition that's < label
         // TODO: use binary search here
-        var state: kotlin.Int = state
-        var idx: kotlin.Int = idx
-        var maxIndex: kotlin.Int = -1
-        var numTransitions: kotlin.Int = automaton!!.initTransition(state, transition)
+        var state: Int = state
+        var idx: Int = idx
+        var maxIndex: Int = -1
+        var numTransitions: Int = automaton!!.initTransition(state, transition)
         for (i in 0..<numTransitions) {
             automaton!!.getNextTransition(transition)
             if (transition.min < leadLabel) {
@@ -259,11 +256,10 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
         automaton!!.getTransition(state, maxIndex, transition)
 
         // Append floorLabel
-        val floorLabel: kotlin.Int
-        if (transition.max > leadLabel - 1) {
-            floorLabel = leadLabel - 1
+        val floorLabel: Int = if (transition.max > leadLabel - 1) {
+            leadLabel - 1
         } else {
-            floorLabel = transition.max
+            transition.max
         }
         // System.out.println("  floorLabel=" + (char) floorLabel);
         term.grow(1 + idx)
@@ -306,13 +302,12 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
      * Return a [TermsEnum] intersecting the provided [Terms] with the terms accepted by
      * this automaton.
      */
-    @kotlin.Throws(IOException::class)
-    fun getTermsEnum(terms: Terms): TermsEnum? {
-        when (type) {
-            AUTOMATON_TYPE.NONE -> return TermsEnum.EMPTY
-            AUTOMATON_TYPE.ALL -> return terms.iterator()
-            AUTOMATON_TYPE.SINGLE -> return SingleTermsEnum(terms.iterator(), term)
-            AUTOMATON_TYPE.NORMAL -> return terms.intersect(this, null)
+    fun getTermsEnum(terms: Terms): TermsEnum {
+        return when (type) {
+            AUTOMATON_TYPE.NONE -> TermsEnum.EMPTY
+            AUTOMATON_TYPE.ALL -> terms.iterator()
+            AUTOMATON_TYPE.SINGLE -> SingleTermsEnum(terms.iterator(), term)
+            AUTOMATON_TYPE.NORMAL -> terms.intersect(this, null)
             else ->         // unreachable
                 throw RuntimeException("unhandled case")
         }
@@ -322,10 +317,12 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
     fun visit(visitor: QueryVisitor, parent: Query, field: String) {
         if (visitor.acceptField(field)) {
             when (type) {
-                AUTOMATON_TYPE.NORMAL -> visitor.consumeTermsMatching(parent, field, { runAutomaton!! })
+                AUTOMATON_TYPE.NORMAL -> visitor.consumeTermsMatching(parent, field) { runAutomaton!! }
                 AUTOMATON_TYPE.NONE -> {}
                 AUTOMATON_TYPE.ALL -> visitor.consumeTermsMatching(
-                    parent, field, { ByteRunAutomaton(Automata.makeAnyString()) })
+                    parent,
+                    field
+                ) { ByteRunAutomaton(Automata.makeAnyString()) }
 
                 AUTOMATON_TYPE.SINGLE -> visitor.consumeTerms(parent, Term(field, term!!))
             }
@@ -382,7 +379,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
                 // <= our label:
 
                 while (true) {
-                    val numTransitions: kotlin.Int = automaton!!.getNumTransitions(state)
+                    val numTransitions: Int = automaton!!.getNumTransitions(state)
                     if (numTransitions == 0) {
                         require(runAutomaton!!.isAccept(state))
                         output.setLength(idx)
@@ -470,7 +467,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
         val other: CompiledAutomaton = obj as CompiledAutomaton
         if (type != other.type) return false
         if (type == AUTOMATON_TYPE.SINGLE) {
-            if (!term!!.equals(other.term)) return false
+            if (term!! != other.term) return false
         } else if (type == AUTOMATON_TYPE.NORMAL) {
             return runAutomaton == other.runAutomaton
                     && nfaRunAutomaton == other.nfaRunAutomaton
@@ -479,8 +476,8 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
         return true
     }
 
-    override fun ramBytesUsed(): kotlin.Long {
-        return (CompiledAutomaton.Companion.BASE_RAM_BYTES
+    override fun ramBytesUsed(): Long {
+        return (BASE_RAM_BYTES
                 + RamUsageEstimator.sizeOfObject(automaton)
                 + RamUsageEstimator.sizeOfObject(commonSuffixRef)
                 + RamUsageEstimator.sizeOfObject(runAutomaton)
@@ -490,7 +487,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
     }
 
     companion object {
-        private val BASE_RAM_BYTES: kotlin.Long = RamUsageEstimator.shallowSizeOfInstance(CompiledAutomaton::class)
+        private val BASE_RAM_BYTES: Long = RamUsageEstimator.shallowSizeOfInstance(CompiledAutomaton::class)
 
         /** Returns sink state, if present, else -1.  */
         private fun findSinkState(automaton: Automaton): Int {
