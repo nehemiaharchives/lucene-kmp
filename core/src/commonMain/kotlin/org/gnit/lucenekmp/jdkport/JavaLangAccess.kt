@@ -74,8 +74,8 @@ object JavaLangAccess {
         }
 
     fun headStackableScope(job: Job?): StackableScope? {
-        if (job == null) return null
-        return stackHeads[job]
+    if (job == null) return null
+    return stackHeads[job]
     }
 
     /**
@@ -84,18 +84,18 @@ object JavaLangAccess {
     private val threadContainerMap: MutableMap<Job, ThreadContainer> = mutableMapOf()
 
     fun threadContainer(thread: Job): ThreadContainer? {
-        return threadContainerMap[thread]
+    return threadContainerMap[thread]
     }
 
     /**
      * Starts a thread in the given ThreadContainer.
      */
     fun start(thread: Job, container: ThreadContainer){
-        // Record the container for this thread and register it for discovery.
-        threadContainerMap[thread] = container
-        registerJob(thread)
-        // Notify the container that the thread is starting.
-        container.onStart(thread)
+    // Record the container for this thread and register it for discovery.
+    threadContainerMap[thread] = container
+    registerJob(thread)
+    // Notify the container that the thread is starting.
+    container.onStart(thread)
     }
 
     private val jobRegistry: MutableSet<Job> = mutableSetOf()

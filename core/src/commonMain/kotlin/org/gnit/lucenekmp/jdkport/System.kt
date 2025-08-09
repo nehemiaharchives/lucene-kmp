@@ -23,6 +23,10 @@ import kotlin.time.TimeSource
  */
 object System {
 
+    // Anchor for monotonic time to ensure nanoTime() is monotonic within process
+        @OptIn(ExperimentalTime::class)
+        private val monotonicBase = TimeSource.Monotonic.markNow()
+
     /**
      * ported from java.lang.System.getProperty() but implementation is EnvVar
      *
@@ -73,7 +77,8 @@ object System {
 
     @OptIn(ExperimentalTime::class)
     fun nanoTime(): Long {
-        return TimeSource.Monotonic.markNow().elapsedNow().inWholeNanoseconds
+        // Use a single monotonic base mark so successive calls are comparable
+        return monotonicBase.elapsedNow().inWholeNanoseconds
     }
 
     @OptIn(ExperimentalTime::class)

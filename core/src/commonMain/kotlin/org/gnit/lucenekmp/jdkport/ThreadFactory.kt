@@ -2,6 +2,9 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -37,4 +40,14 @@ interface ThreadFactory {
      * creating threads](../../lang/Thread.html.inheritance)
      */
     fun newThread(r: Runnable): Job
+}
+
+/**
+ * Optional extension for Runnables that can run cooperatively in a coroutine.
+ * If a Runnable also implements this, ThreadFactory implementations may invoke
+ * [runSuspending] inside a coroutine rather than calling [Runnable.run],
+ * avoiding nested runBlocking and enabling proper cancellation/wakeups.
+ */
+interface CoroutineRunnable : Runnable {
+    suspend fun runSuspending()
 }
