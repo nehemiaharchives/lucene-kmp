@@ -556,8 +556,14 @@ object Executors {
             private val count = AtomicInteger(1)
             override fun newThread(r: Runnable): Job {
                 val threadName = "pool-thread-${count.fetchAndIncrement()}"
+                println("[DBG][ThreadFactory] creating new coroutine thread name=$threadName runnableClass=${r::class.simpleName}")
                 return GlobalScope.launch(CoroutineName(threadName)) {
-                    r.run()
+                    println("[DBG][ThreadFactory] launched coroutine name=$threadName starting runnableClass=${r::class.simpleName}")
+                    when (r) {
+                        is CoroutineRunnable -> r.runSuspending()
+                        else -> r.run()
+                    }
+                    println("[DBG][ThreadFactory] coroutine name=$threadName finished runnableClass=${r::class.simpleName}")
                 }
             }
         }

@@ -2,6 +2,8 @@
 .gradle
 .idea
 .DS_Store
+*.log
+.vscode
 build
 build_output.txt
 captures

@@ -43,14 +43,14 @@ class SharedThreadContainer
     override fun onStart(thread: Job) {
         // virtual threads needs to be tracked
         if (thread.isVirtual()) {
-            var vthreads: MutableSet<Job>? = this.virtualThreads
+            var vthreads = virtualThreads
             if (vthreads == null) {
         // lazily initialize the set
         vthreads = mutableSetOf()
         // publish to field (no CAS in this port)
         this.virtualThreads = vthreads
             }
-            vthreads!!.add(thread)
+            vthreads.add(thread)
         }
     }
 
