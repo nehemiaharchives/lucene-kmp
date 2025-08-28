@@ -5,68 +5,60 @@ import org.gnit.lucenekmp.util.AttributeReflector
 import kotlin.reflect.KClass
 
 fun KClass<*>.getClassLoader(): ClassLoader {
-    // This is a no-op implementation for Kotlin Multiplatform
+    // No real classloader semantics in KMP common; return a placeholder.
     return ClassLoader()
 }
 
 fun <U : Any> KClass<U>.asSubclass(clazz: KClass<*>): KClass<U> {
-    TODO("Not yet implemented")
+    // Simplified: assume caller provides correct type in KMP usage paths.
+    @Suppress("UNCHECKED_CAST")
+    return this as KClass<U>
 }
 
 fun KClass<*>.isAssignableFrom(other: KClass<*>): Boolean {
-    TODO("Not yet implemented")
+    // Minimal, conservative check: equality only.
+    return this == other
 }
 
 fun classForName(name: String, initialize: Boolean, loader: ClassLoader): KClass<*> {
-    TODO("Not yet implemented")
+    throw UnsupportedOperationException("classForName is not supported in KMP common")
 }
 
-class MethodHandle() {
+class MethodHandle {
     fun invokeExact(): AttributeImpl {
-        return object : AttributeImpl(){
-
-            override fun clear() {
-                TODO("Not yet implemented")
-            }
-
-            override fun reflectWith(reflector: AttributeReflector) {
-                TODO("Not yet implemented")
-            }
-
-            override fun copyTo(target: AttributeImpl) {
-                TODO("Not yet implemented")
-            }
-
-            override fun newInstance(): AttributeImpl {
-                TODO("Not yet implemented")
-            }
-        }
+        throw UnsupportedOperationException("MethodHandle.invokeExact is not supported in KMP common")
     }
 
-    fun asType(NO_ARG_RETURNING_ATTRIBUTEIMPL: MethodType): MethodHandle {
-        TODO("Not yet implemented")
+    fun asType(@Suppress("UNUSED_PARAMETER") NO_ARG_RETURNING_ATTRIBUTEIMPL: MethodType): MethodHandle {
+        // No-op; return self.
+        return this
     }
 }
 
 class MethodHandles {
     class Lookup {
-        fun findConstructor(clazz: KClass<*>, NO_ARG_CTOR: MethodType): MethodHandle {
-            TODO("Not yet implemented")
+        fun findConstructor(@Suppress("UNUSED_PARAMETER") clazz: KClass<*>, @Suppress("UNUSED_PARAMETER") NO_ARG_CTOR: MethodType): MethodHandle {
+            throw UnsupportedOperationException("MethodHandles.Lookup.findConstructor is not supported in KMP common")
+        }
+        // Placeholder to mirror potential API surface; not used.
+        fun findClass(@Suppress("UNUSED_PARAMETER") name: String): KClass<*> {
+            throw UnsupportedOperationException("MethodHandles.Lookup.findClass is not supported in KMP common")
         }
     }
 
-    companion object{
+    companion object {
         fun publicLookup(): Lookup {
-            TODO("Not yet implemented")
+            // Return a benign Lookup that throws if used for unsupported operations.
+            return Lookup()
         }
     }
 }
 
 class MethodType {
     companion object {
-
-        fun methodType(type: KClass<*>): MethodType {
-            TODO("Not yet implemented")
+        fun methodType(@Suppress("UNUSED_PARAMETER") type: KClass<*>): MethodType {
+            // Return a dummy MethodType instance.
+            return MethodType()
         }
     }
 }

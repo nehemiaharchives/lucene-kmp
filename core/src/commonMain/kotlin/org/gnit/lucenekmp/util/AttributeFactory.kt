@@ -1,79 +1,40 @@
 package org.gnit.lucenekmp.util
 
-import org.gnit.lucenekmp.jdkport.KClassValue
-import org.gnit.lucenekmp.jdkport.MethodHandle
-import org.gnit.lucenekmp.jdkport.MethodHandles
-import org.gnit.lucenekmp.jdkport.MethodType
-import org.gnit.lucenekmp.jdkport.Void
-import org.gnit.lucenekmp.jdkport.asSubclass
-import org.gnit.lucenekmp.jdkport.classForName
-import org.gnit.lucenekmp.jdkport.getClassLoader
-import org.gnit.lucenekmp.jdkport.isAssignableFrom
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
 import kotlin.reflect.KClass
 
-
-/** An AttributeFactory creates instances of [AttributeImpl]s.  */
+// KMP-friendly factory that creates AttributeImpl instances for Attribute interfaces.
+// Reflection-free; supports combined implementations via getStaticImplementation.
 abstract class AttributeFactory {
-    /**
-     * Returns an [AttributeImpl] for the supplied [Attribute] interface class.
-     *
-     * @throws UndeclaredThrowableException A wrapper runtime exception thrown if the constructor of
-     * the attribute class throws a checked exception. Note that attributes should not throw or
-     * declare checked exceptions; this may be verified and fail early in the future.
-     */
-    @Throws(/*java.lang.reflect.UndeclaredThrowableException::class*/ Exception::class)
+    @Throws(Exception::class)
     abstract fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl
 
     private class DefaultAttributeFactory : AttributeFactory() {
         override fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl {
-            val ctor = findAttributeImplCtor(
-                findImplClass(attClass.asSubclass(Attribute::class as KClass<*>) as KClass<Attribute>)
-            )
-            try {
-                return ctor.invokeExact()
-            } catch (e: Error) {
-                throw e
-            } catch (e: RuntimeException) {
-                throw e
-            } catch (e: Throwable) {
-                throw /*java.lang.reflect.UndeclaredThrowable*/Exception(e)
-            }
-        }
-
-        fun findImplClass(attClass: KClass<Attribute>): KClass<AttributeImpl> {
-            try {
-                return /*KClass*/classForName(attClass.qualifiedName + "Impl", true, attClass.getClassLoader())
-                    .asSubclass(AttributeImpl::class) as KClass<AttributeImpl>
-            } catch (cnfe: /*KClassNotFound*/Exception) {
-                throw IllegalArgumentException(
-                    "Cannot find implementing class for: " + attClass.qualifiedName, cnfe
+            return when (attClass) {
+                // Minimal direct mappings for cases that are not covered by static combined impls
+                CharTermAttribute::class -> CharTermAttributeImpl()
+                OffsetAttribute::class -> OffsetAttributeImpl()
+                else -> throw IllegalArgumentException(
+                    "Cannot find implementing class for: ${attClass.qualifiedName}"
                 )
             }
         }
     }
 
-
-
-    /**
-     * **Expert**: AttributeFactory returning an instance of the given `clazz` for the
-     * attributes it implements. For all other attributes it calls the given delegate factory as
-     * fallback. This class can be used to prefer a specific `AttributeImpl` which combines
-     * multiple attributes over separate classes.
-     *
-     * @lucene.internal
-     */
     abstract class StaticImplementationAttributeFactory<A : AttributeImpl>
     protected constructor(private val delegate: AttributeFactory, clazz: KClass<out A>) : AttributeFactory() {
+        @Suppress("UNCHECKED_CAST")
         private val clazz: KClass<A> = clazz as KClass<A>
 
         override fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl {
-            return if (attClass.isAssignableFrom(clazz))
-                createInstance()
-            else
-                delegate.createAttributeInstance(attClass)
+            return if (implImplementsAttribute(clazz, attClass)) createInstance() else delegate.createAttributeInstance(attClass)
         }
 
-        /** Creates an instance of `A`.  */
         protected abstract fun createInstance(): A
 
         override fun equals(other: Any?): Boolean {
@@ -89,63 +50,32 @@ abstract class AttributeFactory {
     }
 
     companion object {
-        /** Returns a correctly typed [MethodHandle] for the no-arg ctor of the given class.  */
-        fun findAttributeImplCtor(clazz: KClass<*>): MethodHandle {
-            try {
-                return lookup.findConstructor(clazz, NO_ARG_CTOR).asType(NO_ARG_RETURNING_ATTRIBUTEIMPL)
-            } catch (e: /*NoSuchMethod*/Exception) {
-                throw IllegalArgumentException(
-                    "Cannot lookup accessible no-arg constructor for: " + clazz.qualifiedName, e
-                )
-            } catch (e: /*IllegalAccess*/Exception) {
-                throw IllegalArgumentException(
-                    "Cannot lookup accessible no-arg constructor for: " + clazz.qualifiedName, e
-                )
-            }
-        }
-
-        private val lookup: MethodHandles.Lookup = MethodHandles.publicLookup()
-        private val NO_ARG_CTOR: MethodType = MethodType.methodType(Void.TYPE)
-        private val NO_ARG_RETURNING_ATTRIBUTEIMPL: MethodType =
-            MethodType.methodType(
-                AttributeImpl::class
-            )
-
-        /**
-         * This is the default factory that creates [AttributeImpl]s using the class name of the
-         * supplied [Attribute] interface class by appending `Impl` to it.
-         */
         val DEFAULT_ATTRIBUTE_FACTORY: AttributeFactory = DefaultAttributeFactory()
 
-        /**
-         * Returns an AttributeFactory returning an instance of the given `clazz` for the attributes
-         * it implements. The given `clazz` must have a public no-arg constructor. For all other
-         * attributes it calls the given delegate factory as fallback. This method can be used to prefer a
-         * specific `AttributeImpl` which combines multiple attributes over separate classes.
-         *
-         *
-         * Please save instances created by this method in a static final field, because on each call,
-         * this does reflection for creating a [MethodHandle].
-         */
         fun <A : AttributeImpl> getStaticImplementation(
             delegate: AttributeFactory, clazz: KClass<out A>
         ): AttributeFactory {
-            val constr: MethodHandle = findAttributeImplCtor(clazz)
+            val ctor = ctorFor(clazz)
             return object : StaticImplementationAttributeFactory<A>(delegate, clazz) {
                 override fun createInstance(): A {
-                    try {
-                        // be explicit with casting, so javac compiles correct call to polymorphic signature:
-                        val impl = constr.invokeExact() as AttributeImpl
-                        // now cast to generic type:
-                        return impl as A
-                    } catch (e: Error) {
-                        throw e
-                    } catch (e: RuntimeException) {
-                        throw e
-                    } catch (e: Throwable) {
-                        throw /*java.lang.reflect.UndeclaredThrowable*/Exception(e)
-                    }
+                    val impl = ctor.invoke()
+                    @Suppress("UNCHECKED_CAST")
+                    return impl as A
                 }
+            }
+        }
+
+        private fun implImplementsAttribute(implClazz: KClass<*>, attClass: KClass<out Attribute>): Boolean {
+            val interfaces = AttributeSource.getInterfaces(implClazz)
+            return interfaces.any { it == attClass }
+        }
+
+        private fun ctorFor(clazz: KClass<out AttributeImpl>): () -> AttributeImpl {
+            return when (clazz) {
+                PackedTokenAttributeImpl::class -> { { PackedTokenAttributeImpl() } }
+                CharTermAttributeImpl::class -> { { CharTermAttributeImpl() } }
+                OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
+                else -> throw IllegalArgumentException("No known no-arg constructor for ${clazz.qualifiedName}")
             }
         }
     }
