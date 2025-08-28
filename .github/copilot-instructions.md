@@ -40,8 +40,8 @@ Under this directory you find two sub directories:
 
 ## Running Unit Tests
 
-### Priority 1, Intelij IDEA MCP Server
-When you have access to Intelij IDEA MCP server, you should use the IDEA's internal test runner.
+### Priority 1, JetBrains MCP Server
+When you have access to JetBrains MCP server, you should use the IDEA's internal test runner. Using the mcp, find run configuration then run test via found run configuration to compile, test, read test result and do other works needed for debugging and development.
 
 ### Priority 2, Gradle command line
-When you don't have access to Intelij IDEA MCP server, you should use the command line Gradle test runner.
+When you don't have access to JetBrains MCP server, you should use the command line Gradle test runner.
