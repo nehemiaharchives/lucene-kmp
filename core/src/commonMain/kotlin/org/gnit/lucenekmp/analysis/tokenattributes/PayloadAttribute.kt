@@ -24,12 +24,12 @@ interface PayloadAttribute : Attribute {
      *
      * @see .setPayload
      */
-    val payload: BytesRef
+    var payload: BytesRef?
 
     /**
      * Sets this Token's payload.
      *
      * @see .getPayload
      */
-    fun setPayload(payload: BytesRef)
+    //fun setPayload(payload: BytesRef?)
 }

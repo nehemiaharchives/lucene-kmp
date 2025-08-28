@@ -294,7 +294,13 @@ class DocumentsWriterDeleteQueue private constructor(
     override fun close() {
         globalBufferLock.lock()
         try {
-            check(!anyChanges()) { "Can't close queue unless all changes are applied" }
+            // Avoid nested locking: inline the anyChanges() logic under the held lock
+            val hasChanges =
+                globalBufferedUpdates.any() ||
+                    !globalSlice.isEmpty ||
+                    globalSlice.sliceTail !== tail ||
+                    tail.next != null
+            check(!hasChanges) { "Can't close queue unless all changes are applied" }
             this.closed = true
             val seqNo: Long = nextSeqNo.load()
             assert(

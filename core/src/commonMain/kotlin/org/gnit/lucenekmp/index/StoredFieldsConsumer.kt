@@ -72,7 +72,7 @@ open class StoredFieldsConsumer(
     }
 
     @Throws(IOException::class)
-    open fun flush(state: SegmentWriteState, sortMap: Sorter.DocMap) {
+    open fun flush(state: SegmentWriteState, sortMap: Sorter.DocMap?) {
         try {
             writer!!.finish(state.segmentInfo.maxDoc())
         } finally {

@@ -200,7 +200,7 @@ internal class SortedSetDocValuesWriter(
     @Throws(IOException::class)
     override fun flush(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         dvConsumer: DocValuesConsumer
     ) {
         finish()

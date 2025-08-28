@@ -27,7 +27,7 @@ class MockFixedLengthPayloadFilter(
     override fun incrementToken(): Boolean {
         if (input.incrementToken()) {
             random.nextBytes(bytes)
-            payloadAtt.setPayload(payload)
+            payloadAtt.payload = payload
             return true
         }
         return false

@@ -65,34 +65,29 @@ class FieldInvertState
     var lastStartOffset: Int = 0
     var lastPosition: Int = 0
 
-    var attributeSource: AttributeSource?
-    // TODO: better name?
+    var attributeSource: AttributeSource? = null
+        // TODO: better name?
         /** Sets attributeSource to a new instance.  */
-        set(attributeSource) {
-            if (this.attributeSource !== attributeSource) {
-                this.attributeSource = attributeSource
-                if (attributeSource == null) {
+        set(value) {
+            if (field !== value) {
+                field = value
+                if (value == null) {
                     termAttribute = null
                     termFreqAttribute = null
                     posIncrAttribute = null
                     offsetAttribute = null
                     payloadAttribute = null
                 } else {
-                    termAttribute = attributeSource.getAttribute(TermToBytesRefAttribute::class)
-                    termFreqAttribute = attributeSource.addAttribute(TermFrequencyAttribute::class)
-                    posIncrAttribute = attributeSource.addAttribute(PositionIncrementAttribute::class)
-                    offsetAttribute = attributeSource.addAttribute(OffsetAttribute::class)
-                    payloadAttribute = attributeSource.getAttribute(PayloadAttribute::class)
+                    termAttribute = value.addAttribute(TermToBytesRefAttribute::class)
+                    termFreqAttribute = value.addAttribute(TermFrequencyAttribute::class)
+                    posIncrAttribute = value.addAttribute(PositionIncrementAttribute::class)
+                    offsetAttribute = value.addAttribute(OffsetAttribute::class)
+                    payloadAttribute = value.addAttribute(PayloadAttribute::class)
                 }
             }
         }
-        /**
-         * Returns the [AttributeSource] from the [TokenStream] that provided the indexed
-         * tokens for this field.
-         */
-        get(): AttributeSource? {
-            return attributeSource
-        }
+        /** Returns the AttributeSource from the TokenStream that provided the indexed tokens. */
+        get() = field
 
     var offsetAttribute: OffsetAttribute? = null
     var posIncrAttribute: PositionIncrementAttribute? = null

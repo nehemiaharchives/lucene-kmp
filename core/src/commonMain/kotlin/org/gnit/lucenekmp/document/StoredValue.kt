@@ -41,24 +41,28 @@ class StoredValue {
     private var floatValue = 0f
     private var doubleValue = 0.0
     private lateinit var dataInput: StoredFieldDataInput
+    // private backing fields to hold values
+    private var _binaryValue: BytesRef? = null
+    private var _stringValue: String? = null
+
     var binaryValue: BytesRef
-        get(): BytesRef {
+        get() {
             require(type == Type.BINARY) { "Cannot get a binary value on a $type value" }
-            return binaryValue
+            return _binaryValue ?: error("binaryValue has not been initialized")
         }
         set(value) {
             require(type == Type.BINARY) { "Cannot set a binary value on a $type value" }
-            binaryValue = value
+            _binaryValue = value
         }
 
     var stringValue: String
-        get(): String {
+        get() {
             require(type == Type.STRING) { "Cannot get a string value on a $type value" }
-            return stringValue
+            return _stringValue ?: error("stringValue has not been initialized")
         }
         set(value) {
             require(type == Type.STRING) { "Cannot set a string value on a $type value" }
-            stringValue = value
+            _stringValue = value
         }
 
     /** Ctor for integer values.  */

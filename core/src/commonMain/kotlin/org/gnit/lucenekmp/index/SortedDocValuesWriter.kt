@@ -116,7 +116,7 @@ internal class SortedDocValuesWriter(
     @Throws(IOException::class)
     override fun flush(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         dvConsumer: DocValuesConsumer
     ) {
         finish()
@@ -261,7 +261,7 @@ internal class SortedDocValuesWriter(
             sortedValues: IntArray,
             ordMap: IntArray,
             docsWithField: DocsWithFieldSet,
-            sortMap: Sorter.DocMap
+            sortMap: Sorter.DocMap?
         ): DocValuesProducer {
             val sorted: IntArray?
             if (sortMap != null) {

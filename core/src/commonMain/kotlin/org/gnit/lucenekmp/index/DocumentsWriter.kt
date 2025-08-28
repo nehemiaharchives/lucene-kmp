@@ -19,6 +19,7 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
  * This class accepts multiple added documents and directly writes segment files.
@@ -81,6 +82,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     directory: Directory,
     globalFieldNumberMap: FieldInfos.FieldNumbers
 ) : AutoCloseable, Accountable {
+    private val logger = KotlinLogging.logger {}
     @OptIn(ExperimentalAtomicApi::class)
     private val pendingNumDocs: AtomicLong
 
@@ -380,17 +382,24 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         while (flushControl.anyStalledThreads()
             || (config.checkPendingFlushOnUpdate && flushControl.numQueuedFlushes() > 0)
         ) {
-            // Help out flushing any queued DWPTs so we can un-stall:
-            // Try pickup pending threads here if possible
-            // no need to loop over the next pending flushes... doFlush will take care of this
-            hasEvents = hasEvents or maybeFlush()
-            flushControl.waitIfStalled() // block if stalled
+            logger.debug { "DW.preUpdate() stalled=${flushControl.anyStalledThreads()} queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}" }
+            // Proactively flush to help un-stall. This will either pick a pending DWPT
+            // or check out the largest non-pending DWPT and flush it.
+            val flushed = flushOneDWPT()
+            hasEvents = hasEvents || flushed
+            if (!flushed) {
+                // Nothing to flush right now; avoid busy spinning. Original Java blocks
+                // up to 1s here; we yield cooperatively instead.
+                logger.debug { "DW.preUpdate() nothing to flush; yielding via waitIfStalled" }
+                flushControl.waitIfStalled()
+                break
+            }
         }
         return hasEvents
     }
 
     private suspend fun postUpdate(
-        flushingDWPT: DocumentsWriterPerThread,
+        flushingDWPT: DocumentsWriterPerThread?,
         hasEvents: Boolean
     ): Boolean {
         var hasEvents = hasEvents
@@ -406,12 +415,12 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
 
     suspend fun updateDocuments(
         docs: Iterable<Iterable<IndexableField>>,
-        delNode: DocumentsWriterDeleteQueue.Node<*>
+        delNode: DocumentsWriterDeleteQueue.Node<*>?
     ): Long {
         val hasEvents = preUpdate()
 
         val dwpt: DocumentsWriterPerThread = flushControl.obtainAndLock()
-        val flushingDWPT: DocumentsWriterPerThread
+        val flushingDWPT: DocumentsWriterPerThread?
         var seqNo: Long
 
         try {
@@ -430,7 +439,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     flushControl.doOnAbort(dwpt)
                 }
             }
-            flushingDWPT = flushControl.doAfterDocument(dwpt)!!
+            flushingDWPT = flushControl.doAfterDocument(dwpt)
         } finally {
             // If a flush is occurring, we don't want to allow this dwpt to be reused
             // If it is aborted, we shouldn't allow it to be reused
@@ -455,17 +464,21 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     }
 
     private suspend fun maybeFlush(): Boolean {
+        logger.debug { "DW.maybeFlush() called: queued=${flushControl.numQueuedFlushes()} fullFlush=${flushControl.isFullFlush}" }
         val flushingDWPT: DocumentsWriterPerThread? = flushControl.nextPendingFlush()
         if (flushingDWPT != null) {
+            logger.debug { "DW.maybeFlush() got DWPT seg=${flushingDWPT.getSegmentInfo().name} docsInRAM=${flushingDWPT.numDocsInRAM}" }
             doFlush(flushingDWPT)
             return true
         }
+        logger.debug { "DW.maybeFlush() nothing to flush" }
         return false
     }
 
     private suspend fun doFlush(flushingDWPT: DocumentsWriterPerThread) {
         var flushingDWPT: DocumentsWriterPerThread = flushingDWPT
         checkNotNull(flushingDWPT) { "Flushing DWPT must not be null" }
+        logger.debug { "DW.doFlush() start seg=${flushingDWPT.getSegmentInfo().name} docsInRAM=${flushingDWPT.numDocsInRAM}" }
         do {
             assert(!flushingDWPT.hasFlushed())
             var success = false
@@ -501,7 +514,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     val dwpt: DocumentsWriterPerThread = flushingDWPT
                     // Each flush is assigned a ticket in the order they acquire the ticketQueue lock
                     ticket =
-                        ticketQueue.addTicket { FlushTicket(dwpt.prepareFlush()!!, true) }
+                        ticketQueue.addTicket { FlushTicket(dwpt.prepareFlush(), true) }
                     val flushingDocsInRam: Int = flushingDWPT.numDocsInRAM
                     var dwptSuccess = false
                     try {
@@ -509,6 +522,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                         val newSegment: FlushedSegment = flushingDWPT.flush(flushNotifications)!!
                         ticketQueue.addSegment(ticket, newSegment)
                         dwptSuccess = true
+                        logger.debug { "DW.doFlush() flushed seg=${newSegment.segmentInfo.info.name} delCount=${newSegment.delCount}" }
                     } finally {
                         subtractFlushedNumDocs(flushingDocsInRam)
                         if (!flushingDWPT.pendingFilesToDelete().isEmpty()) {
@@ -543,9 +557,19 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 }
             } finally {
                 flushControl.doAfterFlush(flushingDWPT)
+                logger.debug { "DW.doFlush() after doAfterFlush seg=${flushingDWPT.getSegmentInfo().name} queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}" }
             }
-        } while ((flushControl.nextPendingFlush().also { flushingDWPT = it!! }) != null)
+            // poll next pending flush safely
+            val next: DocumentsWriterPerThread? = flushControl.nextPendingFlush()
+            if (next != null) {
+                flushingDWPT = next
+                logger.debug { "DW.doFlush() chaining to next seg=${flushingDWPT.getSegmentInfo().name}" }
+            } else {
+                break
+            }
+        } while (true)
         flushNotifications.afterSegmentsFlushed()
+        logger.debug { "DW.doFlush() end" }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -670,6 +694,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         if (infoStream.isEnabled("DW")) {
             infoStream.message("DW", "startFullFlush")
         }
+        logger.debug { "DW.flushAllThreads() enter" }
 
         // TODO synchronized is not supported in KMP, need to think what to do here
         //synchronized(this) {
@@ -686,9 +711,22 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
 
         var anythingFlushed = false
         try {
-            anythingFlushed = anythingFlushed or maybeFlush()
+            // Keep flushing pending DWPTs until none are left. This avoids relying on
+            // other threads to help out and prevents waitForFlush() from spinning.
+            do {
+                val queued = flushControl.numQueuedFlushes()
+                val blocked = flushControl.numBlockedFlushes()
+                val flushing = flushControl.numFlushingDWPT()
+                logger.debug { "DW.flushAllThreads() loop: queued=$queued blocked=$blocked flushing=$flushing fullFlush=${flushControl.isFullFlush}" }
+                val flushedNow = maybeFlush()
+                logger.debug { "DW.flushAllThreads() maybeFlush -> $flushedNow" }
+                anythingFlushed = anythingFlushed or flushedNow
+            } while (flushControl.numQueuedFlushes() > 0)
+
+            logger.debug { "DW.flushAllThreads() waiting for inflight flushes... flushing=${flushControl.numFlushingDWPT()}" }
             // If a concurrent flush is still in flight wait for it
             flushControl.waitForFlush()
+            logger.debug { "DW.flushAllThreads() inflight flushes done. queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}" }
             if (!anythingFlushed && flushingDeleteQueue.anyChanges()
             ) { // apply deletes if we did not flush any document
                 if (infoStream.isEnabled("DW")) {
@@ -697,6 +735,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                         "DW", /*java.lang.Thread.currentThread().getName() + */": flush naked frozen global deletes"
                     )
                 }
+                logger.debug { "DW.flushAllThreads() adding ticket to freeze global deletes" }
                 assert(assertTicketQueueModification(flushingDeleteQueue))
                 ticketQueue.addTicket { maybeFreezeGlobalBuffer(flushingDeleteQueue)!! }
             }
@@ -705,16 +744,15 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             // concurrently if we have very small ram buffers this happens quite frequently
             assert(!flushingDeleteQueue.anyChanges())
         } finally {
+            logger.debug { "DW.flushAllThreads() finally: closing currentFullFlushDelQueue" }
             assert(flushingDeleteQueue == currentFullFlushDelQueue)
             flushingDeleteQueue
                 .close() // all DWPT have been processed and this queue has been fully flushed to the
             // ticket-queue
         }
-        return if (anythingFlushed) {
-            -seqNo
-        } else {
-            seqNo
-        }
+        val result = if (anythingFlushed) -seqNo else seqNo
+        logger.debug { "DW.flushAllThreads() exit: resultSeq=$result" }
+        return result
     }
 
     private fun maybeFreezeGlobalBuffer(

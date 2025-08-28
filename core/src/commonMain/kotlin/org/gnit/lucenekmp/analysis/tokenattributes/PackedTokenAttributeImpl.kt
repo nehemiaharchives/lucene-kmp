@@ -29,13 +29,13 @@ class PackedTokenAttributeImpl
     override var positionLength: Int = 1
         set(positionLength) {
             require(positionLength >= 1) { "Position length must be 1 or greater: got $positionLength" }
-            this.positionLength = positionLength
+            field = positionLength
         }
 
     override var termFrequency: Int = 1
         set(termFrequency) {
             require(termFrequency >= 1) { "Term frequency must be 1 or greater; got $termFrequency" }
-            this.termFrequency = termFrequency
+            field = termFrequency
 
         }
 

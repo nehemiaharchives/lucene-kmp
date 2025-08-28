@@ -82,7 +82,7 @@ internal class BinaryDocValuesWriter(
     @Throws(IOException::class)
     override fun flush(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         dvConsumer: DocValuesConsumer
     ) {
         bytes.freeze(false)

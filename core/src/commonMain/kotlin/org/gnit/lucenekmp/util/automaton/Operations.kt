@@ -1299,7 +1299,7 @@ object Operations {
         val t = Transition()
 
         while (!stack.isEmpty()) {
-            val state: Int = stack.peek() // Just peek, don't remove the state yet
+            val state: Int = stack.peek()!! // Just peek, don't remove the state yet
 
             val count = a.initTransition(state, t)
             var pushed = false

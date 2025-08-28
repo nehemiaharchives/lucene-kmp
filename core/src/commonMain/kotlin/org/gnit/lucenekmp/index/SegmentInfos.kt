@@ -94,16 +94,16 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     /** Counts how often the index has been changed.  */
     var version: Long = 0
         set(newVersion) {
-            require(newVersion >= version) {
+            require(newVersion >= field) {
                 ("newVersion (="
                         + newVersion
                         + ") cannot be less than current version (="
-                        + version
+                        + field
                         + ")")
             }
             // System.out.println(Thread.currentThread().getName() + ": SIS.setVersion change from " +
             // version + " to " + newVersion);
-            version = newVersion
+            field = newVersion
         }
 
     /** Returns current generation.  */

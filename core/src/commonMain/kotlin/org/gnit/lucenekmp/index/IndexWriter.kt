@@ -258,9 +258,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             assert(
                 Int.MAX_VALUE - permits.availablePermits > 0
             ) { "must acquire a permit before processing events" }
-            var event: Event
-            while ((queue.poll().also { event = it!! }) != null) {
-                event.process(writer)
+            var event: Event?
+            while ((queue.poll().also { event = it }) != null) {
+                event!!.process(writer)
             }
         }
 
@@ -346,10 +346,13 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
          * Returns a [LiveIndexWriterConfig], which can be used to query the IndexWriter current
          * settings, as well as modify "live" ones.
          */
-        get(): LiveIndexWriterConfig {
+        /*get(): LiveIndexWriterConfig {
             ensureOpen(false)
             return config
-        }
+        }*/
+        // TODO above is commented out because it emits following error: java.lang.StackOverflowError while running TestSearch.kt fix it in future
+        //	at org.gnit.lucenekmp.index.IndexWriter.getConfig(IndexWriter.kt:350)
+        //	at org.gnit.lucenekmp.index.IndexWriter.getConfig(IndexWriter.kt:351)
 
     /**
      * System.nanoTime() when commit started; used to write an infoStream message about how long
@@ -923,7 +926,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      */
     @Throws(IOException::class)
     private fun getFieldNumberMap(): FieldNumbers {
-        val map = FieldNumbers(config.softDeletesField!!, config.parentField)
+        val map = FieldNumbers(config.softDeletesField, config.parentField)
 
         for (info in segmentInfos) {
             val fis: FieldInfos = readFieldInfos(info)
@@ -1214,7 +1217,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         ensureOpen()
         var success = false
         try {
-            val seqNo = maybeProcessEvents(runBlocking { docWriter.updateDocuments(docs, delNode!!) })
+            val seqNo = maybeProcessEvents(runBlocking { docWriter.updateDocuments(docs, delNode) })
             success = true
             return seqNo
         } catch (tragedy: Error) {
@@ -2650,7 +2653,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         fieldInfos: FieldInfos,
         packet: FrozenBufferedUpdates,
         globalPacket: FrozenBufferedUpdates,
-        sortMap: DocMap
+        sortMap: DocMap?
     ) {
         var published = false
         try {
@@ -3282,7 +3285,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // Don't reorder if blocks can't be identified using the parent field.
         val hasBlocksButNoParentField = readers.map { obj: LeafReader -> obj.metaData }.any(LeafMetaData::hasBlocks)
                 && readers.map { obj: CodecReader -> obj.fieldInfos }
-            .map { obj: FieldInfos -> obj.parentField }.any { obj: Any -> Objects.isNull(obj) }
+            .map { obj: FieldInfos -> obj.parentField }.any { obj: String? -> Objects.isNull(obj) }
 
         val intraMergeExecutor: Executor = mergeScheduler.getIntraMergeExecutor(merge)
 
@@ -5146,7 +5149,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         && mergeReaders
                     .map { obj: CodecReader -> obj.fieldInfos }
                     .map { obj: FieldInfos -> obj.parentField }
-                    .any { obj: Any -> Objects.isNull(obj) }
+                    .any { obj: String? -> Objects.isNull(obj) }
 
             if (!hasIndexSort && !hasBlocksButNoParentField) {
                 // Create a merged view of the input segments. This effectively does the merge.
@@ -5874,7 +5877,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             forced
         ) { ticket: DocumentsWriterFlushQueue.FlushTicket ->
             val newSegment: DocumentsWriterPerThread.FlushedSegment? = ticket.flushedSegment
-            val bufferedUpdates: FrozenBufferedUpdates = ticket.getFrozenUpdates()
+            val bufferedUpdates: FrozenBufferedUpdates? = ticket.getFrozenUpdates()
             ticket.markPublished()
             if (newSegment == null) { // this is a flushed global deletes package - not a segments
                 if (bufferedUpdates != null && bufferedUpdates.any()) { // TODO why can this be null
@@ -5900,7 +5903,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     newSegment.segmentInfo,
                     newSegment.fieldInfos,
                     newSegment.segmentUpdates!!,
-                    bufferedUpdates,
+                    bufferedUpdates!!,
                     newSegment.sortMap
                 )
             }
@@ -6785,8 +6788,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     globalFieldNumberMap,
                     { bufferedUpdatesStream.completedDelGen },
                     infoStream,
-                    conf.softDeletesField!!,
-                    reader!!
+                    conf.softDeletesField,
+                    reader
                 )
             if (config.readerPooling) {
                 readerPool.enableReaderPooling()

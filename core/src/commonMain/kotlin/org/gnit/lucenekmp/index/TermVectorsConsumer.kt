@@ -54,7 +54,7 @@ open class TermVectorsConsumer(
     override fun flush(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         norms: NormsProducer
     ) {
         if (writer != null) {

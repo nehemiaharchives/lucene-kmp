@@ -46,7 +46,7 @@ import kotlin.time.ExperimentalTime
  * @see LockFactory
  */
 class NativeFSLockFactory constructor(
-    val fs: FileSystem =FileSystem.SYSTEM
+    val fs: FileSystem = FileSystem.SYSTEM
 ) : FSLockFactory() {
     @OptIn(ExperimentalTime::class)
     override fun obtainFSLock(
@@ -150,10 +150,9 @@ class NativeFSLockFactory constructor(
         init {
             /*this.lock = lock
             this.channel = channel*/
-            val tmp = path.parent!! / "${path.name}.tmp-${Clock.System.now().toEpochMilliseconds()}"
-            fs.write(tmp) { /* empty */ }          // create tmp file  ✔
-            fs.atomicMove(tmp, path)  // try-lock (throws if exists)  ✔
-
+            // Don't modify the lock file here; we already ensured its existence above.
+            // Creating and then atomically replacing it would change its creation time
+            // and cause ensureValid() to falsely detect external modification.
             this.path = path
             this.creationTime = creationTime
         }

@@ -265,14 +265,14 @@ class IndexingChain(
 
     @OptIn(ExperimentalTime::class)
     @Throws(IOException::class)
-    fun flush(state: SegmentWriteState): Sorter.DocMap {
+    fun flush(state: SegmentWriteState): Sorter.DocMap? {
         // NOTE: caller (DocumentsWriterPerThread) handles
         // aborting on any exception from this method
 
         val sortMap: Sorter.DocMap? = maybeSortSegment(state)
         val maxDoc: Int = state.segmentInfo.maxDoc()
         var t0: Instant = Clock.System.now()
-        writeNorms(state, sortMap!!)
+        writeNorms(state, sortMap)
         if (infoStream.isEnabled("IW")) {
             infoStream.message(
                 "IW",
@@ -382,7 +382,7 @@ class IndexingChain(
     @Throws(IOException::class)
     private fun writePoints(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap
+        sortMap: Sorter.DocMap?
     ) {
         var pointsWriter: PointsWriter? = null
         var success = false
@@ -428,7 +428,7 @@ class IndexingChain(
     @Throws(IOException::class)
     private fun writeDocValues(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap
+        sortMap: Sorter.DocMap?
     ) {
         var dvConsumer: DocValuesConsumer? = null
         var success = false
@@ -502,7 +502,7 @@ class IndexingChain(
     @Throws(IOException::class)
     private fun writeNorms(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap
+        sortMap: Sorter.DocMap?
     ) {
         var success = false
         var normsConsumer: NormsConsumer? = null
@@ -1043,9 +1043,9 @@ class IndexingChain(
         val reserved: Boolean
     ) : Comparable<PerField> {
         var fieldInfo: FieldInfo? = null
-            set(fieldInfo) {
-                assert(this.fieldInfo == null)
-                this.fieldInfo = fieldInfo
+            set(value) {
+                assert(field == null)
+                field = value
             }
 
         var invertState: FieldInvertState? = null

@@ -25,7 +25,7 @@ class MockVariableLengthPayloadFilter(
         if (input.incrementToken()) {
             random.nextBytes(bytes)
             payload.length = random.nextInt(MAXLENGTH)
-            payloadAtt.setPayload(payload)
+            payloadAtt.payload = payload
             return true
         }
         return false

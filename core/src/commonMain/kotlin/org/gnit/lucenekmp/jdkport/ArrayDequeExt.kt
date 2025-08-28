@@ -4,8 +4,10 @@ fun <E>ArrayDeque<E>.push(e: E) {
     addFirst(e)
 }
 
-fun <E> ArrayDeque<E>.peek(): E{
-    return elementAt(0)
+fun <E> ArrayDeque<E>.peek(): E?{
+    // Return null if empty to match Java's Deque.peek semantics
+    if (isEmpty()) return null
+    return this[0]
 }
 
 fun <E> ArrayDeque<E>.pop(): E {
@@ -79,7 +81,7 @@ fun <E> ArrayDeque<E>.descendingIterator(): MutableIterator<E> = object : Mutabl
         if (lastReturned < 0)                      // next() not called or already removed
             throw IllegalStateException("Call next() before remove()")
 
-        this@descendingIterator.removeAt(lastReturned)   // O(1) amortised, std‑lib method&#8203;:contentReference[oaicite:3]{index=3}
+        this@descendingIterator.removeAt(lastReturned)   // O(1) amortised, std‑lib method​:contentReference[oaicite:3]{index=3}
         /* After a deletion indices ≥ lastReturned shift left by 1.
            Since we always iterate downward, the nextIndex is already < lastReturned,
            so no extra adjustment is usually needed.  Re‑sync anyway for safety. */

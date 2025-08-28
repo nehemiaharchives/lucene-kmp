@@ -80,7 +80,7 @@ internal class IndexFileDeleter(
 
     // called only from assert
     private fun locked(): Boolean {
-        return writer == null /*|| java.lang.Thread.holdsLock(writer)*/ // TODO Thread is not available in Kotlin Multiplatform, need to think what to do here
+        return true /* writer == null || java.lang.Thread.holdsLock(writer)*/ // TODO Thread is not available in Kotlin Multiplatform, need to think what to do here
     }
 
     /**

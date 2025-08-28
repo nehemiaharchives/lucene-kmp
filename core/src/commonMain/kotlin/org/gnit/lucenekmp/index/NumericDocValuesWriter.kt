@@ -65,7 +65,7 @@ internal class NumericDocValuesWriter(
     @Throws(IOException::class)
     override fun flush(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         dvConsumer: DocValuesConsumer
     ) {
         if (finalValues == null) {
@@ -219,7 +219,7 @@ internal class NumericDocValuesWriter(
             writerFieldInfo: FieldInfo,
             values: PackedLongValues,
             docsWithField: DocsWithFieldSet,
-            sortMap: Sorter.DocMap
+            sortMap: Sorter.DocMap?
         ): DocValuesProducer {
             val sorted: NumericDVs?
             if (sortMap != null) {

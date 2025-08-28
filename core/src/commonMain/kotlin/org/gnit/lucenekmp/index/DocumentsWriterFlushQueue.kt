@@ -6,8 +6,6 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.util.IOConsumer
 import okio.IOException
-import org.gnit.lucenekmp.jdkport.decrementAndGet
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.jdkport.peek
 import org.gnit.lucenekmp.jdkport.poll
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -62,7 +60,7 @@ class DocumentsWriterFlushQueue {
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
-    fun addSegment(ticket: FlushTicket, segment: DocumentsWriterPerThread.FlushedSegment) {
+    fun addSegment(ticket: FlushTicket, segment: FlushedSegment) {
         assert(ticket.hasSegment)
         // the actual flush is done asynchronously and once done the FlushedSegment
         // is passed to the flush ticket
@@ -87,13 +85,8 @@ class DocumentsWriterFlushQueue {
     private fun innerPurge(consumer: IOConsumer<FlushTicket>) {
         assert(purgeLock.isHeldByCurrentThread())
         while (true) {
-            val canPublish: Boolean
-
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
             val head = queue.peek()
-                canPublish = head != null && head.canPublish() // do this synced
-            //}
+            val canPublish: Boolean = head?.canPublish() == true // do this synced
             if (canPublish) {
                 try {
                     /*
@@ -102,16 +95,13 @@ class DocumentsWriterFlushQueue {
                    * the downside is that we need to force a purge on fullFlush since there could
                    * be a ticket still in the queue.
                    */
-                    consumer.accept(head)
+                    consumer.accept(head!!) // head is non-null here
                 } finally {
-                    // TODO Synchronized is not supported in KMP, need to think what to do here
-                    //synchronized(this) {
-                        // finally remove the published ticket from the queue
-                        val poll: FlushTicket? = queue.poll()
-                        decTickets()
-                        // we hold the purgeLock so no other thread should have polled:
-                        assert(poll == head)
-                    //}
+                    // finally remove the published ticket from the queue
+                    val poll: FlushTicket? = queue.poll()
+                    decTickets()
+                    // we hold the purgeLock so no other thread should have polled:
+                    assert(poll == head)
                 }
             } else {
                 break
@@ -149,7 +139,7 @@ class DocumentsWriterFlushQueue {
         return ticketCount.load()
     }
 
-    class FlushTicket(private val frozenUpdates: FrozenBufferedUpdates, val hasSegment: Boolean) {
+    class FlushTicket(private val frozenUpdates: FrozenBufferedUpdates?, val hasSegment: Boolean) {
         private var segment: FlushedSegment? = null
         private var failed = false
         private var published = false
@@ -183,7 +173,7 @@ class DocumentsWriterFlushQueue {
             get() = segment
 
         /** Returns a frozen global deletes package.  */
-        fun getFrozenUpdates(): FrozenBufferedUpdates {
+        fun getFrozenUpdates(): FrozenBufferedUpdates? {
             return frozenUpdates
         }
     }

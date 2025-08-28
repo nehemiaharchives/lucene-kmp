@@ -37,31 +37,6 @@ class FieldInfo(
     isParentField: Boolean
 ) {
 
-    /**
-     * Returns [DocValuesType] of the docValues; this is `DocValuesType.NONE` if the field
-     * has no docvalues.
-     */
-    var docValuesType = DocValuesType.NONE
-        /** Record that this field is indexed with docvalues, with the specified type  */
-        set(type) {
-            if (type == null) {
-                throw NullPointerException("DocValuesType must not be null (field: \"$name\")")
-            }
-            require(!(docValuesType !== DocValuesType.NONE && type !== DocValuesType.NONE && docValuesType !== type)) {
-                ("cannot change DocValues type from "
-                        + docValuesType
-                        + " to "
-                        + type
-                        + " for field \""
-                        + name
-                        + "\"")
-            }
-            docValuesType = type
-            this.checkConsistency()
-        }
-
-    private val docValuesSkipIndex: DocValuesSkipIndexType
-
     // True if any document indexed term vectors
     private var storeTermVector = false
 
@@ -112,12 +87,40 @@ class FieldInfo(
      */
     val isParentField: Boolean
 
+    // Guard to skip consistency checks during construction
+    private var initializing: Boolean = false
+
+    /**
+     * Returns [DocValuesType] of the docValues; this is `DocValuesType.NONE` if the field
+     * has no docvalues.
+     */
+    var docValuesType: DocValuesType = DocValuesType.NONE
+        /** Record that this field is indexed with docvalues, with the specified type  */
+        set(value) {
+            require(!(field !== DocValuesType.NONE && value !== DocValuesType.NONE && field !== value)) {
+                ("cannot change DocValues type from "
+                        + field
+                        + " to "
+                        + value
+                        + " for field \""
+                        + name
+                        + "\"")
+            }
+            field = value
+            if (!initializing) {
+                this.checkConsistency()
+            }
+        }
+
+    private val docValuesSkipIndex: DocValuesSkipIndexType
+
     /**
      * Sole constructor.
      *
      * @lucene.experimental
      */
     init {
+        initializing = true
         this.docValuesType =
             requireNotNull<DocValuesType>(
                 docValues
@@ -146,6 +149,7 @@ class FieldInfo(
         this.vectorSimilarityFunction = vectorSimilarityFunction
         this.isSoftDeletesField = softDeletesField
         this.isParentField = isParentField
+        initializing = false
         this.checkConsistency()
     }
 
@@ -165,7 +169,7 @@ class FieldInfo(
             require(!omitNorms) { "non-indexed field '$name' cannot omit norms" }
         }
 
-        requireNotNull(docValuesType) { "DocValuesType must not be null (field: '$name')" }
+        // docValuesType is non-nullable; validate compatibility only
         require(docValuesSkipIndex.isCompatibleWith(docValuesType)) {
             ("field '"
                     + name

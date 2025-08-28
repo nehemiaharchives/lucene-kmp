@@ -83,8 +83,6 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         return this
     }
 
-    public override lateinit var openMode: OpenMode
-
     /**
      * Expert: set the compatibility version to use for this index. In case the index is created, it
      * will use the given major version for compatibility. It is sometimes useful to set the previous
@@ -182,8 +180,6 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         return this
     }
 
-    override lateinit var similarity: Similarity
-
     /**
      * Expert: sets the merge scheduler used by this writer. The default is [ ].
      *
@@ -199,8 +195,6 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         return this
     }
 
-    public override lateinit var mergeScheduler: MergeScheduler
-
     /**
      * Set the [Codec].
      *
@@ -212,10 +206,6 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         this.codec = codec
         return this
     }
-
-    override lateinit var codec: Codec
-
-    override lateinit var mergePolicy: MergePolicy
 
     /**
      * By default, IndexWriter does not pool the SegmentReaders it must open for deletions and
@@ -230,8 +220,6 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         this.readerPooling = readerPooling
         return this
     }
-
-    override var readerPooling: Boolean /* init code was not set in java lucene */ = DEFAULT_READER_POOLING
 
     /**
      * Expert: Controls when segments are flushed to disk during indexing. The [FlushPolicy]

@@ -26,8 +26,8 @@ internal class ReaderPool(
     private val fieldNumbers: FieldInfos.FieldNumbers,
     private val completedDelGenSupplier: () -> Long,
     private val infoStream: InfoStream,
-    private val softDeletesField: String,
-    reader: StandardDirectoryReader
+    private val softDeletesField: String?,
+    reader: StandardDirectoryReader?
 ) : AutoCloseable {
     private val readerMap: MutableMap<SegmentCommitInfo, ReadersAndUpdates> = mutableMapOf()
 
@@ -69,13 +69,10 @@ internal class ReaderPool(
                         segReader.numDocs(),
                         true
                     )
-                readerMap.put(
-                    newReader.originalSegmentInfo,
-                    ReadersAndUpdates(
-                        segmentInfos.indexCreatedVersionMajor,
-                        newReader,
-                        newPendingDeletes(newReader, newReader.originalSegmentInfo)
-                    )
+                readerMap[newReader.originalSegmentInfo] = ReadersAndUpdates(
+                    segmentInfos.indexCreatedVersionMajor,
+                    newReader,
+                    newPendingDeletes(newReader, newReader.originalSegmentInfo)
                 )
             }
         }
@@ -409,7 +406,7 @@ internal class ReaderPool(
                     segmentInfos.indexCreatedVersionMajor, info, newPendingDeletes(info)
                 )
             // Steal initial reference:
-            readerMap.put(info, rld)
+            readerMap[info] = rld
         } else {
             assert(
                 rld.info === info

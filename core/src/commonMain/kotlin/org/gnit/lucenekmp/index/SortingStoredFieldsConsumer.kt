@@ -37,7 +37,7 @@ internal class SortingStoredFieldsConsumer(
     @Throws(IOException::class)
     override fun flush(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap
+        sortMap: Sorter.DocMap?
     ) {
         super.flush(state, sortMap)
         val reader: StoredFieldsReader =

@@ -516,7 +516,7 @@ open class IndexSearcher(
         doDocScores: Boolean
     ): TopFieldDocs {
         require(!(after != null && after !is FieldDoc)) { "after must be a FieldDoc; got $after" }
-        return searchAfter(after as FieldDoc, query, numHits, sort, doDocScores)
+        return searchAfter(after as? FieldDoc, query, numHits, sort, doDocScores)
     }
 
     @Throws(IOException::class)
@@ -542,7 +542,7 @@ open class IndexSearcher(
 
         val topDocs: TopFieldDocs = search(query, manager)
         if (doDocScores) {
-            TopFieldCollector.populateScores(topDocs.scoreDocs!!, this, query)
+            TopFieldCollector.populateScores(topDocs.scoreDocs, this, query)
         }
         return topDocs
     }

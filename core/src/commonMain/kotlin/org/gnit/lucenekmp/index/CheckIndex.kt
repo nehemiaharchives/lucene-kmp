@@ -1079,7 +1079,7 @@ class CheckIndex(
                 }
 
                 // Test Soft Deletes
-                val softDeletesField: String = reader.fieldInfos.softDeletesField
+                val softDeletesField: String? = reader.fieldInfos.softDeletesField
                 if (softDeletesField != null) {
                     segInfoStat.softDeletesStatus =
                         checkSoftDeletes(softDeletesField, info, reader, infoStream, failFast)

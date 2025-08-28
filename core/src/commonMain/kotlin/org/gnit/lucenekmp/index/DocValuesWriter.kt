@@ -8,7 +8,7 @@ internal abstract class DocValuesWriter<T : DocIdSetIterator> {
     @Throws(IOException::class)
     abstract fun flush(
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         consumer: DocValuesConsumer
     )
 

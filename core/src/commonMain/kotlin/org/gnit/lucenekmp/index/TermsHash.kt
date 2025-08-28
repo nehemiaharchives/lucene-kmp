@@ -50,7 +50,7 @@ abstract class TermsHash(
     open fun flush(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         norms: NormsProducer
     ) {
         if (nextTermsHash != null) {

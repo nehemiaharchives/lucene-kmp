@@ -30,7 +30,7 @@ internal class SortingTermVectorsConsumer(
     override fun flush(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         norms: NormsProducer
     ) {
         super.flush(fieldsToFlush, state, sortMap, norms)
@@ -64,7 +64,7 @@ internal class SortingTermVectorsConsumer(
     @Throws(IOException::class)
     override fun initTermVectorsWriter() {
         if (writer == null) {
-            val context: IOContext =
+            val context =
                 IOContext(FlushInfo(lastDocID, bytesUsed.get()))
             tmpDirectory = TrackingTmpOutputDirectoryWrapper(directory)
             writer = TEMP_TERM_VECTORS_FORMAT.vectorsWriter(tmpDirectory!!, info, context)

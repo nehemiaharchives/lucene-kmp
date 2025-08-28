@@ -61,7 +61,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         segmentUpdates: BufferedUpdates,
         val liveDocs: FixedBitSet,
         val delCount: Int,
-        val sortMap: Sorter.DocMap
+        val sortMap: Sorter.DocMap?
     ) {
         val segmentUpdates: FrozenBufferedUpdates? = if (segmentUpdates != null && segmentUpdates.any())
             FrozenBufferedUpdates(infoStream, segmentUpdates, segmentInfo)
@@ -151,7 +151,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     @Throws(IOException::class)
     fun updateDocuments(
         docs: Iterable<out Iterable<out IndexableField>>,
-        deleteNode: DocumentsWriterDeleteQueue.Node<*>,
+        deleteNode: DocumentsWriterDeleteQueue.Node<*>?,
         flushNotifications: FlushNotifications,
         onNewDocOnRAM: Runnable
     ): Long {
@@ -244,7 +244,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     }
 
     private fun finishDocuments(
-        deleteNode: DocumentsWriterDeleteQueue.Node<*>,
+        deleteNode: DocumentsWriterDeleteQueue.Node<*>?,
         docIdUpTo: Int
     ): Long {
         /*
@@ -371,7 +371,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                 "flush postings as segment " + flushState.segmentInfo.name + " numDocs=" + numDocsInRAM
             )
         }
-        val sortMap: Sorter.DocMap
+        val sortMap: Sorter.DocMap?
         try {
             val softDeletedDocs = if (indexWriterConfig.softDeletesField != null) {
                 indexingChain.getHasDocValues(indexWriterConfig.softDeletesField!!)
@@ -578,7 +578,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     @Throws(IOException::class)
     fun sealFlushedSegment(
         flushedSegment: FlushedSegment,
-        sortMap: Sorter.DocMap,
+        sortMap: Sorter.DocMap?,
         flushNotifications: FlushNotifications
     ) {
         //checkNotNull(flushedSegment)

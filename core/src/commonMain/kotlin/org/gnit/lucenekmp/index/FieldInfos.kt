@@ -30,10 +30,10 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     private val hasVectorValues: Boolean
 
     /** Returns the soft-deletes field name if exists; otherwise returns null  */
-    val softDeletesField: String
+    val softDeletesField: String?
 
     /** Returns the parent document field name if exists; otherwise returns null  */
-    val parentField: String
+    val parentField: String?
 
     // used only by fieldInfo(int)
     private val byNumber: Array<FieldInfo>
@@ -112,8 +112,8 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         this.hasDocValues = hasDocValues
         this.hasPointValues = hasPointValues
         this.hasVectorValues = hasVectorValues
-        this.softDeletesField = softDeletesField!!
-        this.parentField = parentField!!
+        this.softDeletesField = softDeletesField
+        this.parentField = parentField
 
         if (fieldNumberStrictlyAscending && maxFieldNumber == infos.size - 1) {
             // The input FieldInfo[] contains all fields numbered from 0 to infos.length - 1, and they are
@@ -358,7 +358,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
 
         private fun verifySoftDeletedFieldName(fieldName: String, isSoftDeletesField: Boolean) {
             if (isSoftDeletesField) {
-                requireNotNull(softDeletesFieldName != null) {
+                require(softDeletesFieldName != null) {
                     ("this index has ["
                             + fieldName
                             + "] as soft-deletes already but soft-deletes field is not configured in IWC")
@@ -770,8 +770,8 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
             var set = false
             var theField: String? = null
             for (ctx in leaves) {
-                val field: String = ctx.reader().fieldInfos.parentField
-                check(!(set && field == theField == false)) {
+                val field: String? = ctx.reader().fieldInfos.parentField
+                check(!(set && field != theField)) {
                     ("expected parent doc field to be \""
                             + theField
                             + " \" across all segments but found a segment with different field \""

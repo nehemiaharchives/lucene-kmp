@@ -312,7 +312,7 @@ internal class FreqProxFields(fieldList: MutableList<FreqProxTermsWriterPerField
                     ended = true
                     docID = postingsArray.lastDocIDs[termID]
                     if (readTermFreq) {
-                        freq = postingsArray.termFreqs[termID]
+                        freq = postingsArray.termFreqs!![termID]
                     }
                 }
             } else {
@@ -396,7 +396,7 @@ internal class FreqProxFields(fieldList: MutableList<FreqProxTermsWriterPerField
                 } else {
                     ended = true
                     docID = postingsArray.lastDocIDs[termID]
-                    freq = postingsArray.termFreqs[termID]
+                    freq = postingsArray.termFreqs!![termID]
                 }
             } else {
                 val code: Int = reader.readVInt()

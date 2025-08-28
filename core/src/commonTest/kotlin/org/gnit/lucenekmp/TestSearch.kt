@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp
 
 import okio.Path.Companion.toPath
+import okio.fakefilesystem.FakeFileSystem
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
@@ -26,8 +27,10 @@ import org.gnit.lucenekmp.search.SortField
 import org.gnit.lucenekmp.search.TermQuery
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FSDirectory
+import org.gnit.lucenekmp.store.NativeFSLockFactory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.util.IOUtils
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,6 +38,7 @@ import kotlin.test.assertEquals
 
 /** JUnit adaptation of an older test case SearchTest.  */
 class TestSearch : LuceneTestCase() {
+
     /**
      * This test performs a number of searches. It also compares output of searches using multi-file
      * index segments with single-file index segments.
@@ -46,9 +50,13 @@ class TestSearch : LuceneTestCase() {
      */
     @Test
     fun testSearch() {
+        val fs = FakeFileSystem()
+        Files.setFileSystem(fs)
+        IOUtils.fileSystem = fs
+
         var sw = StringWriter()
         //var pw: PrintWriter = PrintWriter(sw, true)
-        doTestSearch(random(), /*pw,*/ false)
+        doTestSearch(random(), /*pw,*/ false, fs)
         //pw.close()
         sw.close()
         val multiFileOutput: String = sw.toString()
@@ -56,7 +64,7 @@ class TestSearch : LuceneTestCase() {
         // System.out.println(multiFileOutput);
         sw = StringWriter()
         //pw = PrintWriter(sw, true)
-        doTestSearch(random(), /*pw,*/ true)
+        doTestSearch(random(), /*pw,*/ true, fs)
         //pw.close()
         sw.close()
         val singleFileOutput: String = sw.toString()
@@ -64,11 +72,12 @@ class TestSearch : LuceneTestCase() {
         assertEquals(multiFileOutput, singleFileOutput)
     }
 
-    private fun doTestSearch(random: Random, /*out: PrintWriter, */useCompoundFile: Boolean) {
+    private fun doTestSearch(random: Random, /*out: PrintWriter, */useCompoundFile: Boolean, fs: FakeFileSystem) {
         val randomDirNumber = random.nextInt(1000)
         val path = "/tmp/$randomDirNumber/".toPath()
-        Files.createFile(path)
-        val directory: Directory = /*newDirectory()*/ FSDirectory.open(path = path)
+        // Ensure the index path is a directory in the fake filesystem
+        Files.createDirectories(path)
+        val directory: Directory = /*newDirectory()*/ FSDirectory.open(path = path, lockFactory = NativeFSLockFactory(fs))
         val analyzer: Analyzer = MockAnalyzer(random)
         val conf = /*newIndexWriterConfig(analyzer)*/ IndexWriterConfig(analyzer)
         val mp: MergePolicy = conf.mergePolicy
@@ -105,7 +114,7 @@ class TestSearch : LuceneTestCase() {
                 println("TEST: query=$query")
             }
 
-            hits = searcher.search(query, 1000, sort).scoreDocs!!
+            hits = searcher.search(query, 1000, sort).scoreDocs
 
             /*out.*/println(hits.size.toString() + " total results")
             val storedFields: StoredFields = searcher.storedFields()

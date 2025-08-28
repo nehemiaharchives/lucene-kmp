@@ -5,6 +5,8 @@ import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttributeImpl
 import kotlin.reflect.KClass
 
 // KMP-friendly factory that creates AttributeImpl instances for Attribute interfaces.
@@ -19,6 +21,7 @@ abstract class AttributeFactory {
                 // Minimal direct mappings for cases that are not covered by static combined impls
                 CharTermAttribute::class -> CharTermAttributeImpl()
                 OffsetAttribute::class -> OffsetAttributeImpl()
+                PayloadAttribute::class -> PayloadAttributeImpl()
                 else -> throw IllegalArgumentException(
                     "Cannot find implementing class for: ${attClass.qualifiedName}"
                 )
@@ -75,6 +78,7 @@ abstract class AttributeFactory {
                 PackedTokenAttributeImpl::class -> { { PackedTokenAttributeImpl() } }
                 CharTermAttributeImpl::class -> { { CharTermAttributeImpl() } }
                 OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
+                PayloadAttributeImpl::class -> { { PayloadAttributeImpl() } }
                 else -> throw IllegalArgumentException("No known no-arg constructor for ${clazz.qualifiedName}")
             }
         }

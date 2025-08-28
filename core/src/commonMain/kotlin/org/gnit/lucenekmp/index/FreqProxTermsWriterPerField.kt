@@ -77,21 +77,19 @@ internal class FreqProxTermsWriterPerField(
         }
 
         assert(postingsArray === freqProxPostingsArray)
-        freqProxPostingsArray!!.lastPositions[termID] = fieldState.position
+        freqProxPostingsArray!!.lastPositions!![termID] = fieldState.position
     }
 
     fun writeOffsets(termID: Int, offsetAccum: Int) {
         val startOffset: Int = offsetAccum + offsetAttribute!!.startOffset()
         val endOffset: Int = offsetAccum + offsetAttribute!!.endOffset()
-        assert(startOffset - freqProxPostingsArray!!.lastOffsets[termID] >= 0)
-        writeVInt(1, startOffset - freqProxPostingsArray!!.lastOffsets[termID])
+        assert(startOffset - freqProxPostingsArray!!.lastOffsets!![termID] >= 0)
+        writeVInt(1, startOffset - freqProxPostingsArray!!.lastOffsets!![termID])
         writeVInt(1, endOffset - startOffset)
-        freqProxPostingsArray!!.lastOffsets[termID] = startOffset
+        freqProxPostingsArray!!.lastOffsets!![termID] = startOffset
     }
 
     override fun newTerm(termID: Int, docID: Int) {
-        // First time we're seeing this term since the last
-        // flush
         val postings: FreqProxPostingsArray = freqProxPostingsArray!!
 
         postings.lastDocIDs[termID] = docID
@@ -101,7 +99,7 @@ internal class FreqProxTermsWriterPerField(
             fieldState.maxTermFrequency = max(1, fieldState.maxTermFrequency)
         } else {
             postings.lastDocCodes[termID] = docID shl 1
-            postings.termFreqs[termID] = this.termFreq
+            postings.termFreqs!![termID] = this.termFreq
             if (hasProx) {
                 writeProx(termID, fieldState.position)
                 if (hasOffsets) {
@@ -110,14 +108,14 @@ internal class FreqProxTermsWriterPerField(
             } else {
                 assert(!hasOffsets)
             }
-            fieldState.maxTermFrequency = max(postings.termFreqs[termID], fieldState.maxTermFrequency)
+            fieldState.maxTermFrequency = max(postings.termFreqs!![termID], fieldState.maxTermFrequency)
         }
         fieldState.uniqueTermCount++
     }
 
     override fun addTerm(termID: Int, docID: Int) {
         val postings: FreqProxPostingsArray = freqProxPostingsArray!!
-        assert(!hasFreq || postings.termFreqs[termID] > 0)
+        assert(!hasFreq || postings.termFreqs!![termID] > 0)
 
         if (!hasFreq) {
             assert(postings.termFreqs == null)
@@ -127,7 +125,6 @@ internal class FreqProxTermsWriterPerField(
                         + "\": must index term freq while using custom TermFrequencyAttribute")
             }
             if (docID != postings.lastDocIDs[termID]) {
-                // New document; now encode docCode for previous doc:
                 assert(docID > postings.lastDocIDs[termID])
                 writeVInt(0, postings.lastDocCodes[termID])
                 postings.lastDocCodes[termID] = docID - postings.lastDocIDs[termID]
@@ -144,22 +141,22 @@ internal class FreqProxTermsWriterPerField(
 
             // Now that we know doc freq for previous doc,
             // write it & lastDocCode
-            if (1 == postings.termFreqs[termID]) {
+            if (1 == postings.termFreqs!![termID]) {
                 writeVInt(0, postings.lastDocCodes[termID] or 1)
             } else {
                 writeVInt(0, postings.lastDocCodes[termID])
-                writeVInt(0, postings.termFreqs[termID])
+                writeVInt(0, postings.termFreqs!![termID])
             }
 
             // Init freq for the current document
-            postings.termFreqs[termID] = this.termFreq
-            fieldState.maxTermFrequency = max(postings.termFreqs[termID], fieldState.maxTermFrequency)
+            postings.termFreqs!![termID] = this.termFreq
+            fieldState.maxTermFrequency = max(postings.termFreqs!![termID], fieldState.maxTermFrequency)
             postings.lastDocCodes[termID] = (docID - postings.lastDocIDs[termID]) shl 1
             postings.lastDocIDs[termID] = docID
             if (hasProx) {
                 writeProx(termID, fieldState.position)
                 if (hasOffsets) {
-                    postings.lastOffsets[termID] = 0
+                    postings.lastOffsets!![termID] = 0
                     writeOffsets(termID, fieldState.offset)
                 }
             } else {
@@ -167,10 +164,10 @@ internal class FreqProxTermsWriterPerField(
             }
             fieldState.uniqueTermCount++
         } else {
-            postings.termFreqs[termID] = Math.addExact(postings.termFreqs[termID], this.termFreq)
-            fieldState.maxTermFrequency = max(fieldState.maxTermFrequency, postings.termFreqs[termID])
+            postings.termFreqs!![termID] = Math.addExact(postings.termFreqs!![termID], this.termFreq)
+            fieldState.maxTermFrequency = max(fieldState.maxTermFrequency, postings.termFreqs!![termID])
             if (hasProx) {
-                writeProx(termID, fieldState.position - postings.lastPositions[termID])
+                writeProx(termID, fieldState.position - postings.lastPositions!![termID])
                 if (hasOffsets) {
                     writeOffsets(termID, fieldState.offset)
                 }
@@ -205,11 +202,11 @@ internal class FreqProxTermsWriterPerField(
 
     internal class FreqProxPostingsArray(size: Int, writeFreqs: Boolean, writeProx: Boolean, writeOffsets: Boolean) :
         ParallelPostingsArray(size) {
-        lateinit var termFreqs: IntArray // # times this term occurs in the current doc
+        var termFreqs: IntArray? = null // # times this term occurs in the current doc
         var lastDocIDs: IntArray // Last docID where this term occurred
         var lastDocCodes: IntArray // Code for prior doc
-        lateinit var lastPositions: IntArray // Last position where this term occurred
-        lateinit var lastOffsets: IntArray // Last endOffset where this term occurred
+        var lastPositions: IntArray? = null // Last position where this term occurred
+        var lastOffsets: IntArray? = null // Last endOffset where this term occurred
 
         init {
             if (writeFreqs) {
@@ -225,8 +222,6 @@ internal class FreqProxTermsWriterPerField(
             } else {
                 assert(!writeOffsets)
             }
-            // System.out.println("PA init freqs=" + writeFreqs + " pos=" + writeProx + " offs=" +
-            // writeOffsets);
         }
 
         override fun newInstance(size: Int): ParallelPostingsArray {
@@ -245,15 +240,15 @@ internal class FreqProxTermsWriterPerField(
             System.arraycopy(lastDocCodes, 0, to.lastDocCodes, 0, numToCopy)
             if (lastPositions != null) {
                 checkNotNull(to.lastPositions)
-                System.arraycopy(lastPositions, 0, to.lastPositions, 0, numToCopy)
+                System.arraycopy(lastPositions!!, 0, to.lastPositions!!, 0, numToCopy)
             }
             if (lastOffsets != null) {
                 checkNotNull(to.lastOffsets)
-                System.arraycopy(lastOffsets, 0, to.lastOffsets, 0, numToCopy)
+                System.arraycopy(lastOffsets!!, 0, to.lastOffsets!!, 0, numToCopy)
             }
             if (termFreqs != null) {
                 checkNotNull(to.termFreqs)
-                System.arraycopy(termFreqs, 0, to.termFreqs, 0, numToCopy)
+                System.arraycopy(termFreqs!!, 0, to.termFreqs!!, 0, numToCopy)
             }
         }
 

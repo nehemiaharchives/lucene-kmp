@@ -301,9 +301,9 @@ class SegmentInfo(
      * If a value already exists for the field, it will be replaced with the new value. This method
      * make a copy on write for every attribute change.
      */
-    fun putAttribute(key: String, value: String): String {
+    fun putAttribute(key: String, value: String): String? {
         val newMap: HashMap<String, String> = HashMap(attributes)
-        val oldValue: String = newMap.put(key, value)!!
+        val oldValue: String? = newMap.put(key, value)
         // This needs to be thread-safe because multiple threads may be updating (different) attributes
         // at the same time due to concurrent merging, plus some threads may be calling toString() on
         // segment info while other threads are updating attributes.

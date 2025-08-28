@@ -53,9 +53,9 @@ abstract class TopFieldCollector private constructor(
             // as all segments are sorted in the same way, enough to check only the 1st segment for
             // indexSort
             if (searchSortPartOfIndexSort == null) {
-                val indexSort: Sort = context.reader().metaData.sort!!
-                searchSortPartOfIndexSort = canEarlyTerminate(sort, indexSort)
-                if (searchSortPartOfIndexSort!!) {
+                val indexSort: Sort? = context.reader().metaData.sort
+                searchSortPartOfIndexSort = if (indexSort != null) canEarlyTerminate(sort, indexSort) else false
+                if (searchSortPartOfIndexSort == true) {
                     firstComparator.disableSkipping()
                 }
             }

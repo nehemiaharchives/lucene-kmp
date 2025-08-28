@@ -54,7 +54,7 @@ class VectorValuesConsumer(
     }
 
     @Throws(IOException::class)
-    fun flush(state: SegmentWriteState, sortMap: Sorter.DocMap) {
+    fun flush(state: SegmentWriteState, sortMap: Sorter.DocMap?) {
         if (writer == null) return
         try {
             writer!!.flush(state.segmentInfo.maxDoc(), sortMap)

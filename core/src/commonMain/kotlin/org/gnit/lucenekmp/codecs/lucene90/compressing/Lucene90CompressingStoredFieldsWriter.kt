@@ -309,7 +309,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
             success = true
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(metaStream!!, fieldsStream!!, indexWriter!!)
+                IOUtils.closeWhileHandlingException(metaStream, fieldsStream, indexWriter)
             }
         }
     }
