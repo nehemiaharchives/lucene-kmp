@@ -37,7 +37,7 @@ import kotlin.math.min
 /** Writer for [Lucene101PostingsFormat].  */
 class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, private val version: Int) :
     PushPostingsWriterBase() {
-    var metaOut: IndexOutput
+    var metaOut: IndexOutput?
     var docOut: IndexOutput? = null
     var posOut: IndexOutput? = null
     var payOut: IndexOutput? = null
@@ -134,7 +134,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
         try {
             docOut = state.directory.createOutput(docFileName, state.context)
             CodecUtil.writeIndexHeader(
-                metaOut, META_CODEC, version, state.segmentInfo.getId(), state.segmentSuffix
+                metaOut!!, META_CODEC, version, state.segmentInfo.getId(), state.segmentSuffix
             )
             CodecUtil.writeIndexHeader(
                 docOut!!, DOC_CODEC, version, state.segmentInfo.getId(), state.segmentSuffix
@@ -651,18 +651,18 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
                 CodecUtil.writeFooter(payOut!!)
             }
             if (metaOut != null) {
-                metaOut.writeInt(maxNumImpactsAtLevel0)
-                metaOut.writeInt(maxImpactNumBytesAtLevel0)
-                metaOut.writeInt(maxNumImpactsAtLevel1)
-                metaOut.writeInt(maxImpactNumBytesAtLevel1)
-                metaOut.writeLong(docOut!!.filePointer)
+                metaOut!!.writeInt(maxNumImpactsAtLevel0)
+                metaOut!!.writeInt(maxImpactNumBytesAtLevel0)
+                metaOut!!.writeInt(maxNumImpactsAtLevel1)
+                metaOut!!.writeInt(maxImpactNumBytesAtLevel1)
+                metaOut!!.writeLong(docOut!!.filePointer)
                 if (posOut != null) {
-                    metaOut.writeLong(posOut!!.filePointer)
+                    metaOut!!.writeLong(posOut!!.filePointer)
                     if (payOut != null) {
-                        metaOut.writeLong(payOut!!.filePointer)
+                        metaOut!!.writeLong(payOut!!.filePointer)
                     }
                 }
-                CodecUtil.writeFooter(metaOut)
+                CodecUtil.writeFooter(metaOut!!)
             }
             success = true
         } finally {
@@ -674,7 +674,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
             payOut = null
             posOut = payOut
             docOut = posOut
-            metaOut = docOut!!
+            metaOut = docOut
         }
     }
 
