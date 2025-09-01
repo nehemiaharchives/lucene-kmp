@@ -139,7 +139,7 @@ class FieldsIndexWriter internal constructor(
 
     override fun close() {
         try {
-            IOUtils.close(docsOut!!, filePointersOut!!)
+            IOUtils.close(docsOut, filePointersOut)
         } finally {
             val fileNames: MutableList<String> = ArrayList()
             if (docsOut != null) {
