@@ -185,6 +185,6 @@ object IndexFileNames {
      * All files created by codecs must match this pattern (checked in SegmentInfo).
      */
     /* val CODEC_FILE_PATTERN: java.util.regex.Pattern = java.util.regex.Pattern.compile("_[a-z0-9]+(_.*)\\..*") */
-    val CODEC_FILE_PATTERN: Regex = Regex("_[a-z0-9]+(_.*)\\..*")
+    val CODEC_FILE_PATTERN: Regex = Regex("_[a-z0-9]+(_.*)?\\..*")
 
 }
