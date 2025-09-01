@@ -7,7 +7,6 @@ import okio.FileHandle
 import okio.FileSystem
 import okio.IOException
 import okio.Path
-import okio.SYSTEM
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.assert
 import kotlin.math.min
@@ -49,7 +48,7 @@ class NIOFSDirectory
 constructor(
     path: Path,
     lockFactory: LockFactory = FSLockFactory.default,
-    val fileSystem: FileSystem = FileSystem.SYSTEM
+    val fileSystem: FileSystem = IOUtils.fileSystem
 ) : FSDirectory(path, lockFactory) {
     override fun openInput(
         name: String,
