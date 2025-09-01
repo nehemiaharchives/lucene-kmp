@@ -283,7 +283,7 @@ object CodecUtil {
         checkIndexHeaderID(`in`, expectedID)
 
         // we can't verify extension either, so we pass-through:
-        val suffixLength: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+        val suffixLength: Int = (`in`.readByte().toInt() and 0xFF)
         val suffixBytes = ByteArray(suffixLength)
         `in`.readBytes(suffixBytes, 0, suffixLength)
 
@@ -315,7 +315,7 @@ object CodecUtil {
         val codec: String = `in`.readString()
         readBEInt(`in`)
         `in`.seek(`in`.filePointer + StringHelper.ID_LENGTH)
-        val suffixLength: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+        val suffixLength: Int = (`in`.readByte().toInt() and 0xFF)
         val bytes = ByteArray(headerLength(codec) + StringHelper.ID_LENGTH + 1 + suffixLength)
         `in`.seek(0)
         `in`.readBytes(bytes, 0, bytes.size)
@@ -364,7 +364,7 @@ object CodecUtil {
     /** Expert: just reads and verifies the suffix of an index header  */
     @Throws(IOException::class)
     fun checkIndexHeaderSuffix(`in`: DataInput, expectedSuffix: String?): String {
-        val suffixLength: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+        val suffixLength: Int = (`in`.readByte().toInt() and 0xFF)
         val suffixBytes = ByteArray(suffixLength)
         `in`.readBytes(suffixBytes, 0, suffixBytes.size)
         val suffix: String = String.fromByteArray(suffixBytes, StandardCharsets.UTF_8)
@@ -677,16 +677,18 @@ object CodecUtil {
     /** read int value from header / footer with big endian order  */
     @Throws(IOException::class)
     fun readBEInt(`in`: DataInput): Int {
-        return (((`in`.readByte() and 0xFF.toByte()).toLong() shl 24)
-                or ((`in`.readByte() and 0xFF.toByte()).toLong() shl 16)
-                or ((`in`.readByte() and 0xFF.toByte()).toLong() shl 8)
-                or ((`in`.readByte() and 0xFF.toByte()).toLong())).toInt()
+        val b1 = `in`.readByte().toInt() and 0xFF
+        val b2 = `in`.readByte().toInt() and 0xFF
+        val b3 = `in`.readByte().toInt() and 0xFF
+        val b4 = `in`.readByte().toInt() and 0xFF
+        return (b1 shl 24) or (b2 shl 16) or (b3 shl 8) or b4
     }
 
     /** read long value from header / footer with big endian order  */
     @Throws(IOException::class)
     fun readBELong(`in`: DataInput): Long {
-        val long = readBEInt(`in`).toLong()
-        return (long shl 32) or (long and 0xFFFFFFFFL)
+        val hi = readBEInt(`in`)
+        val lo = readBEInt(`in`)
+        return (hi.toLong() shl 32) or (lo.toLong() and 0xFFFFFFFFL)
     }
 }
