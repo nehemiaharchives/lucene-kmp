@@ -903,7 +903,7 @@ class Lucene90BlockTreeTermsWriter(
                 hasTerms,
                 isFloor,
                 floorLeadLabel,
-                subIndices!!
+                subIndices
             )
         }
 
