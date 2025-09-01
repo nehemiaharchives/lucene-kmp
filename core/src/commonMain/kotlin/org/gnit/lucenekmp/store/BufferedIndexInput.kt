@@ -12,7 +12,7 @@ import kotlin.math.min
 
 
 /** Base implementation class for buffered [IndexInput].  */
-abstract class BufferedIndexInput constructor(resourceDesc: String, bufferSize: Int = BUFFER_SIZE) :
+abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER_SIZE) :
     IndexInput(resourceDesc), RandomAccessInput {
     /** Returns buffer size  */
     val bufferSize: Int
@@ -322,8 +322,11 @@ abstract class BufferedIndexInput constructor(resourceDesc: String, bufferSize: 
         return wrap(sliceDescription, this, offset, length)
     }
 
+    @Throws(IOException::class)
     override fun prefetch(offset: Long, length: Long) {
-        TODO("Not yet implemented")
+        // Disambiguate multiple default implementations.
+        // Keep Lucene semantics (no-op) by delegating to IndexInput.
+        super<IndexInput>.prefetch(offset, length)
     }
 
     /** Implementation of an IndexInput that reads from a portion of a file.  */
