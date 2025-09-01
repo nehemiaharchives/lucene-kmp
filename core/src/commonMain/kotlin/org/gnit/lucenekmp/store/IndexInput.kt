@@ -92,7 +92,11 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * thread while `clone` is called by another, disaster could strike.
      */
     override fun clone(): IndexInput {
-        return super.clone() as IndexInput
+        // Create an independent view over the same underlying resource
+        val pos = this.filePointer
+        val clone = this.slice("clone", 0L, this.length())
+        clone.seek(pos)
+        return clone
     }
 
     /**
