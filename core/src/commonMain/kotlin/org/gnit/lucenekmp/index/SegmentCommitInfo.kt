@@ -23,15 +23,15 @@ class SegmentCommitInfo(
     /** Id that uniquely identifies this segment commit.  */
     private var id: ByteArray?
 
-    var delCount: Int
+    var delCount: Int = delCount
         /** Returns the number of deleted docs in the segment.  */
-        get() = delCount
+        /*get() = field*/
         set(value) {
             require(!(value < 0 || value > info.maxDoc())) { "invalid delCount=" + value + " (maxDoc=" + info.maxDoc() + ")" }
             require(
                 softDelCount + value <= info.maxDoc()
             ) { "maxDoc=" + info.maxDoc() + ",delCount=" + value + ",softDelCount=" + softDelCount }
-            this.delCount = value
+            field = value
         }
 
     // How many soft-deleted docs in the segment that are not also hard-deleted:
@@ -356,3 +356,5 @@ class SegmentCommitInfo(
         return if (id == null) null else id!!.copyOf() as ByteArray // this cast is needed for kotlin/native target compilation to pass
     }
 }
+
+
