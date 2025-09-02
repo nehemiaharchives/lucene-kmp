@@ -235,7 +235,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
             return MatchNoDocsQuery("empty DisjunctionMaxQuery")
         }
 
-        if (disjuncts.size() == 1) {
+        if (disjuncts.size == 1) {
             return disjuncts.iterator().next()
         }
 

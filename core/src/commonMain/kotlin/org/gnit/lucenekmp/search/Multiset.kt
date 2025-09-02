@@ -55,9 +55,9 @@ class Multiset<T>
         }
     }
 
-    fun size(): Int {
+    /*fun size(): Int {
         return size
-    }
+    }*/
 
     override fun clear() {
         map.clear()
@@ -71,7 +71,7 @@ class Multiset<T>
             0
         }
 
-        map.put(e, (number + 1))
+        map[e] = (number + 1)
         size += 1
         return true
     }
@@ -92,7 +92,7 @@ class Multiset<T>
         } else if (1 == count) {
             map.remove(o)
         } else {
-            map.put(o as T, count - 1)
+            map[o as T] = count - 1
         }
         size -= 1
         return true
@@ -102,11 +102,11 @@ class Multiset<T>
         return map.containsKey(o)
     }
 
-    override fun equals(obj: Any?): Boolean {
-        if (obj == null || obj::class != this::class) {
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other::class != this::class) {
             return false
         }
-        val that = obj as Multiset<*>
+        val that = other as Multiset<*>
         return size == that.size // not necessary but helps escaping early
                 && map == that.map
     }
