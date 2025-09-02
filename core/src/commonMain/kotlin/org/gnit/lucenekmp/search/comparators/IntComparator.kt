@@ -13,21 +13,17 @@ import kotlin.jvm.JvmName
  * Comparator based on [Integer.compare] for `numHits`. This comparator provides a
  * skipping functionality – an iterator that can skip over non-competitive documents.
  */
-class IntComparator(numHits: Int, field: String, missingValue: Int, reverse: Boolean, pruning: Pruning) :
+class IntComparator(numHits: Int, field: String, missingValue: Int?, reverse: Boolean, pruning: Pruning) :
     NumericComparator<Int>(
         field,
-        if (missingValue != null) missingValue else 0,
+        missingValue ?: 0,
         reverse,
         pruning,
         Int.SIZE_BYTES
     ) {
-    private val values: IntArray
+    private val values: IntArray = IntArray(numHits)
     protected var topValue: Int = 0
     protected var bottom: Int = 0
-
-    init {
-        values = IntArray(numHits)
-    }
 
     override fun compare(slot1: Int, slot2: Int): Int {
         return Int.compare(values[slot1], values[slot2])
@@ -44,11 +40,11 @@ class IntComparator(numHits: Int, field: String, missingValue: Int, reverse: Boo
         return values[slot]
     }
 
-    protected override fun missingValueAsComparableLong(): Long {
+    override fun missingValueAsComparableLong(): Long {
         return missingValue.toLong()
     }
 
-    protected override fun sortableBytesToLong(bytes: ByteArray): Long {
+    override fun sortableBytesToLong(bytes: ByteArray): Long {
         return NumericUtils.sortableBytesToInt(bytes, 0).toLong()
     }
 

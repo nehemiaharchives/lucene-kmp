@@ -178,7 +178,7 @@ class SortField {
      * or DOC.
      * @param type Type of values in the terms.
      */
-    constructor(field: String?, type: SortField.Type) {
+    constructor(field: String?, type: Type) {
         initFieldType(field, type)
     }
 
@@ -191,7 +191,7 @@ class SortField {
      * @param type Type of values in the terms.
      * @param reverse True if natural order should be reversed.
      */
-    constructor(field: String?, type: SortField.Type, reverse: Boolean) {
+    constructor(field: String?, type: Type, reverse: Boolean) {
         initFieldType(field, type)
         this.reverse = reverse
     }
@@ -199,20 +199,20 @@ class SortField {
     /** A SortFieldProvider for field sorts  */
     class Provider
     /** Creates a new Provider  */
-        : SortFieldProvider(Provider.Companion.NAME) {
+        : SortFieldProvider(NAME) {
 
         @Throws(IOException::class)
-        public override fun readSortField(`in`: DataInput): SortField {
-            val sf: SortField = SortField(`in`.readString(), SortField.Companion.readType(`in`), `in`.readInt() === 1)
-            if (`in`.readInt() === 1) {
+        override fun readSortField(`in`: DataInput): SortField {
+            val sf = SortField(`in`.readString(), readType(`in`), `in`.readInt() == 1)
+            if (`in`.readInt() == 1) {
                 // missing object
                 when (sf.type) {
                     Type.STRING -> {
                         val missingString: Int = `in`.readInt()
                         if (missingString == 1) {
-                            sf.setMissingValue(SortField.Companion.STRING_FIRST)
+                            sf.setMissingValue(STRING_FIRST)
                         } else {
-                            sf.setMissingValue(SortField.Companion.STRING_LAST)
+                            sf.setMissingValue(STRING_LAST)
                         }
                     }
 
@@ -231,7 +231,7 @@ class SortField {
         }
 
         @Throws(IOException::class)
-        public override fun writeSortField(sf: SortField, out: DataOutput) {
+        override fun writeSortField(sf: SortField, out: DataOutput) {
             sf.serialize(out)
         }
 
@@ -252,9 +252,9 @@ class SortField {
         } else {
             out.writeInt(1)
             when (type) {
-                Type.STRING -> if (missingValue === SortField.Companion.STRING_LAST) {
+                Type.STRING -> if (missingValue === STRING_LAST) {
                     out.writeInt(0)
-                } else if (missingValue === SortField.Companion.STRING_FIRST) {
+                } else if (missingValue === STRING_FIRST) {
                     out.writeInt(1)
                 } else {
                     throw IllegalArgumentException(
@@ -332,7 +332,7 @@ class SortField {
 
     // Sets field & type, and ensures field is not NULL unless
     // type is SCORE or DOC
-    private fun initFieldType(field: String?, type: SortField.Type) {
+    private fun initFieldType(field: String?, type: Type) {
         this.type = type
         if (field == null) {
             require(!(type != Type.SCORE && type != Type.DOC)) { "field can only be null when type is SCORE or DOC" }
@@ -346,7 +346,7 @@ class SortField {
      *
      * @return One of the constants SCORE, DOC, STRING, INT or FLOAT.
      */
-    fun getType(): SortField.Type {
+    fun getType(): Type {
         return type
     }
 
@@ -407,7 +407,7 @@ class SortField {
         return Objects.hash(field, type, reverse, comparatorSource, missingValue)
     }
 
-    private var bytesComparator: Comparator<BytesRef> = naturalOrder<BytesRef>()
+    private var bytesComparator: Comparator<BytesRef> = naturalOrder()
 
     fun setBytesComparator(b: Comparator<BytesRef>) {
         bytesComparator = b
@@ -431,7 +431,7 @@ class SortField {
             Type.SCORE -> fieldComparator = RelevanceComparator(numHits)
             Type.DOC -> fieldComparator = DocComparator(numHits, reverse, pruning)
             Type.INT -> fieldComparator =
-                IntComparator(numHits, field!!, missingValue as Int, reverse, pruning)
+                IntComparator(numHits, field!!, missingValue as Int?, reverse, pruning)
 
             Type.FLOAT -> fieldComparator =
                 FloatComparator(numHits, field!!, missingValue as Float, reverse, pruning)
@@ -621,12 +621,12 @@ class SortField {
         val FIELD_DOC: SortField = SortField(null, Type.DOC)
 
         @Throws(IOException::class)
-        protected fun readType(`in`: DataInput): SortField.Type {
+        protected fun readType(`in`: DataInput): Type {
             val type: String = `in`.readString()
             try {
                 return Type.valueOf(type)
             } catch (e: IllegalArgumentException) {
-                throw IllegalArgumentException("Can't deserialize SortField - unknown type " + type, e)
+                throw IllegalArgumentException("Can't deserialize SortField - unknown type $type", e)
             }
         }
 
