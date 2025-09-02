@@ -26,14 +26,15 @@ class DocumentStoredFieldVisitor : StoredFieldVisitor {
      * not set.
      */
     val document: Document = Document()
-    private val fieldsToAdd: MutableSet<String>
+    // Null means: load all fields. Non-null means: load only fields contained in the set.
+    private val fieldsToAdd: MutableSet<String>?
 
     /**
      * Load only fields named in the provided `Set<String>`.
      *
      * @param fieldsToAdd Set of fields to load, or `null` (all fields).
      */
-    constructor(fieldsToAdd: MutableSet<String>) {
+    constructor(fieldsToAdd: MutableSet<String>?) {
         this.fieldsToAdd = fieldsToAdd
     }
 
@@ -44,7 +45,7 @@ class DocumentStoredFieldVisitor : StoredFieldVisitor {
 
     /** Load all stored fields.  */
     constructor() {
-        this.fieldsToAdd = mutableSetOf()
+        this.fieldsToAdd = null
     }
 
     @Throws(IOException::class)
