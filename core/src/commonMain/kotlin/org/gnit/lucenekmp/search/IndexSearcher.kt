@@ -673,8 +673,8 @@ open class IndexSearcher(
             }
             try {
                 // Optimize for the case when live docs are stored in a FixedBitSet.
-                val acceptDocs: Bits =
-                    ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)!!
+                val acceptDocs: Bits? =
+                    ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)
                 scorer.score(leafCollector, acceptDocs, minDocId, maxDocId)
             } catch (e: CollectionTerminatedException) {
                 // collection was terminated prematurely
