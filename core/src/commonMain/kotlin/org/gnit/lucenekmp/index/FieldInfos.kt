@@ -225,7 +225,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
      *
      * @return the FieldInfo object or null when the given fieldName doesn't exist.
      */
-    open fun fieldInfo(fieldName: String): FieldInfo? {
+    open fun fieldInfo(fieldName: String?): FieldInfo? {
         return byName[fieldName]
     }
 

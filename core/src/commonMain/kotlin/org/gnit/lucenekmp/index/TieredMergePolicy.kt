@@ -112,7 +112,7 @@ open class TieredMergePolicy
         var v = v
         require(!(v < 0.0)) { "maxMergedSegmentMB must be >=0 (got $v)" }
         v *= (1024 * 1024).toDouble()
-        maxMergedSegmentBytes = if (v > Long.Companion.MAX_VALUE) Long.Companion.MAX_VALUE else v.toLong()
+        maxMergedSegmentBytes = if (v > Long.MAX_VALUE) Long.MAX_VALUE else v.toLong()
         return this
     }
 
@@ -137,7 +137,7 @@ open class TieredMergePolicy
      * amplification factor will lead to higher CPU and I/O activity as indicated above.
      */
     fun setDeletesPctAllowed(v: Double): TieredMergePolicy {
-        require(!(v < 5 || v > 50)) { "indexPctDeletedTarget must be >= 5.0 and <= 50 (got $v)" }
+        require(v in 5.0..50.0) { "indexPctDeletedTarget must be >= 5.0 and <= 50 (got $v)" }
         deletesPctAllowed = v
         return this
     }
@@ -158,7 +158,7 @@ open class TieredMergePolicy
         var v = v
         require(!(v <= 0.0)) { "floorSegmentMB must be > 0.0 (got $v)" }
         v *= (1024 * 1024).toDouble()
-        floorSegmentBytes = if (v > Long.Companion.MAX_VALUE) Long.Companion.MAX_VALUE else v.toLong()
+        floorSegmentBytes = if (v > Long.MAX_VALUE) Long.MAX_VALUE else v.toLong()
         return this
     }
 
@@ -179,7 +179,7 @@ open class TieredMergePolicy
      * this threshold. Default is 10%.
      */
     fun setForceMergeDeletesPctAllowed(v: Double): TieredMergePolicy {
-        require(!(v < 0.0 || v > 100.0)) { "forceMergeDeletesPctAllowed must be between 0.0 and 100.0 inclusive (got $v)" }
+        require(v in 0.0..100.0) { "forceMergeDeletesPctAllowed must be between 0.0 and 100.0 inclusive (got $v)" }
         forceMergeDeletesPctAllowed = v
         return this
     }
@@ -267,11 +267,11 @@ open class TieredMergePolicy
         mergeTrigger: MergeTrigger,
         infos: SegmentInfos,
         mergeContext: MergeContext
-    ): MergeSpecification {
+    ): MergeSpecification? {
         val merging: MutableSet<SegmentCommitInfo> = mergeContext.mergingSegments
         // Compute total index bytes & print details about the index
         var totIndexBytes: Long = 0
-        var minSegmentBytes = Long.Companion.MAX_VALUE
+        var minSegmentBytes = Long.MAX_VALUE
 
         var totalDelDocs = 0
         var totalMaxDoc = 0
@@ -403,7 +403,7 @@ open class TieredMergePolicy
             MERGE_TYPE.NATURAL,
             mergeContext,
             mergingBytes >= maxMergedSegmentBytes
-        )!!
+        )
     }
 
     @Throws(IOException::class)
@@ -422,7 +422,7 @@ open class TieredMergePolicy
 
         val segInfosSizes: MutableMap<SegmentCommitInfo, SegmentSizeAndDocs> = mutableMapOf()
         for (segSizeDocs in sortedEligible) {
-            segInfosSizes.put(segSizeDocs.segInfo, segSizeDocs)
+            segInfosSizes[segSizeDocs.segInfo] = segSizeDocs
         }
 
         val originalSortedSize = sortedEligible.size
@@ -744,8 +744,8 @@ open class TieredMergePolicy
 
         // Set the maximum segment size based on how many segments have been specified.
         if (maxSegmentCount == 1) {
-            maxMergeBytes = Long.Companion.MAX_VALUE
-        } else if (maxSegmentCount != Int.Companion.MAX_VALUE) {
+            maxMergeBytes = Long.MAX_VALUE
+        } else if (maxSegmentCount != Int.MAX_VALUE) {
             maxMergeBytes = max(
                 ((totalMergeBytes.toDouble() / maxSegmentCount.toDouble())).toLong(),
                 maxMergedSegmentBytes
@@ -773,11 +773,11 @@ open class TieredMergePolicy
                 continue
             }
             // Let the scoring handle whether to merge large segments.
-            if (maxSegmentCount == Int.Companion.MAX_VALUE && isOriginal != null && isOriginal == false) {
+            if (maxSegmentCount == Int.MAX_VALUE && isOriginal != null && isOriginal == false) {
                 iter.remove()
             }
             // Don't try to merge a segment with no deleted docs that's over the max size.
-            if (maxSegmentCount != Int.Companion.MAX_VALUE && segSizeDocs.sizeInBytes >= maxMergeBytes) {
+            if (maxSegmentCount != Int.MAX_VALUE && segSizeDocs.sizeInBytes >= maxMergeBytes) {
                 iter.remove()
             }
         }
@@ -790,7 +790,7 @@ open class TieredMergePolicy
         // We only bail if there are no deletions
         if (!foundDeletes) {
             val infoZero: SegmentCommitInfo = sortedSizeAndDocs[0].segInfo
-            if ((maxSegmentCount != Int.Companion.MAX_VALUE && maxSegmentCount > 1 && sortedSizeAndDocs.size <= maxSegmentCount)
+            if ((maxSegmentCount != Int.MAX_VALUE && maxSegmentCount > 1 && sortedSizeAndDocs.size <= maxSegmentCount)
                 || (maxSegmentCount == 1 && sortedSizeAndDocs.size == 1 && (segmentsToMerge[infoZero] != null
                         || isMerged(infos, infoZero, mergeContext)))
             ) {
@@ -926,8 +926,8 @@ open class TieredMergePolicy
         return doFindMerges(
             sortedInfos,
             maxMergedSegmentBytes,
-            Int.Companion.MAX_VALUE,
-            Int.Companion.MAX_VALUE,
+            Int.MAX_VALUE,
+            Int.MAX_VALUE,
             0,
             getMaxAllowedDocs(infos.totalMaxDoc(), totalDelCount),
             MERGE_TYPE.FORCE_MERGE_DELETES,

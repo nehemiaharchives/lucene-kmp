@@ -632,7 +632,7 @@ abstract class MergePolicy
     @Throws(IOException::class)
     abstract fun findMerges(
         mergeTrigger: MergeTrigger, segmentInfos: SegmentInfos, mergeContext: MergeContext
-    ): MergeSpecification
+    ): MergeSpecification?
 
     /**
      * Define the set of merge operations to perform on provided codec readers in [ ][IndexWriter.addIndexes].

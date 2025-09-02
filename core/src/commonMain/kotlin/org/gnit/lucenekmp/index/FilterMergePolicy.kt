@@ -20,7 +20,7 @@ open class FilterMergePolicy(
         mergeTrigger: MergeTrigger,
         segmentInfos: SegmentInfos,
         mergeContext:MergeContext
-    ):MergeSpecification {
+    ):MergeSpecification? {
         return `in`.findMerges(mergeTrigger, segmentInfos, mergeContext)
     }
 

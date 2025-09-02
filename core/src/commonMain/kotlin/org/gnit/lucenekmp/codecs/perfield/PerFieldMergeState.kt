@@ -155,7 +155,7 @@ internal object PerFieldMergeState {
             return filtered.size
         }
 
-        override fun fieldInfo(fieldName: String): FieldInfo? {
+        override fun fieldInfo(fieldName: String?): FieldInfo? {
             require(filteredNames.contains(fieldName)) {
                 ("The field named '"
                         + fieldName

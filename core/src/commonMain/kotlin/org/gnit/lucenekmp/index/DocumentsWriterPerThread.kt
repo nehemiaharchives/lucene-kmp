@@ -58,8 +58,8 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         infoStream: InfoStream,
         val segmentInfo: SegmentCommitInfo,
         val fieldInfos: FieldInfos,
-        segmentUpdates: BufferedUpdates,
-        val liveDocs: FixedBitSet,
+        segmentUpdates: BufferedUpdates?,
+        val liveDocs: FixedBitSet?,
         val delCount: Int,
         val sortMap: Sorter.DocMap?
     ) {
@@ -463,8 +463,8 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                     infoStream,
                     segmentInfoPerCommit,
                     flushState.fieldInfos!!,
-                    segmentDeletes!!,
-                    flushState.liveDocs!!,
+                    segmentDeletes,
+                    flushState.liveDocs,
                     flushState.delCountOnFlush,
                     sortMap
                 )

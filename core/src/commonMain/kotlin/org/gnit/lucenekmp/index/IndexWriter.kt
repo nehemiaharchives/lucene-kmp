@@ -2651,8 +2651,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     private fun publishFlushedSegment(
         newSegment: SegmentCommitInfo,
         fieldInfos: FieldInfos,
-        packet: FrozenBufferedUpdates,
-        globalPacket: FrozenBufferedUpdates,
+        packet: FrozenBufferedUpdates?,
+        globalPacket: FrozenBufferedUpdates?,
         sortMap: DocMap?
     ) {
         var published = false
@@ -2697,7 +2697,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // DON't release this ReadersAndUpdates we need to stick with that sortMap
             }
             val fieldInfo: FieldInfo? =
-                fieldInfos.fieldInfo(config.softDeletesField!!) // will return null if no soft deletes are present
+                fieldInfos.fieldInfo(config.softDeletesField) // will return null if no soft deletes are present
             // this is a corner case where documents delete them-self with soft deletes. This is used to
             // build delete tombstones etc. in this case we haven't seen any updates to the DV in this
             // fresh flushed segment.
@@ -5902,8 +5902,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 publishFlushedSegment(
                     newSegment.segmentInfo,
                     newSegment.fieldInfos,
-                    newSegment.segmentUpdates!!,
-                    bufferedUpdates!!,
+                    newSegment.segmentUpdates,
+                    bufferedUpdates,
                     newSegment.sortMap
                 )
             }

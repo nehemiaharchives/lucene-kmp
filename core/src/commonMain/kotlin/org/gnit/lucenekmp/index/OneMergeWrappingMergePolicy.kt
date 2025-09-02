@@ -18,7 +18,7 @@ class OneMergeWrappingMergePolicy(
         mergeTrigger: MergeTrigger,
         segmentInfos: SegmentInfos,
         mergeContext: MergeContext
-    ): MergeSpecification {
+    ): MergeSpecification? {
         return wrapSpec(`in`.findMerges(mergeTrigger, segmentInfos, mergeContext))
     }
 
@@ -28,7 +28,7 @@ class OneMergeWrappingMergePolicy(
         maxSegmentCount: Int,
         segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
         mergeContext: MergeContext
-    ): MergeSpecification {
+    ): MergeSpecification? {
         return wrapSpec(
             `in`.findForcedMerges(segmentInfos, maxSegmentCount, segmentsToMerge, mergeContext)
         )
@@ -38,7 +38,7 @@ class OneMergeWrappingMergePolicy(
     override fun findForcedDeletesMerges(
         segmentInfos: SegmentInfos,
         mergeContext: MergeContext
-    ): MergeSpecification {
+    ): MergeSpecification? {
         return wrapSpec(`in`.findForcedDeletesMerges(segmentInfos, mergeContext))
     }
 
@@ -47,11 +47,11 @@ class OneMergeWrappingMergePolicy(
         mergeTrigger: MergeTrigger,
         segmentInfos: SegmentInfos,
         mergeContext: MergeContext
-    ): MergeSpecification {
-        return wrapSpec(`in`.findFullFlushMerges(mergeTrigger, segmentInfos, mergeContext)!!)
+    ): MergeSpecification? {
+        return wrapSpec(`in`.findFullFlushMerges(mergeTrigger, segmentInfos, mergeContext))
     }
 
-    private fun wrapSpec(spec: MergeSpecification?): MergeSpecification {
+    private fun wrapSpec(spec: MergeSpecification?): MergeSpecification? {
         val wrapped: MergeSpecification? =
             if (spec == null) null else MergeSpecification()
         if (wrapped != null) {
@@ -59,6 +59,6 @@ class OneMergeWrappingMergePolicy(
                 wrapped.add(wrapOneMerge(merge))
             }
         }
-        return wrapped!!
+        return wrapped
     }
 }
