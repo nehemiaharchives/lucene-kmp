@@ -45,7 +45,7 @@ class SegmentReader : CodecReader {
     override var liveDocs: Bits?
         get(): Bits? {
             ensureOpen()
-            return liveDocs
+            return field
         }
 
     /**
@@ -76,7 +76,7 @@ class SegmentReader : CodecReader {
     override var fieldInfos: FieldInfos
         get(): FieldInfos {
             ensureOpen()
-            return fieldInfos
+            return field
         }
 
     /**
@@ -96,7 +96,7 @@ class SegmentReader : CodecReader {
             LeafMetaData(
                 createdVersionMajor,
                 si.info.minVersion,
-                si.info.indexSort!!,
+                si.info.indexSort,
                 si.info.hasBlocks
             )
 
