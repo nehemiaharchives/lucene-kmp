@@ -130,8 +130,8 @@ abstract class TopFieldCollector private constructor(
         }
 
         @Throws(IOException::class)
-        override fun competitiveIterator(): DocIdSetIterator {
-            return comparator.competitiveIterator()!!
+        override fun competitiveIterator(): DocIdSetIterator? {
+            return comparator.competitiveIterator()
         }
     }
 

@@ -35,8 +35,8 @@ class ScoreCachingWrappingScorer(scorer: Scorable) :
         }
 
         @Throws(IOException::class)
-        override fun competitiveIterator(): DocIdSetIterator {
-            return `in`.competitiveIterator()!!
+        override fun competitiveIterator(): DocIdSetIterator? {
+            return `in`.competitiveIterator()
         }
     }
 
