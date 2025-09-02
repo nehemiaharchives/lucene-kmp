@@ -22,6 +22,10 @@ object Files {
         this.fileSystem = fileSystem
     }
 
+    fun getFileSystem(): FileSystem {
+        return fileSystem
+    }
+
     /**
      * Resets the file system provider to the default (SystemFileSystem).
      */

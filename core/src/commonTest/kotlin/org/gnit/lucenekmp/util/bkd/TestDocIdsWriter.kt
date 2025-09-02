@@ -37,7 +37,7 @@ class TestDocIdsWriter : LuceneTestCase() {
     private fun getDirectory(): Directory {
         val path = "/tmp".toPath()
         fakeFileSystem.createDirectories(path)
-        return NIOFSDirectory(path, FSLockFactory.default, fakeFileSystem)
+        return NIOFSDirectory(path, FSLockFactory.default)
     }
 
     @Test

@@ -40,7 +40,7 @@ class TestDirectMonotonic : LuceneTestCase() {
     private fun newDirectory(): Directory {
         val path = "/dir".toPath()
         fs.createDirectories(path)
-        return NIOFSDirectory(path, FSLockFactory.Companion.default, fs)
+        return NIOFSDirectory(path, FSLockFactory.default)
     }
 
     @Test
@@ -60,7 +60,7 @@ class TestDirectMonotonic : LuceneTestCase() {
         }
         assertEquals(
             "blockShift is too low for the provided number of values: blockShift=5, numValues=1099511627776, MAX_ARRAY_LENGTH=" +
-                ArrayUtil.Companion.MAX_ARRAY_LENGTH,
+                ArrayUtil.MAX_ARRAY_LENGTH,
             e!!.message
         )
     }
@@ -68,17 +68,17 @@ class TestDirectMonotonic : LuceneTestCase() {
     @Test
     fun testEmpty() {
         val dir = newDirectory()
-        val blockShift = TestUtil.Companion.nextInt(random(), DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
+        val blockShift = TestUtil.nextInt(random(), DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
         val dataLength: Long
-        dir.createOutput("meta", IOContext.Companion.DEFAULT).use { metaOut ->
-            dir.createOutput("data", IOContext.Companion.DEFAULT).use { dataOut ->
+        dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
+            dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
                 DirectMonotonicWriter.getInstance(metaOut, dataOut, 0, blockShift).finish()
                 dataLength = dataOut.filePointer
             }
         }
 
-        dir.openInput("meta", IOContext.Companion.READONCE).use { metaIn ->
-            dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
+        dir.openInput("meta", IOContext.READONCE).use { metaIn ->
+            dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                 val meta = DirectMonotonicReader.loadMeta(metaIn, 0, blockShift)
                 DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength))
             }
@@ -94,8 +94,8 @@ class TestDirectMonotonic : LuceneTestCase() {
         val actualValues = listOf(1L, 2L, 5L, 7L, 8L, 100L)
         val numValues = actualValues.size
         val dataLength: Long
-        dir.createOutput("meta", IOContext.Companion.DEFAULT).use { metaOut ->
-            dir.createOutput("data", IOContext.Companion.DEFAULT).use { dataOut ->
+        dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
+            dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
                 val w = DirectMonotonicWriter.getInstance(metaOut, dataOut, numValues.toLong(), blockShift)
                 for (v in actualValues) w.add(v)
                 w.finish()
@@ -103,8 +103,8 @@ class TestDirectMonotonic : LuceneTestCase() {
             }
         }
 
-        dir.openInput("meta", IOContext.Companion.READONCE).use { metaIn ->
-            dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
+        dir.openInput("meta", IOContext.READONCE).use { metaIn ->
+            dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                 val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
                 val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength))
                 for (i in 0 until numValues) {
@@ -120,8 +120,8 @@ class TestDirectMonotonic : LuceneTestCase() {
     @Test
     fun testConstantSlope() {
         val dir = newDirectory()
-        val blockShift = TestUtil.Companion.nextInt(random(), DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
-        val numValues = TestUtil.Companion.nextInt(random(), 1, 1 shl 20)
+        val blockShift = TestUtil.nextInt(random(), DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
+        val numValues = TestUtil.nextInt(random(), 1, 1 shl 20)
         var min = random().nextLong()
         val inc = random().nextInt(1 shl random().nextInt(20))
         val maxInc = inc.toLong() * (numValues - 1).toLong()
@@ -131,8 +131,8 @@ class TestDirectMonotonic : LuceneTestCase() {
         val actualValues = ArrayList<Long>(numValues)
         for (i in 0 until numValues) actualValues.add(min + inc.toLong() * i)
         val dataLength: Long
-        dir.createOutput("meta", IOContext.Companion.DEFAULT).use { metaOut ->
-            dir.createOutput("data", IOContext.Companion.DEFAULT).use { dataOut ->
+        dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
+            dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
                 val w = DirectMonotonicWriter.getInstance(metaOut, dataOut, numValues.toLong(), blockShift)
                 for (v in actualValues) w.add(v)
                 w.finish()
@@ -140,8 +140,8 @@ class TestDirectMonotonic : LuceneTestCase() {
             }
         }
 
-        dir.openInput("meta", IOContext.Companion.READONCE).use { metaIn ->
-            dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
+        dir.openInput("meta", IOContext.READONCE).use { metaIn ->
+            dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                 val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
                 val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength))
                 for (i in 0 until numValues) {
@@ -157,15 +157,15 @@ class TestDirectMonotonic : LuceneTestCase() {
     @Test
     fun testZeroValuesSmallBlobShift() {
         val dir = newDirectory()
-        val numValues = TestUtil.Companion.nextInt(random(), 8, 1 shl 20)
-        val blockShift = TestUtil.Companion.nextInt(
+        val numValues = TestUtil.nextInt(random(), 8, 1 shl 20)
+        val blockShift = TestUtil.nextInt(
             random(),
             DirectMonotonicWriter.MIN_BLOCK_SHIFT,
             Math.toIntExact(Math.round((ln(numValues.toDouble()) / ln(2.0)).toFloat()) - 1L)
         )
         val dataLength: Long
-        dir.createOutput("meta", IOContext.Companion.DEFAULT).use { metaOut ->
-            dir.createOutput("data", IOContext.Companion.DEFAULT).use { dataOut ->
+        dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
+            dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
                 val w = DirectMonotonicWriter.getInstance(metaOut, dataOut, numValues.toLong(), blockShift)
                 for (i in 0 until numValues) w.add(0)
                 w.finish()
@@ -173,8 +173,8 @@ class TestDirectMonotonic : LuceneTestCase() {
             }
         }
 
-        dir.openInput("meta", IOContext.Companion.READONCE).use { metaIn ->
-            dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
+        dir.openInput("meta", IOContext.READONCE).use { metaIn ->
+            dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                 val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
                 assertEquals(metaIn.length(), metaIn.filePointer)
                 metaIn.seek(0L)
@@ -199,13 +199,13 @@ class TestDirectMonotonic : LuceneTestCase() {
         val iters = atLeast(rnd, 3)
         for (iter in 0 until iters) {
             val dir = newDirectory()
-            val blockShift = TestUtil.Companion.nextInt(rnd, DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
+            val blockShift = TestUtil.nextInt(rnd, DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)
             val maxNumValues = 1 shl 20
             val numValues: Int = if (rnd.nextBoolean()) {
-                TestUtil.Companion.nextInt(rnd, 1, maxNumValues)
+                TestUtil.nextInt(rnd, 1, maxNumValues)
             } else {
-                val numBlocks = TestUtil.Companion.nextInt(rnd, 0, maxNumValues ushr blockShift)
-                TestUtil.Companion.nextInt(rnd, 0, numBlocks) shl blockShift
+                val numBlocks = TestUtil.nextInt(rnd, 0, maxNumValues ushr blockShift)
+                TestUtil.nextInt(rnd, 0, numBlocks) shl blockShift
             }
             val actualValues = ArrayList<Long>()
             var previous = rnd.nextLong()
@@ -220,8 +220,8 @@ class TestDirectMonotonic : LuceneTestCase() {
                 actualValues.add(previous)
             }
             val dataLength: Long
-            dir.createOutput("meta", IOContext.Companion.DEFAULT).use { metaOut ->
-                dir.createOutput("data", IOContext.Companion.DEFAULT).use { dataOut ->
+            dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
+                dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
                     val w = DirectMonotonicWriter.getInstance(metaOut, dataOut, numValues.toLong(), blockShift)
                     for (v in actualValues) w.add(v)
                     w.finish()
@@ -229,8 +229,8 @@ class TestDirectMonotonic : LuceneTestCase() {
                 }
             }
 
-            dir.openInput("meta", IOContext.Companion.READONCE).use { metaIn ->
-                dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
+            dir.openInput("meta", IOContext.READONCE).use { metaIn ->
+                dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                     val meta = DirectMonotonicReader.loadMeta(metaIn, numValues.toLong(), blockShift)
                     val values = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0, dataLength), merging)
                     for (i in 0 until numValues) assertEquals(actualValues[i].toDouble(), values.get(i.toLong()).toDouble(), 1e10)
@@ -257,26 +257,26 @@ class TestDirectMonotonic : LuceneTestCase() {
                 val arrayLength = random().nextInt(1 shl random().nextInt(14))
                 val array = LongArray(arrayLength)
                 val base = random().nextLong()
-                val bpv = TestUtil.Companion.nextInt(random(), 4, 61)
+                val bpv = TestUtil.nextInt(random(), 4, 61)
                 for (i in array.indices) {
                     array[i] = base + random().nextLong(0, 1L shl bpv)
                 }
                 array.sort()
-                doTestMonotonicBinarySearchAgainstLongArray(dir, array, TestUtil.Companion.nextInt(random(), 2, 10))
+                doTestMonotonicBinarySearchAgainstLongArray(dir, array, TestUtil.nextInt(random(), 2, 10))
             }
         }
     }
 
     private fun doTestMonotonicBinarySearchAgainstLongArray(dir: Directory, array: LongArray, blockShift: Int) {
-        dir.createOutput("meta", IOContext.Companion.DEFAULT).use { metaOut ->
-            dir.createOutput("data", IOContext.Companion.DEFAULT).use { dataOut ->
+        dir.createOutput("meta", IOContext.DEFAULT).use { metaOut ->
+            dir.createOutput("data", IOContext.DEFAULT).use { dataOut ->
                 val writer = DirectMonotonicWriter.getInstance(metaOut, dataOut, array.size.toLong(), blockShift)
                 for (l in array) writer.add(l)
                 writer.finish()
             }
         }
-        dir.openInput("meta", IOContext.Companion.READONCE).use { metaIn ->
-            dir.openInput("data", IOContext.Companion.DEFAULT).use { dataIn ->
+        dir.openInput("meta", IOContext.READONCE).use { metaIn ->
+            dir.openInput("data", IOContext.DEFAULT).use { dataIn ->
                 val meta = DirectMonotonicReader.loadMeta(metaIn, array.size.toLong(), blockShift)
                 val reader = DirectMonotonicReader.getInstance(meta, dataIn.randomAccessSlice(0L, dir.fileLength("data")))
                 if (array.isEmpty()) {

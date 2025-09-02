@@ -52,7 +52,6 @@ class TestSearch : LuceneTestCase() {
     fun testSearch() {
         val fs = FakeFileSystem()
         Files.setFileSystem(fs)
-        IOUtils.fileSystem = fs
 
         var sw = StringWriter()
         //var pw: PrintWriter = PrintWriter(sw, true)

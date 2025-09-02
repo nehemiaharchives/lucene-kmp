@@ -5,11 +5,11 @@ import okio.IOException
 import okio.FileNotFoundException
 import okio.Path
 import okio.FileSystem
-import okio.SYSTEM
 import org.gnit.lucenekmp.jdkport.BufferedReader
 import org.gnit.lucenekmp.jdkport.Charset
 import org.gnit.lucenekmp.jdkport.CharsetDecoder
 import org.gnit.lucenekmp.jdkport.CodingErrorAction
+import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.InputStream
 import org.gnit.lucenekmp.jdkport.InputStreamReader
 import org.gnit.lucenekmp.jdkport.Reader
@@ -19,7 +19,7 @@ import kotlin.jvm.JvmName
 
 object IOUtils {
 
-    var fileSystem: FileSystem = FileSystem.SYSTEM
+    private var fileSystem: FileSystem = Files.getFileSystem()
 
     /** UTF-8 charset string.  */
     const val UTF_8: String = "UTF-8"

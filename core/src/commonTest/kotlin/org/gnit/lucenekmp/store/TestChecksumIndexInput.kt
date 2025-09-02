@@ -53,7 +53,7 @@ class TestChecksumIndexInput : LuceneTestCase() {
         val testBytes = ByteArray(numTestBytes)
         val path = "/dir".toPath()
         fakeFileSystem.createDirectories(path)
-        val dir = NIOFSDirectory(path, FSLockFactory.default, fakeFileSystem)
+        val dir = NIOFSDirectory(path, FSLockFactory.default)
         val out = dir.createOutput("foo", IOContext(FlushInfo(0, 0)))
         out.use { it.writeBytes(testBytes, numTestBytes) }
 

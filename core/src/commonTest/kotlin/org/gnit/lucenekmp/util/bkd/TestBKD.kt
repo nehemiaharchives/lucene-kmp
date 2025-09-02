@@ -43,7 +43,7 @@ class TestBKD : LuceneTestCase() {
     private fun getDirectory(): Directory {
         val path = "/tmp".toPath()
         fakeFileSystem.createDirectories(path)
-        return NIOFSDirectory(path, FSLockFactory.default, fakeFileSystem)
+        return NIOFSDirectory(path, FSLockFactory.default)
     }
 
     private fun getPointValues(input: org.gnit.lucenekmp.store.IndexInput): org.gnit.lucenekmp.index.PointValues {

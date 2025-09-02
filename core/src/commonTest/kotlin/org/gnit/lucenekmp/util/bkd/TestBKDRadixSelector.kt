@@ -54,7 +54,7 @@ class TestBKDRadixSelector : LuceneTestCase() {
     private fun getDirectory(): Directory {
         val path = "/tmp".toPath()
         fs.createDirectories(path)
-        return NIOFSDirectory(path, FSLockFactory.default, fs)
+        return NIOFSDirectory(path, FSLockFactory.default)
     }
 
     @Test

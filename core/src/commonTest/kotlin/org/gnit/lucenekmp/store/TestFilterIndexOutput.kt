@@ -39,7 +39,7 @@ class TestFilterIndexOutput : BaseDataOutputTestCase<FilterIndexOutput>() {
     fun testUnwrap() {
         val path = "/dir".toPath()
         fakeFileSystem.createDirectories(path)
-        val dir = NIOFSDirectory(path, FSLockFactory.default, fakeFileSystem)
+        val dir = NIOFSDirectory(path, FSLockFactory.default)
         val output = dir.createOutput("test", IOContext.DEFAULT)
         val filterIndexOutput = object : FilterIndexOutput("wrapper of test", "FilterDirectory{test}", output) {}
         assertEquals(output, filterIndexOutput.delegate)

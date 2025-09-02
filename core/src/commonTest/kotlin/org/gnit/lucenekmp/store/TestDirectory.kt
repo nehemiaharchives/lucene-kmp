@@ -29,8 +29,8 @@ class TestDirectory : LuceneTestCase() {
                 largeBuffer[i] = i.toByte()
             }
             val dirs = arrayOf(
-                NIOFSDirectory(path, FSLockFactory.default, fs),
-                NIOFSDirectory(path, FSLockFactory.default, fs)
+                NIOFSDirectory(path, FSLockFactory.default),
+                NIOFSDirectory(path, FSLockFactory.default)
             )
             for (i in dirs.indices) {
                 val dir = dirs[i]
@@ -99,13 +99,13 @@ class TestDirectory : LuceneTestCase() {
         try {
             val path = "/testnotdir".toPath()
             Files.createDirectories(path)
-            val fsDir = NIOFSDirectory(path, FSLockFactory.default, fs)
+            val fsDir = NIOFSDirectory(path, FSLockFactory.default)
             try {
                 val out = fsDir.createOutput("afile", IOContext(FlushInfo(0,0)))
                 out.close()
                 assertTrue(fs.exists(path / "afile"))
                 expectThrows<IOException>(IOException::class) {
-                    NIOFSDirectory(path / "afile", FSLockFactory.default, fs)
+                    NIOFSDirectory(path / "afile", FSLockFactory.default)
                 }
             } finally {
                 fsDir.close()
