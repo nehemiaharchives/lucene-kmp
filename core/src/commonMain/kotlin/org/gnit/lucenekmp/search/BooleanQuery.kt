@@ -565,23 +565,27 @@ class BooleanQuery private constructor(
 
         // Inline SHOULD clauses from the only MUST clause
         run {
-            val inner = clauseSets[Occur.MUST]!!.iterator().next()
+            val shoulds = clauseSets[Occur.SHOULD]!!
+            val musts = clauseSets[Occur.MUST]!!
 
-            if (clauseSets[Occur.SHOULD]!!.isEmpty()
-                && clauseSets[Occur.MUST]!!.size == 1 && inner is BooleanQuery
-                && inner.clauses.size == inner.clauseSets[Occur.SHOULD]!!.size
-            ) {
-                val rewritten = Builder()
-                for (clause in clauses) {
-                    if (clause.occur !== Occur.MUST) {
-                        rewritten.add(clause)
+            if (shoulds.isEmpty() && musts.size == 1) {
+                val inner = musts.iterator().next()
+
+                if (inner is BooleanQuery
+                    && inner.clauses.size == inner.clauseSets[Occur.SHOULD]!!.size
+                ) {
+                    val rewritten = Builder()
+                    for (clause in clauses) {
+                        if (clause.occur !== Occur.MUST) {
+                            rewritten.add(clause)
+                        }
                     }
+                    for (innerClause in inner.clauses()) {
+                        rewritten.add(innerClause)
+                    }
+                    rewritten.setMinimumNumberShouldMatch(max(1, inner.minimumNumberShouldMatch))
+                    return rewritten.build()
                 }
-                for (innerClause in inner.clauses()) {
-                    rewritten.add(innerClause)
-                }
-                rewritten.setMinimumNumberShouldMatch(max(1, inner.minimumNumberShouldMatch))
-                return rewritten.build()
             }
         }
 
