@@ -117,7 +117,7 @@ class SegmentReader : CodecReader {
             } else {
                 assert(si.delCount == 0)
                 liveDocs = null
-                hardLiveDocs = liveDocs!!
+                hardLiveDocs = liveDocs
             }
             numDocs = si.info.maxDoc() - si.delCount
 

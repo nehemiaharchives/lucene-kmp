@@ -5,6 +5,7 @@ import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.util.NamedSPILoader
+import org.gnit.lucenekmp.codecs.lucene90.Lucene90DocValuesFormat
 
 
 /**
@@ -84,13 +85,31 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
     companion object {
         /** looks up a format by name  */
         fun forName(name: String): DocValuesFormat {
-            //return Holder.loader.lookup(name)
-            throw UnsupportedOperationException("DocValuesFormat.forName is not implemented yet")
+            // Provide built-in mappings for known formats in KMP (no real SPI discovery):
+            return when (name) {
+                "Lucene90" -> Lucene90DocValuesFormat()
+                else -> {
+                    // Fallback to the SPI loader if available; otherwise, throw a clear error
+                    try {
+                        Holder.loader.lookup(name)
+                    } catch (e: Throwable) {
+                        throw UnsupportedOperationException(
+                            "DocValuesFormat '$name' is not available. Known built-ins: [Lucene90].",
+                            e
+                        )
+                    }
+                }
+            }
         }
 
         /** returns a list of all available format names  */
         fun availableDocValuesFormats(): MutableSet<String> {
-            return Holder.loader.availableServices()
+            // Include any discovered services plus known built-ins
+            val discovered = Holder.loader.availableServices()
+            val result = mutableSetOf<String>()
+            result.addAll(discovered)
+            result.add("Lucene90")
+            return result
         }
 
         /**
@@ -107,7 +126,7 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
          */
         fun reloadDocValuesFormats(classloader: ClassLoader) {
             //Holder.loader.reload(classloader)
-            TODO() // ClassLoader needs to be implemented to make it work
+            TODO() // needs to be implemented without ClassLoader bc this project is in kotlin common
         }
     }
 }
