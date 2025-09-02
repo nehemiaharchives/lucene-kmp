@@ -235,7 +235,7 @@ class SegmentInfo(
         this.maxDoc = maxDoc
         this.useCompoundFile = isCompoundFile
         this.hasBlocks = hasBlocks
-        this.codec = requireNotNull(codec)
+        this.codecNullable = codec
         this.diagnostics = HashMap<String, String>(diagnostics)
 
         this.id = id
