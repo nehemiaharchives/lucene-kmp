@@ -9,7 +9,7 @@ class CompositeReaderContext private constructor(
     docbaseInParent: Int,
     private val children: MutableList<IndexReaderContext>,
     leaves: MutableList<LeafReaderContext>?
-) : IndexReaderContext(parent!!, ordInParent, docbaseInParent) {
+) : IndexReaderContext(parent, ordInParent, docbaseInParent) {
     private val leaves: MutableList<LeafReaderContext> = leaves!!
 
     /**
