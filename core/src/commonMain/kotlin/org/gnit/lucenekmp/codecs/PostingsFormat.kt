@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.codecs
 
 
 import okio.IOException
+import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.jdkport.ClassLoader
@@ -87,8 +88,21 @@ abstract class PostingsFormat protected constructor(override val name: String) :
 
         /** looks up a format by name  */
         fun forName(name: String): PostingsFormat {
-            //return Holder.loader.lookup(name)
-            throw UnsupportedOperationException("PostingsFormat.forName is not implemented yet")
+            // First try hardcoded built-ins (no SPI in KMP):
+            return when (name) {
+                "Lucene101" -> Lucene101PostingsFormat()
+                else -> {
+                    // Fallback to SPI loader if available, otherwise throw consistent error
+                    try {
+                        Holder.loader.lookup(name)
+                    } catch (e: Throwable) {
+                        throw UnsupportedOperationException(
+                            "PostingsFormat '$name' is not available. Known built-ins: [Lucene101].",
+                            e
+                        )
+                    }
+                }
+            }
         }
 
         /** returns a list of all available format names  */

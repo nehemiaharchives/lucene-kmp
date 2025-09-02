@@ -195,7 +195,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
     }
 
     override fun close() {
-        IOUtils.close(docIn!!, posIn, payIn!!)
+        IOUtils.close(docIn, posIn, payIn)
     }
 
     @Throws(IOException::class)

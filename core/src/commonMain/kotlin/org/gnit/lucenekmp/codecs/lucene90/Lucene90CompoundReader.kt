@@ -44,8 +44,9 @@ internal class Lucene90CompoundReader(private val directory: Directory, si: Segm
 
         // find the last FileEntry in the map (largest offset+length) and add length of codec footer:
         val expectedLength: Long =
-            (entries.values.maxOfOrNull { e -> e.offset + e.length } ?: CodecUtil.indexHeaderLength(Lucene90CompoundFormat.DATA_CODEC, "")).toLong()
-        + CodecUtil.footerLength()
+            ((entries.values.maxOfOrNull { e -> e.offset + e.length }
+                ?: CodecUtil.indexHeaderLength(Lucene90CompoundFormat.DATA_CODEC, "")).toLong()
+                + CodecUtil.footerLength())
 
         handle = directory.openInput(dataFileName, IOContext.DEFAULT.withReadAdvice(ReadAdvice.NORMAL))
         try {
