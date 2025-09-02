@@ -58,7 +58,7 @@ class IntComparator(numHits: Int, field: String, missingValue: Int?, reverse: Bo
         @Throws(IOException::class)
         private fun getValueForDoc(doc: Int): Int {
             if (docValues.advanceExact(doc)) {
-                return docValues.longValue() as Int
+                return docValues.longValue().toInt()
             } else {
                 return missingValue
             }
