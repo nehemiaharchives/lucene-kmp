@@ -119,7 +119,7 @@ class TestIOUtils : LuceneTestCase() {
         val dir = "/fsyncNonExistentBase".toPath()
         Files.createDirectories(dir)
         val nonExistent = dir / "nonexistent"
-        expectThrows<FileNotFoundException>(FileNotFoundException::class) {
+        expectThrows(FileNotFoundException::class) {
             IOUtils.fsync(nonExistent, true)
         }
     }

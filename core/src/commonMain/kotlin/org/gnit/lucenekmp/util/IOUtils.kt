@@ -19,7 +19,8 @@ import kotlin.jvm.JvmName
 
 object IOUtils {
 
-    private var fileSystem: FileSystem = Files.getFileSystem()
+    // Do not cache the FileSystem; always read the current instance so tests can swap it.
+    private fun fs(): FileSystem = Files.getFileSystem()
 
     /** UTF-8 charset string.  */
     const val UTF_8: String = "UTF-8"
@@ -47,7 +48,7 @@ object IOUtils {
         close(objects.asList().filterNotNull())
     }
 
-    /** Closes all given AutoCloseables.&#8203;:contentReference[oaicite:0]{index=0}
+    /** Closes all given AutoCloseables.:contentReference[oaicite:0]{index=0}
      * @see #close(vararg AutoCloseable) */
     @Throws(IOException::class)
     fun close(objects: Iterable<AutoCloseable>) {
@@ -75,7 +76,7 @@ object IOUtils {
         closeWhileHandlingException(objects.asList().filterNotNull())
     }
 
-    /** Closes all given AutoCloseables, suppressing all thrown non-Error exceptions.&#8203;:contentReference[oaicite:1]{index=1}
+    /** Closes all given AutoCloseables, suppressing all thrown non-Error exceptions.:contentReference[oaicite:1]{index=1}
      * Even if a VirtualMachineError (or equivalent fatal Error) is thrown, all given resources are closed. */
     fun closeWhileHandlingException(objects: Iterable<AutoCloseable>) {
         var firstError: Error? = null
@@ -158,21 +159,21 @@ object IOUtils {
     fun deleteFilesIgnoringExceptions(dir: Directory, files: Collection<String>) {
         for (name in files) {
             try {
-                dir.deleteFile(name)     // Lucene Directory deletion&#8203;:contentReference[oaicite:3]{index=3}
+                dir.deleteFile(name)     // Lucene Directory deletion:contentReference[oaicite:3]{index=3}
             } catch (_: Throwable) {
                 // ignore any exception
             }
         }
     }
 
-    /** Deletes all given files in a Directory, suppressing all thrown IOExceptions.&#8203;:contentReference[oaicite:4]{index=4}
+    /** Deletes all given files in a Directory, suppressing all thrown IOExceptions.:contentReference[oaicite:4]{index=4}
      * @param dir the Directory to delete files from
      * @param files vararg of file names to delete */
     fun deleteFilesIgnoringExceptions(dir: Directory, vararg files: String) {
         deleteFilesIgnoringExceptions(dir, files.asList())
     }
 
-    /** Deletes all given file names from a Directory.&#8203;:contentReference[oaicite:5]{index=5}
+    /** Deletes all given file names from a Directory.:contentReference[oaicite:5]{index=5}
      * Some of the names may be null; they are ignored.
      * After deletion, throws the first exception encountered (with others suppressed) if any failures occurred.
      * @param dir Directory to delete files from
@@ -206,7 +207,7 @@ object IOUtils {
         for (path in files) {
             if (path != null) {
                 try {
-                    fileSystem.delete(path, mustExist = false)  // ignore if doesn't exist
+                    fs().delete(path, mustExist = false)  // ignore if doesn't exist
                 } catch (_: Throwable) {
                     // ignore all failures
                 }
@@ -229,7 +230,7 @@ object IOUtils {
         for (file in files) {
             try {
                 if (file != null) {
-                    fileSystem.delete(file, mustExist = false) // won't throw if file not present
+                    fs().delete(file, mustExist = false) // won't throw if file not present
                 }
             } catch (t: Throwable) {
                 th = useOrSuppress(th, t)
@@ -262,7 +263,7 @@ object IOUtils {
             for (location in locations) {
                 if (location != null) {
                     try {
-                        fileSystem.delete(location, mustExist = false)
+                        fs().delete(location, mustExist = false)
                     } catch (e: IOException) {
                         // If directory not empty or other issue, record it
                         unremoved[location] = e
@@ -319,38 +320,35 @@ object IOUtils {
         }
     }
 
-    /** Ensure that any writes to the given file are persisted to the storage device.&#8203;:contentReference[oaicite:6]{index=6}
+    /** Ensure that any writes to the given file are persisted to the storage device.:contentReference[oaicite:6]{index=6}
      * On non-JVM platforms, this is implemented as a no-op (except for checking file existence) since fsync is not universally available.
      * @param fileToSync the file or directory to fsync
      * @param isDir true if [fileToSync] is a directory (in which case we attempt a best-effort no-op) */
     @Throws(IOException::class)
     fun fsync(fileToSync: Path, isDir: Boolean) {
+        val fileSystem = fs()
         if (isDir) {
             // Many platforms do not support fsync on directories. Just verify existence.
-            // If directory doesn't exist, throw FileNotFoundException (NoSuchFileException equivalent).
             try {
-                // Attempt to open or list directory to ensure it exists
-                fileSystem.delete(fileToSync, mustExist = true)
+                val meta = fileSystem.metadataOrNull(fileToSync)
+                if (meta == null) {
+                    throw FileNotFoundException("The directory '$fileToSync' was not found.")
+                }
             } catch (e: FileNotFoundException) {
                 throw e
-            } catch (_: Exception) {
-                // Ignore other exceptions for directory fsync on non-JVM
+            } catch (_: Throwable) {
+                // Best-effort on directories: swallow non-existence/access errors
             }
-            return  // Directory sync not supported, return quietly if exists
+            return
         }
-        // For a regular file, we try to ensure it exists and then perform no further action as a fallback.
-        try {
-            if (fileSystem.source(fileToSync) != null) {
-                // Successfully opened file (implies exists). Close immediately.
-                fileSystem.source(fileToSync).close()
-            }
-        } catch (e: FileNotFoundException) {
-            throw e
-        } catch (_: Exception) {
-            // If cannot open for some reason, treat it as not existing or not accessible
-            throw IOException("Failed to open file for fsync: $fileToSync")
+        // Regular file: ensure it exists; no explicit flush available in common/Okio.
+        val meta = fileSystem.metadataOrNull(fileToSync)
+            ?: throw FileNotFoundException("The file '$fileToSync' was not found.")
+        if (meta.isDirectory) {
+            // Called with isDir=false but path is a directory; nothing we can do here.
+            return
         }
-        // No explicit flush available; on JVM, one would use FileChannel.force(true). Here, we do nothing further.
+        // No-op fsync in KMP common code.
     }
 
     /** Applies the [consumer] to all non-null elements in the [collection].
@@ -390,4 +388,3 @@ object IOUtils {
         }
     }
 }
-

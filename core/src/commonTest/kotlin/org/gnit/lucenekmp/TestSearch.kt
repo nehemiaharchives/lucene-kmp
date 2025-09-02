@@ -30,7 +30,6 @@ import org.gnit.lucenekmp.store.FSDirectory
 import org.gnit.lucenekmp.store.NativeFSLockFactory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
-import org.gnit.lucenekmp.util.IOUtils
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
