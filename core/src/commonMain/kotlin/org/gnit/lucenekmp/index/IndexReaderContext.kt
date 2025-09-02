@@ -7,7 +7,7 @@ package org.gnit.lucenekmp.index
  */
 abstract class IndexReaderContext internal constructor(
     /** The reader context for this reader's immediate parent, or null if none  */
-    val parent: CompositeReaderContext,
+    val parent: CompositeReaderContext?,
     /** the ord for this reader in the parent, `0` if parent is null  */
     val ordInParent: Int,
     /** the doc base for this reader in the parent, `0` if parent is null  */

@@ -13,7 +13,7 @@ class LeafReaderContext internal constructor(
     leafOrd: Int = 0,
     leafDocBase: Int = 0,
 
-) : IndexReaderContext(parent!!, ord, docBase) {
+) : IndexReaderContext(parent, ord, docBase) {
     private val leaves: MutableList<LeafReaderContext>?
 
     /** Creates a new [LeafReaderContext]  */
