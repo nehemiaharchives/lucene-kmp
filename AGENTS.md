@@ -45,3 +45,30 @@ When you have access to Intelij IDEA MCP server, you should use the IDEA's inter
 
 ### Priority 2, Gradle command line
 When you don't have access to Intelij IDEA MCP server, you should use the command line Gradle test runner.
+
+## Additional Unit Test Porting Rules
+
+- **Parity with Java tests**
+    - All Lucene unit tests should be *ported*, not newly created. Keep method names, signatures, and local variable names **exactly** the same as the original Java tests.
+    - Replace Java assertions (`assertTrue`, `assertEquals`, etc.) with the equivalent Kotlin test assertions.
+    - Do not invent new tests or expectations beyond what exists in the Java source.
+
+- **Package mapping**
+    - For Lucene packages (`analysis, codecs, document, index, internal, search, store, util`), map:
+        - `org.apache.lucene.*` → `org.gnit.lucenekmp.*` (for both code and tests).
+    - For JDK classes missing from Kotlin stdlib, always check `org.gnit.lucenekmp.jdkport.*` first. If absent, port the class/method and add unit tests there.
+
+- **Superclass methods**
+    - If the class under test is a subclass of an abstract or base class and the subclass does not override some methods, create tests for those inherited methods as well.
+
+- **Naming convention for jdkport tests**
+    - For each ported JDK class, create a test named `ClassNameTest.kt`. Example:
+        - `org.gnit.lucenekmp.jdkport.CharacterTest`
+        - `org.gnit.lucenekmp.jdkport.Inet4AddressTest`
+
+- **Test ordering / coverage**
+    - JDK ported classes have tests created in alphabetical order. Interfaces and abstract classes can be skipped for direct tests.
+
+- **Examples**
+    - Java: `org.apache.lucene.util.TestUnicodeUtil`  
+      Kotlin: `org.gnit.lucenekmp.util.TestUnicodeUtil`
