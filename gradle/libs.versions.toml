@@ -1,7 +1,7 @@
 [versions]
 agp = "8.11.1"
-kotlin = "2.2.0"
-okio = "3.15.0"
+kotlin = "2.2.10"
+okio = "3.16.0"
 android-minSdk = "24"
 android-compileSdk = "36"
 kotlin-coroutines = "1.10.2"
@@ -15,7 +15,7 @@ kotlinbignum = { module = "com.ionspin.kotlin:bignum" , version = "0.3.10" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.7.1" }
-kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "7.0.7" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "7.0.13" }
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.18" }
 
 [plugins]
