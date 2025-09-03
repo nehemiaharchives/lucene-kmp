@@ -26,7 +26,7 @@ OPT_DIR="/opt"                #/opt is fine in most cases such as chatgpt.com/co
 JDK_VERSION="24.0.1_9"
 
 # Base URL for Gradle cache tarballs (GitHub Release)
-RELEASE_VERSION="1.3"
+RELEASE_VERSION="1.4"
 RELEASE_BASE_URL="https://github.com/nehemiaharchives/lucene-kmp-gc/releases/download/${RELEASE_VERSION}"
 
 # -----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ KONAN_DIR="$HOME/.konan"
 mkdir -p "$KONAN_DIR"
 
 # 5a – compiler bundle
-KONAN_VERSION="2.2.0"
+KONAN_VERSION="2.2.10"
 KONAN_PLATFORM="linux-x86_64"   # this container is Linux/amd64
 KONAN_PREBUILT_DIR="kotlin-native-prebuilt-${KONAN_PLATFORM}-${KONAN_VERSION}"
 KONAN_ARCHIVE="$KONAN_PREBUILT_DIR.tar.gz"
@@ -110,7 +110,7 @@ rm /tmp/${KONAN_ARCHIVE}
 DEPS_DIR="$KONAN_DIR/dependencies"
 mkdir -p "$DEPS_DIR"
 
-LLVM_DIR="llvm-19-x86_64-linux-essentials-100"
+LLVM_DIR="llvm-19-x86_64-linux-essentials-103"
 LLDB_DIR="lldb-4-linux"
 GCC_DIR="x86_64-unknown-linux-gnu-gcc-8.3.0-glibc-2.19-kernel-4.9-2"
 LIBFFI_DIR="libffi-3.2.1-2-linux-x86-64"
@@ -214,4 +214,4 @@ javac -version
 [[ -d "$DEPS_DIR/$LIBFFI_DIR/lib" ]]                           || { echo "❌  libffi dependencies missing" >&2; exit 1; }
 
 echo "✅  All Android and Kotlin/Native components present — you can now run ./gradlew build --offline"
-./gradlew --offline :core:compileKotlinJvm :core:compileKotlinLinuxX64
+./gradlew --offline --console=plain :core:compileKotlinJvm :core:compileKotlinLinuxX64
