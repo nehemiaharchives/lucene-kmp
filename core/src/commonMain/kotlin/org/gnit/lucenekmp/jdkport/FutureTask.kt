@@ -484,42 +484,42 @@ open class FutureTask<V> : RunnableFuture<V> {
     private suspend fun awaitDone(timed: Boolean, duration: Duration): V {
         return suspendCancellableCoroutine { cont ->
             CoroutineScope(Dispatchers.Default).launch {
-                try {
-                    mutex.withLock {
-                        if (state.load() > COMPLETING) {
-                            val result = report(state.load())
-                            cont.resume(result)
-                            return@withLock
-                        }
+                var completed = false
+                mutex.withLock {
+                    val s = state.load()
+                    if (s > COMPLETING) {
+                        cont.resume(report(s))
+                        completed = true
+                    } else {
                         continuation = cont
                         cont.invokeOnCancellation {
                             if (state.compareAndSet(NEW, CANCELLED)) {
                                 finishCompletion()
                             }
                         }
+                        val s2 = state.load()
+                        if (s2 > COMPLETING && continuation != null) {
+                            continuation = null
+                            cont.resume(report(s2))
+                            completed = true
+                        }
                     }
+                }
+                if (completed) return@launch
 
-                    if (timed) {
-                        val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
-                            delay(duration)
-                            mutex.withLock {
-                                if (state.load() <= COMPLETING && cont.isActive) {
-                                    cont.resumeWithException(TimeoutException())
-                                    if (state.compareAndSet(NEW, CANCELLED)) {
-                                        finishCompletion()
-                                    }
+                if (timed) {
+                    val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+                        delay(duration)
+                        mutex.withLock {
+                            if (state.load() <= COMPLETING && cont.isActive) {
+                                cont.resumeWithException(TimeoutException())
+                                if (state.compareAndSet(NEW, CANCELLED)) {
+                                    finishCompletion()
                                 }
                             }
                         }
-
-                        cont.invokeOnCancellation {
-                            timeoutJob.cancel()
-                        }
                     }
-                } catch (e: Exception) {
-                    if (cont.isActive) {
-                        cont.resumeWithException(e)
-                    }
+                    cont.invokeOnCancellation { timeoutJob.cancel() }
                 }
             }
         }
