@@ -22,14 +22,11 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
                 return
             }
 
-            // pad with extra "dummy byte": see javadocs for using Inflater(true)
-            val paddedLength = compressedLength + 1
-            compressed = ArrayUtil.growNoCopy(compressed, paddedLength)
+            compressed = ArrayUtil.growNoCopy(compressed, compressedLength)
             `in`.readBytes(compressed, 0, compressedLength)
-            compressed[compressedLength] = 0 // explicitly set dummy byte to 0
 
             val stream = alloc<z_stream>()
-            stream.avail_in = paddedLength.convert()
+            stream.avail_in = compressedLength.convert()
             stream.next_in = compressed.refTo(0).getPointer(memScope).reinterpret()
 
             val initResult = inflateInit2(stream.ptr, 15 + 32)

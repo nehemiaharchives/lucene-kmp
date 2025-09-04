@@ -20,14 +20,9 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
             if (compressedLength == 0) {
                 return
             }
-            // pad with extra "dummy byte": see javadocs for using Inflater(true)
-            val paddedLength = compressedLength + 1
-            compressed = ArrayUtil.growNoCopy(compressed, paddedLength)
+            compressed = ArrayUtil.growNoCopy(compressed, compressedLength)
             `in`.readBytes(compressed, 0, compressedLength)
-            compressed[compressedLength] = 0 // explicitly set dummy byte to 0
-
-            // extra "dummy byte"
-            decompressor.setInput(compressed, 0, paddedLength)
+            decompressor.setInput(compressed, 0, compressedLength)
             try {
                 bytes.length +=
                     decompressor.inflate(bytes.bytes, bytes.length, bytes.bytes.size - bytes.length)
