@@ -24,3 +24,11 @@ description: "KMP + Lucene porting rules for code and tests"
       `import io.github.oshai.kotlinlogging.KotlinLogging`  
       `private val logger = KotlinLogging.logger {}`  
       `logger.debug { "message" }`
+
+# writing code, then compile then run tests
+1. First write the code, then run `./gradlew compileKotlinJvm` and `./gradlew compileTestKotlinJvm` to check if there are compilation errors.
+2. If you encounter compilation errors, find out the cause of the error, edit the code to fix the error, then repeat step 1.
+3. If there is no compilation error, run unit tests, but run specific test class which you just ported or modified, not all tests.
+4. If the specific test fails, find out the cause of the failure, edit the code to fix the error, then repeat step 3.
+5. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
+6. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
