@@ -214,4 +214,8 @@ javac -version
 [[ -d "$DEPS_DIR/$LIBFFI_DIR/lib" ]]                           || { echo "❌  libffi dependencies missing" >&2; exit 1; }
 
 echo "✅  All Android and Kotlin/Native components present — you can now run ./gradlew build --offline"
-./gradlew --offline --console=plain :core:compileKotlinJvm :core:compileKotlinLinuxX64
+./gradlew --offline --console=plain :core:compileKotlinJvm
+./gradlew --offline --console=plain :core:compileKotlinLinuxX64
+./gradlew --offline --console=plain :core:compileTestKotlinJvm
+./gradlew --offline --console=plain :core:compileTestKotlinLinuxX64
+
