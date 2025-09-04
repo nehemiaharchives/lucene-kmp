@@ -120,6 +120,42 @@ android {
     }
 }
 
+// To enable hang detection, run ./gradlew commands with -PenableHangDetection=true
+val enableHangDetection = providers
+    .gradleProperty("enableHangDetection")
+    .orElse(providers.systemProperty("enableHangDetection"))
+    .map { it.equals("true", ignoreCase = true) }
+    .orElse(false)
+
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events("started", "passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+
+    if(enableHangDetection.get()) {
+        val slowThresholdMs = 60_000L // 60 seconds; adjust as needed
+        addTestListener(object : TestListener {
+            override fun beforeTest(descriptor: TestDescriptor) {
+                // to detect hanging tests
+                println("START ${descriptor.className} > ${descriptor.displayName}")
+            }
+
+            override fun afterTest(descriptor: TestDescriptor, result: TestResult) {
+                val dur = result.endTime - result.startTime
+                if (dur >= slowThresholdMs) {
+
+                    // to detect slow tests which passed or failed
+                    println("SLOW (${dur} ms) ${descriptor.className} > ${descriptor.displayName}")
+                }
+            }
+
+            override fun beforeSuite(suite: TestDescriptor) {}
+            override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
+        })
+    }
+}
+
 mavenPublishing {
     publishToMavenCentral()
 
