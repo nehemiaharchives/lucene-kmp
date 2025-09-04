@@ -1,5 +1,10 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import kotlin.apply
+import java.util.concurrent.TimeUnit
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -127,32 +132,100 @@ val enableHangDetection = providers
     .map { it.equals("true", ignoreCase = true) }
     .orElse(false)
 
+// --- Low-noise, precise hang detection for tests (JVM/Android) ---
 tasks.withType<Test>().configureEach {
+    // Keep Gradle output short; rely on our custom listener for hangs/slow tests.
     testLogging {
-        events("started", "passed", "skipped", "failed")
-        showStandardStreams = true
+        // Only show failures from Gradle itself.
+        events("failed"/*, "skipped"*/)
+        showStandardStreams = false
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
     }
 
-    if(enableHangDetection.get()) {
-        val slowThresholdMs = 60_000L // 60 seconds; adjust as needed
+    if (enableHangDetection.get()) {
+        val slowThresholdMs = 60_000L // adjust as needed
+
+        // One scheduled, daemon thread per Test task
+        val scheduler = Executors.newSingleThreadScheduledExecutor { r ->
+            Thread(r, "hang-detector-tests").apply { isDaemon = true }
+        }
+
+        // Track delayed "potential hang" prints per test so we can cancel them on finish
+        val pending: MutableMap<String, ScheduledFuture<*>> = ConcurrentHashMap()
+
         addTestListener(object : TestListener {
             override fun beforeTest(descriptor: TestDescriptor) {
-                // to detect hanging tests
-                println("START ${descriptor.className} > ${descriptor.displayName}")
+                val id = "${descriptor.className} > ${descriptor.displayName}"
+                // Schedule a one-time "potential hang" message if it runs longer than threshold
+                val future = scheduler.schedule({
+                    println("POTENTIAL HANG TEST ($slowThresholdMs ms threshold) $id")
+                }, slowThresholdMs, TimeUnit.MILLISECONDS)
+                pending[id] = future
             }
 
             override fun afterTest(descriptor: TestDescriptor, result: TestResult) {
+                val id = "${descriptor.className} > ${descriptor.displayName}"
+                // Cancel the pending "hang" message if the test finished
+                pending.remove(id)?.cancel(false)
+
                 val dur = result.endTime - result.startTime
                 if (dur >= slowThresholdMs) {
-
-                    // to detect slow tests which passed or failed
-                    println("SLOW (${dur} ms) ${descriptor.className} > ${descriptor.displayName}")
+                    println("SLOW TEST (${dur} ms) $id")
                 }
             }
 
             override fun beforeSuite(suite: TestDescriptor) {}
             override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
         })
+
+        // Ensure the scheduler stops when the task finishes
+        this.doLast { scheduler.shutdownNow() }
+    }
+}
+
+// --- Low-noise, precise hang detection for Gradle tasks ---
+if (enableHangDetection.get()) {
+    val slowTaskThresholdMs = 120_000L // adjust as needed
+
+    val scheduler = Executors.newSingleThreadScheduledExecutor { r ->
+        Thread(r, "hang-detector-tasks").apply { isDaemon = true }
+    }
+    val taskStart: MutableMap<String, Long> = ConcurrentHashMap()
+    val taskHangFuture: MutableMap<String, ScheduledFuture<*>> = ConcurrentHashMap()
+
+    gradle.addListener(object : TaskExecutionListener {
+        override fun beforeExecute(task: Task) {
+            val key = task.path
+            taskStart[key] = System.currentTimeMillis()
+            //println("START TASK $key")
+
+            // Schedule a one-time "potential hang" message
+            val future = scheduler.schedule({
+                println("POTENTIAL HANG TASK ($slowTaskThresholdMs ms threshold) $key")
+            }, slowTaskThresholdMs, TimeUnit.MILLISECONDS)
+            taskHangFuture[key] = future
+        }
+
+        override fun afterExecute(task: Task, state: TaskState) {
+            val key = task.path
+            taskHangFuture.remove(key)?.cancel(false)
+
+            val start = taskStart.remove(key) ?: return
+            val dur = System.currentTimeMillis() - start
+
+            if (dur >= slowTaskThresholdMs || state.failure != null) {
+                val status = when {
+                    state.failure != null -> "FAILED"
+                    state.skipped -> "SKIPPED"
+                    else -> "DONE"
+                }
+                println("SLOW TASK (${dur} ms) $key [$status]")
+            }
+        }
+    })
+
+    gradle.buildFinished {
+        scheduler.shutdownNow()
     }
 }
 
