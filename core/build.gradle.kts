@@ -132,6 +132,9 @@ val enableHangDetection = providers
     .map { it.equals("true", ignoreCase = true) }
     .orElse(false)
 
+// Detect if configuration cache is requested; avoid registering global listeners when it's on
+val configurationCacheRequested = gradle.startParameter.isConfigurationCacheRequested
+
 // --- Low-noise, precise hang detection for tests (JVM/Android) ---
 tasks.withType<Test>().configureEach {
     // Keep Gradle output short; rely on our custom listener for hangs/slow tests.
@@ -184,7 +187,9 @@ tasks.withType<Test>().configureEach {
 }
 
 // --- Low-noise, precise hang detection for Gradle tasks ---
-if (enableHangDetection.get()) {
+// Global Gradle listeners are not compatible with configuration cache at configuration time.
+// Only register when configuration cache is NOT requested.
+if (enableHangDetection.get() && !configurationCacheRequested) {
     val slowTaskThresholdMs = 120_000L // adjust as needed
 
     val scheduler = Executors.newSingleThreadScheduledExecutor { r ->
@@ -227,6 +232,9 @@ if (enableHangDetection.get()) {
     gradle.buildFinished {
         scheduler.shutdownNow()
     }
+} else if (enableHangDetection.get() && configurationCacheRequested) {
+    // Informative log so users know why task-level hang detection isn't active
+    logger.info("Hang detection for Gradle tasks is disabled because configuration cache is requested.")
 }
 
 mavenPublishing {
