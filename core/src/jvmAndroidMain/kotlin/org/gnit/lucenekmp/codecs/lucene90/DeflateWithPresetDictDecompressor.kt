@@ -12,32 +12,42 @@ import java.util.zip.Inflater
 actual class DeflateWithPresetDictDecompressor actual constructor() : Decompressor() {
     actual var compressed: ByteArray = ByteArray(0)
 
+    // Helper that reuses the provided Inflater (so preset dictionary is honored) and pads input.
+    @Throws(IOException::class)
+    private fun doDecompress(`in`: DataInput, decompressor: Inflater, bytes: BytesRef) {
+        val compressedLength: Int = `in`.readVInt()
+        if (compressedLength == 0) {
+            return
+        }
+        // Add a dummy trailing byte for Inflater(true) compliance
+        val paddedLength = compressedLength + 1
+        compressed = ArrayUtil.grow(compressed, paddedLength)
+        `in`.readBytes(compressed, 0, compressedLength)
+        compressed[compressedLength] = 0
+
+        decompressor.setInput(compressed, 0, paddedLength)
+        try {
+            bytes.length += decompressor.inflate(bytes.bytes, bytes.length, bytes.bytes.size - bytes.length)
+        } catch (e: DataFormatException) {
+            throw IOException(e)
+        }
+        if (!decompressor.finished()) {
+            throw CorruptIndexException(
+                "Invalid decoder state: needsInput=" +
+                    decompressor.needsInput() +
+                    ", needsDict=" +
+                    decompressor.needsDictionary(),
+                `in`
+            )
+        }
+    }
+
+    // Kept to satisfy the 'actual' signature; uses a temporary Inflater.
     @Throws(IOException::class)
     actual fun doDecompress(`in`: DataInput, bytes: BytesRef) {
         val decompressor = Inflater(true)
         try {
-            val compressedLength: Int = `in`.readVInt()
-            if (compressedLength == 0) {
-                return
-            }
-            compressed = ArrayUtil.growNoCopy(compressed, compressedLength)
-            `in`.readBytes(compressed, 0, compressedLength)
-            decompressor.setInput(compressed, 0, compressedLength)
-            try {
-                bytes.length +=
-                    decompressor.inflate(bytes.bytes, bytes.length, bytes.bytes.size - bytes.length)
-            } catch (e: DataFormatException) {
-                throw IOException(e)
-            }
-            if (!decompressor.finished()) {
-                throw CorruptIndexException(
-                    ("Invalid decoder state: needsInput=" +
-                            decompressor.needsInput() +
-                            ", needsDict=" +
-                            decompressor.needsDictionary()),
-                    `in`
-                )
-            }
+            doDecompress(`in`, decompressor, bytes)
         } finally {
             decompressor.end()
         }
@@ -65,7 +75,7 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
         val decompressor = Inflater(true)
         try {
             // Read the dictionary
-            doDecompress(`in`, bytes)
+            doDecompress(`in`, decompressor, bytes)
             if (dictLength != bytes.length) {
                 throw CorruptIndexException("Unexpected dict length", `in`)
             }
@@ -86,7 +96,7 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
                 bytes.bytes = ArrayUtil.grow(bytes.bytes, bytes.length + blockLength)
                 decompressor.reset()
                 decompressor.setDictionary(bytes.bytes, 0, dictLength)
-                doDecompress(`in`, bytes)
+                doDecompress(`in`, decompressor, bytes)
                 offsetInBlock += blockLength
             }
 
