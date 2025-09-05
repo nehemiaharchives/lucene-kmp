@@ -1,3 +1,9 @@
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestListener
+import org.gradle.api.tasks.testing.TestResult
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.concurrent.ConcurrentHashMap
@@ -135,54 +141,83 @@ val enableHangDetection = providers
 // Detect if configuration cache is requested; avoid registering global listeners when it's on
 val configurationCacheRequested = gradle.startParameter.isConfigurationCacheRequested
 
-// --- Low-noise, precise hang detection for tests (JVM/Android) ---
+// BuildService-based hang detection for tests to keep configuration cache compatible
+abstract class HangDetectionService : BuildService<BuildServiceParameters.None>, AutoCloseable {
+    private val scheduler = Executors.newSingleThreadScheduledExecutor { r ->
+        Thread(r, "hang-detector-tests").apply { isDaemon = true }
+    }
+    private val listeners: MutableMap<String, TestListener> = ConcurrentHashMap()
+    private val pending: MutableMap<String, ScheduledFuture<*>> = ConcurrentHashMap()
+
+    fun registerFor(task: Test, slowThresholdMs: Long) {
+        val key = task.path
+        listeners.computeIfAbsent(key) {
+            val listener = object : TestListener {
+                override fun beforeTest(descriptor: TestDescriptor) {
+                    val id = "${descriptor.className} > ${descriptor.displayName}"
+                    val fut = scheduler.schedule({
+                        println("POTENTIAL HANG TEST ($slowThresholdMs ms threshold) $id")
+                    }, slowThresholdMs, TimeUnit.MILLISECONDS)
+                    pending[id] = fut
+                }
+                override fun afterTest(descriptor: TestDescriptor, result: TestResult) {
+                    val id = "${descriptor.className} > ${descriptor.displayName}"
+                    pending.remove(id)?.cancel(false)
+                    val dur = result.endTime - result.startTime
+                    if (dur >= slowThresholdMs) {
+                        println("SLOW TEST (${dur} ms) $id")
+                    }
+                }
+                override fun beforeSuite(suite: TestDescriptor) {}
+                override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
+            }
+            task.addTestListener(listener)
+            listener
+        }
+    }
+
+    fun unregisterFor(task: Test) {
+        val key = task.path
+        val listener = listeners.remove(key) ?: return
+        task.removeTestListener(listener)
+        // cancel any still-pending scheduled prints
+        pending.values.forEach { it.cancel(false) }
+        pending.clear()
+    }
+
+    override fun close() {
+        try {
+            scheduler.shutdownNow()
+        } finally {
+            pending.values.forEach { it.cancel(false) }
+            pending.clear()
+            listeners.clear()
+        }
+    }
+}
+
+// --- Low-noise, precise hang detection for tests (via BuildService) ---
 tasks.withType<Test>().configureEach {
     // Keep Gradle output short; rely on our custom listener for hangs/slow tests.
     testLogging {
-        // Only show failures from Gradle itself.
-        events("failed"/*, "skipped"*/)
+        events("failed")
         showStandardStreams = false
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
     }
 
     if (enableHangDetection.get()) {
+        val hangService = gradle.sharedServices.registerIfAbsent(
+            "hangDetectionService",
+            HangDetectionService::class
+        ) {}
+        usesService(hangService)
         val slowThresholdMs = 60_000L // adjust as needed
-
-        // One scheduled, daemon thread per Test task
-        val scheduler = Executors.newSingleThreadScheduledExecutor { r ->
-            Thread(r, "hang-detector-tests").apply { isDaemon = true }
+        doFirst {
+            hangService.get().registerFor(this as Test, slowThresholdMs)
         }
-
-        // Track delayed "potential hang" prints per test so we can cancel them on finish
-        val pending: MutableMap<String, ScheduledFuture<*>> = ConcurrentHashMap()
-
-        addTestListener(object : TestListener {
-            override fun beforeTest(descriptor: TestDescriptor) {
-                val id = "${descriptor.className} > ${descriptor.displayName}"
-                // Schedule a one-time "potential hang" message if it runs longer than threshold
-                val future = scheduler.schedule({
-                    println("POTENTIAL HANG TEST ($slowThresholdMs ms threshold) $id")
-                }, slowThresholdMs, TimeUnit.MILLISECONDS)
-                pending[id] = future
-            }
-
-            override fun afterTest(descriptor: TestDescriptor, result: TestResult) {
-                val id = "${descriptor.className} > ${descriptor.displayName}"
-                // Cancel the pending "hang" message if the test finished
-                pending.remove(id)?.cancel(false)
-
-                val dur = result.endTime - result.startTime
-                if (dur >= slowThresholdMs) {
-                    println("SLOW TEST (${dur} ms) $id")
-                }
-            }
-
-            override fun beforeSuite(suite: TestDescriptor) {}
-            override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
-        })
-
-        // Ensure the scheduler stops when the task finishes
-        this.doLast { scheduler.shutdownNow() }
+        doLast {
+            hangService.get().unregisterFor(this as Test)
+        }
     }
 }
 
