@@ -11,7 +11,6 @@ class TestDeflateWithPresetDictCompressionMode : AbstractTestCompressionMode() {
         mode = DeflateWithPresetDictCompressionMode()
     }
 
-    @Ignore
     @Test
     override fun testDecompress() = super.testDecompress()
 
