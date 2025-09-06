@@ -482,46 +482,23 @@ open class FutureTask<V> : RunnableFuture<V> {
      */
     @OptIn(ExperimentalAtomicApi::class)
     private suspend fun awaitDone(timed: Boolean, duration: Duration): V {
-        return suspendCancellableCoroutine { cont ->
-            CoroutineScope(Dispatchers.Default).launch {
-                var completed = false
-                mutex.withLock {
-                    val s = state.load()
-                    if (s > COMPLETING) {
-                        cont.resume(report(s))
-                        completed = true
-                    } else {
-                        continuation = cont
-                        cont.invokeOnCancellation {
-                            if (state.compareAndSet(NEW, CANCELLED)) {
-                                finishCompletion()
-                            }
-                        }
-                        val s2 = state.load()
-                        if (s2 > COMPLETING && continuation != null) {
-                            continuation = null
-                            cont.resume(report(s2))
-                            completed = true
-                        }
-                    }
+        val deadline = if (timed) System.nanoTime() + duration.inWholeNanoseconds else Long.MAX_VALUE
+        while (true) {
+            val s = state.load()
+            if (s > COMPLETING) return report(s)
+            if (timed && System.nanoTime() >= deadline) {
+                if (state.compareAndSet(NEW, CANCELLED)) {
+                    finishCompletion()
                 }
-                if (completed) return@launch
-
-                if (timed) {
-                    val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
-                        delay(duration)
-                        mutex.withLock {
-                            if (state.load() <= COMPLETING && cont.isActive) {
-                                cont.resumeWithException(TimeoutException())
-                                if (state.compareAndSet(NEW, CANCELLED)) {
-                                    finishCompletion()
-                                }
-                            }
-                        }
-                    }
-                    cont.invokeOnCancellation { timeoutJob.cancel() }
-                }
+                throw TimeoutException()
             }
+            if (!currentCoroutineContext().isActive) {
+                if (state.compareAndSet(NEW, CANCELLED)) {
+                    finishCompletion()
+                }
+                throw CancellationException()
+            }
+            yield()
         }
     }
 
