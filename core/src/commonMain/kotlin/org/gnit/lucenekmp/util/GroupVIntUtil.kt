@@ -72,12 +72,12 @@ object GroupVIntUtil {
      */
     @Throws(IOException::class)
     fun readGroupVInt(`in`: DataInput, dst: LongArray, offset: Int) {
-        val flag: Byte = `in`.readByte() and 0xFF.toByte()
+        val flag = `in`.readByte().toInt() and 0xFF
 
-        val n1Minus1 = flag.toInt() shr 6
-        val n2Minus1 = (flag.toInt() shr 4) and 0x03
-        val n3Minus1 = (flag.toInt() shr 2) and 0x03
-        val n4Minus1 = (flag and 0x03).toInt()
+        val n1Minus1 = flag shr 6
+        val n2Minus1 = (flag shr 4) and 0x03
+        val n3Minus1 = (flag shr 2) and 0x03
+        val n4Minus1 = flag and 0x03
 
         dst[offset] = readIntInGroup(`in`, n1Minus1).toLong() and 0xFFFFFFFFL
         dst[offset + 1] = readIntInGroup(`in`, n2Minus1).toLong() and 0xFFFFFFFFL
@@ -94,7 +94,7 @@ object GroupVIntUtil {
      */
     @Throws(IOException::class)
     fun readGroupVInt(`in`: DataInput, dst: IntArray, offset: Int) {
-        val flag: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+        val flag = `in`.readByte().toInt() and 0xFF
 
         val n1Minus1 = flag shr 6
         val n2Minus1 = (flag shr 4) and 0x03
@@ -110,9 +110,10 @@ object GroupVIntUtil {
     @Throws(IOException::class)
     private fun readIntInGroup(`in`: DataInput, numBytesMinus1: Int): Int {
         when (numBytesMinus1) {
-            0 -> return (`in`.readByte() and 0xFF.toByte()).toInt()
-            1 -> return (`in`.readShort().toByte() and 0xFFFF.toByte()).toInt()
-            2 -> return (`in`.readShort().toByte() and 0xFFFF.toByte()).toInt() or ((`in`.readByte() and 0xFF.toByte()).toInt() shl 16)
+            0 -> return `in`.readByte().toInt() and 0xFF
+            1 -> return `in`.readShort().toInt() and 0xFFFF
+            2 -> return (`in`.readShort().toInt() and 0xFFFF) or
+                ((`in`.readByte().toInt() and 0xFF) shl 16)
             else -> return `in`.readInt()
         }
     }
@@ -139,7 +140,7 @@ object GroupVIntUtil {
             readGroupVInt(`in`, dst, offset)
             return 0
         }
-        val flag: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+        val flag = `in`.readByte().toInt() and 0xFF
         val posStart = ++pos // exclude the flag bytes, the position has updated via readByte().
         val n1Minus1 = flag shr 6
         val n2Minus1 = (flag shr 4) and 0x03
@@ -180,7 +181,7 @@ object GroupVIntUtil {
             readGroupVInt(`in`, dst, offset)
             return 0
         }
-        val flag: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+        val flag = `in`.readByte().toInt() and 0xFF
         val posStart = ++pos // exclude the flag bytes, the position has updated via readByte().
         val n1Minus1 = flag shr 6
         val n2Minus1 = (flag shr 4) and 0x03
