@@ -10,6 +10,7 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.BitSet
 import org.gnit.lucenekmp.util.BitSetIterator
+import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.SparseFixedBitSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -82,37 +83,148 @@ class TestIndexedDISI : LuceneTestCase() {
     @Test
     @LuceneTestCase.Companion.Nightly
     fun testRandomBlocks() {
-        // TODO
+        val BLOCKS = 5
+        val set = createSetWithRandomBlocks(BLOCKS)
+        newDirectory().use { dir ->
+            doTestAllSingleJump(set, dir)
+        }
     }
 
     @Test
     fun testPositionNotZero() {
-        // TODO
+        val BLOCKS = 10
+        val denseRankPower: Byte =
+            if (rarely()) (-1).toByte() else (random().nextInt(7) + 7).toByte()
+        val set = createSetWithRandomBlocks(BLOCKS)
+        newDirectory().use { dir ->
+            val cardinality = set.cardinality()
+            val jumpTableEntryCount: Int
+            dir.createOutput("foo", IOContext.DEFAULT).use { out ->
+                jumpTableEntryCount =
+                    IndexedDISI.writeBitSet(
+                        BitSetIterator(set, cardinality.toLong()),
+                        out,
+                        denseRankPower
+                    ).toInt()
+            }
+            dir.openInput("foo", IOContext.DEFAULT).use { fullInput ->
+                val blockData =
+                    IndexedDISI.createBlockSlice(
+                        fullInput,
+                        "blocks",
+                        0L,
+                        fullInput.length(),
+                        jumpTableEntryCount
+                    )
+                blockData.seek(random().nextInt(blockData.length().toInt()).toLong())
+                val jumpTable =
+                    IndexedDISI.createJumpTable(
+                        fullInput,
+                        0L,
+                        fullInput.length(),
+                        jumpTableEntryCount
+                    )
+                val disi =
+                    IndexedDISI(
+                        blockData,
+                        jumpTable,
+                        jumpTableEntryCount,
+                        denseRankPower,
+                        cardinality.toLong()
+                    )
+                disi.advanceExact(BLOCKS * 65536 - 1)
+            }
+        }
     }
 
     @Test
     fun testOneDoc() {
-        // TODO
+        val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+        val set: BitSet = SparseFixedBitSet(maxDoc)
+        set.set(random().nextInt(maxDoc))
+        newDirectory().use { dir ->
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testTwoDocs() {
-        // TODO
+        val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+        val set: BitSet = SparseFixedBitSet(maxDoc)
+        set.set(random().nextInt(maxDoc))
+        set.set(random().nextInt(maxDoc))
+        newDirectory().use { dir ->
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testAllDocs() {
-        // TODO
+        val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+        val set = FixedBitSet(maxDoc)
+        set.set(1, maxDoc)
+        newDirectory().use { dir ->
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testHalfFull() {
-        // TODO
+        val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+        val set: BitSet = SparseFixedBitSet(maxDoc)
+        var i = random().nextInt(2)
+        while (i < maxDoc) {
+            set.set(i)
+            i += TestUtil.nextInt(random(), 1, 3)
+        }
+        newDirectory().use { dir ->
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testDocRange() {
-        // TODO
+        newDirectory().use { dir ->
+            for (iter in 0 until 10) {
+                val maxDoc = TestUtil.nextInt(random(), 1, 1000000)
+                val set = FixedBitSet(maxDoc)
+                val start = random().nextInt(maxDoc)
+                val end = TestUtil.nextInt(random(), start + 1, maxDoc)
+                set.set(start, end)
+                doTest(set, dir)
+            }
+        }
+    }
+
+    private fun createSetWithRandomBlocks(blockCount: Int): BitSet {
+        val B = 65536
+        val set: BitSet = SparseFixedBitSet(blockCount * B)
+        for (block in 0 until blockCount) {
+            when (random().nextInt(4)) {
+                0 -> {
+                    // EMPTY
+                }
+                1 -> {
+                    for (docID in block * B until (block + 1) * B) {
+                        set.set(docID)
+                    }
+                }
+                2 -> {
+                    for (docID in block * B until (block + 1) * B step 101) {
+                        set.set(docID)
+                    }
+                }
+                3 -> {
+                    for (docID in block * B until (block + 1) * B step 3) {
+                        set.set(docID)
+                    }
+                }
+                else -> {
+                    throw IllegalStateException("Modulo logic error: there should only be 4 possibilities")
+                }
+            }
+        }
+        return set
     }
 
     @Test
