@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 class TestIndexedDISI : LuceneTestCase() {
 
@@ -229,37 +230,214 @@ class TestIndexedDISI : LuceneTestCase() {
 
     @Test
     fun testSparseDenseBoundary() {
-        // TODO
+        newDirectory().use { dir ->
+            val set = FixedBitSet(200000)
+            val start = 65536 + random().nextInt(100)
+            val denseRankPower: Byte =
+                if (rarely()) (-1).toByte() else (random().nextInt(7) + 7).toByte()
+
+            // we set MAX_ARRAY_LENGTH bits so the encoding will be sparse
+            set.set(start, start + IndexedDISI.MAX_ARRAY_LENGTH)
+            var length: Long
+            val jumpTableEntryCount: Int
+            dir.createOutput("sparse", IOContext.DEFAULT).use { out ->
+                jumpTableEntryCount =
+                    IndexedDISI.writeBitSet(
+                        BitSetIterator(set, IndexedDISI.MAX_ARRAY_LENGTH.toLong()),
+                        out,
+                        denseRankPower
+                    ).toInt()
+                length = out.filePointer
+            }
+            dir.openInput("sparse", IOContext.DEFAULT).use { input ->
+                val disi =
+                    IndexedDISI(
+                        input,
+                        0L,
+                        length,
+                        jumpTableEntryCount,
+                        denseRankPower,
+                        IndexedDISI.MAX_ARRAY_LENGTH.toLong()
+                    )
+                assertEquals(start, disi.nextDoc())
+                assertEquals(IndexedDISI.Method.SPARSE, disi.method)
+            }
+            doTest(set, dir)
+
+            // now we set one more bit so the encoding will be dense
+            set.set(start + IndexedDISI.MAX_ARRAY_LENGTH + random().nextInt(100))
+            dir.createOutput("bar", IOContext.DEFAULT).use { out ->
+                IndexedDISI.writeBitSet(
+                    BitSetIterator(set, (IndexedDISI.MAX_ARRAY_LENGTH + 1).toLong()),
+                    out,
+                    denseRankPower
+                )
+                length = out.filePointer
+            }
+            dir.openInput("bar", IOContext.DEFAULT).use { input ->
+                val disi =
+                    IndexedDISI(
+                        input,
+                        0L,
+                        length,
+                        jumpTableEntryCount,
+                        denseRankPower,
+                        (IndexedDISI.MAX_ARRAY_LENGTH + 1).toLong()
+                    )
+                assertEquals(start, disi.nextDoc())
+                assertEquals(IndexedDISI.Method.DENSE, disi.method)
+            }
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testOneDocMissing() {
-        // TODO
+        val maxDoc = TestUtil.nextInt(random(), 1, 1000000)
+        val set = FixedBitSet(maxDoc)
+        set.set(0, maxDoc)
+        set.clear(random().nextInt(maxDoc))
+        newDirectory().use { dir ->
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testFewMissingDocs() {
-        // TODO
+        newDirectory().use { dir ->
+            val numIters = atLeast(10)
+            for (iter in 0 until numIters) {
+                val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+                val set = FixedBitSet(maxDoc)
+                set.set(0, maxDoc)
+                val numMissingDocs = TestUtil.nextInt(random(), 2, 1000)
+                for (i in 0 until numMissingDocs) {
+                    set.clear(random().nextInt(maxDoc))
+                }
+                doTest(set, dir)
+            }
+        }
     }
 
     @Test
     fun testDenseMultiBlock() {
-        // TODO
+        newDirectory().use { dir ->
+            val maxDoc = 10 * 65536
+            val set = FixedBitSet(maxDoc)
+            for (i in 0 until maxDoc step 2) {
+                set.set(i)
+            }
+            doTest(set, dir)
+        }
     }
 
     @Test
     fun testIllegalDenseRankPower() {
-        // TODO
+        // Legal values
+        for (denseRankPower in byteArrayOf(-1, 7, 8, 9, 10, 11, 12, 13, 14, 15)) {
+            createAndOpenDISI(denseRankPower, denseRankPower)
+        }
+
+        // Illegal values
+        for (denseRankPower in byteArrayOf(-2, 0, 1, 6, 16)) {
+            assertFailsWith<IllegalArgumentException> {
+                createAndOpenDISI(denseRankPower, 8.toByte())
+            }
+            assertFailsWith<IllegalArgumentException> {
+                createAndOpenDISI(8.toByte(), denseRankPower)
+            }
+        }
+    }
+
+    private fun createAndOpenDISI(denseRankPowerWrite: Byte, denseRankPowerRead: Byte) {
+        val set = FixedBitSet(10)
+        set.set(set.length() - 1)
+        newDirectory().use { dir ->
+            val length: Long
+            var jumpTableEntryCount = -1
+            dir.createOutput("foo", IOContext.DEFAULT).use { out ->
+                jumpTableEntryCount = IndexedDISI.writeBitSet(
+                    BitSetIterator(set, set.cardinality().toLong()),
+                    out,
+                    denseRankPowerWrite
+                ).toInt()
+                length = out.filePointer
+            }
+            dir.openInput("foo", IOContext.DEFAULT).use { input ->
+                IndexedDISI(
+                    input,
+                    0L,
+                    length,
+                    jumpTableEntryCount,
+                    denseRankPowerRead,
+                    set.cardinality().toLong()
+                )
+            }
+        }
     }
 
     @Test
     fun testOneDocMissingFixed() {
-        // TODO
+        val maxDoc = 9699
+        val denseRankPower: Byte =
+            if (rarely()) (-1).toByte() else (random().nextInt(7) + 7).toByte()
+        val set = FixedBitSet(maxDoc)
+        set.set(0, maxDoc)
+        set.clear(1345)
+        newDirectory().use { dir ->
+            val cardinality = set.cardinality()
+            val length: Long
+            val jumpTableEntryCount: Int
+            dir.createOutput("foo", IOContext.DEFAULT).use { out ->
+                jumpTableEntryCount = IndexedDISI.writeBitSet(
+                    BitSetIterator(set, cardinality.toLong()),
+                    out,
+                    denseRankPower
+                ).toInt()
+                length = out.filePointer
+            }
+
+            val step = 16000
+            dir.openInput("foo", IOContext.DEFAULT).use { input ->
+                val disi = IndexedDISI(
+                    input,
+                    0L,
+                    length,
+                    jumpTableEntryCount,
+                    denseRankPower,
+                    cardinality.toLong()
+                )
+                val disi2 = BitSetIterator(set, cardinality.toLong())
+                assertAdvanceEquality(disi, disi2, step)
+            }
+        }
     }
 
     @Test
     fun testRandom() {
-        // TODO
+        newDirectory().use { dir ->
+            val numIters = atLeast(3)
+            for (i in 0 until numIters) {
+                doTestRandom(dir)
+            }
+        }
+    }
+
+    private fun doTestRandom(dir: Directory) {
+        val random = random()
+        val maxStep = TestUtil.nextInt(random, 1, 1 shl TestUtil.nextInt(random, 2, 20))
+        val numDocs = TestUtil.nextInt(random, 1, minOf(100000, (Int.MAX_VALUE - 1) / maxStep))
+        val docs: BitSet = SparseFixedBitSet(numDocs * maxStep + 1)
+        var lastDoc = -1
+        var doc = -1
+        for (i in 0 until numDocs) {
+            doc += TestUtil.nextInt(random, 1, maxStep)
+            docs.set(doc)
+            lastDoc = doc
+        }
+        val maxDoc = lastDoc + TestUtil.nextInt(random, 1, 100)
+        val set = BitSet.of(BitSetIterator(docs, docs.approximateCardinality().toLong()), maxDoc)
+        doTest(set, dir)
     }
 
     private fun rarely(): Boolean = TestUtil.rarely(random())
