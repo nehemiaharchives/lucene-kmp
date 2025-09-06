@@ -160,6 +160,7 @@ abstract class HangDetectionService : BuildService<BuildServiceParameters.None>,
                     }, slowThresholdMs, TimeUnit.MILLISECONDS)
                     pending[id] = fut
                 }
+
                 override fun afterTest(descriptor: TestDescriptor, result: TestResult) {
                     val id = "${descriptor.className} > ${descriptor.displayName}"
                     pending.remove(id)?.cancel(false)
@@ -168,6 +169,7 @@ abstract class HangDetectionService : BuildService<BuildServiceParameters.None>,
                         println("SLOW TEST (${dur} ms) $id")
                     }
                 }
+
                 override fun beforeSuite(suite: TestDescriptor) {}
                 override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
             }
@@ -237,7 +239,6 @@ if (enableHangDetection.get() && !configurationCacheRequested) {
         override fun beforeExecute(task: Task) {
             val key = task.path
             taskStart[key] = System.currentTimeMillis()
-            //println("START TASK $key")
 
             // Schedule a one-time "potential hang" message
             val future = scheduler.schedule({
