@@ -89,9 +89,10 @@ internal class PForUtil {
             forUtil.decode(bitsPerValue, pdu, ints)
         }
         val numExceptions = token ushr 5
-        for (i in 0..<numExceptions) {
-            ints[Byte.toUnsignedInt(`in`.readByte())] =
-                ints[Byte.toUnsignedInt(`in`.readByte())] or (Byte.toUnsignedLong(`in`.readByte()) shl bitsPerValue).toInt()
+        for (i in 0 until numExceptions) {
+            val index = Byte.toUnsignedInt(`in`.readByte())
+            // apply stored exception value at the given index
+            ints[index] = ints[index] or (Byte.toUnsignedLong(`in`.readByte()) shl bitsPerValue).toInt()
         }
     }
 
