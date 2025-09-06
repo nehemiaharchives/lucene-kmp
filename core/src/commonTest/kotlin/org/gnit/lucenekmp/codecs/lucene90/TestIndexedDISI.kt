@@ -13,6 +13,7 @@ import org.gnit.lucenekmp.util.BitSetIterator
 import org.gnit.lucenekmp.util.SparseFixedBitSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -65,7 +66,17 @@ class TestIndexedDISI : LuceneTestCase() {
 
     @Test
     fun testLastEmptyBlocks() {
-        // TODO
+        val B = 65536
+        val maxDoc = B * 3
+        val set: BitSet = SparseFixedBitSet(maxDoc)
+        for (docID in 0 until B * 2) {
+            set.set(docID)
+        }
+
+        newDirectory().use { dir ->
+            doTestAllSingleJump(set, dir)
+            assertAdvanceBeyondEnd(set, dir)
+        }
     }
 
     @Test
@@ -213,6 +224,48 @@ class TestIndexedDISI : LuceneTestCase() {
                 }
             }
         }
+    }
+
+    private fun assertAdvanceBeyondEnd(set: BitSet, dir: Directory) {
+        val cardinality = set.cardinality()
+        val denseRankPower: Byte = 9
+        val jumpTableEntryCount: Int
+        dir.createOutput("bar", IOContext.DEFAULT).use { out ->
+            jumpTableEntryCount =
+                IndexedDISI.writeBitSet(BitSetIterator(set, cardinality.toLong()), out, denseRankPower).toInt()
+        }
+
+        dir.openInput("bar", IOContext.DEFAULT).use { input ->
+            val disi2 = BitSetIterator(set, cardinality.toLong())
+            var doc = disi2.docID()
+            var index = 0
+            while (doc < cardinality) {
+                doc = disi2.nextDoc()
+                index++
+            }
+
+            val disi =
+                IndexedDISI(
+                    input,
+                    0L,
+                    input.length(),
+                    jumpTableEntryCount,
+                    denseRankPower,
+                    cardinality.toLong()
+                )
+            assertFalse(
+                disi.advanceExact(set.length()),
+                "There should be no set bit beyond the valid docID range"
+            )
+            disi.advance(doc)
+            assertEquals(
+                index,
+                disi.index() + 1,
+                "The index when advancing beyond the last defined docID should be correct"
+            )
+        }
+
+        dir.deleteFile("bar")
     }
 
     private fun assertAdvanceExactRandomized(
