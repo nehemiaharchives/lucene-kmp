@@ -8,7 +8,6 @@ import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.codecs.compressing.Decompressor
 import platform.zlib.*
-import kotlin.math.min
 
 actual class DeflateWithPresetDictDecompressor actual constructor() : Decompressor() {
     actual var compressed: ByteArray = ByteArray(0)
@@ -17,91 +16,44 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
     @Throws(IOException::class)
     actual fun doDecompress(`in`: DataInput, bytes: BytesRef) {
         memScoped {
-            val compressedLength: Int = `in`.readVInt()
-            if (compressedLength == 0) {
-                return
-            }
+            val compressedLength = `in`.readVInt()
+            if (compressedLength == 0) return
 
             compressed = ArrayUtil.growNoCopy(compressed, compressedLength)
             `in`.readBytes(compressed, 0, compressedLength)
 
             val stream = alloc<z_stream>()
             stream.avail_in = compressedLength.convert()
-            stream.next_in = compressed.refTo(0).getPointer(memScope).reinterpret()
+            stream.next_in = compressed.refTo(0).getPointer(memScope).reinterpret<UByteVar>()
 
-            val initResult = inflateInit2(stream.ptr, 15 + 32)
-            if (initResult != Z_OK) {
-                throw IOException("Failed to initialize zlib inflater: $initResult")
-            }
+            val init = inflateInit2(stream.ptr, -15)
+            if (init != Z_OK) throw IOException("Failed to initialize zlib inflater: $init")
 
             try {
-                val bufferSize = 8192 // You can adjust the buffer size as needed
-                val buffer = ByteArray(bufferSize)
-                var totalInflated = 0
-
-                stream.avail_out = bufferSize.convert()
-                stream.next_out = buffer.refTo(0).getPointer(memScope).reinterpret()
-
-                var result = inflate(stream.ptr, Z_NO_FLUSH)
-
-                while (result == Z_OK) {
-                    val inflatedBytes = bufferSize - stream.avail_out.toInt()
-                    if (inflatedBytes > 0) {
-                        bytes.bytes = ArrayUtil.grow(bytes.bytes, bytes.length + inflatedBytes)
-                        buffer.copyInto(bytes.bytes, bytes.length, 0, inflatedBytes)
-                        bytes.length += inflatedBytes
-                        totalInflated += inflatedBytes
+                val bufSize = 8192
+                val tmp = ByteArray(bufSize)
+                while (true) {
+                    stream.avail_out = bufSize.convert()
+                    stream.next_out = tmp.refTo(0).getPointer(memScope).reinterpret<UByteVar>()
+                    val res = inflate(stream.ptr, Z_NO_FLUSH)
+                    val produced = bufSize - stream.avail_out.toInt()
+                    if (produced > 0) {
+                        bytes.bytes = ArrayUtil.grow(bytes.bytes, bytes.length + produced)
+                        tmp.copyInto(bytes.bytes, bytes.length, 0, produced)
+                        bytes.length += produced
                     }
-
-                    stream.avail_out = bufferSize.convert()
-                    stream.next_out = buffer.refTo(0).getPointer(memScope).reinterpret()
-                    result = inflate(stream.ptr, Z_NO_FLUSH)
-                }
-
-                if (result != Z_STREAM_END) {
-                    if (result == Z_DATA_ERROR) {
-                        throw IOException("Malformed data stream")
-                    } else {
-                        throw IOException("Failed to inflate data: $result")
+                    when (res) {
+                        Z_OK -> continue
+                        Z_STREAM_END -> break
+                        Z_NEED_DICT -> throw IOException("Unexpected dictionary required for dictionary block")
+                        Z_DATA_ERROR -> throw IOException("Malformed data stream")
+                        else -> throw IOException("Failed to inflate data: $res")
                     }
-                }
-
-                val inflatedBytes = bufferSize - stream.avail_out.toInt()
-                if (inflatedBytes > 0) {
-                    bytes.bytes = ArrayUtil.grow(bytes.bytes, bytes.length + inflatedBytes)
-                    buffer.copyInto(bytes.bytes, bytes.length, 0, inflatedBytes)
-                    bytes.length += inflatedBytes
-                    totalInflated += inflatedBytes
-                }
-
-                if (!finished(stream.ptr)) {
-                    throw CorruptIndexException(
-                        ("Invalid decoder state: needsInput=" +
-                                needsInput(stream.ptr) +
-                                ", needsDict=" +
-                                needsDictionary(stream.ptr)),
-                        `in`
-                    )
                 }
             } finally {
                 inflateEnd(stream.ptr)
             }
         }
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    private fun needsInput(stream: CPointer<z_stream>): Boolean {
-        return stream.pointed.avail_in == 0u
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    private fun needsDictionary(stream: CPointer<z_stream>): Boolean {
-        return stream.pointed.state != null && stream.pointed.data_type == 2
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    private fun finished(stream: CPointer<z_stream>): Boolean {
-        return stream.pointed.avail_in == 0u && stream.pointed.avail_out != 0u
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -119,53 +71,77 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
             return
         }
 
-        val dictLength: Int = `in`.readVInt()
-        val blockLength: Int = `in`.readVInt()
+        val dictLength = `in`.readVInt()
+        val blockLength = `in`.readVInt()
         bytes.bytes = ArrayUtil.growNoCopy(bytes.bytes, dictLength)
         bytes.length = 0
-        bytes.offset = bytes.length
+        bytes.offset = 0
 
         memScoped {
+            // Read dictionary (no preset dict)
+            doDecompress(`in`, bytes)
+            if (dictLength != bytes.length) throw CorruptIndexException("Unexpected dict length", `in`)
+
+            var offsetInBlock = dictLength
+            var offsetInBytesRef = offset
+
+            // Skip blocks before offset
+            while (offsetInBlock + blockLength < offset) {
+                val clen = `in`.readVInt()
+                `in`.skipBytes(clen.toLong())
+                offsetInBlock += blockLength
+                offsetInBytesRef -= blockLength
+            }
+
+            // Decompress needed blocks with preset dictionary
             val stream = alloc<z_stream>()
+            val init = inflateInit2(stream.ptr, -15)
+            if (init != Z_OK) throw IOException("Failed to initialize zlib inflater: $init")
 
             try {
-                // Read the dictionary
-                doDecompress(`in`, bytes)
-                if (dictLength != bytes.length) {
-                    throw CorruptIndexException("Unexpected dict length", `in`)
-                }
-
-                var offsetInBlock = dictLength
-                var offsetInBytesRef = offset
-
-                // Skip unneeded blocks
-                while (offsetInBlock + blockLength < offset) {
-                    val compressedLength: Int = `in`.readVInt()
-                    `in`.skipBytes(compressedLength.toLong())
-                    offsetInBlock += blockLength
-                    offsetInBytesRef -= blockLength
-                }
-
-                // Read blocks that intersect with the interval we need
                 while (offsetInBlock < offset + length) {
-                    bytes.bytes = ArrayUtil.grow(bytes.bytes, bytes.length + blockLength)
-
-                    val initResult = inflateInit2(stream.ptr, 15 + 32)
-                    if (initResult != Z_OK) {
-                        throw IOException("Failed to initialize zlib inflater: $initResult")
+                    val clen = `in`.readVInt()
+                    if (clen == 0) {
+                        offsetInBlock += blockLength
+                        continue
                     }
 
-                    stream.reset()
-                    val setDictResult = inflateSetDictionary(
-                        stream.ptr,
-                        bytes.bytes.refTo(0).getPointer(memScope).reinterpret(),
-                        dictLength.convert<UInt>()
-                    )
-                    if (setDictResult != Z_OK) {
-                        throw IOException("Failed to set dictionary for zlib inflater: $setDictResult")
+                    compressed = ArrayUtil.growNoCopy(compressed, clen)
+                    `in`.readBytes(compressed, 0, clen)
+
+                    inflateReset(stream.ptr)
+                    if (dictLength > 0) {
+                        val setRes = inflateSetDictionary(
+                            stream.ptr,
+                            bytes.bytes.refTo(0).getPointer(memScope).reinterpret<UByteVar>(),
+                            dictLength.convert()
+                        )
+                        if (setRes != Z_OK) throw IOException("Failed to set dictionary for zlib inflater: $setRes")
                     }
 
-                    doDecompress(`in`, bytes)
+                    stream.avail_in = clen.convert()
+                    stream.next_in = compressed.refTo(0).getPointer(memScope).reinterpret<UByteVar>()
+
+                    while (true) {
+                        if (bytes.bytes.size - bytes.length == 0) {
+                            bytes.bytes = ArrayUtil.grow(bytes.bytes)
+                        }
+                        val outCap = bytes.bytes.size - bytes.length
+                        stream.avail_out = outCap.convert()
+                        stream.next_out = bytes.bytes.refTo(bytes.length).getPointer(memScope).reinterpret<UByteVar>()
+
+                        val res = inflate(stream.ptr, Z_NO_FLUSH)
+                        val produced = outCap - stream.avail_out.toInt()
+                        if (produced > 0) bytes.length += produced
+
+                        when (res) {
+                            Z_OK -> continue
+                            Z_STREAM_END -> break
+                            Z_DATA_ERROR -> throw IOException("Malformed data stream")
+                            else -> throw IOException("Failed to inflate data: $res")
+                        }
+                    }
+
                     offsetInBlock += blockLength
                 }
 
@@ -178,21 +154,6 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
         }
     }
 
-    actual override fun clone(): Decompressor {
-        return DeflateWithPresetDictDecompressor()
-    }
+    actual override fun clone(): Decompressor = DeflateWithPresetDictDecompressor()
 }
 
-@OptIn(ExperimentalForeignApi::class)
-private fun z_stream.reset() {
-    avail_in = 0u
-    next_in = null
-    avail_out = 0u
-    next_out = null
-    msg = null
-    state = null
-    data_type = 0
-    adler = 0u
-    total_in = 0u
-    total_out = 0u
-}
