@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.jdkport.ParseException
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -127,12 +127,12 @@ class TestDateTools : LuceneTestCase() {
 
     @Test
     fun testDateToolsUTC() {
-        val time = 1130630400L
+        val time = 1_130_630_400L
         val d1 = DateTools.dateToString(Instant.fromEpochSeconds(time), DateTools.Resolution.MINUTE)
-        val d2 = DateTools.dateToString(Instant.fromEpochSeconds(time + 3600), DateTools.Resolution.MINUTE)
-        assertFalse(d1 == d2, "different times")
-        assertEquals(time * 1000, DateTools.stringToTime(d1), "midnight")
-        assertEquals((time + 3600) * 1000, DateTools.stringToTime(d2), "later")
+        val d2 = DateTools.dateToString(Instant.fromEpochSeconds(time + 3_600), DateTools.Resolution.MINUTE)
+        assertNotEquals(d1, d2, "different times")
+        assertEquals(time * 1_000, DateTools.stringToTime(d1), "midnight")
+        assertEquals((time + 3_600) * 1_000, DateTools.stringToTime(d2), "later")
     }
 
     private fun isoFormat(instant: Instant): String {
@@ -145,7 +145,7 @@ class TestDateTools : LuceneTestCase() {
         }
         val y = dt.year.toString().padStart(4, '0')
         val M = pad2(dt.month.number)
-        val d = pad2(dt.day)
+        val d = pad2(dt.dayOfMonth)
         val h = pad2(dt.hour)
         val m = pad2(dt.minute)
         val s = pad2(dt.second)
