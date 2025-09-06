@@ -203,8 +203,9 @@ class ForUtil {
             while (idx < numInts) {
                 if (remainingBitsPerValue >= remainingBitsPerInt) {
                     remainingBitsPerValue -= remainingBitsPerInt
-                    tmp[tmpIdx++] =
-                        tmp[tmpIdx++] or ((ints[idx] ushr remainingBitsPerValue) and maskRemainingBitsPerInt)
+                    tmp[tmpIdx] =
+                        tmp[tmpIdx] or ((ints[idx] ushr remainingBitsPerValue) and maskRemainingBitsPerInt)
+                    tmpIdx++
                     if (remainingBitsPerValue == 0) {
                         idx++
                         remainingBitsPerValue = bitsPerValue
@@ -220,19 +221,20 @@ class ForUtil {
                         mask2 = MASKS16[remainingBitsPerInt - remainingBitsPerValue]
                     } else {
                         mask1 = MASKS32[remainingBitsPerValue]
-                        mask2 = MASKS32[remainingBitsPerInt - remainingBitsPerValue]
-                    }
-                    tmp[tmpIdx] =
-                        tmp[tmpIdx] or ((ints[idx++] and mask1) shl (remainingBitsPerInt - remainingBitsPerValue))
-                    remainingBitsPerValue = bitsPerValue - remainingBitsPerInt + remainingBitsPerValue
-                    tmp[tmpIdx++] = tmp[tmpIdx++] or ((ints[idx] ushr remainingBitsPerValue) and mask2)
+                    mask2 = MASKS32[remainingBitsPerInt - remainingBitsPerValue]
                 }
-            }
-
-            for (i in 0..<numIntsPerShift) {
-                out.writeInt(tmp[i])
+                tmp[tmpIdx] =
+                    tmp[tmpIdx] or ((ints[idx++] and mask1) shl (remainingBitsPerInt - remainingBitsPerValue))
+                remainingBitsPerValue = bitsPerValue - remainingBitsPerInt + remainingBitsPerValue
+                tmp[tmpIdx] = tmp[tmpIdx] or ((ints[idx] ushr remainingBitsPerValue) and mask2)
+                tmpIdx++
             }
         }
+
+        for (i in 0..<numIntsPerShift) {
+            out.writeInt(tmp[i])
+        }
+    }
 
         /** Number of bytes required to encode 128 integers of `bitsPerValue` bits per value.  */
         fun numBytes(bitsPerValue: Int): Int {

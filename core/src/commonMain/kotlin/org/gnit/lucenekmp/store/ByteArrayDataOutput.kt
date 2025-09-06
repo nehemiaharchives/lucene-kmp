@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.store
 
+import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.util.BitUtil
 import org.gnit.lucenekmp.util.BytesRef
 import kotlin.jvm.JvmOverloads
@@ -37,36 +39,36 @@ class ByteArrayDataOutput : DataOutput {
     }
 
     override fun writeByte(b: Byte) {
-        require(this.position < limit)
+        assert(this.position < limit)
         bytes[this.position++] = b
     }
 
     override fun writeBytes(b: ByteArray, offset: Int, length: Int) {
-        require(this.position + length <= limit)
-        /*java.lang.System.arraycopy(b, offset, bytes, this.position, length)*/
-        b.copyInto(
+        assert(this.position + length <= limit)
+        System.arraycopy(b, offset, bytes, this.position, length)
+        /*b.copyInto(
             destination = bytes,
             destinationOffset = this.position,
             startIndex = offset,
             endIndex = offset + length
-        )
+        )*/
         this.position += length
     }
 
     override fun writeShort(i: Short) {
-        require(this.position + Short.SIZE_BYTES <= limit)
+        assert(this.position + Short.SIZE_BYTES <= limit)
         BitUtil.VH_LE_SHORT.set(bytes, this.position, i)
         this.position += Short.SIZE_BYTES
     }
 
     override fun writeInt(i: Int) {
-        require(this.position + Int.SIZE_BYTES <= limit)
+        assert(this.position + Int.SIZE_BYTES <= limit)
         BitUtil.VH_LE_INT.set(bytes, this.position, i)
         this.position += Int.SIZE_BYTES
     }
 
     override fun writeLong(i: Long) {
-        require(this.position + Long.SIZE_BYTES <= limit)
+        assert(this.position + Long.SIZE_BYTES <= limit)
         BitUtil.VH_LE_LONG.set(bytes, this.position, i)
         this.position += Long.SIZE_BYTES
     }
