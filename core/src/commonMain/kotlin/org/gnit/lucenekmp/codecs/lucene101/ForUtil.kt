@@ -203,8 +203,9 @@ class ForUtil {
             while (idx < numInts) {
                 if (remainingBitsPerValue >= remainingBitsPerInt) {
                     remainingBitsPerValue -= remainingBitsPerInt
-                    tmp[tmpIdx++] =
-                        tmp[tmpIdx++] or ((ints[idx] ushr remainingBitsPerValue) and maskRemainingBitsPerInt)
+                    tmp[tmpIdx] =
+                        tmp[tmpIdx] or ((ints[idx] ushr remainingBitsPerValue) and maskRemainingBitsPerInt)
+                    tmpIdx++
                     if (remainingBitsPerValue == 0) {
                         idx++
                         remainingBitsPerValue = bitsPerValue
@@ -225,7 +226,9 @@ class ForUtil {
                     tmp[tmpIdx] =
                         tmp[tmpIdx] or ((ints[idx++] and mask1) shl (remainingBitsPerInt - remainingBitsPerValue))
                     remainingBitsPerValue = bitsPerValue - remainingBitsPerInt + remainingBitsPerValue
-                    tmp[tmpIdx++] = tmp[tmpIdx++] or ((ints[idx] ushr remainingBitsPerValue) and mask2)
+                    tmp[tmpIdx] =
+                        tmp[tmpIdx] or ((ints[idx] ushr remainingBitsPerValue) and mask2)
+                    tmpIdx++
                 }
             }
 
