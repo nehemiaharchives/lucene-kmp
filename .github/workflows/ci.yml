@@ -172,7 +172,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Full Build
-        run: ./gradlew -PenableHangDetection=true :core:build -x testDebugUnitTest -x koverGenerateArtifactJvm -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverCachedVerify -x koverVerify
+        run: ./gradlew -PenableHangDetection=true :core:build -x testDebugUnitTest -x koverGenerateArtifactJvm -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverGenerateArtifactDebug -x koverCachedVerify -x koverVerify
 
       - name: Generate Coverage Report
         run: ./gradlew :core:koverXmlReport
