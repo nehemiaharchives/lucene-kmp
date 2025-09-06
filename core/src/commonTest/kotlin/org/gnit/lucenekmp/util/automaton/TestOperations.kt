@@ -635,6 +635,7 @@ class TestOperations : LuceneTestCase() {
         }
     }
 
+    // TODO, this test hangs sometimes, needs to be fixed!
     @Test
     fun testDuelRepeat() {
         val iters: Int = atLeast(10) // TODO originally 1_000 but reduced to 10 for dev speed
