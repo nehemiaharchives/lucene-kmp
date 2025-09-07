@@ -1,14 +1,23 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 
@@ -357,11 +366,9 @@ open class FutureTask<V> : RunnableFuture<V> {
 
     @OptIn(ExperimentalAtomicApi::class)
     override fun run() {
-    println("[DBG][FutureTask.run] enter state=${state.load()} hasRunner=${runner.load()!=null} this=${this.hashCode()}")
-    logger.debug { "[FutureTask.run] enter state=${state.load()} hasRunner=${runner.load()!=null} hash=${this.hashCode()}" }
+        logger.debug { "[FutureTask.run] enter state=${state.load()} hasRunner=${runner.load() != null} hash=${this.hashCode()}" }
         if (state.load() != NEW || !runner.compareAndSet(null, Job())) {
-        println("[DBG][FutureTask.run] abort state=${state.load()} runnerWasSet=${runner.load()!=null} hash=${this.hashCode()}")
-        logger.debug { "[FutureTask.run] abort: state=${state.load()} runnerWasSet=${runner.load()!=null} hash=${this.hashCode()}" }
+            logger.debug { "[FutureTask.run] abort: state=${state.load()} runnerWasSet=${runner.load() != null} hash=${this.hashCode()}" }
             return
         }
         val currentRunner = runner.load()!!
@@ -371,18 +378,15 @@ open class FutureTask<V> : RunnableFuture<V> {
                 var result: V? = null
                 var ran = false
                 try {
-            println("[DBG][FutureTask.run] invoking callable hash=${this.hashCode()}")
-            logger.debug { "[FutureTask.run] invoking callable hash=${this.hashCode()}" }
+                    logger.debug { "[FutureTask.run] invoking callable hash=${this.hashCode()}" }
                     result = c.call()
                     ran = true
                 } catch (ex: Throwable) {
-            println("[DBG][FutureTask.run] exception ${ex::class.simpleName} msg=${ex.message} hash=${this.hashCode()}")
-            logger.debug { "[FutureTask.run] callable threw ${ex::class.simpleName}: ${ex.message} hash=${this.hashCode()}" }
+                    logger.debug { "[FutureTask.run] callable threw ${ex::class.simpleName}: ${ex.message} hash=${this.hashCode()}" }
                     setException(ex)
                 }
                 if (ran) {
-            println("[DBG][FutureTask.run] callable completed setting result hash=${this.hashCode()}")
-            logger.debug { "[FutureTask.run] callable completed, setting result hash=${this.hashCode()}" }
+                    logger.debug { "[FutureTask.run] callable completed, setting result hash=${this.hashCode()}" }
                     set(result as V)
                 }
             }
@@ -396,7 +400,6 @@ open class FutureTask<V> : RunnableFuture<V> {
             if (s >= INTERRUPTING) {
                 handlePossibleCancellationInterrupt(s)
             }
-            println("[DBG][FutureTask.run] exit finalState=$s hash=${this.hashCode()}")
             logger.debug { "[FutureTask.run] exit finalState=$s hash=${this.hashCode()}" }
         }
     }
@@ -461,7 +464,7 @@ open class FutureTask<V> : RunnableFuture<V> {
         continuation.let { cont ->
             continuation = null
             val s = state.load()
-            if(cont != null) {
+            if (cont != null) {
                 if (s >= CANCELLED) {
                     cont.cancel()
                 } else {
@@ -543,19 +546,16 @@ object Executors {
     }
 
     @OptIn(ExperimentalAtomicApi::class)
-    fun defaultThreadFactory():ThreadFactory {
+    fun defaultThreadFactory(): ThreadFactory {
         return object : ThreadFactory {
             private val count = AtomicInteger(1)
             override fun newThread(r: Runnable): Job {
                 val threadName = "pool-thread-${count.fetchAndIncrement()}"
-                println("[DBG][ThreadFactory] creating new coroutine thread name=$threadName runnableClass=${r::class.simpleName}")
                 return GlobalScope.launch(CoroutineName(threadName)) {
-                    println("[DBG][ThreadFactory] launched coroutine name=$threadName starting runnableClass=${r::class.simpleName}")
                     when (r) {
                         is CoroutineRunnable -> r.runSuspending()
                         else -> r.run()
                     }
-                    println("[DBG][ThreadFactory] coroutine name=$threadName finished runnableClass=${r::class.simpleName}")
                 }
             }
         }
