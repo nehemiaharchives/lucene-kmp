@@ -25,8 +25,11 @@ class TestNFARunAutomaton : LuceneTestCase() {
 
     @Test
     fun testWithRandomRegex() {
-        var count = 0
-        while (count < 100) {
+        var found = 0
+        var attempts = 0
+        val maxAttempts = 5000 // safety cap to avoid potential CI hangs on pathological seeds
+        while (found < 100 && attempts < maxAttempts) {
+            attempts++
             val regExp = RegExp(AutomatonTestUtil.randomRegexp(random()), RegExp.NONE)
             val nfa = regExp.toAutomaton()
             if (nfa.isDeterministic) {
@@ -37,9 +40,10 @@ class TestNFARunAutomaton : LuceneTestCase() {
             val randomStringGen = try {
                 AutomatonTestUtil.RandomAcceptedStrings(dfa)
             } catch (_: IllegalArgumentException) {
+                // sometimes the automaton accepts nothing and throws
                 continue
             }
-            repeat(3) { // TODO originally 20, but reducing to 3 for dev speed
+            repeat(20) {
                 if (random().nextBoolean()) {
                     testAcceptedString(regExp, randomStringGen, candidate, 10)
                     testRandomString(regExp, dfa, candidate, 10)
@@ -48,8 +52,9 @@ class TestNFARunAutomaton : LuceneTestCase() {
                     testAcceptedString(regExp, randomStringGen, candidate, 10)
                 }
             }
-            count++
+            found++
         }
+        assertTrue(found > 0, "failed to generate any valid nondeterministic NFAs within attempts=$attempts")
     }
 
     @Test
@@ -79,12 +84,13 @@ class TestNFARunAutomaton : LuceneTestCase() {
 
         val t1 = Transition()
         val t2 = Transition()
+        // Initialize transitions for both automatons before reading counts
         automaton1.initTransition(state, t1)
-        if (random().nextBoolean()) {
-            automaton2.initTransition(state, t2)
-        }
-        val numStates = automaton2.getNumTransitions(state)
-        for (i in 0 until numStates) {
+        automaton2.initTransition(state, t2)
+        val count1 = automaton1.getNumTransitions(state)
+        val count2 = automaton2.getNumTransitions(state)
+        assertEquals(count1, count2, "transition count mismatch at state=$state")
+        for (i in 0 until count1) {
             automaton1.getNextTransition(t1)
             automaton2.getTransition(state, i, t2)
             assertEquals(t1.toString(), t2.toString())
@@ -112,7 +118,9 @@ class TestNFARunAutomaton : LuceneTestCase() {
         repeat: Int
     ) {
         repeat(repeat) {
-            val randomString = IntArray(random().nextInt(50)) { Random.nextInt(0, Character.MAX_CODE_POINT) }
+            // Use the same LuceneTestCase RNG for reproducibility
+            val len = random().nextInt(50)
+            val randomString = IntArray(len) { random().nextInt(0, Character.MAX_CODE_POINT) }
             val expected = Operations.run(dfa, IntsRef(randomString, 0, randomString.size))
             val actual = candidate.run(randomString)
             assertEquals(expected, actual,
