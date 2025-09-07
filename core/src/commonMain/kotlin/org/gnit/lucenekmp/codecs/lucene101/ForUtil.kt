@@ -203,7 +203,6 @@ class ForUtil {
             while (idx < numInts) {
                 if (remainingBitsPerValue >= remainingBitsPerInt) {
                     remainingBitsPerValue -= remainingBitsPerInt
-                    // |= is not available on array elements, so do the read/modify/write manually
                     tmp[tmpIdx] =
                         tmp[tmpIdx] or ((ints[idx] ushr remainingBitsPerValue) and maskRemainingBitsPerInt)
                     tmpIdx++
