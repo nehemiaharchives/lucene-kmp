@@ -148,7 +148,7 @@ jobs:
     name: Full Build and Test
     needs: [build-jvm, build-android, build-ios]
     runs-on: macos-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
