@@ -28,6 +28,8 @@ Under this directory you find two sub directories:
     1. jvmAndroidMain, jvmAndroidTest for jvm/android platform
     2. nativeMain, nativeTest for native platform (iOS, linux)
 
+- If the target java class to port into kotlin common is too large for your context size, eg. more than 500 LOC, or more than 50 unit test functions, try porting again baby step strategy. For example, create a class with empty functions with // TODO comments, or when you port unit test class, first create empty test class with no-op tests with //TODO comments as skeleton. Then one by one implement the //TODO of each functions.
+
 ## Specific Instruction
 * do not use String.toByteArray() but use String.encodeToByteArray() instead.
 * because this project is kotlin common project, in common code, do not use String.format function but use kotlin string interpolation.

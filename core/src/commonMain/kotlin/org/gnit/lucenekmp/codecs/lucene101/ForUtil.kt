@@ -7,8 +7,8 @@ import org.gnit.lucenekmp.store.DataOutput
 
 /**
  * Inspired from https://fulmicoton.com/posts/bitpacking/ Encodes multiple integers in one to get
- * SIMD-like speedups. If bitsPerValue &lt;= 8 then we pack 4 ints per Java int else if bitsPerValue
- * &lt;= 16 we pack 2 ints per Java int else we do scalar operations.
+ * SIMD-like speedups. If bitsPerValue <= 8 then we pack 4 ints per Java int else if bitsPerValue
+ * <= 16 we pack 2 ints per Java int else we do scalar operations.
  */
 class ForUtil {
     private val tmp = IntArray(BLOCK_SIZE)
@@ -178,12 +178,12 @@ class ForUtil {
             val numIntsPerShift = bitsPerValue * 4
             var idx = 0
             var shift = primitiveSize - bitsPerValue
-            for (i in 0..<numIntsPerShift) {
+            for (i in 0 until numIntsPerShift) {
                 tmp[i] = ints[idx++] shl shift
             }
-            shift = shift - bitsPerValue
+            shift -= bitsPerValue
             while (shift >= 0) {
-                for (i in 0..<numIntsPerShift) {
+                for (i in 0 until numIntsPerShift) {
                     tmp[i] = tmp[i] or (ints[idx++] shl shift)
                 }
                 shift -= bitsPerValue
@@ -232,7 +232,7 @@ class ForUtil {
                 }
             }
 
-            for (i in 0..<numIntsPerShift) {
+            for (i in 0 until numIntsPerShift) {
                 out.writeInt(tmp[i])
             }
         }
