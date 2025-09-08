@@ -48,7 +48,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.search.TestBooleanQuery -> org.apache.lucene.search.BooleanQuery (Ported)
 - org.apache.lucene.search.TestCollectorManager -> org.apache.lucene.search.CollectorManager (Ported)
 - org.apache.lucene.search.TestDisiPriorityQueue -> org.apache.lucene.search.DisiPriorityQueue (Ported)
-- org.apache.lucene.search.TestDisjunctionScoreBlockBoundaryPropagator -> org.apache.lucene.search.DisjunctionScoreBlockBoundaryPropagator (Ported)
 - org.apache.lucene.search.TestIndexSearcher -> org.apache.lucene.search.IndexSearcher (Ported)
 - org.apache.lucene.search.TestKnnByteVectorQuery -> org.apache.lucene.search.KnnByteVectorQuery (Ported)
 - org.apache.lucene.search.TestKnnFloatVectorQuery -> org.apache.lucene.search.KnnFloatVectorQuery (Ported)
