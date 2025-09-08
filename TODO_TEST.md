@@ -56,7 +56,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.search.TestMatchesIterator -> org.apache.lucene.search.MatchesIterator (Ported)
 - org.apache.lucene.search.TestReqExclBulkScorer -> org.apache.lucene.search.ReqExclBulkScorer (Ported)
 - org.apache.lucene.search.TestTermScorer -> org.apache.lucene.search.TermScorer (Ported)
-- org.apache.lucene.search.TestTimeLimitingBulkScorer -> org.apache.lucene.search.TimeLimitingBulkScorer (Ported)
 - org.apache.lucene.search.TestTopDocsCollector -> org.apache.lucene.search.TopDocsCollector (Ported)
 - org.apache.lucene.search.TestVectorScorer -> org.apache.lucene.search.VectorScorer (Ported)
 - org.apache.lucene.store.TestLockFactory -> org.apache.lucene.store.LockFactory (Ported)
