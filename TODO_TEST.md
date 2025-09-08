@@ -1,10 +1,6 @@
-# TODO: Unported Unit Test Classes (Depth 7/6/5)
+# TODO: Unported Unit Test Classes
 
 From PROGRESS2.md → Progress Table for Unit Test Classes:
-
-- No unported unit test classes found at Depth 7, 6, or 5.
-
-Note: Entries previously listed at these depths were test-framework helpers or production classes (e.g., `org.apache.lucene.tests.*`, `org.apache.lucene.codecs.*`), not actual unit test classes like `org.apache.lucene.*.Test*`.
 
 ## Depth 4
 - org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings -> org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings
