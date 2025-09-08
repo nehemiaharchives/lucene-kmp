@@ -29,7 +29,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl -> org.apache.lucene.analysis.tokenattributes.PackedTokenAttributeImpl (Ported)
 - org.apache.lucene.index.TestByteSlicePool -> org.apache.lucene.index.ByteSlicePool (Ported)
 - org.apache.lucene.index.TestCachingMergeContext -> org.apache.lucene.index.CachingMergeContext (Ported)
-- org.apache.lucene.index.TestConcurrentApproximatePriorityQueue -> org.apache.lucene.index.ConcurrentApproximatePriorityQueue (Ported)
 - org.apache.lucene.index.TestDirectoryReader -> org.apache.lucene.index.DirectoryReader (Ported)
 - org.apache.lucene.index.TestDocumentsWriterStallControl -> org.apache.lucene.index.DocumentsWriterStallControl (Ported)
 - org.apache.lucene.index.TestFieldInvertState -> org.apache.lucene.index.FieldInvertState (Ported)
