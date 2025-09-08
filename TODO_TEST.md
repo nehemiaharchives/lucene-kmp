@@ -57,4 +57,3 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.store.TestNIOFSDirectory -> org.apache.lucene.store.NIOFSDirectory (Ported)
 - org.apache.lucene.tests.util.TestRuleTemporaryFilesCleanup -> org.apache.lucene.tests.util.TestRuleTemporaryFilesCleanup
 - org.apache.lucene.util.TestCloseableThreadLocal -> org.apache.lucene.util.CloseableThreadLocal (Ported)
-- org.apache.lucene.util.fst.TestBitTableUtil -> org.apache.lucene.util.fst.BitTableUtil (Ported)
