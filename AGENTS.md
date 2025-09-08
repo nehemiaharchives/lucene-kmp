@@ -32,6 +32,8 @@ Under this directory you find two sub directories:
 
 - What should be ported next can be detemined by the output file of `progress.main.kts` script named `PROGERSS.md`. The md file is automatically geneted by the script and should be only be updated by the script. The script shows the Unit test classes which are not yet ported yet. Also, in the same way, `progressv2.main.kts` generates `PROGRESS2.md` which comes with more detailed porting progress info which includes number of methods and dependency depth. The higher the depth the sooner the porting must be done. For example, depth 7 dependency class should be ported first because those are not using other class, but other classes are using that class. After porting of depth 7 dependency classes finished, porting of depth 6 classes can start, then depth 5, 4, 3, 2, and 1. However, if I ask you to port specific class, port that class and its dependency classes.
 
+- I asked AI agent to create `TODO.md` and `TODO_TEST.md` which is simple TODO lists of what to port next. You follow this TODO list from top to bottom. First, we will port from the `TODO_TEST.md` Test* classes with its couneter part marked as (Ported) from top to bottom. Because classes of priority 1 API and its dependenceis are already ported, and tests which verify them is needed. When you finished porting a Test class, delete the entry in `TODO_TEST.md`.
+
 ## Specific Instruction
 * do not use String.toByteArray() but use String.encodeToByteArray() instead.
 * because this project is kotlin common project, in common code, do not use String.format function but use kotlin string interpolation.
