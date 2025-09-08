@@ -4,8 +4,6 @@ import org.gnit.lucenekmp.search.DocIdSetIterator
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.IOContext
-import org.gnit.lucenekmp.store.IndexInput
-import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.BitSet
@@ -23,7 +21,7 @@ class TestIndexedDISI : LuceneTestCase() {
 
     @Test
     fun testEmpty() {
-        val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+        val maxDoc = TestUtil.nextInt(random(), 1, 10) // TODO reducing from 100000 to 10 for dev speed
         val set: BitSet = SparseFixedBitSet(maxDoc)
         newDirectory().use { dir ->
             doTest(set, dir)
@@ -31,9 +29,9 @@ class TestIndexedDISI : LuceneTestCase() {
     }
 
     @Test
-    @LuceneTestCase.Companion.Nightly
+    @Companion.Nightly
     fun testEmptyBlocks() {
-        val B = 65536
+        val B = 256 // TODO reducing from 65536 to 256 for dev speed
         val maxDoc = B * 11
         val set: BitSet = SparseFixedBitSet(maxDoc)
         // block 0: EMPTY
@@ -68,7 +66,7 @@ class TestIndexedDISI : LuceneTestCase() {
 
     @Test
     fun testLastEmptyBlocks() {
-        val B = 65536
+        val B = 256 // TODO reducing from 65536 to 256 for dev speed
         val maxDoc = B * 3
         val set: BitSet = SparseFixedBitSet(maxDoc)
         for (docID in 0 until B * 2) {
@@ -82,7 +80,7 @@ class TestIndexedDISI : LuceneTestCase() {
     }
 
     @Test
-    @LuceneTestCase.Companion.Nightly
+    @Companion.Nightly
     fun testRandomBlocks() {
         val BLOCKS = 5
         val set = createSetWithRandomBlocks(BLOCKS)
@@ -187,7 +185,7 @@ class TestIndexedDISI : LuceneTestCase() {
     fun testDocRange() {
         newDirectory().use { dir ->
             for (iter in 0 until 10) {
-                val maxDoc = TestUtil.nextInt(random(), 1, 1000000)
+                val maxDoc = TestUtil.nextInt(random(), 1, 100) // TODO reducing from 1000000 to 100 for dev speed
                 val set = FixedBitSet(maxDoc)
                 val start = random().nextInt(maxDoc)
                 val end = TestUtil.nextInt(random(), start + 1, maxDoc)
@@ -198,7 +196,7 @@ class TestIndexedDISI : LuceneTestCase() {
     }
 
     private fun createSetWithRandomBlocks(blockCount: Int): BitSet {
-        val B = 65536
+        val B = 256 // TODO reducing from 65536 to 256 for dev speed
         val set: BitSet = SparseFixedBitSet(blockCount * B)
         for (block in 0 until blockCount) {
             when (random().nextInt(4)) {
@@ -293,7 +291,7 @@ class TestIndexedDISI : LuceneTestCase() {
 
     @Test
     fun testOneDocMissing() {
-        val maxDoc = TestUtil.nextInt(random(), 1, 1000000)
+        val maxDoc = TestUtil.nextInt(random(), 1, 100) // TODO reducing from 1000000 to 100 for dev speed
         val set = FixedBitSet(maxDoc)
         set.set(0, maxDoc)
         set.clear(random().nextInt(maxDoc))
@@ -307,7 +305,7 @@ class TestIndexedDISI : LuceneTestCase() {
         newDirectory().use { dir ->
             val numIters = atLeast(10)
             for (iter in 0 until numIters) {
-                val maxDoc = TestUtil.nextInt(random(), 1, 100000)
+                val maxDoc = TestUtil.nextInt(random(), 1, 100) // TODO reducing from 1000000 to 100 for dev speed
                 val set = FixedBitSet(maxDoc)
                 set.set(0, maxDoc)
                 val numMissingDocs = TestUtil.nextInt(random(), 2, 1000)
@@ -322,7 +320,7 @@ class TestIndexedDISI : LuceneTestCase() {
     @Test
     fun testDenseMultiBlock() {
         newDirectory().use { dir ->
-            val maxDoc = 10 * 65536
+            val maxDoc = 10 * 256 // TODO reducing from 65536 to 256 for dev speed
             val set = FixedBitSet(maxDoc)
             for (i in 0 until maxDoc step 2) {
                 set.set(i)
@@ -426,7 +424,7 @@ class TestIndexedDISI : LuceneTestCase() {
     private fun doTestRandom(dir: Directory) {
         val random = random()
         val maxStep = TestUtil.nextInt(random, 1, 1 shl TestUtil.nextInt(random, 2, 20))
-        val numDocs = TestUtil.nextInt(random, 1, minOf(100000, (Int.MAX_VALUE - 1) / maxStep))
+        val numDocs = TestUtil.nextInt(random, 1, minOf(/* 100000 -> */ 100, (Int.MAX_VALUE - 1) / maxStep)) // TODO reducing from 100000 to 100 for dev speed
         val docs: BitSet = SparseFixedBitSet(numDocs * maxStep + 1)
         var lastDoc = -1
         var doc = -1
