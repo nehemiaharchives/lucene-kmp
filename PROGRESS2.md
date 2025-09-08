@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 1078
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 843
+### Total KMP classes: 848
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1004
+### Total KMP Unit Test classes: 1020
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -351,7 +351,7 @@
 | [org.apache.lucene.search.SimpleScorable](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SimpleScorable.java) | org.gnit.lucenekmp.search.SimpleScorable | Depth 4 | [x] | 2 | 2 | 89% | 0 |
 | [org.apache.lucene.search.Sort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Sort.java) | org.gnit.lucenekmp.search.Sort | Depth 1 | [x] | 2 | 0 | 0% | 2 |
 | [org.apache.lucene.search.SortField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SortField.java) | org.gnit.lucenekmp.search.SortField | Depth 1 | [x] | 6 | 1 | 0% | 6 |
-| [org.apache.lucene.search.TaskExecutor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TaskExecutor.java) | org.gnit.lucenekmp.search.TaskExecutor | Depth 2 | [x] | 2 | 14 | 14% | 0 |
+| [org.apache.lucene.search.TaskExecutor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TaskExecutor.java) | org.gnit.lucenekmp.search.TaskExecutor | Depth 2 | [x] | 2 | 21 | 10% | 0 |
 | [org.apache.lucene.search.TermCollectingRewrite](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermCollectingRewrite.java) | org.gnit.lucenekmp.search.TermCollectingRewrite | Depth 4 | [x] | 2 | 2 | 46% | 0 |
 | [org.apache.lucene.search.TermInSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermInSetQuery.java) | org.gnit.lucenekmp.search.TermInSetQuery | Depth 3 | [x] | 24 | 0 | 0% | 24 |
 | [org.apache.lucene.search.TermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermQuery.java) | org.gnit.lucenekmp.search.TermQuery | Depth 2 | [x] | 9 | 3 | 0% | 9 |
@@ -424,7 +424,7 @@
 | [org.apache.lucene.util.ArrayTimSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/ArrayTimSorter.java) | org.gnit.lucenekmp.util.ArrayTimSorter | Depth 2 | [x] | 42 | 39 | 87% | 3 |
 | [org.apache.lucene.util.ArrayUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/ArrayUtil.java) | org.gnit.lucenekmp.util.ArrayUtil | Depth 2 | [x] | 11 | 11 | 90% | 0 |
 | [org.apache.lucene.util.Attribute](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/Attribute.java) | org.gnit.lucenekmp.util.Attribute | Depth 1 | [x] | 0 | 0 | 0% | 0 |
-| [org.apache.lucene.util.AttributeFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeFactory.java) | org.gnit.lucenekmp.util.AttributeFactory | Depth 2 | [x] | 4 | 2 | 75% | 2 |
+| [org.apache.lucene.util.AttributeFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeFactory.java) | org.gnit.lucenekmp.util.AttributeFactory | Depth 2 | [x] | 4 | 2 | 85% | 2 |
 | [org.apache.lucene.util.AttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeImpl.java) | org.gnit.lucenekmp.util.AttributeImpl | Depth 2 | [x] | 5 | 7 | 72% | 0 |
 | [org.apache.lucene.util.AttributeSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeSource.java) | org.gnit.lucenekmp.util.AttributeSource | Depth 3 | [x] | 2 | 1 | 0% | 2 |
 | [org.apache.lucene.util.BitDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/BitDocIdSet.java) | org.gnit.lucenekmp.util.BitDocIdSet | Depth 2 | [x] | 1 | 0 | 100% | 1 |
@@ -6605,11 +6605,11 @@
 - **Java Property Accessors**: 1
 - **Java Auto-Generated**: 0
 - **Java Synthetic**: 0
-- **KMP Core Business Logic**: 14
+- **KMP Core Business Logic**: 21
 - **KMP Property Accessors**: 3
 - **KMP Auto-Generated**: 1
-- **KMP Synthetic**: 11
-- **Semantic Completion**: 14%
+- **KMP Synthetic**: 9
+- **Semantic Completion**: 10%
 
 
 ## Detailed Analysis: org.apache.lucene.search.TermCollectingRewrite -> org.gnit.lucenekmp.search.TermCollectingRewrite
@@ -8108,8 +8108,8 @@
 - **KMP Core Business Logic**: 2
 - **KMP Property Accessors**: 0
 - **KMP Auto-Generated**: 2
-- **KMP Synthetic**: 4
-- **Semantic Completion**: 75%
+- **KMP Synthetic**: 2
+- **Semantic Completion**: 85%
 
 ### Missing Core Methods:
 - `package-private static java.lang.invoke.MethodHandle findAttributeImplCtor(java.lang.Class<? extends org.apache.lucene.util.AttributeImpl>)`
@@ -8626,7 +8626,7 @@
 - **Java Auto-Generated**: 0
 - **Java Synthetic**: 4
 - **KMP Core Business Logic**: 25
-- **KMP Property Accessors**: 2
+- **KMP Property Accessors**: 1
 - **KMP Auto-Generated**: 0
 - **KMP Synthetic**: 0
 - **Semantic Completion**: 0%
@@ -10947,7 +10947,6 @@
 | [org.apache.lucene.codecs.TermStats](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/TermStats.java) | org.gnit.lucenekmp.codecs.TermStats | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.codecs.TermVectorsReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/TermVectorsReader.java) | org.gnit.lucenekmp.codecs.TermVectorsReader | Depth 1 | [x] | 4 | 4 | 92% |
 | [org.apache.lucene.codecs.TermVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/TermVectorsWriter.java) | org.gnit.lucenekmp.codecs.TermVectorsWriter | Depth 3 | [x] | 2 | 2 | 35% |
-| [org.apache.lucene.codecs.TestCodecUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecUtil.java) | org.gnit.lucenekmp.codecs.TestCodecUtil | Depth 1 | [] | 20 | 0 | 0% |
 | [org.apache.lucene.codecs.compressing.CompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/compressing/CompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.CompressionMode | Depth 4 | [x] | 2 | 2 | 0% |
 | [org.apache.lucene.codecs.compressing.Decompressor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/compressing/Decompressor.java) | org.gnit.lucenekmp.codecs.compressing.Decompressor | Depth 4 | [x] | 1 | 1 | 85% |
 | [org.apache.lucene.codecs.compressing.MatchingReaders](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/compressing/MatchingReaders.java) | org.gnit.lucenekmp.codecs.compressing.MatchingReaders | Depth 5 | [x] | 0 | 0 | 0% |
@@ -11314,7 +11313,7 @@
 | [org.apache.lucene.search.SortedNumericSortField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SortedNumericSortField.java) | org.gnit.lucenekmp.search.SortedNumericSortField | Depth 3 | [] | 8 | 0 | 0% |
 | [org.apache.lucene.search.SortedSetSortField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SortedSetSortField.java) | org.gnit.lucenekmp.search.SortedSetSortField | Depth 4 | [] | 7 | 0 | 0% |
 | [org.apache.lucene.search.SynonymQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SynonymQuery.java) | org.gnit.lucenekmp.search.SynonymQuery | Depth 2 | [x] | 1 | 0 | 0% |
-| [org.apache.lucene.search.TaskExecutor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TaskExecutor.java) | org.gnit.lucenekmp.search.TaskExecutor | Depth 2 | [x] | 2 | 14 | 14% |
+| [org.apache.lucene.search.TaskExecutor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TaskExecutor.java) | org.gnit.lucenekmp.search.TaskExecutor | Depth 2 | [x] | 2 | 21 | 10% |
 | [org.apache.lucene.search.TermCollectingRewrite](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermCollectingRewrite.java) | org.gnit.lucenekmp.search.TermCollectingRewrite | Depth 3 | [x] | 2 | 2 | 46% |
 | [org.apache.lucene.search.TermInSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermInSetQuery.java) | org.gnit.lucenekmp.search.TermInSetQuery | Depth 3 | [x] | 24 | 0 | 0% |
 | [org.apache.lucene.search.TermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermQuery.java) | org.gnit.lucenekmp.search.TermQuery | Depth 2 | [x] | 9 | 3 | 0% |
@@ -11573,7 +11572,7 @@
 | [org.apache.lucene.util.ArrayTimSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/ArrayTimSorter.java) | org.gnit.lucenekmp.util.ArrayTimSorter | Depth 1 | [x] | 42 | 39 | 87% |
 | [org.apache.lucene.util.ArrayUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/ArrayUtil.java) | org.gnit.lucenekmp.util.ArrayUtil | Depth 2 | [x] | 11 | 11 | 90% |
 | [org.apache.lucene.util.Attribute](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/Attribute.java) | org.gnit.lucenekmp.util.Attribute | Depth 1 | [x] | 0 | 0 | 0% |
-| [org.apache.lucene.util.AttributeFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeFactory.java) | org.gnit.lucenekmp.util.AttributeFactory | Depth 2 | [x] | 4 | 2 | 75% |
+| [org.apache.lucene.util.AttributeFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeFactory.java) | org.gnit.lucenekmp.util.AttributeFactory | Depth 2 | [x] | 4 | 2 | 85% |
 | [org.apache.lucene.util.AttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeImpl.java) | org.gnit.lucenekmp.util.AttributeImpl | Depth 1 | [x] | 5 | 7 | 72% |
 | [org.apache.lucene.util.AttributeSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/AttributeSource.java) | org.gnit.lucenekmp.util.AttributeSource | Depth 3 | [x] | 2 | 1 | 0% |
 | [org.apache.lucene.util.BaseSortTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/BaseSortTestCase.java) | org.gnit.lucenekmp.util.BaseSortTestCase | Depth 2 | [x] | 2 | 2 | 82% |
@@ -11740,8 +11739,8 @@
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1078
-- Ported Unit Test Classes: 801
+- Ported Unit Test Classes: 802
 - Unit Test Porting Progress: 74%
 - **Unit Test Semantic Completion: 35%**
 - Total Test Core Methods Needed: 9333
-- Test Core Methods Implemented: 3326
+- Test Core Methods Implemented: 3345
