@@ -39,7 +39,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.index.TestIndexWriter -> org.apache.lucene.index.IndexWriter (Ported)
 - org.apache.lucene.index.TestIndexWriterConfig -> org.apache.lucene.index.IndexWriterConfig (Ported)
 - org.apache.lucene.index.TestIndexableField -> org.apache.lucene.index.IndexableField (Ported)
-- org.apache.lucene.index.TestLockableConcurrentApproximatePriorityQueue -> org.apache.lucene.index.LockableConcurrentApproximatePriorityQueue (Ported)
 - org.apache.lucene.index.TestMultiFields -> org.apache.lucene.index.MultiFields (Ported)
 - org.apache.lucene.index.TestOneMergeWrappingMergePolicy -> org.apache.lucene.index.OneMergeWrappingMergePolicy (Ported)
 - org.apache.lucene.index.TestPendingDeletes -> org.apache.lucene.index.PendingDeletes (Ported)
