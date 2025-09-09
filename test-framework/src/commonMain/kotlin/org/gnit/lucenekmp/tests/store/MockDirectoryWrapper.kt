@@ -26,6 +26,26 @@ class MockDirectoryWrapper(
     /** Probability of throwing an IOException when opening files. */
     var randomIOExceptionRateOnOpen: Double = 0.0
 
+    /** Throttling behavior, no-op in this simplified implementation. */
+    enum class Throttling {
+        /** Never throttles I/O operations. */
+        NEVER,
+
+        /** Occasionally throttles I/O operations. */
+        SOMETIMES,
+
+        /** Always throttles I/O operations. */
+        ALWAYS
+    }
+
+    /** Current throttling mode. */
+    private var throttling: Throttling = Throttling.NEVER
+
+    /** Set the [Throttling] mode. */
+    fun setThrottling(throttling: Throttling) {
+        this.throttling = throttling
+    }
+
     private fun maybeThrowIOException(reason: String?) {
         if (random.nextDouble() < randomIOExceptionRate) {
             throw IOException("Mock IO exception" + (reason?.let { ": $it" } ?: ""))
