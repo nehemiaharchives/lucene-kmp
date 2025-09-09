@@ -1,17 +1,15 @@
 package org.gnit.lucenekmp.index
 
-import okio.IOException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** A [MergeScheduler] that simply does each merge sequentially, using the current thread. */
 class SerialMergeScheduler : MergeScheduler() {
 
-    /**
-     * Just do the merges in sequence. We do this "synchronized" so that even if the application is
-     * using multiple threads, only one merge may run at a time.
-     */
-    @Throws(IOException::class)
+    private val mergeMutex = Mutex()
+
     override suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger) {
-        synchronized(this) {
+        mergeMutex.withLock {
             while (true) {
                 val merge = mergeSource.nextMerge ?: break
                 mergeSource.merge(merge)
