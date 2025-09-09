@@ -29,18 +29,24 @@ class TestNFARunAutomaton : LuceneTestCase() {
         var attempts = 0
         val maxAttempts = 5000 // safety cap to avoid potential CI hangs on pathological seeds
         while (found < 100 && attempts < maxAttempts) {
-            attempts++
+            attempts++ // ensure progress even when we skip
             val regExp = RegExp(AutomatonTestUtil.randomRegexp(random()), RegExp.NONE)
             val nfa = regExp.toAutomaton()
             if (nfa.isDeterministic) {
+                // Skip deterministic NFAs like Java's i-- path (retry)
                 continue
             }
-            val dfa = Operations.determinize(nfa, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+            val dfa = try {
+                Operations.determinize(nfa, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
+            } catch (e: TooComplexToDeterminizeException) {
+                // Retry on complexity overflow (rare, but safe)
+                continue
+            }
             val candidate = NFARunAutomaton(nfa)
             val randomStringGen = try {
                 AutomatonTestUtil.RandomAcceptedStrings(dfa)
             } catch (_: IllegalArgumentException) {
-                // sometimes the automaton accepts nothing and throws
+                // Retry when DFA accepts nothing (same as Java)
                 continue
             }
             repeat(20) {
@@ -52,6 +58,7 @@ class TestNFARunAutomaton : LuceneTestCase() {
                     testAcceptedString(regExp, randomStringGen, candidate, 10)
                 }
             }
+            // Count only successful exercises toward the target
             found++
         }
         assertTrue(found > 0, "failed to generate any valid nondeterministic NFAs within attempts=$attempts")

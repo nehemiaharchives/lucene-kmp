@@ -81,17 +81,12 @@ class TopScoreDocCollector internal constructor(
             private var minCompetitiveScore = 0f
 
             override var scorer: Scorable? = null
-                get() {
-                    throw UnsupportedOperationException(
-                        "Scorer cannot be set directly on TopScoreDocCollector. Use setScorer instead."
-                    )
-                }
-                set(scorer) {
-                    field = scorer
+                set(value) {
+                    field = value
                     if (minScoreAcc == null) {
-                        updateMinCompetitiveScore(scorer!!)
+                        updateMinCompetitiveScore(value!!)
                     } else {
-                        updateGlobalMinCompetitiveScore(scorer!!)
+                        updateGlobalMinCompetitiveScore(value!!)
                     }
                 }
 

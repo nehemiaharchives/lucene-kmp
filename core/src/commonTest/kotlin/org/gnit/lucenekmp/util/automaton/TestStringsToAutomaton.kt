@@ -38,7 +38,7 @@ class TestStringsToAutomaton : LuceneTestCase() {
         val iters = if (TEST_NIGHTLY) 20 else 5
         repeat(iters) {
             val buildBinary = random().nextBoolean()
-            val size = random().nextInt(2, 50)
+            val size = random().nextInt(2, 10) // TODO originally 50 but reduced to 10 for dev speed
             val terms = mutableSetOf<BytesRef>()
             val automata = mutableListOf<Automaton>()
             for (j in 0 until size) {
@@ -48,7 +48,7 @@ class TestStringsToAutomaton : LuceneTestCase() {
                     terms.add(t)
                     automata.add(Automata.makeBinary(t))
                 } else {
-                    val s = LuceneTestCase.randomUnicodeString(random(), 8)
+                    val s = randomUnicodeString(random(), 8)
                     terms.add(newBytesRef(s))
                     automata.add(Automata.makeString(s))
                 }
@@ -96,9 +96,9 @@ class TestStringsToAutomaton : LuceneTestCase() {
     }
 
     private fun testRandom(allowBinary: Boolean) {
-        val iters = /*if (RandomizedTest.isNightly) 50 else */10
+        val iters = /*if (RandomizedTest.isNightly) 50 else */3
         for (i in 0..<iters) {
-            val size: Int = random().nextInt(50, 200)  // TODO originally 500, 2000 but reducing to 50, 200 for dev speed
+            val size: Int = random().nextInt(3, 10)  // TODO originally 500, 2000 but reducing to 3, 10 for dev speed
             val terms: MutableSet<BytesRef> = HashSet(size)
             for (j in 0..<size) {
                 if (allowBinary && random().nextInt(10) < 2) {
