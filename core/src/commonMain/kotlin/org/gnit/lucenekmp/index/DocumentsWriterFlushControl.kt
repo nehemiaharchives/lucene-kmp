@@ -777,6 +777,11 @@ class DocumentsWriterFlushControl(
         updateStallState()
     }
 
+    /** Returns an iterator over all currently active [DocumentsWriterPerThread] instances. */
+    fun allActiveWriters(): MutableIterator<DocumentsWriterPerThread> {
+        return perThreadPool.iterator()
+    }
+
     /** Retrieve next pending DWPT to flush, if any (typically during full flush). */
     fun nextPendingFlush(): DocumentsWriterPerThread? {
         logger.debug { "DWFC.nextPendingFlush() called" }
