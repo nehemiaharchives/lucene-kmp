@@ -57,7 +57,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testCopyFrom() {
+    open fun testCopyFrom() {
         newDirectory().use { source ->
             newDirectory().use { dest ->
                 runCopyFrom(source, dest)
@@ -66,7 +66,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRename() {
+    open fun testRename() {
         newDirectory().use { dir ->
             val out = dir.createOutput("foobar", IOContext.DEFAULT)
             val numBytes = Random.nextInt(20000)
@@ -86,7 +86,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDeleteFile() {
+    open fun testDeleteFile() {
         newDirectory().use { dir ->
             val file = "foo.txt"
             kotlin.test.assertFalse(dir.listAll().contains(file))
@@ -100,7 +100,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testByte() {
+    open fun testByte() {
         newDirectory().use { dir ->
             dir.createOutput("byte", IOContext.DEFAULT).use { it.writeByte(128.toByte()) }
             dir.openInput("byte", IOContext.DEFAULT).use { input ->
@@ -111,7 +111,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testShort() {
+    open fun testShort() {
         newDirectory().use { dir ->
             dir.createOutput("short", IOContext.DEFAULT).use { it.writeShort((-20).toShort()) }
             dir.openInput("short", IOContext.DEFAULT).use { input ->
@@ -122,7 +122,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testInt() {
+    open fun testInt() {
         newDirectory().use { dir ->
             dir.createOutput("int", IOContext.DEFAULT).use { it.writeInt(-500) }
             dir.openInput("int", IOContext.DEFAULT).use { input ->
@@ -133,7 +133,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testLong() {
+    open fun testLong() {
         newDirectory().use { dir ->
             dir.createOutput("long", IOContext.DEFAULT).use { it.writeLong(-5000L) }
             dir.openInput("long", IOContext.DEFAULT).use { input ->
@@ -144,7 +144,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAlignedLittleEndianLongs() {
+    open fun testAlignedLittleEndianLongs() {
         newDirectory().use { dir ->
             dir.createOutput("littleEndianLongs", IOContext.DEFAULT).use { out ->
                 out.writeLong(3L)
@@ -162,7 +162,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testUnalignedLittleEndianLongs() {
+    open fun testUnalignedLittleEndianLongs() {
         newDirectory().use { dir ->
             dir.createOutput("littleEndianLongs", IOContext.DEFAULT).use { out ->
                 out.writeByte(2)
@@ -182,7 +182,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testLittleEndianLongsUnderflow() {
+    open fun testLittleEndianLongsUnderflow() {
         newDirectory().use { dir ->
             val offset = Random.nextInt(8)
             val length = TestUtil.nextInt(Random, 1, 16)
@@ -201,7 +201,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAlignedInts() {
+    open fun testAlignedInts() {
         newDirectory().use { dir ->
             dir.createOutput("Ints", IOContext.DEFAULT).use { out ->
                 out.writeInt(3)
@@ -219,7 +219,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testUnalignedInts() {
+    open fun testUnalignedInts() {
         val padding = Random.nextInt(3) + 1
         newDirectory().use { dir ->
             dir.createOutput("Ints", IOContext.DEFAULT).use { out ->
@@ -240,7 +240,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIntsUnderflow() {
+    open fun testIntsUnderflow() {
         newDirectory().use { dir ->
             val offset = Random.nextInt(4)
             val length = TestUtil.nextInt(Random, 1, 16)
@@ -259,7 +259,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAlignedFloats() {
+    open fun testAlignedFloats() {
         newDirectory().use { dir ->
             dir.createOutput("Floats", IOContext.DEFAULT).use { out ->
                 out.writeInt(3f.toBits())
@@ -277,7 +277,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testUnalignedFloats() {
+    open fun testUnalignedFloats() {
         val padding = Random.nextInt(3) + 1
         newDirectory().use { dir ->
             dir.createOutput("Floats", IOContext.DEFAULT).use { out ->
@@ -298,7 +298,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testFloatsUnderflow() {
+    open fun testFloatsUnderflow() {
         newDirectory().use { dir ->
             val offset = Random.nextInt(4)
             val length = TestUtil.nextInt(Random, 1, 16)
@@ -317,7 +317,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testString() {
+    open fun testString() {
         newDirectory().use { dir ->
             dir.createOutput("string", IOContext.DEFAULT).use { it.writeString("hello!") }
             dir.openInput("string", IOContext.DEFAULT).use { input ->
@@ -328,7 +328,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testVInt() {
+    open fun testVInt() {
         newDirectory().use { dir ->
             dir.createOutput("vint", IOContext.DEFAULT).use { it.writeVInt(500) }
             dir.openInput("vint", IOContext.DEFAULT).use { input ->
@@ -339,7 +339,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testVLong() {
+    open fun testVLong() {
         newDirectory().use { dir ->
             dir.createOutput("vlong", IOContext.DEFAULT).use { it.writeVLong(Long.MAX_VALUE) }
             dir.openInput("vlong", IOContext.DEFAULT).use { input ->
@@ -350,7 +350,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testZInt() {
+    open fun testZInt() {
         val ints = IntArray(Random.nextInt(10))
         for (i in ints.indices) {
             ints[i] = when (Random.nextInt(3)) {
@@ -372,7 +372,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testZLong() {
+    open fun testZLong() {
         val longs = LongArray(Random.nextInt(10))
         for (i in longs.indices) {
             longs[i] = when (Random.nextInt(3)) {
@@ -394,7 +394,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSetOfStrings() {
+    open fun testSetOfStrings() {
         newDirectory().use { dir ->
             dir.createOutput("stringset", IOContext.DEFAULT).use { out ->
                 out.writeSetOfStrings(mutableSetOf("test1", "test2"))
@@ -420,7 +420,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testMapOfStrings() {
+    open fun testMapOfStrings() {
         val m = mutableMapOf("test1" to "value1", "test2" to "value2")
 
         newDirectory().use { dir ->
@@ -448,7 +448,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testChecksum() {
+    open fun testChecksum() {
         val expected = org.gnit.lucenekmp.jdkport.CRC32()
         val numBytes = Random.nextInt(20000)
         val bytes = ByteArray(numBytes).also { Random.nextBytes(it) }
@@ -465,7 +465,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Throwable::class)
-    fun testDetectClose() {
+    open fun testDetectClose() {
         val dir = newDirectory()
         dir.close()
         LuceneTestCase.expectThrows(org.gnit.lucenekmp.store.AlreadyClosedException::class) {
@@ -474,7 +474,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testThreadSafetyInListAll() {
+    open fun testThreadSafetyInListAll() {
         newDirectory().use { dir ->
             val max = TestUtil.nextInt(Random, 500, 1000)
             for (i in 0 until max) {
@@ -491,7 +491,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testFileExistsInListAfterCreated() {
+    open fun testFileExistsInListAfterCreated() {
         newDirectory().use { dir ->
             val name = "file"
             dir.createOutput(name, IOContext.DEFAULT).close()
@@ -501,7 +501,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSeekToEOFThenBack() {
+    open fun testSeekToEOFThenBack() {
         newDirectory().use { dir ->
             val bufferLength = 1024
             val bytes = ByteArray(3 * bufferLength)
@@ -518,7 +518,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalEOF() {
+    open fun testIllegalEOF() {
         newDirectory().use { dir ->
             dir.createOutput("out", IOContext.DEFAULT).use { out ->
                 val b = ByteArray(1024)
@@ -531,7 +531,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSeekPastEOF() {
+    open fun testSeekPastEOF() {
         newDirectory().use { dir ->
             val len = Random.nextInt(2048)
             dir.createOutput("out", IOContext.DEFAULT).use { out ->
@@ -552,7 +552,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSliceOutOfBounds() {
+    open fun testSliceOutOfBounds() {
         newDirectory().use { dir ->
             val len = Random.nextInt(2040) + 8
             dir.createOutput("out", IOContext.DEFAULT).use { out ->
@@ -578,7 +578,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Throwable::class)
-    fun testNoDir() {
+    open fun testNoDir() {
         val tempDir = createTempDir("doesnotexist")
         IOUtils.rm(tempDir)
         getDirectory(tempDir).use { dir ->
@@ -591,7 +591,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testCopyBytes() {
+    open fun testCopyBytes() {
         newDirectory().use { dir ->
             var out = dir.createOutput("test", IOContext.DEFAULT)
             val bytes = ByteArray(TestUtil.nextInt(Random, 1, 77777))
@@ -655,7 +655,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
         return ((idx % 256) * (1 + (idx / 256))).toByte()
     }
 
-    fun testCopyBytesWithThreads() {
+    open fun testCopyBytesWithThreads() {
         newDirectory().use { d ->
             val headerLen = 100
             val data = ByteArray(TestUtil.nextInt(Random, headerLen + 1, 10000))
@@ -689,7 +689,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testFsyncDoesntCreateNewFiles() {
+    open fun testFsyncDoesntCreateNewFiles() {
         val path = createTempDir("nocreate")
         getDirectory(path).use { fsdir ->
             if (fsdir !is FSDirectory) {
@@ -713,7 +713,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRandomLong() {
+    open fun testRandomLong() {
         newDirectory().use { dir ->
             dir.createOutput("longs", IOContext.DEFAULT).use { output ->
                 val num = TestUtil.nextInt(Random, 50, 3000)
@@ -767,7 +767,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRandomInt() {
+    open fun testRandomInt() {
         newDirectory().use { dir ->
             dir.createOutput("ints", IOContext.DEFAULT).use { output ->
                 val num = TestUtil.nextInt(Random, 50, 3000)
@@ -817,7 +817,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRandomShort() {
+    open fun testRandomShort() {
         newDirectory().use { dir ->
             dir.createOutput("shorts", IOContext.DEFAULT).use { output ->
                 val num = TestUtil.nextInt(Random, 50, 3000)
@@ -867,7 +867,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRandomByte() {
+    open fun testRandomByte() {
         newDirectory().use { dir ->
             dir.createOutput("bytes", IOContext.DEFAULT).use { output ->
                 val num = if (LuceneTestCase.TEST_NIGHTLY) TestUtil.nextInt(Random, 1000, 3000)
@@ -913,7 +913,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSliceOfSlice() {
+    open fun testSliceOfSlice() {
         newDirectory().use { dir ->
             dir.createOutput("bytes", IOContext.DEFAULT).use { output ->
                 val num = if (LuceneTestCase.TEST_NIGHTLY) TestUtil.nextInt(Random, 250, 2500)
@@ -958,7 +958,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testLargeWrites() {
+    open fun testLargeWrites() {
         newDirectory().use { dir ->
             val os = dir.createOutput("testBufferStart.txt", IOContext.DEFAULT)
             val largeBuf = ByteArray(2048)
@@ -974,7 +974,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIndexOutputToString() {
+    open fun testIndexOutputToString() {
         newDirectory().use { dir ->
             dir.createOutput("camelCase.txt", IOContext.DEFAULT).use { out ->
                 kotlin.test.assertTrue(out.toString().contains("camelCase.txt"))
@@ -983,7 +983,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDoubleCloseOutput() {
+    open fun testDoubleCloseOutput() {
         newDirectory().use { dir ->
             val out = dir.createOutput("foobar", IOContext.DEFAULT)
             out.writeString("testing")
@@ -993,7 +993,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDoubleCloseInput() {
+    open fun testDoubleCloseInput() {
         newDirectory().use { dir ->
             dir.createOutput("foobar", IOContext.DEFAULT).use { out -> out.writeString("testing") }
             val input = dir.openInput("foobar", IOContext.DEFAULT)
@@ -1004,7 +1004,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testCreateTempOutput() {
+    open fun testCreateTempOutput() {
         newDirectory().use { dir ->
             val names = mutableListOf<String>()
             val iters = LuceneTestCase.atLeast(50)
@@ -1025,7 +1025,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testCreateOutputForExistingFile() {
+    open fun testCreateOutputForExistingFile() {
         newDirectory().use { dir ->
             val name = "file"
             dir.createOutput(name, IOContext.DEFAULT).use { }
@@ -1038,7 +1038,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSeekToEndOfFile() {
+    open fun testSeekToEndOfFile() {
         newDirectory().use { dir ->
             dir.createOutput("a", IOContext.DEFAULT).use { out ->
                 repeat(1024) { out.writeByte(0) }
@@ -1053,7 +1053,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSeekBeyondEndOfFile() {
+    open fun testSeekBeyondEndOfFile() {
         newDirectory().use { dir ->
             dir.createOutput("a", IOContext.DEFAULT).use { out ->
                 repeat(1024) { out.writeByte(0) }
@@ -1067,7 +1067,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPendingDeletions() {
+    open fun testPendingDeletions() {
         val path = createTempDir("pending")
         getDirectory(path).use { dir ->
             if (dir !is FSDirectory) return
@@ -1084,7 +1084,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testListAllIsSorted() {
+    open fun testListAllIsSorted() {
         newDirectory().use { dir ->
             val count = LuceneTestCase.atLeast(20)
             val names = mutableSetOf<String>()
@@ -1111,7 +1111,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDataTypes() {
+    open fun testDataTypes() {
         val values = longArrayOf(43, 12345, 123456, 1234567890)
         getDirectory(createTempDir("testDataTypes")).use { dir ->
             dir.createOutput("test", IOContext.DEFAULT).use { out ->
@@ -1135,7 +1135,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testGroupVIntOverflow() {
+    open fun testGroupVIntOverflow() {
         getDirectory(createTempDir("testGroupVIntOverflow")).use { dir ->
             val size = 32
             val values = LongArray(size)
@@ -1164,7 +1164,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testGroupVInt() {
+    open fun testGroupVInt() {
         getDirectory(createTempDir("testGroupVInt")).use { dir ->
             doTestGroupVInt(dir, 5, 1, 6, 8)
             doTestGroupVInt(dir, LuceneTestCase.atLeast(100), 1, 31, 128)
@@ -1172,17 +1172,17 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPrefetch() {
+    open fun testPrefetch() {
         doTestPrefetch(0)
     }
 
     @Throws(Exception::class)
-    fun testPrefetchOnSlice() {
+    open fun testPrefetchOnSlice() {
         doTestPrefetch(TestUtil.nextInt(Random, 1, 1024))
     }
 
     @Throws(Exception::class)
-    fun testUpdateReadAdvice() {
+    open fun testUpdateReadAdvice() {
         getDirectory(createTempDir("testUpdateReadAdvice")).use { dir ->
             val totalLength = TestUtil.nextInt(Random, 16384, 65536)
             val arr = ByteArray(totalLength)
@@ -1213,12 +1213,12 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIsLoaded() {
+    open fun testIsLoaded() {
         testIsLoaded(0)
     }
 
     @Throws(Exception::class)
-    fun testIsLoadedOnSlice() {
+    open fun testIsLoadedOnSlice() {
         testIsLoaded(TestUtil.nextInt(Random, 1, 1024))
     }
 
