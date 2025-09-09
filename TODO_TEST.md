@@ -13,7 +13,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 ## Depth 2
 - org.apache.lucene.index.TestExitableDirectoryReader -> org.apache.lucene.index.ExitableDirectoryReader
 - org.apache.lucene.index.TestFilterLeafReader -> org.apache.lucene.index.FilterLeafReader (Ported)
-- org.apache.lucene.search.TestConjunctions -> org.apache.lucene.search.BooleanQuery (Ported)
 - org.apache.lucene.tests.util.TestRuleDelegate -> org.apache.lucene.tests.util.TestRuleDelegate
 - org.apache.lucene.tests.util.TestRuleIgnoreAfterMaxFailures -> org.apache.lucene.tests.util.TestRuleIgnoreAfterMaxFailures
 - org.apache.lucene.tests.util.TestRuleMarkFailure -> org.apache.lucene.tests.util.TestRuleMarkFailure
