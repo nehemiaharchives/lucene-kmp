@@ -13,6 +13,7 @@ import org.gnit.lucenekmp.search.IndexSearcher
 import org.gnit.lucenekmp.search.MatchNoDocsQuery
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.TermQuery
+import org.gnit.lucenekmp.search.ScoreDoc
 import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -128,10 +129,30 @@ abstract class BaseKnnVectorQueryTestCase : LuceneTestCase() {
         }
     }
 
-    @Ignore
     @Test
     fun testFindAll() {
-        // TODO: implement
+        val indexStore = getIndexStore(
+            "field",
+            floatArrayOf(0f, 1f),
+            floatArrayOf(1f, 2f),
+            floatArrayOf(0f, 0f)
+        )
+        try {
+            val reader = DirectoryReader.open(indexStore)
+            try {
+                val searcher = IndexSearcher(reader)
+                val kvq = getKnnVectorQuery("field", floatArrayOf(0f, 0f), 10)
+                assertMatches(searcher, kvq, 3)
+                val scoreDocs = searcher.search(kvq, 3).scoreDocs
+                assertIdMatches(reader, "id2", scoreDocs[0])
+                assertIdMatches(reader, "id0", scoreDocs[1])
+                assertIdMatches(reader, "id1", scoreDocs[2])
+            } finally {
+                reader.close()
+            }
+        } finally {
+            indexStore.close()
+        }
     }
 
     @Ignore
@@ -308,6 +329,11 @@ abstract class BaseKnnVectorQueryTestCase : LuceneTestCase() {
     private fun assertMatches(searcher: IndexSearcher, q: Query, expectedMatches: Int) {
         val result = searcher.search(q, 1000).scoreDocs
         assertEquals(expectedMatches, result.size)
+    }
+
+    private fun assertIdMatches(reader: DirectoryReader, expectedId: String, scoreDoc: ScoreDoc) {
+        val actualId = reader.storedFields().document(scoreDoc.doc).get("id")
+        assertEquals(expectedId, actualId)
     }
 }
 

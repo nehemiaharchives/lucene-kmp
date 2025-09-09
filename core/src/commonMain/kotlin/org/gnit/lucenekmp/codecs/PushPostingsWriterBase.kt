@@ -58,7 +58,7 @@ protected constructor() : PostingsWriterBase() {
      * only if the term has at least one document.
      */
     @Throws(IOException::class)
-    abstract fun startTerm(norms: NumericDocValues)
+    abstract fun startTerm(norms: NumericDocValues?)
 
     /**
      * Finishes the current term. The provided [BlockTermState] contains the term's summary
@@ -109,7 +109,7 @@ protected constructor() : PostingsWriterBase() {
         } else {
             norms.getNorms(fieldInfo!!)
         }
-        startTerm(normValues!!)
+        startTerm(normValues)
         postingsEnum = termsEnum.postings(postingsEnum, enumFlags)
         checkNotNull(postingsEnum)
 
