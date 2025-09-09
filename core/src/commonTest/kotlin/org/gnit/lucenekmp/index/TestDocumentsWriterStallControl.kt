@@ -12,19 +12,13 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import kotlin.test.Ignore
 
 /**
  * Kotlin port of Lucene's TestDocumentsWriterStallControl.
- *
- * The underlying DocumentsWriterStallControl is currently only
- * partially implemented, so these tests are marked as ignored
- * until the full functionality is available.
  */
 class TestDocumentsWriterStallControl : LuceneTestCase() {
 
     @Test
-    @Ignore("DocumentsWriterStallControl.waitIfStalled is not fully implemented")
     fun testSimpleStall() {
         val ctrl = DocumentsWriterStallControl()
 
@@ -48,7 +42,6 @@ class TestDocumentsWriterStallControl : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("DocumentsWriterStallControl.waitIfStalled is not fully implemented")
     fun testRandom() {
         val ctrl = DocumentsWriterStallControl()
         ctrl.updateStalled(false)
@@ -83,7 +76,6 @@ class TestDocumentsWriterStallControl : LuceneTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Test
-    @Ignore("DocumentsWriterStallControl.waitIfStalled is not fully implemented")
     fun testAcquireReleaseRace() {
         val ctrl = DocumentsWriterStallControl()
         ctrl.updateStalled(false)
