@@ -1,9 +1,13 @@
 package org.gnit.lucenekmp.jdkport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import kotlin.test.*
 
 class ThreadPoolExecutorTest {
+
+    private val logger = KotlinLogging.logger {}
+
     private fun newExecutor(
         core: Int = 1,
         max: Int = 2,
@@ -19,36 +23,36 @@ class ThreadPoolExecutorTest {
 
     @Test
     fun execute_runsTask() = runBlocking {
-        println("[TEST] execute_runsTask: start on dispatcher=${coroutineContext[CoroutineDispatcher]}")
+        logger.debug { "[TEST] execute_runsTask: start on dispatcher=${coroutineContext[CoroutineDispatcher]}" }
         val queue = LinkedBlockingQueue<Runnable>()
         val exec = newExecutor(core = 1, max = 1, queue = queue)
         try {
             val result = CompletableDeferred<Int>()
-            println("[TEST] execute_runsTask: submitting task; queueSize(before)=${queue.size}")
-            exec.execute(Runnable {
-                println("[TEST] execute_runsTask: task running (worker started)")
+            logger.debug { "[TEST] execute_runsTask: submitting task; queueSize(before)=${queue.size}" }
+            exec.execute {
+                logger.debug { "[TEST] execute_runsTask: task running (worker started)" }
                 result.complete(42)
-                println("[TEST] execute_runsTask: task completed result.isCompleted=${result.isCompleted}")
-            })
-            println("[TEST] execute_runsTask: submitted; queueSize(afterSubmit)=${queue.size}; awaiting result...")
+                logger.debug { "[TEST] execute_runsTask: task completed result.isCompleted=${result.isCompleted}" }
+            }
+            logger.debug { "[TEST] execute_runsTask: submitted; queueSize(afterSubmit)=${queue.size}; awaiting result..." }
             val v = try {
-                println("[TEST] execute_runsTask: about to await result (withTimeout)")
+                logger.debug { "[TEST] execute_runsTask: about to await result (withTimeout)" }
                 withTimeout(1500) { result.await() }.also {
-                    println("[TEST] execute_runsTask: await returned value=$it")
+                    logger.debug { "[TEST] execute_runsTask: await returned value=$it" }
                 }
             } catch (t: TimeoutCancellationException) {
-                println("[TEST] execute_runsTask: TIMEOUT waiting for result; queueSize(now)=${queue.size} resultCompleted=${result.isCompleted}")
+                logger.debug { "[TEST] execute_runsTask: TIMEOUT waiting for result; queueSize(now)=${queue.size} resultCompleted=${result.isCompleted}" }
                 throw t
             }
-            println("[TEST] execute_runsTask: got result $v (post-await log)")
+            logger.debug { "[TEST] execute_runsTask: got result $v (post-await log)" }
             assertEquals(42, v)
         } finally {
-            println("[TEST] execute_runsTask: shutting down (before shutdown())")
+            logger.debug { "[TEST] execute_runsTask: shutting down (before shutdown())" }
             exec.shutdown()
-            println("[TEST] execute_runsTask: after shutdown() isShutdown=${exec.isShutdown} isTerminated=${exec.isTerminated}")
+            logger.debug { "[TEST] execute_runsTask: after shutdown() isShutdown=${exec.isShutdown} isTerminated=${exec.isTerminated}" }
             val terminated = exec.awaitTermination(1, TimeUnit.SECONDS)
-            println("[TEST] execute_runsTask: after awaitTermination terminated=$terminated isTerminated=${exec.isTerminated}")
-            println("[TEST] execute_runsTask: end")
+            logger.debug { "[TEST] execute_runsTask: after awaitTermination terminated=$terminated isTerminated=${exec.isTerminated}" }
+            logger.debug { "[TEST] execute_runsTask: end" }
         }
     }
 
@@ -56,14 +60,17 @@ class ThreadPoolExecutorTest {
     fun submit_runnableAndCallable() = runBlocking {
         val exec = newExecutor()
         try {
-            println("[TEST] submit_runnableAndCallable: submitting tasks")
-            val f1 = exec.submit(Runnable { println("[TEST] submit_runnableAndCallable: runnable ran") })
-            val f2 = exec.submit(Callable { println("[TEST] submit_runnableAndCallable: callable ran"); 7 })
-            println("[TEST] submit_runnableAndCallable: submitted; awaiting f1")
+            logger.debug { "[TEST] submit_runnableAndCallable: submitting tasks" }
+            val f1 = exec.submit {
+                logger.debug { "[TEST] submit_runnableAndCallable: runnable ran" }
+            }
+            val f2 = exec.submit(Callable {
+                logger.debug { "[TEST] submit_runnableAndCallable: callable ran" }; 7 })
+            logger.debug { "[TEST] submit_runnableAndCallable: submitted; awaiting f1" }
             withTimeout(2000) { f1.get() }
-            println("[TEST] submit_runnableAndCallable: f1 done awaiting f2")
+            logger.debug { "[TEST] submit_runnableAndCallable: f1 done awaiting f2" }
             val v = withTimeout(2000) { f2.get() }
-            println("[TEST] submit_runnableAndCallable: f2 done value=$v")
+            logger.debug { "[TEST] submit_runnableAndCallable: f2 done value=$v" }
             assertEquals(7, v)
         } finally {
             exec.shutdown()
@@ -110,14 +117,16 @@ class ThreadPoolExecutorTest {
             val gate = CompletableDeferred<Unit>()
 
             // Fill queue and worker so next execute() is rejected
-            exec.execute(Runnable {
+            exec.execute {
                 runBlocking { gate.await() }
                 order.add("worker")
+            }
+            assertTrue(queue.offer {
+                order.add("queued")
             })
-            assertTrue(queue.offer(Runnable { order.add("queued") }))
 
             // This will be rejected and should run in caller (current coroutine) immediately
-            exec.execute(Runnable { order.add("caller") })
+            exec.execute { order.add("caller") }
 
             // Unblock worker and let queued run
             gate.complete(Unit)

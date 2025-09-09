@@ -93,7 +93,7 @@ class NeighborQueue(initialSize: Int, maxHeap: Boolean) {
      */
     private fun encode(node: Int, score: Float): Long {
         return order.apply(
-            ((NumericUtils.floatToSortableInt(score) as Long) shl 32) or (0xFFFFFFFFL and node.toLong().inv())
+            ((NumericUtils.floatToSortableInt(score).toLong()) shl 32) or (0xFFFFFFFFL and node.toLong().inv())
         )
     }
 

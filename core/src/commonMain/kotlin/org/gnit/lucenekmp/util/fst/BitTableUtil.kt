@@ -5,7 +5,6 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.bitCount
 import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
 import org.gnit.lucenekmp.jdkport.numberOfTrailingZeros
-import kotlin.experimental.and
 
 
 /**
@@ -108,13 +107,13 @@ internal object BitTableUtil {
             i = 0
         } else {
             reader.skipBytes(byteIndex.toLong())
-            i = ((reader.readByte() and 0xFF.toByte()) and mask.toByte()).toInt()
+            i = reader.readByte().toInt() and 0xFF and mask
         }
         while (i == 0) {
             if (++byteIndex == bitTableBytes) {
                 return -1
             }
-            i = (reader.readByte() and 0xFF.toByte()).toInt()
+            i = reader.readByte().toInt() and 0xFF
         }
         return Int.numberOfTrailingZeros(i) + (byteIndex shl 3)
     }
@@ -138,20 +137,20 @@ internal object BitTableUtil {
         var byteIndex = bitIndex shr 3
         reader.skipBytes(byteIndex.toLong())
         val mask = (1 shl (bitIndex and (Byte.SIZE_BITS - 1))) - 1
-        var i: Int = ((reader.readByte() and 0xFF.toByte()) and mask.toByte()).toInt()
+        var i = reader.readByte().toInt() and 0xFF and mask
         while (i == 0) {
             if (byteIndex-- == 0) {
                 return -1
             }
             reader.skipBytes(-2) // FST.BytesReader implementations support negative skip.
-            i = (reader.readByte() and 0xFF.toByte()).toInt()
+            i = reader.readByte().toInt() and 0xFF
         }
         return (Int.SIZE_BITS - 1) - Int.numberOfLeadingZeros(i) + (byteIndex shl 3)
     }
 
     @Throws(IOException::class)
     private fun readByte(reader: BytesReader): Long {
-        return (reader.readByte() and 0xFFL.toByte()).toLong()
+        return (reader.readByte().toInt() and 0xFF).toLong()
     }
 
     @Throws(IOException::class)
