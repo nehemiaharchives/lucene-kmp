@@ -33,7 +33,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.index.TestDocumentsWriterStallControl -> org.apache.lucene.index.DocumentsWriterStallControl (Ported)
 - org.apache.lucene.index.TestFieldInvertState -> org.apache.lucene.index.FieldInvertState (Ported)
 - org.apache.lucene.index.TestFlushByRamOrCountsPolicy -> org.apache.lucene.index.FlushByRamOrCountsPolicy (Ported)
-- org.apache.lucene.index.TestIndexCommit -> org.apache.lucene.index.IndexCommit (Ported)
 - org.apache.lucene.index.TestIndexWriter -> org.apache.lucene.index.IndexWriter (Ported)
 - org.apache.lucene.index.TestIndexWriterConfig -> org.apache.lucene.index.IndexWriterConfig (Ported)
 - org.apache.lucene.index.TestIndexableField -> org.apache.lucene.index.IndexableField (Ported)
