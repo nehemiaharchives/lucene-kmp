@@ -128,7 +128,9 @@ internal class DisiPriorityQueueN(maxSize: Int) : DisiPriorityQueue() {
         val i = --size
         heap[0] = heap[i]
         heap[i] = null
-        downHeap(i)
+        if (i > 0) {
+            downHeap(i)
+        }
         return result
     }
 

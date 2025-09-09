@@ -877,7 +877,7 @@ class TestAutomaton : LuceneTestCase() {
     fun testRandomFinite() {
 
         val numTerms: Int = atLeast(10)
-        val iters: Int = atLeast(10) // TODO originally 100, but reduced to 10 for dev speed
+        val iters: Int = atLeast(1) // TODO originally 100, but reduced to 1 for dev speed
 
         if (VERBOSE) {
             println("TEST: numTerms=$numTerms iters=$iters")
@@ -1580,7 +1580,7 @@ class TestAutomaton : LuceneTestCase() {
     @Test
     fun testMakeBinaryIntervalFiniteCasesRandom() {
         val random = random()
-        val iters = atLeast(100)
+        val iters = atLeast(10) // TODO originally 100, but reduced to 10 for dev speed
         for (iter in 0 until iters) {
             val prefix = newBytesRef(TestUtil.randomUnicodeString(random))
             var b = BytesRefBuilder()

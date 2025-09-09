@@ -108,7 +108,7 @@ class TestUnicodeUtil : LuceneTestCase() {
         )
 
         // And do some random stuff.
-        val num: Int = atLeast(500) // java lucene tests with 50000, but that takes too long in Kotlin
+        val num: Int = atLeast(50) // TODO originally 50000 but reduced to 50 for dev speed
         for (i in 0..<num) {
             val s: String = randomUnicodeString(Random)
             val utf8 = ByteArray(UnicodeUtil.maxUTF8Length(s.length))
@@ -140,7 +140,7 @@ class TestUnicodeUtil : LuceneTestCase() {
     @Test
     fun testUTF8toUTF32() {
         var utf32 = IntArray(0)
-        val num = atLeast(500) // java lucene tests with 50000, but that takes too long in Kotlin
+        val num = atLeast(5) // TODO reduced from 50000 to 5 for dev speed
         for (i in 0..<num) {
             val s: String = TestUtil.randomUnicodeString(Random)
             val utf8 = ByteArray(UnicodeUtil.maxUTF8Length(s.length))

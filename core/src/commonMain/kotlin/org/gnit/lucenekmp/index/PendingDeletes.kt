@@ -14,18 +14,19 @@ import org.gnit.lucenekmp.util.IOUtils
 /** This class handles accounting and applying pending deletes for live segment readers  */
 open class PendingDeletes(
     val info: SegmentCommitInfo,
-    liveDocs: Bits? = null,
+    initialLiveDocs: Bits? = null,
     liveDocsInitialized: Boolean = !info.hasDeletions()
 ) {
 
     // Read-only live docs, null until live docs are initialized or if all docs are alive
-    var liveDocs: Bits?
+    var liveDocs: Bits? = initialLiveDocs
         /** Returns a snapshot of the current live docs.  */
-        get(): Bits? {
+        get() {
             // Prevent modifications to the returned live docs
             writeableLiveDocs = null
-            return liveDocs
+            return field
         }
+        private set
 
     // Writeable live docs, null if this instance is not ready to accept writes, in which
     // case getMutableBits needs to be called
@@ -42,7 +43,6 @@ open class PendingDeletes(
     }
 
     init {
-        this.liveDocs = liveDocs
         pendingDeleteCount = 0
         this.liveDocsInitialized = liveDocsInitialized
     }
