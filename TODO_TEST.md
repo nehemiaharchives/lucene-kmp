@@ -35,7 +35,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.index.TestFieldInvertState -> org.apache.lucene.index.FieldInvertState (Ported)
 - org.apache.lucene.index.TestFlushByRamOrCountsPolicy -> org.apache.lucene.index.FlushByRamOrCountsPolicy (Ported)
 - org.apache.lucene.index.TestIndexCommit -> org.apache.lucene.index.IndexCommit (Ported)
-- org.apache.lucene.index.TestIndexInput -> org.apache.lucene.store.IndexInput (Ported)
 - org.apache.lucene.index.TestIndexWriter -> org.apache.lucene.index.IndexWriter (Ported)
 - org.apache.lucene.index.TestIndexWriterConfig -> org.apache.lucene.index.IndexWriterConfig (Ported)
 - org.apache.lucene.index.TestIndexableField -> org.apache.lucene.index.IndexableField (Ported)
@@ -57,7 +56,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.search.TestTimeLimitingBulkScorer -> org.apache.lucene.search.TimeLimitingBulkScorer (Ported)
 - org.apache.lucene.search.TestTopDocsCollector -> org.apache.lucene.search.TopDocsCollector (Ported)
 - org.apache.lucene.search.TestVectorScorer -> org.apache.lucene.search.VectorScorer (Ported)
-- org.apache.lucene.store.TestLockFactory -> org.apache.lucene.store.LockFactory (Ported)
 - org.apache.lucene.store.TestNIOFSDirectory -> org.apache.lucene.store.NIOFSDirectory (Ported)
 - org.apache.lucene.tests.util.TestRuleTemporaryFilesCleanup -> org.apache.lucene.tests.util.TestRuleTemporaryFilesCleanup
 - org.apache.lucene.util.TestCloseableThreadLocal -> org.apache.lucene.util.CloseableThreadLocal (Ported)
