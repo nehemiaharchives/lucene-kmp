@@ -218,7 +218,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
         fieldHasNorms = fieldInfo.hasNorms()
     }
 
-    override fun startTerm(norms: NumericDocValues) {
+    override fun startTerm(norms: NumericDocValues?) {
         docStartFP = docOut!!.filePointer
         if (writePositions) {
             posStartFP = posOut!!.filePointer
@@ -234,6 +234,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
         level0LastDocID = -1
         level1LastDocID = -1
         this.norms = norms
+        fieldHasNorms = fieldHasNorms && norms != null
         if (writeFreqs) {
             level0FreqNormAccumulator.clear()
         }
