@@ -66,7 +66,7 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
         val job = launch {
             var queueIndex = -1
             for (i in 0 until pq.queues.size) {
-                if (!pq.queues[i].isEmpty()) {
+                if (!pq.queues[i].isEmpty) {
                     queueIndex = i
                     break
                 }
