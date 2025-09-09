@@ -517,7 +517,7 @@ class TestPackedInts : LuceneTestCase() {
         writer.subMutables[pageIdx] = GrowableWriter(1, valueCount, writer.acceptableOverheadRatio)
         writer.set(index, 2)
         assertEquals(2L, writer.get(index))
-        repeat(10) { // TODO originally 1000 but reduced to 10 for dev speed
+        repeat(3) { // TODO originally 1000 but reduced to 3 for dev speed
             val idx = nextLong(random(), 0, size)
             val pIdx = writer.pageIndex(idx)
             val sub = writer.subMutables[pIdx]

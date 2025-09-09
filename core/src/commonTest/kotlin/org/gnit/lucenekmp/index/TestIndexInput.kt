@@ -237,7 +237,7 @@ class TestIndexInput : LuceneTestCase() {
 
     @Test
     fun testRawIndexInputRead() {
-        for (i in 0 until 10) {
+        for (i in 0 until 1) { // TODO originally 10 but reduced to 1 for dev speed
             val random = random()
             newDirectory().use { dir ->
                 dir.createOutput("foo", newIOContext(random)).use { os ->

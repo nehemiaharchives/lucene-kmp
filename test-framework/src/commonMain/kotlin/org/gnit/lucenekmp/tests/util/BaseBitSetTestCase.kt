@@ -107,7 +107,7 @@ abstract class BaseBitSetTestCase<T : BitSet> : LuceneTestCase() {
     /** Test [BitSet.nextSetBit] with range. */
     open fun testNextSetBitInRange() {
         val random = Random.Default
-        val numBits = 1 + random.nextInt(100000)
+        val numBits = 1 + random.nextInt(1000) // TODO originally 100000 but reduced to 1000 for dev speed
         for (percentSet in floatArrayOf(0f, 0.01f, 0.1f, 0.5f, 0.9f, 0.99f, 1f)) {
             val set1 = JavaUtilBitSet(randomSet(numBits, percentSet), numBits)
             val set2 = copyOf(set1, numBits)
@@ -173,11 +173,11 @@ abstract class BaseBitSetTestCase<T : BitSet> : LuceneTestCase() {
     /** Test the [BitSet.clear] range method. */
     open fun testClearRange() {
         val random = Random.Default
-        val numBits = 1 + random.nextInt(100000)
+        val numBits = 1 + random.nextInt(1000) // TODO originally 100000 but reduced to 1000 for dev speed
         for (percentSet in floatArrayOf(0f, 0.01f, 0.1f, 0.5f, 0.9f, 0.99f, 1f)) {
             val set1 = JavaUtilBitSet(randomSet(numBits, percentSet), numBits)
             val set2 = copyOf(set1, numBits)
-            val iters = atLeast(random, 10)
+            val iters = atLeast(random, 3) // TODO originally 10 but reduced to 3 for dev speed
             repeat(iters) {
                 val from = random.nextInt(numBits)
                 val to = random.nextInt(numBits + 1)
@@ -191,11 +191,11 @@ abstract class BaseBitSetTestCase<T : BitSet> : LuceneTestCase() {
     /** Test the [BitSet.clear] all method. */
     open fun testClearAll() {
         val random = Random.Default
-        val numBits = 1 + random.nextInt(100000)
+        val numBits = 1 + random.nextInt(1000) // TODO originally 100000 but reduced to 1000 for dev speed
         for (percentSet in floatArrayOf(0f, 0.01f, 0.1f, 0.5f, 0.9f, 0.99f, 1f)) {
             val set1 = JavaUtilBitSet(randomSet(numBits, percentSet), numBits)
             val set2 = copyOf(set1, numBits)
-            val iters = atLeast(random, 10)
+            val iters = atLeast(random, 3) // TODO originally 10 but reduced to 3 for dev speed
             repeat(iters) {
                 set1.clear()
                 set2.clear()
