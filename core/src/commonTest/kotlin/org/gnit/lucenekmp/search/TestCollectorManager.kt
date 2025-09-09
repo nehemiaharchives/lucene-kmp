@@ -123,7 +123,7 @@ class TestCollectorManager : LuceneTestCase() {
 
         override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
             return object : LeafCollector {
-                override fun setScorer(scorer: Scorable) {}
+                override var scorer: Scorable? = null
                 override fun collect(doc: Int) {
                     if (predicate(doc)) {
                         collected.add(doc)

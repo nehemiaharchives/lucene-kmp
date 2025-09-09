@@ -58,12 +58,13 @@ class MultiCollector private constructor(private val collectors: Array<Collector
         }
         val delegates = leafCollectors.toTypedArray()
         return object : LeafCollector {
-            @Throws(IOException::class)
-            override fun setScorer(scorer: Scorable) {
-                for (lc in delegates) {
-                    lc.setScorer(scorer)
+            override var scorer: Scorable? = null
+                set(value) {
+                    field = value
+                    for (lc in delegates) {
+                        lc.scorer = value
+                    }
                 }
-            }
 
             @Throws(IOException::class)
             override fun collect(doc: Int) {
