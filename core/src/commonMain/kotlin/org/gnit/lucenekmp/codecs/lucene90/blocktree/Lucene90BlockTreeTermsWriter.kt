@@ -256,7 +256,7 @@ class Lucene90BlockTreeTermsWriter(
     )
 
     @Throws(IOException::class)
-    override fun write(fields: Fields, norms: NormsProducer) {
+    override fun write(fields: Fields, norms: NormsProducer?) {
         // if (DEBUG) System.out.println("\nBTTW.write seg=" + segment);
 
         var lastField: String? = null
@@ -909,7 +909,7 @@ class Lucene90BlockTreeTermsWriter(
 
         /** Writes one term's worth of postings.  */
         @Throws(IOException::class)
-        fun write(text: BytesRef, termsEnum: TermsEnum, norms: NormsProducer) {
+        fun write(text: BytesRef, termsEnum: TermsEnum, norms: NormsProducer?) {
             /*
       if (DEBUG) {
         int[] tmp = new int[lastTerm.length];

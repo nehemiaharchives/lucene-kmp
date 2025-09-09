@@ -40,7 +40,7 @@ protected constructor() : AutoCloseable {
      *
      */
     @Throws(IOException::class)
-    abstract fun write(fields: Fields, norms: NormsProducer)
+    abstract fun write(fields: Fields, norms: NormsProducer?)
 
     /**
      * Merges in the fields from the readers in `mergeState`. The default implementation
@@ -49,7 +49,7 @@ protected constructor() : AutoCloseable {
      * etc).
      */
     @Throws(IOException::class)
-    open fun merge(mergeState: MergeState, norms: NormsProducer) {
+    open fun merge(mergeState: MergeState, norms: NormsProducer?) {
         val fields: MutableList<Fields> = mutableListOf()
         val slices: MutableList<ReaderSlice> = mutableListOf()
 

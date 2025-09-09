@@ -5,6 +5,7 @@ import okio.IOException
 import org.gnit.lucenekmp.index.IndexReaderContext
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.LeafReaderContext
+import org.gnit.lucenekmp.index.DocValues
 import org.gnit.lucenekmp.index.NumericDocValues
 import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.ReaderUtil
@@ -127,17 +128,17 @@ class TermQuery : Query {
                         return ConstantScoreScorer(0f, scoreMode, DocIdSetIterator.empty())
                     }
 
-                    var norms: NumericDocValues? = null
+                    var norms: NumericDocValues = DocValues.emptyNumeric()
                     if (scoreMode.needsScores()) {
-                        norms = context.reader().getNormValues(term.field())
+                        context.reader().getNormValues(term.field())?.let { norms = it }
                     }
 
                     if (scoreMode == ScoreMode.TOP_SCORES) {
                         return TermScorer(
-                            termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms!!, topLevelScoringClause)
+                            termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms, topLevelScoringClause)
                     } else {
                         val flags: Int = if (scoreMode.needsScores()) PostingsEnum.FREQS.toInt() else PostingsEnum.NONE.toInt()
-                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms!!)
+                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms)
                     }
                 }
 
