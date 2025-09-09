@@ -49,7 +49,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.search.TestKnnByteVectorQuery -> org.apache.lucene.search.KnnByteVectorQuery (Ported)
 - org.apache.lucene.search.TestKnnFloatVectorQuery -> org.apache.lucene.search.KnnFloatVectorQuery (Ported)
 - org.apache.lucene.search.TestMatchesIterator -> org.apache.lucene.search.MatchesIterator (Ported)
-- org.apache.lucene.search.TestReqExclBulkScorer -> org.apache.lucene.search.ReqExclBulkScorer (Ported)
 - org.apache.lucene.search.TestTermScorer -> org.apache.lucene.search.TermScorer (Ported)
 - org.apache.lucene.search.TestTopDocsCollector -> org.apache.lucene.search.TopDocsCollector (Ported)
 - org.apache.lucene.search.TestVectorScorer -> org.apache.lucene.search.VectorScorer (Ported)
