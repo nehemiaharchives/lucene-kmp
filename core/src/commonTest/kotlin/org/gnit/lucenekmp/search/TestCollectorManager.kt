@@ -62,8 +62,7 @@ class TestCollectorManager : LuceneTestCase() {
     private fun reader(dir: Directory): DirectoryReader {
         val iw = IndexWriter(dir, IndexWriterConfig())
         iw.addDocument(Document())
-        iw.commit()
-        val reader = DirectoryReader.open(dir)
+        val reader = DirectoryReader.open(iw)
         iw.close()
         return reader
     }
