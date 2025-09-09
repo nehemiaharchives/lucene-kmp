@@ -55,6 +55,17 @@ Under this directory you find two sub directories:
 6. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
 7. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
 
+### troubleshooting java/cacerts problem
+When you try to run `./gradldew` and get `Trust store file /etc/ssl/certs/java/cacerts does not exist or is not readable. This may lead to SSL connection failures.`, try to run following command to solve it:
+
+```
+keytool -importcert -noprompt -trustcacerts \
+        -alias isrgrootx1 \
+        -file /usr/share/ca-certificates/mozilla/ISRG_Root_X1.crt \
+        -keystore "$JAVA_HOME/lib/security/cacerts" \
+        -storepass changeit
+```
+
 ### Priority 1, Intelij IDEA MCP Server
 When you have access to Intelij IDEA MCP server, you should use the IDEA's internal test runner.
 
