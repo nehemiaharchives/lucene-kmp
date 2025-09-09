@@ -1,6 +1,9 @@
 package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.Volatile
@@ -21,9 +24,11 @@ class DocumentsWriterStallControl {
     @Volatile
     private var stalled = false
 
+    /** Synchronization primitive used to emulate Java's wait/notify. */
+    private val lock: ReentrantLock = ReentrantLock()
+    private val condition = lock.newCondition()
+
     // for tests
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@get:Synchronized*/
     var numWaiting: Int = 0 // only with assert
         private set
     private var wasStalled = false // only with assert
@@ -38,38 +43,42 @@ class DocumentsWriterStallControl {
     // TODO Synchronized is not supported in KMP, need to think what to do here  */
     /*@Synchronized*/
     fun updateStalled(stalled: Boolean) {
-        if (this.stalled != stalled) {
-            this.stalled = stalled
-            if (stalled) {
-                wasStalled = true
+        lock.lock()
+        try {
+            if (this.stalled != stalled) {
+                this.stalled = stalled
+                if (stalled) {
+                    wasStalled = true
+                }
+                runBlocking { condition.signalAll() }
             }
-
-            // TODO need to implement something here
-            /*(this as java.lang.Object).notifyAll()*/
+        } finally {
+            lock.unlock()
         }
     }
 
     /** Blocks if documents writing is currently in a stalled state.  */
     fun waitIfStalled() {
         if (stalled) {
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
+            lock.lock()
+            try {
                 if (stalled) { // react on the first wakeup call!
                     // don't loop here, higher level logic will re-stall!
                     try {
                         incWaiters()
-                        // Defensive, in case we have a concurrency bug that fails to .notify/All our thread:
-                        // just wait for up to 1 second here, and let caller re-stall if it's still needed:
-
-                        // TODO need to implement something here
-                        /*(this as java.lang.Object).wait(1000)*/
-
-                        decrWaiters()
+                        runBlocking {
+                            // Defensive timeout: wait up to 1 second
+                            condition.await(1, TimeUnit.SECONDS)
+                        }
                     } catch (e: CancellationException) {
                         throw ThreadInterruptedException(e)
+                    } finally {
+                        decrWaiters()
                     }
                 }
-            //}
+            } finally {
+                lock.unlock()
+            }
         }
     }
 

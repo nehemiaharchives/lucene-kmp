@@ -30,7 +30,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.index.TestByteSlicePool -> org.apache.lucene.index.ByteSlicePool (Ported)
 - org.apache.lucene.index.TestCachingMergeContext -> org.apache.lucene.index.CachingMergeContext (Ported)
 - org.apache.lucene.index.TestDirectoryReader -> org.apache.lucene.index.DirectoryReader (Ported)
-- org.apache.lucene.index.TestDocumentsWriterStallControl -> org.apache.lucene.index.DocumentsWriterStallControl (Ported)
 - org.apache.lucene.index.TestFieldInvertState -> org.apache.lucene.index.FieldInvertState (Ported)
 - org.apache.lucene.index.TestFlushByRamOrCountsPolicy -> org.apache.lucene.index.FlushByRamOrCountsPolicy (Ported)
 - org.apache.lucene.index.TestIndexCommit -> org.apache.lucene.index.IndexCommit (Ported)
