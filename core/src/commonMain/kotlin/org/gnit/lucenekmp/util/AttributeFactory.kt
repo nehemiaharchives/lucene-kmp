@@ -2,6 +2,8 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
@@ -22,6 +24,7 @@ abstract class AttributeFactory {
                 CharTermAttribute::class -> CharTermAttributeImpl()
                 OffsetAttribute::class -> OffsetAttributeImpl()
                 PayloadAttribute::class -> PayloadAttributeImpl()
+                FlagsAttribute::class -> FlagsAttributeImpl()
                 else -> throw IllegalArgumentException(
                     "Cannot find implementing class for: ${attClass.qualifiedName}"
                 )
@@ -79,6 +82,7 @@ abstract class AttributeFactory {
                 CharTermAttributeImpl::class -> { { CharTermAttributeImpl() } }
                 OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
                 PayloadAttributeImpl::class -> { { PayloadAttributeImpl() } }
+                FlagsAttributeImpl::class -> { { FlagsAttributeImpl() } }
                 else -> throw IllegalArgumentException("No known no-arg constructor for ${clazz.qualifiedName}")
             }
         }

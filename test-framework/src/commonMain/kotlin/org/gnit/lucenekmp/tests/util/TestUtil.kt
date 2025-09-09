@@ -1458,7 +1458,7 @@ class TestUtil {
             att: AttributeImpl, reflectedValues: MutableMap<String, T>
         ) {
             val map: MutableMap<String, T> = HashMap()
-            att.reflectWith { attClass: KClass<out Attribute>, key: String, value: Any ->
+            att.reflectWith { attClass: KClass<out Attribute>, key: String, value: Any? ->
                 map.put(
                     attClass.simpleName + '#' + key,
                     value as T
