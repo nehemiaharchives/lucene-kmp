@@ -134,10 +134,10 @@ class TermQuery : Query {
 
                     if (scoreMode == ScoreMode.TOP_SCORES) {
                         return TermScorer(
-                            termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms!!, topLevelScoringClause)
+                            termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms, topLevelScoringClause)
                     } else {
                         val flags: Int = if (scoreMode.needsScores()) PostingsEnum.FREQS.toInt() else PostingsEnum.NONE.toInt()
-                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms!!)
+                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms)
                     }
                 }
 
