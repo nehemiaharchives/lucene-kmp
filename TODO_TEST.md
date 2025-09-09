@@ -39,7 +39,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 - org.apache.lucene.index.TestIndexableField -> org.apache.lucene.index.IndexableField (Ported)
 - org.apache.lucene.index.TestMultiFields -> org.apache.lucene.index.MultiFields (Ported)
 - org.apache.lucene.index.TestOneMergeWrappingMergePolicy -> org.apache.lucene.index.OneMergeWrappingMergePolicy (Ported)
-- org.apache.lucene.index.TestPendingDeletes -> org.apache.lucene.index.PendingDeletes (Ported)
 - org.apache.lucene.index.TestPendingSoftDeletes -> org.apache.lucene.index.PendingSoftDeletes (Ported)
 - org.apache.lucene.index.TestTermVectorsReader -> org.apache.lucene.codecs.TermVectorsReader (Ported)
 - org.apache.lucene.internal.vectorization.TestVectorScorer -> org.apache.lucene.search.VectorScorer (Ported)
