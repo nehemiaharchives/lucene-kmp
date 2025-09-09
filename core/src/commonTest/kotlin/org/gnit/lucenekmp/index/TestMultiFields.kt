@@ -14,7 +14,6 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOSupplier
 import org.gnit.lucenekmp.util.UnicodeUtil
 import kotlin.test.Test
-import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -35,7 +34,6 @@ class TestMultiFields : LuceneTestCase() {
 
     private fun newDirectory(): Directory = ByteBuffersDirectory()
 
-    @Ignore // TODO: IndexWriter commit NPE in IndexingChain.flush
     @Test
     fun testRandom() {
         val num = atLeast(2)
@@ -145,7 +143,6 @@ class TestMultiFields : LuceneTestCase() {
         }
     }
 
-    @Ignore // TODO: IndexWriter commit NPE in IndexingChain.flush
     @Test
     fun testSeparateEnums() {
         newDirectory().use { dir ->
@@ -165,7 +162,6 @@ class TestMultiFields : LuceneTestCase() {
         }
     }
 
-    @Ignore // TODO: IndexWriter commit NPE in IndexingChain.flush
     @Test
     fun testTermDocsEnum() {
         newDirectory().use { dir ->
