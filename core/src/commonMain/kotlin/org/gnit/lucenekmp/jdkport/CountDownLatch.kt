@@ -10,6 +10,11 @@ import kotlinx.coroutines.Job
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+// TODO this is a very small subset of the original JDK CountDownLatch API
+// in order to make the ported code compile. Proper waiting semantics are
+// not implemented yet.
+import org.gnit.lucenekmp.jdkport.TimeUnit
+
 class CountDownLatch(count: Int) {
 
     @OptIn(ExperimentalAtomicApi::class)
@@ -41,5 +46,23 @@ class CountDownLatch(count: Int) {
                 return
             }
         }
+    }
+
+    /**
+     * Waits until the latch has counted down to zero. This placeholder
+     * implementation does not block and simply returns immediately.
+     */
+    fun await() {
+        // no-op for now
+    }
+
+    /**
+     * Waits until the latch has counted down to zero, or the specified
+     * waiting time elapses. This placeholder always returns whether the
+     * latch has already counted down.
+     */
+    fun await(timeout: Long, unit: TimeUnit): Boolean {
+        // ignore timeout and just check count
+        return getCount() == 0L
     }
 }
