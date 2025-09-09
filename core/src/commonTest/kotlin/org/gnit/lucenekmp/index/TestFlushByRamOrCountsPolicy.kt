@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.coroutineScope
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.jdkport.AtomicInteger
-import org.gnit.lucenekmp.jdkport.decrementAndGet
 import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
@@ -248,7 +247,7 @@ class TestFlushByRamOrCountsPolicy : LuceneTestCase() {
         suspend fun run() {
             try {
                 var ramSize = 0L
-                while (pendingDocs.decrementAndGet() > -1) {
+                while (pendingDocs.decrementAndFetch() > -1) {
                     val doc: Document = docs.nextDoc()
                     writer.addDocument(doc)
                     val newRamSize = writer.ramBytesUsed()
