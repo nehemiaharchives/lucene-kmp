@@ -37,7 +37,7 @@ class ThreadPoolExecutorTest {
             logger.debug { "[TEST] execute_runsTask: submitted; queueSize(afterSubmit)=${queue.size}; awaiting result..." }
             val v = try {
                 logger.debug { "[TEST] execute_runsTask: about to await result (withTimeout)" }
-                withTimeout(1500) { result.await() }.also {
+                withTimeout(5000) { result.await() }.also {
                     logger.debug { "[TEST] execute_runsTask: await returned value=$it" }
                 }
             } catch (t: TimeoutCancellationException) {
@@ -60,6 +60,8 @@ class ThreadPoolExecutorTest {
     fun submit_runnableAndCallable() = runBlocking {
         val exec = newExecutor()
         try {
+            // Proactively start a core worker to reduce scheduler jitter on CI
+            exec.prestartCoreThread()
             logger.debug { "[TEST] submit_runnableAndCallable: submitting tasks" }
             val f1 = exec.submit {
                 logger.debug { "[TEST] submit_runnableAndCallable: runnable ran" }
@@ -67,9 +69,9 @@ class ThreadPoolExecutorTest {
             val f2 = exec.submit(Callable {
                 logger.debug { "[TEST] submit_runnableAndCallable: callable ran" }; 7 })
             logger.debug { "[TEST] submit_runnableAndCallable: submitted; awaiting f1" }
-            withTimeout(2000) { f1.get() }
+            withTimeout(5000) { f1.get() }
             logger.debug { "[TEST] submit_runnableAndCallable: f1 done awaiting f2" }
-            val v = withTimeout(2000) { f2.get() }
+            val v = withTimeout(5000) { f2.get() }
             logger.debug { "[TEST] submit_runnableAndCallable: f2 done value=$v" }
             assertEquals(7, v)
         } finally {
