@@ -40,7 +40,7 @@ open class FileSystemException
      * @param   file
      * a string identifying the file or `null` if not known.
      */
-    constructor(file: String) : super(null as String) {
+    constructor(file: String) : super() {
         this.file = file
         this.otherFile = null
     }
