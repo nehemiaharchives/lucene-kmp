@@ -2,6 +2,9 @@ package org.gnit.lucenekmp.codecs
 
 
 import okio.IOException
+import org.gnit.lucenekmp.codecs.hnsw.FlatVectorScorerUtil
+import org.gnit.lucenekmp.codecs.lucene99.Lucene99FlatVectorsFormat
+import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsFormat
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.index.SegmentReadState
@@ -83,13 +86,32 @@ abstract class KnnVectorsFormat protected constructor(name: String) : NamedSPI {
 
         /** looks up a format by name  */
         fun forName(name: String): KnnVectorsFormat {
-            //return Holder.loader.lookup(name)
-            throw UnsupportedOperationException("KnnVectorsFormat.forName is not implemented yet")
+            return when (name) {
+                "Lucene99HnswVectorsFormat" -> Lucene99HnswVectorsFormat()
+                "Lucene99FlatVectorsFormat" ->
+                    Lucene99FlatVectorsFormat(FlatVectorScorerUtil.getLucene99FlatVectorsScorer())
+                "EMPTY" -> EMPTY
+                else -> {
+                    try {
+                        Holder.loader.lookup(name)
+                    } catch (e: Throwable) {
+                        throw UnsupportedOperationException(
+                            "KnnVectorsFormat '$name' is not available. Known built-ins: [Lucene99HnswVectorsFormat, Lucene99FlatVectorsFormat].",
+                            e
+                        )
+                    }
+                }
+            }
         }
 
         /** returns a list of all available format names  */
         fun availableKnnVectorsFormats(): MutableSet<String> {
-            return Holder.loader.availableServices()
+            val discovered = Holder.loader.availableServices()
+            val result = mutableSetOf<String>()
+            result.addAll(discovered)
+            result.add("Lucene99HnswVectorsFormat")
+            result.add("Lucene99FlatVectorsFormat")
+            return result
         }
 
         /**
