@@ -137,7 +137,13 @@ object Files {
     }
 
     fun isDirectory(path: Path): Boolean {
-        return fileSystem.metadata(path).isDirectory
+        return try {
+            fileSystem.metadata(path).isDirectory
+        } catch (e: Throwable) {
+            // Match java.nio.file.Files.isDirectory: return false if the file does not exist
+            // or if its attributes cannot be read due to an I/O error.
+            false
+        }
     }
 
     fun size(path: Path): Long {
