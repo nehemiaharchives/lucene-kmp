@@ -57,4 +57,21 @@ subprojects {
             }
         }
     }
+
+    // Centralized Android configuration for Android library modules
+    pluginManager.withPlugin("com.android.library") {
+        extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+            // Unique namespace per module: <group>.<module-name>
+            namespace = "${project.group}.${project.name.replace('-', '.')}"
+
+            compileSdk = libs.versions.android.compileSdk.get().toInt()
+            defaultConfig {
+                minSdk = libs.versions.android.minSdk.get().toInt()
+            }
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_11
+                targetCompatibility = JavaVersion.VERSION_11
+            }
+        }
+    }
 }
