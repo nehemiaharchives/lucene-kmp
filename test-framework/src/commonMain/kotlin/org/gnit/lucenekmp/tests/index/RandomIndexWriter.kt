@@ -296,7 +296,7 @@ class RandomIndexWriter private constructor(
     }
 
     @Throws(IOException::class)
-    fun deleteDocuments(q: org.apache.lucene.search.Query): Long {
+    fun deleteDocuments(q: Query): Long {
         LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
         return w.deleteDocuments(q)
     }
@@ -306,7 +306,7 @@ class RandomIndexWriter private constructor(
     fun commit(flushConcurrently: Boolean = r.nextInt(10) == 0): Long {
         LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
         if (flushConcurrently) {
-            val throwableList: MutableList<Throwable> = CopyOnWriteArrayList<Throwable>()
+            val throwableList: MutableList<Throwable> = /*CopyOnWriteArrayList<Throwable>()*/ mutableListOf()
             val thread: java.lang.Thread =
                 java.lang.Thread(
                     java.lang.Runnable {
@@ -468,7 +468,7 @@ class RandomIndexWriter private constructor(
                 val reader: DirectoryReader =
                     DirectoryReader.open(w.getDirectory())
                 if (config.softDeletesField != null) {
-                    return SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField)
+                    return SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
                 } else {
                     return reader
                 }

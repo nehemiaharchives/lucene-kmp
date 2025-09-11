@@ -1,6 +1,9 @@
 package org.gnit.lucenekmp.tests.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.analysis.Analyzer
+import org.gnit.lucenekmp.index.IndexWriterConfig
+import org.gnit.lucenekmp.index.LiveIndexWriterConfig
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
@@ -183,6 +186,245 @@ open class LuceneTestCase {
 
         fun atLeast(i: Int): Int {
             return atLeast(Random, i)
+        }
+
+
+        // line 943 of LuceneTestCase.java
+        /** create a new index writer config with random defaults using the specified random  */
+        fun newIndexWriterConfig(
+            r: Random,
+            a: Analyzer
+        ): IndexWriterConfig {
+            val c = IndexWriterConfig(a)
+
+            // TODO implement following later to improve tests
+            /*c.setSimilarity(LuceneTestCase.classEnvRule.similarity)
+            if (LuceneTestCase.VERBOSE) {
+                // Even though TestRuleSetupAndRestoreClassEnv calls
+                // InfoStream.setDefault, we do it again here so that
+                // the PrintStreamInfoStream.messageID increments so
+                // that when there are separate instances of
+                // IndexWriter created we see "IW 0", "IW 1", "IW 2",
+                // ... instead of just always "IW 0":
+                c.setInfoStream(
+                    ThreadNameFixingPrintStreamInfoStream(java.lang.System.out)
+                )
+            }
+
+            if (LuceneTestCase.rarely(r)) {
+                c.setMergeScheduler(SerialMergeScheduler())
+            } else if (LuceneTestCase.rarely(r)) {
+                val cms: ConcurrentMergeScheduler?
+                if (r.nextBoolean()) {
+                    cms = LuceneTestCase.TestConcurrentMergeScheduler()
+                } else {
+                    cms =
+                        object : LuceneTestCase.TestConcurrentMergeScheduler() {
+
+                            override fun maybeStall(mergeSource: MergeScheduler.MergeSource?): Boolean {
+                                return true
+                            }
+                        }
+                }
+                val maxThreadCount: Int = TestUtil.nextInt(r, 1, 4)
+                val maxMergeCount: Int =
+                    TestUtil.nextInt(r, maxThreadCount, maxThreadCount + 4)
+                cms.setMaxMergesAndThreads(maxMergeCount, maxThreadCount)
+                if (random().nextBoolean()) {
+                    cms.disableAutoIOThrottle()
+                    assertFalse(cms.getAutoIOThrottle())
+                }
+                cms.setForceMergeMBPerSec(10 + 10 * random().nextDouble())
+                c.setMergeScheduler(cms)
+            } else {
+                // Always use consistent settings, else CMS's dynamic (SSD or not)
+                // defaults can change, hurting reproducibility:
+                val cms: ConcurrentMergeScheduler =
+                    if (randomBoolean()) LuceneTestCase.TestConcurrentMergeScheduler() else ConcurrentMergeScheduler()
+
+                // Only 1 thread can run at once (should maybe help reproducibility),
+                // with up to 3 pending merges before segment-producing threads are
+                // stalled:
+                cms.setMaxMergesAndThreads(3, 1)
+                c.setMergeScheduler(cms)
+            }
+
+            if (r.nextBoolean()) {
+                if (LuceneTestCase.rarely(r)) {
+                    // crazy value
+                    c.setMaxBufferedDocs(TestUtil.nextInt(r, 2, 15))
+                } else {
+                    // reasonable value
+                    c.setMaxBufferedDocs(TestUtil.nextInt(r, 16, 1000))
+                }
+            }
+
+            c.setMergePolicy(LuceneTestCase.newMergePolicy(r))
+
+            if (LuceneTestCase.rarely(r)) {
+                c.setMergedSegmentWarmer(SimpleMergedSegmentWarmer(c.getInfoStream()))
+            }
+            c.setUseCompoundFile(r.nextBoolean())
+            c.setReaderPooling(r.nextBoolean())
+            if (LuceneTestCase.rarely(r)) {
+                c.setCheckPendingFlushUpdate(false)
+            }
+
+            if (LuceneTestCase.rarely(r)) {
+                c.setIndexWriterEventListener(MockIndexWriterEventListener())
+            }
+            when (r.nextInt(3)) {
+                0 ->         // Disable merge on refresh
+                    c.setMaxFullFlushMergeWaitMillis(0L)
+
+                1 ->         // Very low timeout, merges will likely not be able to run in time
+                    c.setMaxFullFlushMergeWaitMillis(1L)
+
+                else ->         // Very long timeout, merges will almost always be able to run in time
+                    c.setMaxFullFlushMergeWaitMillis(1000L)
+            }
+
+            c.setMaxFullFlushMergeWaitMillis(
+                (if (LuceneTestCase.rarely()) atLeast(
+                    r,
+                    1000
+                ) else atLeast(r, 200)).toLong()
+            )*/
+            return c
+        }
+
+        //↓ line 1143 of LuceneTestCase.java
+        // if you want it in LiveIndexWriterConfig: it must and will be tested here.
+        fun maybeChangeLiveIndexWriterConfig(r: Random, c: LiveIndexWriterConfig) {
+            var didChange = false
+
+            val previous = c.toString()
+
+            // TODO implement following later to improve tests
+            /*if (LuceneTestCase.rarely(r)) {
+                // change flush parameters:
+                // this is complicated because the api requires you "invoke setters in a magical order!"
+                // LUCENE-5661: workaround for race conditions in the API
+
+                // TODO synchronized is not supported in kotlin multiplatform common code, need walk around
+                //synchronized(c) {
+                    val flushByRAM: Boolean
+                    when (LuceneTestCase.liveIWCFlushMode) {
+                        LiveIWCFlushMode.BY_RAM -> flushByRAM = true
+                        LiveIWCFlushMode.BY_DOCS -> flushByRAM = false
+                        LiveIWCFlushMode.EITHER -> flushByRAM = r.nextBoolean()
+                        else -> throw AssertionError()
+                    }
+                    if (flushByRAM) {
+                        c.setRAMBufferSizeMB(TestUtil.nextInt(r, 1, 10).toDouble())
+                        c.setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH)
+                    } else {
+                        if (LuceneTestCase.rarely(r)) {
+                            // crazy value
+                            c.setMaxBufferedDocs(TestUtil.nextInt(r, 2, 15))
+                        } else {
+                            // reasonable value
+                            c.setMaxBufferedDocs(TestUtil.nextInt(r, 16, 1000))
+                        }
+                        c.setRAMBufferSizeMB(IndexWriterConfig.DISABLE_AUTO_FLUSH.toDouble())
+                    }
+                //}
+                didChange = true
+            }
+
+            if (LuceneTestCase.rarely(r)) {
+                val curWarmer: org.apache.lucene.index.IndexWriter.IndexReaderWarmer? = c.getMergedSegmentWarmer()
+                if (curWarmer == null || curWarmer is SimpleMergedSegmentWarmer) {
+                    // change warmer parameters
+                    if (r.nextBoolean()) {
+                        c.setMergedSegmentWarmer(SimpleMergedSegmentWarmer(c.getInfoStream()))
+                    } else {
+                        c.setMergedSegmentWarmer(null)
+                    }
+                }
+                didChange = true
+            }
+
+            if (LuceneTestCase.rarely(r)) {
+                // change CFS flush parameters
+                c.setUseCompoundFile(r.nextBoolean())
+                didChange = true
+            }
+
+            if (LuceneTestCase.rarely(r)) {
+                // change CMS merge parameters
+                val ms: MergeScheduler? = c.getMergeScheduler()
+                if (ms is ConcurrentMergeScheduler) {
+                    val maxThreadCount: Int = TestUtil.nextInt(r, 1, 4)
+                    val maxMergeCount: Int =
+                        TestUtil.nextInt(r, maxThreadCount, maxThreadCount + 4)
+                    val enableAutoIOThrottle: Boolean =
+                        random().nextBoolean()
+                    if (enableAutoIOThrottle) {
+                        ms.enableAutoIOThrottle()
+                    } else {
+                        ms.disableAutoIOThrottle()
+                    }
+                    ms.setMaxMergesAndThreads(maxMergeCount, maxThreadCount)
+                    didChange = true
+                }
+            }
+
+            if (LuceneTestCase.rarely(r)) {
+                val mp: MergePolicy = c.getMergePolicy()
+                LuceneTestCase.configureRandom(r, mp)
+                if (mp is LogMergePolicy) {
+                    mp.setCalibrateSizeByDeletes(r.nextBoolean())
+                    if (LuceneTestCase.rarely(r)) {
+                        mp.setMergeFactor(TestUtil.nextInt(r, 2, 9))
+                    } else {
+                        mp.setMergeFactor(TestUtil.nextInt(r, 10, 50))
+                    }
+                } else if (mp is org.apache.lucene.index.TieredMergePolicy) {
+                    if (LuceneTestCase.rarely(r)) {
+                        mp.setMaxMergedSegmentMB(0.2 + r.nextDouble() * 2.0)
+                    } else {
+                        mp.setMaxMergedSegmentMB(r.nextDouble() * 100)
+                    }
+                    mp.setFloorSegmentMB(0.2 + r.nextDouble() * 2.0)
+                    mp.setForceMergeDeletesPctAllowed(0.0 + r.nextDouble() * 30.0)
+                    if (LuceneTestCase.rarely(r)) {
+                        mp.setSegmentsPerTier(TestUtil.nextInt(r, 2, 20).toDouble())
+                    } else {
+                        mp.setSegmentsPerTier(TestUtil.nextInt(r, 10, 50).toDouble())
+                    }
+                    LuceneTestCase.configureRandom(r, mp)
+                    mp.setDeletesPctAllowed(20 + LuceneTestCase.random().nextDouble() * 30)
+                }
+                didChange = true
+            }*/
+            if (VERBOSE && didChange) {
+                val current = c.toString()
+                val previousLines: Array<String?> =
+                    previous.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val currentLines: Array<String?> =
+                    current.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val diff = StringBuilder()
+
+                // this should always be the case, diff each line
+                if (previousLines.size == currentLines.size) {
+                    for (i in previousLines.indices) {
+                        if (previousLines[i] != currentLines[i]) {
+                            diff.append("- ").append(previousLines[i]).append("\n")
+                            diff.append("+ ").append(currentLines[i]).append("\n")
+                        }
+                    }
+                } else {
+                    // but just in case of something ridiculous...
+                    diff.append(current)
+                }
+
+                // its possible to be empty, if we "change" a value to what it had before.
+                if (diff.isNotEmpty()) {
+                    println("NOTE: LuceneTestCase: randomly changed IWC's live settings:")
+                    println(diff)
+                }
+            }
         }
 
 
