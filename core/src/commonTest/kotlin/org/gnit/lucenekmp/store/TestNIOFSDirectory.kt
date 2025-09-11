@@ -7,8 +7,6 @@ import okio.IOException
 import okio.ForwardingFileSystem
 import org.gnit.lucenekmp.jdkport.toRealPath
 import org.gnit.lucenekmp.jdkport.Files
-import org.gnit.lucenekmp.store.Directory
-import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.tests.store.BaseDirectoryTestCase
 import kotlin.test.Test
 import kotlin.test.assertEquals

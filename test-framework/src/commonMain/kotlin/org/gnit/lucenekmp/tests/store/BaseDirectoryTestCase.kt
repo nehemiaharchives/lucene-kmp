@@ -924,10 +924,11 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
             }
 
             val input = dir.openInput("bytes", IOContext.DEFAULT)
-            input.seek(Random.nextLong(0, input.length()))
+            // Read the entire content first to build the expected reference bytes
             val bytes = ByteArray(input.length().toInt())
             input.readBytes(bytes, 0, bytes.size)
-
+            // Seek to a random spot; this should not impact subsequent slicing behavior
+            input.seek(Random.nextLong(0, input.length()))
             for (i in bytes.indices step 16) {
                 val slice1 = input.slice("slice1", i.toLong(), bytes.size - i.toLong())
                 kotlin.test.assertEquals(0L, slice1.filePointer)
