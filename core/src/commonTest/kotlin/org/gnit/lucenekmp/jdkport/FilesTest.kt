@@ -244,9 +244,8 @@ class FilesTest {
         val nonExistingPath = "/nonExistingForIsDir/someFile.txt".toPath()
         assertFalse(fakeFileSystem.exists(nonExistingPath), "Path should not exist before calling isDirectory")
 
-        assertFailsWith<IOException>("Should throw IOException when calling isDirectory on a non-existing path") {
-            Files.isDirectory(nonExistingPath)
-        }
+        // java.nio.file.Files.isDirectory returns false when the path does not exist or attributes cannot be read.
+        assertFalse(Files.isDirectory(nonExistingPath), "Files.isDirectory should return false for a non-existing path")
     }
 
     @Test
@@ -440,7 +439,7 @@ class FilesTest {
         assertTrue(fakeFileSystem.exists(parentDir), "Parent directory should exist before delete")
         assertTrue(fakeFileSystem.exists(innerFile), "Inner file should exist before delete")
 
-        // Files.delete() is not recursive for non-empty directories as it uses fileSystem.delete()
+        // Files.delete() is not recursive for non-empty directories as it uses fileSystem.delete(),
         // not fileSystem.deleteRecursively(). So, this should throw.
         assertFailsWith<IOException>("Files.delete should fail for a non-empty directory") {
             Files.delete(parentDir)
