@@ -5,8 +5,8 @@ import org.gnit.lucenekmp.analysis.TokenFilter
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
-import org.gnit.lucenekmp.util.automaton.CharacterRunAutomaton
 import org.gnit.lucenekmp.util.automaton.Automata
+import org.gnit.lucenekmp.util.automaton.CharacterRunAutomaton
 import org.gnit.lucenekmp.util.automaton.Operations
 
 /**

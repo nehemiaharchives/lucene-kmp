@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.util.automaton.CharacterRunAutomaton
 import org.gnit.lucenekmp.util.automaton.Operations
 import org.gnit.lucenekmp.util.automaton.RegExp
 
+// TODO this needs to be implemented fully to copy all the functions of Java Lucene's MockTokenizer
 /**
  * Simplified tokenizer used for testing.
  * This is a light-weight port of Lucene's MockTokenizer supporting only basic features.
@@ -20,6 +21,7 @@ class MockTokenizer(
 
     private val termAtt = addAttribute(CharTermAttribute::class)
     private val offsetAtt = addAttribute(OffsetAttribute::class)
+    var enableChecks = true
 
     private var tokens: List<String> = emptyList()
     private var starts: IntArray = intArrayOf()

@@ -30,7 +30,7 @@ class MockAnalyzer(
 
     override fun createComponents(fieldName: String): TokenStreamComponents {
         val tokenizer = MockTokenizer(runAutomaton, lowerCase, maxTokenLength)
-        tokenizer.setEnableChecks(enableChecks)
+        tokenizer.enableChecks = enableChecks
         val filt = MockTokenFilter(tokenizer, filter)
         return TokenStreamComponents(tokenizer, maybePayload(filt, fieldName))
     }
@@ -47,14 +47,14 @@ class MockAnalyzer(
         var valInt = previousMappings[fieldName]
         if (valInt == null) {
             var v = -1
-            if (TestUtil.rarely(random)) {
+            if (TestUtil.Companion.rarely(random)) {
                 when (random.nextInt(3)) {
                     0 -> v = -1
                     1 -> v = Int.MAX_VALUE
                     2 -> v = random.nextInt(12)
                 }
             }
-            if (LuceneTestCase.VERBOSE) {
+            if (LuceneTestCase.Companion.VERBOSE) {
                 when (v) {
                     Int.MAX_VALUE -> println("MockAnalyzer: field=$fieldName gets variable length payloads")
                     -1 -> {}
