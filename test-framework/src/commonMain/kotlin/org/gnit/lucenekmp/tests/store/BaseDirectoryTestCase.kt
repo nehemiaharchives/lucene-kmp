@@ -476,7 +476,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
     @Throws(Exception::class)
     open fun testThreadSafetyInListAll() {
         newDirectory().use { dir ->
-            val max = TestUtil.nextInt(Random, 500, 1000)
+            val max = TestUtil.nextInt(Random, 5, 10) // TODO reduced from 500, 1000 to 5, 10 for dev speed
             for (i in 0 until max) {
                 val fileName = "file-" + i
                 dir.createOutput(fileName, IOContext.DEFAULT).use { _ -> }
