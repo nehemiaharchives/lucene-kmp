@@ -1238,7 +1238,13 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
             val bpv = TestUtil.nextInt(Random, minBpv, maxBpv)
             numValuesArray[iter] = TestUtil.nextInt(Random, 1, maxNumValues)
             for (j in 0 until numValuesArray[iter]) {
-                values[j] = Random.nextInt(0, PackedInts.maxValue(bpv).toInt() + 1).toLong()
+                val maxVal = PackedInts.maxValue(bpv)
+                values[j] = if (maxVal >= Int.MAX_VALUE.toLong()) {
+                    // Avoid Int overflow when bpv=31 (maxVal=Int.MAX_VALUE); use long range [0, Int.MAX_VALUE]
+                    Random.nextLong(0L, Int.MAX_VALUE.toLong() + 1)
+                } else {
+                    Random.nextInt(0, (maxVal + 1).toInt()).toLong()
+                }
                 vIntOut.writeVInt(values[j].toInt())
             }
             groupVIntOut.writeGroupVInts(values, numValuesArray[iter])
