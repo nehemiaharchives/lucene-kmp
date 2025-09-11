@@ -159,7 +159,7 @@ class TestTermVectorsReader : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("TermVectorsReader not yet fully implemented")
+    @Ignore //TermVectorsReader not yet fully implemented
     fun testReader() {
         val reader: TermVectorsReader = Lucene101Codec().termVectorsFormat()
             .vectorsReader(dir, seg!!.info, fieldInfos, IOContext.DEFAULT)
@@ -180,7 +180,7 @@ class TestTermVectorsReader : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("TermVectorsReader not yet fully implemented")
+    @Ignore //TermVectorsReader not yet fully implemented
     fun testDocsEnum() {
         val reader: TermVectorsReader = Lucene101Codec().termVectorsFormat()
             .vectorsReader(dir, seg!!.info, fieldInfos, IOContext.DEFAULT)
@@ -208,7 +208,7 @@ class TestTermVectorsReader : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("TermVectorsReader not yet fully implemented")
+    @Ignore //TermVectorsReader not yet fully implemented
     fun testPositionReader() {
         val reader: TermVectorsReader = Lucene101Codec().termVectorsFormat()
             .vectorsReader(dir, seg!!.info, fieldInfos, IOContext.DEFAULT)
@@ -263,7 +263,7 @@ class TestTermVectorsReader : LuceneTestCase() {
     }
 
     @Test
-    @Ignore("TermVectorsReader not yet fully implemented")
+    @Ignore //TermVectorsReader not yet fully implemented
     fun testOffsetReader() {
         val reader: TermVectorsReader = Lucene101Codec().termVectorsFormat()
             .vectorsReader(dir, seg!!.info, fieldInfos, IOContext.DEFAULT)
