@@ -29,7 +29,7 @@ abstract class FilterDirectoryReader(
          * @return an array of wrapped LeafReaders. The returned array might contain less elements
          * compared to the given reader list if an entire reader is filtered out.
          */
-        protected open fun wrap(readers: List<out LeafReader>): Array<LeafReader> {
+        open fun wrap(readers: List<out LeafReader>): Array<LeafReader> {
             val wrapped = ArrayList<LeafReader>(readers.size)
             for (reader in readers) {
                 val wrap = wrap(reader)
@@ -87,11 +87,9 @@ abstract class FilterDirectoryReader(
         get() = `in`.version
 
     override val isCurrent: Boolean
-        @Throws(IOException::class)
         get() = `in`.isCurrent
 
     override val indexCommit: IndexCommit
-        @Throws(IOException::class)
         get() = `in`.indexCommit
 
     @Throws(IOException::class)

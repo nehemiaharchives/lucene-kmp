@@ -32,6 +32,7 @@ kotlin {
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
+                implementation(libs.kotlinx.coroutines)
                 implementation(libs.kotlin.logging)
             }
         }

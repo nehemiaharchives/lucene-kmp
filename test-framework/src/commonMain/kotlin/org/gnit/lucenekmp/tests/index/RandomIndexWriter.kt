@@ -17,7 +17,6 @@ import org.gnit.lucenekmp.index.Term
 import org.gnit.lucenekmp.index.TieredMergePolicy
 import org.gnit.lucenekmp.internal.tests.IndexWriterAccess
 import org.gnit.lucenekmp.internal.tests.TestSecrets
-import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.TermQuery
@@ -28,10 +27,11 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
-import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.jvm.JvmOverloads
 import kotlin.math.min
 import kotlin.random.Random
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 /**
@@ -301,47 +301,56 @@ class RandomIndexWriter private constructor(
         return w.deleteDocuments(q)
     }
 
-    @JvmOverloads
     @Throws(IOException::class)
     fun commit(flushConcurrently: Boolean = r.nextInt(10) == 0): Long {
         LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
         if (flushConcurrently) {
-            val throwableList: MutableList<Throwable> = /*CopyOnWriteArrayList<Throwable>()*/ mutableListOf()
-            val thread: java.lang.Thread =
-                java.lang.Thread(
-                    java.lang.Runnable {
-                        try {
-                            flushAllBuffersSequentially()
-                        } catch (e: Throwable) {
-                            throwableList.add(e)
-                        }
-                    })
-            thread.start()
-            try {
-                return w.commit()
-            } catch (t: Throwable) {
-                throwableList.add(t)
-            } finally {
+            // Launch flush in background using coroutines, mirroring original Thread behavior
+            return runBlocking {
+                val throwableList: MutableList<Throwable> = mutableListOf()
+                val job = launch(Dispatchers.Default) {
+                    try {
+                        flushAllBuffersSequentially()
+                    } catch (e: Throwable) {
+                        // capture background exception
+                        throwableList.add(e)
+                    }
+                }
                 try {
-                    // make sure we wait for the thread to join otherwise it might still be processing events
-                    // and the IW won't be fully closed in the case of a fatal exception
-                    thread.join()
-                } catch (e: InterruptedException) {
-                    throwableList.add(e)
+                    val result = w.commit()
+                    // Ensure background job finishes before returning (same as finally+join)
+                    try {
+                        job.join()
+                    } catch (e: Throwable) {
+                        // join shouldn't normally throw, but capture just in case
+                        throwableList.add(e)
+                    }
+                    // IMPORTANT: keep original semantics — ignore background exceptions on success
+                    return@runBlocking result
+                } catch (t: Throwable) {
+                    // capture commit exception to aggregate with background job failures
+                    throwableList.add(t)
+                } finally {
+                    try {
+                        job.join()
+                    } catch (e: Throwable) {
+                        throwableList.add(e)
+                    }
                 }
-            }
-            if (throwableList.size != 0) {
-                val primary = throwableList.get(0)
-                for (i in 1..<throwableList.size) {
-                    primary.addSuppressed(throwableList.get(i))
+                // If we get here, commit threw or join failed: aggregate and rethrow
+                if (throwableList.isNotEmpty()) {
+                    val primary = throwableList[0]
+                    for (i in 1 until throwableList.size) {
+                        primary.addSuppressed(throwableList[i])
+                    }
+                    when (primary) {
+                        is IOException -> throw primary
+                        is RuntimeException -> throw primary
+                        else -> throw AssertionError(primary)
+                    }
                 }
-                if (primary is IOException) {
-                    throw primary as IOException
-                } else if (primary is RuntimeException) {
-                    throw primary as RuntimeException
-                } else {
-                    throw AssertionError(primary)
-                }
+                // Unreachable, but keeps type system happy
+                throw AssertionError("unreachable")
             }
         }
         return w.commit()
@@ -355,7 +364,6 @@ class RandomIndexWriter private constructor(
         return w.deleteAll()
     }
 
-    @get:Throws(IOException::class)
     val reader: DirectoryReader
         get() {
             LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
@@ -483,7 +491,6 @@ class RandomIndexWriter private constructor(
      *
      * @see IndexWriter.close
      */
-    @Throws(IOException::class)
     override fun close() {
         var success = false
         try {
@@ -587,7 +594,7 @@ class RandomIndexWriter private constructor(
                 conf,
                 object : TestPoint {
                     override fun apply(message: String) {
-                        if (random.nextInt(4) == 2) java.lang.Thread.yield()
+                        if (random.nextInt(4) == 2) /*java.lang.Thread.yield()*/ {} // TODO implement later
                     }
                 })
         }
@@ -618,8 +625,9 @@ class RandomIndexWriter private constructor(
             try {
                 iw =
                     object : IndexWriter(dir, conf) {
-                        val isEnableTestPoints: Boolean
-                            get() = true
+                        override fun isEnableTestPoints(): Boolean {
+                            return true
+                        }
                     }
                 success = true
             } finally {

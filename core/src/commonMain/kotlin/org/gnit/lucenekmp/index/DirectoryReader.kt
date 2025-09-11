@@ -54,7 +54,7 @@ abstract class DirectoryReader protected constructor(
      * @return null if there are no changes; else, a new DirectoryReader instance.
      */
     @Throws(IOException::class)
-    protected abstract fun doOpenIfChanged(): DirectoryReader?
+    abstract fun doOpenIfChanged(): DirectoryReader?
 
     /**
      * Implement this method to support [.openIfChanged]. If this
@@ -64,7 +64,7 @@ abstract class DirectoryReader protected constructor(
      * @return null if there are no changes; else, a new DirectoryReader instance.
      */
     @Throws(IOException::class)
-    protected abstract fun doOpenIfChanged(commit: IndexCommit?): DirectoryReader?
+    abstract fun doOpenIfChanged(commit: IndexCommit?): DirectoryReader?
 
     /**
      * Implement this method to support [.openIfChanged].
@@ -74,7 +74,7 @@ abstract class DirectoryReader protected constructor(
      * @return null if there are no changes; else, a new DirectoryReader instance.
      */
     @Throws(IOException::class)
-    protected abstract fun doOpenIfChanged(
+    abstract fun doOpenIfChanged(
         writer: IndexWriter,
         applyAllDeletes: Boolean
     ): DirectoryReader?
