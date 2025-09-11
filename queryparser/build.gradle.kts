@@ -8,9 +8,6 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-group = "org.gnit.lucenekmp"
-version = "1.0.0"
-
 kotlin {
     jvm()
     //jvmToolchain(23) // we run build on jdk 24, so getting INFO saying "Kotlin does not yet support 24 JDK target, falling back to Kotlin JVM_23 JVM target"

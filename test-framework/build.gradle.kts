@@ -6,9 +6,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-group = "org.gnit.lucenekmp"
-version = "1.0.0"
-
 kotlin {
     jvm()
     androidTarget {
