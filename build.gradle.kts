@@ -14,8 +14,7 @@ subprojects {
             publishToMavenCentral()
             signAllPublications()
 
-            // Use module name as artifactId
-            coordinates(group.toString(), project.name, version.toString())
+            coordinates(group.toString(), "lucene-kmp-${project.name}", version.toString())
 
             pom {
                 name = "lucene-kmp (module: ${project.name})"
@@ -61,8 +60,8 @@ subprojects {
     // Centralized Android configuration for Android library modules
     pluginManager.withPlugin("com.android.library") {
         extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
-            // Unique namespace per module: <group>.<module-name>
-            namespace = "${project.group}.${project.name.replace('-', '.')}"
+            // Stable per-module namespace within the lucenekmp package
+            namespace = "${project.group}.lucenekmp.${project.name.replace('-', '.')}"
 
             compileSdk = libs.versions.android.compileSdk.get().toInt()
             defaultConfig {
