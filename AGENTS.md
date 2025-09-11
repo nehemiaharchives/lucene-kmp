@@ -37,6 +37,7 @@ Under this directory you find two sub directories:
 ## Specific Instruction
 * do not use String.toByteArray() but use String.encodeToByteArray() instead.
 * because this project is kotlin common project, in common code, do not use String.format function but use kotlin string interpolation.
+* @Ignore annotation in the test will not take any arguments in kmp.
 
 ## Logging
 * when logging, use the following code:
