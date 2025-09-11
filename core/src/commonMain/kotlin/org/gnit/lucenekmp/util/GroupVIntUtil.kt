@@ -37,7 +37,8 @@ object GroupVIntUtil {
             i += 4
         }
         while (i < limit) {
-            dst[i] = (`in`.readVInt() and 0xFFFFFFFFL.toInt()).toLong()
+            // Mask at long-width to interpret value as unsigned 32-bit
+            dst[i] = (`in`.readVInt().toLong()) and 0xFFFFFFFFL
             ++i
         }
     }
@@ -227,55 +228,40 @@ object GroupVIntUtil {
     fun writeGroupVInts(out: DataOutput, scratch: ByteArray, values: LongArray, limit: Int) {
         var readPos = 0
 
-        // encode each group
-        /*while ((limit - readPos) >= 4) {
-            var writePos = 0
-            val n1Minus1 = numBytes(toInt(values[readPos])) - 1
-            val n2Minus1 = numBytes(toInt(values[readPos + 1])) - 1
-            val n3Minus1 = numBytes(toInt(values[readPos + 2])) - 1
-            val n4Minus1 = numBytes(toInt(values[readPos + 3])) - 1
-            val flag = (n1Minus1 shl 6) or (n2Minus1 shl 4) or (n3Minus1 shl 2) or (n4Minus1)
-            scratch[writePos++] = flag.toByte()
-            BitUtil.VH_LE_INT.set(scratch, writePos, (values[readPos++]).toInt())
-            writePos += n1Minus1 + 1
-            BitUtil.VH_LE_INT.set(scratch, writePos, (values[readPos++]).toInt())
-            writePos += n2Minus1 + 1
-            BitUtil.VH_LE_INT.set(scratch, writePos, (values[readPos++]).toInt())
-            writePos += n3Minus1 + 1
-            BitUtil.VH_LE_INT.set(scratch, writePos, (values[readPos++]).toInt())
-            writePos += n4Minus1 + 1
-
-            out.writeBytes(scratch, writePos)
-        }*/
-
         // Process groups of 4 values at a time
         while (limit - readPos >= 4) {
             var writePos = 0
+            // Validate and convert to 32-bit unsigned compatible ints (throws on overflow)
+            val v1 = toInt(values[readPos])
+            val v2 = toInt(values[readPos + 1])
+            val v3 = toInt(values[readPos + 2])
+            val v4 = toInt(values[readPos + 3])
+
             // For each value, determine number of bytes needed minus one:
-            val n1Minus1 = numBytes(values[readPos].toInt()) - 1
-            val n2Minus1 = numBytes(values[readPos + 1].toInt()) - 1
-            val n3Minus1 = numBytes(values[readPos + 2].toInt()) - 1
-            val n4Minus1 = numBytes(values[readPos + 3].toInt()) - 1
+            val n1Minus1 = numBytes(v1) - 1
+            val n2Minus1 = numBytes(v2) - 1
+            val n3Minus1 = numBytes(v3) - 1
+            val n4Minus1 = numBytes(v4) - 1
 
             // Pack the counts into a single flag byte
             val flag = (n1Minus1 shl 6) or (n2Minus1 shl 4) or (n3Minus1 shl 2) or n4Minus1
             scratch[writePos++] = flag.toByte()
 
-            // Write each value into the scratch buffer using little-endian order.
-            // Note: Here we simply write all 4 bytes of the int, even though only nXMinus1+1 bytes are significant.
-            scratch.putIntLE(writePos, values[readPos].toInt())
+            // Write each value into the scratch buffer using little-endian order,
+            // then advance by the actual number of bytes to emit for that value.
+            scratch.putIntLE(writePos, v1)
             writePos += n1Minus1 + 1
             readPos++
 
-            scratch.putIntLE(writePos, values[readPos].toInt())
+            scratch.putIntLE(writePos, v2)
             writePos += n2Minus1 + 1
             readPos++
 
-            scratch.putIntLE(writePos, values[readPos].toInt())
+            scratch.putIntLE(writePos, v3)
             writePos += n3Minus1 + 1
             readPos++
 
-            scratch.putIntLE(writePos, values[readPos].toInt())
+            scratch.putIntLE(writePos, v4)
             writePos += n4Minus1 + 1
             readPos++
 
@@ -295,27 +281,6 @@ object GroupVIntUtil {
     @Throws(IOException::class)
     fun writeGroupVInts(out: DataOutput, scratch: ByteArray, values: IntArray, limit: Int) {
         var readPos = 0
-
-        // encode each group
-        /*while ((limit - readPos) >= 4) {
-            var writePos = 0
-            val n1Minus1 = numBytes(values[readPos]) - 1
-            val n2Minus1 = numBytes(values[readPos + 1]) - 1
-            val n3Minus1 = numBytes(values[readPos + 2]) - 1
-            val n4Minus1 = numBytes(values[readPos + 3]) - 1
-            val flag = (n1Minus1 shl 6) or (n2Minus1 shl 4) or (n3Minus1 shl 2) or (n4Minus1)
-            scratch[writePos++] = flag.toByte()
-            BitUtil.VH_LE_INT.set(scratch, writePos, values[readPos++])
-            writePos += n1Minus1 + 1
-            BitUtil.VH_LE_INT.set(scratch, writePos, values[readPos++])
-            writePos += n2Minus1 + 1
-            BitUtil.VH_LE_INT.set(scratch, writePos, values[readPos++])
-            writePos += n3Minus1 + 1
-            BitUtil.VH_LE_INT.set(scratch, writePos, values[readPos++])
-            writePos += n4Minus1 + 1
-
-            out.writeBytes(scratch, writePos)
-        }*/
 
         // Process groups of 4 values at a time
         while ((limit - readPos) >= 4) {
