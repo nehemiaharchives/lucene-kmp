@@ -272,37 +272,3 @@ if (enableHangDetection.get() && !configurationCacheRequested) {
     // Informative log so users know why task-level hang detection isn't active
     logger.info("Hang detection for Gradle tasks is disabled because configuration cache is requested.")
 }
-
-mavenPublishing {
-    publishToMavenCentral()
-
-    signAllPublications()
-
-    coordinates(group.toString(), "library", version.toString())
-
-    pom {
-        name = "My library"
-        description = "A library."
-        inceptionYear = "2024"
-        url = "https://github.com/kotlin/multiplatform-library-template/"
-        licenses {
-            license {
-                name = "XXX"
-                url = "YYY"
-                distribution = "ZZZ"
-            }
-        }
-        developers {
-            developer {
-                id = "XXX"
-                name = "YYY"
-                url = "ZZZ"
-            }
-        }
-        scm {
-            url = "XXX"
-            connection = "YYY"
-            developerConnection = "ZZZ"
-        }
-    }
-}
