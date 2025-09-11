@@ -118,7 +118,7 @@ abstract class AbstractKnnVectorQuery(
         timeLimitingKnnCollectorManager: TimeLimitingKnnCollectorManager
     ): TopDocs {
         val reader: LeafReader = ctx.reader()
-        val liveDocs: Bits = reader.liveDocs!!
+        val liveDocs: Bits = reader.liveDocs ?: Bits.MatchAllBits(reader.maxDoc())
 
         if (filterWeight == null) {
             return approximateSearch(ctx, liveDocs, Int.Companion.MAX_VALUE, timeLimitingKnnCollectorManager)

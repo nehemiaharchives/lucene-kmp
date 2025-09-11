@@ -349,7 +349,16 @@ class IndexingChain(
             // Use the merge instance in order to reuse the same IndexInput for all terms
             normsMergeInstance = norms.mergeInstance
         }
-        termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance!!)
+        val emptyNormsProducer = object : NormsProducer() {
+            override fun getNorms(field: FieldInfo): NumericDocValues {
+                throw UnsupportedOperationException("No norms")
+            }
+
+            override fun checkIntegrity() {}
+
+            override fun close() {}
+        }
+        termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance ?: emptyNormsProducer)
 
 
         if (infoStream.isEnabled("IW")) {
