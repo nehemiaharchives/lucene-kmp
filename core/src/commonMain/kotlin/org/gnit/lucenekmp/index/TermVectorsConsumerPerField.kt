@@ -272,7 +272,7 @@ class TermVectorsConsumerPerField(
         }
 
     override fun newPostingsArray() {
-        termVectorsPostingsArray = postingsArray as TermVectorsPostingsArray
+        termVectorsPostingsArray = postingsArray as? TermVectorsPostingsArray
     }
 
     override fun createPostingsArray(size: Int): ParallelPostingsArray {

@@ -58,7 +58,7 @@ protected constructor() : PostingsWriterBase() {
      * only if the term has at least one document.
      */
     @Throws(IOException::class)
-    abstract fun startTerm(norms: NumericDocValues)
+    abstract fun startTerm(norms: NumericDocValues?)
 
     /**
      * Finishes the current term. The provided [BlockTermState] contains the term's summary
@@ -102,14 +102,10 @@ protected constructor() : PostingsWriterBase() {
 
     @Throws(IOException::class)
     override fun writeTerm(
-        term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer
+        term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer?
     ): BlockTermState? {
-        val normValues: NumericDocValues? = if (!fieldInfo!!.hasNorms()) {
-            null
-        } else {
-            norms.getNorms(fieldInfo!!)
-        }
-        startTerm(normValues!!)
+        val normValues: NumericDocValues? = null
+        startTerm(normValues)
         postingsEnum = termsEnum.postings(postingsEnum, enumFlags)
         checkNotNull(postingsEnum)
 

@@ -51,7 +51,7 @@ abstract class TermsHash(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
         sortMap: Sorter.DocMap?,
-        norms: NormsProducer
+        norms: NormsProducer?
     ) {
         if (nextTermsHash != null) {
             val nextChildFields: MutableMap<String, TermsHashPerField> = HashMap()

@@ -90,36 +90,49 @@ internal class NormValuesWriter(
     // iterates over the values we have in ram
     private class BufferedNorms(
         values: PackedLongValues,
-        docsWithFields: DocIdSetIterator
+        private val docsWithFields: DocIdSetIterator
     ) : NumericDocValues() {
-        val iter: PackedLongValues.Iterator = values.iterator()
-        val docsWithField: DocIdSetIterator = docsWithFields
+        private val iter: PackedLongValues.Iterator = values.iterator()
         private var value: Long = 0
+        private var doc = -1
 
         override fun docID(): Int {
-            return docsWithField.docID()
+            return doc
         }
 
         @Throws(IOException::class)
         override fun nextDoc(): Int {
-            val docID: Int = docsWithField.nextDoc()
+            val docID: Int = docsWithFields.nextDoc()
             if (docID != NO_MORE_DOCS) {
                 value = iter.next()
             }
+            doc = docID
             return docID
         }
 
+        @Throws(IOException::class)
         override fun advance(target: Int): Int {
-            throw UnsupportedOperationException()
+            var cur = doc
+            if (cur == NO_MORE_DOCS) {
+                return cur
+            }
+            if (target <= cur) {
+                return cur
+            }
+            do {
+                cur = nextDoc()
+            } while (cur < target)
+            return cur
         }
 
         @Throws(IOException::class)
         override fun advanceExact(target: Int): Boolean {
-            throw UnsupportedOperationException()
+            val cur = advance(target)
+            return cur == target
         }
 
         override fun cost(): Long {
-            return docsWithField.cost()
+            return docsWithFields.cost()
         }
 
         override fun longValue(): Long {

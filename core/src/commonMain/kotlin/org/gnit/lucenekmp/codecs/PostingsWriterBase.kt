@@ -37,7 +37,7 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class)
     abstract fun writeTerm(
-        term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer
+        term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer?
     ): BlockTermState?
 
     /**

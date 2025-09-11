@@ -55,7 +55,7 @@ open class TermVectorsConsumer(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
         sortMap: Sorter.DocMap?,
-        norms: NormsProducer
+        norms: NormsProducer?
     ) {
         if (writer != null) {
             val numDocs: Int = state.segmentInfo.maxDoc()

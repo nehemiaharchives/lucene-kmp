@@ -64,7 +64,7 @@ class FreqProxTermsWriter(
         fieldsToFlush: MutableMap<String, TermsHashPerField>,
         state: SegmentWriteState,
         sortMap: Sorter.DocMap?,
-        norms: NormsProducer
+        norms: NormsProducer?
     ) {
         super.flush(fieldsToFlush, state, sortMap, norms)
 

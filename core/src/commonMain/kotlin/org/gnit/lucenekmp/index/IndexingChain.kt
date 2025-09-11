@@ -344,12 +344,15 @@ class IndexingChain(
             null
         }
 
-        var normsMergeInstance: NormsProducer? = null
         if (norms != null) {
-            // Use the merge instance in order to reuse the same IndexInput for all terms
-            normsMergeInstance = norms.mergeInstance
+            norms.use { np ->
+                // Use the merge instance in order to reuse the same IndexInput for all terms
+                val normsMergeInstance = np.mergeInstance
+                termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance)
+            }
+        } else {
+            termsHash.flush(fieldsToFlush, state, sortMap, null)
         }
-        termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance!!)
 
 
         if (infoStream.isEnabled("IW")) {

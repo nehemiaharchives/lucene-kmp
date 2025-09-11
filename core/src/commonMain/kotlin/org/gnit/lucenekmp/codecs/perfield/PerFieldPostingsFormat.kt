@@ -65,7 +65,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
         val toClose: MutableList<AutoCloseable> = ArrayList()
 
         @Throws(IOException::class)
-        override fun write(fields: Fields, norms: NormsProducer) {
+        override fun write(fields: Fields, norms: NormsProducer?) {
             val formatToGroups: MutableMap<PostingsFormat, FieldsGroup> = buildFieldsGroupMapping(fields)
 
             // Write postings
@@ -96,7 +96,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
         }
 
         @Throws(IOException::class)
-        override fun merge(mergeState: MergeState, norms: NormsProducer) {
+        override fun merge(mergeState: MergeState, norms: NormsProducer?) {
             val mutableIterators: Array<MutableIterator<String>> = mergeState.fieldsProducers
                 .filterNotNull()
                 .map { it.iterator() }
