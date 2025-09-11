@@ -136,6 +136,7 @@ val enableHangDetection = providers
     .orElse(false)
 
 // Detect if configuration cache is requested; avoid registering global listeners when it's on
+@Suppress("DEPRECATION")
 val configurationCacheRequested = gradle.startParameter.isConfigurationCacheRequested
 
 // BuildService-based hang detection for tests to keep configuration cache compatible
@@ -232,6 +233,7 @@ if (enableHangDetection.get() && !configurationCacheRequested) {
     val taskStart: MutableMap<String, Long> = ConcurrentHashMap()
     val taskHangFuture: MutableMap<String, ScheduledFuture<*>> = ConcurrentHashMap()
 
+    @Suppress("DEPRECATION")
     gradle.addListener(object : TaskExecutionListener {
         override fun beforeExecute(task: Task) {
             val key = task.path
@@ -262,6 +264,7 @@ if (enableHangDetection.get() && !configurationCacheRequested) {
         }
     })
 
+    @Suppress("DEPRECATION")
     gradle.buildFinished {
         scheduler.shutdownNow()
     }
