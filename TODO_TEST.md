@@ -27,7 +27,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes:
 ## Depth 1
 - org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl -> org.apache.lucene.analysis.tokenattributes.CharTermAttributeImpl (Ported)
 - org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl -> org.apache.lucene.analysis.tokenattributes.PackedTokenAttributeImpl (Ported)
-- org.apache.lucene.index.TestByteSlicePool -> org.apache.lucene.index.ByteSlicePool (Ported)
 - org.apache.lucene.index.TestCachingMergeContext -> org.apache.lucene.index.CachingMergeContext (Ported)
 - org.apache.lucene.index.TestDirectoryReader -> org.apache.lucene.index.DirectoryReader (Ported)
 - org.apache.lucene.index.TestDocumentsWriterStallControl -> org.apache.lucene.index.DocumentsWriterStallControl (Ported)
