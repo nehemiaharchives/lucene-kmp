@@ -272,6 +272,7 @@ class TermVectorsConsumerPerField(
         }
 
     override fun newPostingsArray() {
+        // postingsArray can be null when no terms were added; safe cast prevents NPE
         termVectorsPostingsArray = postingsArray as? TermVectorsPostingsArray
     }
 
