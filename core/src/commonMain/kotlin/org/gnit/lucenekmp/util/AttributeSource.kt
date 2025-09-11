@@ -349,7 +349,7 @@ open class AttributeSource {
         val buffer = StringBuilder()
         reflectWith(
             object : AttributeReflector {
-                override fun reflect(attClass: KClass<out Attribute>, key: String, value: Any) {
+                override fun reflect(attClass: KClass<out Attribute>, key: String, value: Any?) {
                     if (buffer.length > 0) {
                         buffer.append(',')
                     }

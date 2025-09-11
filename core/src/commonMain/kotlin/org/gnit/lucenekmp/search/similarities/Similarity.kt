@@ -131,7 +131,7 @@ abstract class Similarity
      * @param state accumulated state of term processing for this field
      * @return computed norm value
      */
-    fun computeNorm(state: FieldInvertState): Long {
+    open fun computeNorm(state: FieldInvertState): Long {
         val numTerms: Int
         if (state.indexOptions === IndexOptions.DOCS) {
             numTerms = state.uniqueTermCount
