@@ -14,7 +14,7 @@ subprojects {
             publishToMavenCentral()
             signAllPublications()
 
-            coordinates(group.toString(), "lucene-kmp-${project.name}", version.toString())
+            coordinates("org.gnit.lucene-kmp", "lucene-kmp-${project.name}", version.toString())
 
             pom {
                 name = "lucene-kmp (module: ${project.name})"
