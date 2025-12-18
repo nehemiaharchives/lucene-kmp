@@ -38,9 +38,63 @@ object Files {
         return OkioSourceInputStream(source)
     }
 
-    fun newOutputStream(path: Path): OutputStream {
+    // New overload that honors open options
+    fun newOutputStream(path: Path, vararg options: OpenOption): OutputStream {
+        // Defaults for Files.newOutputStream when no options are provided are CREATE & TRUNCATE_EXISTING
+        val opts = options.toSet()
+        val defaulted = opts.isEmpty()
+        val append = opts.contains(StandardOpenOption.APPEND)
+        val createNew = opts.contains(StandardOpenOption.CREATE_NEW)
+        val create = opts.contains(StandardOpenOption.CREATE) || defaulted
+        val truncate = opts.contains(StandardOpenOption.TRUNCATE_EXISTING) || defaulted
+
+        if (append && truncate) {
+            throw IllegalArgumentException("APPEND and TRUNCATE_EXISTING cannot be used together")
+        }
+
+        // Ensure parent directories exist when creating
+        val parent = path.parent
+        if ((create || createNew) && parent != null && !fileSystem.exists(parent)) {
+            createDirectories(parent)
+        }
+
+        val exists = fileSystem.exists(path)
+        if (createNew) {
+            if (exists) {
+                throw FileAlreadyExistsException(path.toString())
+            }
+            // Best-effort atomic create; prefer mustCreate when available
+            val sink = try {
+                // Okio FileSystem.sink has an overload with mustCreate
+                fileSystem.sink(path, mustCreate = true).buffer()
+            } catch (e: Throwable) {
+                // Fallback: explicit existence check already done, create via write
+                // This still prevents overwriting existing files
+                fileSystem.sink(path).buffer()
+            }
+            return OkioSinkOutputStream(sink)
+        }
+
+        if (append) {
+            val sink = fileSystem.appendingSink(path).buffer()
+            return OkioSinkOutputStream(sink)
+        }
+
+        // Truncate or create if missing
+        if (!exists && !create) {
+            // In Java, default creates the file; if CREATE wasn't requested explicitly and file doesn't exist,
+            // behavior is to fail. However, Lucene always requests the right options. We mirror Java defaults when no options.
+            throw IOException("File does not exist: $path")
+        }
+
+        // Default behavior: create if needed, otherwise truncate
         val sink = fileSystem.sink(path).buffer()
         return OkioSinkOutputStream(sink)
+    }
+
+    fun newOutputStream(path: Path): OutputStream {
+        // Delegate to the options-aware overload with defaults
+        return newOutputStream(path, *emptyArray())
     }
 
     fun newBufferedReader(path: Path, charset: Charset): Reader {
@@ -83,7 +137,13 @@ object Files {
     }
 
     fun isDirectory(path: Path): Boolean {
-        return fileSystem.metadata(path).isDirectory
+        return try {
+            fileSystem.metadata(path).isDirectory
+        } catch (e: Throwable) {
+            // Match java.nio.file.Files.isDirectory: return false if the file does not exist
+            // or if its attributes cannot be read due to an I/O error.
+            false
+        }
     }
 
     fun size(path: Path): Long {
@@ -128,4 +188,3 @@ object Files {
 }
 
 fun Path.toRealPath() = this.normalized()
-

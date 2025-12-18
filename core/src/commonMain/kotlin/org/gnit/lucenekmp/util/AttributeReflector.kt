@@ -13,5 +13,5 @@ fun interface AttributeReflector {
      * method once using `org.apache.lucene.analysis.tokenattributes.CharTermAttribute.class` as
      * attribute class, `"term"` as key and the actual value as a String.
      */
-    fun reflect(attClass: KClass<out Attribute>, key: String, value: Any)
+    fun reflect(attClass: KClass<out Attribute>, key: String, value: Any?)
 }

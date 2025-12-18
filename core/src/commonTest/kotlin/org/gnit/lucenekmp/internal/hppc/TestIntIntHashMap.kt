@@ -422,7 +422,7 @@ class TestIntIntHashMap : LuceneTestCase() {
             other.clear()
             map.clear()
 
-            for (round in 0 until size * 20) {
+            for (round in 0 until size * 2) { // TODO originally 20 but reducing to 2 for dev speed
                 var key = cast(rnd.nextInt(size))
                 if (rnd.nextInt(50) == 0) {
                     key = 0

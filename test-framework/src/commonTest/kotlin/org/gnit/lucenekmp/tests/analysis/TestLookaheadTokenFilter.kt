@@ -1,9 +1,5 @@
 package org.gnit.lucenekmp.tests.analysis
 
-import org.gnit.lucenekmp.analysis.Analyzer
-import org.gnit.lucenekmp.analysis.TokenStream
-import org.gnit.lucenekmp.analysis.Tokenizer
-import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import kotlin.test.Ignore
 import kotlin.test.Test

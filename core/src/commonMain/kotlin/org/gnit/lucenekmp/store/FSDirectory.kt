@@ -304,7 +304,7 @@ abstract class FSDirectory protected constructor(path: Path, lockFactory: LockFa
     ) : OutputStreamIndexOutput(
         "FSIndexOutput(path=\"" + directory.resolve(name) + "\")",
         name,
-        object : FilterOutputStream(Files.newOutputStream(directory.resolve(name)/*, *options*/)) {
+        object : FilterOutputStream(Files.newOutputStream(directory.resolve(name), *options)) {
             // This implementation ensures, that we never write more than CHUNK_SIZE bytes:
             @Throws(IOException::class)
             override fun write(b: ByteArray, offset: Int, length: Int) {

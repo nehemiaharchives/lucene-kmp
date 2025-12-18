@@ -2,9 +2,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
 
-group = "org.gnit.lucenekmp"
-version = "1.0.0"
-
 kotlin {
     jvm()
 

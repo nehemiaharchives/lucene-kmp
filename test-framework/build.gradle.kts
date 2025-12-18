@@ -6,9 +6,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-group = "org.gnit.lucenekmp"
-version = "1.0.0"
-
 kotlin {
     jvm()
     androidTarget {
@@ -22,7 +19,9 @@ kotlin {
     iosX64()
     iosSimulatorArm64()
 
-    linuxX64()
+    macosX64() // intel mac
+    macosArm64() // m1/2/3/4 mac
+    linuxX64() // when you are in linux X64 machine, run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios, macos and linux for developer convenience.
 
     sourceSets {
         val commonMain by getting {
@@ -32,6 +31,7 @@ kotlin {
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
+                implementation(libs.kotlinx.coroutines)
                 implementation(libs.kotlin.logging)
             }
         }
@@ -74,6 +74,8 @@ kotlin {
         iosX64Main.get().dependsOn(nativeMain)
         iosSimulatorArm64Main.get().dependsOn(nativeMain)
 
+        macosArm64Main.get().dependsOn(nativeMain)
+        macosX64Main.get().dependsOn(nativeMain)
         linuxX64Main.get().dependsOn(nativeMain)
 
         val nativeTest by creating {
@@ -84,18 +86,8 @@ kotlin {
         iosX64Test.get().dependsOn(nativeTest)
         iosSimulatorArm64Test.get().dependsOn(nativeTest)
 
+        macosArm64Test.get().dependsOn(nativeTest)
+        macosX64Test.get().dependsOn(nativeTest)
         linuxX64Test.get().dependsOn(nativeTest)
-    }
-}
-
-android {
-    namespace = "org.jetbrains.kotlinx.multiplatform.library.template"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }

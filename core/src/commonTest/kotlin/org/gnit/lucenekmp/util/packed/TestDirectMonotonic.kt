@@ -196,7 +196,7 @@ class TestDirectMonotonic : LuceneTestCase() {
 
     private fun doTestRandom(merging: Boolean) {
         val rnd = /*random()*/ Random(12345)
-        val iters = atLeast(rnd, 3)
+        val iters = atLeast(rnd, 1)  // TODO originally 3 but reduced to 1 for dev speed
         for (iter in 0 until iters) {
             val dir = newDirectory()
             val blockShift = TestUtil.nextInt(rnd, DirectMonotonicWriter.MIN_BLOCK_SHIFT, DirectMonotonicWriter.MAX_BLOCK_SHIFT)

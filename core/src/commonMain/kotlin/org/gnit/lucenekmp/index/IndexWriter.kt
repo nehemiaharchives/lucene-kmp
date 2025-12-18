@@ -6466,7 +6466,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     }
 
     /** Tests should override this to enable test points. Default is `false`.  */
-    protected fun isEnableTestPoints(): Boolean {
+    protected open fun isEnableTestPoints(): Boolean {
         return false
     }
 

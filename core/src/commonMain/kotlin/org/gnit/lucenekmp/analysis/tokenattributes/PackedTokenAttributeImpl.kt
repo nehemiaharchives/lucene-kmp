@@ -17,7 +17,7 @@ import org.gnit.lucenekmp.util.AttributeReflector
  *  * [TermFrequencyAttribute]
  *
  */
-class PackedTokenAttributeImpl
+open class PackedTokenAttributeImpl
 /** Constructs the attribute implementation.  */
     : CharTermAttributeImpl(), TypeAttribute, PositionIncrementAttribute, PositionLengthAttribute, OffsetAttribute,
     TermFrequencyAttribute {

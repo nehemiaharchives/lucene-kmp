@@ -8,9 +8,6 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-group = "org.gnit.lucenekmp"
-version = "1.0.0"
-
 kotlin {
     jvm()
     //jvmToolchain(23) // we run build on jdk 24, so getting INFO saying "Kotlin does not yet support 24 JDK target, falling back to Kotlin JVM_23 JVM target"
@@ -25,10 +22,9 @@ kotlin {
     iosX64()
     iosSimulatorArm64()
 
-    // build target only for developer convenience
-    // when you are in linux X64 machine,
-    // run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios and linux.
-    linuxX64()
+    macosX64() // intel mac
+    macosArm64() // m1/2/3/4 mac
+    linuxX64() // when you are in linux X64 machine, run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios, macos and linux for developer convenience.
 
     sourceSets {
         val commonMain by getting {
@@ -86,6 +82,8 @@ kotlin {
         iosX64Main.get().dependsOn(nativeMain)
         iosSimulatorArm64Main.get().dependsOn(nativeMain)
 
+        macosArm64Main.get().dependsOn(nativeMain)
+        macosX64Main.get().dependsOn(nativeMain)
         linuxX64Main.get().dependsOn(nativeMain)
 
         val nativeTest by creating {
@@ -96,6 +94,8 @@ kotlin {
         iosX64Test.get().dependsOn(nativeTest)
         iosSimulatorArm64Test.get().dependsOn(nativeTest)
 
+        macosArm64Test.get().dependsOn(nativeTest)
+        macosX64Test.get().dependsOn(nativeTest)
         linuxX64Test.get().dependsOn(nativeTest)
     }
 }
@@ -109,52 +109,5 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
         freeCompilerArgs.addAll(
             "-Xexpect-actual-classes",
         )
-    }
-}
-
-android {
-    namespace = "org.jetbrains.kotlinx.multiplatform.library.template"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-
-mavenPublishing {
-    publishToMavenCentral()
-
-    signAllPublications()
-
-    coordinates(group.toString(), "library", version.toString())
-
-    pom {
-        name = "My library"
-        description = "A library."
-        inceptionYear = "2024"
-        url = "https://github.com/kotlin/multiplatform-library-template/"
-        licenses {
-            license {
-                name = "XXX"
-                url = "YYY"
-                distribution = "ZZZ"
-            }
-        }
-        developers {
-            developer {
-                id = "XXX"
-                name = "YYY"
-                url = "ZZZ"
-            }
-        }
-        scm {
-            url = "XXX"
-            connection = "YYY"
-            developerConnection = "ZZZ"
-        }
     }
 }
