@@ -43,6 +43,17 @@ import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/***** A NormsProducer instance that should never be used. *****/
+private object EMPTY_NORMS_PRODUCER : NormsProducer() {
+    override fun getNorms(field: FieldInfo): NumericDocValues {
+        throw UnsupportedOperationException("no norms")
+    }
+
+    override fun checkIntegrity() {}
+
+    override fun close() {}
+}
+
 /** Default general purpose indexing chain, which handles indexing of all types of fields.  */
 class IndexingChain(
     private val indexCreatedVersionMajor: Int,
@@ -344,12 +355,13 @@ class IndexingChain(
             null
         }
 
-        var normsMergeInstance: NormsProducer? = null
-        if (norms != null) {
-            // Use the merge instance in order to reuse the same IndexInput for all terms
-            normsMergeInstance = norms.mergeInstance
-        }
-        termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance!!)
+        val normsMergeInstance = norms?.mergeInstance
+        termsHash.flush(
+            fieldsToFlush,
+            state,
+            sortMap,
+            normsMergeInstance ?: EMPTY_NORMS_PRODUCER
+        )
 
 
         if (infoStream.isEnabled("IW")) {

@@ -19,12 +19,13 @@ open class PendingDeletes(
 ) {
 
     // Read-only live docs, null until live docs are initialized or if all docs are alive
-    var liveDocs: Bits?
+    var liveDocs: Bits? = null
+        private set
         /** Returns a snapshot of the current live docs.  */
-        get(): Bits? {
+        get() {
             // Prevent modifications to the returned live docs
             writeableLiveDocs = null
-            return liveDocs
+            return field
         }
 
     // Writeable live docs, null if this instance is not ready to accept writes, in which

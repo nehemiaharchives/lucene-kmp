@@ -138,16 +138,7 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
 
     /** The comparator for sorting leaf readers.  */
     var leafSorter: Comparator<LeafReader>? = null
-        /**
-         * Returns a comparator for sorting leaf readers. If not `null`, this comparator is used to
-         * sort leaf readers within `DirectoryReader` opened from the `IndexWriter` of this
-         * configuration.
-         *
-         * @return a comparator for sorting leaf readers
-         */
-        get(): Comparator<LeafReader>? {
-            return leafSorter
-        }
+        protected set
 
     /** Returns the field names involved in the index sort  */
     /** The field names involved in the index sort  */
