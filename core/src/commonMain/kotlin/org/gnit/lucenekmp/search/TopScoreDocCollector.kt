@@ -79,25 +79,29 @@ class TopScoreDocCollector internal constructor(
             // that at this point top() is already initialized.
             private var pqTop: ScoreDoc = pq.top()
             private var minCompetitiveScore = 0f
+            private var currentScorer: Scorable? = null
 
-            override var scorer: Scorable? = null
+            override var scorer: Scorable?
+                get() = currentScorer
                 set(value) {
-                    field = value
+                    val scorer = requireNotNull(value)
+                    currentScorer = scorer
                     if (minScoreAcc == null) {
-                        updateMinCompetitiveScore(value!!)
+                        updateMinCompetitiveScore(scorer)
                     } else {
-                        updateGlobalMinCompetitiveScore(value!!)
+                        updateGlobalMinCompetitiveScore(scorer)
                     }
                 }
 
             @Throws(IOException::class)
             override fun collect(doc: Int) {
-                val score: Float = scorer!!.score()
+                val scorer = requireNotNull(currentScorer)
+                val score: Float = scorer.score()
 
                 val hitCountSoFar: Int = ++totalHits
 
                 if (minScoreAcc != null && (hitCountSoFar.toLong() and minScoreAcc.modInterval) == 0L) {
-                    updateGlobalMinCompetitiveScore(scorer!!)
+                    updateGlobalMinCompetitiveScore(scorer)
                 }
 
                 if (after != null && (score > afterScore || (score == afterScore && doc <= afterDoc))) {
@@ -105,7 +109,7 @@ class TopScoreDocCollector internal constructor(
                     if (totalHitsRelation == TotalHits.Relation.EQUAL_TO) {
                         // we just reached totalHitsThreshold, we can start setting the min
                         // competitive score now
-                        updateMinCompetitiveScore(scorer!!)
+                        updateMinCompetitiveScore(scorer)
                     }
                     return
                 }
@@ -116,23 +120,23 @@ class TopScoreDocCollector internal constructor(
                     if (hitCountSoFar == totalHitsThreshold + 1) {
                         // we just exceeded totalHitsThreshold, we can start setting the min
                         // competitive score now
-                        updateMinCompetitiveScore(scorer!!)
+                        updateMinCompetitiveScore(scorer)
                     }
 
                     // Since docs are returned in-order (i.e., increasing doc Id), a document
                     // with equal score to pqTop.score cannot compete since HitQueue favors
                     // documents with lower doc Ids. Therefore reject those docs too.
                 } else {
-                    collectCompetitiveHit(doc, score)
+                    collectCompetitiveHit(doc, score, scorer)
                 }
             }
 
             @Throws(IOException::class)
-            fun collectCompetitiveHit(doc: Int, score: Float) {
+            fun collectCompetitiveHit(doc: Int, score: Float, scorer: Scorable) {
                 pqTop.doc = doc + docBase
                 pqTop.score = score
                 pqTop = pq.updateTop()
-                updateMinCompetitiveScore(scorer!!)
+                updateMinCompetitiveScore(scorer)
             }
 
             @Throws(IOException::class)
