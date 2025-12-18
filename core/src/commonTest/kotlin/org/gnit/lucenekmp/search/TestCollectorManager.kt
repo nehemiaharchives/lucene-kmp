@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.document.Document
+import org.gnit.lucenekmp.document.Field
+import org.gnit.lucenekmp.document.TextField
 import org.gnit.lucenekmp.index.DirectoryReader
 import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.IndexWriterConfig
@@ -61,8 +63,11 @@ class TestCollectorManager : LuceneTestCase() {
 
     private fun reader(dir: Directory): DirectoryReader {
         val iw = IndexWriter(dir, IndexWriterConfig())
-        iw.addDocument(Document())
-        val reader = DirectoryReader.open(iw)
+        val doc = Document()
+        doc.add(TextField("id", "0", Field.Store.NO))
+        iw.addDocument(doc)
+        iw.commit()
+        val reader = iw.getReader(true, false)
         iw.close()
         return reader
     }
