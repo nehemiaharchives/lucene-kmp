@@ -11,7 +11,7 @@ class TestIndexCommit : LuceneTestCase() {
     @Test
     fun testEqualsHashCode() {
         newDirectory().use { dir ->
-            val ic1 = object : IndexCommit() {
+            val ic1: IndexCommit = object : IndexCommit() {
                 override val segmentsFileName: String? = "a"
                 override val directory: Directory = dir
                 override val fileNames: MutableCollection<String> = mutableListOf()
@@ -21,7 +21,7 @@ class TestIndexCommit : LuceneTestCase() {
                 override val isDeleted: Boolean = false
                 override val segmentCount: Int = 2
             }
-            val ic2 = object : IndexCommit() {
+            val ic2: IndexCommit = object : IndexCommit() {
                 override val segmentsFileName: String? = "b"
                 override val directory: Directory = dir
                 override val fileNames: MutableCollection<String> = mutableListOf()
