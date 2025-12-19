@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import kotlin.test.Test
+import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import org.gnit.lucenekmp.index.Term
@@ -36,6 +37,36 @@ class TestBooleanQuery : LuceneTestCase() {
         assertEquals(bq1, bq2)
     }
 
+    @Ignore
+    @Test
+    fun testEqualityDoesNotDependOnOrder() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testEqualityOnDuplicateShouldClauses() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testEqualityOnDuplicateMustClauses() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testEqualityOnDuplicateFilterClauses() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testEqualityOnDuplicateMustNotClauses() {
+        // TODO: port this test
+    }
+
     @Test
     fun testHashCodeIsStable() {
         val bq = BooleanQuery.Builder()
@@ -61,6 +92,138 @@ class TestBooleanQuery : LuceneTestCase() {
         assertFailsWith<IndexSearcher.TooManyClauses> {
             bq.add(TermQuery(Term("foo", "bar-MAX")), BooleanClause.Occur.SHOULD)
         }
+    }
+
+    @Ignore
+    @Test
+    fun testNullOrSubScorer() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testDeMorgan() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testBS2DisjunctionNextVsAdvance() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testMinShouldMatchLeniency() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testFILTERClauseBehavesLikeMUST() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testFilterClauseDoesNotImpactScore() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testConjunctionPropagatesApproximations() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testDisjunctionPropagatesApproximations() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testBoostedScorerPropagatesApproximations() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testExclusionPropagatesApproximations() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testReqOptPropagatesApproximations() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testQueryMatchesCount() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testConjunctionMatchesCount() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testDisjunctionMatchesCount() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testTwoClauseTermDisjunctionCountOptimization() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testDisjunctionTwoClausesMatchesCountAndScore() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testDisjunctionRandomClausesMatchesCount() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testProhibitedMatchesCount() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testRandomBooleanQueryMatchesCount() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testToString() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testQueryVisitor() {
+        // TODO: port this test
+    }
+
+    @Ignore
+    @Test
+    fun testClauseSetsImmutability() {
+        // TODO: port this test
     }
 }
 
