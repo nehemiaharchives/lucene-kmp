@@ -24,7 +24,6 @@ actual class DeflateCompressor actual constructor(actual val level: Int) : Compr
     actual var closed: Boolean = false
 
     @OptIn(ExperimentalForeignApi::class)
-    @Throws(IOException::class)
     actual override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) {
         val len = buffersInput.length() as Int
 

@@ -205,7 +205,6 @@ class TestArrayUtil : LuceneTestCase() {
         }
     }
 
-    @JvmRecord
     internal data class Item(val `val`: Int, val order: Int) : Comparable<Item> {
         override fun compareTo(other: Item): Int {
             return this.order - other.order

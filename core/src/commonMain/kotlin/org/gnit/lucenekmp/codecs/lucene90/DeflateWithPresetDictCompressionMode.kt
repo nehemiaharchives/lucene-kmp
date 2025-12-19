@@ -94,7 +94,6 @@ expect class DeflateWithPresetDictDecompressor : Decompressor {
         }
     }*/
 
-    @Throws(IOException::class)
     override fun decompress(
         `in`: DataInput,
         originalLength: Int,
@@ -194,7 +193,6 @@ expect class DeflateWithPresetDictCompressor : Compressor {
         out.writeBytes(compressed, totalCount)
     }*/
 
-    @Throws(IOException::class)
     override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) /*{
         val len = (buffersInput.length() - buffersInput.position()) as Int
         val dictLength = len / (NUM_SUB_BLOCKS * DICT_SIZE_FACTOR)

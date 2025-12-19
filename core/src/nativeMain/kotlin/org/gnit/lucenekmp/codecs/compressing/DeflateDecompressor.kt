@@ -23,7 +23,6 @@ actual class DeflateDecompressor : Decompressor() {
     actual var compressed: ByteArray = ByteArray(0)
 
     @OptIn(ExperimentalForeignApi::class)
-    @Throws(IOException::class)
     actual override fun decompress(
         `in`: DataInput,
         originalLength: Int,

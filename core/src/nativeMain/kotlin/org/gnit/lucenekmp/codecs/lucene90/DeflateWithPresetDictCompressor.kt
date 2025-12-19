@@ -92,7 +92,6 @@ actual class DeflateWithPresetDictCompressor actual constructor(level: Int) : Co
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    @Throws(IOException::class)
     actual override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) {
         val len = (buffersInput.length() - buffersInput.position()).toInt()
         val dictLength = len / (NUM_SUB_BLOCKS * DICT_SIZE_FACTOR)

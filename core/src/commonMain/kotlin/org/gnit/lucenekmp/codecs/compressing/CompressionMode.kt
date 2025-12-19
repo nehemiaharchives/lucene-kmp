@@ -152,7 +152,6 @@ expect class DeflateDecompressor() : Decompressor {
 
     var compressed: ByteArray/* = ByteArray(0)*/
 
-    @Throws(IOException::class)
     override fun decompress(
         `in`: DataInput,
         originalLength: Int,
@@ -227,8 +226,7 @@ expect class DeflateCompressor : Compressor {
         compressed = ByteArray(64)
     }*/
 
-    @Throws(IOException::class)
-     override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) /*{
+    override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) /*{
         val len = buffersInput.length() as Int
 
         val bytes = ByteArray(len)

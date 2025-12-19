@@ -57,7 +57,6 @@ actual class DeflateWithPresetDictDecompressor actual constructor() : Decompress
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    @Throws(IOException::class)
     actual override fun decompress(
         `in`: DataInput,
         originalLength: Int,

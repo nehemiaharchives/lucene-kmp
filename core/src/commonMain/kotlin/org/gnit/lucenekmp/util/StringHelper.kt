@@ -647,8 +647,8 @@ object StringHelper {
             var s1 = x0
             val s0 = x1
             x0 = s0
-            s1 = s1 xor (s1 shl 23) // a
-            x1 = s1 xor s0 xor (s1 ushr 17) xor (s0 ushr 26) // b, c
+            s1 = s1!! xor (s1 shl 23) // a
+            x1 = s1 xor s0!! xor (s1 ushr 17) xor (s0 ushr 26) // b, c
         }
 
         // 64-bit unsigned mask
