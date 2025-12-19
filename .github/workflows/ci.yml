@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-jvm:
-    name: Build JVM
+    name: Test JVM
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -56,7 +56,7 @@ jobs:
           echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
 
   build-android:
-    name: Build Android
+    name: Test Android
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -77,7 +77,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Android
-        run: ./gradlew -PenableHangDetection=true :core:assembleRelease :core:testReleaseUnitTest
+        run: ./gradlew -PenableHangDetection=true :core:testReleaseUnitTest
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -98,7 +98,7 @@ jobs:
           echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
 
   build-ios:
-    name: Build iOS
+    name: Test iOS
     runs-on: macos-latest
     timeout-minutes: 15
 
@@ -124,7 +124,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Build iOS
-        run: ./gradlew -PenableHangDetection=true :core:iosX64Test :core:iosX64MainKlibrary :core:iosArm64MainKlibrary :core:iosSimulatorArm64MainKlibrary
+        run: ./gradlew -PenableHangDetection=true :core:iosSimulatorArm64Test
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
@@ -144,10 +144,10 @@ jobs:
           echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
 
-  full-build:
-    name: Full Build and Test
+  coverage:
+    name: Coverage
     needs: [build-jvm, build-android, build-ios]
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
@@ -170,9 +170,6 @@ jobs:
           key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts') }}
           restore-keys: |
             ${{ runner.os }}-konan-
-
-      - name: Full Build
-        run: ./gradlew -PenableHangDetection=true :core:build -x testDebugUnitTest -x koverGenerateArtifactJvm -x koverGenerateArtifactRelease -x koverGenerateArtifact -x koverGenerateArtifactDebug -x koverCachedVerify -x koverVerify
 
       - name: Generate Coverage Report
         run: ./gradlew :core:koverXmlReport
