@@ -16,7 +16,7 @@ jobs:
   build-jvm:
     name: Test JVM
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
 
     steps:
       - name: Checkout code
@@ -58,7 +58,7 @@ jobs:
   build-android:
     name: Test Android
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
 
     steps:
       - name: Checkout code
