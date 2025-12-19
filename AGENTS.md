@@ -44,17 +44,42 @@ Under this directory you find two sub directories:
 * import io.github.oshai.kotlinlogging.KotlinLogging
 * private val logger = KotlinLogging.logger {}
 * logger.debug { "message" }
+* 
+## Agent‑Human Coworking Flow
 
-## Running Unit Tests
+### Step 1: Suggest & Discuss
 
-### writing code, then compile then run tests
-1. First write the code, then run `./gradlew compileKotlinJvm` and `./gradlew compileTestKotlinJvm` to check if there are compilation errors.
+* Propose multiple solutions using your built‑in knowledge.
+* Only perform external research if:
+    * You are uncertain about an API or behavior, **or**
+    * I explicitly request official documentation or references.
+* Otherwise, skip research and move straight to proposing fixes.
+
+### Step 2: Code, Run, Debug
+1. Apply the chosen code changes. when you code be careful of writing code in platform agnostic kotlin common code. avoid expect/actual pattern as much as possible. do not mix platform specific code such as jvm code in commonMain/commonTest.
+2. Use `get_file_problems` tool of `jetbrains` MCP server to check if there are any compilation errors for each files you changed. iterate over until you solve all errors.
+3. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them
+4. Perform internet search **only** if an error is unclear and you need confirmation of a fix. If you are confident in the solution, skip research and proceed.
+
+## Tool Use Priority
+
+### Priority 1, jetbrains MCP Server (always)
+When you have access to jetbrains MCP server, you should use the IDEA's internal test runner. `.run` dir contains.
+Example agent runtime environment: locally running ai coding agent in desktop/laptop of a developer such as codex cli, GitHub Copilot Agent.
+
+### Priority 2, Gradle command line (avoid as much as possible)
+When you don't have access to jetbrains MCP server, first ask Human developer to enable it and wait until it is enabled! Never use Gradle wrapper (./gradlew).
+If you are in cloud environment where you have NO access to jetbrains MCP server, you are allowed to use the command line Gradle wrapper (./gradlew) to compile and run tests.
+Example agent runtime environment: desktop/laptop but human developer forgot to launch JetBrains IDEs, or cloud coding agent such as codex web, Google Jules.
+When you use ./gradlew command line tool, use like following (e.g. when you develop core module):
+1. First write the code, then run `./gradlew core:compileKotlinJvm` and `./gradlew core:compileTestKotlinJvm` to check if there are compilation errors.
 2. If you encounter compilation errors, find out the cause of the error, edit the code to fix the error, then repeat step 1.
-3. If there is no compilation error with jvm compile, then run `./gradlew compileKotlinLinuxX64` and `./gradlew compileTestKotlinLinuxX64` which is kotlin/native that covers both linux and ios
-4. If there is no compilation error with both kotlni/jvm and kotlin/native, run unit tests, but run specific test class which you just ported or modified, not all tests. 
+3. If there is no compilation error with jvm compile, then run `./gradlew core:compileKotlinLinuxX64` and `./gradlew core:compileTestKotlinLinuxX64` which is kotlin/native that covers both linux and ios
+4. If there is no compilation error with both kotlni/jvm and kotlin/native, run unit tests, but run specific test class which you just ported or modified, not all tests.
 5. If the specific test fails, find out the cause of the failure, edit the code to fix the error, then repeat step 3.
 6. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
 7. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
+
 
 ### troubleshooting java/cacerts problem
 When you try to run `./gradldew` and get `Trust store file /etc/ssl/certs/java/cacerts does not exist or is not readable. This may lead to SSL connection failures.`, try to run following command to solve it:
