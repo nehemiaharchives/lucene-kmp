@@ -245,8 +245,8 @@ abstract class Weight
             val competitiveIterator: DocIdSetIterator? = collector.competitiveIterator()
             logger.debug {
                 "[DefaultBulkScorer.score] start min=$min max=$max " +
-                    "iterator=${iterator::class.simpleName} twoPhase=${twoPhase?.javaClass?.simpleName} " +
-                    "competitive=${competitiveIterator?.javaClass?.simpleName} acceptDocs=${acceptDocs != null}"
+                    "iterator=${iterator::class.simpleName} twoPhase=${twoPhase!!::class.simpleName} " +
+                    "competitive=${competitiveIterator!!::class.simpleName} acceptDocs=${acceptDocs != null}"
             }
 
             if (competitiveIterator != null) {
