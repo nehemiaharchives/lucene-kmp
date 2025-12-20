@@ -24,7 +24,7 @@ open class CharTermAttributeImpl
     protected var builder: BytesRefBuilder = BytesRefBuilder()
 
 
-    override fun newInstance(): AttributeImpl {
+    override open fun newInstance(): AttributeImpl {
         return CharTermAttributeImpl()
     }
 

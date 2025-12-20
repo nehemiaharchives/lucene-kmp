@@ -120,7 +120,7 @@ class SortField {
      */
     var field: String? = null
 
-    private lateinit var type: Type // defaults to determining type dynamically
+    lateinit var type: Type // defaults to determining type dynamically
 
     /**
      * Returns whether the sort should be reversed.
@@ -346,9 +346,9 @@ class SortField {
      *
      * @return One of the constants SCORE, DOC, STRING, INT or FLOAT.
      */
-    fun getType(): Type {
+    /*fun getType(): Type {
         return type
-    }
+    }*/
 
     /** Returns the [FieldComparatorSource] used for custom sorting  */
     fun getComparatorSource(): FieldComparatorSource? {

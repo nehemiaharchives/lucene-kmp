@@ -2,8 +2,8 @@ package org.gnit.lucenekmp.search
 
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.document.SpatialQuery
 import org.gnit.lucenekmp.util.FrequencyTrackingRingBuffer
-import kotlin.reflect.KClass
 
 /**
  * A [QueryCachingPolicy] that tracks usage statistics of recently-used filters in order to
@@ -13,6 +13,7 @@ import kotlin.reflect.KClass
  */
 open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
     QueryCachingPolicy {
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     private val recentlyUsedFilters: FrequencyTrackingRingBuffer = FrequencyTrackingRingBuffer(historySize, SENTINEL)
 
     /**
@@ -58,7 +59,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
 
         // call hashCode outside of sync block
         // in case it's somewhat expensive:
+        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] hashCode start query=${query::class.simpleName}" }
         val hashCode = query.hashCode()
+        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] hashCode done value=$hashCode" }
 
         // we only track hash codes to avoid holding references to possible
         // large queries; this may cause rare false positives, but at worse
@@ -66,7 +69,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
 
         // TODO synchronized is not supported in KMP, need to think what to do here
         //synchronized(this) {
-            recentlyUsedFilters.add(hashCode)
+        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add start" }
+        recentlyUsedFilters.add(hashCode)
+        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add done" }
         //}
     }
 
@@ -86,11 +91,16 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
 
     @Throws(IOException::class)
     override fun shouldCache(query: Query): Boolean {
+        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] enter query=${query::class.simpleName}" }
         if (shouldNeverCache(query)) {
+            logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] neverCache=true" }
             return false
         }
+        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] frequency start" }
         val frequency = frequency(query)
+        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] frequency done value=$frequency" }
         val minFrequency = minFrequencyToCache(query)
+        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] minFrequency=$minFrequency" }
         return frequency >= minFrequency
     }
 
@@ -99,19 +109,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
         private const val SENTINEL = Int.MIN_VALUE
 
         private fun isPointQuery(query: Query): Boolean {
-            // we need to check for super classes because we occasionally use anonymous
-            // sub classes of eg. PointRangeQuery
-            var clazz: KClass<*> = query::class
-            while (clazz != Query::class) {
-                val simpleName: String = clazz.simpleName!!
-                if (simpleName.startsWith("Point") && simpleName.endsWith("Query")) {
-                    return true
-                }
-
-                // TODO this level of reflection is not supported in KMP, so we cannot use, if this commenting out code causes problem, implement a walkaround
-                //clazz = clazz.getSuperclass()
-            }
-            return false
+            return query is PointRangeQuery
+                || query is PointInSetQuery
+                || query is SpatialQuery
         }
 
         fun isCostly(query: Query): Boolean {

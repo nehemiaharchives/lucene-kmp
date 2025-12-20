@@ -59,6 +59,7 @@ open class IndexSearcher(
     context: IndexReaderContext,
     executor: Executor? = null
 ) {
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     private var queryTimeout: QueryTimeout? = null
 
     // partialResult may be set on one of the threads of the executor. It may be correct to not make
@@ -595,7 +596,11 @@ open class IndexSearcher(
                 val collector = collectors[i]
                 listTasks.add(
                     Callable {
+                        logger.debug {
+                            "[IndexSearcher.search] task start slice=$i partitions=${leaves.size} collector=${collector::class.simpleName}"
+                        }
                         search(leaves, weight, collector)
+                        logger.debug { "[IndexSearcher.search] task end slice=$i" }
                         collector
                     })
             }
@@ -656,6 +661,9 @@ open class IndexSearcher(
         weight: Weight,
         collector: Collector
     ) {
+        logger.debug {
+            "[IndexSearcher.searchLeaf] enter ord=${ctx.ord} minDocId=$minDocId maxDocId=$maxDocId"
+        }
         val leafCollector: LeafCollector
         try {
             leafCollector = collector.getLeafCollector(ctx)
@@ -664,18 +672,29 @@ open class IndexSearcher(
             // continue with the following leaf
             return
         }
+        logger.debug {
+            "[IndexSearcher.searchLeaf] scorerSupplier start weight=${weight::class.simpleName} query=${weight.query::class.simpleName}"
+        }
         val scorerSupplier: ScorerSupplier? = weight.scorerSupplier(ctx)
+        logger.debug {
+            "[IndexSearcher.searchLeaf] scorerSupplier done weight=${weight::class.simpleName} query=${weight.query::class.simpleName} hasScorer=${scorerSupplier != null}"
+        }
         if (scorerSupplier != null) {
+            logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier ready ord=${ctx.ord}" }
             scorerSupplier.setTopLevelScoringClause()
-            var scorer: BulkScorer = scorerSupplier.bulkScorer()!!
+            val scorer: BulkScorer = scorerSupplier.bulkScorer()!!
+            logger.debug { "[IndexSearcher.searchLeaf] bulkScorer ready ord=${ctx.ord}" }
+            var maybeTimedScorer: BulkScorer = scorer
             if (queryTimeout != null) {
-                scorer = TimeLimitingBulkScorer(scorer, queryTimeout!!)
+                maybeTimedScorer = TimeLimitingBulkScorer(scorer, queryTimeout!!)
             }
             try {
                 // Optimize for the case when live docs are stored in a FixedBitSet.
                 val acceptDocs: Bits? =
                     ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)
-                scorer.score(leafCollector, acceptDocs, minDocId, maxDocId)
+                logger.debug { "[IndexSearcher.searchLeaf] scoring start ord=${ctx.ord}" }
+                maybeTimedScorer.score(leafCollector, acceptDocs, minDocId, maxDocId)
+                logger.debug { "[IndexSearcher.searchLeaf] scoring end ord=${ctx.ord}" }
             } catch (e: CollectionTerminatedException) {
                 // collection was terminated prematurely
                 // continue with the following leaf
@@ -686,6 +705,7 @@ open class IndexSearcher(
         // Note: this is called if collection ran successfully, including the above special cases of
         // CollectionTerminatedException and TimeExceededException, but no other exception.
         leafCollector.finish()
+        logger.debug { "[IndexSearcher.searchLeaf] finish ord=${ctx.ord}" }
     }
 
     /**

@@ -133,6 +133,10 @@ open class PackedTokenAttributeImpl
         return super.clone() as PackedTokenAttributeImpl
     }
 
+    override fun newInstance(): AttributeImpl {
+        return PackedTokenAttributeImpl()
+    }
+
     override fun equals(obj: Any?): Boolean {
         if (obj === /*~~wrdocy~~*/this) return true
 

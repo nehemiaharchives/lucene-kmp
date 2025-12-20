@@ -211,6 +211,7 @@ open class FutureTask<V> : RunnableFuture<V> {
      */
     @OptIn(ExperimentalAtomicApi::class)
     override suspend fun get(): V {
+        logger.debug { "[FutureTask.get] enter state=${state.load()} hash=${this.hashCode()}" }
         var s = state.load()
         if (s <= COMPLETING) {
             if (s == NEW) {
@@ -219,6 +220,7 @@ open class FutureTask<V> : RunnableFuture<V> {
                     if (s == NEW) {
                         return suspendCancellableCoroutine { cont ->
                             this.continuation = cont
+                            logger.debug { "[FutureTask.get] suspended state=NEW hash=${this.hashCode()}" }
                             cont.invokeOnCancellation {
                                 if (state.compareAndSet(NEW, CANCELLED)) {
                                     finishCompletion()
@@ -230,9 +232,13 @@ open class FutureTask<V> : RunnableFuture<V> {
                 s = state.load()
             }
             if (s <= COMPLETING) {
-                return awaitDone(false, 0.nanoseconds)
+                logger.debug { "[FutureTask.get] awaiting completion state=$s hash=${this.hashCode()}" }
+                val result = awaitDone(false, 0.nanoseconds)
+                logger.debug { "[FutureTask.get] completed via awaitDone state=${state.load()} hash=${this.hashCode()}" }
+                return result
             }
         }
+        logger.debug { "[FutureTask.get] return report state=$s hash=${this.hashCode()}" }
         return report(s)
     }
 
@@ -472,6 +478,7 @@ open class FutureTask<V> : RunnableFuture<V> {
                 }
             }
         }
+        logger.debug { "[FutureTask.finishCompletion] state=${state.load()} hasContinuation=${continuation != null} hash=${this.hashCode()}" }
         done()
         callable = null // to reduce footprint
     }
@@ -486,6 +493,7 @@ open class FutureTask<V> : RunnableFuture<V> {
     @OptIn(ExperimentalAtomicApi::class)
     private suspend fun awaitDone(timed: Boolean, duration: Duration): V {
         val deadline = if (timed) System.nanoTime() + duration.inWholeNanoseconds else Long.MAX_VALUE
+        var spins = 0
         while (true) {
             val s = state.load()
             if (s > COMPLETING) return report(s)
@@ -500,6 +508,10 @@ open class FutureTask<V> : RunnableFuture<V> {
                     finishCompletion()
                 }
                 throw CancellationException()
+            }
+            spins++
+            if (spins % 100000 == 0) {
+                logger.debug { "[FutureTask.awaitDone] still waiting state=$s hash=${this.hashCode()}" }
             }
             yield()
         }

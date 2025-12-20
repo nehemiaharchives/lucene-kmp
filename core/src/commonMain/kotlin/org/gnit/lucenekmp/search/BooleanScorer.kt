@@ -183,7 +183,7 @@ internal class BooleanScorer(scorers: MutableCollection<Scorer>, minShouldMatch:
         val head = this.head
         val tail = this.tail
         var headTop: DisiWrapper = head.top()
-        var tailTop: DisiWrapper? = tail.top()
+        var tailTop: DisiWrapper? = tail.topOrNull()
         while (headTop.doc < min) {
             if (tailTop == null || headTop.cost <= tailTop.cost) {
                 headTop.doc = headTop.iterator!!.advance(min)

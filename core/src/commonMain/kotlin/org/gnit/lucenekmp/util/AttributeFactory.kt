@@ -9,6 +9,10 @@ import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttributeImpl
+import org.gnit.lucenekmp.search.BoostAttribute
+import org.gnit.lucenekmp.search.BoostAttributeImpl
+import org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttribute
+import org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttributeImpl
 import kotlin.reflect.KClass
 
 // KMP-friendly factory that creates AttributeImpl instances for Attribute interfaces.
@@ -25,6 +29,8 @@ abstract class AttributeFactory {
                 OffsetAttribute::class -> OffsetAttributeImpl()
                 PayloadAttribute::class -> PayloadAttributeImpl()
                 FlagsAttribute::class -> FlagsAttributeImpl()
+                BoostAttribute::class -> BoostAttributeImpl()
+                MaxNonCompetitiveBoostAttribute::class -> MaxNonCompetitiveBoostAttributeImpl()
                 else -> throw IllegalArgumentException(
                     "Cannot find implementing class for: ${attClass.qualifiedName}"
                 )
@@ -83,6 +89,8 @@ abstract class AttributeFactory {
                 OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
                 PayloadAttributeImpl::class -> { { PayloadAttributeImpl() } }
                 FlagsAttributeImpl::class -> { { FlagsAttributeImpl() } }
+                BoostAttributeImpl::class -> { { BoostAttributeImpl() } }
+                MaxNonCompetitiveBoostAttributeImpl::class -> { { MaxNonCompetitiveBoostAttributeImpl() } }
                 else -> throw IllegalArgumentException("No known no-arg constructor for ${clazz.qualifiedName}")
             }
         }

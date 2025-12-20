@@ -199,7 +199,7 @@ object DirectReader {
 
         override fun get(index: Long): Long {
             try {
-                return (`in`.readByte(offset + index) and 0xFF.toByte()).toLong()
+                return (`in`.readByte(offset + index).toInt() and 0xFF).toLong()
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
@@ -271,7 +271,7 @@ object DirectReader {
 
         override fun get(index: Long): Long {
             try {
-                return (`in`.readInt(this.offset + (index shl 2)).toInt() and 0xFFFFFFFFL.toInt()).toLong()
+                return (`in`.readInt(this.offset + (index shl 2)).toLong() and 0xFFFFFFFFL)
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }

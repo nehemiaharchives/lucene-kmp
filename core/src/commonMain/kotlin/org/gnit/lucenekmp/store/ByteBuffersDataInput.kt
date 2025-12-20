@@ -240,7 +240,8 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
             while (len > 0) {
                 val block: ByteBuffer = blocks[blockIndex(absPos)]
                 val blockPosition = blockOffset(absPos)
-                val chunk = min(len, block.capacity - blockPosition)
+                // Respect the buffer limit: slices may have limit < capacity.
+                val chunk = min(len, block.limit - blockPosition)
                 if (chunk == 0) {
                     throw EOFException()
                 }
@@ -253,13 +254,14 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
                 offset += chunk
             }
         } catch (e: BufferUnderflowException) {
-            if (absPos >= length()) {
+            // absPos is absolute (includes this.offset), but length() is relative to this input.
+            if (absPos - this.offset >= length()) {
                 throw EOFException()
             } else {
                 throw e // Something is wrong.
             }
         } catch (e: IndexOutOfBoundsException) {
-            if (absPos >= length()) {
+            if (absPos - this.offset >= length()) {
                 throw EOFException()
             } else {
                 throw e
@@ -354,42 +356,8 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
     }
 
     override fun readLongs(arr: LongArray, off: Int, len: Int) {
-        var off = off
-        var len = len
-        try {
-            while (len > 0) {
-                val longBuffer: LongBuffer = getLongBuffer(pos)
-                longBuffer.position(blockOffset(pos) shr 3)
-                val chunk = min(len, longBuffer.remaining())
-                if (chunk == 0) {
-                    // read a single long spanning the boundary between two buffers
-                    arr[off] = readLong(pos - offset)
-                    off++
-                    len--
-                    pos += Long.SIZE_BYTES.toLong()
-                    continue
-                }
-
-                // Update pos early on for EOF detection, then try to get buffer content.
-                pos += (chunk shl 3).toLong()
-                longBuffer.get(arr, off, chunk)
-
-                len -= chunk
-                off += chunk
-            }
-        } catch (e: BufferUnderflowException) {
-            if (pos - offset + Long.SIZE_BYTES > length()) {
-                throw EOFException()
-            } else {
-                throw e // Something is wrong.
-            }
-        } catch (e: IndexOutOfBoundsException) {
-            if (pos - offset + Long.SIZE_BYTES > length()) {
-                throw EOFException()
-            } else {
-                throw e
-            }
-        }
+        // Use the safe DataInput implementation to avoid alignment and buffer-view pitfalls.
+        super.readLongs(arr, off, len)
     }
 
     private fun getFloatBuffer(pos: Long): FloatBuffer {

@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene101
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.lucene101.ForUtil.Companion.BLOCK_SIZE
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat.Companion.DOC_CODEC
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat.Companion.LEVEL1_NUM_DOCS
@@ -280,6 +281,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         /* Variables that store the content of a block and the current position within this block */ /* Shared variables */
         private var encoding: DeltaEncoding? = null
         private var doc = 0 // doc we last read
+        private var debugCalls: Long = 0
 
         /* Variables when the block is stored as packed deltas (Frame Of Reference) */
         private val docBuffer = IntArray(BLOCK_SIZE)
@@ -678,6 +680,9 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
         @Throws(IOException::class)
         private fun moveToNextLevel0Block() {
+            if (doc == NO_MORE_DOCS) {
+                return
+            }
             if (doc == level1LastDocID) { // advance level 1 skip data
                 skipLevel1To(doc + 1)
             }
@@ -808,8 +813,21 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             skipLevel0To(target)
         }
 
+        val logger = KotlinLogging.logger {  }
+
         @Throws(IOException::class)
         override fun nextDoc(): Int {
+            if (doc == NO_MORE_DOCS) {
+                return NO_MORE_DOCS
+            }
+            debugCalls++
+            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+                logger.debug {
+                    "[BlockPostingsEnum.nextDoc] enter doc=$doc level0LastDocID=$level0LastDocID " +
+                        "needsRefilling=$needsRefilling docBufferUpto=$docBufferUpto docBufferSize=$docBufferSize " +
+                        "encoding=$encoding"
+                }
+            }
             if (doc == level0LastDocID || needsRefilling) {
                 if (needsRefilling) {
                     refillDocs()
@@ -834,11 +852,28 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             }
 
             ++docBufferUpto
+            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+                logger.debug { "[BlockPostingsEnum.nextDoc] exit doc=$doc docBufferUpto=$docBufferUpto" }
+            }
+            if (doc == NO_MORE_DOCS) {
+                logger.debug { "[BlockPostingsEnum.nextDoc] reached NO_MORE_DOCS" }
+            }
             return this.doc
         }
 
         @Throws(IOException::class)
         override fun advance(target: Int): Int {
+            if (doc == NO_MORE_DOCS) {
+                return NO_MORE_DOCS
+            }
+            debugCalls++
+            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+                logger.debug {
+                    "[BlockPostingsEnum.advance] enter target=$target doc=$doc level0LastDocID=$level0LastDocID " +
+                        "needsRefilling=$needsRefilling docBufferUpto=$docBufferUpto docBufferSize=$docBufferSize " +
+                        "encoding=$encoding"
+                }
+            }
             if (target > level0LastDocID || needsRefilling) {
                 if (target > level0LastDocID) {
                     doAdvanceShallow(target)
@@ -881,6 +916,12 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 }
             }
 
+            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+                logger.debug { "[BlockPostingsEnum.advance] exit doc=$doc docBufferUpto=$docBufferUpto" }
+            }
+            if (doc == NO_MORE_DOCS) {
+                logger.debug { "[BlockPostingsEnum.advance] reached NO_MORE_DOCS target=$target" }
+            }
             return doc
         }
 

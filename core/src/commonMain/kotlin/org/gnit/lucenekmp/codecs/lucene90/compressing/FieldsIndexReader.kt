@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene90.compressing
 
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.lucene90.compressing.FieldsIndexWriter.Companion.VERSION_CURRENT
 import org.gnit.lucenekmp.codecs.lucene90.compressing.FieldsIndexWriter.Companion.VERSION_START
@@ -111,6 +112,20 @@ internal class FieldsIndexReader : FieldsIndex {
         if (blockIndex < 0) {
             blockIndex = -2 - blockIndex
         }
+
+        if (docID == 23145) {
+            val bi = blockIndex
+            val prev = if (bi > 0) bi - 1 else bi
+            val next = if (bi + 1 < numChunks) bi + 1 else bi
+            logger.debug {
+                "FieldsIndexReader.getBlockID: docID=$docID maxDoc=$maxDoc numChunks=$numChunks blockShift=$blockShift " +
+                    "docsStartPointer=$docsStartPointer docsEndPointer=$docsEndPointer " +
+                    "startPointersStartPointer=$startPointersStartPointer startPointersEndPointer=$startPointersEndPointer " +
+                    "maxPointer=$maxPointer indexInput.length=${indexInput.length()} " +
+                    "blockIndex=$bi docs[prev]=${docs.get(prev)} docs[bi]=${docs.get(bi)} docs[next]=${docs.get(next)} " +
+                    "startPointer[bi]=${startPointers.get(bi)}"
+            }
+        }
         return blockIndex
     }
 
@@ -138,5 +153,9 @@ internal class FieldsIndexReader : FieldsIndex {
     @Throws(IOException::class)
     override fun checkIntegrity() {
         CodecUtil.checksumEntireFile(indexInput)
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
     }
 }

@@ -173,6 +173,11 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
         return heap[1]!!
     }
 
+    /** Returns the least element or null if the queue is empty. */
+    fun topOrNull(): T? {
+        return heap[1]
+    }
+
     /** Removes and returns the least element of the PriorityQueue in log(size) time.  */
     fun pop(): T? {
         if (size > 0) {

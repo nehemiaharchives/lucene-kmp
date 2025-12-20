@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.abs
-import kotlin.math.pow
 
 /**
  * Compares the two specified `float` values. The sign
@@ -98,35 +97,7 @@ fun Float.Companion.floatToIntBits(value: Float): Int {
 }
 
 fun Float.Companion.intBitsToFloat(bits: Int): Float {
-    val e = (bits ushr 23) and 0xff
-    val mantissa = bits and 0x7fffff
-    val sign = if ((bits ushr 31) == 0) 1 else -1
-
-    return when (e) {
-        0xff -> { // Infinity or NaN
-            if (mantissa == 0) {
-                if (sign > 0) Float.POSITIVE_INFINITY else Float.NEGATIVE_INFINITY
-            } else {
-                Float.NaN
-            }
-        }
-        0 -> { // Zero or subnormal
-            if (mantissa == 0) {
-                // Handle +0.0 and -0.0 explicitly
-                return Float.fromBits(bits) // This correctly preserves the sign of zero
-            }
-            // Subnormal number
-            // The float value is computed as: sign * mantissa * 2^(1 - 127 - 23)
-            // (1 - 127 for exponent bias for subnormals, 23 for mantissa bits)
-            (sign * mantissa.toDouble() * 2.0.pow(1 - 127 - 23)).toFloat()
-        }
-        else -> { // Normalized number
-            val mVal = mantissa or 0x800000 // Add implicit leading 1
-            // The float value is computed as: sign * mVal * 2^(e - 127 - 23)
-            // (e - 127 for exponent bias, 23 for mantissa bits)
-            (sign * mVal * 2.0.pow((e - 127 - 23).toDouble())).toFloat()
-        }
-    }
+    return Float.fromBits(bits)
 }
 
 val Float.Companion.PRECISION: Int

@@ -18,12 +18,12 @@ class TermScorer : Scorer {
     private val postingsEnum: PostingsEnum
     private val iterator: DocIdSetIterator
     private val scorer: SimScorer
-    private val norms: NumericDocValues
+    private val norms: NumericDocValues?
     private val impactsDisi: ImpactsDISI?
     private val maxScoreCache: MaxScoreCache
 
     /** Construct a [TermScorer] that will iterate all documents.  */
-    constructor(postingsEnum: PostingsEnum, scorer: SimScorer, norms: NumericDocValues) {
+    constructor(postingsEnum: PostingsEnum, scorer: SimScorer, norms: NumericDocValues?) {
         this.postingsEnum = postingsEnum
         iterator = this.postingsEnum
         val impactsEnum: ImpactsEnum = SlowImpactsEnum(postingsEnum)
@@ -40,7 +40,7 @@ class TermScorer : Scorer {
     constructor(
         impactsEnum: ImpactsEnum,
         scorer: SimScorer,
-        norms: NumericDocValues,
+        norms: NumericDocValues?,
         topLevelScoringClause: Boolean
     ) {
         postingsEnum = impactsEnum

@@ -239,12 +239,9 @@ internal class BooleanScorerSupplier(
             return MaxScoreBulkScorer(maxDoc, optionalScorers, null)
         }
 
-        val optional: MutableList<Scorer> = mutableListOf()
-        for (ss in subs[Occur.SHOULD]!!) {
-            optional.add(ss.get(Long.Companion.MAX_VALUE))
-        }
-
-        return BooleanScorer(optional, max(1, minShouldMatch), scoreMode.needsScores())
+        // Disable BooleanScorer in KMP for now; fall back to scorer-based bulk scoring
+        // to avoid potential infinite loops in BooleanScorer.
+        return null
     }
 
     @Throws(IOException::class)

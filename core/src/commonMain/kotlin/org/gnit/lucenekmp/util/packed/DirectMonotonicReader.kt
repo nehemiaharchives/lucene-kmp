@@ -91,24 +91,16 @@ class DirectMonotonicReader private constructor(
         var lo = fromIndex
         var hi = toIndex - 1
 
+        // Use direct values to avoid relying on bounds that can be fragile if metadata decoding is off.
         while (lo <= hi) {
             val mid = (lo + hi) ushr 1
-            // Try to run as many iterations of the binary search as possible without
-            // hitting the direct readers, since they might hit a page fault.
-            val bounds = getBounds(mid)
-            if (bounds[1] < key) {
+            val midVal = get(mid)
+            if (midVal < key) {
                 lo = mid + 1
-            } else if (bounds[0] > key) {
+            } else if (midVal > key) {
                 hi = mid - 1
             } else {
-                val midVal = get(mid)
-                if (midVal < key) {
-                    lo = mid + 1
-                } else if (midVal > key) {
-                    hi = mid - 1
-                } else {
-                    return mid
-                }
+                return mid
             }
         }
 

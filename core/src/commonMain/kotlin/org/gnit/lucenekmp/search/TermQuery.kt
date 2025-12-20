@@ -25,6 +25,7 @@ class TermQuery : Query {
 
     private val term: Term
     private val perReaderTermState: TermStates?
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
 
     internal inner class TermWeight (searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float, termStates: TermStates?) : Weight(this@TermQuery ) {
         private val similarity: Similarity
@@ -95,12 +96,14 @@ class TermQuery : Query {
         }
 
         @Throws(IOException::class) override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
+            logger.debug { "[TermQuery.scorerSupplier] enter term=${term.field()}:${term.text()} ord=${context.ord}" }
             require(termStates == null || termStates.wasBuiltFor(ReaderUtil.getTopLevelContext(context))
             ) {("The top-reader used to create Weight is not the same as the current reader's top-reader ("
                     + ReaderUtil.getTopLevelContext(context))}
 
             val stateSupplier: IOSupplier<TermState?>? = termStates?.get(context)
             if (stateSupplier == null) {
+                logger.debug { "[TermQuery.scorerSupplier] no term state term=${term.field()}:${term.text()} ord=${context.ord}" }
                 return null
             }
 
@@ -111,12 +114,17 @@ class TermQuery : Query {
 
                 @Throws(IOException::class) fun getTermsEnum(): TermsEnum? {
                     if (termsEnum == null) {
+                        logger.debug { "[TermQuery.getTermsEnum] load state term=${term.field()}:${term.text()} ord=${context.ord}" }
                         val state: TermState? = stateSupplier.get()
                         if (state == null) {
+                            logger.debug { "[TermQuery.getTermsEnum] no state term=${term.field()}:${term.text()} ord=${context.ord}" }
                             return null
                         }
+                        logger.debug { "[TermQuery.getTermsEnum] terms() start term=${term.field()}:${term.text()} ord=${context.ord}" }
                         termsEnum = context.reader().terms(term.field())!!.iterator()
+                        logger.debug { "[TermQuery.getTermsEnum] seekExact start term=${term.field()}:${term.text()} ord=${context.ord}" }
                         termsEnum!!.seekExact(term.bytes(), state)
+                        logger.debug { "[TermQuery.getTermsEnum] seekExact done term=${term.field()}:${term.text()} ord=${context.ord}" }
                     }
                     return termsEnum
                 }
@@ -134,10 +142,10 @@ class TermQuery : Query {
 
                     if (scoreMode == ScoreMode.TOP_SCORES) {
                         return TermScorer(
-                            termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms!!, topLevelScoringClause)
+                            termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms, topLevelScoringClause)
                     } else {
                         val flags: Int = if (scoreMode.needsScores()) PostingsEnum.FREQS.toInt() else PostingsEnum.NONE.toInt()
-                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms!!)
+                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms)
                     }
                 }
 

@@ -1,9 +1,12 @@
 package org.gnit.lucenekmp.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.util.Bits
 import kotlin.math.min
+
+private val logger = KotlinLogging.logger {}
 
 
 /**
@@ -240,6 +243,11 @@ abstract class Weight
             var min = min
             collector.scorer = scorer
             val competitiveIterator: DocIdSetIterator? = collector.competitiveIterator()
+            logger.debug {
+                "[DefaultBulkScorer.score] start min=$min max=$max " +
+                    "iterator=${iterator::class.simpleName} twoPhase=${twoPhase?.javaClass?.simpleName} " +
+                    "competitive=${competitiveIterator?.javaClass?.simpleName} acceptDocs=${acceptDocs != null}"
+            }
 
             if (competitiveIterator != null) {
                 if (competitiveIterator.docID() > min) {
@@ -279,16 +287,51 @@ abstract class Weight
         }
 
         companion object {
+            private const val LOG_INTERVAL = 1000
+            private const val STALL_THRESHOLD = 1000
+            private const val ITERATION_HARD_LIMIT = 1_000_000
+
             @Throws(IOException::class)
             private fun scoreIterator(
                 collector: LeafCollector, acceptDocs: Bits?, iterator: DocIdSetIterator, max: Int
             ) {
                 var doc = iterator.docID()
+                var iterations = 0
+                var stallCount = 0
                 while (doc < max) {
+                    if (iterations % LOG_INTERVAL == 0) {
+                        logger.debug { "[DefaultBulkScorer.scoreIterator] doc=$doc max=$max iter=$iterations" }
+                    }
+                    if (iterations > ITERATION_HARD_LIMIT) {
+                        throw IllegalStateException(
+                            "DefaultBulkScorer.scoreIterator exceeded iteration limit doc=$doc max=$max iterator=${iterator::class.simpleName}"
+                        )
+                    }
+                    if (iterations < 5) {
+                        logger.debug { "[DefaultBulkScorer.scoreIterator] pre-collect doc=$doc" }
+                    }
                     if (acceptDocs == null || acceptDocs.get(doc)) {
                         collector.collect(doc)
                     }
-                    doc = iterator.nextDoc()
+                    if (iterations < 5) {
+                        logger.debug { "[DefaultBulkScorer.scoreIterator] pre-nextDoc doc=$doc" }
+                    }
+                    val nextDoc = iterator.nextDoc()
+                    if (iterations < 5) {
+                        logger.debug { "[DefaultBulkScorer.scoreIterator] post-nextDoc doc=$doc nextDoc=$nextDoc" }
+                    }
+                    if (nextDoc == doc) {
+                        stallCount++
+                        if (stallCount >= STALL_THRESHOLD) {
+                            throw IllegalStateException(
+                                "DefaultBulkScorer.scoreIterator stuck doc=$doc max=$max iterator=${iterator::class.simpleName}"
+                            )
+                        }
+                    } else {
+                        stallCount = 0
+                    }
+                    doc = nextDoc
+                    iterations++
                 }
             }
 
@@ -301,11 +344,28 @@ abstract class Weight
                 max: Int
             ) {
                 var doc = iterator.docID()
+                var iterations = 0
+                var stallCount = 0
                 while (doc < max) {
+                    if (iterations % LOG_INTERVAL == 0) {
+                        logger.debug { "[DefaultBulkScorer.scoreTwoPhaseIterator] doc=$doc max=$max iter=$iterations" }
+                    }
                     if ((acceptDocs == null || acceptDocs.get(doc)) && twoPhase.matches()) {
                         collector.collect(doc)
                     }
-                    doc = iterator.nextDoc()
+                    val nextDoc = iterator.nextDoc()
+                    if (nextDoc == doc) {
+                        stallCount++
+                        if (stallCount >= STALL_THRESHOLD) {
+                            throw IllegalStateException(
+                                "DefaultBulkScorer.scoreTwoPhaseIterator stuck doc=$doc max=$max iterator=${iterator::class.simpleName}"
+                            )
+                        }
+                    } else {
+                        stallCount = 0
+                    }
+                    doc = nextDoc
+                    iterations++
                 }
             }
 
@@ -318,7 +378,16 @@ abstract class Weight
                 max: Int
             ) {
                 var doc = iterator.docID()
+                var iterations = 0
+                var stallCount = 0
                 while (doc < max) {
+                    if (iterations % LOG_INTERVAL == 0) {
+                        logger.debug {
+                            "[DefaultBulkScorer.scoreCompetitiveIterator] doc=$doc max=$max iter=$iterations " +
+                                "competitive=${competitiveIterator.docID()}"
+                        }
+                    }
+                    val prevDoc = doc
                     require(
                         competitiveIterator.docID() <= doc // invariant
                     )
@@ -326,6 +395,18 @@ abstract class Weight
                         val competitiveNext = competitiveIterator.advance(doc)
                         if (competitiveNext != doc) {
                             doc = iterator.advance(competitiveNext)
+                            if (doc == prevDoc) {
+                                stallCount++
+                                if (stallCount >= STALL_THRESHOLD) {
+                                    throw IllegalStateException(
+                                        "DefaultBulkScorer.scoreCompetitiveIterator advance stuck " +
+                                            "doc=$doc prevDoc=$prevDoc competitiveNext=$competitiveNext " +
+                                            "iterator=${iterator::class.simpleName} competitive=${competitiveIterator::class.simpleName}"
+                                    )
+                                }
+                            } else {
+                                stallCount = 0
+                            }
                             continue
                         }
                     }
@@ -334,7 +415,19 @@ abstract class Weight
                         collector.collect(doc)
                     }
 
-                    doc = iterator.nextDoc()
+                    val nextDoc = iterator.nextDoc()
+                    if (nextDoc == doc) {
+                        stallCount++
+                        if (stallCount >= STALL_THRESHOLD) {
+                            throw IllegalStateException(
+                                "DefaultBulkScorer.scoreCompetitiveIterator stuck doc=$doc max=$max iterator=${iterator::class.simpleName}"
+                            )
+                        }
+                    } else {
+                        stallCount = 0
+                    }
+                    doc = nextDoc
+                    iterations++
                 }
             }
 
@@ -348,7 +441,16 @@ abstract class Weight
                 max: Int
             ) {
                 var doc = iterator.docID()
+                var iterations = 0
+                var stallCount = 0
                 while (doc < max) {
+                    if (iterations % LOG_INTERVAL == 0) {
+                        logger.debug {
+                            "[DefaultBulkScorer.scoreTwoPhaseOrCompetitiveIterator] doc=$doc max=$max iter=$iterations " +
+                                "competitive=${competitiveIterator.docID()}"
+                        }
+                    }
+                    val prevDoc = doc
                     require(
                         competitiveIterator.docID() <= doc // invariant
                     )
@@ -356,6 +458,18 @@ abstract class Weight
                         val competitiveNext = competitiveIterator.advance(doc)
                         if (competitiveNext != doc) {
                             doc = iterator.advance(competitiveNext)
+                            if (doc == prevDoc) {
+                                stallCount++
+                                if (stallCount >= STALL_THRESHOLD) {
+                                    throw IllegalStateException(
+                                        "DefaultBulkScorer.scoreTwoPhaseOrCompetitiveIterator advance stuck " +
+                                            "doc=$doc prevDoc=$prevDoc competitiveNext=$competitiveNext " +
+                                            "iterator=${iterator::class.simpleName} competitive=${competitiveIterator::class.simpleName}"
+                                    )
+                                }
+                            } else {
+                                stallCount = 0
+                            }
                             continue
                         }
                     }
@@ -364,7 +478,19 @@ abstract class Weight
                         collector.collect(doc)
                     }
 
-                    doc = iterator.nextDoc()
+                    val nextDoc = iterator.nextDoc()
+                    if (nextDoc == doc) {
+                        stallCount++
+                        if (stallCount >= STALL_THRESHOLD) {
+                            throw IllegalStateException(
+                                "DefaultBulkScorer.scoreTwoPhaseOrCompetitiveIterator stuck doc=$doc max=$max iterator=${iterator::class.simpleName}"
+                            )
+                        }
+                    } else {
+                        stallCount = 0
+                    }
+                    doc = nextDoc
+                    iterations++
                 }
             }
         }

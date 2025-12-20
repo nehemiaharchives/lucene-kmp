@@ -82,6 +82,7 @@ open class LRUQueryCache(
     private val leavesToCache: (LeafReaderContext) -> Boolean = minSegmentSizePredicate(10000),
     skipCacheFactor: Float = 10f
 ) : QueryCache, Accountable {
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
 
     // maps queries that are contained in the cache to a singleton so that this
     // cache does not store several copies of the same query
@@ -676,45 +677,69 @@ open class LRUQueryCache(
 
         @Throws(IOException::class)
         override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
+            logger.debug {
+                "[LRUQueryCache.CachingWrapperWeight] enter query=${`in`.query::class.simpleName} weight=${`in`::class.simpleName}"
+            }
             if (used.compareAndSet(expectedValue = false, newValue = true)) {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] policy.onUse start" }
                 policy.onUse(query)
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] policy.onUse done" }
             }
 
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] isCacheable start" }
             if (!`in`.isCacheable(context)) {
                 // this segment is not suitable for caching
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] not cacheable -> delegate" }
                 return `in`.scorerSupplier(context)
             }
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] isCacheable done" }
 
             // Short-circuit: Check whether this segment is eligible for caching
             // before we take a lock because of #get
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] shouldCache start" }
             if (!shouldCache(context)) {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] shouldCache=false -> delegate" }
                 return `in`.scorerSupplier(context)
             }
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] shouldCache done" }
 
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] cacheHelper start" }
             val cacheHelper: IndexReader.CacheHelper = context.reader().coreCacheHelper
             if (cacheHelper == null) {
                 // this reader has no cache helper
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] no cacheHelper -> delegate" }
                 return `in`.scorerSupplier(context)
             }
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] cacheHelper done" }
 
             // If the lock is already busy, prefer using the uncached version than waiting
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] tryLock start" }
             if (!cacheMutex.tryLock()) {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] cacheMutex busy -> delegate" }
                 return `in`.scorerSupplier(context)
             }
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] tryLock acquired" }
 
             var cached: CacheAndCount?
             try {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] get cache start" }
                 cached = get(`in`.query, cacheHelper)
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] get cache done hit=${cached != null}" }
             } finally {
                 cacheMutex.unlock()
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] tryLock released" }
             }
 
             val maxDoc: Int = context.reader().maxDoc()
             if (cached == null) {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] policy.shouldCache start" }
                 if (policy.shouldCache(`in`.query)) {
+                    logger.debug { "[LRUQueryCache.CachingWrapperWeight] policy.shouldCache=true" }
+                    logger.debug { "[LRUQueryCache.CachingWrapperWeight] cache miss, building" }
                     val supplier: ScorerSupplier? = `in`.scorerSupplier(context)
                     if (supplier == null) {
                         runBlocking { putIfAbsent(`in`.query, CacheAndCount.EMPTY, cacheHelper) }
+                        logger.debug { "[LRUQueryCache.CachingWrapperWeight] delegate returned null" }
                         return null
                     }
 
@@ -748,19 +773,24 @@ open class LRUQueryCache(
                         }
                     }
                 } else {
+                    logger.debug { "[LRUQueryCache.CachingWrapperWeight] policy.shouldCache=false -> delegate" }
+                    logger.debug { "[LRUQueryCache.CachingWrapperWeight] policy.shouldCache=false -> delegate" }
                     return `in`.scorerSupplier(context)
                 }
             }
 
             //checkNotNull(cached)
             if (cached === CacheAndCount.EMPTY) {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] cached EMPTY" }
                 return null
             }
             val disi: DocIdSetIterator = cached.iterator()
             if (disi == null) {
+                logger.debug { "[LRUQueryCache.CachingWrapperWeight] cached iterator null" }
                 return null
             }
 
+            logger.debug { "[LRUQueryCache.CachingWrapperWeight] cached hit -> ConstantScoreScorerSupplier" }
             return ConstantScoreScorerSupplier.fromIterator(
                 disi, 0f, ScoreMode.COMPLETE_NO_SCORES, maxDoc
             )

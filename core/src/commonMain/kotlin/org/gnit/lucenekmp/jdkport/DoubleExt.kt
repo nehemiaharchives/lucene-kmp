@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.abs
-import kotlin.math.pow
 
 /** Minimum unbiased exponent of a *normalised* binary-64 value (-1022). */
 val Double.Companion.MIN_EXPONENT: Int
@@ -102,28 +101,7 @@ fun Double.Companion.compare(d1: Double, d2: Double): Int {
 }
 
 fun Double.Companion.longBitsToDouble(bits: Long): Double {
-    // Extract the sign, exponent, and fraction bits.
-    val sign = if ((bits ushr 63) == 0L) 1.0 else -1.0
-    val exponent = ((bits shr 52) and 0x7FFL).toInt()
-    val fraction = bits and 0xFFFFFFFFFFFFFL
-
-    // Handle special cases: infinities and NaN.
-    if (exponent == 0x7FF) {
-        return if (fraction == 0L) {
-            if (sign > 0) Double.POSITIVE_INFINITY else Double.NEGATIVE_INFINITY
-        } else {
-            Double.NaN
-        }
-    }
-
-    // For normal numbers, set the implicit bit.
-    // For subnormals (exponent == 0) the significand is adjusted by shifting left.
-    val m = if (exponent == 0) fraction shl 1 else fraction or (1L shl 52)
-
-    // The true exponent is (exponent - 1075) where 1075 = 1023 + 52.
-    // This computes: sign * (1.fraction) * 2^(exponent-1023) for normals,
-    // and sign * (fraction * 2) * 2^(-1075) for subnormals.
-    return sign * m.toDouble() * 2.0.pow(exponent - 1075.0)
+    return Double.fromBits(bits)
 }
 
 /**

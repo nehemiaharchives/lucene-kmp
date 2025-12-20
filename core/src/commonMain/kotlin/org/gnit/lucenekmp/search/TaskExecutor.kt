@@ -29,6 +29,7 @@ import kotlin.concurrent.atomics.fetchAndIncrement
  */
 class TaskExecutor(executor: Executor) {
     private val executor: Executor
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
 
     /**
      * Creates a TaskExecutor instance
@@ -62,12 +63,15 @@ class TaskExecutor(executor: Executor) {
     </T> */
     @OptIn(ExperimentalAtomicApi::class)
     suspend fun <T> invokeAll(callables: MutableCollection<Callable<T>>): MutableList<T> {
+        logger.debug { "[TaskExecutor.invokeAll] start callables=${callables.size}" }
         val futures: MutableList<RunnableFuture<T>> =
             mutableListOf()
+        var idx = 0
         for (callable in callables) {
-            futures.add(Task(callable, futures))
+            futures.add(Task(callable, futures, idx++))
         }
         val count = futures.size
+        logger.debug { "[TaskExecutor.invokeAll] futures=$count" }
         // taskId provides the first index of an un-executed task in #futures
         val taskId = AtomicInt(0)
         // we fork execution count - 1 tasks to execute at least one task on the current thread to
@@ -76,6 +80,7 @@ class TaskExecutor(executor: Executor) {
             val work = Runnable {
                     val id: Int = taskId.fetchAndIncrement()
                     if (id < count) {
+                        logger.debug { "[TaskExecutor.invokeAll] executor running taskId=$id" }
                         futures[id].run()
                     }
                 }
@@ -89,13 +94,16 @@ class TaskExecutor(executor: Executor) {
         // have limited or no parallelism
         var id: Int
         while ((taskId.fetchAndIncrement().also { id = it }) < count) {
+            logger.debug { "[TaskExecutor.invokeAll] caller running taskId=$id" }
             futures[id].run()
             if (id >= count - 1) {
                 // save redundant CAS in case this was the last task
                 break
             }
         }
-        return collectResults(futures)
+        val results = collectResults(futures)
+        logger.debug { "[TaskExecutor.invokeAll] done results=${results.size}" }
+        return results
     }
 
     override fun toString(): String {
@@ -104,21 +112,26 @@ class TaskExecutor(executor: Executor) {
 
     private class Task<T>(
         callable: Callable<T>,
-        private val futures: MutableList<RunnableFuture<T>>
+        private val futures: MutableList<RunnableFuture<T>>,
+        private val taskId: Int
     ) : FutureTask<T>(callable) {
 
         @OptIn(ExperimentalAtomicApi::class)
         private val startedOrCancelled = AtomicReference(false)
+        private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
 
 
         @OptIn(ExperimentalAtomicApi::class)
         override fun run() {
             if (startedOrCancelled.compareAndSet(false, true)) {
+                logger.debug { "[TaskExecutor.Task.run] start taskId=$taskId" }
                 super.run()
+                logger.debug { "[TaskExecutor.Task.run] end taskId=$taskId" }
             }
         }
 
         override fun setException(t: Throwable) {
+            logger.debug { "[TaskExecutor.Task.setException] taskId=$taskId type=${t::class.simpleName} msg=${t.message}" }
             super.setException(t)
             cancelAll(futures)
         }
@@ -134,22 +147,28 @@ class TaskExecutor(executor: Executor) {
             make it wait for cancelled tasks, but FutureTask#awaitDone is private. Tasks that are cancelled before they are started will be no-op.
              */
             if (startedOrCancelled.compareAndSet(false, true)) {
+                logger.debug { "[TaskExecutor.Task.cancel] taskId=$taskId cancelledBeforeStart=true" }
                 // task is cancelled hence it has no results to return. That's fine: they would be
                 // ignored anyway.
                 set(null)
                 return true
             }
+            logger.debug { "[TaskExecutor.Task.cancel] taskId=$taskId cancelledBeforeStart=false" }
             return false
         }
     }
 
     companion object {
         private suspend fun <T> collectResults(futures: MutableList<RunnableFuture<T>>): MutableList<T> {
+            val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
             var exc: Throwable? = null
             val results: MutableList<T> = ArrayList(futures.size)
+            var idx = 0
             for (future in futures) {
                 try {
+                    logger.debug { "[TaskExecutor.collectResults] awaiting future index=$idx" }
                     results.add(future.get())
+                    logger.debug { "[TaskExecutor.collectResults] got future index=$idx" }
                 } catch (e: CancellationException) {
                     exc = IOUtils.useOrSuppress(exc, ThreadInterruptedException(e))
                 } catch (e: ExecutionException) {
@@ -157,6 +176,7 @@ class TaskExecutor(executor: Executor) {
                 }catch (e: Throwable) {
                     exc = IOUtils.useOrSuppress(exc, e)
                 }
+                idx++
             }
             assert(assertAllFuturesCompleted(futures)) { "Some tasks are still running" }
             if (exc != null) {

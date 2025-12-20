@@ -23,6 +23,7 @@ private constructor(
     // anyway.
     val fields: Array<SortField>, size: Int) :
     PriorityQueue<T>(size) {
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     /** Extension of ScoreDoc to also store the [FieldComparator] slot.  */
     open class Entry(var slot: Int, doc: Int) : ScoreDoc(doc, Float.NaN) {
         override fun toString(): String {
@@ -98,7 +99,13 @@ private constructor(
         val comparators: Array<LeafFieldComparator> =
             kotlin.arrayOfNulls<LeafFieldComparator>(this.comparators.size) as Array<LeafFieldComparator>
         for (i in comparators.indices) {
+            logger.debug {
+                "[FieldValueHitQueue.getComparators] enter i=$i field=${fields[i].field} type=${fields[i].type}"
+            }
             comparators[i] = this.comparators[i].getLeafComparator(context)
+            logger.debug {
+                "[FieldValueHitQueue.getComparators] exit i=$i field=${fields[i].field} type=${fields[i].type}"
+            }
         }
         return comparators
     }
