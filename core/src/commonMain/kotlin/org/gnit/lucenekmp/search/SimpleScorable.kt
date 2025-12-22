@@ -8,9 +8,6 @@ internal class SimpleScorable
 /** Sole constructor.  */
     : Scorable() {
     var score: Float = 0f
-        set(score) {
-            this.score = score
-        }
 
     override var minCompetitiveScore: Float = 0f
 
