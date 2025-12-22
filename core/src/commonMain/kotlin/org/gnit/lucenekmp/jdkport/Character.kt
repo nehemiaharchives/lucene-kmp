@@ -56,7 +56,190 @@ class Character {
         const val MIN_CODE_POINT: Int = 0x000000
         const val MAX_CODE_POINT: Int = 0X10FFFF
         const val MIN_SUPPLEMENTARY_CODE_POINT: Int = 0x010000
+
+        /**
+         * General category "Cn" in the Unicode specification.
+         * @since   1.1
+         */
         const val UNASSIGNED: Byte = 0
+
+        /**
+         * General category "Lu" in the Unicode specification.
+         * @since   1.1
+         */
+        const val UPPERCASE_LETTER: Byte = 1
+
+        /**
+         * General category "Ll" in the Unicode specification.
+         * @since   1.1
+         */
+        const val LOWERCASE_LETTER: Byte = 2
+
+        /**
+         * General category "Lt" in the Unicode specification.
+         * @since   1.1
+         */
+        const val TITLECASE_LETTER: Byte = 3
+
+        /**
+         * General category "Lm" in the Unicode specification.
+         * @since   1.1
+         */
+        const val MODIFIER_LETTER: Byte = 4
+
+        /**
+         * General category "Lo" in the Unicode specification.
+         * @since   1.1
+         */
+        const val OTHER_LETTER: Byte = 5
+
+        /**
+         * General category "Mn" in the Unicode specification.
+         * @since   1.1
+         */
+        const val NON_SPACING_MARK: Byte = 6
+
+        /**
+         * General category "Me" in the Unicode specification.
+         * @since   1.1
+         */
+        const val ENCLOSING_MARK: Byte = 7
+
+        /**
+         * General category "Mc" in the Unicode specification.
+         * @since   1.1
+         */
+        const val COMBINING_SPACING_MARK: Byte = 8
+
+        /**
+         * General category "Nd" in the Unicode specification.
+         * @since   1.1
+         */
+        const val DECIMAL_DIGIT_NUMBER: Byte = 9
+
+        /**
+         * General category "Nl" in the Unicode specification.
+         * @since   1.1
+         */
+        const val LETTER_NUMBER: Byte = 10
+
+        /**
+         * General category "No" in the Unicode specification.
+         * @since   1.1
+         */
+        const val OTHER_NUMBER: Byte = 11
+
+        /**
+         * General category "Zs" in the Unicode specification.
+         * @since   1.1
+         */
+        const val SPACE_SEPARATOR: Byte = 12
+
+        /**
+         * General category "Zl" in the Unicode specification.
+         * @since   1.1
+         */
+        const val LINE_SEPARATOR: Byte = 13
+
+        /**
+         * General category "Zp" in the Unicode specification.
+         * @since   1.1
+         */
+        const val PARAGRAPH_SEPARATOR: Byte = 14
+
+        /**
+         * General category "Cc" in the Unicode specification.
+         * @since   1.1
+         */
+        const val CONTROL: Byte = 15
+
+        /**
+         * General category "Cf" in the Unicode specification.
+         * @since   1.1
+         */
+        const val FORMAT: Byte = 16
+
+        /**
+         * General category "Co" in the Unicode specification.
+         * @since   1.1
+         */
+        const val PRIVATE_USE: Byte = 18
+
+        /**
+         * General category "Cs" in the Unicode specification.
+         * @since   1.1
+         */
+        const val SURROGATE: Byte = 19
+
+        /**
+         * General category "Pd" in the Unicode specification.
+         * @since   1.1
+         */
+        const val DASH_PUNCTUATION: Byte = 20
+
+        /**
+         * General category "Ps" in the Unicode specification.
+         * @since   1.1
+         */
+        const val START_PUNCTUATION: Byte = 21
+
+        /**
+         * General category "Pe" in the Unicode specification.
+         * @since   1.1
+         */
+        const val END_PUNCTUATION: Byte = 22
+
+        /**
+         * General category "Pc" in the Unicode specification.
+         * @since   1.1
+         */
+        const val CONNECTOR_PUNCTUATION: Byte = 23
+
+        /**
+         * General category "Po" in the Unicode specification.
+         * @since   1.1
+         */
+        const val OTHER_PUNCTUATION: Byte = 24
+
+        /**
+         * General category "Sm" in the Unicode specification.
+         * @since   1.1
+         */
+        const val MATH_SYMBOL: Byte = 25
+
+        /**
+         * General category "Sc" in the Unicode specification.
+         * @since   1.1
+         */
+        const val CURRENCY_SYMBOL: Byte = 26
+
+        /**
+         * General category "Sk" in the Unicode specification.
+         * @since   1.1
+         */
+        const val MODIFIER_SYMBOL: Byte = 27
+
+        /**
+         * General category "So" in the Unicode specification.
+         * @since   1.1
+         */
+        const val OTHER_SYMBOL: Byte = 28
+
+        /**
+         * General category "Pi" in the Unicode specification.
+         * @since   1.4
+         */
+        const val INITIAL_QUOTE_PUNCTUATION: Byte = 29
+
+        /**
+         * General category "Pf" in the Unicode specification.
+         * @since   1.4
+         */
+        const val FINAL_QUOTE_PUNCTUATION: Byte = 30
+
+        /**
+         * Error flag. Use int (code point) to avoid confusion with U+FFFF.
+         */
         const val ERROR: Int = -0x1
 
         /**
@@ -271,18 +454,6 @@ class Character {
          * @since 1.5
          */
         const val MAX_SURROGATE: Char = MAX_LOW_SURROGATE
-
-        /**
-         * General category "Nd" in the Unicode specification.
-         * @since   1.1
-         */
-        const val DECIMAL_DIGIT_NUMBER: Byte = 9
-
-        /**
-         * General category "Co" in the Unicode specification.
-         * @since   1.1
-         */
-        const val PRIVATE_USE: Byte = 18
 
         fun charCount(codePoint: Int): Int {
             return if (codePoint >= MIN_SUPPLEMENTARY_CODE_POINT) 2 else 1
@@ -684,6 +855,98 @@ class Character {
         fun isSupplementaryCodePoint(codePoint: Int): Boolean {
             return codePoint >= MIN_SUPPLEMENTARY_CODE_POINT
                     && codePoint < MAX_CODE_POINT + 1
+        }
+
+        /**
+         * Determines if the specified character (Unicode code point) is
+         * an Extended Pictographic.
+         *
+         *
+         * A character is considered to be an Extended Pictographic if and only if it has
+         * the `Extended_Pictographic` property, defined in
+         * [
+         * Unicode Emoji (Technical Standard #51)](https://unicode.org/reports/tr51/#Emoji_Properties_and_Data_Files).
+         *
+         * @param   codePoint the character (Unicode code point) to be tested.
+         * @return  `true` if the character is an Extended Pictographic;
+         * `false` otherwise.
+         * @since   21
+         */
+        fun isExtendedPictographic(codePoint: Int): Boolean {
+            return CharacterData.of(codePoint).isExtendedPictographic(codePoint)
+        }
+
+
+        /**
+         * Returns a value indicating a character's general category.
+         *
+         * @param   codePoint the character (Unicode code point) to be tested.
+         * @return  a value of type `int` representing the
+         * character's general category.
+         * @see Character.COMBINING_SPACING_MARK COMBINING_SPACING_MARK
+         *
+         * @see Character.CONNECTOR_PUNCTUATION CONNECTOR_PUNCTUATION
+         *
+         * @see Character.CONTROL CONTROL
+         *
+         * @see Character.CURRENCY_SYMBOL CURRENCY_SYMBOL
+         *
+         * @see Character.DASH_PUNCTUATION DASH_PUNCTUATION
+         *
+         * @see Character.DECIMAL_DIGIT_NUMBER DECIMAL_DIGIT_NUMBER
+         *
+         * @see Character.ENCLOSING_MARK ENCLOSING_MARK
+         *
+         * @see Character.END_PUNCTUATION END_PUNCTUATION
+         *
+         * @see Character.FINAL_QUOTE_PUNCTUATION FINAL_QUOTE_PUNCTUATION
+         *
+         * @see Character.FORMAT FORMAT
+         *
+         * @see Character.INITIAL_QUOTE_PUNCTUATION INITIAL_QUOTE_PUNCTUATION
+         *
+         * @see Character.LETTER_NUMBER LETTER_NUMBER
+         *
+         * @see Character.LINE_SEPARATOR LINE_SEPARATOR
+         *
+         * @see Character.LOWERCASE_LETTER LOWERCASE_LETTER
+         *
+         * @see Character.MATH_SYMBOL MATH_SYMBOL
+         *
+         * @see Character.MODIFIER_LETTER MODIFIER_LETTER
+         *
+         * @see Character.MODIFIER_SYMBOL MODIFIER_SYMBOL
+         *
+         * @see Character.NON_SPACING_MARK NON_SPACING_MARK
+         *
+         * @see Character.OTHER_LETTER OTHER_LETTER
+         *
+         * @see Character.OTHER_NUMBER OTHER_NUMBER
+         *
+         * @see Character.OTHER_PUNCTUATION OTHER_PUNCTUATION
+         *
+         * @see Character.OTHER_SYMBOL OTHER_SYMBOL
+         *
+         * @see Character.PARAGRAPH_SEPARATOR PARAGRAPH_SEPARATOR
+         *
+         * @see Character.PRIVATE_USE PRIVATE_USE
+         *
+         * @see Character.SPACE_SEPARATOR SPACE_SEPARATOR
+         *
+         * @see Character.START_PUNCTUATION START_PUNCTUATION
+         *
+         * @see Character.SURROGATE SURROGATE
+         *
+         * @see Character.TITLECASE_LETTER TITLECASE_LETTER
+         *
+         * @see Character.UNASSIGNED UNASSIGNED
+         *
+         * @see Character.UPPERCASE_LETTER UPPERCASE_LETTER
+         *
+         * @since   1.5
+         */
+        fun getType(codePoint: Int): Int {
+            return CharacterData.of(codePoint).getType(codePoint)
         }
 
         // end of companion object

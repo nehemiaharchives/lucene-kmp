@@ -12,4 +12,32 @@ package org.gnit.lucenekmp.jdkport
  *
 */
 @Ported(from = "java.util.Locale")
-class Locale
+class Locale(
+    val language: String? = null,
+    val country: String? = null,
+    val variant: String? = null
+) {
+    companion object {
+        val ROOT: Locale = Locale("", "")
+        val US: Locale = Locale(language = "en", country = "US")
+
+        fun forLanguageTag(languageTag: String): Locale {
+/*            val tag: LanguageTag? = LanguageTag.parse(languageTag, null)
+            val bldr: InternalLocaleBuilder = InternalLocaleBuilder()
+            bldr.setLanguageTag(tag)
+            val base: BaseLocale = bldr.getBaseLocale()
+            var exts: LocaleExtensions? = bldr.getLocaleExtensions()
+            if (exts == null && !base.getVariant().isEmpty()) {
+                exts = getCompatibilityExtensions(
+                    base.getLanguage(), base.getScript(),
+                    base.getRegion(), base.getVariant()
+                )
+            }
+            return getInstance(base, exts)*/
+            return when(languageTag) {
+                "en" -> US
+                else -> throw UnsupportedOperationException()
+            }
+        }
+    }
+}
