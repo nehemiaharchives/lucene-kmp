@@ -112,13 +112,25 @@ class BreakIteratorProviderImpl(
         dictionaryName: String
     ): BreakIterator {
 
-        // TODO implement kotlin multiplatform version of embedded DictionaryBasedBreakIterator without accessing files working on memory
         //val lr: LocaleResources = LocaleProviderAdapter.forJRE().getLocaleResources(locale)
-        val classNames = /*lr.getBreakIteratorInfo("BreakIteratorClasses") as Array<String>*/ arrayOf("")
+        val isThai = locale.language == "th"
+        val classNames = if (isThai) {
+            arrayOf(
+                "DictionaryBasedBreakIterator",
+                "DictionaryBasedBreakIterator",
+                "RuleBasedBreakIterator"
+            )
+        } else {
+            arrayOf(
+                "RuleBasedBreakIterator",
+                "RuleBasedBreakIterator",
+                "RuleBasedBreakIterator"
+            )
+        }
         /*val ruleFile = lr.getBreakIteratorInfo(ruleName) as String */ // lucene-kmp is self-containing library and it should be able to work without file access, so only embedded data via memory is allowed. no file access
         val ruleData: ByteArray = when (ruleName) {
-            "WordData" -> wordBreakIteratorData
-            "LineData" -> lineBreakIteratorData
+            "WordData" -> if (isThai) wordBreakIteratorDataTh else wordBreakIteratorData
+            "LineData" -> if (isThai) lineBreakIteratorDataTh else lineBreakIteratorData
             "SentenceData" -> sentenceBreakIteratorData
             else -> throw IllegalArgumentException("Invalid break iterator data name \"$ruleName\"")
         }
@@ -128,8 +140,10 @@ class BreakIteratorProviderImpl(
                 "RuleBasedBreakIterator" -> return RuleBasedBreakIterator(/*ruleFile,*/ ruleData)
 
                 "DictionaryBasedBreakIterator" -> {
-                    /*val dictionaryFile = lr.getBreakIteratorInfo(dictionaryName) as String*/
-                    val dictionaryData: ByteArray = byteArrayOf(/* TODO implement embedded dictionary data and feed here */) /*lr.getBreakIteratorResources(dictionaryName)*/
+                    val dictionaryData: ByteArray = when (dictionaryName) {
+                        "WordDictionary", "LineDictionary" -> thaiDictionaryData
+                        else -> throw IllegalArgumentException("Invalid dictionary data name \"$dictionaryName\"")
+                    }
                     return DictionaryBasedBreakIterator(
                         /*ruleFile,*/ ruleData = ruleData,
                         /*dictionaryFile,*/ dictionaryData = dictionaryData

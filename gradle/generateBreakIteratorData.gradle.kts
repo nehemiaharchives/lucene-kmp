@@ -11,6 +11,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.DefaultTask
+import org.gradle.api.provider.ListProperty
 import java.io.File
 import java.io.OutputStream
 
@@ -74,6 +75,15 @@ abstract class GenerateBreakIteratorBinaryData : BaseJavaToolTask() {
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
+    @get:InputFiles
+    abstract val resourceJavaSources: ConfigurableFileCollection
+
+    @get:InputFiles
+    abstract val dictionaryFiles: ConfigurableFileCollection
+
+    @get:org.gradle.api.tasks.Input
+    abstract val languages: ListProperty<String>
+
     @TaskAction
     fun generate() {
         val unicodeFile = unicodeDataFile.get().asFile
@@ -88,13 +98,16 @@ abstract class GenerateBreakIteratorBinaryData : BaseJavaToolTask() {
             "--add-exports", "java.base/sun.text=ALL-UNNAMED",
             "--add-exports", "java.base/sun.text.resources=ALL-UNNAMED"
         )
-        val command = listOf(javaBin) + moduleArgs + listOf(
-            "-cp", classpathDir,
-            "build.tools.generatebreakiteratordata.GenerateBreakIteratorData",
-            "-o", output.absolutePath,
-            "-spec", unicodeFile.absolutePath
-        )
-        runProcess(command, System.out, System.err)
+        for (language in languages.get()) {
+            val langArgs = if (language.isBlank()) emptyList() else listOf("-language", language)
+            val command = listOf(javaBin) + moduleArgs + listOf(
+                "-cp", classpathDir,
+                "build.tools.generatebreakiteratordata.GenerateBreakIteratorData",
+                "-o", output.absolutePath,
+                "-spec", unicodeFile.absolutePath
+            ) + langArgs
+            runProcess(command, System.out, System.err)
+        }
     }
 }
 
@@ -105,13 +118,18 @@ abstract class GenerateBreakIteratorKotlinTask : DefaultTask() {
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
+    @get:InputFiles
+    abstract val dictionaryFiles: ConfigurableFileCollection
+
     @TaskAction
     fun generateKotlin() {
         val dataRoot = dataDir.get().asFile
         val dataFiles = mapOf(
             "WordBreakIteratorData" to "wordBreakIteratorData",
             "LineBreakIteratorData" to "lineBreakIteratorData",
-            "SentenceBreakIteratorData" to "sentenceBreakIteratorData"
+            "SentenceBreakIteratorData" to "sentenceBreakIteratorData",
+            "WordBreakIteratorData_th" to "wordBreakIteratorDataTh",
+            "LineBreakIteratorData_th" to "lineBreakIteratorDataTh"
         )
         val packageName = "org.gnit.lucenekmp.jdkport"
         val outputFile = outputDir.get()
@@ -176,11 +194,21 @@ abstract class GenerateBreakIteratorKotlinTask : DefaultTask() {
             append("package ").append(packageName).append("\n\n")
             dataFiles.forEach { (fileName, propertyName) ->
                 val file = dataRoot.resolve(fileName)
-                if (!file.isFile) {
-                    throw GradleException("Generated data file not found: $file")
+                if (file.isFile) {
+                    append(renderByteArrayChunks(propertyName, file.readBytes()))
+                    append("\n")
                 }
-                append(renderByteArrayChunks(propertyName, file.readBytes()))
-                append("\n")
+            }
+
+            dictionaryFiles.files.forEach { dictFile ->
+                if (dictFile.isFile) {
+                    val propName = when (dictFile.name) {
+                        "thai_dict" -> "thaiDictionaryData"
+                        else -> dictFile.name.replace(Regex("[^A-Za-z0-9_]"), "_") + "Data"
+                    }
+                    append(renderByteArrayChunks(propName, dictFile.readBytes()))
+                    append("\n")
+                }
             }
             append("val ruleBasedBreakIteratorData: ByteArray = wordBreakIteratorData\n")
         }
@@ -192,6 +220,9 @@ abstract class GenerateBreakIteratorKotlinTask : DefaultTask() {
 val localJdk24uDir = rootProject.projectDir.resolve("gradle/jdk24u").normalize()
 val generatorSourcesDir = localJdk24uDir
 val unicodeDataFilePath = localJdk24uDir.resolve("UnicodeData.txt")
+val dictionaryFilesTree = fileTree(localJdk24uDir) {
+    include("**/thai_dict")
+}
 
 val breakIteratorToolClassesDir = layout.buildDirectory.dir("generated/breakiterator/tool-classes")
 val breakIteratorDataDir = layout.buildDirectory.dir("generated/breakiterator/data")
@@ -211,12 +242,16 @@ val generateBreakIteratorBinaryData = tasks.register<GenerateBreakIteratorBinary
     unicodeDataFile.set(unicodeDataFilePath)
     toolClassesDir.set(breakIteratorToolClassesDir)
     outputDir.set(breakIteratorDataDir)
+    resourceJavaSources.from(generatorSources)
+    dictionaryFiles.from(dictionaryFilesTree)
+    languages.set(listOf("", "th"))
 }
 
 val generateBreakIteratorKotlin = tasks.register<GenerateBreakIteratorKotlinTask>("generateBreakIteratorKotlin") {
     dependsOn(generateBreakIteratorBinaryData)
     dataDir.set(breakIteratorDataDir)
     outputDir.set(generatedKotlinDir)
+    dictionaryFiles.from(dictionaryFilesTree)
 }
 
 tasks.register("generateBreakIteratorData") {
