@@ -302,7 +302,7 @@ protected constructor() : Cloneable<Any> {
      * the first text boundary or greater than the last text boundary.
      * @since 1.2
      */
-    fun preceding(offset: Int): Int {
+    open fun preceding(offset: Int): Int {
         // NOTE:  This implementation is here solely because we can't add new
         // abstract methods to an existing class.  There is almost ALWAYS a
         // better, faster way to do this.
