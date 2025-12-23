@@ -19,6 +19,8 @@ plugins {
     alias(libs.plugins.kover)
 }
 
+apply(from = rootProject.file("gradle/generateBreakIteratorData.gradle.kts"))
+
 kotlin {
     jvm()
     //jvmToolchain(23) // we run build on jdk 24, so getting INFO saying "Kotlin does not yet support 24 JDK target, falling back to Kotlin JVM_23 JVM target"
@@ -39,6 +41,7 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
+            kotlin.srcDir(layout.buildDirectory.dir("generated/breakiterator/kotlin"))
             dependencies {
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
@@ -105,6 +108,14 @@ kotlin {
         macosX64Test.get().dependsOn(nativeTest)
         linuxX64Test.get().dependsOn(nativeTest)
     }
+}
+
+tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
+    dependsOn("generateBreakIteratorKotlin")
+}
+
+tasks.matching { it.name == "prepareKotlinIdeaImport" }.configureEach {
+    dependsOn("generateBreakIteratorKotlin")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {

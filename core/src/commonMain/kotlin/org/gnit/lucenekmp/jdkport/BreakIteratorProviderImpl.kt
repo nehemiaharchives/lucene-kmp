@@ -112,11 +112,16 @@ class BreakIteratorProviderImpl(
         dictionaryName: String
     ): BreakIterator {
 
-        // TODO implement kotlin multiplatform version of embedded RuleBasedBreakIterator and DictionaryBasedBreakIterator without accessing files working on memory
+        // TODO implement kotlin multiplatform version of embedded DictionaryBasedBreakIterator without accessing files working on memory
         //val lr: LocaleResources = LocaleProviderAdapter.forJRE().getLocaleResources(locale)
         val classNames = /*lr.getBreakIteratorInfo("BreakIteratorClasses") as Array<String>*/ arrayOf("")
         /*val ruleFile = lr.getBreakIteratorInfo(ruleName) as String */ // lucene-kmp is self-containing library and it should be able to work without file access, so only embedded data via memory is allowed. no file access
-        val ruleData: ByteArray = /*lr.getBreakIteratorResources(ruleName)*/ byteArrayOf(/* TODO this bytearray needs to be fed from generated code */)
+        val ruleData: ByteArray = when (ruleName) {
+            "WordData" -> wordBreakIteratorData
+            "LineData" -> lineBreakIteratorData
+            "SentenceData" -> sentenceBreakIteratorData
+            else -> throw IllegalArgumentException("Invalid break iterator data name \"$ruleName\"")
+        }
 
         try {
             when (classNames[type]) {
