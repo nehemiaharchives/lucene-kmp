@@ -110,7 +110,7 @@ kotlin {
     }
 }
 
-tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     dependsOn("generateBreakIteratorKotlin")
 }
 
