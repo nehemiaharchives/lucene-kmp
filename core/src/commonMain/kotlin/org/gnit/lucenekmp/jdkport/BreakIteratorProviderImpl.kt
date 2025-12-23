@@ -127,16 +127,14 @@ class BreakIteratorProviderImpl(
             when (classNames[type]) {
                 "RuleBasedBreakIterator" -> return RuleBasedBreakIterator(/*ruleFile,*/ ruleData)
 
-                /*
-
                 "DictionaryBasedBreakIterator" -> {
-                    val dictionaryFile = lr.getBreakIteratorInfo(dictionaryName) as String
-                    val dictionaryData: ByteArray = lr.getBreakIteratorResources(dictionaryName)
+                    /*val dictionaryFile = lr.getBreakIteratorInfo(dictionaryName) as String*/
+                    val dictionaryData: ByteArray = byteArrayOf(/* TODO implement embedded dictionary data and feed here */) /*lr.getBreakIteratorResources(dictionaryName)*/
                     return DictionaryBasedBreakIterator(
-                        ruleFile, ruleData,
-                        dictionaryFile, dictionaryData
+                        /*ruleFile,*/ ruleData = ruleData,
+                        /*dictionaryFile,*/ dictionaryData = dictionaryData
                     )
-                }*/
+                }
 
                 else -> throw IllegalArgumentException(
                     "Invalid break iterator class \"" +
@@ -151,8 +149,8 @@ class BreakIteratorProviderImpl(
     }
 
     override fun isSupportedLocale(locale: Locale): Boolean {
-        return LocaleProviderAdapter.forType(type!!).isSupportedProviderLocale(
-            locale!!,
+        return LocaleProviderAdapter.forType(type).isSupportedProviderLocale(
+            locale,
             this.availableLanguageTags
         )
     }

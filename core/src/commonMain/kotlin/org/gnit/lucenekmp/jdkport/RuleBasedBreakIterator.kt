@@ -551,7 +551,7 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
         // iterate forward from the known break position until we pass our
         // starting point.  The last break position before the starting
         // point is our return value
-        while (result != BreakIterator.DONE && result < start) {
+        while (result != DONE && result < start) {
             lastResult = result
             result = handleNext()
         }
@@ -587,12 +587,12 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
          * Returns current character
          */
         get() {
-            val c1: Char = text!!.current()
+            val c1: Char = text.current()
             if (Character.isHighSurrogate(c1) &&
-                text!!.index < text!!.endIndex
+                text.index < text.endIndex
             ) {
-                val c2: Char = text!!.next()
-                text!!.previous()
+                val c2: Char = text.next()
+                text.previous()
                 if (c2.isLowSurrogate()) {
                     return Character.toCodePoint(c1, c2)
                 }
@@ -605,12 +605,12 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
          * Returns the count of next character.
          */
         get() {
-            val c1: Char = text!!.current()
+            val c1: Char = text.current()
             if (Character.isHighSurrogate(c1) &&
-                text!!.index < text!!.endIndex
+                text.index < text.endIndex
             ) {
-                val c2: Char = text!!.next()
-                text!!.previous()
+                val c2: Char = text.next()
+                text.previous()
                 if (c2.isLowSurrogate()) {
                     return 2
                 }
@@ -623,14 +623,14 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
          * Returns next character
          */
         get() {
-            var index: Int = text!!.index
-            val endIndex: Int = text!!.endIndex
+            var index: Int = text.index
+            val endIndex: Int = text.endIndex
             if (index == endIndex ||
                 (this.currentCodePointCount.let { index += it; index }) >= endIndex
             ) {
                 return CharacterIterator.DONE.code
             }
-            text!!.setIndex(index)
+            text.setIndex(index)
             return this.current
         }
 
@@ -639,8 +639,8 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
          * Returns the position of next character.
          */
         get() {
-            val index: Int = text!!.index + this.currentCodePointCount
-            val endIndex: Int = text!!.endIndex
+            val index: Int = text.index + this.currentCodePointCount
+            val endIndex: Int = text.endIndex
             if (index > endIndex) {
                 return endIndex
             } else {
@@ -996,7 +996,7 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
         /**
          * A token used as a character-category value to identify ignore characters
          */
-        protected val IGNORE: Byte = -1
+        val IGNORE: Byte = -1
 
         /**
          * The state number of the starting state
@@ -1035,7 +1035,7 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
         /**
          * Throw IllegalArgumentException unless begin <= offset < end.
          */
-        protected fun checkOffset(offset: Int, text: CharacterIterator) {
+        fun checkOffset(offset: Int, text: CharacterIterator) {
             require(!(offset < text.beginIndex || offset > text.endIndex)) { "offset out of bounds" }
         }
     }
