@@ -1,0 +1,1 @@
+**this is `analysis` package under `org.gnit.lucenekmp` root package of `lucene-kmp/analysis/common/src/commonTest/kotlin/` source set**

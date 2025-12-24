@@ -39,5 +39,7 @@ class Locale(
                 else -> throw UnsupportedOperationException()
             }
         }
+
+        fun getDefault() = US
     }
 }

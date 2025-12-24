@@ -84,15 +84,15 @@ abstract class CharArrayIterator : CharacterIterator {
         return current()
     }
 
-    override fun clone(): CharArrayIterator {
-        throw UnsupportedOperationException("CharacterIterator does not allow you to throw CloneNotSupported")
+    protected abstract fun newInstanceForClone(): CharArrayIterator
 
-        /*try {
-            return super.clone() as CharArrayIterator
-        } catch (e: CloneNotSupportedException) {
-            // CharacterIterator does not allow you to throw CloneNotSupported
-            throw RuntimeException(e)
-        }*/
+    override fun clone(): CharArrayIterator {
+        val result = newInstanceForClone()
+        if (this::text.isInitialized) {
+            result.setText(text, start, endIndex)
+            result.setIndex(index)
+        }
+        return result
     }
 
     companion object {
@@ -108,12 +108,20 @@ abstract class CharArrayIterator : CharacterIterator {
                     override fun jreBugWorkaround(ch: Char): Char {
                         return if (ch.code in 0xD800..0xDFFF) 0x002C.toChar() else ch
                     }
+
+                    override fun newInstanceForClone(): CharArrayIterator {
+                        return newSentenceInstance()
+                    }
                 }
             } else {
                 return object : CharArrayIterator() {
                     // no bugs
                     override fun jreBugWorkaround(ch: Char): Char {
                         return ch
+                    }
+
+                    override fun newInstanceForClone(): CharArrayIterator {
+                        return newSentenceInstance()
                     }
                 }
             }
@@ -130,12 +138,20 @@ abstract class CharArrayIterator : CharacterIterator {
                     override fun jreBugWorkaround(ch: Char): Char {
                         return if (ch.code in 0xD800..0xDFFF) 0x0041.toChar() else ch
                     }
+
+                    override fun newInstanceForClone(): CharArrayIterator {
+                        return newWordInstance()
+                    }
                 }
             } else {
                 return object : CharArrayIterator() {
                     // no bugs
                     override fun jreBugWorkaround(ch: Char): Char {
                         return ch
+                    }
+
+                    override fun newInstanceForClone(): CharArrayIterator {
+                        return newWordInstance()
                     }
                 }
             }

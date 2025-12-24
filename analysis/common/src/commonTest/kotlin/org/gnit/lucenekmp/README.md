@@ -1,0 +1,1 @@
+this is root package for `lucene-kmp/analysis/common/src/commonTest/kotlin/` source set
