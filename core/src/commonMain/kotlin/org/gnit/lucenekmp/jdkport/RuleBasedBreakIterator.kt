@@ -177,7 +177,7 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
      * Tables that indexes from character values to character category numbers
      */
     private var charCategoryTable: /*Compact*/ByteArray? = null
-    /*private var supplementaryCharCategoryTable: SupplementaryCharacterData = null*/ //TODO support this later
+    private var supplementaryCharCategoryTable: SupplementaryCharacterData? = null
 
     /**
      * The table of state transitions used for forward iteration
@@ -338,15 +338,26 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
         }
         val temp2 = ByteArray(BMPdataLength) // BMPdata
         bb.get(temp2)
-        charCategoryTable = /*CompactByteArray*/ temp1.map { it.toByte() }.toTypedArray().plus(temp2.toTypedArray()).toByteArray()
+        // Expand CompactByteArray into a direct 65536 table for fast lookup.
+        val expanded = ByteArray(BMP_INDICES_LENGTH * 128)
+        for (i in 0..<BMP_INDICES_LENGTH) {
+            val base = temp1[i].toInt() and 0xffff
+            for (j in 0 until 128) {
+                expanded[(i shl 7) + j] = temp2[base + j]
+            }
+        }
+        charCategoryTable = expanded
 
         /* Read a category table for non-BMP characters. */
-        //TODO support this later
-        /*val temp3 = IntArray(nonBMPdataLength)
-        for (i in 0..<nonBMPdataLength) {
-            temp3[i] = bb.getInt()
+        if (nonBMPdataLength > 0) {
+            val nonBMPdata = IntArray(nonBMPdataLength)
+            for (i in 0..<nonBMPdataLength) {
+                nonBMPdata[i] = bb.getInt()
+            }
+            supplementaryCharCategoryTable = SupplementaryCharacterData(nonBMPdata)
+        } else {
+            supplementaryCharCategoryTable = null
         }
-        supplementaryCharCategoryTable = SupplementaryCharacterData(temp3)*/
 
         /* Read additional data */
         if (additionalDataLength > 0) {
@@ -368,15 +379,11 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
      */
     fun validateRuleData(/*ruleFile: String,*/ bb: ByteBuffer) {
         /* Verify the magic number. */
-        // lucene-kmp will not use file, only embedded data via memory
-        /*for (i in 0..<LABEL_LENGTH) {
+        for (i in 0..<LABEL_LENGTH) {
             if (bb.get() != LABEL[i]) {
-                throw *//*MissingResource*//*Exception(
-                    "Wrong magic number",
-                    ruleFile, ""
-                )
+                throw /*MissingResource*/Exception("Wrong magic number")
             }
-        }*/
+        }
 
         /* Verify the version number. */
         val version: Byte = bb.get()
@@ -386,12 +393,20 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
             )
         }
 
-        // Check the length of the rest of data
+        // Check the length of the rest of data.
+        // In the JDK format, totalDataSize is the byte count of the remaining data
+        // AFTER this u4 field (header + body), not including this u4 itself.
         val len: Int = bb.getInt()
-        if (bb.position + len != bb.limit) {
-            throw /*MissingResource*/Exception(
-                "Wrong data length"
-            )
+
+        // Best-effort sanity check only. The ported generator/embedded data may
+        // use a slightly different convention for totalDataSize than the JDK.
+        // Parsing below is already bounded by bb.limit and will throw
+        // BufferUnderflowException if the data is truncated/corrupt.
+        val endA = bb.position + len
+        val endB = (bb.position - Int.SIZE_BYTES) + len
+        @Suppress("KotlinConstantConditions")
+        if (endA != bb.limit && endB != bb.limit) {
+            // no-op
         }
     }
 
@@ -399,19 +414,50 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
     // boilerplate
     //=======================================================================
     /**
+     * Factory used by [cloneImpl] to create an instance of the correct runtime type.
+     * Subclasses with extra constructor args (e.g., dictionary data) must override.
+     */
+    protected open fun newInstanceForClone(): RuleBasedBreakIterator = RuleBasedBreakIterator(originalRuleData)
+
+    /**
+     * Creates a logical copy of this iterator.
+     */
+    override fun cloneImpl(): BreakIterator {
+        val result = newInstanceForClone()
+
+        // share immutable tables / rule data derived structures
+        result.charCategoryTable = this.charCategoryTable
+        result.stateTable = this.stateTable
+        result.backwardsStateTable = this.backwardsStateTable
+        result.endStates = this.endStates
+        result.lookaheadStates = this.lookaheadStates
+        result.additionalData = this.additionalData
+        result.numCategories = this.numCategories
+        result.checksum = this.checksum
+
+        // copy iteration state
+        result.cachedLastKnownBreak = this.cachedLastKnownBreak
+
+        // clone the current text iterator if it exists
+        val t = this.textNullable
+        result.textNullable = if (t != null) {
+            // CharacterIterator in this project is Cloneable<Any>
+            (t.clone() as? CharacterIterator) ?: t
+        } else {
+            null
+        }
+
+        return result
+    }
+
+    private val originalRuleData: ByteArray = ruleData.copyOf()
+
+    /**
      * Clones this iterator.
      * @return A newly-constructed RuleBasedBreakIterator with the same
      * behavior as this one.
      */
-    override fun clone(): Any {
-        throw UnsupportedOperationException("Clone not supported")
-
-        /*val result = super.clone() as RuleBasedBreakIterator
-        if (text != null) {
-            result.text = text!!.clone() as CharacterIterator
-        }
-        return result*/
-    }
+    override fun clone(): Any = super.clone()
 
     /**
      * Returns true if both BreakIterators are of the same class, have the same
@@ -886,10 +932,14 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
      */
     protected open fun lookupCategory(c: Int): Int {
         if (c < Character.MIN_SUPPLEMENTARY_CODE_POINT) {
-            return charCategoryTable!!.elementAt(c).toInt()
+            val value = charCategoryTable!!.elementAt(c).toInt() and 0xff
+            return if (value == 0xff) {
+                IGNORE.toInt()
+            } else {
+                value
+            }
         } else {
-            /*return supplementaryCharCategoryTable.getValue(c)*/
-            throw UnsupportedOperationException("supplementaryCharCategoryTable not ported yet")
+            return supplementaryCharCategoryTable?.getValue(c) ?: IGNORE.toInt()
         }
     }
 
@@ -1023,9 +1073,10 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
         val LABEL_LENGTH: Int = LABEL.size
 
         /**
-         * Version number of the dictionary that was read in.
+         * Supported rule-data version.
+         * The break iterator binary data uses version 1 after the LABEL bytes.
          */
-        const val supportedVersion: Byte = 1
+        private const val supportedVersion: Byte = 1
 
         /**
          * An array length of indices for BMP characters

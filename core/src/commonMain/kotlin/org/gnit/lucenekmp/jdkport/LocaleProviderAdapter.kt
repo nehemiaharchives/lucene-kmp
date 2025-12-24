@@ -56,7 +56,7 @@ abstract class LocaleProviderAdapter {
     /**
      * Getter method for Locale Service Providers.
      */
-    abstract fun <P : LocaleServiceProvider> getLocaleServiceProvider(c: KClass<out P>): P
+    abstract fun getLocaleServiceProvider(c: KClass<out LocaleServiceProvider>): LocaleServiceProvider
 
     /**
      * Returns a BreakIteratorProvider for this LocaleProviderAdapter, or null if no

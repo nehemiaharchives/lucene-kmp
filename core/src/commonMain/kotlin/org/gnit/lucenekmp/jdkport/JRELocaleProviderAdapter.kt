@@ -67,12 +67,45 @@ class JRELocaleProviderAdapter() : LocaleProviderAdapter() {
         getLanguageTagSet("FormatData")
     )
 
-    override fun <P : LocaleServiceProvider> getLocaleServiceProvider(c: KClass<out P>): P {
+    override fun getLocaleServiceProvider(c: KClass<out LocaleServiceProvider>): LocaleServiceProvider {
 
-        if(!(c is BreakIteratorProvider)){
+        /*
+        switch (c.getSimpleName()) {
+        case "BreakIteratorProvider":
+            return (P) getBreakIteratorProvider();
+        case "CollatorProvider":
+            return (P) getCollatorProvider();
+        case "DateFormatProvider":
+            return (P) getDateFormatProvider();
+        case "DateFormatSymbolsProvider":
+            return (P) getDateFormatSymbolsProvider();
+        case "DecimalFormatSymbolsProvider":
+            return (P) getDecimalFormatSymbolsProvider();
+        case "NumberFormatProvider":
+            return (P) getNumberFormatProvider();
+        case "CurrencyNameProvider":
+            return (P) getCurrencyNameProvider();
+        case "LocaleNameProvider":
+            return (P) getLocaleNameProvider();
+        case "TimeZoneNameProvider":
+            return (P) getTimeZoneNameProvider();
+        case "CalendarDataProvider":
+            return (P) getCalendarDataProvider();
+        case "CalendarNameProvider":
+            return (P) getCalendarNameProvider();
+        case "CalendarProvider":
+            return (P) getCalendarProvider();
+        case "JavaTimeDateTimePatternProvider":
+            return (P) getJavaTimeDateTimePatternProvider();
+        default:
+            throw new InternalError("should not come down here");
+        }
+        */
+        val className = c.simpleName
+        if(className == "BreakIteratorProvider"){
+            return breakIteratorProvider
+        }else{
             throw UnsupportedOperationException("only BreakIteratorProvider is supported for now")
         }
-
-        return breakIteratorProvider as P
     }
 }

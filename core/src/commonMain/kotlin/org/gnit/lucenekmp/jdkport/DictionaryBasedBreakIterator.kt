@@ -437,4 +437,22 @@ class DictionaryBasedBreakIterator(
         }
         positionInCache = 0
     }
+
+    override fun newInstanceForClone(): RuleBasedBreakIterator =
+        DictionaryBasedBreakIterator(ruleData = originalRuleData, dictionaryData = originalDictionaryData)
+
+    private val originalRuleData: ByteArray = ruleData.copyOf()
+    private val originalDictionaryData: ByteArray = dictionaryData.copyOf()
+
+    override fun cloneImpl(): BreakIterator {
+        val result = super.cloneImpl() as DictionaryBasedBreakIterator
+
+        // dictionary-specific mutable state
+        result.categoryFlags = this.categoryFlags.copyOf()
+        result.dictionaryCharCount = this.dictionaryCharCount
+        result.cachedBreakPositions = this.cachedBreakPositions?.copyOf()
+        result.positionInCache = this.positionInCache
+
+        return result
+    }
 }

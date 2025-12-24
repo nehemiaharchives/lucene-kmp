@@ -198,12 +198,7 @@ class StringCharacterIterator(text: String, begin: Int, end: Int, pos: Int) : Ch
      * @return A copy of this
      */
     override fun clone(): Any {
-        throw UnsupportedOperationException()
-        /*try {
-            val other = super.clone() as StringCharacterIterator
-            return other
-        } catch (e: java.lang.CloneNotSupportedException) {
-            throw java.lang.InternalError(e)
-        }*/
+        // String is immutable; copying fields is enough for a correct clone.
+        return StringCharacterIterator(text, beginIndex, endIndex, index)
     }
 }

@@ -200,17 +200,20 @@ abstract class BreakIterator
 protected constructor() : Cloneable<Any> {
     /**
      * Create a copy of this iterator
+     *
+     * In Java this is typically implemented via Object.clone(). In Kotlin common
+     * we can't rely on platform cloning, so subclasses must provide the actual
+     * cloning logic.
+     *
      * @return A copy of this
      */
-    override fun clone(): Any {
-        throw UnsupportedOperationException("Clone not supported")
+    override fun clone(): Any = cloneImpl()
 
-        /*try {
-            return super.clone()!!
-        } catch (e: java.lang.CloneNotSupportedException) {
-            throw java.lang.InternalError(e)
-        }*/
-    }
+    /**
+     * Subclasses must return a logical copy of this iterator whose state
+     * (text + current position) matches this iterator at the time of cloning.
+     */
+    protected abstract fun cloneImpl(): BreakIterator
 
     /**
      * Returns the first boundary. The iterator's current position is set
@@ -550,10 +553,12 @@ protected constructor() : Cloneable<Any> {
              * `BreakIterator` instances are available.
              */
             get() {
-                throw UnsupportedOperationException()
-                /*val pool: LocaleServiceProviderPool =
-                    LocaleServiceProviderPool.getPool(BreakIteratorProvider::class.java)
-                return pool.getAvailableLocales()*/
+                val locales = LocaleProviderAdapter.forJRE().availableLocales
+                return if (locales.isNotEmpty()) {
+                    locales
+                } else {
+                    arrayOf(Locale.ROOT, Locale.US)
+                }
             }
     }
 }

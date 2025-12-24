@@ -276,6 +276,19 @@ class BreakIteratorProviderImpl(
                     ci!! == other.ci && offset == other.offset &&
                     boundaries!! == other.boundaries && boundaryIndex == other.boundaryIndex
         }
+
+        override fun cloneImpl(): BreakIterator {
+            val result = GraphemeBreakIterator()
+
+            val clonedCi = (this.ci.clone() as? CharacterIterator) ?: this.ci
+            result.setText(clonedCi)
+
+            result.boundaryIndex = this.boundaryIndex
+            result.offset = this.offset
+            result.ci.setIndex(this.offset)
+
+            return result
+        }
     }
 
     /**
