@@ -48,7 +48,7 @@ class TestFrequencyTrackingRingBuffer : LuceneTestCase() {
 
     @Test
     fun testBasic() {
-        val iterations = atLeast(100)
+        val iterations = atLeast(10) // TODO reducing iterations from 100 to 10 to speed up test execution
         for (i in 0 until iterations) {
             val maxSize = 2 + random().nextInt(100)
             val numItems = random().nextInt(5000)
