@@ -1,10 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import okio.FileSystem
-import okio.IOException
-import okio.Path.Companion.toPath
-import okio.SYSTEM
-import okio.buffer
+import org.gnit.lucenekmp.util.BreakIteratorTestResources
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.fail
@@ -997,35 +993,33 @@ class BreakIteratorTest {
 
     @Test
     fun TestGraphemeBreak() {
-        val source = openGraphemeBreakTestSource()
-        try {
-            var line: String? = source.readUtf8Line()
-            val codepoint = Regex("([0-9A-F]{4,5})")
-            val comment = Regex("#.*")
-            val splitRule = Regex("\\s*÷[\\s\\t]*")
-            val joinRule = Regex("\\s×\\s")
+        val graphemeBreakTextString = BreakIteratorTestResources.graphemeBreakTestTxt
 
-            while (line != null) {
-                val currentLine = line
-                val cleaned = comment.replace(currentLine, "").trim()
-                if (cleaned.isNotEmpty()) {
-                    val parts = splitRule.split(cleaned)
-                    val expected = mutableListOf<String>()
-                    for (part in parts) {
-                        val replaced = codepoint.replace(part) { mr ->
-                            codePointToString(mr.value.toInt(16))
-                        }
-                        val segment = joinRule.replace(replaced, "")
-                        if (segment.isNotEmpty()) {
-                            expected.add(segment)
-                        }
-                    }
-                    generalIteratorTest(characterBreak, expected)
-                }
-                line = source.readUtf8Line()
+        var line: String?
+        val codepoint = Regex("([0-9A-F]{4,5})")
+        val comment = Regex("#.*")
+        val splitRule = Regex("\\s*÷[\\s\\t]*")
+        val joinRule = Regex("\\s×\\s")
+
+        for (rawLine in graphemeBreakTextString.lineSequence()) {
+            line = rawLine
+            val cleaned = comment.replace(line, "").trim()
+            if (cleaned.isEmpty()) {
+                continue
             }
-        } finally {
-            source.close()
+
+            val parts = splitRule.split(cleaned)
+            val expected = mutableListOf<String>()
+            for (part in parts) {
+                val replaced = codepoint.replace(part) { mr ->
+                    codePointToString(mr.value.toInt(16))
+                }
+                val segment = joinRule.replace(replaced, "")
+                if (segment.isNotEmpty()) {
+                    expected.add(segment)
+                }
+            }
+            generalIteratorTest(characterBreak, expected)
         }
     }
 
@@ -1037,15 +1031,6 @@ class BreakIteratorTest {
         val high = 0xD800 + (cp shr 10)
         val low = 0xDC00 + (cp and 0x3FF)
         return charArrayOf(high.toChar(), low.toChar()).concatToString()
-    }
-
-    private fun openGraphemeBreakTestSource(): okio.BufferedSource {
-        val fs = FileSystem.SYSTEM
-        val path = "src/commonTest/resources/GraphemeBreakTest.txt".toPath()
-        if (!fs.exists(path)) {
-            throw IOException("GraphemeBreakTest.txt not found at $path")
-        }
-        return fs.source(path).buffer()
     }
 
     @Test
