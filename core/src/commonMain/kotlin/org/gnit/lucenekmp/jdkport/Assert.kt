@@ -12,8 +12,24 @@ package org.gnit.lucenekmp.jdkport
  * Delegates to platform-specific implementations on JVM and Native.
  * Remove this function when the standard library provides a common `assert`.
  */
-@PublishedApi
-internal expect inline fun assert(
+//@PublishedApi
+expect inline fun assert(
     condition: Boolean,
     lazyMessage: () -> Any = { "assertion failed" }
 )
+
+// TODO need to change like below:
+//ref: https://blog.nnn.dev/entry/2025/07/15/110000
+/*
+inline fun debugAssert(condition: () -> Boolean, message: () -> String) {
+    if (AssertionFlag.enabled) {
+        if (!condition()) {
+            throw AssertionError(message())
+        }
+    }
+}
+
+object AssertionFlag {
+    val enabled: Boolean = javaClass.desiredAssertionStatus() // TODO need to figure out what to do in KMP, Kotlin/Common
+}
+*/
