@@ -1,9 +1,10 @@
 package org.gnit.lucenekmp.jdkport
 
 import okio.FileSystem
-import okio.Path.Companion.toPath
 import okio.IOException
+import okio.Path.Companion.toPath
 import okio.SYSTEM
+import okio.buffer
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.fail
@@ -996,10 +997,9 @@ class BreakIteratorTest {
 
     @Test
     fun TestGraphemeBreak() {
-        val path = findGraphemeBreakTestPath()
-        val reader = Files.newBufferedReader(path, StandardCharsets.UTF_8) as BufferedReader
+        val source = openGraphemeBreakTestSource()
         try {
-            var line: String? = reader.readLine()
+            var line: String? = source.readUtf8Line()
             val codepoint = Regex("([0-9A-F]{4,5})")
             val comment = Regex("#.*")
             val splitRule = Regex("\\s*÷[\\s\\t]*")
@@ -1022,10 +1022,10 @@ class BreakIteratorTest {
                     }
                     generalIteratorTest(characterBreak, expected)
                 }
-                line = reader.readLine()
+                line = source.readUtf8Line()
             }
         } finally {
-            reader.close()
+            source.close()
         }
     }
 
@@ -1039,42 +1039,13 @@ class BreakIteratorTest {
         return charArrayOf(high.toChar(), low.toChar()).concatToString()
     }
 
-    private fun findGraphemeBreakTestPath(): okio.Path {
+    private fun openGraphemeBreakTestSource(): okio.BufferedSource {
         val fs = FileSystem.SYSTEM
-        val roots = linkedSetOf<String>()
-        fun addRoot(path: String?) {
-            if (!path.isNullOrBlank()) {
-                roots.add(path)
-            }
+        val path = "src/commonTest/resources/GraphemeBreakTest.txt".toPath()
+        if (!fs.exists(path)) {
+            throw IOException("GraphemeBreakTest.txt not found at $path")
         }
-        addRoot(System.getProperty("PWD"))
-        addRoot(System.getProperty("user.dir"))
-        addRoot(System.getProperty("user.home"))
-        addRoot(
-            try {
-                fs.canonicalize(".".toPath()).toString()
-            } catch (_: Throwable) {
-                null
-            }
-        )
-        val rootSnapshot = roots.toList()
-        for (root in rootSnapshot) {
-            roots.add("$root/code/bbl-lucene")
-            roots.add("$root/bbl-lucene")
-        }
-        for (root in roots) {
-            var current = root.toPath()
-            repeat(10) {
-                val candidate = (current.toString() +
-                    "/jdk24u/src/java.base/share/data/unicodedata/auxiliary/GraphemeBreakTest.txt").toPath()
-                if (fs.exists(candidate)) {
-                    return candidate
-                }
-                val parent = current.parent ?: return@repeat
-                current = parent
-            }
-        }
-        throw IOException("GraphemeBreakTest.txt not found relative to ${roots.firstOrNull() ?: "."}")
+        return fs.source(path).buffer()
     }
 
     @Test
