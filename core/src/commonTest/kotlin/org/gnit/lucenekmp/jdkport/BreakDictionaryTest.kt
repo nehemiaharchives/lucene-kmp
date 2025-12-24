@@ -41,8 +41,10 @@ class BreakDictionaryTest {
     }
 
     private fun buildSimpleDictionaryData(): ByteArray {
-        val columnMapShorts = shortArrayOf(0, 1)
-        val columnMapBytes = byteArrayOf()
+        val columnMapShorts = ShortArray(512) { 0 }
+        val columnMapBytes = ByteArray(128)
+        columnMapBytes[0] = 0
+        columnMapBytes[1] = 1
         val rowIndex = shortArrayOf(0)
         val rowIndexFlagsIndex = shortArrayOf((-1).toShort())
         val rowIndexFlags = intArrayOf()

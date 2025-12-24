@@ -14,10 +14,13 @@ package org.gnit.lucenekmp.jdkport
 @Ported(from = "sun.text.BreakDictionary")
 internal class BreakDictionary(/*dictionaryName: String,*/ dictionaryData: ByteArray) {
     /**
-     * Maps from characters to column numbers.  The main use of this is to
-     * avoid making room in the array for empty columns.
+     * Maps from characters to column numbers. This is stored in the same
+     * compact form as the JDK's CompactByteArray: an index array of block
+     * offsets plus a data array containing the values.
      */
-    private var columnMap: /*sun.text.Compact*/ByteArray? = null
+    private var columnMapIndex: ShortArray? = null
+    private var columnMapValues: ByteArray? = null
+    private var columnMapBlockSize: Int = 0
     /*private var supplementaryCharColumnMap: SupplementaryCharacterData? = null*/ // TODO implement later
 
     /**
@@ -122,7 +125,11 @@ internal class BreakDictionary(/*dictionaryName: String,*/ dictionaryData: ByteA
         len = bb.getInt()
         val temp2 = ByteArray(len)
         bb.get(temp2)
-        columnMap = temp.map { it.toByte() }.toTypedArray().toByteArray().plus(temp2) /*sun.text.CompactByteArray(temp, temp2)*/
+        columnMapIndex = temp
+        columnMapValues = temp2
+        require(temp.isNotEmpty()) { "Invalid column map index size" }
+        require(65536 % temp.size == 0) { "Invalid column map index size: ${temp.size}" }
+        columnMapBlockSize = 65536 / temp.size
 
         // read in numCols and numColGroups
         numCols = bb.getInt()
@@ -183,7 +190,11 @@ internal class BreakDictionary(/*dictionaryName: String,*/ dictionaryData: ByteA
     fun getNextStateFromCharacter(row: Int, ch: Int): Short {
         val col: Int
         if (ch < Character.MIN_SUPPLEMENTARY_CODE_POINT) {
-            col = columnMap!!.elementAt(ch).toInt()
+            val blockSize = columnMapBlockSize
+            val blockIndex = ch / blockSize
+            val inBlock = ch % blockSize
+            val base = columnMapIndex!![blockIndex].toInt() and 0xffff
+            col = columnMapValues!![base + inBlock].toInt() and 0xff
         } else {
             throw UnsupportedOperationException("not implemented yet") //TODO implement later
             /*col = supplementaryCharColumnMap.getValue(ch)*/

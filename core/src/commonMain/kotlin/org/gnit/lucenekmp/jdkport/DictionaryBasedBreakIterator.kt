@@ -429,11 +429,12 @@ class DictionaryBasedBreakIterator(
         // our starting position goes into this array as a break position).
         // This array becomes the cache of break positions used by next()
         // and previous(), so this is where we actually refresh the cache.
-        cachedBreakPositions = IntArray(currentBreakPositions.size + 1)
+        val orderedBreakPositions = currentBreakPositions.toList().sorted()
+        cachedBreakPositions = IntArray(orderedBreakPositions.size + 1)
         cachedBreakPositions!![0] = startPos
 
-        for (i in currentBreakPositions.indices) {
-            cachedBreakPositions!![i + 1] = currentBreakPositions.elementAt(i)
+        for (i in orderedBreakPositions.indices) {
+            cachedBreakPositions!![i + 1] = orderedBreakPositions[i]
         }
         positionInCache = 0
     }
