@@ -95,6 +95,18 @@ class FilesTest {
     }
 
     @Test
+    fun testNewBufferedWriter() {
+        Files.newBufferedWriter(testFilePath, StandardCharsets.UTF_8).use { writer ->
+            writer.write(testContent)
+        }
+
+        Files.newInputStream(testFilePath).use { inputStream ->
+            val content = inputStream.readAllBytes()!!.decodeToString()
+            assertEquals(testContent, content)
+        }
+    }
+
+    @Test
     fun testCreateSingleDirectory() {
         val dirPath = "/testDir".toPath()
         Files.createDirectories(dirPath)

@@ -106,7 +106,9 @@ object Files {
     }
 
     fun newBufferedWriter(path: Path, charset: Charset): Writer {
-        return TODO("implement this")
+        val outputStream = newOutputStream(path)
+        val writer = OutputStreamWriter(outputStream, charset)
+        return BufferedWriter(writer)
     }
 
     fun createDirectories(path: Path){
