@@ -105,6 +105,10 @@ object Files {
         return BufferedReader(reader)
     }
 
+    fun newBufferedWriter(path: Path, charset: Charset): Writer {
+        return TODO("implement this")
+    }
+
     fun createDirectories(path: Path){
         // Ensure the parent directories exist
         val parent = path.parent ?: throw IOException("Cannot create directories for root path") as Throwable

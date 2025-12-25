@@ -18,12 +18,11 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.tests.mockfile.VirusCheckingFS
 //import org.gnit.lucenekmp.tests.mockfile.WindowsFS
 //import java.util.zip.ZipInputStream
+//import java.util.regex.PatternSyntaxException
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
-import okio.FileSystem
 import okio.IOException
-import okio.Path
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.KnnVectorsFormat
@@ -34,32 +33,16 @@ import org.gnit.lucenekmp.codecs.lucene90.Lucene90DocValuesFormat
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsFormat
 import org.gnit.lucenekmp.codecs.perfield.PerFieldDocValuesFormat
 import org.gnit.lucenekmp.codecs.perfield.PerFieldPostingsFormat
-import org.gnit.lucenekmp.document.BinaryDocValuesField
-import org.gnit.lucenekmp.document.BinaryPoint
-import org.gnit.lucenekmp.document.Document
-import org.gnit.lucenekmp.document.Field
-import org.gnit.lucenekmp.document.NumericDocValuesField
-import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.DocValuesType
-import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.index.IndexReader
-import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.LeafReader
-import org.gnit.lucenekmp.index.MergePolicy
 import org.gnit.lucenekmp.index.MultiTerms
 import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TermsEnum
-import org.gnit.lucenekmp.jdkport.Arrays
-import org.gnit.lucenekmp.jdkport.BufferedInputStream
-import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
 import org.gnit.lucenekmp.jdkport.CharBuffer
 import org.gnit.lucenekmp.jdkport.Character
-import org.gnit.lucenekmp.jdkport.Files
-import org.gnit.lucenekmp.jdkport.InputStream
-import org.gnit.lucenekmp.jdkport.PrintStream
-import org.gnit.lucenekmp.jdkport.StandardCharsets
-import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.StrictMath
 import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.codePointAt
@@ -68,29 +51,18 @@ import org.gnit.lucenekmp.jdkport.floatToRawIntBits
 import org.gnit.lucenekmp.jdkport.fromCharArray
 import org.gnit.lucenekmp.jdkport.isNaN
 import org.gnit.lucenekmp.jdkport.valueOf
-import org.gnit.lucenekmp.search.FieldDoc
-import org.gnit.lucenekmp.search.ScoreDoc
 import org.gnit.lucenekmp.search.TopDocs
-import org.gnit.lucenekmp.search.TotalHits
 import org.gnit.lucenekmp.store.Directory
-import org.gnit.lucenekmp.store.FSDirectory
-import org.gnit.lucenekmp.store.FilterDirectory
-import org.gnit.lucenekmp.store.IOContext
-import org.gnit.lucenekmp.tests.junitport.assertArrayEquals
 import org.gnit.lucenekmp.util.Attribute
 import org.gnit.lucenekmp.util.AttributeImpl
-import org.gnit.lucenekmp.util.AttributeReflector
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.CharsRef
 import org.gnit.lucenekmp.util.UnicodeUtil
-//import java.util.regex.PatternSyntaxException
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class TestUtil {
     companion object {
@@ -1693,7 +1665,7 @@ class TestUtil {
             }
         }*/
 
-        /*fun randomAnalysisString(random: Random, maxLength: Int, simple: Boolean): String {
+        fun randomAnalysisString(random: Random, maxLength: Int, simple: Boolean): String {
             var maxLength = maxLength
             assert(maxLength >= 0)
 
@@ -1706,20 +1678,94 @@ class TestUtil {
             // first decide how big the string will really be: 0..n
             maxLength = random.nextInt(maxLength)
             val avgWordLength: Int = nextInt(random, 3, 8)
-            val sb: StringBuilder = StringBuilder()
+            val sb = StringBuilder()
+            val gaussianRandom = GaussianRandom(random)
             while (sb.length < maxLength) {
                 if (sb.length > 0) {
                     sb.append(' ')
                 }
                 var wordLength = -1
                 while (wordLength < 0) {
-                    wordLength = (random.nextGaussian() * 3 + avgWordLength).toInt()
+                    wordLength = (gaussianRandom.nextGaussian() * 3 + avgWordLength).toInt()
                 }
                 wordLength = min(wordLength, maxLength - sb.length)
                 sb.append(randomSubString(random, wordLength, simple))
             }
             return sb.toString()
-        }*/
+        }
+
+        class GaussianRandom(private val random: Random){
+            private var nextNextGaussian: Double = 0.0
+            private var haveNextNextGaussian: Boolean = false
+
+            /**
+             * Returns the next pseudorandom, Gaussian ("normally") distributed
+             * {@code double} value with mean {@code 0.0} and standard
+             * deviation {@code 1.0} from this random number generator's sequence.
+             * <p>
+             * The general contract of {@code nextGaussian} is that one
+             * {@code double} value, chosen from (approximately) the usual
+             * normal distribution with mean {@code 0.0} and standard deviation
+             * {@code 1.0}, is pseudorandomly generated and returned.
+             *
+             * @implSpec The method {@code nextGaussian} is implemented by class
+             * {@code Random} as if by a threadsafe version of the following:
+             * <pre>{@code
+             * private double nextNextGaussian;
+             * private boolean haveNextNextGaussian = false;
+             *
+             * public double nextGaussian() {
+             *   if (haveNextNextGaussian) {
+             *     haveNextNextGaussian = false;
+             *     return nextNextGaussian;
+             *   } else {
+             *     double v1, v2, s;
+             *     do {
+             *       v1 = 2 * nextDouble() - 1;   // between -1.0 and 1.0
+             *       v2 = 2 * nextDouble() - 1;   // between -1.0 and 1.0
+             *       s = v1 * v1 + v2 * v2;
+             *     } while (s >= 1 || s == 0);
+             *     double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s)/s);
+             *     nextNextGaussian = v2 * multiplier;
+             *     haveNextNextGaussian = true;
+             *     return v1 * multiplier;
+             *   }
+             * }}</pre>
+             *
+             * This uses the <i>polar method</i> of G. E. P. Box, M. E. Muller, and
+             * G. Marsaglia, as described by Donald E. Knuth in <cite>The Art of
+             * Computer Programming, Volume 2, third edition: Seminumerical Algorithms</cite>,
+             * section 3.4.1, subsection C, algorithm P. Note that it generates two
+             * independent values at the cost of only one call to {@code StrictMath.log}
+             * and one call to {@code StrictMath.sqrt}.
+             *
+             * @return the next pseudorandom, Gaussian ("normally") distributed
+             *         {@code double} value with mean {@code 0.0} and
+             *         standard deviation {@code 1.0} from this random number
+             *         generator's sequence
+             */
+            fun nextGaussian(): Double {
+                // See Knuth, TAOCP, Vol. 2, 3rd edition, Section 3.4.1 Algorithm C.
+                if (haveNextNextGaussian) {
+                    haveNextNextGaussian = false
+                    return nextNextGaussian
+                } else {
+                    var v1: Double
+                    var v2: Double
+                    var s: Double
+                    do {
+                        v1 = 2 * random.nextDouble() - 1 // between -1 and 1
+                        v2 = 2 * random.nextDouble() - 1 // between -1 and 1
+                        s = v1 * v1 + v2 * v2
+                    } while (s >= 1 || s == 0.0)
+                    val multiplier: Double =
+                        StrictMath.sqrt(-2 * StrictMath.log(s) / s)
+                    nextNextGaussian = v2 * multiplier
+                    haveNextNextGaussian = true
+                    return v1 * multiplier
+                }
+            }
+        }
 
         fun randomSubString(random: Random, wordLength: Int, simple: Boolean): String {
             if (wordLength == 0) {

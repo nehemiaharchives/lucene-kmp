@@ -241,7 +241,7 @@ abstract class Analyzer
      * @param reader original Reader
      * @return reader, optionally decorated with CharFilter(s)
      */
-    protected fun initReader(fieldName: String, reader: Reader): Reader {
+    protected open fun initReader(fieldName: String, reader: Reader): Reader {
         return reader
     }
 

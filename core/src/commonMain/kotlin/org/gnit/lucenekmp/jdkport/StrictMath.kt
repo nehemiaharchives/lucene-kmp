@@ -126,4 +126,25 @@ object StrictMath {
     fun max(a: Int, b: Int): Int {
         return kotlin.math.max(a, b)
     }
+
+    /**
+     * Returns the natural logarithm (base *e*) of a `double`
+     * value. Special cases:
+     *  * If the argument is NaN or less than zero, then the result
+     * is NaN.
+     *  * If the argument is positive infinity, then the result is
+     * positive infinity.
+     *  * If the argument is positive zero or negative zero, then the
+     * result is negative infinity.
+     *  * If the argument is `1.0`, then the result is positive
+     * zero.
+     *
+     *
+     * @param   a   a value
+     * @return  the value ln&nbsp;`a`, the natural logarithm of
+     * `a`.
+     */
+    fun log(a: Double): Double {
+        return FdLibm.Log.compute(a)
+    }
 }
