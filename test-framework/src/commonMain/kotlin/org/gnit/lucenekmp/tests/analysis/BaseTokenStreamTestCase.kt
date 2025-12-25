@@ -34,6 +34,7 @@ import org.gnit.lucenekmp.util.Attribute
 import org.gnit.lucenekmp.util.AttributeFactory
 import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.AttributeReflector
+import org.gnit.lucenekmp.util.AttributeSource
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.IOUtils
@@ -220,6 +221,13 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
     }
 
     companion object {
+        init {
+            AttributeSource.registerAttributeInterfaces(
+                CheckClearAttributesAttributeImpl::class,
+                arrayOf(CheckClearAttributesAttribute::class)
+            )
+        }
+
         // graphOffsetsAreCorrect validates:
         //   - graph offsets are correct (all tokens leaving from
         //     pos X have the same startOffset; all tokens
@@ -242,7 +250,13 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
             boost: FloatArray?
         ) {
             /*assertNotNull(output)*/
-            val checkClearAtt: CheckClearAttributesAttribute = ts.addAttribute(CheckClearAttributesAttribute::class)
+            val checkClearAtt: CheckClearAttributesAttribute =
+                if (ts.hasAttribute(CheckClearAttributesAttribute::class)) {
+                    ts.getAttribute(CheckClearAttributesAttribute::class)
+                } else {
+                    ts.addAttributeImpl(CheckClearAttributesAttributeImpl())
+                    ts.getAttribute(CheckClearAttributesAttribute::class)
+                }
 
             var termAtt: CharTermAttribute? = null
             if (output.isNotEmpty()) {

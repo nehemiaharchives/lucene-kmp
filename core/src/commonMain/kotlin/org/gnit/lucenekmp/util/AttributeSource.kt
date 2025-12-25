@@ -440,8 +440,22 @@ open class AttributeSource {
     }
 
     companion object {
+        private val registeredInterfaces: MutableMap<KClass<*>, Array<KClass<*>>> =
+            mutableMapOf()
+
+        fun registerAttributeInterfaces(
+            implClass: KClass<*>,
+            interfaces: Array<KClass<out Attribute>>
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            registeredInterfaces[implClass] = interfaces as Array<KClass<*>>
+        }
 
         fun getInterfaces(clazz: KClass<*>): Array<KClass<*>> {
+            val registered = registeredInterfaces[clazz]
+            if (registered != null) {
+                return registered
+            }
             return when (clazz) {
                 CharTermAttributeImpl::class -> arrayOf(
                     CharTermAttribute::class,
