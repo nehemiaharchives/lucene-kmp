@@ -28,12 +28,10 @@ class MockReaderWrapper(
         throwExcNext = true
     }
 
-    @Throws(IOException::class)
     override fun close() {
         `in`.close()
     }
 
-    @Throws(IOException::class)
     override fun read(cbuf: CharArray, off: Int, len: Int): Int {
         if (throwExcNext || (excAtChar != -1 && readSoFar >= excAtChar)) {
             throw RuntimeException("fake exception now!")
