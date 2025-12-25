@@ -7,6 +7,7 @@ package org.gnit.lucenekmp.jdkport
  * TODO later we will implement or refactor with kotlin coroutines
  */
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -44,6 +45,8 @@ class CountDownLatch(count: Int) {
     }
 
     fun await(){
-        TODO("implement this")
+        runBlocking {
+            completed.join()
+        }
     }
 }
