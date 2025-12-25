@@ -40,6 +40,11 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.automaton.Automaton
 import org.gnit.lucenekmp.util.fst.Util
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.jvm.JvmOverloads
 import kotlin.random.Random
 import kotlin.test.assertEquals
@@ -125,7 +130,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         simple: Boolean,
         graphOffsetsAreCorrect: Boolean,
         iw: RandomIndexWriter?
-    ) /*: java.lang.Thread()*/ { // TODO use kotlin.coroutine.Job instead of Thread
+    ) /*: java.lang.Thread()*/ { // use kotlin.coroutine.Job instead of Thread
         val iterations: Int
         val maxWordLength: Int
         val a: Analyzer
@@ -139,6 +144,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         // add memory barriers (ie alter how threads
         // interact)... so this is just "best effort":
         var failed: Boolean = false
+        private var job: Job? = null
 
         init {
             this.a = a
@@ -176,11 +182,15 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         fun start(){
-            TODO("implement this")
+            job = CoroutineScope(Dispatchers.Default).launch {
+                run()
+            }
         }
 
         fun join(){
-            TODO("implement this")
+            runBlocking {
+                job?.join()
+            }
         }
     }
 
