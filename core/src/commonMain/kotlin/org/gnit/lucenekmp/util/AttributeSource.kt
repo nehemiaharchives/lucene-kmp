@@ -11,6 +11,8 @@ import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TermFrequencyAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -477,6 +479,9 @@ open class AttributeSource {
                     CharSequence::class,
                     Appendable::class
                 )
+                KeywordAttributeImpl::class -> arrayOf(
+                    KeywordAttribute::class
+                )
                 AttributeImpl::class -> arrayOf(Cloneable::class)
                 else -> emptyArray()
             }
@@ -487,6 +492,7 @@ open class AttributeSource {
                 CharTermAttributeImpl::class -> AttributeImpl::class
                 OffsetAttributeImpl::class -> AttributeImpl::class
                 PackedTokenAttributeImpl::class -> CharTermAttributeImpl::class
+                KeywordAttributeImpl::class -> AttributeImpl::class
                 AttributeImpl::class -> Any::class
                 Any::class -> null
                 else -> null

@@ -4,6 +4,8 @@ import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
@@ -35,6 +37,7 @@ abstract class AttributeFactory {
                 PositionLengthAttribute::class -> PackedTokenAttributeImpl()
                 TypeAttribute::class -> PackedTokenAttributeImpl()
                 TermFrequencyAttribute::class -> PackedTokenAttributeImpl()
+                KeywordAttribute::class -> KeywordAttributeImpl()
                 PayloadAttribute::class -> PayloadAttributeImpl()
                 FlagsAttribute::class -> FlagsAttributeImpl()
                 BoostAttribute::class -> BoostAttributeImpl()
@@ -97,6 +100,7 @@ abstract class AttributeFactory {
                 OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
                 PayloadAttributeImpl::class -> { { PayloadAttributeImpl() } }
                 FlagsAttributeImpl::class -> { { FlagsAttributeImpl() } }
+                KeywordAttributeImpl::class -> { { KeywordAttributeImpl() } }
                 BoostAttributeImpl::class -> { { BoostAttributeImpl() } }
                 MaxNonCompetitiveBoostAttributeImpl::class -> { { MaxNonCompetitiveBoostAttributeImpl() } }
                 else -> throw IllegalArgumentException("No known no-arg constructor for ${clazz.qualifiedName}")

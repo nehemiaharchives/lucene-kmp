@@ -1097,8 +1097,8 @@ class TestUtil {
                 val codePoint: Int = str.codePointAt(pos)
                 pos += Character.charCount(codePoint)
                 when (nextInt(random, 0, 2)) {
-                    0 -> builder.appendCodePoint(codePoint.toChar().uppercaseChar().code)
-                    1 -> builder.appendCodePoint(codePoint.toChar().lowercaseChar().code)
+                    0 -> builder.appendCodePoint(Character.toUpperCase(codePoint))
+                    1 -> builder.appendCodePoint(Character.toLowerCase(codePoint))
                     2 -> builder.appendCodePoint(codePoint) // leave intact
                 }
             }
