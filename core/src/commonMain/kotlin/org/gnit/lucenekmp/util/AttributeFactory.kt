@@ -9,6 +9,10 @@ import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.TermFrequencyAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttribute
 import org.gnit.lucenekmp.search.BoostAttribute
 import org.gnit.lucenekmp.search.BoostAttributeImpl
 import org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttribute
@@ -27,6 +31,10 @@ abstract class AttributeFactory {
                 // Minimal direct mappings for cases that are not covered by static combined impls
                 CharTermAttribute::class -> CharTermAttributeImpl()
                 OffsetAttribute::class -> OffsetAttributeImpl()
+                PositionIncrementAttribute::class -> PackedTokenAttributeImpl()
+                PositionLengthAttribute::class -> PackedTokenAttributeImpl()
+                TypeAttribute::class -> PackedTokenAttributeImpl()
+                TermFrequencyAttribute::class -> PackedTokenAttributeImpl()
                 PayloadAttribute::class -> PayloadAttributeImpl()
                 FlagsAttribute::class -> FlagsAttributeImpl()
                 BoostAttribute::class -> BoostAttributeImpl()

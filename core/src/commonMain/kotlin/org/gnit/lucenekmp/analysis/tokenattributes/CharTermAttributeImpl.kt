@@ -30,7 +30,9 @@ open class CharTermAttributeImpl
 
     override fun copyBuffer(buffer: CharArray, offset: Int, length: Int) {
         growTermBuffer(length)
-        buffer.copyInto(termBuffer, 0, offset, length)
+        if (length > 0) {
+            buffer.copyInto(termBuffer, 0, offset, offset + length)
+        }
         termLength = length
     }
 

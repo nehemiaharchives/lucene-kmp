@@ -372,42 +372,40 @@ class StandardTokenizerImpl(`in`: Reader) {
             }
 
 
-            zzForAction@{
-                zzForAction@ while (true) {
-                    if (zzCurrentPosL < zzEndReadL) {
-                        zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
-                        zzCurrentPosL += Character.charCount(zzInput)
-                    } else if (zzAtEOF) {
+            zzForAction@ while (true) {
+                if (zzCurrentPosL < zzEndReadL) {
+                    zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
+                    zzCurrentPosL += Character.charCount(zzInput)
+                } else if (zzAtEOF) {
+                    zzInput = YYEOF
+                    break@zzForAction
+                } else {
+                    // store back cached positions
+                    zzCurrentPos = zzCurrentPosL
+                    zzMarkedPos = zzMarkedPosL
+                    val eof = zzRefill()
+                    // get translated positions and possibly new buffer
+                    zzCurrentPosL = zzCurrentPos
+                    zzMarkedPosL = zzMarkedPos
+                    zzBufferL = zzBuffer
+                    zzEndReadL = zzEndRead
+                    if (eof) {
                         zzInput = YYEOF
                         break@zzForAction
                     } else {
-                        // store back cached positions
-                        zzCurrentPos = zzCurrentPosL
-                        zzMarkedPos = zzMarkedPosL
-                        val eof = zzRefill()
-                        // get translated positions and possibly new buffer
-                        zzCurrentPosL = zzCurrentPos
-                        zzMarkedPosL = zzMarkedPos
-                        zzBufferL = zzBuffer
-                        zzEndReadL = zzEndRead
-                        if (eof) {
-                            zzInput = YYEOF
-                            break@zzForAction
-                        } else {
-                            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
-                            zzCurrentPosL += Character.charCount(zzInput)
-                        }
+                        zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL)
+                        zzCurrentPosL += Character.charCount(zzInput)
                     }
-                    val zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput)]
-                    if (zzNext == -1) break@zzForAction
-                    zzState = zzNext
+                }
+                val zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput)]
+                if (zzNext == -1) break@zzForAction
+                zzState = zzNext
 
-                    zzAttributes = zzAttrL[zzState]
-                    if ((zzAttributes and 1) == 1) {
-                        zzAction = zzState
-                        zzMarkedPosL = zzCurrentPosL
-                        if ((zzAttributes and 8) == 8) break@zzForAction
-                    }
+                zzAttributes = zzAttrL[zzState]
+                if ((zzAttributes and 1) == 1) {
+                    zzAction = zzState
+                    zzMarkedPosL = zzCurrentPosL
+                    if ((zzAttributes and 8) == 8) break@zzForAction
                 }
             }
 
@@ -463,7 +461,15 @@ class StandardTokenizerImpl(`in`: Reader) {
                     }
 
                     18 -> {}
-                    else -> zzScanError(ZZ_NO_MATCH)
+                    else -> {
+                        val length = zzMarkedPosL - zzStartRead
+                        val snippet = if (length > 0) {
+                            String.fromCharArray(zzBufferL, zzStartRead, length)
+                        } else {
+                            ""
+                        }
+                        zzScanError(ZZ_NO_MATCH)
+                    }
                 }
             }
         }
