@@ -74,9 +74,8 @@ abstract class CharFilterFactory : AbstractAnalysisFactory {
                 throw java.lang.IllegalStateException(e)
             }*/
             catch (e: Exception) {
-
+                throw IllegalStateException(e)
             }
-            return TODO("implement something")
         }
 
         /**

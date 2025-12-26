@@ -72,9 +72,8 @@ abstract class TokenFilterFactory : AbstractAnalysisFactory {
                 throw java.lang.IllegalStateException(e)
             }*/
             catch (e: Exception){
-
+                throw IllegalStateException(e)
             }
-            return TODO("implement later")
         }
 
         /**

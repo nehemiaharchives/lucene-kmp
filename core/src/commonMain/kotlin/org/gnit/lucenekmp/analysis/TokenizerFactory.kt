@@ -68,8 +68,8 @@ abstract class TokenizerFactory : AbstractAnalysisFactory {
             } catch (e: java.lang.IllegalStateException) {
                 throw java.lang.IllegalStateException(e)
             }*/ catch (e: Exception) {
+                throw IllegalStateException(e)
             }
-            return TODO("do something")
         }
 
         /**

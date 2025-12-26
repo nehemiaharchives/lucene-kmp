@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
 import org.gnit.lucenekmp.jdkport.ClassLoader
+import org.gnit.lucenekmp.jdkport.ServiceLoader
 import org.gnit.lucenekmp.jdkport.getClassLoader
 import org.gnit.lucenekmp.util.ClassLoaderUtils
 import kotlin.concurrent.Volatile
@@ -57,8 +58,9 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
      */
     fun reload(classloader: ClassLoader) {
         //java.util.Objects.requireNonNull<ClassLoader>(classloader, "classloader")
-        val services: MutableMap<String, KClass<S>> = this.services.toMutableMap()
-        val originalNames: MutableSet<String> = this.originalNames.toMutableSet()
+        requireNotNull(classloader) { "classloader must not be null" }
+        val services: LinkedHashMap<String, KClass<S>> = LinkedHashMap(this.services)
+        val originalNames: LinkedHashSet<String> = LinkedHashSet(this.originalNames)
 
         // following was java lucene implementation:
         /*java.util.ServiceLoader.load<S>(clazz, classloader).stream()
@@ -118,10 +120,48 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
             )
         }*/
 
-        // TODO implement something
+        for (service in ServiceLoader.load(clazz, classloader)) {
+            val serviceClass = service::class as KClass<S>
+            var name: String? = null
+            var originalName: String? = null
+            var cause: Exception? = null
+            try {
+                originalName = lookupSPIName(serviceClass as KClass<out AbstractAnalysisFactory>)
+                name = originalName.lowercase()
+                if (!isValidName(originalName)) {
+                    throw IllegalStateException(
+                        "The name $originalName for ${serviceClass.qualifiedName ?: serviceClass.simpleName} is invalid: " +
+                            "Allowed characters are (English) alphabet, digits, and underscore. " +
+                            "It should be started with an alphabet."
+                    )
+                }
+            } catch (e: Exception) {
+                cause = e
+            }
+            if (name == null) {
+                val serviceName = serviceClass.qualifiedName ?: serviceClass.simpleName ?: "unknown"
+                if (cause != null) {
+                    throw IllegalStateException(
+                        "The class name $serviceName has no service name field: [public static final String NAME]",
+                        cause
+                    )
+                }
+                throw IllegalStateException(
+                    "The class name $serviceName has no service name field: [public static final String NAME]"
+                )
+            }
+            if (!services.containsKey(name)) {
+                services[name] = serviceClass
+                originalNames.add(originalName!!)
+            }
+        }
 
-        this.services = services.toMutableMap()
-        this.originalNames = originalNames.toMutableSet()
+        if (services.keys.size != originalNames.size) {
+            throw IllegalStateException("Service lookup key set is inconsistent with original name set!")
+        }
+
+        this.services = services
+        this.originalNames = originalNames
     }
 
     /*private fun isValidName(name: String): Boolean {
@@ -152,7 +192,20 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
                         + availableServices())
             )
         }*/
-        return TODO("implement something")
+        val service: KClass<out S>? = services[name.lowercase()]
+        if (service != null) {
+            return service
+        }
+        throw IllegalArgumentException(
+            ("A SPI class of type "
+                + (clazz.qualifiedName ?: clazz.simpleName)
+                + " with name '"
+                + name
+                + "' does not exist. "
+                + "You need to add the corresponding JAR file supporting this SPI to your classpath. "
+                + "The current classpath supports the following names: "
+                + availableServices())
+        )
     }
 
     fun availableServices(): MutableSet<String> {
@@ -185,7 +238,7 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
                 return (field.get(null) as String)
             }
             throw java.lang.IllegalStateException("No SPI name defined.")*/
-            return TODO("implement something")
+            return AnalysisSPIReflection.lookupSPIName(service)
         }
 
         /**
@@ -217,7 +270,7 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
                     e
                 )
             }*/
-            return TODO("implement something")
+            return AnalysisSPIReflection.newFactoryClassInstance(clazz, args)
         }
     }
 }
