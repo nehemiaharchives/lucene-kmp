@@ -57,10 +57,11 @@ Under this directory you find two sub directories:
 
 ### Step 2: Code, Run, Debug
 1. Apply the chosen code changes. when you code be careful of writing code in platform agnostic kotlin common code. avoid expect/actual pattern as much as possible. do not mix platform specific code such as jvm code in commonMain/commonTest.
-2. Use `get_file_problems` tool of `jetbrains` MCP server to check if there are any compilation errors for each files you changed. iterate over until you solve all errors.
-3. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them
-4. Perform internet search **only** if an error is unclear and you need confirmation of a fix. If you are confident in the solution, skip research and proceed.
-5. lucene is very complex software. if you are not sure where is the bug, use `val logger = KotlinLogging.logger{}` if not found, add it, and `logger.debug { "things you want to see: $xxxx" }` to output debug log in the
+2. Use `get_file_problems` tool of `jetbrains` MCP server to check if there are any compilation errors for each files you changed. iterate over until you solve all errors for Kotiln/JVM.
+3. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run either [`compileKotlinLinuxX64` and `compileTestKotlinLiuxX64` on linux] or [`compileKotlinMacosX64` and `compileTestKotlinMacosX64` on macOS], to check if there are any compilation errors for each files you changed especially for Kotlin/Native. iterate over until you solve all errors.
+4. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them. tests should pass both in `jvmTest` and tests for native env which is either `linuxX64Test` or `macosX64Test` depending on your work env.
+5. Perform internet search **only** if an error is unclear and you need confirmation of a fix. If you are confident in the solution, skip research and proceed.
+6. lucene is very complex software. if you are not sure where is the bug, use `val logger = KotlinLogging.logger{}` if not found, add it, and `logger.debug { "things you want to see: $xxxx" }` to output debug log in the
    suspicious lines of code and make sure. then run the tests to see the debug log. then rethink the next suspicious code to track down the root cause of the bug.
 
 ## Tool Use Priority
@@ -74,13 +75,15 @@ When you don't have access to jetbrains MCP server, first ask Human developer to
 If you are in cloud environment where you have NO access to jetbrains MCP server, you are allowed to use the command line Gradle wrapper (./gradlew) to compile and run tests.
 Example agent runtime environment: desktop/laptop but human developer forgot to launch JetBrains IDEs, or cloud coding agent such as codex web, Google Jules.
 When you use ./gradlew command line tool, use like following (e.g. when you develop core module):
-1. First write the code, then run `./gradlew core:compileKotlinJvm` and `./gradlew core:compileTestKotlinJvm` to check if there are compilation errors.
+1. First write the code, then run `./gradlew core:compileKotlinJvm` and `./gradlew core:compileTestKotlinJvm` to check if there are compilation errors on Kotlin/JVM.
 2. If you encounter compilation errors, find out the cause of the error, edit the code to fix the error, then repeat step 1.
-3. If there is no compilation error with jvm compile, then run `./gradlew core:compileKotlinLinuxX64` and `./gradlew core:compileTestKotlinLinuxX64` which is kotlin/native that covers both linux and ios
-4. If there is no compilation error with both kotlni/jvm and kotlin/native, run unit tests, but run specific test class which you just ported or modified, not all tests.
-5. If the specific test fails, find out the cause of the failure, edit the code to fix the error, then repeat step 3.
-6. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
-7. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
+3. Then, run if you are on linux run `./gradlew core:compileKotlinLinuxX64` and `./gradlew core:compileTestKotlinLiuxX64` or if you are on macOS run `./gradlew core:compileKotlinMacosX64` and `./gradlew core:compileTestKotlinMacosX64` to check if there are compilation errors on Kotlin/Native. 
+4. If you encounter compilation errors, find out the cause of the error, edit the code to fix the error, then repeat step 3.
+5. If there is no compilation error with jvm compile, then run `./gradlew core:compileKotlinLinuxX64` and `./gradlew core:compileTestKotlinLinuxX64` which is kotlin/native that covers both linux and ios
+6. If there is no compilation error with both kotlni/jvm and kotlin/native, run unit tests, but run specific test class which you just ported or modified, not all tests.
+7. If the specific test fails, find out the cause of the failure, edit the code to fix the error, then repeat step 3.
+8. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
+9. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
 
 
 ### troubleshooting java/cacerts problem
