@@ -24,7 +24,7 @@ class NamedSPILoader<S : NamedSPILoader.NamedSPI>(
         var classloader: ClassLoader? = classloader
         this.clazz = clazz
         // if clazz' classloader is not a parent of the given one, we scan clazz's classloader, too:
-        val clazzClassloader: ClassLoader = clazz.getClassLoader()
+        val clazzClassloader: ClassLoader? = clazz.getClassLoader()
         if (classloader == null) {
             classloader = clazzClassloader
         }
@@ -33,7 +33,7 @@ class NamedSPILoader<S : NamedSPILoader.NamedSPI>(
         ) {
             reload(clazzClassloader)
         }
-        reload(classloader)
+        reload(classloader!!)
     }
 
     /**

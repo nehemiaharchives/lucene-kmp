@@ -432,7 +432,7 @@ open class LuceneTestCase {
         /** Checks a specific exception class is thrown by the given runnable, and returns it.  */
         fun <T : Throwable> expectThrows(
             expectedType: KClass<T>, runnable: ThrowingRunnable
-        ): T? {
+        ): T {
             return expectThrows<T>(
                 expectedType,
                 "Expected exception " + expectedType.simpleName + " but no exception was thrown",
@@ -445,7 +445,7 @@ open class LuceneTestCase {
             expectedType: KClass<T>,
             noExceptionMessage: String?,
             runnable: ThrowingRunnable
-        ): T? {
+        ): T {
             val thrown: Throwable? =
                 _expectThrows(mutableListOf(expectedType), runnable)
             if (expectedType.isInstance(thrown)) {
@@ -468,7 +468,7 @@ open class LuceneTestCase {
         fun <T : Throwable> expectThrowsAnyOf(
             expectedTypes: MutableList<KClass<out T>>,
             runnable: ThrowingRunnable
-        ): T? {
+        ): T {
             if (expectedTypes.isEmpty()) {
                 throw AssertionError("At least one expected exception type is required?")
             }
@@ -510,7 +510,7 @@ open class LuceneTestCase {
             expectedOuterType: KClass<TO>,
             expectedWrappedType: KClass<TW>,
             runnable: ThrowingRunnable
-        ): TW? {
+        ): TW {
             val thrown: Throwable? =
                 _expectThrows(mutableListOf<KClass<TO>>(expectedOuterType), runnable)
             if (null == thrown) {

@@ -4,9 +4,9 @@ import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.AttributeReflector
 import kotlin.reflect.KClass
 
-fun KClass<*>.getClassLoader(): ClassLoader {
+fun KClass<*>.getClassLoader(): ClassLoader? {
     // No real classloader semantics in KMP common; return a placeholder.
-    return ClassLoader()
+    return null
 }
 
 fun <U : Any> KClass<U>.asSubclass(clazz: KClass<*>): KClass<U> {
