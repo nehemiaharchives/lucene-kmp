@@ -8,6 +8,8 @@ import org.gnit.lucenekmp.analysis.de.GermanLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanStemFilterFactory
+import org.gnit.lucenekmp.analysis.es.SpanishLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.es.SpanishPluralStemFilterFactory
 import org.gnit.lucenekmp.analysis.util.ElisionFilterFactory
 
 /** Registers analysis/common factories for SPI lookups. */
@@ -61,6 +63,16 @@ object AnalysisCommonFactories {
             GermanNormalizationFilterFactory.NAME,
             GermanNormalizationFilterFactory::class
         ) { args -> GermanNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            SpanishLightStemFilterFactory.NAME,
+            SpanishLightStemFilterFactory::class
+        ) { args -> SpanishLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            SpanishPluralStemFilterFactory.NAME,
+            SpanishPluralStemFilterFactory::class
+        ) { args -> SpanishPluralStemFilterFactory(args) }
         initialized = true
     }
 }

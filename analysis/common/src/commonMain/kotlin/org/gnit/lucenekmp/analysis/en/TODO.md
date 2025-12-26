@@ -1,5 +1,9 @@
 # English analysis port TODO
 
+## Current task (verification)
+- PORTED: EnglishAnalyzer
+- PORTED: TestEnglishAnalyzer
+
 ## Classes (dependency order)
 - PORTED: KStemData1
 - PORTED: KStemData2
