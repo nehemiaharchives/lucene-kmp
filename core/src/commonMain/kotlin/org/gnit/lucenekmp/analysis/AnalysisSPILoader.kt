@@ -40,7 +40,9 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
         ) {
             reload(clazzClassloader)
         }
-        reload(classloader!!)
+        if (classloader != null) {
+            reload(classloader)
+        }
     }
 
     /**

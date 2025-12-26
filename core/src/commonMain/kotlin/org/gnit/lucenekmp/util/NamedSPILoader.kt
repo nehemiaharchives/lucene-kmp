@@ -33,7 +33,9 @@ class NamedSPILoader<S : NamedSPILoader.NamedSPI>(
         ) {
             reload(clazzClassloader)
         }
-        reload(classloader!!)
+        if (classloader != null) {
+            reload(classloader)
+        }
     }
 
     /**
@@ -48,8 +50,10 @@ class NamedSPILoader<S : NamedSPILoader.NamedSPI>(
      * *This method is expensive and should only be called for discovery of new service
      * providers on the given classpath/classloader!*
      */
-    fun reload(classloader: ClassLoader) {
-        requireNotNull<ClassLoader>(classloader) { "classloader must not be null" }
+    fun reload(classloader: ClassLoader?) {
+        if (classloader == null) {
+            return
+        }
         val services: LinkedHashMap<String, S> = LinkedHashMap<String, S>(this.services)
         for (service in ServiceLoader.load<S>(clazz, classloader)) {
             val name: String = service.name
