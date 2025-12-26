@@ -60,6 +60,8 @@ Under this directory you find two sub directories:
 2. Use `get_file_problems` tool of `jetbrains` MCP server to check if there are any compilation errors for each files you changed. iterate over until you solve all errors.
 3. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them
 4. Perform internet search **only** if an error is unclear and you need confirmation of a fix. If you are confident in the solution, skip research and proceed.
+5. lucene is very complex software. if you are not sure where is the bug, use `val logger = KotlinLogging.logger{}` if not found, add it, and `logger.debug { "things you want to see: $xxxx" }` to output debug log in the
+   suspicious lines of code and make sure. then run the tests to see the debug log. then rethink the next suspicious code to track down the root cause of the bug.
 
 ## Tool Use Priority
 
