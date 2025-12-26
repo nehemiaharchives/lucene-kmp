@@ -4,6 +4,10 @@ import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
 import org.gnit.lucenekmp.analysis.en.KStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.PorterStemFilterFactory
+import org.gnit.lucenekmp.analysis.de.GermanLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.de.GermanMinimalStemFilterFactory
+import org.gnit.lucenekmp.analysis.de.GermanNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.de.GermanStemFilterFactory
 import org.gnit.lucenekmp.analysis.util.ElisionFilterFactory
 
 /** Registers analysis/common factories for SPI lookups. */
@@ -37,6 +41,26 @@ object AnalysisCommonFactories {
             PorterStemFilterFactory.NAME,
             PorterStemFilterFactory::class
         ) { args -> PorterStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            GermanLightStemFilterFactory.NAME,
+            GermanLightStemFilterFactory::class
+        ) { args -> GermanLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            GermanMinimalStemFilterFactory.NAME,
+            GermanMinimalStemFilterFactory::class
+        ) { args -> GermanMinimalStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            GermanStemFilterFactory.NAME,
+            GermanStemFilterFactory::class
+        ) { args -> GermanStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            GermanNormalizationFilterFactory.NAME,
+            GermanNormalizationFilterFactory::class
+        ) { args -> GermanNormalizationFilterFactory(args) }
         initialized = true
     }
 }
