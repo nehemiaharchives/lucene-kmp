@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.analysis
 
 import kotlin.reflect.KClass
 
-internal actual object AnalysisSPIReflection {
+actual object AnalysisSPIReflection {
     actual fun lookupSPIName(service: KClass<out AbstractAnalysisFactory>): String {
         val simpleName = service.simpleName ?: throw IllegalStateException("No SPI name defined.")
         val baseName = stripFactorySuffix(simpleName)
@@ -17,6 +17,11 @@ internal actual object AnalysisSPIReflection {
         clazz: KClass<T>,
         args: MutableMap<String, String>
     ): T {
+        val ctor = AnalysisSPIRegistry.constructorFor(clazz as KClass<out AbstractAnalysisFactory>)
+        if (ctor != null) {
+            @Suppress("UNCHECKED_CAST")
+            return ctor(args) as T
+        }
         throw UnsupportedOperationException(
             "Factory ${clazz.simpleName ?: "<unknown>"} cannot be instantiated. " +
                 "This is likely due to missing Map<String,String> constructor."

@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.analysis
 
 import kotlin.reflect.KClass
 
-internal expect object AnalysisSPIReflection {
+expect object AnalysisSPIReflection {
     fun lookupSPIName(service: KClass<out AbstractAnalysisFactory>): String
 
     fun <T : AbstractAnalysisFactory> newFactoryClassInstance(

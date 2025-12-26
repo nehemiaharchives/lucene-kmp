@@ -158,6 +158,22 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
             }
         }
 
+        for (entry in AnalysisSPIRegistry.entriesFor(clazz as KClass<out AbstractAnalysisFactory>)) {
+            val name = entry.name.lowercase()
+            if (!isValidName(entry.name)) {
+                throw IllegalStateException(
+                    "The name ${entry.name} for ${entry.service.qualifiedName ?: entry.service.simpleName} is invalid: " +
+                        "Allowed characters are (English) alphabet, digits, and underscore. " +
+                        "It should be started with an alphabet."
+                )
+            }
+            if (!services.containsKey(name)) {
+                @Suppress("UNCHECKED_CAST")
+                services[name] = entry.service as KClass<S>
+                originalNames.add(entry.name)
+            }
+        }
+
         if (services.keys.size != originalNames.size) {
             throw IllegalStateException("Service lookup key set is inconsistent with original name set!")
         }
@@ -179,24 +195,30 @@ class AnalysisSPILoader<S : AbstractAnalysisFactory>(
     }
 
     fun lookupClass(name: String): KClass<out S> {
-        /*val service: KClass<out S> = services.get(name.lowercase())
-        if (service != null) {
-            return service
-        } else {
-            throw java.lang.IllegalArgumentException(
-                ("A SPI class of type "
-                        + clazz.getName()
-                        + " with name '"
-                        + name
-                        + "' does not exist. "
-                        + "You need to add the corresponding JAR file supporting this SPI to your classpath. "
-                        + "The current classpath supports the following names: "
-                        + availableServices())
-            )
-        }*/
         val service: KClass<out S>? = services[name.lowercase()]
         if (service != null) {
             return service
+        }
+
+        // Late-bind registry entries for this SPI type.
+        val registryEntries = AnalysisSPIRegistry.entriesFor(clazz as KClass<out AbstractAnalysisFactory>)
+        if (registryEntries.isNotEmpty()) {
+            val updated = LinkedHashMap<String, KClass<S>>(services)
+            val updatedNames = LinkedHashSet<String>(originalNames)
+            for (entry in registryEntries) {
+                val lowered = entry.name.lowercase()
+                if (!updated.containsKey(lowered)) {
+                    @Suppress("UNCHECKED_CAST")
+                    updated[lowered] = entry.service as KClass<S>
+                    updatedNames.add(entry.name)
+                }
+            }
+            services = updated
+            originalNames = updatedNames
+            val retry = services[name.lowercase()]
+            if (retry != null) {
+                return retry
+            }
         }
         throw IllegalArgumentException(
             ("A SPI class of type "

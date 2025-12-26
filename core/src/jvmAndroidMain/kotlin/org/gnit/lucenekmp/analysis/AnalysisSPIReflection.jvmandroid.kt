@@ -5,7 +5,7 @@ import java.lang.reflect.Modifier
 import kotlin.reflect.KClass
 import kotlin.jvm.java
 
-internal actual object AnalysisSPIReflection {
+actual object AnalysisSPIReflection {
     actual fun lookupSPIName(service: KClass<out AbstractAnalysisFactory>): String {
         val field = service.java.getField("NAME")
         val modifier = field.modifiers

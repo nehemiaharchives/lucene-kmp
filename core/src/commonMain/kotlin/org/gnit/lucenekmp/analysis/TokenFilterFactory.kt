@@ -40,7 +40,7 @@ abstract class TokenFilterFactory : AbstractAnalysisFactory {
      * unchanged, filters that should be applied at normalization time can delegate to `create`
      * method.
      */
-    fun normalize(input: TokenStream): TokenStream {
+    open fun normalize(input: TokenStream): TokenStream {
         return input
     }
 
