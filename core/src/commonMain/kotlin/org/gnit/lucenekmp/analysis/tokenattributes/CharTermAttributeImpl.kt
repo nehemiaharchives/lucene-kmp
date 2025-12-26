@@ -43,7 +43,7 @@ open class CharTermAttributeImpl
             // Not big enough; create a new array with slight
             // over allocation and preserve content
             val newCharBuffer = CharArray(ArrayUtil.oversize(newSize, Char.SIZE_BYTES))
-            termBuffer.copyInto(newCharBuffer, 0, 0, termLength)
+            termBuffer.copyInto(newCharBuffer, 0, 0, termBuffer.size)
             termBuffer = newCharBuffer
         }
         return termBuffer

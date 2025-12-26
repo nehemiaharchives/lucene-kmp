@@ -31,6 +31,7 @@ import org.gnit.lucenekmp.util.Attribute
 import org.gnit.lucenekmp.util.AttributeFactory
 import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.AttributeReflector
+import org.gnit.lucenekmp.util.AttributeSource
 import org.gnit.lucenekmp.util.BytesRef
 
 /**
@@ -95,11 +96,10 @@ class Token() : PackedTokenAttributeImpl(), FlagsAttribute, PayloadAttribute {
     }
 
     companion object {
-        val TOKEN_ATTRIBUTE_FACTORY: AttributeFactory = object : AttributeFactory() {
-            private var tokenImpl: Token? = null
-            override fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl {
-                val token = tokenImpl ?: Token().also { tokenImpl = it }
-                return when (attClass) {
+        init {
+            AttributeSource.registerAttributeInterfaces(
+                Token::class,
+                arrayOf(
                     FlagsAttribute::class,
                     PayloadAttribute::class,
                     CharTermAttribute::class,
@@ -108,11 +108,17 @@ class Token() : PackedTokenAttributeImpl(), FlagsAttribute, PayloadAttribute {
                     PositionLengthAttribute::class,
                     OffsetAttribute::class,
                     TermFrequencyAttribute::class,
-                    TermToBytesRefAttribute::class -> token
-                    else -> AttributeFactory.DEFAULT_ATTRIBUTE_FACTORY.createAttributeInstance(attClass)
-                }
-            }
+                    TermToBytesRefAttribute::class
+                )
+            )
         }
+
+        val TOKEN_ATTRIBUTE_FACTORY: AttributeFactory =
+            object : AttributeFactory.StaticImplementationAttributeFactory<Token>(
+                AttributeFactory.DEFAULT_ATTRIBUTE_FACTORY,
+                Token::class
+            ) {
+                override fun createInstance(): Token = Token()
+            }
     }
 }
-
