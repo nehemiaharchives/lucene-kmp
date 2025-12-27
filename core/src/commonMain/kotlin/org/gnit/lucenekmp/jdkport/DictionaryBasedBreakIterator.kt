@@ -388,7 +388,7 @@ class DictionaryBasedBreakIterator(
                         ) {
                             currentBreakPositions.push(text.index)
                         }
-                        next() // was getNext() is it ok to port like this? not sure
+                        nextCodePoint()
                         currentBreakPositions.push(text.index)
                     }
                 } else {

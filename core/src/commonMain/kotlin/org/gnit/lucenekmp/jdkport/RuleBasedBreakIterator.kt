@@ -628,6 +628,13 @@ open class RuleBasedBreakIterator(/*ruleFile: String,*/ ruleData: ByteArray) : B
             return c2.code
         }
 
+    /**
+     * Advances the text iterator by one code point and returns it.
+     */
+    protected fun nextCodePoint(): Int {
+        return next
+    }
+
     val current: Int
         /**
          * Returns current character

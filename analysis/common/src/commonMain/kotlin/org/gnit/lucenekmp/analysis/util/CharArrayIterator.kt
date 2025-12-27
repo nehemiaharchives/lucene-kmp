@@ -17,10 +17,9 @@ abstract class CharArrayIterator : CharacterIterator {
 
     var start: Int = 0
         private set
-    override var index = 0
-        get(): Int {
-            return field - start
-        }
+    private var indexAbsolute: Int = 0
+    override val index: Int
+        get() = indexAbsolute - start
 
     override var endIndex: Int = 0
 
@@ -36,19 +35,19 @@ abstract class CharArrayIterator : CharacterIterator {
     fun setText(array: CharArray, start: Int, length: Int) {
         this.text = array
         this.start = start
-        this.index = start
+        this.indexAbsolute = start
         this.endIndex = length
         this.limit = start + length
     }
 
     override fun current(): Char {
-        return if (index == limit) CharacterIterator.DONE else jreBugWorkaround(this.text[index])
+        return if (indexAbsolute == limit) CharacterIterator.DONE else jreBugWorkaround(this.text[indexAbsolute])
     }
 
     protected abstract fun jreBugWorkaround(ch: Char): Char
 
     override fun first(): Char {
-        index = start
+        indexAbsolute = start
         return current()
     }
 
@@ -56,13 +55,13 @@ abstract class CharArrayIterator : CharacterIterator {
         get() = 0
 
     override fun last(): Char {
-        index = if (limit == start) limit else limit - 1
+        indexAbsolute = if (limit == start) limit else limit - 1
         return current()
     }
 
     override fun next(): Char {
-        if (++index >= limit) {
-            index = limit
+        if (++indexAbsolute >= limit) {
+            indexAbsolute = limit
             return CharacterIterator.DONE
         } else {
             return current()
@@ -70,8 +69,8 @@ abstract class CharArrayIterator : CharacterIterator {
     }
 
     override fun previous(): Char {
-        if (--index < start) {
-            index = start
+        if (--indexAbsolute < start) {
+            indexAbsolute = start
             return CharacterIterator.DONE
         } else {
             return current()
@@ -80,7 +79,7 @@ abstract class CharArrayIterator : CharacterIterator {
 
     override fun setIndex(position: Int): Char {
         require(!(position < this.beginIndex || position > this.endIndex)) { "Illegal Position: $position" }
-        index = start + position
+        indexAbsolute = start + position
         return current()
     }
 

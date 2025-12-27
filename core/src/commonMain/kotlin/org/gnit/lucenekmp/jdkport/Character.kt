@@ -949,6 +949,20 @@ class Character {
             return CharacterData.of(codePoint).getType(codePoint)
         }
 
+        /**
+         * Determines if the specified character (Unicode code point) is a digit.
+         */
+        fun isDigit(codePoint: Int): Boolean {
+            return CharacterData.of(codePoint).isDigit(codePoint)
+        }
+
+        /**
+         * Returns the numeric value of the specified character (Unicode code point).
+         */
+        fun getNumericValue(codePoint: Int): Int {
+            return CharacterData.of(codePoint).getNumericValue(codePoint)
+        }
+
         // end of companion object
     }
 }

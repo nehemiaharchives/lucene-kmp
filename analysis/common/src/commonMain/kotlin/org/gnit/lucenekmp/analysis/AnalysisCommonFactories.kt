@@ -18,6 +18,7 @@ import org.gnit.lucenekmp.analysis.pt.PortugueseStemFilterFactory
 import org.gnit.lucenekmp.analysis.ru.RussianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.sv.SwedishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.sv.SwedishMinimalStemFilterFactory
+import org.gnit.lucenekmp.analysis.th.ThaiTokenizerFactory
 import org.gnit.lucenekmp.analysis.util.ElisionFilterFactory
 
 /** Registers analysis/common factories for SPI lookups. */
@@ -121,6 +122,11 @@ object AnalysisCommonFactories {
             SwedishMinimalStemFilterFactory.NAME,
             SwedishMinimalStemFilterFactory::class
         ) { args -> SwedishMinimalStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenizerFactory::class,
+            ThaiTokenizerFactory.NAME,
+            ThaiTokenizerFactory::class
+        ) { args -> ThaiTokenizerFactory(args) }
         initialized = true
     }
 }
