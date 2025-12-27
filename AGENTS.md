@@ -38,6 +38,7 @@ Under this directory you find two sub directories:
 * do not use String.toByteArray() but use String.encodeToByteArray() instead.
 * because this project is kotlin common project, in common code, do not use String.format function but use kotlin string interpolation.
 * @Ignore annotation in the test will not take any arguments in kmp.
+* do not use resource files in code or unit tests; Kotlin/Native does not support resources. Inline fixed data in code/tests or inject a custom ResourceLoader in tests.
 
 ## Logging
 * when logging, use the following code:
@@ -59,7 +60,7 @@ Under this directory you find two sub directories:
 1. Apply the chosen code changes. when you code be careful of writing code in platform agnostic kotlin common code. avoid expect/actual pattern as much as possible. do not mix platform specific code such as jvm code in commonMain/commonTest.
 2. Use `get_file_problems` tool of `jetbrains` MCP server to check if there are any compilation errors for each files you changed. iterate over until you solve all errors for Kotiln/JVM.
 3. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run either [`compileKotlinLinuxX64` and `compileTestKotlinLiuxX64` on linux] or [`compileKotlinMacosX64` and `compileTestKotlinMacosX64` on macOS], to check if there are any compilation errors for each files you changed especially for Kotlin/Native. iterate over until you solve all errors.
-4. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them. tests should pass both in `jvmTest` and tests for native env which is either `linuxX64Test` or `macosX64Test` depending on your work env.
+4. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them. tests should pass both in `jvmTest` and tests for native env which is either `linuxX64Test` or `macosX64Test` depending on your work env, plus `iosX64Test` where applicable.
 5. Perform internet search **only** if an error is unclear and you need confirmation of a fix. If you are confident in the solution, skip research and proceed.
 6. lucene is very complex software. if you are not sure where is the bug, use `val logger = KotlinLogging.logger{}` if not found, add it, and `logger.debug { "things you want to see: $xxxx" }` to output debug log in the
    suspicious lines of code and make sure. then run the tests to see the debug log. then rethink the next suspicious code to track down the root cause of the bug.
