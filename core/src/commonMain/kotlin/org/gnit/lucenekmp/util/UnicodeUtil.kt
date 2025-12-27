@@ -601,7 +601,7 @@ object UnicodeUtil {
         while (offset < limit) {
             val b = utf8[offset++].toInt() and 0xff
             if (b < 0xc0) {
-                if (b < 0x80) throw RuntimeException()
+                if (b >= 0x80) throw RuntimeException()
                 out[out_offset++] = b.toChar()
             } else if (b < 0xe0) {
                 out[out_offset++] = (((b and 0x1f) shl 6) + (utf8[offset++].toInt() and 0x3f)).toChar()
@@ -610,7 +610,7 @@ object UnicodeUtil {
                     (((b and 0xf) shl 12) + ((utf8[offset].toInt() and 0x3f) shl 6) + (utf8[offset + 1].toInt() and 0x3f)).toChar()
                 offset += 2
             } else {
-                if (b < 0xf8) throw RuntimeException("b = 0x" + b.toHexString())
+                if (b >= 0xf8) throw RuntimeException("b = 0x" + b.toHexString())
                 val ch =
                     (((b and 0x7) shl 18)
                             + ((utf8[offset].toInt() and 0x3f) shl 12)
