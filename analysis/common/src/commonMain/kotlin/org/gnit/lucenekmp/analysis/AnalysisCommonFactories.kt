@@ -10,6 +10,9 @@ import org.gnit.lucenekmp.analysis.de.GermanNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishPluralStemFilterFactory
+import org.gnit.lucenekmp.analysis.hi.HindiNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.hi.HindiStemFilterFactory
+import org.gnit.lucenekmp.analysis.`in`.IndicNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.id.IndonesianStemFilterFactory
 import org.gnit.lucenekmp.analysis.it.ItalianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseLightStemFilterFactory
@@ -82,6 +85,21 @@ object AnalysisCommonFactories {
             SpanishPluralStemFilterFactory.NAME,
             SpanishPluralStemFilterFactory::class
         ) { args -> SpanishPluralStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            IndicNormalizationFilterFactory.NAME,
+            IndicNormalizationFilterFactory::class
+        ) { args -> IndicNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HindiNormalizationFilterFactory.NAME,
+            HindiNormalizationFilterFactory::class
+        ) { args -> HindiNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HindiStemFilterFactory.NAME,
+            HindiStemFilterFactory::class
+        ) { args -> HindiStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             IndonesianStemFilterFactory.NAME,
