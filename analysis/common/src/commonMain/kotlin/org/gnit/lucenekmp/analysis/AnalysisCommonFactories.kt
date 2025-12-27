@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
+import org.gnit.lucenekmp.analysis.bn.BengaliNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.bn.BengaliStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
 import org.gnit.lucenekmp.analysis.en.KStemFilterFactory
@@ -30,6 +32,16 @@ object AnalysisCommonFactories {
 
     fun ensureInitialized() {
         if (initialized) return
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            BengaliNormalizationFilterFactory.NAME,
+            BengaliNormalizationFilterFactory::class
+        ) { args -> BengaliNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            BengaliStemFilterFactory.NAME,
+            BengaliStemFilterFactory::class
+        ) { args -> BengaliStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             ElisionFilterFactory.NAME,
