@@ -15,6 +15,8 @@ import org.gnit.lucenekmp.analysis.pt.PortugueseLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseStemFilterFactory
 import org.gnit.lucenekmp.analysis.ru.RussianLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.sv.SwedishLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.sv.SwedishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.util.ElisionFilterFactory
 
 /** Registers analysis/common factories for SPI lookups. */
@@ -103,6 +105,16 @@ object AnalysisCommonFactories {
             RussianLightStemFilterFactory.NAME,
             RussianLightStemFilterFactory::class
         ) { args -> RussianLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            SwedishLightStemFilterFactory.NAME,
+            SwedishLightStemFilterFactory::class
+        ) { args -> SwedishLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            SwedishMinimalStemFilterFactory.NAME,
+            SwedishMinimalStemFilterFactory::class
+        ) { args -> SwedishMinimalStemFilterFactory(args) }
         initialized = true
     }
 }
