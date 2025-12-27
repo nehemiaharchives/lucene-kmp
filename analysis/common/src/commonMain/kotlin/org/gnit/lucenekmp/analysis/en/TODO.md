@@ -5,6 +5,9 @@
 - PORTED: TestEnglishAnalyzer
 
 ## Cross-language queue (dependency order)
+- PORTED: NepaliStemmer (snowball)
+- PORTED: NepaliAnalyzer
+- PORTED: TestNepaliAnalyzer
 - PORTED: TamilStemmer (snowball)
 - PORTED: TamilAnalyzer
 - PORTED: TestTamilAnalyzer
