@@ -4,6 +4,13 @@
 - PORTED: EnglishAnalyzer
 - PORTED: TestEnglishAnalyzer
 
+## Cross-language queue (dependency order)
+- PORTED: TamilStemmer (snowball)
+- PORTED: TamilAnalyzer
+- PORTED: TestTamilAnalyzer
+- PORTED: EnglishAnalyzer
+- PORTED: TestEnglishAnalyzer
+
 ## Classes (dependency order)
 - PORTED: KStemData1
 - PORTED: KStemData2
