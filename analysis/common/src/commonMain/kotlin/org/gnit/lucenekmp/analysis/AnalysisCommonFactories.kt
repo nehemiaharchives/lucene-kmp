@@ -23,6 +23,8 @@ import org.gnit.lucenekmp.analysis.pt.PortugueseStemFilterFactory
 import org.gnit.lucenekmp.analysis.ru.RussianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.sv.SwedishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.sv.SwedishMinimalStemFilterFactory
+import org.gnit.lucenekmp.analysis.te.TeluguNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.te.TeluguStemFilterFactory
 import org.gnit.lucenekmp.analysis.th.ThaiTokenizerFactory
 import org.gnit.lucenekmp.analysis.util.ElisionFilterFactory
 
@@ -152,6 +154,16 @@ object AnalysisCommonFactories {
             SwedishMinimalStemFilterFactory.NAME,
             SwedishMinimalStemFilterFactory::class
         ) { args -> SwedishMinimalStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            TeluguNormalizationFilterFactory.NAME,
+            TeluguNormalizationFilterFactory::class
+        ) { args -> TeluguNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            TeluguStemFilterFactory.NAME,
+            TeluguStemFilterFactory::class
+        ) { args -> TeluguStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenizerFactory::class,
             ThaiTokenizerFactory.NAME,
