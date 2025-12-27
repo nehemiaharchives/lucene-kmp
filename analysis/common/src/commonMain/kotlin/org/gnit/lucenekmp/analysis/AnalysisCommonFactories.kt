@@ -10,6 +10,7 @@ import org.gnit.lucenekmp.analysis.de.GermanNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishPluralStemFilterFactory
+import org.gnit.lucenekmp.analysis.it.ItalianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseStemFilterFactory
@@ -77,6 +78,11 @@ object AnalysisCommonFactories {
             SpanishPluralStemFilterFactory.NAME,
             SpanishPluralStemFilterFactory::class
         ) { args -> SpanishPluralStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            ItalianLightStemFilterFactory.NAME,
+            ItalianLightStemFilterFactory::class
+        ) { args -> ItalianLightStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             PortugueseLightStemFilterFactory.NAME,
