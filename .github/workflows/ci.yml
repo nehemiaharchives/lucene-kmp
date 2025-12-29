@@ -1,3 +1,4 @@
+# lucene-kmp/.github/workflows/ci.yml
 name: CI
 
 on:
@@ -13,124 +14,141 @@ on:
       - '**.sh'
 
 jobs:
-  build-jvm:
-    name: Test JVM
-    runs-on: ubuntu-latest
-    timeout-minutes: 7
+  tests:
+    name: Test (${{ matrix.platform }} \- ${{ matrix.module_name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # JVM
+          - platform: jvm
+            module_name: core
+            os: ubuntu-latest
+            timeout: 10
+            task: :core:jvmTest
+            artifact: jvm-core-reports
+          - platform: jvm
+            module_name: analysis-common
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:common:jvmTest
+            artifact: jvm-analysis-common-reports
+          - platform: jvm
+            module_name: analysis-morfologik
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:morfologik:jvmTest
+            artifact: jvm-analysis-morfologik-reports
+
+          # Android
+          - platform: android
+            module_name: core
+            os: ubuntu-latest
+            timeout: 10
+            task: :core:testReleaseUnitTest
+            artifact: android-core-reports
+            needs_android: true
+          - platform: android
+            module_name: analysis-common
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:common:testReleaseUnitTest
+            artifact: android-analysis-common-reports
+            needs_android: true
+          - platform: android
+            module_name: analysis-morfologik
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:morfologik:testReleaseUnitTest
+            artifact: android-analysis-morfologik-reports
+            needs_android: true
+
+          # iOS
+          - platform: ios
+            module_name: core
+            os: macos-latest
+            timeout: 20
+            task: :core:iosSimulatorArm64Test
+            artifact: ios-core-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: analysis-common
+            os: macos-latest
+            timeout: 20
+            task: :analysis:common:iosSimulatorArm64Test
+            artifact: ios-analysis-common-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: analysis-morfologik
+            os: macos-latest
+            timeout: 20
+            task: :analysis:morfologik:iosSimulatorArm64Test
+            artifact: ios-analysis-morfologik-reports
+            needs_konan_cache: true
+
+          # Linux
+          - platform: linux
+            module_name: core
+            os: ubuntu-latest
+            timeout: 20
+            task: :core:linuxX64Test
+            artifact: linux-core-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: analysis-common
+            os: ubuntu-latest
+            timeout: 20
+            task: :analysis:common:linuxX64Test
+            artifact: linux-analysis-common-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: analysis-morfologik
+            os: ubuntu-latest
+            timeout: 20
+            task: :analysis:morfologik:linuxX64Test
+            artifact: linux-analysis-morfologik-reports
+            needs_konan_cache: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Validate Gradle Wrapper
+        if: ${{ matrix.platform == 'jvm' }}
         uses: gradle/wrapper-validation-action@v3
 
       - name: Set up JDK 24
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '24'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build JVM
-        run: ./gradlew -PenableHangDetection=true :core:jvmMainClasses :core:jvmTest
-
-      - name: Upload build reports
-        if: ${{ env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: jvm-reports
-          path: |
-            **/build/reports/
-            **/build/test-results/
-
-      - name: Build Summary
-        if: always()
-        run: |
-          echo "### JVM Build Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Workflow: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
-
-  build-android:
-    name: Test Android
-    runs-on: ubuntu-latest
-    timeout-minutes: 7
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 24
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '24'
 
       - name: Set up Android SDK
+        if: ${{ matrix.needs_android }}
         uses: android-actions/setup-android@v3
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Android
-        run: ./gradlew -PenableHangDetection=true :core:testReleaseUnitTest
-
-      - name: Upload build reports
-        if: ${{ env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-reports
-          path: |
-            **/build/reports/
-            **/build/test-results/
-
-      - name: Build Summary
-        if: always()
-        run: |
-          echo "### Android Build Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Workflow: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
-
-  build-ios:
-    name: Test iOS
-    runs-on: macos-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 24
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '24'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Konan cache
+        if: ${{ matrix.needs_konan_cache }}
         uses: actions/cache@v4
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts') }}
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', 'gradle/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-konan-
 
-      - name: Build iOS
-        run: ./gradlew -PenableHangDetection=true :core:iosSimulatorArm64Test
+      - name: Run tests
+        run: ./gradlew -PenableHangDetection=true ${{ matrix.task }}
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ios-reports
+          name: ${{ matrix.artifact }}
           path: |
             **/build/reports/
             **/build/test-results/
@@ -138,7 +156,7 @@ jobs:
       - name: Build Summary
         if: always()
         run: |
-          echo "### iOS Build Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "### ${{ matrix.platform }} \- ${{ matrix.module_name }} Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "* Workflow: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
           echo "* Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
           echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
@@ -146,7 +164,7 @@ jobs:
 
   coverage:
     name: Coverage
-    needs: [build-jvm, build-android, build-ios]
+    needs: [tests]
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -157,7 +175,7 @@ jobs:
       - name: Set up JDK 24
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '24'
 
       - name: Setup Gradle
@@ -167,18 +185,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts') }}
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', 'gradle/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-konan-
 
       - name: Generate Coverage Report
-        run: ./gradlew :core:koverXmlReport
+        run: ./gradlew :core:koverXmlReport :analysis:common:koverXmlReport :analysis:morfologik:koverXmlReport
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
         uses: codecov/codecov-action@v5
         with:
-          files: core/build/reports/kover/report.xml
+          files: |
+            core/build/reports/kover/report.xml
+            analysis/common/build/reports/kover/report.xml
+            analysis/morfologik/build/reports/kover/report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build reports
@@ -187,14 +208,7 @@ jobs:
         with:
           name: build-reports
           path: |
-            build/reports/
             core/build/reports/kover/
-
-      - name: Build Summary
-        if: always()
-        run: |
-          echo "### Full Build Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Workflow: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+            analysis/common/build/reports/kover/
+            analysis/morfologik/build/reports/kover/
+            build/reports/
