@@ -190,7 +190,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Generate Coverage Report
-        run: ./gradlew :core:koverXmlReport :analysis:common:koverXmlReport :analysis:morfologik:koverXmlReport -x :analysis:morfologik:compileDebugKotlinAndroid -x :analysis:morfologik:compileReleaseKotlinAndroid
+        run: ./gradlew :core:koverXmlReport :analysis:common:koverXmlReport :analysis:morfologik:koverXmlReport -x :analysis:morfologik:compileDebugKotlinAndroid -x :analysis:morfologik:compileReleaseKotlinAndroid -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid -x :analysis:morfologik:koverGenerateArtifactDebug -x :analysis:morfologik:koverGenerateArtifactRelease
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
