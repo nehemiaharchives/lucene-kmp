@@ -18,6 +18,8 @@ Under this directory you find two sub directories:
 
 - When porting, when the certain java class included in JDK (e.g. java.util.List, java.util.Map, java.lang.String, etc) is used in lucene java code, you should use kotlin common code equivalent class (e.g. kotlin.collections.List, kotlin.collections.Map, kotlin.String, etc) instead of the JDK class. If those equivalent class is not found in kotlin common code of kotlin standard library, this project will copy the source code of the JDK class which is missing in kotlin std lib and port it into kotlin common code in a package called org.gnit.lucene-kmp.jdkport. These jdk ported classes/interface need to have annotation called @Ported with argument called from like this: @Ported(from="java.util.List") So when porting, if you encounter compilation error saying unresolved reference to certain JDK class/interface, you should first look into the package org.gnit.lucene-kmp.jdkport to see if the ported class/interface is already there. Only when if not found, it should be ported form JDK source code. Most of the missing JDK classes are already in the package.
 
+- Do not port `getXxx()` `setXxx()` method from java when there is `val xxx` or `var xxx` in kotlin common. porting them will end up compilation error regarding platform declaration.   
+
 - The ported project is targeting following platforms:
     1. jvm (jvm server, jvm desktop, Android)
     2. native (iOS, linux)
