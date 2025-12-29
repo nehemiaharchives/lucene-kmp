@@ -15,7 +15,7 @@ on:
 
 jobs:
   tests:
-    name: Test (${{ matrix.platform }} \- ${{ matrix.module_name }})
+    name: Test (${{ matrix.platform }} - ${{ matrix.module_name }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.timeout }}
     strategy:
