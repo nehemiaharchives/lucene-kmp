@@ -166,7 +166,7 @@ afterEvaluate {
     val sourceSets = kotlinExtension.extensions.getByName("sourceSets") as NamedDomainObjectContainer<*>
     val commonMain = sourceSets.getByName("commonMain") as ExtensionAware
 
-    tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
         dependsOn(generatePolishDictionaryKotlin)
     }
 }
