@@ -1,9 +1,8 @@
 package org.gnit.lucenekmp.analysis.morfologik
 
-import okio.FileSystem
 import okio.IOException
-import okio.Path.Companion.toPath
-import okio.SYSTEM
+import okio.Buffer
+import okio.ByteString.Companion.decodeBase64
 import okio.buffer
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.jdkport.InputStream
@@ -36,29 +35,11 @@ class TestMorfologikFilterFactory : BaseTokenStreamTestCase() {
         }
     }
 
-    private class FileResourceLoader(private val resources: Map<String, String>) : ResourceLoader {
-        private fun resolvePath(pathString: String): okio.Path {
-            var prefix = ""
-            repeat(6) {
-                val candidate = if (prefix.isEmpty()) {
-                    pathString
-                } else {
-                    "$prefix/$pathString"
-                }
-                val path = candidate.toPath()
-                if (FileSystem.SYSTEM.exists(path)) {
-                    return path
-                }
-                prefix = if (prefix.isEmpty()) ".." else "$prefix/.."
-            }
-            throw IOException("Resource not found: $pathString")
-        }
-
+    private class InMemoryResourceLoader(private val resources: Map<String, ByteArray>) : ResourceLoader {
         override fun openResource(resource: String): InputStream {
-            val pathString = resources[resource] ?: throw IOException("Resource not found: $resource")
-            val path = resolvePath(pathString)
-            val source = FileSystem.SYSTEM.source(path).buffer()
-            return OkioSourceInputStream(source)
+            val bytes = resources[resource] ?: throw IOException("Resource not found: $resource")
+            val buffer = Buffer().apply { write(bytes) }
+            return OkioSourceInputStream(buffer)
         }
 
         override fun <T> findClass(cname: String, expectedType: KClass<*>): KClass<*> {
@@ -80,10 +61,10 @@ class TestMorfologikFilterFactory : BaseTokenStreamTestCase() {
     @Test
     @Throws(Exception::class)
     fun testExplicitDictionary() {
-        val loader = FileResourceLoader(
+        val loader = InMemoryResourceLoader(
             mapOf(
-                "custom-dictionary.dict" to "lucene/lucene/analysis/morfologik/src/test-files/org/apache/lucene/analysis/morfologik/custom-dictionary.dict",
-                "custom-dictionary.info" to "lucene/lucene/analysis/morfologik/src/test-files/org/apache/lucene/analysis/morfologik/custom-dictionary.info"
+                "custom-dictionary.dict" to CUSTOM_DICT_BYTES,
+                "custom-dictionary.info" to CUSTOM_INFO_BYTES
             )
         )
 
@@ -100,7 +81,7 @@ class TestMorfologikFilterFactory : BaseTokenStreamTestCase() {
     @Test
     @Throws(Exception::class)
     fun testMissingDictionary() {
-        val loader = FileResourceLoader(emptyMap())
+        val loader = InMemoryResourceLoader(emptyMap())
         val expected = assertFailsWith<IOException> {
             val params = mutableMapOf<String, String>()
             params[MorfologikFilterFactory.DICTIONARY_ATTRIBUTE] = "missing-dictionary-resource.dict"
@@ -119,5 +100,15 @@ class TestMorfologikFilterFactory : BaseTokenStreamTestCase() {
             MorfologikFilterFactory(params)
         }
         assertTrue(expected.message?.contains("Unknown parameters") == true)
+    }
+
+    companion object {
+        private val CUSTOM_DICT_BYTES: ByteArray =
+            requireNotNull("XGZzYQVfKwIAAABeBmkGbgZmBmwGZQZjBnQGZQZkBjG4ATIGOwZBBkQGRgZtBm0GYQYyBjsGdAZhBmcGMgMAOwZBBkQGRgZtBm0GYQYxBjsGdAZhBmcGMQMA".decodeBase64())
+                .toByteArray()
+
+        private val CUSTOM_INFO_BYTES: ByteArray =
+            requireNotNull("IwojIEFuIGV4YW1wbGUgc3RlbW1pbmcgZGljdGlvbmFyeSBmaWxlIGZvciBNb3Jmb2xvZ2lrIGZpbHRlci4KIwojIENvbXBpbGUgd2l0aCBNb3Jmb2xvZ2lrLXN0ZW1taW5nLCBzZWUKIyBodHRwczovL2dpdGh1Yi5jb20vbW9yZm9sb2dpay9tb3Jmb2xvZ2lrLXN0ZW1taW5nL3dpa2kvRXhhbXBsZXMKIwoKIyBBdXRob3Igb2YgdGhlIGRpY3Rpb25hcnkuCmZzYS5kaWN0LmF1dGhvcj1BY21lIEluYy4KCiMgRGF0ZSB0aGUgZGljdGlvbmFyeSBkYXRhIHdhcyBhc3NlbWJsZWQgKG5vdCBjb21waWxhdGlvbiB0aW1lISkuCmZzYS5kaWN0LmNyZWF0ZWQ9MjAxNS8xMC8wOCAwOToxNjowMAoKIyBUaGUgbGljZW5zZSBmb3IgdGhlIGRpY3Rpb25hcnkgZGF0YS4KZnNhLmRpY3QubGljZW5zZT1BU0wgMi4wCgojIENoYXJhY3RlciBlbmNvZGluZyBpbnNpZGUgdGhlIGF1dG9tYXRvbiAoYW5kIGlucHV0IGZpbGUpLgpmc2EuZGljdC5lbmNvZGluZz1VVEYtOAoKIyBmaWVsZCBzZXBhcmF0b3IgKGxlbW1hO2luZmxlY3RlZDt0YWcpCmZzYS5kaWN0LnNlcGFyYXRvcj07CgojIHR5cGUgb2YgYmFzZS9sZW1tYSBjb21wcmVzc2lvbiBlbmNvZGluZyBiZWZvcmUgYXV0b21hdG9uIGNvbXByZXNzaW9uLgpmc2EuZGljdC5lbmNvZGVyPUlORklY".decodeBase64())
+                .toByteArray()
     }
 }
