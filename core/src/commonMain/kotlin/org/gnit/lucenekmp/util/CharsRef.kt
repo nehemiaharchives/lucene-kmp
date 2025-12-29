@@ -25,7 +25,7 @@ class CharsRef : Comparable<CharsRef>, CharSequence, Cloneable<CharsRef> {
     override var length: Int = 0
 
     override fun get(index: Int): Char {
-        throw UnsupportedOperationException("get() is not supported. Use charAt() instead.")
+        return charAt(index)
     }
 
     /** Creates a new [CharsRef] initialized with an array of the given capacity  */

@@ -117,7 +117,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         override fun newInstance(): AttributeImpl {
-            throw UnsupportedOperationException("newInstance is not implemented")
+            return CheckClearAttributesAttributeImpl()
         }
     }
 
