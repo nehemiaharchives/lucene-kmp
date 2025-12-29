@@ -151,8 +151,8 @@ abstract class GeneratePolishDictionaryKotlinTask : DefaultTask() {
     }
 }
 
-val polishDictFile = rootProject.projectDir.resolve("../morfologik-stemming/morfologik-polish/src/main/resources/morfologik/stemming/polish/polish.dict").normalize()
-val polishInfoFile = rootProject.projectDir.resolve("../morfologik-stemming/morfologik-polish/src/main/resources/morfologik/stemming/polish/polish.info").normalize()
+val polishDictFile = rootProject.projectDir.resolve("gradle/morfologik/polish/polish.dict").normalize()
+val polishInfoFile = rootProject.projectDir.resolve("gradle/morfologik/polish/polish.info").normalize()
 val generatedKotlinDir = layout.buildDirectory.dir("generated/morfologik/polish/kotlin")
 
 val generatePolishDictionaryKotlin = tasks.register<GeneratePolishDictionaryKotlinTask>("generatePolishDictionaryKotlin") {

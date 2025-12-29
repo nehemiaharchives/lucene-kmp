@@ -20,7 +20,7 @@ import org.gnit.lucenekmp.util.AttributeSource
  */
 class MorfologikFilter(inStream: TokenStream, dict: Dictionary? = null) : TokenFilter(inStream) {
     private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
-    private val tagsAtt: MorphosyntacticTagsAttribute = addAttribute(MorphosyntacticTagsAttribute::class)
+    private val tagsAtt: MorphosyntacticTagsAttribute
     private val posIncrAtt: PositionIncrementAttribute = addAttribute(PositionIncrementAttribute::class)
     private val keywordAttr: KeywordAttribute = addAttribute(KeywordAttribute::class)
 
@@ -34,6 +34,12 @@ class MorfologikFilter(inStream: TokenStream, dict: Dictionary? = null) : TokenF
     private var lemmaListIndex: Int = 0
 
     private val lemmaSplitter = Regex("\\+|\\|")
+
+    init {
+        // Ensure the custom attribute is registered without relying on the default factory.
+        addAttributeImpl(MorphosyntacticTagsAttributeImpl())
+        tagsAtt = addAttribute(MorphosyntacticTagsAttribute::class)
+    }
 
     private fun popNextLemma() {
         val lemma = lemmaList[lemmaListIndex++]

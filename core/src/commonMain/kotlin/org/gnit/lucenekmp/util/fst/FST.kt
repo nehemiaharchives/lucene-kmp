@@ -381,7 +381,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             if (metadata.version < VERSION_LITTLE_ENDIAN) {
                 Short.reverseBytes(`in`.readShort()).toInt() and 0xFFFF
             } else {
-                (`in`.readShort() and 0xFFFF.toShort()).toInt()
+                `in`.readShort().toInt() and 0xFFFF
             }
         } else {
             `in`.readVInt()

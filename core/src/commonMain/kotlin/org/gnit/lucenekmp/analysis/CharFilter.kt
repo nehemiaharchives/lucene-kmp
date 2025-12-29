@@ -21,7 +21,7 @@ import org.gnit.lucenekmp.jdkport.Reader
 // the way java.io.FilterReader should work!
 abstract class CharFilter(input: Reader) : Reader() {
     /** The underlying character-input stream.  */
-    protected val input: Reader = input
+    protected open val input: Reader = input
 
     /**
      * Closes the underlying input stream.
@@ -46,7 +46,7 @@ abstract class CharFilter(input: Reader) : Reader() {
     fun correctOffset(currentOff: Int): Int {
         val corrected = correct(currentOff)
         return if (input is CharFilter)
-            input.correctOffset(corrected)
+            (input as CharFilter).correctOffset(corrected)
         else
             corrected
     }

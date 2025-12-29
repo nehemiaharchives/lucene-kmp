@@ -150,7 +150,7 @@ class StringReader(s: String) : Reader() {
      *
      * @throws     IOException  If an I/O error occurs
      */
-    fun reset() {
+    override fun reset() {
         ensureOpen()
         next = mark
     }

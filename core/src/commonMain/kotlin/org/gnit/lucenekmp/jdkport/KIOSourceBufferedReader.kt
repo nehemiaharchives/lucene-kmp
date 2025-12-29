@@ -215,7 +215,7 @@ class KIOSourceBufferedReader(
      *
      * @throws IOException if the stream has never been marked, or if the mark has been invalidated&#8203;:contentReference[oaicite:22]{index=22}.
      */
-    fun reset() {
+    override fun reset() {
         ensureOpen()
         if (markPos < 0) {
             throw IOException("Stream not marked")

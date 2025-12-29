@@ -452,7 +452,7 @@ open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFA
      * or if the mark has been invalidated
      */
     @Throws(IOException::class)
-    fun reset() {
+    override fun reset() {
         ensureOpen()
         if (markedChar < 0) throw IOException(
             if (markedChar == INVALIDATED)

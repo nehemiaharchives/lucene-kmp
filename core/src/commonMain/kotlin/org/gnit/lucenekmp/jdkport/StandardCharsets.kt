@@ -43,6 +43,11 @@ class StandardCharsets private constructor() {
         val UTF_16BE: Charset = org.gnit.lucenekmp.jdkport.UTF_16BE()
 
         /**
+         * Windows-1251 (CP1251).
+         */
+        val WINDOWS_1251: Charset = org.gnit.lucenekmp.jdkport.CP1251()
+
+        /**
          * Sixteen-bit UCS Transformation Format, little-endian byte order.
          */
         //val UTF_16LE: Charset = sun.nio.cs.UTF_16LE()
@@ -104,6 +109,18 @@ class StandardCharsets private constructor() {
                 "ISO-10646-UCS-2",
                 "X-UTF-16BE",
                 "UnicodeBigUnmarked",
+            )
+        }
+
+        fun aliases_CP1251(): Set<String> {
+            return setOf(
+                "windows-1251",
+                "cp1251",
+                "CP1251",
+                "Cp1251",
+                "MS1251",
+                "ansi-1251",
+                "WINDOWS-1251"
             )
         }
     }

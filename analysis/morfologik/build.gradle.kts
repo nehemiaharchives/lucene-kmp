@@ -9,6 +9,7 @@ plugins {
 }
 
 apply(from = rootProject.file("gradle/generatePolishDicData.gradle.kts"))
+apply(from = rootProject.file("gradle/generateUkrainianDicData.gradle.kts"))
 
 kotlin {
     jvm()
@@ -31,9 +32,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             kotlin.srcDir(layout.buildDirectory.dir("generated/morfologik/polish/kotlin"))
+            kotlin.srcDir(layout.buildDirectory.dir("generated/morfologik/ukrainian/kotlin"))
             dependencies {
                 implementation(project(":core"))
-
+                implementation(project(":analysis:common"))
                 // TODO add following after these modules
                 // implementation(project(":queries"))
                 // implementation(project(":sandbox"))
@@ -48,7 +50,6 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(project(":core"))
-                implementation(project(":analysis:common"))
                 implementation(project(":test-framework"))
                 implementation(libs.kotlin.test)
             }
@@ -102,6 +103,9 @@ kotlin {
         macosX64Test.get().dependsOn(nativeTest)
         linuxX64Test.get().dependsOn(nativeTest)
     }
+}
+dependencies {
+    implementation(project(":analysis:common"))
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {

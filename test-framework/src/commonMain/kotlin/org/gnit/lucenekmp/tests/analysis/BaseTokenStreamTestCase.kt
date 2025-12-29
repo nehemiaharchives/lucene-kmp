@@ -1675,7 +1675,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         @Throws(IOException::class)
-        protected fun whitespaceMockTokenizer(input: Reader): MockTokenizer {
+        fun whitespaceMockTokenizer(input: Reader): MockTokenizer {
             val mockTokenizer: MockTokenizer =
                 MockTokenizer(
                     MockTokenizer.WHITESPACE,

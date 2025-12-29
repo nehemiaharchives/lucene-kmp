@@ -140,6 +140,7 @@ abstract class Charset protected constructor(
         val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8()
 
         val ISO_8859_1: Charset = org.gnit.lucenekmp.jdkport.ISO_8859_1()
+        val WINDOWS_1251: Charset = org.gnit.lucenekmp.jdkport.CP1251()
 
         /**
          * Returns a charset object for the named charset.
@@ -176,4 +177,3 @@ abstract class Charset protected constructor(
  */
 class UnsupportedCharsetException(charsetName: String) :
     IllegalArgumentException("Unsupported charset: $charsetName")
-

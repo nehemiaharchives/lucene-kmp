@@ -350,7 +350,7 @@ object Util {
         scratch.setLength(charLimit)
         scratch.growNoCopy(charLimit)
         for (idx in 0..<charLimit) {
-            scratch.setIntAt(idx, s[idx].digitToInt())
+            scratch.setIntAt(idx, s[idx].code)
         }
         return scratch.get()
     }

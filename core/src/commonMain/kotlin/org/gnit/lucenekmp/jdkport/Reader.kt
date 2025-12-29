@@ -104,4 +104,22 @@ abstract class Reader: Readable, AutoCloseable {
         return false
     }
 
+
+    /**
+     * Resets the stream.  If the stream has been marked, then attempt to
+     * reposition it at the mark.  If the stream has not been marked, then
+     * attempt to reset it in some way appropriate to the particular stream,
+     * for example by repositioning it to its starting point.  Not all
+     * character-input streams support the reset() operation, and some support
+     * reset() without supporting mark().
+     *
+     * @throws     IOException  If the stream has not been marked,
+     * or if the mark has been invalidated,
+     * or if the stream does not support reset(),
+     * or if some other I/O error occurs
+     */
+    @Throws(IOException::class)
+    open fun reset() {
+        throw IOException("reset() not supported")
+    }
 }

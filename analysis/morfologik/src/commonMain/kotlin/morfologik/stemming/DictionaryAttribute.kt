@@ -190,6 +190,8 @@ enum class DictionaryAttribute(val propertyName: String) {
             return when {
                 upper == "UTF-8" || upper == "UTF8" -> Charset.UTF_8
                 upper == "ISO-8859-1" || upper == "ISO_8859_1" -> Charset.ISO_8859_1
+                upper == "CP1251" || upper == "WINDOWS-1251" || upper == "WINDOWS1251" || upper == "MS1251" || upper == "ANSI-1251" ->
+                    Charset.WINDOWS_1251
                 else -> throw UnsupportedCharsetException(normalized)
             }
         }
