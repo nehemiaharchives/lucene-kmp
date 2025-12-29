@@ -190,7 +190,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Generate Coverage Report
-        run: ./gradlew :core:koverXmlReport :analysis:common:koverXmlReport :analysis:morfologik:koverXmlReport -Dkotlin.daemon.jvm.options="-Xmx1g" -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1
+        run: ./gradlew :core:koverXmlReport :analysis:common:koverXmlReport :analysis:morfologik:koverXmlReport -Dkotlin.daemon.jvm.options="-Xmx1g" -Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1 -Dkotlin.compiler.useK2=false
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
