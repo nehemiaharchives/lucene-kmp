@@ -29,8 +29,15 @@ class PrintWriter(val out: Writer): Writer() {
      * @param      s   The `String` to be printed
      * @see Charset.defaultCharset
      */
-    fun print(s: String) {
-        write(s)
+    /**
+     * Prints a string, mapping null to "null" (matches java.io.PrintWriter behavior).
+     */
+    fun print(s: String?) {
+        if (s == null) {
+            write("null")
+        } else {
+            write(s)
+        }
     }
 
     /**

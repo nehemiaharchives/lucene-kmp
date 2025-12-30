@@ -25,7 +25,7 @@ class StandardCharsets private constructor() {
          * Seven-bit ASCII, also known as ISO646-US, also known as the
          * Basic Latin block of the Unicode character set.
          */
-        //val US_ASCII: Charset = sun.nio.cs.US_ASCII.INSTANCE
+        val US_ASCII: Charset = org.gnit.lucenekmp.jdkport.US_ASCII()
 
         /**
          * ISO Latin Alphabet No. 1, also known as ISO-LATIN-1.
@@ -136,6 +136,23 @@ class StandardCharsets private constructor() {
                 "EUC_CN",
                 "EUC-CN",
                 "csGB2312",
+            )
+        }
+
+        fun aliases_US_ASCII(): Set<String> {
+            return setOf(
+                "us-ascii",
+                "ASCII",
+                "646",
+                "iso646-us",
+                "us",
+                "ANSI_X3.4-1968",
+                "ANSI_X3.4-1986",
+                "ISO_646.irv:1991",
+                "ISO646-US",
+                "IBM367",
+                "cp367",
+                "csASCII"
             )
         }
     }

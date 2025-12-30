@@ -63,10 +63,8 @@ class Token() : PackedTokenAttributeImpl(), FlagsAttribute, PayloadAttribute {
     }
 
     override fun clone(): Token {
-        val t = super.clone() as Token
-        if (payload != null) {
-            t.payload = BytesRef.deepCopyOf(payload!!)
-        }
+        val t = Token()
+        this.copyTo(t)
         return t
     }
 
@@ -88,6 +86,8 @@ class Token() : PackedTokenAttributeImpl(), FlagsAttribute, PayloadAttribute {
         (target as FlagsAttribute).flags = flags
         (target as PayloadAttribute).payload = payload?.let { BytesRef.deepCopyOf(it) }
     }
+
+    override fun newInstance(): AttributeImpl = Token()
 
     override fun reflectWith(reflector: AttributeReflector) {
         super.reflectWith(reflector)

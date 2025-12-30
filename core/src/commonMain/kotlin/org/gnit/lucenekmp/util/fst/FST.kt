@@ -1169,7 +1169,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 }
             val startNode: Long = metaIn.readVLong()
             val numBytes: Long = metaIn.readVLong()
-            return FSTMetadata(inputType, outputs, emptyOutput!!, startNode, version, numBytes)
+            return FSTMetadata(inputType, outputs, emptyOutput, startNode, version, numBytes)
         }
 
         /** Reads an automaton from a file.  */

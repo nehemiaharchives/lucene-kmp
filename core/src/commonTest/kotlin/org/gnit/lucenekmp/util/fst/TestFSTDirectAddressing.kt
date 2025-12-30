@@ -153,7 +153,7 @@ class TestFSTDirectAddressing : LuceneTestCase() {
             val MAX_NUM_WORDS = 1_000_000
             val wordList = mutableListOf<BytesRef>()
             Files.newBufferedReader(wordsFilePath.toPath(), StandardCharsets.UTF_8).use { r ->
-                val reader = r as org.gnit.lucenekmp.jdkport.BufferedReader
+                val reader = r
                 while (wordList.size < MAX_NUM_WORDS) {
                     val word = reader.readLine() ?: break
                     wordList.add(BytesRef(word))

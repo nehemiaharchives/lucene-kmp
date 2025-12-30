@@ -97,7 +97,7 @@ object Files {
         return newOutputStream(path, *emptyArray())
     }
 
-    fun newBufferedReader(path: Path, charset: Charset): Reader {
+    fun newBufferedReader(path: Path, charset: Charset): BufferedReader {
         // Create a new input stream for each reader to avoid stream closure issues
         val inputStream = newInputStream(path)
         val decoder = charset.newDecoder()
@@ -105,7 +105,7 @@ object Files {
         return BufferedReader(reader)
     }
 
-    fun newBufferedWriter(path: Path, charset: Charset): Writer {
+    fun newBufferedWriter(path: Path, charset: Charset): BufferedWriter {
         val outputStream = newOutputStream(path)
         val writer = OutputStreamWriter(outputStream, charset)
         return BufferedWriter(writer)

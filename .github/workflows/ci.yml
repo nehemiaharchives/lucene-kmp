@@ -47,6 +47,12 @@ jobs:
             timeout: 10
             task: :analysis:smartcn:jvmTest
             artifact: jvm-analysis-smartcn-reports
+          - platform: jvm
+            module_name: analysis-nori
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:nori:jvmTest
+            artifact: jvm-analysis-nori-reports
 
           # Android
           - platform: android
@@ -76,6 +82,13 @@ jobs:
             timeout: 10
             task: :analysis:smartcn:testReleaseUnitTest
             artifact: android-analysis-smartcn-reports
+            needs_android: true
+          - platform: android
+            module_name: analysis-nori
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:nori:testReleaseUnitTest
+            artifact: android-analysis-nori-reports
             needs_android: true
 
           # iOS
@@ -107,6 +120,13 @@ jobs:
             task: :analysis:smartcn:iosSimulatorArm64Test
             artifact: ios-analysis-smartcn-reports
             needs_konan_cache: true
+          - platform: ios
+            module_name: analysis-nori
+            os: macos-latest
+            timeout: 20
+            task: :analysis:nori:iosSimulatorArm64Test
+            artifact: ios-analysis-nori-reports
+            needs_konan_cache: true
 
           # Linux
           - platform: linux
@@ -136,6 +156,13 @@ jobs:
             timeout: 20
             task: :analysis:smartcn:linuxX64Test
             artifact: linux-analysis-smartcn-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: analysis-nori
+            os: ubuntu-latest
+            timeout: 20
+            task: :analysis:nori:linuxX64Test
+            artifact: linux-analysis-nori-reports
             needs_konan_cache: true
 
     steps:
@@ -216,25 +243,38 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-konan-
 
-      - name: Generate Coverage Report
-        run: |
-          ./gradlew \
-            :core:koverXmlReport \
-            :analysis:common:koverXmlReport \
-            :analysis:morfologik:koverXmlReport \
-            :analysis:smartcn:koverXmlReport \
-            -x :analysis:morfologik:compileDebugKotlinAndroid \
-            -x :analysis:morfologik:compileReleaseKotlinAndroid \
-            -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid \
-            -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid \
-            -x :analysis:morfologik:koverGenerateArtifactDebug \
-            -x :analysis:morfologik:koverGenerateArtifactRelease \
-            -x :analysis:smartcn:compileDebugKotlinAndroid \
-            -x :analysis:smartcn:compileReleaseKotlinAndroid \
-            -x :analysis:smartcn:compileDebugUnitTestKotlinAndroid \
-            -x :analysis:smartcn:compileReleaseUnitTestKotlinAndroid \
-            -x :analysis:smartcn:koverGenerateArtifactDebug \
-            -x :analysis:smartcn:koverGenerateArtifactRelease
+      - name: Coverage :core
+        run: ./gradlew :core:koverXmlReport
+
+      - name: Coverage :analysis:common
+        run: ./gradlew :analysis:common:koverXmlReport
+
+      - name: Coverage :analysis:morfologik
+        run: ./gradlew :analysis:morfologik:koverXmlReport 
+          -x :analysis:morfologik:compileDebugKotlinAndroid \
+          -x :analysis:morfologik:compileReleaseKotlinAndroid \
+          -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid \
+          -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid \
+          -x :analysis:morfologik:koverGenerateArtifactDebug \
+          -x :analysis:morfologik:koverGenerateArtifactRelease
+
+      - name: Coverage :analysis:smartcn
+        run: ./gradlew :analysis:smartcn:koverXmlReport \
+          -x :analysis:smartcn:compileDebugKotlinAndroid \
+          -x :analysis:smartcn:compileReleaseKotlinAndroid \
+          -x :analysis:smartcn:compileDebugUnitTestKotlinAndroid \
+          -x :analysis:smartcn:compileReleaseUnitTestKotlinAndroid \
+          -x :analysis:smartcn:koverGenerateArtifactDebug \
+          -x :analysis:smartcn:koverGenerateArtifactRelease
+
+      - name: Coverage :analysis:nori
+        run: ./gradlew :analysis:nori:koverXmlReport \
+          -x :analysis:nori:compileDebugKotlinAndroid \
+          -x :analysis:nori:compileReleaseKotlinAndroid \
+          -x :analysis:nori:compileDebugUnitTestKotlinAndroid \
+          -x :analysis:nori:compileReleaseUnitTestKotlinAndroid \
+          -x :analysis:nori:koverGenerateArtifactDebug \
+          -x :analysis:nori:koverGenerateArtifactRelease
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
@@ -245,6 +285,7 @@ jobs:
             analysis/common/build/reports/kover/report.xml
             analysis/morfologik/build/reports/kover/report.xml
             analysis/smartcn/build/reports/kover/report.xml
+            analysis/nori/build/reports/kover/report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build reports
@@ -257,4 +298,5 @@ jobs:
             analysis/common/build/reports/kover/
             analysis/morfologik/build/reports/kover/
             analysis/smartcn/build/reports/kover/
+            analysis/nori/build/reports/kover/
             build/reports/
