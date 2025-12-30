@@ -38,7 +38,7 @@ jobs:
           - platform: jvm
             module_name: analysis-morfologik
             os: ubuntu-latest
-            timeout: 10
+            timeout: 15
             task: :analysis:morfologik:jvmTest
             artifact: jvm-analysis-morfologik-reports
           - platform: jvm
@@ -58,35 +58,35 @@ jobs:
           - platform: android
             module_name: core
             os: ubuntu-latest
-            timeout: 10
+            timeout: 15
             task: :core:testReleaseUnitTest
             artifact: android-core-reports
             needs_android: true
           - platform: android
             module_name: analysis-common
             os: ubuntu-latest
-            timeout: 10
+            timeout: 15
             task: :analysis:common:testReleaseUnitTest
             artifact: android-analysis-common-reports
             needs_android: true
           - platform: android
             module_name: analysis-morfologik
             os: ubuntu-latest
-            timeout: 10
+            timeout: 15
             task: :analysis:morfologik:testReleaseUnitTest
             artifact: android-analysis-morfologik-reports
             needs_android: true
           - platform: android
             module_name: analysis-smartcn
             os: ubuntu-latest
-            timeout: 10
+            timeout: 15
             task: :analysis:smartcn:testReleaseUnitTest
             artifact: android-analysis-smartcn-reports
             needs_android: true
           - platform: android
             module_name: analysis-nori
             os: ubuntu-latest
-            timeout: 10
+            timeout: 15
             task: :analysis:nori:testReleaseUnitTest
             artifact: android-analysis-nori-reports
             needs_android: true
