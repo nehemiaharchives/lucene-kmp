@@ -20,6 +20,7 @@ plugins {
 }
 
 apply(from = rootProject.file("gradle/generateBreakIteratorData.gradle.kts"))
+apply(from = rootProject.file("gradle/generateGb2312Data.gradle.kts"))
 
 kotlin {
     jvm()
@@ -42,6 +43,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             kotlin.srcDir(layout.buildDirectory.dir("generated/breakiterator/kotlin"))
+            kotlin.srcDir(layout.buildDirectory.dir("generated/gb2312/kotlin"))
             dependencies {
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)

@@ -48,6 +48,11 @@ class StandardCharsets private constructor() {
         val WINDOWS_1251: Charset = org.gnit.lucenekmp.jdkport.CP1251()
 
         /**
+         * GB2312 (EUC-CN repertoire).
+         */
+        val GB2312: Charset = org.gnit.lucenekmp.jdkport.GB2312()
+
+        /**
          * Sixteen-bit UCS Transformation Format, little-endian byte order.
          */
         //val UTF_16LE: Charset = sun.nio.cs.UTF_16LE()
@@ -121,6 +126,16 @@ class StandardCharsets private constructor() {
                 "MS1251",
                 "ansi-1251",
                 "WINDOWS-1251"
+            )
+        }
+
+        fun aliases_GB2312(): Set<String> {
+            return setOf(
+                "GB2312",
+                "gb2312",
+                "EUC_CN",
+                "EUC-CN",
+                "csGB2312",
             )
         }
     }

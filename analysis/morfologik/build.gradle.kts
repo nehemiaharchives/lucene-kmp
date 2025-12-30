@@ -104,9 +104,6 @@ kotlin {
         linuxX64Test.get().dependsOn(nativeTest)
     }
 }
-dependencies {
-    implementation(project(":analysis:common"))
-}
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     compilerOptions{

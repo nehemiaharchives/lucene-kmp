@@ -41,6 +41,12 @@ jobs:
             timeout: 10
             task: :analysis:morfologik:jvmTest
             artifact: jvm-analysis-morfologik-reports
+          - platform: jvm
+            module_name: analysis-smartcn
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:smartcn:jvmTest
+            artifact: jvm-analysis-smartcn-reports
 
           # Android
           - platform: android
@@ -63,6 +69,13 @@ jobs:
             timeout: 10
             task: :analysis:morfologik:testReleaseUnitTest
             artifact: android-analysis-morfologik-reports
+            needs_android: true
+          - platform: android
+            module_name: analysis-smartcn
+            os: ubuntu-latest
+            timeout: 10
+            task: :analysis:smartcn:testReleaseUnitTest
+            artifact: android-analysis-smartcn-reports
             needs_android: true
 
           # iOS
@@ -87,6 +100,13 @@ jobs:
             task: :analysis:morfologik:iosSimulatorArm64Test
             artifact: ios-analysis-morfologik-reports
             needs_konan_cache: true
+          - platform: ios
+            module_name: analysis-smartcn
+            os: macos-latest
+            timeout: 20
+            task: :analysis:smartcn:iosSimulatorArm64Test
+            artifact: ios-analysis-smartcn-reports
+            needs_konan_cache: true
 
           # Linux
           - platform: linux
@@ -109,6 +129,13 @@ jobs:
             timeout: 20
             task: :analysis:morfologik:linuxX64Test
             artifact: linux-analysis-morfologik-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: analysis-smartcn
+            os: ubuntu-latest
+            timeout: 20
+            task: :analysis:smartcn:linuxX64Test
+            artifact: linux-analysis-smartcn-reports
             needs_konan_cache: true
 
     steps:

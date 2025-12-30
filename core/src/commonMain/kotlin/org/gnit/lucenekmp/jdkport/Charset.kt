@@ -140,7 +140,9 @@ abstract class Charset protected constructor(
         val UTF_8: Charset = org.gnit.lucenekmp.jdkport.UTF_8()
 
         val ISO_8859_1: Charset = org.gnit.lucenekmp.jdkport.ISO_8859_1()
+        val UTF_16BE: Charset = org.gnit.lucenekmp.jdkport.UTF_16BE()
         val WINDOWS_1251: Charset = org.gnit.lucenekmp.jdkport.CP1251()
+        val GB2312: Charset = org.gnit.lucenekmp.jdkport.GB2312()
 
         /**
          * Returns a charset object for the named charset.
@@ -148,22 +150,34 @@ abstract class Charset protected constructor(
          *
          * @throws UnsupportedCharsetException if the name is not "UTF-8" or "UTF8".
          */
-        /*fun forName(charsetName: String): Charset {
-            if (charsetName.equals("UTF-8", ignoreCase = true) ||
-                charsetName.equals("UTF8", ignoreCase = true)
-            ) {
-                return UTF_8
+        private val CHARSET_BY_NAME: Map<String, Charset> by lazy {
+            val map = mutableMapOf<String, Charset>()
+            fun add(cs: Charset, aliases: Set<String>) {
+                map[cs.name().lowercase()] = cs
+                for (alias in aliases) {
+                    map[alias.lowercase()] = cs
+                }
             }
-            throw UnsupportedCharsetException(charsetName)
-        }*/
+            add(UTF_8, StandardCharsets.aliases_UTF_8())
+            add(ISO_8859_1, StandardCharsets.aliases_ISO_8859_1())
+            add(UTF_16BE, StandardCharsets.aliases_UTF_16BE())
+            add(WINDOWS_1251, StandardCharsets.aliases_CP1251())
+            add(GB2312, StandardCharsets.aliases_GB2312())
+            map
+        }
+
+        fun forName(charsetName: String): Charset {
+            val key = charsetName.trim().lowercase()
+            return CHARSET_BY_NAME[key] ?: throw UnsupportedCharsetException(charsetName)
+        }
 
         /**
          * Tells whether the named charset is supported.
          */
-        /*fun isSupported(charsetName: String): Boolean {
-            return charsetName.equals("UTF-8", ignoreCase = true) ||
-                    charsetName.equals("UTF8", ignoreCase = true)
-        }*/
+        fun isSupported(charsetName: String): Boolean {
+            val key = charsetName.trim().lowercase()
+            return CHARSET_BY_NAME.containsKey(key)
+        }
 
         /**
          * Returns the default charset. Always UTF-8.

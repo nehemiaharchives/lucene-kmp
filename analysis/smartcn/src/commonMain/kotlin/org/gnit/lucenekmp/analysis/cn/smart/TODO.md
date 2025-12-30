@@ -1,0 +1,22 @@
+# SmartCN porting order
+
+- [PORTED] CharType
+- [PORTED] WordType
+- [PORTED] Utility
+- [PORTED] SegToken
+- [PORTED] SegTokenPair
+- [PORTED] PathNode
+- [PORTED] SegGraph
+- [PORTED] SegTokenFilter
+- [PORTED] AbstractDictionary
+- [PORTED] AnalyzerProfile
+- [PORTED] WordDictionary
+- [PORTED] BigramDictionary
+- [PORTED] BiSegGraph
+- [PORTED] HHMMSegmenter
+- [PORTED] WordSegmenter
+- [PORTED] HMMChineseTokenizer
+- [PORTED] HMMChineseTokenizerFactory
+- [PORTED] TestHMMChineseTokenizerFactory
+- [PORTED] SmartChineseAnalyzer
+- [PORTED] TestSmartChineseAnalyzer
