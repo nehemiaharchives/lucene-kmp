@@ -232,6 +232,9 @@ jobs:
           distribution: temurin
           java-version: '24'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -250,30 +253,33 @@ jobs:
         run: ./gradlew :analysis:common:koverXmlReport
 
       - name: Coverage :analysis:morfologik
-        run: ./gradlew :analysis:morfologik:koverXmlReport 
-          -x :analysis:morfologik:compileDebugKotlinAndroid \
-          -x :analysis:morfologik:compileReleaseKotlinAndroid \
-          -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid \
-          -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid \
-          -x :analysis:morfologik:koverGenerateArtifactDebug \
+        run: >
+          ./gradlew :analysis:morfologik:koverXmlReport
+          -x :analysis:morfologik:compileDebugKotlinAndroid
+          -x :analysis:morfologik:compileReleaseKotlinAndroid
+          -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid
+          -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:morfologik:koverGenerateArtifactDebug
           -x :analysis:morfologik:koverGenerateArtifactRelease
 
       - name: Coverage :analysis:smartcn
-        run: ./gradlew :analysis:smartcn:koverXmlReport \
-          -x :analysis:smartcn:compileDebugKotlinAndroid \
-          -x :analysis:smartcn:compileReleaseKotlinAndroid \
-          -x :analysis:smartcn:compileDebugUnitTestKotlinAndroid \
-          -x :analysis:smartcn:compileReleaseUnitTestKotlinAndroid \
-          -x :analysis:smartcn:koverGenerateArtifactDebug \
+        run: >
+          ./gradlew :analysis:smartcn:koverXmlReport
+          -x :analysis:smartcn:compileDebugKotlinAndroid
+          -x :analysis:smartcn:compileReleaseKotlinAndroid
+          -x :analysis:smartcn:compileDebugUnitTestKotlinAndroid
+          -x :analysis:smartcn:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:smartcn:koverGenerateArtifactDebug
           -x :analysis:smartcn:koverGenerateArtifactRelease
 
       - name: Coverage :analysis:nori
-        run: ./gradlew :analysis:nori:koverXmlReport \
-          -x :analysis:nori:compileDebugKotlinAndroid \
-          -x :analysis:nori:compileReleaseKotlinAndroid \
-          -x :analysis:nori:compileDebugUnitTestKotlinAndroid \
-          -x :analysis:nori:compileReleaseUnitTestKotlinAndroid \
-          -x :analysis:nori:koverGenerateArtifactDebug \
+        run: >
+          ./gradlew :analysis:nori:koverXmlReport
+          -x :analysis:nori:compileDebugKotlinAndroid
+          -x :analysis:nori:compileReleaseKotlinAndroid
+          -x :analysis:nori:compileDebugUnitTestKotlinAndroid
+          -x :analysis:nori:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:nori:koverGenerateArtifactDebug
           -x :analysis:nori:koverGenerateArtifactRelease
 
       - name: Upload coverage reports to Codecov
