@@ -236,7 +236,7 @@ abstract class GenerateGB2312MappingKotlinTask : DefaultTask() {
 }
 
 val gb2312MapFile = rootProject.projectDir
-    .resolve("../jdk24u/make/data/charsetmapping/EUC_CN.map")
+    .resolve("gradle/gb2312/EUC_CN.map")
     .normalize()
 val generatedKotlinDir = layout.buildDirectory.dir("generated/gb2312/kotlin")
 
