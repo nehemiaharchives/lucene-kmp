@@ -243,10 +243,10 @@ abstract class GenerateChineseDictionaryKotlinTask : DefaultTask() {
 }
 
 val bigramMemFilePath = rootProject.projectDir
-    .resolve("../lucene/lucene/analysis/smartcn/src/resources/org/apache/lucene/analysis/cn/smart/hhmm/bigramdict.mem")
+    .resolve("gradle/smartcn/bigramdict.mem")
     .normalize()
 val coreMemFilePath = rootProject.projectDir
-    .resolve("../lucene/lucene/analysis/smartcn/src/resources/org/apache/lucene/analysis/cn/smart/hhmm/coredict.mem")
+    .resolve("gradle/smartcn/coredict.mem")
     .normalize()
 val generatedKotlinDir = layout.buildDirectory.dir("generated/cn/smart/kotlin")
 
