@@ -217,7 +217,24 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Generate Coverage Report
-        run: ./gradlew :core:koverXmlReport :analysis:common:koverXmlReport :analysis:morfologik:koverXmlReport -x :analysis:morfologik:compileDebugKotlinAndroid -x :analysis:morfologik:compileReleaseKotlinAndroid -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid -x :analysis:morfologik:koverGenerateArtifactDebug -x :analysis:morfologik:koverGenerateArtifactRelease
+        run: |
+          ./gradlew \
+            :core:koverXmlReport \
+            :analysis:common:koverXmlReport \
+            :analysis:morfologik:koverXmlReport \
+            :analysis:smartcn:koverXmlReport \
+            -x :analysis:morfologik:compileDebugKotlinAndroid \
+            -x :analysis:morfologik:compileReleaseKotlinAndroid \
+            -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid \
+            -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid \
+            -x :analysis:morfologik:koverGenerateArtifactDebug \
+            -x :analysis:morfologik:koverGenerateArtifactRelease \
+            -x :analysis:smartcn:compileDebugKotlinAndroid \
+            -x :analysis:smartcn:compileReleaseKotlinAndroid \
+            -x :analysis:smartcn:compileDebugUnitTestKotlinAndroid \
+            -x :analysis:smartcn:compileReleaseUnitTestKotlinAndroid \
+            -x :analysis:smartcn:koverGenerateArtifactDebug \
+            -x :analysis:smartcn:koverGenerateArtifactRelease
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
@@ -227,6 +244,7 @@ jobs:
             core/build/reports/kover/report.xml
             analysis/common/build/reports/kover/report.xml
             analysis/morfologik/build/reports/kover/report.xml
+            analysis/smartcn/build/reports/kover/report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build reports
@@ -238,4 +256,5 @@ jobs:
             core/build/reports/kover/
             analysis/common/build/reports/kover/
             analysis/morfologik/build/reports/kover/
+            analysis/smartcn/build/reports/kover/
             build/reports/
