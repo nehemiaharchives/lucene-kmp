@@ -54,7 +54,7 @@ class CharSequenceOutputs private constructor() : Outputs<CharsRef>() {
                 val result = CharsRef(prefix.length + output.length)
                 System.arraycopy(prefix.chars, prefix.offset, result.chars, 0, prefix.length)
                 System.arraycopy(output.chars, output.offset, result.chars, prefix.length, output.length)
-                result.length = prefix.length + output.length
+                result.lengthMutable = prefix.length + output.length
                 result
             }
         }
@@ -79,7 +79,7 @@ class CharSequenceOutputs private constructor() : Outputs<CharsRef>() {
             for (i in 0 until len) {
                 output.chars[i] = `in`.readVInt().toChar()
             }
-            output.length = len
+            output.lengthMutable = len
             output
         }
     }

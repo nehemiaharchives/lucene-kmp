@@ -249,7 +249,7 @@ abstract class Analyzer
      * Wrap the given [Reader] with [CharFilter]s that make sense for normalization. This
      * is typically a subset of the [CharFilter]s that are applied in [.initReader]. This is used by [.normalize].
      */
-    protected fun initReaderForNormalization(fieldName: String?, reader: Reader): Reader {
+    protected open fun initReaderForNormalization(fieldName: String?, reader: Reader): Reader {
         return reader
     }
 

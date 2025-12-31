@@ -35,7 +35,7 @@ abstract class Viterbi<T : Token, U : Viterbi.Position>(
     protected val buffer: RollingCharBuffer = RollingCharBuffer()
     protected val positions: WrappedPositionArray<U> = WrappedPositionArray(positionFactory)
 
-    protected var end: Boolean = false
+    var end: Boolean = false
     protected var lastBackTracePos: Int = 0
     var pos: Int = 0
 
@@ -329,9 +329,9 @@ abstract class Viterbi<T : Token, U : Viterbi.Position>(
     @Throws(IOException::class)
     protected open fun computePenalty(pos: Int, length: Int): Int = 0
 
-    fun isEnd(): Boolean = end
+    open fun isEnd(): Boolean = end
 
-    fun isOutputNBest(): Boolean = outputNBest
+    open fun isOutputNBest(): Boolean = outputNBest
 
     fun resetBuffer(reader: Reader) {
         buffer.reset(reader)
@@ -395,7 +395,7 @@ abstract class Viterbi<T : Token, U : Viterbi.Position>(
             count++
         }
 
-        fun reset() {
+        open fun reset() {
             count = 0
         }
 

@@ -356,7 +356,7 @@ open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFA
      * {@inheritDoc}
      */
     @Throws(IOException::class)
-    fun skip(n: Long): Long {
+    open fun skip(n: Long): Long {
         require(n >= 0L) { "skip value is negative" }
         ensureOpen()
         var r = n
@@ -437,7 +437,7 @@ open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFA
      * @throws     IOException  If an I/O error occurs
      */
     @Throws(IOException::class)
-    fun mark(readAheadLimit: Int) {
+    open fun mark(readAheadLimit: Int) {
         require(readAheadLimit >= 0) { "Read-ahead limit < 0" }
         ensureOpen()
         this.readAheadLimit = readAheadLimit

@@ -42,7 +42,7 @@ abstract class CharFilterFactory : AbstractAnalysisFactory {
      * char filters that should be applied at normalization time can delegate to `create`
      * method.
      */
-    fun normalize(input: Reader): Reader {
+    open fun normalize(input: Reader): Reader {
         return input
     }
 
