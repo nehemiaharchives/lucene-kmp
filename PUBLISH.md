@@ -357,6 +357,57 @@ There’s also another task available which both uploads and releases the artifa
 
 **Et voilà, you have successfully published your library to Maven Central.**
 
+# Fixing Failing Publish GitHub Action
+
+command‑line guide to retag an existing release to a new commit and retrigger publish.
+
+Assumptions:
+
+- Repo: nehemiaharchives/lucene-kmp
+- Tag: 10.2.0-alpha04
+- New commit: NEW_SHA
+- You have git + gh authenticated.
+
+1. Push your new commit (if it’s only local)
+
+cd /path/to/lucene-kmp
+git push origin master
+
+2. Move the tag locally to the new commit
+
+git tag -f 10.2.0-alpha04 NEW_SHA
+
+3. Force‑push the tag to GitHub
+
+git push origin refs/tags/10.2.0-alpha04 --force
+
+4. (Optional) Verify the tag now points to the new commit
+
+git ls-remote --tags origin 10.2.0-alpha04
+
+5. Retrigger the release workflow
+   Option A — delete & recreate the release (most reliable):
+
+gh release delete 10.2.0-alpha04 -R nehemiaharchives/lucene-kmp -y
+gh release create 10.2.0-alpha04 \
+-R nehemiaharchives/lucene-kmp \
+--prerelease \
+--title "10.2.0-alpha04" \
+--notes-file RELEASE_NOTES_10.2.0-alpha04.md
+
+Option B — edit release (sometimes doesn’t re‑emit event):
+
+gh release edit 10.2.0-alpha04 -R nehemiaharchives/lucene-kmp --draft=false --prerelease
+
+6. Confirm publish workflow is running
+
+gh run list -R nehemiaharchives/lucene-kmp -w publish.yml --limit 3
+
+Notes:
+
+- GitHub Actions release event triggers only when a release is created (or some edits), so delete + recreate is the most reliable way to retrigger.
+- The tag must already point to the new commit before you recreate the release.
+
 # Next steps
 - Share your library with the Kotlin Community in the `#feed` channel in the [Kotlin Slack](https://kotlinlang.slack.com/) (To sign up visit https://kotl.in/slack.)
 - Add [shield.io badges](https://shields.io/badges/maven-central-version) to your README.
