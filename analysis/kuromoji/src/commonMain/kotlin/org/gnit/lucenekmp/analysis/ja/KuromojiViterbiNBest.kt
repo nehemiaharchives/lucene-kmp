@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.analysis.ja.dict.UnknownDictionary
 import org.gnit.lucenekmp.analysis.ja.dict.UserDictionary
 import org.gnit.lucenekmp.analysis.morph.ConnectionCosts
 import org.gnit.lucenekmp.analysis.morph.Dictionary
+import org.gnit.lucenekmp.analysis.morph.GraphvizFormatter
 import org.gnit.lucenekmp.analysis.morph.TokenInfoFST
 import org.gnit.lucenekmp.analysis.morph.TokenType
 import org.gnit.lucenekmp.analysis.morph.ViterbiNBest
@@ -45,6 +46,7 @@ internal class KuromojiViterbiNBest(
     private val SEARCH_MODE_OTHER_PENALTY = 1700
 
     private val wordIdRefLocal = IntsRef()
+    private var dotOut: GraphvizFormatter<JaMorphData>? = null
 
     init {
         @Suppress("UNCHECKED_CAST")
@@ -79,6 +81,12 @@ internal class KuromojiViterbiNBest(
             }
         }
         return 0
+    }
+
+    @Throws(IOException::class)
+    private fun computeSecondBestThreshold(pos: Int, length: Int): Int {
+        // Same strategy as upstream: use the penalty as the allowed extra cost.
+        return computePenalty(pos, length)
     }
 
     @Throws(IOException::class)
@@ -133,6 +141,15 @@ internal class KuromojiViterbiNBest(
         }
 
         val fragment = buffer.get(lastBackTracePos, endPos - lastBackTracePos)
+        dotOut?.onBacktrace(
+            { type -> getDict(type) },
+            positions,
+            lastBackTracePos,
+            endPosData,
+            fromIDX,
+            fragment,
+            end
+        )
 
         var pos = endPos
         var bestIDX = fromIDX
@@ -145,13 +162,60 @@ internal class KuromojiViterbiNBest(
             val posData = positions.get(pos)
 
             var backPos = posData.backPos[bestIDX]
-            val length = pos - backPos
+            var length = pos - backPos
             var backType = posData.backType[bestIDX]
             var backID = posData.backID[bestIDX]
             var nextBestIDX = posData.backIndex[bestIDX]
 
-            // Note: full Lucene SEARCH-mode 2nd best segmentation logic is complex; for now we keep
-            // only the 1-best backtrace, and rely on n-best via backtraceNBest/registerNode.
+            if (searchMode && altToken == null && backType != TokenType.USER) {
+                val penalty = computeSecondBestThreshold(backPos, pos - backPos)
+                if (penalty > 0) {
+                    var maxCost = posData.costs[bestIDX] + penalty
+                    if (lastLeftWordID != -1) {
+                        maxCost += costs.get(getDict(backType).getRightId(backID), lastLeftWordID)
+                    }
+
+                    pruneAndRescore(backPos, pos, posData.backIndex[bestIDX])
+
+                    var leastCost = Int.MAX_VALUE
+                    var leastIDX = -1
+                    for (idx in 0 until posData.count) {
+                        var cost = posData.costs[idx]
+                        if (lastLeftWordID != -1) {
+                            cost += costs.get(
+                                getDict(posData.backType[idx]).getRightId(posData.backID[idx]),
+                                lastLeftWordID
+                            )
+                        }
+                        if (cost < leastCost) {
+                            leastCost = cost
+                            leastIDX = idx
+                        }
+                    }
+
+                    if (leastIDX != -1 && leastCost <= maxCost && posData.backPos[leastIDX] != backPos) {
+                        altToken = Token(
+                            fragment,
+                            backPos - lastBackTracePos,
+                            length,
+                            backPos,
+                            backPos + length,
+                            backID,
+                            backType,
+                            getDict(backType).getMorphAttributes()
+                        )
+
+                        bestIDX = leastIDX
+                        nextBestIDX = posData.backIndex[bestIDX]
+
+                        backPos = posData.backPos[bestIDX]
+                        length = pos - backPos
+                        backType = posData.backType[bestIDX]
+                        backID = posData.backID[bestIDX]
+                        backCount = 0
+                    }
+                }
+            }
 
             val offset = backPos - lastBackTracePos
 
@@ -251,6 +315,79 @@ internal class KuromojiViterbiNBest(
         positions.freeBefore(endPos)
     }
 
+    @Throws(IOException::class)
+    private fun pruneAndRescore(startPos: Int, endPos: Int, bestStartIDX: Int) {
+        var pos = endPos
+        while (pos > startPos) {
+            val posData = positions.get(pos)
+            for (arcIDX in 0 until posData.count) {
+                val backPos = posData.backPos[arcIDX]
+                if (backPos >= startPos) {
+                    positions.get(backPos).addForward(
+                        pos,
+                        arcIDX,
+                        posData.backID[arcIDX],
+                        posData.backType[arcIDX]
+                    )
+                }
+            }
+            posData.count = 0
+            pos--
+        }
+
+        for (pos2 in startPos until endPos) {
+            val posData = positions.get(pos2)
+            if (posData.count == 0) {
+                posData.forwardCount = 0
+                continue
+            }
+
+            if (pos2 == startPos) {
+                val rightID = if (startPos == 0) {
+                    0
+                } else {
+                    getDict(posData.backType[bestStartIDX]).getRightId(posData.backID[bestStartIDX])
+                }
+                val pathCost = posData.costs[bestStartIDX]
+                for (forwardArcIDX in 0 until posData.forwardCount) {
+                    val forwardType = posData.forwardType[forwardArcIDX]
+                    val dict2 = getDict(forwardType)
+                    val wordID = posData.forwardID[forwardArcIDX]
+                    val toPos = posData.forwardPos[forwardArcIDX]
+                    val newCost =
+                        pathCost +
+                            dict2.getWordCost(wordID) +
+                            costs.get(rightID, dict2.getLeftId(wordID)) +
+                            computePenalty(pos2, toPos - pos2)
+                    positions.get(toPos).add(
+                        newCost,
+                        dict2.getRightId(wordID),
+                        pos2,
+                        -1,
+                        bestStartIDX,
+                        wordID,
+                        forwardType
+                    )
+                }
+            } else {
+                for (forwardArcIDX in 0 until posData.forwardCount) {
+                    val forwardType = posData.forwardType[forwardArcIDX]
+                    val toPos = posData.forwardPos[forwardArcIDX]
+                    add(
+                        getDict(forwardType).getMorphAttributes(),
+                        posData,
+                        pos2,
+                        toPos,
+                        posData.forwardID[forwardArcIDX],
+                        forwardType,
+                        true
+                    )
+                }
+            }
+            posData.forwardCount = 0
+        }
+    }
+
     override fun registerNode(node: Int, fragment: CharArray) {
         val lattice = lattice ?: return
         val left = lattice.getNodeLeft(node)
@@ -327,6 +464,10 @@ internal class KuromojiViterbiNBest(
     fun isEndOfInput(): Boolean = end
 
     fun isOutputNBestEnabled(): Boolean = outputNBest
+
+    fun setGraphvizFormatter(formatter: GraphvizFormatter<JaMorphData>?) {
+        dotOut = formatter
+    }
 
     companion object {
         fun isPunctuation(ch: Char): Boolean {

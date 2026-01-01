@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.ja.completion.CharSequenceUtils
 import org.gnit.lucenekmp.analysis.ja.completion.KatakanaRomanizer
 import org.gnit.lucenekmp.analysis.ja.tokenattributes.ReadingAttribute
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.ReadingAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
@@ -27,6 +28,11 @@ class JapaneseCompletionFilter(input: TokenStream, private val mode: Mode = DEFA
 
     companion object {
         val DEFAULT_MODE: Mode = Mode.INDEX
+    }
+
+    init {
+        ReadingAttributeImpl.ensureRegistered()
+        addAttributeImpl(ReadingAttributeImpl())
     }
 
     private val termAttr: CharTermAttribute = addAttribute(CharTermAttribute::class)

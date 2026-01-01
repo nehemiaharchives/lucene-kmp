@@ -85,19 +85,19 @@ Port Kuromoji production code first (no tests), then port and run tests.
 - PORTED: TestJapaneseBaseFormFilter (compiles, test fails)
 - PORTED: TestJapaneseCompletionFilter (compiles, test fails)
 - PORTED: TestJapaneseIterationMarkCharFilterFactory (compiles, test fails)
-- TO_BE_PORTED: TestJapaneseKatakanaStemFilter
-- TO_BE_PORTED: TestJapaneseNumberFilterFactory
-- TO_BE_PORTED: TestJapaneseReadingFormFilterFactory
+- PORTED: TestJapaneseKatakanaStemFilter
+- PORTED: TestJapaneseNumberFilterFactory
+- PORTED: TestJapaneseReadingFormFilterFactory
 - PORTED: TestJapaneseTokenizer (compiles, need fix)
 - PORTED: LineNumberReader (need to port jdk unit test)
 - TO_BE_PORTED: TestJapaneseAnalyzer
-- TO_BE_PORTED: TestJapaneseCompletionAnalyzer
-- TO_BE_PORTED: TestJapaneseHiraganaUppercaseFilterFactory
-- TO_BE_PORTED: TestJapaneseIterationMarkCharFilter
-- TO_BE_PORTED: TestJapaneseKatakanaUppercaseFilterFactory
-- TO_BE_PORTED: TestJapaneseNumberFilter
-- TO_BE_PORTED: TestJapaneseReadingFormFilter
-- TO_BE_PORTED: TestSearchMode
+- PORTED: TestJapaneseCompletionAnalyzer
+- PORTED: TestJapaneseHiraganaUppercaseFilterFactory
+- PORTED: TestJapaneseIterationMarkCharFilter
+- PORTED: TestJapaneseKatakanaUppercaseFilterFactory
+- PORTED: TestJapaneseNumberFilter
+- PORTED: TestJapaneseReadingFormFilter
+- PORTED: TestSearchMode
 
 ### B.3 Integration.completion
-- TO_BE_PORTED: TestKatakanaRomanizer
+- PORTED: TestKatakanaRomanizer

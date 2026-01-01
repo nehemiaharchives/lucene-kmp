@@ -27,7 +27,7 @@ class TestCharsRef : LuceneTestCase() {
         }
 
         Arrays.sort(utf8)
-        Arrays.sort(utf16, CharsRef.uTF16SortedAsUTF8Comparator)
+        Arrays.sort(utf16, CharsRef.UTF16SortedAsUTF8Comparator)
 
         for (i in 0 until numStrings) {
             val s1 = utf8[i].utf8ToString()
@@ -71,9 +71,9 @@ class TestCharsRef : LuceneTestCase() {
     @Test
     fun testCharSequenceCharAt() {
         val c = CharsRef("abc")
-        assertEquals('b', c.charAt(1))
-        expectThrows(IndexOutOfBoundsException::class) { c.charAt(-1) }
-        expectThrows(IndexOutOfBoundsException::class) { c.charAt(3) }
+        assertEquals('b', c[1])
+        expectThrows(IndexOutOfBoundsException::class) { c[-1] }
+        expectThrows(IndexOutOfBoundsException::class) { c[3] }
     }
 
     @Test

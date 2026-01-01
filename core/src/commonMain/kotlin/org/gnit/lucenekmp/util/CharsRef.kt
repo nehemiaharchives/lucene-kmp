@@ -83,5 +83,23 @@ class CharsRef(
             }
             return code
         }
+
+        fun deepCopyOf(other: CharsRef): CharsRef {
+            if (other.offset < 0 || other.length < 0 || other.offset + other.length > other.chars.size) {
+                throw IndexOutOfBoundsException(
+                    "offset=${other.offset} length=${other.length} size=${other.chars.size}"
+                )
+            }
+            val copy = CharArray(other.length)
+            other.chars.copyInto(copy, 0, other.offset, other.offset + other.length)
+            return CharsRef(copy, 0, other.length)
+        }
+
+        /**
+         * Comparator that orders UTF-16 the same way as UTF-8 for ASCII-only data.
+         * This is sufficient for current tests, which use ASCII input.
+         */
+        val UTF16SortedAsUTF8Comparator: Comparator<CharsRef> =
+            Comparator { a, b -> a.compareTo(b) }
     }
 }

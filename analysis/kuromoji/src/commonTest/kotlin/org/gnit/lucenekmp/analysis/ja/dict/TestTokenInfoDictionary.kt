@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.analysis.ja.dict
 
 import okio.Path
+import okio.Path.Companion.toPath
 import org.gnit.lucenekmp.analysis.ja.dict.TokenInfoDictionary.Companion.FST_FILENAME_SUFFIX
 import org.gnit.lucenekmp.analysis.morph.BinaryDictionary
 import org.gnit.lucenekmp.analysis.morph.BinaryDictionary.Companion.DICT_FILENAME_SUFFIX
@@ -26,6 +27,14 @@ import kotlin.test.assertTrue
 
 /** Tests of TokenInfoDictionary build tools; run using ant test-tools  */
 class TestTokenInfoDictionary : LuceneTestCase() {
+    private fun createTempDir(prefix: String): Path {
+        val base = "build/tmp/kuromoji".toPath()
+        Files.createDirectories(base)
+        val dir = base.resolve("$prefix-${random().nextInt()}")
+        Files.createDirectories(dir)
+        return dir
+    }
+
     @Throws(Exception::class)
     fun testPut() {
         val dict: TokenInfoDictionary =
@@ -51,7 +60,7 @@ class TestTokenInfoDictionary : LuceneTestCase() {
 
     @Throws(Exception::class)
     private fun newDictionary(vararg entries: String): TokenInfoDictionary {
-        val dir: Path = /*LuceneTestCase.createTempDir()*/ TODO("replace path and file acccess to inlined String val")
+        val dir: Path = createTempDir("tokenInfoDict")
         Files.newOutputStream(dir.resolve("test.csv")).use { out ->
             PrintWriter(
                 OutputStreamWriter(

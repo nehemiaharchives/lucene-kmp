@@ -14,6 +14,10 @@ class BaseFormAttributeImpl : AttributeImpl(), BaseFormAttribute {
                 arrayOf(BaseFormAttribute::class)
             )
         }
+
+        fun ensureRegistered() {
+            // Forces companion initialization on K/N so AttributeSource sees registrations.
+        }
     }
 
     private var token: Token? = null

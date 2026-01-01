@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.util.IOSupplier
 import okio.Path
 
 /** Dictionary for unknown-word handling. */
-class UnknownDictionary private constructor(
+class UnknownDictionary internal constructor(
     targetMapResource: IOSupplier<InputStream>,
     posResource: IOSupplier<InputStream>,
     dictResource: IOSupplier<InputStream>

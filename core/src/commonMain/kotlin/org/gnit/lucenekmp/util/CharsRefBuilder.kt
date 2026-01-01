@@ -45,6 +45,13 @@ class CharsRefBuilder {
         append(buffer, offset, length)
     }
 
+    /** Copies UTF-8 bytes into this builder as UTF-16 chars. */
+    fun copyUTF8Bytes(ref: BytesRef) {
+        val utf16 = CharArray(ref.length)
+        val utf16Len = UnicodeUtil.UTF8toUTF16(ref.bytes, ref.offset, ref.length, utf16)
+        copyChars(utf16, 0, utf16Len)
+    }
+
     override fun toString(): String = chars.concatToString(0, len)
 
     /** Ensures internal buffer can hold at least newLength characters. */

@@ -230,9 +230,9 @@ class TestToStringUtil : LuceneTestCase() {
 
         for (s in table.keys) {
             assertEquals(
-                s,
                 table[s],
-                ToStringUtil.getRomanization(s)
+                ToStringUtil.getRomanization(s),
+                s
             )
         }
     }

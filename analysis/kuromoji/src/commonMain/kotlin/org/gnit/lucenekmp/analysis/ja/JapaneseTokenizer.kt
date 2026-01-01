@@ -18,7 +18,14 @@ import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttribute
+import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.util.AttributeFactory
+import org.gnit.lucenekmp.util.AttributeImpl
+import org.gnit.lucenekmp.util.Attribute
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.BaseFormAttributeImpl
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.InflectionAttributeImpl
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.PartOfSpeechAttributeImpl
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.ReadingAttributeImpl
 import org.gnit.lucenekmp.util.fst.FST
 import org.gnit.lucenekmp.jdkport.StringReader
 
@@ -37,6 +44,19 @@ class JapaneseTokenizer : Tokenizer {
         val DEFAULT_MODE: Mode = Mode.SEARCH
 
         internal fun isPunctuation(ch: Char): Boolean = KuromojiViterbiNBest.isPunctuation(ch)
+
+        private val DEFAULT_TOKEN_ATTRIBUTE_FACTORY: AttributeFactory =
+            object : AttributeFactory() {
+                override fun createAttributeInstance(attClass: kotlin.reflect.KClass<out Attribute>): AttributeImpl {
+                    return when (attClass) {
+                        BaseFormAttribute::class -> BaseFormAttributeImpl()
+                        PartOfSpeechAttribute::class -> PartOfSpeechAttributeImpl()
+                        ReadingAttribute::class -> ReadingAttributeImpl()
+                        InflectionAttribute::class -> InflectionAttributeImpl()
+                        else -> TokenStream.DEFAULT_TOKEN_ATTRIBUTE_FACTORY.createAttributeInstance(attClass)
+                    }
+                }
+            }
     }
 
     private var lastTokenPos: Int = -1
@@ -47,6 +67,19 @@ class JapaneseTokenizer : Tokenizer {
     private val offsetAtt: OffsetAttribute = addAttribute(OffsetAttribute::class)
     private val posIncAtt: PositionIncrementAttribute = addAttribute(PositionIncrementAttribute::class)
     private val posLengthAtt: PositionLengthAttribute = addAttribute(PositionLengthAttribute::class)
+
+    init {
+        // Ensure Kuromoji-specific attributes are registered before addAttribute() is called.
+        BaseFormAttributeImpl.ensureRegistered()
+        PartOfSpeechAttributeImpl.ensureRegistered()
+        ReadingAttributeImpl.ensureRegistered()
+        InflectionAttributeImpl.ensureRegistered()
+        addAttributeImpl(BaseFormAttributeImpl())
+        addAttributeImpl(PartOfSpeechAttributeImpl())
+        addAttributeImpl(ReadingAttributeImpl())
+        addAttributeImpl(InflectionAttributeImpl())
+    }
+
     private val basicFormAtt: BaseFormAttribute = addAttribute(BaseFormAttribute::class)
     private val posAtt: PartOfSpeechAttribute = addAttribute(PartOfSpeechAttribute::class)
     private val readingAtt: ReadingAttribute = addAttribute(ReadingAttribute::class)
@@ -142,9 +175,7 @@ class JapaneseTokenizer : Tokenizer {
 
     /** Expert: set this to produce graphviz (dot) output of the Viterbi lattice */
     fun setGraphvizFormatter(dotOut: GraphvizFormatter<JaMorphData>) {
-        // Graphviz support exists in common morph package; KuromojiViterbi can expose hook later.
-        // Keeping API for parity.
-        // viterbi.setGraphvizFormatter(dotOut)
+        viterbi.setGraphvizFormatter(dotOut)
     }
 
     override fun close() {

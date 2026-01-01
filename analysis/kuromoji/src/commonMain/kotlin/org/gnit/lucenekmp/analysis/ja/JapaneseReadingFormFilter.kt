@@ -5,6 +5,7 @@ import org.gnit.lucenekmp.analysis.TokenFilter
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.ja.dict.ToStringUtil
 import org.gnit.lucenekmp.analysis.ja.tokenattributes.ReadingAttribute
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.ReadingAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 
 /**
@@ -15,6 +16,11 @@ class JapaneseReadingFormFilter(
     input: TokenStream,
     private val useRomaji: Boolean = false
 ) : TokenFilter(input) {
+
+    init {
+        ReadingAttributeImpl.ensureRegistered()
+        addAttributeImpl(ReadingAttributeImpl())
+    }
 
     private val termAttr: CharTermAttribute = addAttribute(CharTermAttribute::class)
     private val readingAttr: ReadingAttribute = addAttribute(ReadingAttribute::class)

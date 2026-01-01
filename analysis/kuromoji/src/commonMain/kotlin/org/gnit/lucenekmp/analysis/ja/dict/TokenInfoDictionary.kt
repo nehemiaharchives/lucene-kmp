@@ -15,7 +15,7 @@ import okio.Path
  * Binary dictionary implementation for a known-word dictionary model: Words are encoded into an FST
  * mapping to a list of wordIDs.
  */
-class TokenInfoDictionary private constructor(
+class TokenInfoDictionary internal constructor(
     targetMapResource: IOSupplier<InputStream>,
     posResource: IOSupplier<InputStream>,
     dictResource: IOSupplier<InputStream>,

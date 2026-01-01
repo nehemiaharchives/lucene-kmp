@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.jdkport.InputStream
 import org.gnit.lucenekmp.util.IOSupplier
 
 /** n-gram connection cost data */
-class ConnectionCosts private constructor(connectionCostResource: IOSupplier<InputStream>) :
+class ConnectionCosts internal constructor(connectionCostResource: IOSupplier<InputStream>) :
     org.gnit.lucenekmp.analysis.morph.ConnectionCosts(
         connectionCostResource,
         DictionaryConstants.CONN_COSTS_HEADER,

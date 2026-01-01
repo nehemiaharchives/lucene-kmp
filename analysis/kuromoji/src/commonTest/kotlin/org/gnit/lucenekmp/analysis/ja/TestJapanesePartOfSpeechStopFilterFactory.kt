@@ -56,7 +56,12 @@ class TestJapanesePartOfSpeechStopFilterFactory : BaseTokenStreamTestCase() {
             expectThrows(
                 IllegalArgumentException::class
             ) {
-                JapanesePartOfSpeechStopFilterFactory(mutableMapOf("luceneMatchVersion" to Version.LATEST.toString()))
+                JapanesePartOfSpeechStopFilterFactory(
+                    mutableMapOf(
+                        "luceneMatchVersion" to Version.LATEST.toString(),
+                        "bogusArg" to "bogusValue"
+                    )
+                )
             }
         assertTrue(expected.message!!.contains("Unknown parameters"))
     }

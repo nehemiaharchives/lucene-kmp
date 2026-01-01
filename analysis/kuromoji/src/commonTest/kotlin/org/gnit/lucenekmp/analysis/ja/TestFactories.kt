@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.analysis.ja
 import okio.IOException
 import org.gnit.lucenekmp.analysis.AbstractAnalysisFactory
 import org.gnit.lucenekmp.analysis.Analyzer
+import org.gnit.lucenekmp.analysis.AnalysisSPIReflection
 import org.gnit.lucenekmp.analysis.CharFilterFactory
 import org.gnit.lucenekmp.analysis.TokenFilterFactory
 import org.gnit.lucenekmp.analysis.Tokenizer
@@ -138,7 +139,7 @@ class TestFactories : BaseTokenStreamTestCase() {
 
         var factory: AbstractAnalysisFactory? = null
         try {
-            factory = /*ctor.newInstance(args)*/ TODO("implement something without using reflection")
+            factory = AnalysisSPIReflection.newFactoryClassInstance(factoryClazz, args)
         } /*catch (e: java.lang.InstantiationException) {
             throw RuntimeException(e)
         } catch (e: java.lang.IllegalAccessException) {

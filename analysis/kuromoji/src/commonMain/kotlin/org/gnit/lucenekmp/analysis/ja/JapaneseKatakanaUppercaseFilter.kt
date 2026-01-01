@@ -50,12 +50,13 @@ class JapaneseKatakanaUppercaseFilter(input: TokenStream) : TokenFilter(input) {
             return false
         }
         val termBuffer = termAttr.buffer()
-        var newLength = termAttr.length
+        val length = termAttr.length
+        var newLength = length
         var from = 0
         var to = 0
-        while (from < newLength) {
+        while (from < length) {
             val c = termBuffer[from]
-            if (c == 'ㇷ' && from + 1 < newLength && termBuffer[from + 1] == '゚') {
+            if (c == 'ㇷ' && from + 1 < length && termBuffer[from + 1] == '゚') {
                 termBuffer[to] = 'プ'
                 from++
                 newLength--

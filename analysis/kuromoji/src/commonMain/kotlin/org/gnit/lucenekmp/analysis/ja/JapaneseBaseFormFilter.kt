@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.analysis.ja
 import org.gnit.lucenekmp.analysis.TokenFilter
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.ja.tokenattributes.BaseFormAttribute
+import org.gnit.lucenekmp.analysis.ja.tokenattributes.BaseFormAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
 
@@ -14,6 +15,11 @@ import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
  * To prevent terms from being stemmed set [KeywordAttribute.isKeyword] before this [TokenStream].
  */
 class JapaneseBaseFormFilter(input: TokenStream) : TokenFilter(input) {
+    init {
+        BaseFormAttributeImpl.ensureRegistered()
+        addAttributeImpl(BaseFormAttributeImpl())
+    }
+
     private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
     private val basicFormAtt: BaseFormAttribute = addAttribute(BaseFormAttribute::class)
     private val keywordAtt: KeywordAttribute = addAttribute(KeywordAttribute::class)
