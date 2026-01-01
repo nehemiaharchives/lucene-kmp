@@ -117,6 +117,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
     }
 }
 
-tasks.matching { it.name.endsWith("SourcesJar") }.configureEach {
+tasks.matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }.configureEach {
     dependsOn("generateJapaneseDictionaryData")
 }
