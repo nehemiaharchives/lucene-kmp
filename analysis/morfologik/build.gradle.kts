@@ -124,3 +124,8 @@ tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
 tasks.matching { it.name == "prepareKotlinIdeaImport" }.configureEach {
     dependsOn("generatePolishDictionaryKotlin")
 }
+
+tasks.matching { it.name.endsWith("SourcesJar") }.configureEach {
+    dependsOn("generatePolishDictionaryKotlin")
+    dependsOn("generateUkrainianDictionaryKotlin")
+}
