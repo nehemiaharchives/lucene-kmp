@@ -76,7 +76,7 @@
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 0 | 0% |
 |     org.apache.lucene.codecs.lucene94 | 1 | 0 | 0% |
-|     org.apache.lucene.codecs.lucene99 | 6 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene99 | 6 | 1 | 16% |
 |     org.apache.lucene.codecs.perfield | 4 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 2 | 4% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
@@ -98,7 +98,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 144 | 21% |
+| Total | 673 | 145 | 21% |
 
 
 ## Tests To Port
@@ -153,7 +153,6 @@
 | [org.apache.lucene.codecs.lucene94.TestLucene94FieldInfosFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene94/TestLucene94FieldInfosFormat.java) | org.gnit.lucenekmp.codecs.lucene94.TestLucene94FieldInfosFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99HnswQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99HnswVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99HnswVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswVectorsFormat |
-| [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorScorer.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorScorer |
 | [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorsWriter.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter |
 | [org.apache.lucene.codecs.lucene99.TestLucene99SegmentInfoFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99SegmentInfoFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99SegmentInfoFormat |
