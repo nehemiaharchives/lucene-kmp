@@ -14,7 +14,8 @@ subprojects {
             publishToMavenCentral()
             signAllPublications()
 
-            coordinates("org.gnit.lucene-kmp", "lucene-kmp-${project.name}", version.toString())
+            val modulePrefix = if (project.path.startsWith(":analysis:")) "analysis-" else ""
+            coordinates("org.gnit.lucene-kmp", "lucene-kmp-${modulePrefix}${project.name}", version.toString())
 
             pom {
                 name = "lucene-kmp (module: ${project.name})"
