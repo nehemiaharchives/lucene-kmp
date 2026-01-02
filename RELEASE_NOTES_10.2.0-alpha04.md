@@ -2,9 +2,9 @@
 
 **Version:** `10.2.0-alpha04`
 
-**Baseline:** commit `02035125` ("10.2.0-alpha03")
+**Baseline:** commit `9821e9c0` ("10.2.0-alpha03")
 
-**Release tag:** `10.2.0-alpha04` (commit `c51c2c7c`)
+**Release tag:** `10.2.0-alpha04` (commit `9821e9c0`)
 
 > Note: The `lucene-kmp` repo does not currently have a tag `10.2.0-alpha03`; the closest reliable baseline is the commit named `10.2.0-alpha03` (`02035125`), which updates `gradle.properties`.
 
