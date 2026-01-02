@@ -14,7 +14,7 @@ import okio.IOException
  * @lucene.experimental
  */
 abstract class QuantizedByteVectorValues : ByteVectorValues(), HasIndexSlice {
-    val scalarQuantizer: ScalarQuantizer
+    open val scalarQuantizer: ScalarQuantizer
         get() {
             throw UnsupportedOperationException()
         }
@@ -29,7 +29,7 @@ abstract class QuantizedByteVectorValues : ByteVectorValues(), HasIndexSlice {
      * @return a [VectorScorer] instance or null
      */
     @Throws(IOException::class)
-    fun scorer(query: FloatArray): VectorScorer {
+    open fun scorer(query: FloatArray): VectorScorer? {
         throw UnsupportedOperationException()
     }
 

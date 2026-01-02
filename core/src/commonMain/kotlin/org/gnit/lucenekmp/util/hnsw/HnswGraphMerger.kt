@@ -23,7 +23,7 @@ interface HnswGraphMerger {
      * @throws IOException If an error occurs while reading from the merge state
      */
     @Throws(IOException::class)
-    fun addReader(reader: KnnVectorsReader, docMap: MergeState.DocMap, liveDocs: Bits): HnswGraphMerger
+    fun addReader(reader: KnnVectorsReader, docMap: MergeState.DocMap, liveDocs: Bits?): HnswGraphMerger
 
     /**
      * Merge and produce the on heap graph

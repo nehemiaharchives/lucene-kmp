@@ -87,16 +87,21 @@ class DefaultVectorUtilSupport : VectorUtilSupport {
      * packed (two int4 values per byte) or whether each byte holds a single int4 value in its low nibble.
      */
     override fun int4DotProduct(a: ByteArray, apacked: Boolean, b: ByteArray, bpacked: Boolean): Int {
-        val lengthA = if (apacked) a.size * 2 else a.size
-        val lengthB = if (bpacked) b.size * 2 else b.size
-        require(lengthA == lengthB) { "Vectors must be the same effective length" }
-        var result = 0
-        for (i in 0 until lengthA) {
-            val aVal = if (apacked) getInt4FromPacked(a, i) else decodeInt4(a[i].toInt() and 0x0F)
-            val bVal = if (bpacked) getInt4FromPacked(b, i) else decodeInt4(b[i].toInt() and 0x0F)
-            result += aVal * bVal
+        check(!(apacked && bpacked)) { "Both inputs cannot be packed" }
+        if (apacked || bpacked) {
+            val packed = if (apacked) a else b
+            val unpacked = if (apacked) b else a
+            var total = 0
+            for (i in packed.indices) {
+                val packedByte = packed[i].toInt() and 0xFF
+                val unpacked1 = unpacked[i].toInt() and 0xFF
+                val unpacked2 = unpacked[i + packed.size].toInt() and 0xFF
+                total += (packedByte and 0x0F) * unpacked2
+                total += (packedByte ushr 4) * unpacked1
+            }
+            return total
         }
-        return result
+        return dotProduct(a, b)
     }
 
     /**
@@ -136,6 +141,7 @@ class DefaultVectorUtilSupport : VectorUtilSupport {
      *
      * Assumes the nibble is in the range 0..15 and converts values >= 8 into negative numbers.
      */
+    @Suppress("unused")
     private fun decodeInt4(nibble: Int): Int {
         return if (nibble >= 8) nibble - 16 else nibble
     }
@@ -146,6 +152,7 @@ class DefaultVectorUtilSupport : VectorUtilSupport {
      * Each byte in the array holds two int4 values. The first value is stored in the high nibble
      * (bits 4-7) and the second value in the low nibble (bits 0-3).
      */
+    @Suppress("unused")
     private fun getInt4FromPacked(array: ByteArray, index: Int): Int {
         val byteIndex = index / 2
         if (byteIndex >= array.size) {

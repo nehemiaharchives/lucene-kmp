@@ -332,6 +332,17 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     override fun clone(): SegmentInfos {
         try {
             val sis = /*super.clone() as SegmentInfos*/ SegmentInfos(indexCreatedVersionMajor)
+            // copy scalar metadata
+            sis.counter = counter
+            sis.version = version
+            sis.generation = generation
+            sis.lastGeneration = lastGeneration
+            sis.pendingCommit = pendingCommit
+            if (this::id.isInitialized) {
+                sis.id = id.copyOf()
+            }
+            sis.luceneVersion = luceneVersion
+            sis.minSegmentLuceneVersion = minSegmentLuceneVersion
             // deep clone, first recreate all collections:
             sis.segments = ArrayList(size())
             for (info in this) {

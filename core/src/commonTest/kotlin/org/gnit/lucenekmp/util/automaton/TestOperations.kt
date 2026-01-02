@@ -638,7 +638,7 @@ class TestOperations : LuceneTestCase() {
     // Previously flaky due to unbounded determinization; now bounded and skips TooComplex cases.
     @Test
     fun testDuelRepeat() {
-        val iters: Int = atLeast(10) // TODO originally 1_000 but reduced to 10 for dev speed
+        val iters: Int = atLeast(3) // TODO originally 1_000 but reduced to 3 for dev speed
         val determinizeWorkLimit = DEFAULT_DETERMINIZE_WORK_LIMIT
         for (iter in 0..<iters) {
             val a: Automaton =

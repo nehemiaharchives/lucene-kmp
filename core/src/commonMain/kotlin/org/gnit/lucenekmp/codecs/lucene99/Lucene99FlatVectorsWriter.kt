@@ -30,8 +30,6 @@ import org.gnit.lucenekmp.util.hnsw.RandomVectorScorerSupplier
 import org.gnit.lucenekmp.util.hnsw.UpdateableRandomVectorScorer
 import okio.IOException
 import org.gnit.lucenekmp.index.KnnVectorValues
-import org.gnit.lucenekmp.jdkport.ByteBuffer
-import org.gnit.lucenekmp.jdkport.ByteOrder
 
 /**
  * Writes vector values to index segments.
@@ -144,11 +142,10 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
 
     @Throws(IOException::class)
     private fun writeFloat32Vectors(fieldData: FieldWriter<*>) {
-        val buffer: ByteBuffer =
-            ByteBuffer.allocate(fieldData.dim * Float.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteArray(fieldData.dim * Float.SIZE_BYTES)
         for (v in fieldData.vectors) {
-            buffer.asFloatBuffer().put(v as FloatArray)
-            vectorData!!.writeBytes(buffer.array(), buffer.array().size)
+            writeFloatArrayLE(v as FloatArray, buffer)
+            vectorData!!.writeBytes(buffer, buffer.size)
         }
     }
 
@@ -181,12 +178,11 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
     @Throws(IOException::class)
     private fun writeSortedFloat32Vectors(fieldData: FieldWriter<*>, ordMap: IntArray): Long {
         val vectorDataOffset: Long = vectorData!!.alignFilePointer(Float.SIZE_BYTES)
-        val buffer: ByteBuffer =
-            ByteBuffer.allocate(fieldData.dim * Float.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteArray(fieldData.dim * Float.SIZE_BYTES)
         for (ordinal in ordMap) {
             val vector = fieldData.vectors[ordinal] as FloatArray
-            buffer.asFloatBuffer().put(vector)
-            vectorData.writeBytes(buffer.array(), buffer.array().size)
+            writeFloatArrayLE(vector, buffer)
+            vectorData.writeBytes(buffer, buffer.size)
         }
         return vectorDataOffset
     }
@@ -478,20 +474,29 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             output: IndexOutput, floatVectorValues: FloatVectorValues
         ): DocsWithFieldSet {
             val docsWithField = DocsWithFieldSet()
-            val buffer: ByteBuffer =
-                ByteBuffer.allocate(floatVectorValues.dimension() * FLOAT32.byteSize)
-                    .order(ByteOrder.LITTLE_ENDIAN)
+            val buffer = ByteArray(floatVectorValues.dimension() * FLOAT32.byteSize)
             val iter: KnnVectorValues.DocIndexIterator = floatVectorValues.iterator()
             var docV: Int = iter.nextDoc()
             while (docV != NO_MORE_DOCS) {
                 // write vector
                 val value: FloatArray = floatVectorValues.vectorValue(iter.index())
-                buffer.asFloatBuffer().put(value)
-                output.writeBytes(buffer.array(), buffer.array().size)
+                writeFloatArrayLE(value, buffer)
+                output.writeBytes(buffer, buffer.size)
                 docsWithField.add(docV)
                 docV = iter.nextDoc()
             }
             return docsWithField
+        }
+
+        private fun writeFloatArrayLE(value: FloatArray, buffer: ByteArray) {
+            var o = 0
+            for (v in value) {
+                val bits = v.toBits()
+                buffer[o++] = (bits and 0xFF).toByte()
+                buffer[o++] = ((bits ushr 8) and 0xFF).toByte()
+                buffer[o++] = ((bits ushr 16) and 0xFF).toByte()
+                buffer[o++] = ((bits ushr 24) and 0xFF).toByte()
+            }
         }
     }
 }

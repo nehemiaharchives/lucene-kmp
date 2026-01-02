@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.search.TopDocs
@@ -32,6 +33,7 @@ import org.gnit.lucenekmp.util.Bits
 abstract class LeafReader
 /** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
 protected constructor() : IndexReader() {
+    private val logger = KotlinLogging.logger {}
     private val readerContext: LeafReaderContext = LeafReaderContext(this)
 
     override val context: LeafReaderContext
@@ -251,14 +253,17 @@ protected constructor() : IndexReader() {
         var k = k
         val fi: FieldInfo? = this.fieldInfos.fieldInfo(field)
         if (fi == null || fi.vectorDimension == 0) {
+            logger.debug { "searchNearestVectors[$field]: no vector field (fi=${fi != null}, dim=${fi?.vectorDimension})" }
             return TopDocsCollector.EMPTY_TOPDOCS
         }
         val floatVectorValues: FloatVectorValues? = getFloatVectorValues(fi.name)
         if (floatVectorValues == null) {
+            logger.debug { "searchNearestVectors[$field]: floatVectorValues null" }
             return TopDocsCollector.EMPTY_TOPDOCS
         }
         k = kotlin.math.min(k, floatVectorValues.size())
         if (k == 0) {
+            logger.debug { "searchNearestVectors[$field]: vectorValues size=0" }
             return TopDocsCollector.EMPTY_TOPDOCS
         }
         val collector: KnnCollector = TopKnnCollector(k, visitedLimit)

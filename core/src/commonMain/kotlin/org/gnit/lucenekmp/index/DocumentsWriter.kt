@@ -776,6 +776,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     "DW", /*java.lang.Thread.currentThread().getName() + */" finishFullFlush success=$success"
                 )
             }
+            logger.debug { "DW.finishFullFlush(): start success=$success" }
             assert(setFlushingDeleteQueue(null))
             if (success) {
                 // Release the flush lock
@@ -785,8 +786,10 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             }
         } finally {
             pendingChangesInCurrentFullFlush = false
+            logger.debug { "DW.finishFullFlush(): applyAllDeletes start" }
             applyAllDeletes() // make sure we do execute this since we block applying deletes during full
             // flush
+            logger.debug { "DW.finishFullFlush(): applyAllDeletes done" }
         }
     }
 

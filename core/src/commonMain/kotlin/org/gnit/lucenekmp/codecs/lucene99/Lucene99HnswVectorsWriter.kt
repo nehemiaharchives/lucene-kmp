@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.codecs.lucene99
 
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.codecs.KnnVectorsWriter
@@ -55,6 +56,7 @@ class Lucene99HnswVectorsWriter(
     private val numMergeWorkers: Int,
     private val mergeExec: TaskExecutor?
 ) : KnnVectorsWriter() {
+    private val logger = KotlinLogging.logger {}
     private val segmentWriteState: SegmentWriteState = state
     private val meta: IndexOutput?
     private val vectorIndex: IndexOutput?
@@ -350,9 +352,25 @@ class Lucene99HnswVectorsWriter(
                     )
                 for (i in 0..<mergeState.liveDocs.size) {
                     if (hasVectorValues(mergeState.fieldInfos[i]!!, fieldInfo.name)) {
-                        merger.addReader(
-                            mergeState.knnVectorsReaders[i]!!, mergeState.docMaps!![i], mergeState.liveDocs[i]!!
-                        )
+                        val reader = mergeState.knnVectorsReaders[i]
+                        val docMaps = mergeState.docMaps
+                        val docMap = docMaps?.get(i)
+                        val liveDocs = mergeState.liveDocs[i]
+                        if (reader == null || docMap == null) {
+                            logger.debug {
+                                "mergeOneField null component: field=${fieldInfo.name} i=$i " +
+                                    "reader=${reader != null} docMaps=${docMaps != null} " +
+                                    "docMap=${docMap != null} liveDocs=${liveDocs != null} " +
+                                    "liveDocsSize=${mergeState.liveDocs.size} " +
+                                    "knnReadersSize=${mergeState.knnVectorsReaders.size} " +
+                                    "docMapsSize=${docMaps?.size}"
+                            }
+                            throw IllegalStateException(
+                                "mergeOneField missing component: reader=${reader != null} " +
+                                    "docMap=${docMap != null} i=$i"
+                            )
+                        }
+                        merger.addReader(reader, docMap, liveDocs)
                     }
                 }
                 val mergedVectorValues: KnnVectorValues = when (fieldInfo.vectorEncoding) {
@@ -375,7 +393,7 @@ class Lucene99HnswVectorsWriter(
                 vectorIndexLength,
                 scorerSupplier.totalVectorCount(),
                 graph,
-                vectorIndexNodeOffsets!!
+                vectorIndexNodeOffsets
             )
             success = true
         } finally {
@@ -443,7 +461,7 @@ class Lucene99HnswVectorsWriter(
         vectorIndexLength: Long,
         count: Int,
         graph: HnswGraph?,
-        graphLevelNodeOffsets: Array<IntArray?>
+        graphLevelNodeOffsets: Array<IntArray?>?
     ) {
         meta!!.writeInt(field.number)
         meta.writeInt(field.vectorEncoding.ordinal)
@@ -488,7 +506,8 @@ class Lucene99HnswVectorsWriter(
                     meta, vectorIndex, valueCount, DIRECT_MONOTONIC_BLOCK_SHIFT
                 )
             var cumulativeOffsetSum: Long = 0
-            for (levelOffsets in graphLevelNodeOffsets) {
+            val levelOffsetsList = requireNotNull(graphLevelNodeOffsets) { "graphLevelNodeOffsets missing" }
+            for (levelOffsets in levelOffsetsList) {
                 for (v in levelOffsets!!) {
                     memoryOffsetsWriter.add(cumulativeOffsetSum)
                     cumulativeOffsetSum += v.toLong()

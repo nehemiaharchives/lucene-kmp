@@ -102,12 +102,12 @@ protected constructor() : PostingsWriterBase() {
 
     @Throws(IOException::class)
     override fun writeTerm(
-        term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer
+        term: BytesRef, termsEnum: TermsEnum, docsSeen: FixedBitSet, norms: NormsProducer?
     ): BlockTermState? {
         val normValues: NumericDocValues? = if (!fieldInfo!!.hasNorms()) {
             null
         } else {
-            norms.getNorms(fieldInfo!!)
+            norms?.getNorms(fieldInfo!!)
         }
         startTerm(normValues!!)
         postingsEnum = termsEnum.postings(postingsEnum, enumFlags)

@@ -24,7 +24,21 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
 ) : Iterable<T> {
     private var size = 0
     private val maxSize: Int
-    private val heap: Array<T?>
+    private val heap: Array<Any?>
+
+    @Suppress("UNCHECKED_CAST")
+    private fun element(i: Int): T? {
+        return heap[i] as T?
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun elementNotNull(i: Int): T {
+        return heap[i] as T
+    }
+
+    private fun setElement(i: Int, value: T?) {
+        heap[i] = value
+    }
 
     /**
      * Create a priority queue that is pre-filled with sentinel objects, so that the code which uses
@@ -73,17 +87,16 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
             heapSize = maxSize + 1
         }
 
-        // T is an unbounded type, so this unchecked cast works always.
-        val h = kotlin.arrayOfNulls<Any>(heapSize) as Array<T?>
+        val h = kotlin.arrayOfNulls<Any>(heapSize)
         this.heap = h
         this.maxSize = maxSize
 
         // If sentinel objects are supported, populate the queue with them
         val sentinel: T? = sentinelObjectSupplier()
         if (sentinel != null) {
-            heap[1] = sentinel
+            setElement(1, sentinel)
             for (i in 2..<heap.size) {
-                heap[i] = sentinelObjectSupplier()!!
+                setElement(i, sentinelObjectSupplier()!!)
             }
             size = maxSize
         }
@@ -111,7 +124,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
         // and thus it's safe to fill array further - no actual non-sentinel value will be overwritten.
         val iterator = elements.iterator()
         while (iterator.hasNext()) {
-            this.heap[size + 1] = iterator.next()
+            setElement(size + 1, iterator.next())
             this.size++
         }
 
@@ -138,10 +151,10 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
     fun add(element: T): T? {
         // don't modify size until we know heap access didn't throw AIOOB.
         val index = size + 1
-        heap[index] = element
+        setElement(index, element)
         size = index
         upHeap(index)
-        return heap[1]
+        return element(1)
     }
 
     /**
@@ -155,9 +168,9 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
         if (size < maxSize) {
             add(element)
             return null
-        } else if (size > 0 && lessThan(heap[1]!!, element)) {
-            val ret = heap[1]
-            heap[1] = element
+        } else if (size > 0 && lessThan(elementNotNull(1), element)) {
+            val ret = element(1)
+            setElement(1, element)
             updateTop()
             return ret
         } else {
@@ -170,20 +183,20 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
         // We don't need to check size here: if maxSize is 0,
         // then heap is length 2 array with both entries null.
         // If size is 0 then heap[1] is already null.
-        return heap[1]!!
+        return elementNotNull(1)
     }
 
     /** Returns the least element or null if the queue is empty. */
     fun topOrNull(): T? {
-        return heap[1]
+        return element(1)
     }
 
     /** Removes and returns the least element of the PriorityQueue in log(size) time.  */
     fun pop(): T? {
         if (size > 0) {
-            val result = heap[1] // save first value
-            heap[1] = heap[size] // move last to first
-            heap[size] = null // permit GC of objects
+            val result = element(1) // save first value
+            setElement(1, element(size)) // move last to first
+            setElement(size, null) // permit GC of objects
             size--
             downHeap(1) // adjust heap
             return result
@@ -213,12 +226,12 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
      */
     fun updateTop(): T {
         downHeap(1)
-        return heap[1]!!
+        return elementNotNull(1)
     }
 
     /** Replace the top of the pq with `newTop` and run [.updateTop].  */
     fun updateTop(newTop: T): T {
-        heap[1] = newTop
+        setElement(1, newTop)
         return updateTop()
     }
 
@@ -230,7 +243,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
     /** Removes all entries from the PriorityQueue.  */
     fun clear() {
         for (i in 0..size) {
-            heap[i] = null
+            setElement(i, null)
         }
         size = 0
     }
@@ -242,9 +255,9 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
      */
     fun remove(element: T): Boolean {
         for (i in 1..size) {
-            if (heap[i] == element) {
-                heap[i] = heap[size]
-                heap[size] = null // permit GC of objects
+            if (element(i) == element) {
+                setElement(i, element(size))
+                setElement(size, null) // permit GC of objects
                 size--
                 if (i <= size) {
                     if (!upHeap(i)) {
@@ -259,38 +272,38 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
 
     private fun upHeap(origPos: Int): Boolean {
         var i = origPos
-        val node = heap[i]!! // save bottom node
+        val node = elementNotNull(i) // save bottom node
         var j = i ushr 1
-        while (j > 0 && lessThan(node, heap[j]!!)) {
-            heap[i] = heap[j] // shift parents down
+        while (j > 0 && lessThan(node, elementNotNull(j))) {
+            setElement(i, elementNotNull(j)) // shift parents down
             i = j
             j = j ushr 1
         }
-        heap[i] = node // install saved node
+        setElement(i, node) // install saved node
         return i != origPos
     }
 
     private fun downHeap(i: Int) {
         var i = i
-        val node = heap[i] ?: return // queue is empty
+        val node = element(i) ?: return // queue is empty
         var j = i shl 1 // find smaller child
         var k = j + 1
-        if (k <= size && lessThan(heap[k]!!, heap[j]!!)) {
+        if (k <= size && lessThan(elementNotNull(k), elementNotNull(j))) {
             j = k
         }
-        while (j <= size && lessThan(heap[j]!!, node)) {
-            heap[i] = heap[j] // shift up child
+        while (j <= size && lessThan(elementNotNull(j), node)) {
+            setElement(i, elementNotNull(j)) // shift up child
             i = j
             j = i shl 1
             k = j + 1
-            if (k <= size && lessThan(heap[k]!!, heap[j]!!)) {
+            if (k <= size && lessThan(elementNotNull(k), elementNotNull(j))) {
                 j = k
             }
         }
-        heap[i] = node // install saved node
+        setElement(i, node) // install saved node
     }
 
-    protected val heapArray: Array<T?>
+    protected val heapArray: Array<Any?>
         /**
          * This method returns the internal heap array as Object[].
          *
@@ -310,7 +323,7 @@ abstract class PriorityQueue<T> @JvmOverloads constructor(
                 if (hasNext() == false) {
                     throw NoSuchElementException()
                 }
-                return heap[i++]!!
+                return elementNotNull(i++)
             }
         }
     }

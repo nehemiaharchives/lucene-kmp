@@ -55,6 +55,7 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
      */
     init {
         NamedSPILoader.checkServiceName(name)
+        register(this)
     }
 
     /** Encodes/decodes postings  */
@@ -97,9 +98,16 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
         return name
     }
     companion object {
+        private val registry: MutableMap<String, Codec> = mutableMapOf()
+
+        /** Register a codec instance for lookup by name. */
+        fun register(codec: Codec) {
+            registry[codec.name] = codec
+        }
+
         /** looks up a codec by name  */
         fun forName(name: String): Codec {
-            return /*Holder.loader.lookup(name)*/ Holder.defaultCodec
+            return registry[name] ?: Holder.defaultCodec
         }
 
         /** returns a list of all available codec names  */

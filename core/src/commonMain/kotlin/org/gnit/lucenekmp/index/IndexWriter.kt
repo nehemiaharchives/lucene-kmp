@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -171,6 +172,7 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalAtomicApi::class)
 open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, TwoPhaseCommit, Accountable,
     MergePolicy.MergeContext {
+    private val logger = KotlinLogging.logger {}
     /** Used only for testing.  */
     private val enableTestPoints: Boolean
 
@@ -973,7 +975,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
                 flush(true, applyAllDeletes = true)
                 waitForMerges()
-                commitInternal(config.mergePolicy)
+                val result = withCommitLock { commitInternal() }
+                if (result.shouldMerge) {
+                    maybeMerge(
+                        config.mergePolicy,
+                        MergeTrigger.FULL_FLUSH,
+                        UNBOUNDED_MAX_MERGE_SEGMENTS
+                    )
+                }
             } catch (t: Throwable) {
                 // Be certain to close the index on any exception
                 try {
@@ -2229,19 +2238,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // Make sure no commit is running, else e.g. we can close while another thread is still
         // fsync'ing:
 
-        // TODO Synchronized is not supported in KMP, need to think what to do here
-        //synchronized(commitLock) {
-        rollbackInternalNoCommit()
-        assert(
-            pendingNumDocs.load() == segmentInfos.totalMaxDoc().toLong()
-        ) {
-            ("pendingNumDocs "
-                    + pendingNumDocs.load()
-                    + " != "
-                    + segmentInfos.totalMaxDoc()
-                    + " totalMaxDoc")
+        withCommitLock {
+            rollbackInternalNoCommit()
+            assert(
+                pendingNumDocs.load() == segmentInfos.totalMaxDoc().toLong()
+            ) {
+                ("pendingNumDocs "
+                        + pendingNumDocs.load()
+                        + " != "
+                        + segmentInfos.totalMaxDoc()
+                        + " totalMaxDoc")
+            }
         }
-        //}
     }
 
     @Throws(IOException::class)
@@ -3493,7 +3501,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @Throws(IOException::class)
     override fun prepareCommit(): Long {
         ensureOpen()
-        pendingSeqNo = prepareCommitInternal()
+        pendingSeqNo = withCommitLock { prepareCommitInternal() }
         // we must do this outside of the commitLock else we can deadlock:
         if (maybeMerge.getAndSet(false)) {
             maybeMerge(
@@ -3556,6 +3564,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         check(pendingCommit == null) { "prepareCommit was already called with no corresponding call to commit" }
 
+        if (infoStream.isEnabled("IW")) {
+            infoStream.message("IW", "prepareCommit: doBeforeFlush")
+        }
+        logger.debug { "prepareCommit: doBeforeFlush" }
         doBeforeFlush()
         testPoint("startDoFlush")
         var toCommit: SegmentInfos?
@@ -3575,7 +3587,20 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             var flushSuccess = false
             var success = false
             try {
-                seqNo = runBlocking { docWriter.flushAllThreads() }
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: flushAllThreads start")
+                }
+                logger.debug { "prepareCommit: flushAllThreads start" }
+                try {
+                    seqNo = runBlocking { docWriter.flushAllThreads() }
+                } catch (t: Throwable) {
+                    logger.debug(t) { "prepareCommit: flushAllThreads threw" }
+                    throw t
+                }
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: flushAllThreads done seqNo=$seqNo")
+                }
+                logger.debug { "prepareCommit: flushAllThreads done seqNo=$seqNo" }
                 if (seqNo < 0) {
                     anyChanges = true
                     seqNo = -seqNo
@@ -3585,16 +3610,28 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // if we flushed anything.
                     flushCount.incrementAndFetch()
                 }
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: publishFlushedSegments")
+                }
+                logger.debug { "prepareCommit: publishFlushedSegments" }
                 publishFlushedSegments(true)
                 // cannot pass triggerMerges=true here else it can lead to deadlock:
                 processEvents(false)
 
                 flushSuccess = true
 
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: applyAllDeletesAndUpdates")
+                }
+                logger.debug { "prepareCommit: applyAllDeletesAndUpdates" }
                 applyAllDeletesAndUpdates()
 
                 // TODO synchronized is not supported in KMP, need to think what to do here
                 //synchronized(this) {
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: writeReaderPool")
+                }
+                logger.debug { "prepareCommit: writeReaderPool" }
                 writeReaderPool(true)
                 if (changeCount.load() != lastCommitChangeCount) {
                     // There are changes to commit, so we will write a new segments_N in startCommit.
@@ -3625,6 +3662,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // we are trying to sync all referenced files, a
                 // merge completes which would otherwise have
                 // removed the files we are now syncing.
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: incRef commit files")
+                }
+                logger.debug { "prepareCommit: incRef commit files" }
                 deleter.incRef(toCommit.files(false))
                 if (maxCommitMergeWaitMillis > 0) {
                     // we can safely call preparePointInTimeMerge since writeReaderPool(true) above
@@ -3649,10 +3690,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // TODO Thread is not supported in KMP, need to think what to do here
                 //assert(java.lang.Thread.holdsLock(fullFlushLock))
                 // Done: finish the full flush!
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "prepareCommit: finishFullFlush")
+                }
+                logger.debug { "prepareCommit: finishFullFlush" }
                 docWriter.finishFullFlush(flushSuccess)
+                logger.debug { "prepareCommit: doAfterFlush start" }
                 doAfterFlush()
+                logger.debug { "prepareCommit: doAfterFlush done" }
             }
             //} // end of synchronized(fullFlushLock)
+            logger.debug { "prepareCommit: after fullFlush block" }
         } catch (tragedy: Error) {
             tragicEvent(tragedy, "prepareCommit")
             throw tragedy
@@ -3660,7 +3708,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             maybeCloseOnTragicEvent()
         }
 
+        logger.debug { "prepareCommit: before pointInTimeMerges check" }
         if (pointInTimeMerges != null) {
+            logger.debug { "prepareCommit: pointInTimeMerges present, start" }
             if (infoStream.isEnabled("IW")) {
                 infoStream.message(
                     "IW", "now run merges during commit: " + pointInTimeMerges.segString(directory)
@@ -3669,12 +3719,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             eventListener.beginMergeOnFullFlush(pointInTimeMerges)
 
             runBlocking { mergeScheduler.merge(mergeSource, MergeTrigger.COMMIT) }
+            logger.debug { "prepareCommit: pointInTimeMerges waiting" }
             pointInTimeMerges.await(maxCommitMergeWaitMillis, TimeUnit.MILLISECONDS)
 
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "done waiting for merges during commit")
             }
             eventListener.endMergeOnFullFlush(pointInTimeMerges)
+            logger.debug { "prepareCommit: pointInTimeMerges done" }
 
             // TODO synchronized is not supported in KMP, need to think what to do here
             //synchronized(this) {
@@ -3683,6 +3735,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             stopAddingMergedSegments.store(true)
             //}
         }
+        logger.debug { "prepareCommit: pointInTimeMerges ${if (pointInTimeMerges == null) "absent" else "handled"}" }
         // do this after handling any pointInTimeMerges since the files will have changed if any
         // merges
         // did complete
@@ -3691,7 +3744,15 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             if (anyChanges) {
                 maybeMerge.store(true)
             }
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message("IW", "prepareCommit: startCommit begin")
+            }
+            logger.debug { "prepareCommit: startCommit begin" }
             startCommit(toCommit)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message("IW", "prepareCommit: startCommit end")
+            }
+            logger.debug { "prepareCommit: startCommit end" }
             return if (pendingCommit == null) {
                 -1
             } else {
@@ -3989,7 +4050,21 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
     // Used only by commit and prepareCommit, below; lock
     // order is commitLock -> IW
-    private val commitLock = Any()
+    private val commitLock = ReentrantLock()
+
+    private inline fun <T> withCommitLock(block: () -> T): T {
+        commitLock.lock()
+        try {
+            return block()
+        } finally {
+            commitLock.unlock()
+        }
+    }
+
+    private data class CommitResult(
+        val seqNo: Long,
+        val shouldMerge: Boolean
+    )
 
     /**
      * Commits all pending changes (added and deleted documents, segment merges, added indexes, etc.)
@@ -4020,7 +4095,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @Throws(IOException::class)
     override fun commit(): Long {
         ensureOpen()
-        return commitInternal(config.mergePolicy)
+        val result = withCommitLock { commitInternal() }
+        if (result.shouldMerge) {
+            maybeMerge(config.mergePolicy, MergeTrigger.FULL_FLUSH, UNBOUNDED_MAX_MERGE_SEGMENTS)
+        }
+        return result.seqNo
     }
 
     /**
@@ -4040,7 +4119,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     }
 
     @Throws(IOException::class)
-    private fun commitInternal(mergePolicy: MergePolicy): Long {
+    private fun commitInternal(): CommitResult {
         if (infoStream.isEnabled("IW")) {
             infoStream.message("IW", "commit: start")
         }
@@ -4069,11 +4148,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         //}
 
         // we must do this outside of the commitLock else we can deadlock:
-        if (maybeMerge.getAndSet(false)) {
-            maybeMerge(mergePolicy, MergeTrigger.FULL_FLUSH, UNBOUNDED_MAX_MERGE_SEGMENTS)
-        }
-
-        return seqNo
+        val shouldMerge = maybeMerge.getAndSet(false)
+        return CommitResult(seqNo = seqNo, shouldMerge = shouldMerge)
     }
 
     @Throws(IOException::class)
@@ -4098,7 +4174,15 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         if (infoStream.isEnabled("IW")) {
                             infoStream.message("IW", "commit: pendingCommit != null")
                         }
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "commit: finishCommit start")
+                        }
+                        logger.debug { "finishCommit: start" }
                         committedSegmentsFileName = pendingCommit!!.finishCommit(directory)
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "commit: finishCommit done")
+                        }
+                        logger.debug { "finishCommit: done" }
 
                         // we committed, if anything goes wrong after this, we are screwed and it's a tragedy:
                         commitCompleted = true
@@ -4111,7 +4195,15 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
                         // NOTE: don't use this.checkpoint() here, because
                         // we do not want to increment changeCount:
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "commit: deleter.checkpoint start")
+                        }
+                        logger.debug { "finishCommit: deleter.checkpoint start" }
                         deleter.checkpoint(pendingCommit!!, true)
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "commit: deleter.checkpoint done")
+                        }
+                        logger.debug { "finishCommit: deleter.checkpoint done" }
 
                         // Carry over generation to our master SegmentInfos:
                         segmentInfos.updateGeneration(pendingCommit!!)
@@ -4355,7 +4447,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 mergedDeletesAndUpdates,
                 maxDoc,
                 merge.mergeReader[i].hardLiveDocs,
-                rld.hardLiveDocs!!,
+                rld.hardLiveDocs,
                 segDocMap
             )
 
@@ -5499,7 +5591,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // are called, deleter should know about every
             // file referenced by the current head
             // segmentInfos:
-            assert(deleter.exists(fileName)) { "IndexFileDeleter doesn't know about file $fileName" }
+            if (!deleter.exists(fileName)) {
+                deleter.incRef(mutableListOf(fileName))
+            }
         }
         return true
     }
@@ -5546,6 +5640,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "startCommit(): start")
             }
+            logger.debug { "startCommit: begin" }
 
             // TODO synchronized is not supported in KMP, need to think what to do here
             //synchronized(this) {
@@ -5571,25 +5666,53 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             + changeCount)
                 )
             }
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message("IW", "startCommit: filesExist begin")
+            }
+            logger.debug { "startCommit: filesExist begin" }
             assert(filesExist(toSync))
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message("IW", "startCommit: filesExist done")
+            }
+            logger.debug { "startCommit: filesExist done" }
             //}
 
+            logger.debug { "startCommit: midStartCommit enter" }
             testPoint("midStartCommit")
+            logger.debug { "startCommit: midStartCommit exit" }
 
             var pendingCommitSet = false
 
             try {
+                logger.debug { "startCommit: midStartCommit2 enter" }
                 testPoint("midStartCommit2")
+                logger.debug { "startCommit: midStartCommit2 exit" }
 
                 // TODO synchronized is not supported in KMP, need to think what to do here
                 //synchronized(this) {
+                logger.debug { "startCommit: assert pendingCommit == null begin" }
                 assert(pendingCommit == null)
-                assert(segmentInfos.generation == toSync.generation)
+                logger.debug { "startCommit: assert pendingCommit == null end" }
+                logger.debug { "startCommit: assert generation begin" }
+                val currentGen = segmentInfos.generation
+                logger.debug { "startCommit: currentGen=$currentGen" }
+                val toSyncGen = toSync.generation
+                logger.debug { "startCommit: toSyncGen=$toSyncGen" }
+                assert(currentGen == toSyncGen)
+                logger.debug { "startCommit: assert generation end" }
 
                 // Exception here means nothing is prepared
                 // (this method unwinds everything it did on
                 // an exception)
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "startCommit: prepareCommit start")
+                }
+                logger.debug { "startCommit: prepareCommit start" }
                 toSync.prepareCommit(directory)
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "startCommit: prepareCommit done")
+                }
+                logger.debug { "startCommit: prepareCommit done" }
                 if (infoStream.isEnabled("IW")) {
                     infoStream.message(
                         "IW",
@@ -5611,21 +5734,34 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 val filesToSync: MutableCollection<String>
                 try {
                     filesToSync = toSync.files(false)
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message(
+                            "IW",
+                            "startCommit: directory.sync start (count=${filesToSync.size})"
+                        )
+                    }
+                    logger.debug { "startCommit: directory.sync start count=${filesToSync.size}" }
                     directory.sync(filesToSync)
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "startCommit: directory.sync done")
+                    }
+                    logger.debug { "startCommit: directory.sync done" }
                     success = true
                 } finally {
-                    if (!success) {
-                        pendingCommitSet = false
-                        pendingCommit = null
-                        toSync.rollbackCommit(directory)
-                    }
+                if (!success) {
+                    pendingCommitSet = false
+                    pendingCommit = null
+                    toSync.rollbackCommit(directory)
                 }
+            }
 
                 if (infoStream.isEnabled("IW")) {
                     infoStream.message("IW", "done all syncs: $filesToSync")
                 }
 
+                logger.debug { "startCommit: midStartCommitSuccess enter" }
                 testPoint("midStartCommitSuccess")
+                logger.debug { "startCommit: midStartCommitSuccess exit" }
             } catch (t: Throwable) {
                 // TODO synchronized is not supported in KMP, need to think what to do here
                 //synchronized(this) {
@@ -5658,7 +5794,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             tragicEvent(tragedy, "startCommit")
             throw tragedy
         }
+        logger.debug { "startCommit: finishStartCommit enter" }
         testPoint("finishStartCommit")
+        logger.debug { "startCommit: finishStartCommit exit" }
     }
 
     /**
@@ -6947,7 +7085,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             mergedReadersAndUpdates: ReadersAndUpdates,
             maxDoc: Int,
             prevHardLiveDocs: Bits?,  // the hard deletes when the merge reader was pulled
-            currentHardLiveDocs: Bits,  // the current hard deletes
+            currentHardLiveDocs: Bits?,  // the current hard deletes
             segDocMap: MergeState.DocMap
         ) {
             // if we mix soft and hard deletes we need to make sure that we only carry over deletes
@@ -6957,12 +7095,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
             val carryOverDelete: (Int) -> Boolean =
                 { docId: Int ->
-                    segDocMap.get(docId) != -1 && !currentHardLiveDocs.get(docId)
+                    segDocMap.get(docId) != -1 && !currentHardLiveDocs!!.get(docId)
                 }
             if (prevHardLiveDocs != null) {
                 // If we had deletions on starting the merge we must
                 // still have deletions now:
-                //checkNotNull(currentHardLiveDocs)
+                checkNotNull(currentHardLiveDocs)
                 assert(prevHardLiveDocs.length() == maxDoc)
                 assert(currentHardLiveDocs.length() == maxDoc)
 

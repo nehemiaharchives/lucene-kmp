@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.codecs.perfield
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.codecs.KnnVectorsFormat
@@ -149,6 +150,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
 
     /** VectorReader that can wrap multiple delegate readers, selected by field.  */
     class FieldsReader : KnnVectorsReader, HnswGraphProvider {
+        private val logger = KotlinLogging.logger {}
         private val fields: IntObjectHashMap<KnnVectorsReader> = IntObjectHashMap()
         private val fieldInfos: FieldInfos
 
@@ -170,6 +172,10 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
                     if (fi.hasVectorValues()) {
                         val fieldName: String = fi.name
                         val formatName: String? = fi.getAttribute(PER_FIELD_FORMAT_KEY)
+                        logger.debug {
+                            "PerFieldKnnVectorsFormat: field=$fieldName vectorDim=${fi.vectorDimension} " +
+                                "formatName=$formatName suffix=${fi.getAttribute(PER_FIELD_SUFFIX_KEY)}"
+                        }
                         if (formatName != null) {
                             // null formatName means the field is in fieldInfos, but has no vectors!
                             val suffix: String = fi.getAttribute(PER_FIELD_SUFFIX_KEY)!!

@@ -38,7 +38,7 @@ abstract class KnnVectorValues {
     @Throws(IOException::class)
     abstract fun copy(): KnnVectorValues
 
-    val vectorByteLength: Int
+    open val vectorByteLength: Int
         /** Returns the vector byte length, defaults to dimension multiplied by float byte size  */
         get() = dimension() * this.encoding.byteSize
 

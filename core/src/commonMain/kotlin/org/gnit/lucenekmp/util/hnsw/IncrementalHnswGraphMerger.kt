@@ -42,7 +42,7 @@ open class IncrementalHnswGraphMerger(
      */
     @Throws(IOException::class)
     override fun addReader(
-        reader: KnnVectorsReader, docMap: MergeState.DocMap, liveDocs: Bits
+        reader: KnnVectorsReader, docMap: MergeState.DocMap, liveDocs: Bits?
     ): IncrementalHnswGraphMerger {
         if (hasDeletes(liveDocs) || reader !is HnswGraphProvider) {
             return this

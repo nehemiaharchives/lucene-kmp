@@ -105,9 +105,9 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             }
         } finally {
             if (success) {
-                metaIn!!.close()
+                metaIn?.close()
             } else {
-                IOUtils.closeWhileHandlingException(metaIn!!)
+                IOUtils.closeWhileHandlingException(metaIn)
             }
         }
 
@@ -165,7 +165,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             success = true
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(docIn!!, posIn, payIn!!)
+                IOUtils.closeWhileHandlingException(docIn, posIn, payIn)
             }
         }
     }

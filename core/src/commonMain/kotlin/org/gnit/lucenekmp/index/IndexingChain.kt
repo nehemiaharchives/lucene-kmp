@@ -338,18 +338,14 @@ class IndexingChain(
             }
         }
 
-        val norms = if (readState.fieldInfos.hasNorms()) {
-            state.segmentInfo.codec.normsFormat().normsProducer(readState)
+        if (readState.fieldInfos.hasNorms()) {
+            state.segmentInfo.codec.normsFormat().normsProducer(readState).use { norms ->
+                val normsMergeInstance = norms.mergeInstance
+                termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance)
+            }
         } else {
-            null
+            termsHash.flush(fieldsToFlush, state, sortMap, null)
         }
-
-        var normsMergeInstance: NormsProducer? = null
-        if (norms != null) {
-            // Use the merge instance in order to reuse the same IndexInput for all terms
-            normsMergeInstance = norms.mergeInstance
-        }
-        termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance!!)
 
 
         if (infoStream.isEnabled("IW")) {

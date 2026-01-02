@@ -237,22 +237,27 @@ internal class SegmentMerger(
         segmentWriteState: SegmentWriteState,
         segmentReadState: SegmentReadState
     ) {
-        val norms: NormsProducer? = if (mergeState.mergeFieldInfos!!.hasNorms()) {
+        val normsProducer: NormsProducer? = if (mergeState.mergeFieldInfos!!.hasNorms()) {
             codec.normsFormat().normsProducer(segmentReadState)
         } else {
             null
         }
 
-        var normsMergeInstance: NormsProducer? = null
-
-        if(norms != null) {
-            // Use the merge instance in order to reuse the same IndexInput for all terms
-            normsMergeInstance = norms.mergeInstance
-        }
-
-        if(mergeState.mergeFieldInfos!!.hasPostings()){
-            val consumer = codec.postingsFormat().fieldsConsumer(segmentWriteState)
-            consumer.merge(mergeState, normsMergeInstance!!)
+        if (mergeState.mergeFieldInfos!!.hasPostings()) {
+            if (normsProducer != null) {
+                normsProducer.use { norms ->
+                    val normsMergeInstance = norms.mergeInstance
+                    codec.postingsFormat().fieldsConsumer(segmentWriteState).use { consumer ->
+                        consumer.merge(mergeState, normsMergeInstance)
+                    }
+                }
+            } else {
+                codec.postingsFormat().fieldsConsumer(segmentWriteState).use { consumer ->
+                    consumer.merge(mergeState, null)
+                }
+            }
+        } else {
+            normsProducer?.close()
         }
     }
 

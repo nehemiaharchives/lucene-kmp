@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.codecs
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.VectorEncoding.BYTE
 import org.gnit.lucenekmp.index.VectorEncoding.FLOAT32
@@ -141,6 +142,7 @@ protected constructor() : Accountable, AutoCloseable {
 
     /** View over multiple vector values supporting iterator-style access via DocIdMerger.  */
     object MergedVectorValues {
+        private val logger = KotlinLogging.logger {}
         private fun validateFieldEncoding(fieldInfo: FieldInfo?, expected: VectorEncoding) {
             require(fieldInfo != null && fieldInfo.hasVectorValues())
             val fieldEncoding: VectorEncoding = fieldInfo.vectorEncoding
@@ -247,6 +249,7 @@ protected constructor() : Accountable, AutoCloseable {
             private var docId = -1
             private var lastOrd = -1
             var current: FloatVectorValuesSub? = null
+            private var lastValue: FloatArray? = null
 
             init {
                 var totalSize = 0
@@ -268,19 +271,20 @@ protected constructor() : Accountable, AutoCloseable {
                         return index
                     }
 
-                    @Throws(IOException::class)
-                    override fun nextDoc(): Int {
-                        current = docIdMerger.next()
-                        if (current == null) {
-                            docId = NO_MORE_DOCS
-                            index = NO_MORE_DOCS
-                        } else {
-                            docId = current!!.mappedDocID
-                            ++lastOrd
-                            ++index
-                        }
-                        return docId
-                    }
+            @Throws(IOException::class)
+            override fun nextDoc(): Int {
+                current = docIdMerger.next()
+                if (current == null) {
+                    docId = NO_MORE_DOCS
+                    index = NO_MORE_DOCS
+                } else {
+                    docId = current!!.mappedDocID
+                    ++lastOrd
+                    ++index
+                    lastValue = null
+                }
+                return docId
+            }
 
                     @Throws(IOException::class)
                     override fun advance(target: Int): Int {
@@ -301,7 +305,33 @@ protected constructor() : Accountable, AutoCloseable {
                             + ", lastOrd="
                             + lastOrd)
                 }
-                return current!!.values.vectorValue(current!!.index())
+                if (current == null) {
+                    throw IllegalStateException("vectorValue called with null current at ord=$ord")
+                }
+                val value = current!!.values.vectorValue(current!!.index())
+                val dim = dimension()
+                if (value.size != dim) {
+                    throw IllegalStateException(
+                        "unexpected vector dimension=${value.size} expected=$dim"
+                    )
+                }
+                if (current!!.iterator.docID() != docId) {
+                    logger.debug {
+                        "doc mismatch: iteratorDoc=${current!!.iterator.docID()} mappedDoc=$docId ord=$ord"
+                    }
+                }
+                var sum = 0.0
+                for (i in 0 until dim) {
+                    sum += value[i] * value[i]
+                }
+                if (sum == 0.0) {
+                    logger.debug {
+                        "zero vector encountered in merged values at ord=$ord docId=$docId " +
+                            "subIndex=${current!!.index()} subDoc=${current!!.iterator.docID()} " +
+                            "subMaxDoc=${current!!.values.size()} dim=$dim value=${value.contentToString()}"
+                    }
+                }
+                return value
             }
 
             override fun size(): Int {

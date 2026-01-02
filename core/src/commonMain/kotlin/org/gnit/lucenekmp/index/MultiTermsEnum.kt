@@ -219,8 +219,8 @@ class MultiTermsEnum(slices: Array<ReaderSlice>) : BaseTermsEnum() {
         // extract all subs from the queue that have the same
         // top term
         require(this.matchCount == 0)
-        this.matchCount = queue.fillTop(this.matchArray as Array<TermsEnumWithSlice>)
-        current = this.matchArray[0].term()
+        this.matchCount = queue.fillTop(this.matchArray)
+        current = this.matchArray[0]!!.term()
     }
 
     @Throws(IOException::class)
@@ -351,7 +351,7 @@ class MultiTermsEnum(slices: Array<ReaderSlice>) : BaseTermsEnum() {
          * Add the [.top] slice as well as all slices that are positionned on the same term to
          * `tops` and return how many of them there are.
          */
-        fun fillTop(tops: Array<TermsEnumWithSlice>): Int {
+        fun fillTop(tops: Array<TermsEnumWithSlice?>): Int {
             val size: Int = size()
             if (size == 0) {
                 return 0
@@ -368,7 +368,7 @@ class MultiTermsEnum(slices: Array<ReaderSlice>) : BaseTermsEnum() {
                 val end = min(size, leftChild + 1)
                 while (child <= end) {
                     val te = get(child)
-                    if (te.compareTermTo(tops[0]) == 0) {
+                    if (te.compareTermTo(tops[0]!!) == 0) {
                         tops[numTop++] = te
                         stack[stackLen++] = child
                     }
@@ -379,7 +379,10 @@ class MultiTermsEnum(slices: Array<ReaderSlice>) : BaseTermsEnum() {
         }
 
         fun get(i: Int): TermsEnumWithSlice {
-            return heapArray[i] as TermsEnumWithSlice
+            return heapArray[i] as? TermsEnumWithSlice
+                ?: throw ClassCastException(
+                    "PriorityQueue heap element is not TermsEnumWithSlice; index=$i value=${heapArray[i]}"
+                )
         }
     }
 

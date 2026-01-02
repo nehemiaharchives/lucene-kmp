@@ -12,6 +12,8 @@ Under this directory you find two sub directories:
 
 - The GitHub copilot never make any change to lucene java source code but only read, copy from, analyze and answer question based on its content. If it's in agent mode, it can use git commands which does not change any code but only read the code and history.
 
+- **Do not deviate from Java Lucene logic.** The Kotlin port must be an exact behavioral port. Only deviate when unavoidable for KMP (e.g., okio for IO, coroutines for threading). Any deviation must be explicitly justified and minimized.
+
 - When porting, class name, interface name, method name, variable name should be the same as much as possible especially for APIs which is used by other classes.
 
 - root package name of java lucene is org.apache.lucene. The root package name of the kotlin common code is org.gnit.lucene-kmp. The sub package structure under the root package should be the same as much as possible.
@@ -60,6 +62,7 @@ Under this directory you find two sub directories:
 
 ### Step 2: Code, Run, Debug
 1. Apply the chosen code changes. when you code be careful of writing code in platform agnostic kotlin common code. avoid expect/actual pattern as much as possible. do not mix platform specific code such as jvm code in commonMain/commonTest.
+2. **After any file change, immediately run `get_file_problems` for each changed file and fix all compile errors before proceeding.**
 2. Use `get_file_problems` tool of `jetbrains` MCP server to check if there are any compilation errors for each files you changed. iterate over until you solve all errors for Kotiln/JVM.
 3. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run either [`compileKotlinLinuxX64` and `compileTestKotlinLiuxX64` on linux] or [`compileKotlinMacosX64` and `compileTestKotlinMacosX64` on macOS], to check if there are any compilation errors for each files you changed especially for Kotlin/Native. iterate over until you solve all errors.
 4. Use `get_run_configuration` tool `jetbrains` MCP server to find proper run configuration. to run specific unit test and use execute_run_configuration to run tests. if any test fail, find out root cause, iterate over until you fix all of them. tests should pass both in `jvmTest` and tests for native env which is either `linuxX64Test` or `macosX64Test` depending on your work env, plus `iosX64Test` where applicable.
