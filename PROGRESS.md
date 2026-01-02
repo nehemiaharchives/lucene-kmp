@@ -64,7 +64,7 @@
 | Subpackage | Count | Ported | % |
 | --- | --- | --- | --- |
 | org.apache.lucene | 6 | 0 | 0% |
-|   org.apache.lucene.analysis | 15 | 6 | 40% |
+|   org.apache.lucene.analysis | 15 | 7 | 46% |
 |     org.apache.lucene.analysis.standard | 2 | 1 | 50% |
 |     org.apache.lucene.analysis.tokenattributes | 4 | 0 | 0% |
 |   org.apache.lucene.codecs | 4 | 1 | 25% |
@@ -98,7 +98,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 143 | 21% |
+| Total | 673 | 144 | 21% |
 
 
 ## Tests To Port
@@ -109,7 +109,6 @@
 | [org.apache.lucene.TestExternalCodecs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestExternalCodecs.java) | org.gnit.lucenekmp.TestExternalCodecs |
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
-| [org.apache.lucene.analysis.TestAbstractAnalysisFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAbstractAnalysisFactory.java) | org.gnit.lucenekmp.analysis.TestAbstractAnalysisFactory |
 | [org.apache.lucene.analysis.TestAnalysisSPILoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAnalysisSPILoader.java) | org.gnit.lucenekmp.analysis.TestAnalysisSPILoader |
 | [org.apache.lucene.analysis.TestAnalyzerWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAnalyzerWrapper.java) | org.gnit.lucenekmp.analysis.TestAnalyzerWrapper |
 | [org.apache.lucene.analysis.TestAutomatonToTokenStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAutomatonToTokenStream.java) | org.gnit.lucenekmp.analysis.TestAutomatonToTokenStream |

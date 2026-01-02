@@ -6,15 +6,44 @@
 import io.github.classgraph.ClassGraph
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.ajalt.mordant.table.table
+import java.io.File
 
 fun main(){
 
     val homeDir = System.getenv("HOME") ?: System.getProperty("user.home")
-    val javaDir = "$homeDir/code/lp/lucene"
-    val kmpDir = "$homeDir/code/lp/lucene-kmp"
+    val cwd = File(".").canonicalFile
+    val javaDir = when {
+        cwd.name == "lucene-kmp" && File(cwd.parentFile, "lucene").isDirectory ->
+            File(cwd.parentFile, "lucene").canonicalPath
+        File(cwd, "lucene").isDirectory -> File(cwd, "lucene").canonicalPath
+        else -> "$homeDir/code/lp/lucene"
+    }
+    val kmpDir = when {
+        cwd.name == "lucene-kmp" -> cwd.canonicalPath
+        File(cwd, "lucene-kmp").isDirectory -> File(cwd, "lucene-kmp").canonicalPath
+        else -> "$homeDir/code/lp/lucene-kmp"
+    }
+
+    val javaRoot = File(javaDir).canonicalFile
+    val kmpRoot = File(kmpDir).canonicalFile
+    require(javaRoot.isDirectory && kmpRoot.isDirectory) {
+        "Invalid roots. javaRoot=$javaRoot (exists=${javaRoot.exists()}), kmpRoot=$kmpRoot (exists=${kmpRoot.exists()})"
+    }
 
     val javaClassPath = "$javaDir/lucene/core/build/classes/java/main"
     val kmpClassPath = "$kmpDir/core/build/classes/kotlin/jvm/main"
+
+    if (!File(javaClassPath).isDirectory || !File(kmpClassPath).isDirectory) {
+        System.err.println(
+            "Build outputs not found.\n" +
+                "javaClassPath=$javaClassPath (exists=${File(javaClassPath).exists()})\n" +
+                "kmpClassPath=$kmpClassPath (exists=${File(kmpClassPath).exists()})\n" +
+                "Run:\n" +
+                "  (cd $javaDir/lucene && ./gradlew :lucene:core:compileJava)\n" +
+                "  (cd $kmpDir && ./gradlew :core:compileKotlinJvm)\n"
+        )
+        return
+    }
 
     val javaSearchResult = ClassGraph().enableAllInfo().overrideClasspath(javaClassPath).scan()
     val kmpSearchResult = ClassGraph().enableAllInfo().overrideClasspath(kmpClassPath).scan()
@@ -22,8 +51,19 @@ fun main(){
     val javaBasePackage = "org.apache.lucene"
     val kmpBasePackage = "org.gnit.lucenekmp"
 
-    val javaClass = javaSearchResult.allClasses.first { it.name == "$javaBasePackage.analysis.Analyzer"}
-    val kmpClass = kmpSearchResult.allClasses.first { it.name == "$kmpBasePackage.analysis.Analyzer" }
+    val javaClass = javaSearchResult.allClasses.firstOrNull { it.name == "$javaBasePackage.analysis.Analyzer"}
+    val kmpClass = kmpSearchResult.allClasses.firstOrNull { it.name == "$kmpBasePackage.analysis.Analyzer" }
+    if (javaClass == null || kmpClass == null) {
+        System.err.println(
+            "Analyzer class not found.\n" +
+                "javaClassPath=$javaClassPath\n" +
+                "kmpClassPath=$kmpClassPath\n" +
+                "java Analyzer present? ${javaClass != null}\n" +
+                "kmp Analyzer present? ${kmpClass != null}\n" +
+                "Ensure compiled classes exist for both projects."
+        )
+        return
+    }
 
     val javaMethodInfos = javaClass.methodInfo
     val javaInnerClasses = javaClass.innerClasses

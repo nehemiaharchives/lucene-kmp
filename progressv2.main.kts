@@ -421,12 +421,34 @@ fun createDetailedClassReport(
 class Progress : CliktCommand() {
 
     private val homeDir = System.getenv("HOME") ?: System.getProperty("user.home")
-    private val javaDir by option("--java", "-j").default("$homeDir/code/lp/lucene")
-    private val kmpDir by option("--kmp", "-k").default("$homeDir/code/lp/lucene-kmp")
+    private val cwd = File(".").canonicalFile
+    private val inferredJavaDir = run {
+        when {
+            cwd.name == "lucene-kmp" && File(cwd.parentFile, "lucene").isDirectory ->
+                File(cwd.parentFile, "lucene").canonicalPath
+            File(cwd, "lucene").isDirectory -> File(cwd, "lucene").canonicalPath
+            else -> "$homeDir/code/lp/lucene"
+        }
+    }
+    private val inferredKmpDir = run {
+        when {
+            cwd.name == "lucene-kmp" -> cwd.canonicalPath
+            File(cwd, "lucene-kmp").isDirectory -> File(cwd, "lucene-kmp").canonicalPath
+            else -> "$homeDir/code/lp/lucene-kmp"
+        }
+    }
+    private val javaDir by option("--java", "-j").default(inferredJavaDir)
+    private val kmpDir by option("--kmp", "-k").default(inferredKmpDir)
 
     val ps = ProgressPrintStream(Terminal(), StringBuilder())
 
     override fun run() {
+        val javaRoot = File(javaDir).canonicalFile
+        val kmpRoot = File(kmpDir).canonicalFile
+        require(javaRoot.isDirectory && kmpRoot.isDirectory) {
+            "Invalid roots. javaRoot=$javaRoot (exists=${javaRoot.exists()}), kmpRoot=$kmpRoot (exists=${kmpRoot.exists()})"
+        }
+
         ps.println("# Lucene KMP Port Progress")
 
         // #
