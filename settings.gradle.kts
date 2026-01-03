@@ -18,6 +18,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "lucene-kmp"
 include(":analysis:common")
+include(":analysis:extra")
 include(":analysis:icu")
 include(":analysis:kuromoji")
 include(":analysis:morfologik")

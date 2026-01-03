@@ -141,7 +141,7 @@ The following table summarizes the classes to port and their dependencies, aidin
 | analysis          | Analyzer              | None                                      | Base class for text analysis           |
 | analysis          | SimpleAnalyzer        | LetterTokenizer, LowerCaseFilter          | Basic tokenizer, simplifies porting    |
 | analysis          | LetterTokenizer       | Tokenizer                                 | Tokenizes on letters                   |
-| analysis          | LowerCaseFilter       | TokenFilter                               | Converts tokens to lowercase           |
+| analysis          | LowerCaseFilter       | TokenFilter                               | Converts vietnameseTokens to lowercase           |
 | search            | IndexSearcher         | IndexReader                               | Performs searches                      |
 | search            | Query                 | None                                      | Base class for queries                 |
 | search            | TermQuery             | Term, Query                               | Queries for specific terms             |
