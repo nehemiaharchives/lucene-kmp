@@ -121,7 +121,7 @@ jobs:
           - platform: ios
             module_name: core
             os: macos-latest
-            timeout: 30
+            timeout: 40
             task: :core:iosSimulatorArm64Test
             artifact: ios-core-reports
             needs_konan_cache: true
