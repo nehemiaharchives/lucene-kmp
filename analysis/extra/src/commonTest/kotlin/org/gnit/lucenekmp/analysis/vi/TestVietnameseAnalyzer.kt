@@ -11,7 +11,7 @@ class TestVietnameseAnalyzer {
     fun testVietnameseAnalyzer() {
         val analyzer = VietnameseAnalyzer(VietnameseConfig())
         val ts = analyzer.tokenStream("field", "công nghệ thông tin Việt Nam")
-        assertEquals(listOf("công nghệ", "thông tin", "việt nam"), termsFromTokenStream(ts))
+        assertEquals(listOf("cong nghe", "thong tin", "viet nam"), termsFromTokenStream(ts))
     }
 
     @Test
@@ -26,9 +26,16 @@ class TestVietnameseAnalyzer {
         val analyzer = VietnameseAnalyzer(VietnameseConfig())
         val ts = analyzer.tokenStream("field", "Công nghệ thông tin Việt Nam https://duydo.me")
         assertEquals(
-            listOf("công nghệ", "thông tin", "việt nam", "https", "duydo", "me"),
+            listOf("cong nghe", "thong tin", "viet nam", "https", "duydo", "me"),
             termsFromTokenStream(ts)
         )
+    }
+
+    @Test
+    fun testVietnameseNormalization() {
+        val analyzer = VietnameseAnalyzer(VietnameseConfig())
+        val ts = analyzer.tokenStream("field", "điện thoại Việt")
+        assertEquals(listOf("dien thoai", "viet"), termsFromTokenStream(ts))
     }
 
     private fun termsFromTokenStream(ts: TokenStream): List<String> {

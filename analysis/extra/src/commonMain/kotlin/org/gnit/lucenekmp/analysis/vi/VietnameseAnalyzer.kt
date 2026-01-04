@@ -111,7 +111,13 @@ vừa
 
     override fun createComponents(fieldName: String): TokenStreamComponents {
         val source: Tokenizer = VietnameseTokenizer(config)
-        val result: TokenStream = StopFilter(source, stopwords)
+        var result: TokenStream = StopFilter(source, stopwords)
+        result = VietnameseNormalizationFilter(result)
+        result = VietnameseStemFilter(result)
         return TokenStreamComponents(source, result)
+    }
+
+    override fun normalize(fieldName: String, `in`: TokenStream): TokenStream {
+        return VietnameseNormalizationFilter(`in`)
     }
 }
