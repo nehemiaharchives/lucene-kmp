@@ -31,7 +31,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":core"))
-
+                implementation(project(":analysis:common"))
                 // TODO add following after these modules
                 // implementation(project(":queries"))
                 // implementation(project(":sandbox"))
@@ -46,6 +46,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(project(":core"))
+                implementation(project(":analysis:common"))
                 implementation(project(":test-framework"))
                 implementation(libs.kotlin.test)
             }
@@ -100,7 +101,6 @@ kotlin {
         linuxX64Test.get().dependsOn(nativeTest)
     }
 }
-
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     compilerOptions{
         optIn.addAll(
