@@ -747,7 +747,7 @@ protected constructor() : QueryBuilder(/*null*/),
     fun handleBareTokenQuery(
         qfield: String,
         term: Token,
-        fuzzySlop: Token,
+        fuzzySlop: Token?,
         prefix: Boolean,
         wildcard: Boolean,
         fuzzy: Boolean,
@@ -765,7 +765,7 @@ protected constructor() : QueryBuilder(/*null*/),
         } else if (regexp) {
             getRegexpQuery(qfield, term.image!!.substring(1, term.image!!.length - 1))
         } else if (fuzzy) {
-            handleBareFuzzy(qfield, fuzzySlop, termImage)
+            handleBareFuzzy(qfield, requireNotNull(fuzzySlop), termImage)
         } else {
             getFieldQuery(qfield, termImage, false)
         }

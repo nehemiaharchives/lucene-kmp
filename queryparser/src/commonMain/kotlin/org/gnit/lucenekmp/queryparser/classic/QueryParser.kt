@@ -450,7 +450,7 @@ class QueryParser : QueryParserBase,
                         jj_la1[14] = jj_gen
                     }
                 }
-                q = handleBareTokenQuery(field, term, fuzzySlop!!, prefix, wildcard, fuzzy, regexp)
+                q = handleBareTokenQuery(field, term, fuzzySlop, prefix, wildcard, fuzzy, regexp)
             }
 
             QueryParserConstants.RANGEIN_START, QueryParserConstants.RANGEEX_START -> {
