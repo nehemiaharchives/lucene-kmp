@@ -349,7 +349,9 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
 
             // First compare up to valid seek frames:
             while (targetUpto < targetLimit) {
-                cmp = (term.byteAt(targetUpto) and 0xFF.toByte()) - (target.bytes[target.offset + targetUpto] and 0xFF.toByte())
+                val termByte = term.byteAt(targetUpto).toInt() and 0xFF
+                val targetByte = target.bytes[target.offset + targetUpto].toInt() and 0xFF
+                cmp = termByte - targetByte
                 // if (DEBUG) {
                 //    System.out.println("    cycle targetUpto=" + targetUpto + " (vs limit=" + targetLimit
                 // + ") cmp=" + cmp + " (targetLabel=" + (char) (target.bytes[target.offset + targetUpto]) +
@@ -361,11 +363,11 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                 }
                 arc = arcs[1 + targetUpto]!!
                 require(
-                    arc.label() == (target.bytes[target.offset + targetUpto] and 0xFF.toByte()).toInt()
+                    arc.label() == (target.bytes[target.offset + targetUpto].toInt() and 0xFF)
                 ) {
                     ("arc.label="
                             + arc.label().toChar() + " targetLabel="
-                            + (target.bytes[target.offset + targetUpto] and 0xFF.toByte()).toInt().toChar())
+                            + (target.bytes[target.offset + targetUpto].toInt() and 0xFF).toChar())
                 }
                 outputAccumulator.push(arc.output()!!)
 
@@ -460,7 +462,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
         // We are done sharing the common prefix with the incoming target and where we are currently
         // seek'd; now continue walking the index:
         while (targetUpto < target.length) {
-            val targetLabel: Int = (target.bytes[target.offset + targetUpto] and 0xFF.toByte()).toInt()
+            val targetLabel: Int = target.bytes[target.offset + targetUpto].toInt() and 0xFF
 
             val nextArc: Arc<BytesRef>? =
                 fr.index.findTargetArc(targetLabel, arc, getArc(1 + targetUpto), fstReader!!)
@@ -628,7 +630,9 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
 
             // First compare up to valid seek frames:
             while (targetUpto < targetLimit) {
-                cmp = (term.byteAt(targetUpto) and 0xFF.toByte()) - (target.bytes[target.offset + targetUpto] and 0xFF.toByte())
+                val termByte = term.byteAt(targetUpto).toInt() and 0xFF
+                val targetByte = target.bytes[target.offset + targetUpto].toInt() and 0xFF
+                cmp = termByte - targetByte
                 // if (DEBUG) {
                 // System.out.println("    cycle targetUpto=" + targetUpto + " (vs limit=" + targetLimit +
                 // ") cmp=" + cmp + " (targetLabel=" + (char) (target.bytes[target.offset + targetUpto]) +
@@ -640,11 +644,11 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                 }
                 arc = arcs[1 + targetUpto]!!
                 require(
-                    arc.label() == (target.bytes[target.offset + targetUpto] and 0xFF.toByte()).toInt()
+                    arc.label() == (target.bytes[target.offset + targetUpto].toInt() and 0xFF)
                 ) {
                     ("arc.label="
                             + arc.label().toChar() + " targetLabel="
-                            + (target.bytes[target.offset + targetUpto] and 0xFF.toByte()).toInt().toChar())
+                            + (target.bytes[target.offset + targetUpto].toInt() and 0xFF).toChar())
                 }
 
                 outputAccumulator.push(arc.output()!!)
@@ -734,7 +738,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
         // We are done sharing the common prefix with the incoming target and where we are currently
         // seek'd; now continue walking the index:
         while (targetUpto < target.length) {
-            val targetLabel: Int = (target.bytes[target.offset + targetUpto] and 0xFF.toByte()).toInt()
+            val targetLabel: Int = target.bytes[target.offset + targetUpto].toInt() and 0xFF
 
             val nextArc: Arc<BytesRef>? =
                 fr.index.findTargetArc(targetLabel, arc, getArc(1 + targetUpto), fstReader!!)
@@ -916,12 +920,12 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                 if (fr.index != null) {
                     require(!isSeekFrame || f.arc != null) { "isSeekFrame=" + isSeekFrame + " f.arc=" + f.arc }
                     if (f.prefixLength > 0 && isSeekFrame
-                        && f.arc!!.label() != (term.byteAt(f.prefixLength - 1) and 0xFF.toByte()).toInt()
+                        && f.arc!!.label() != (term.byteAt(f.prefixLength - 1).toInt() and 0xFF)
                     ) {
                         out.println(
                             ("      broken seek state: arc.label="
                                     + f.arc!!.label().toChar() + " vs term byte="
-                                    + (term.byteAt(f.prefixLength - 1) and 0xFF.toByte()).toInt().toChar())
+                                    + (term.byteAt(f.prefixLength - 1).toInt() and 0xFF).toChar())
                         )
                         throw RuntimeException("seek state is broken")
                     }

@@ -362,7 +362,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
             return
         }
 
-        val targetLabel: Int = (target.bytes[target.offset + prefixLength] and 0xFF.toByte()).toInt()
+        val targetLabel: Int = target.bytes[target.offset + prefixLength].toInt() and 0xFF
 
         // if (DEBUG) {
         //   System.out.println("    scanToFloorFrame fpOrig=" + fpOrig + " targetLabel=" +

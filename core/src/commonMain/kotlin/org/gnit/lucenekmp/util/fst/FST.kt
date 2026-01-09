@@ -375,7 +375,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
     fun readLabel(`in`: DataInput): Int {
         val v: Int = if (metadata.inputType == INPUT_TYPE.BYTE1) {
             // Unsigned byte:
-            (`in`.readByte() and 0xFF.toByte()).toInt()
+            `in`.readByte().toInt() and 0xFF
         } else if (metadata.inputType == INPUT_TYPE.BYTE2) {
             // Unsigned short:
             if (metadata.version < VERSION_LITTLE_ENDIAN) {

@@ -61,7 +61,7 @@ object Util {
         // Accumulate output as we go
         var output = fst.outputs.noOutput
         for (i in 0..<input.length) {
-            if (fst.findTargetArc((input.bytes[i + input.offset] and 0xFF.toByte()).toInt(), arc, arc, fstReader) == null) {
+            if (fst.findTargetArc(input.bytes[i + input.offset].toInt() and 0xFF, arc, arc, fstReader) == null) {
                 return null
             }
             output = fst.outputs.add(output, arc.output()!!)

@@ -80,12 +80,12 @@ open class BytesRefFSTEnum<T>(fst: FST<T>) : FSTEnum<T>(fst) {
         return if (upto - 1 == target!!.length) {
             FST.END_LABEL
         } else {
-            (target!!.bytes[target!!.offset + upto - 1] and 0xFF.toByte()).toInt()
+            target!!.bytes[target!!.offset + upto - 1].toInt() and 0xFF
         }
     }
 
     override fun getCurrentLabel(): Int =// current.offset fixed at 1
-        (current.bytes[upto] and 0xFF.toByte()).toInt()
+        current.bytes[upto].toInt() and 0xFF
 
     override fun setCurrentLabel(label: Int) {
         current.bytes[upto] = label.toByte()
