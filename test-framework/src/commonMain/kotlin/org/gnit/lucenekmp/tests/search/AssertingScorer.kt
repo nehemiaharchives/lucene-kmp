@@ -57,7 +57,6 @@ class AssertingScorer private constructor(
 
     override var minCompetitiveScore: Float
         get() = minCompetitiveScoreValue
-        @Throws(IOException::class)
         set(score) {
             assert(scoreMode == ScoreMode.TOP_SCORES)
             assert(canCallMinCompetitiveScore)

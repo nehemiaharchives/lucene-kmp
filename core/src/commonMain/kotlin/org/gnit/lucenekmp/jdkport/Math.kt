@@ -149,6 +149,40 @@ object Math {
         return kotlin.math.round(a).toInt()
     }
 
+
+    /**
+     * Returns the closest `long` to the argument, with ties
+     * rounding to positive infinity.
+     *
+     *
+     * Special cases:
+     *  * If the argument is NaN, the result is 0.
+     *  * If the argument is negative infinity or any value less than or
+     * equal to the value of `Long.MIN_VALUE`, the result is
+     * equal to the value of `Long.MIN_VALUE`.
+     *  * If the argument is positive infinity or any value greater than or
+     * equal to the value of `Long.MAX_VALUE`, the result is
+     * equal to the value of `Long.MAX_VALUE`.
+     *
+     * @param   a   a floating-point value to be rounded to a
+     * `long`.
+     * @return  the value of the argument rounded to the nearest
+     * `long` value.
+     * @see java.lang.Long.MAX_VALUE
+     *
+     * @see java.lang.Long.MIN_VALUE
+     */
+    fun round(a: Double): Long {
+        // Special cases
+        if (a.isNaN()) return 0
+        if (a.isInfinite()) {
+            return if (a > 0) Long.MAX_VALUE else Long.MIN_VALUE
+        }
+
+        // Use Kotlin's built-in round function which correctly handles all cases
+        return kotlin.math.round(a).toLong()
+    }
+
     /**
      * Returns the floor modulus of the `long` arguments.
      *

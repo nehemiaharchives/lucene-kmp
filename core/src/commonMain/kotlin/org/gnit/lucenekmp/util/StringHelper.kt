@@ -220,14 +220,14 @@ object StringHelper {
      */
     fun murmurhash3_x64_128(
         data: ByteArray, offset: Int, length: Int, seed: Int
-    ): LongArray? {
+    ): LongArray {
         // Use an unsigned 32-bit integer as the seed
         return murmurhash3_x64_128(data, offset, length, seed.toLong() and 0xFFFFFFFFL)
     }
 
     private fun murmurhash3_x64_128(
         data: ByteArray, offset: Int, length: Int, seed: Long
-    ): LongArray? {
+    ): LongArray {
         var h1 = seed
         var h2 = seed
         val nblocks = length shr 4
@@ -576,7 +576,7 @@ object StringHelper {
      * @param data The input data
      * @return The 128-bit hash (2 longs)
      */
-    fun murmurhash3_x64_128(data: BytesRef): LongArray? {
+    fun murmurhash3_x64_128(data: BytesRef): LongArray {
         return murmurhash3_x64_128(data.bytes, data.offset, data.length, 104729)
     }
 
@@ -735,7 +735,7 @@ object StringHelper {
      * Just converts each int in the incoming [IntsRef] to each byte in the returned [ ], throwing `IllegalArgumentException` if any int value is out of bounds for a
      * byte.
      */
-    fun intsRefToBytesRef(ints: IntsRef): BytesRef? {
+    fun intsRefToBytesRef(ints: IntsRef): BytesRef {
         val bytes = ByteArray(ints.length)
         for (i in 0..<ints.length) {
             val x: Int = ints.ints[ints.offset + i]
