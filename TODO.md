@@ -2,40 +2,82 @@
 
 Here are unported classes at Depth 7, then Depth 6.
 
-  ## Depth 6 (unported):
-      - org.apache.lucene.codecs.lucene99.Lucene99ScalarQuantizedVectorScorer → org.gnit.lucenekmp.codecs.lucene99.Lucene99ScalarQuantizedVectorScorer
-      - org.apache.lucene.codecs.lucene99.Lucene99ScalarQuantizedVectorsReader → org.gnit.lucenekmp.codecs.lucene99.Lucene99ScalarQuantizedVectorsReader
-      - org.apache.lucene.codecs.lucene99.Lucene99ScalarQuantizedVectorsWriter → org.gnit.lucenekmp.codecs.lucene99.Lucene99ScalarQuantizedVectorsWriter
-      - org.apache.lucene.tests.search.AssertingLeafCollector → org.gnit.lucenekmp.tests.search.AssertingLeafCollector
-      - org.apache.lucene.tests.search.AssertingScorer → org.gnit.lucenekmp.tests.search.AssertingScorer
-
   ## Depth 5 (unported):
-      - org.apache.lucene.codecs.compressing.MatchingReaders → org.gnit.lucenekmp.codecs.compressing.MatchingReaders
-      - org.apache.lucene.codecs.lucene90.LZ4WithPresetDictCompressionMode → org.gnit.lucenekmp.codecs.lucene90.LZ4WithPresetDictCompressionMode
-      - org.apache.lucene.codecs.lucene90.Lucene90CompoundReader → org.gnit.lucenekmp.codecs.lucene90.Lucene90CompoundReader
-      - org.apache.lucene.codecs.lucene90.Lucene90NormsProducer → org.gnit.lucenekmp.codecs.lucene90.Lucene90NormsProducer
-      - org.apache.lucene.codecs.lucene90.compressing.Lucene90CompressingStoredFieldsReader → org.gnit.lucenekmp.codecs.lucene90.compressing.Lucene90CompressingStoredFieldsReader
-      - org.apache.lucene.codecs.lucene90.compressing.Lucene90CompressingStoredFieldsWriter → org.gnit.lucenekmp.codecs.lucene90.compressing.Lucene90CompressingStoredFieldsWriter
-      - org.apache.lucene.codecs.lucene90.compressing.Lucene90CompressingTermVectorsReader → org.gnit.lucenekmp.codecs.lucene90.compressing.Lucene90CompressingTermVectorsReader
-      - org.apache.lucene.codecs.lucene90.compressing.Lucene90CompressingTermVectorsWriter → org.gnit.lucenekmp.codecs.lucene90.compressing.Lucene90CompressingTermVectorsWriter
-      - org.apache.lucene.codecs.lucene99.Lucene99FlatVectorsReader → org.gnit.lucenekmp.codecs.lucene99.Lucene99FlatVectorsReader
-      - org.apache.lucene.codecs.lucene99.Lucene99FlatVectorsWriter → org.gnit.lucenekmp.codecs.lucene99.Lucene99FlatVectorsWriter
-      - org.apache.lucene.index.FreqProxFields → org.gnit.lucenekmp.index.FreqProxFields
-      - org.apache.lucene.index.MappedMultiFields → org.gnit.lucenekmp.index.MappedMultiFields
-      - org.apache.lucene.search.BlockMaxConjunctionBulkScorer → org.gnit.lucenekmp.search.BlockMaxConjunctionBulkScorer
-      - org.apache.lucene.search.BooleanScorer → org.gnit.lucenekmp.search.BooleanScorer
-      - org.apache.lucene.search.ConjunctionBulkScorer → org.gnit.lucenekmp.search.ConjunctionBulkScorer
-      - org.apache.lucene.search.DenseConjunctionBulkScorer → org.gnit.lucenekmp.search.DenseConjunctionBulkScorer
-      - org.apache.lucene.search.MaxNonCompetitiveBoostAttribute → org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttribute
       - org.apache.lucene.search.similarities.LMSimilarity → org.gnit.lucenekmp.search.similarities.LMSimilarity
       - org.apache.lucene.search.similarities.MultiSimilarity → org.gnit.lucenekmp.search.similarities.MultiSimilarity
       - org.apache.lucene.search.similarities.SimilarityBase → org.gnit.lucenekmp.search.similarities.SimilarityBase
       - org.apache.lucene.tests.search.AssertingBulkScorer → org.gnit.lucenekmp.tests.search.AssertingBulkScorer
-      - org.apache.lucene.util.MergedIterator → org.gnit.lucenekmp.util.MergedIterator
-      - org.apache.lucene.util.bkd.BKDUtil → org.gnit.lucenekmp.util.bkd.BKDUtil
-      - org.apache.lucene.util.compress.LZ4 → org.gnit.lucenekmp.util.compress.LZ4
-      - org.apache.lucene.util.fst.BytesRefFSTEnum → org.gnit.lucenekmp.util.fst.BytesRefFSTEnum
-      - org.apache.lucene.util.hnsw.AbstractHnswGraphSearcher → org.gnit.lucenekmp.util.hnsw.AbstractHnswGraphSearcher
-      - org.apache.lucene.util.hnsw.IncrementalHnswGraphMerger → org.gnit.lucenekmp.util.hnsw.IncrementalHnswGraphMerger
-      - org.apache.lucene.util.hnsw.OnHeapHnswGraph → org.gnit.lucenekmp.util.hnsw.OnHeapHnswGraph
-      - org.apache.lucene.util.quantization.ScalarQuantizer → org.gnit.lucenekmp.util.quantization.ScalarQuantizer
+ 
+    ## Depth 4 (unported):
+      - org.apache.lucene.index.ParallelCompositeReader → org.gnit.lucenekmp.index.ParallelCompositeReader
+      - org.apache.lucene.index.ParallelLeafReader → org.gnit.lucenekmp.index.ParallelLeafReader
+      - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
+      - org.apache.lucene.index.SlowCodecReaderWrapper → org.gnit.lucenekmp.index.SlowCodecReaderWrapper
+      - org.apache.lucene.index.SnapshotDeletionPolicy → org.gnit.lucenekmp.index.SnapshotDeletionPolicy
+      - org.apache.lucene.internal.tests.FilterIndexInputAccess → org.gnit.lucenekmp.internal.tests.FilterIndexInputAccess
+      - org.apache.lucene.search.similarities.AfterEffect → org.gnit.lucenekmp.search.similarities.AfterEffect
+      - org.apache.lucene.search.similarities.AfterEffectB → org.gnit.lucenekmp.search.similarities.AfterEffectB
+      - org.apache.lucene.search.similarities.AfterEffectL → org.gnit.lucenekmp.search.similarities.AfterEffectL
+      - org.apache.lucene.search.similarities.AxiomaticF1EXP → org.gnit.lucenekmp.search.similarities.AxiomaticF1EXP
+      - org.apache.lucene.search.similarities.AxiomaticF1LOG → org.gnit.lucenekmp.search.similarities.AxiomaticF1LOG
+      - org.apache.lucene.search.similarities.AxiomaticF2EXP → org.gnit.lucenekmp.search.similarities.AxiomaticF2EXP
+      - org.apache.lucene.search.similarities.AxiomaticF2LOG → org.gnit.lucenekmp.search.similarities.AxiomaticF2LOG
+      - org.apache.lucene.search.similarities.BasicModel → org.gnit.lucenekmp.search.similarities.BasicModel
+      - org.apache.lucene.search.similarities.BasicModelG → org.gnit.lucenekmp.search.similarities.BasicModelG
+      - org.apache.lucene.search.similarities.BasicModelIF → org.gnit.lucenekmp.search.similarities.BasicModelIF
+      - org.apache.lucene.search.similarities.BasicModelIn → org.gnit.lucenekmp.search.similarities.BasicModelIn
+      - org.apache.lucene.search.similarities.BasicModelIne → org.gnit.lucenekmp.search.similarities.BasicModelIne
+      - org.apache.lucene.search.similarities.ClassicSimilarity → org.gnit.lucenekmp.search.similarities.ClassicSimilarity
+      - org.apache.lucene.search.similarities.DFISimilarity → org.gnit.lucenekmp.search.similarities.DFISimilarity
+      - org.apache.lucene.search.similarities.DFRSimilarity → org.gnit.lucenekmp.search.similarities.DFRSimilarity
+      - org.apache.lucene.search.similarities.Distribution → org.gnit.lucenekmp.search.similarities.Distribution
+      - org.apache.lucene.search.similarities.DistributionLL → org.gnit.lucenekmp.search.similarities.DistributionLL
+      - org.apache.lucene.search.similarities.DistributionSPL → org.gnit.lucenekmp.search.similarities.DistributionSPL
+      - org.apache.lucene.search.similarities.IBSimilarity → org.gnit.lucenekmp.search.similarities.IBSimilarity
+      - org.apache.lucene.search.similarities.Independence → org.gnit.lucenekmp.search.similarities.Independence
+      - org.apache.lucene.search.similarities.IndependenceChiSquared → org.gnit.lucenekmp.search.similarities.IndependenceChiSquared
+      - org.apache.lucene.search.similarities.IndependenceSaturated → org.gnit.lucenekmp.search.similarities.IndependenceSaturated
+      - org.apache.lucene.search.similarities.IndependenceStandardized → org.gnit.lucenekmp.search.similarities.IndependenceStandardized
+      - org.apache.lucene.search.similarities.LMDirichletSimilarity → org.gnit.lucenekmp.search.similarities.LMDirichletSimilarity
+      - org.apache.lucene.search.similarities.LMJelinekMercerSimilarity → org.gnit.lucenekmp.search.similarities.LMJelinekMercerSimilarity
+      - org.apache.lucene.search.similarities.Lambda → org.gnit.lucenekmp.search.similarities.Lambda
+      - org.apache.lucene.search.similarities.LambdaDF → org.gnit.lucenekmp.search.similarities.LambdaDF
+      - org.apache.lucene.search.similarities.LambdaTTF → org.gnit.lucenekmp.search.similarities.LambdaTTF
+      - org.apache.lucene.search.similarities.NormalizationH1 → org.gnit.lucenekmp.search.similarities.NormalizationH1
+      - org.apache.lucene.search.similarities.NormalizationH2 → org.gnit.lucenekmp.search.similarities.NormalizationH2
+      - org.apache.lucene.search.similarities.NormalizationH3 → org.gnit.lucenekmp.search.similarities.NormalizationH3
+      - org.apache.lucene.search.similarities.NormalizationZ → org.gnit.lucenekmp.search.similarities.NormalizationZ
+      - org.apache.lucene.search.similarities.PerFieldSimilarityWrapper → org.gnit.lucenekmp.search.similarities.PerFieldSimilarityWrapper
+      - org.apache.lucene.store.FilterIndexInput → org.gnit.lucenekmp.store.FilterIndexInput
+      - org.apache.lucene.tests.codecs.asserting.AssertingCodec → org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
+      - org.apache.lucene.tests.codecs.asserting.AssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingDocValuesFormat
+      - org.apache.lucene.tests.codecs.asserting.AssertingPostingsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingPostingsFormat
+      - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
+      - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
+      - org.apache.lucene.tests.codecs.compressing.DeflateWithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.DeflateWithPresetCompressingCodec
+      - org.apache.lucene.tests.codecs.compressing.FastCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.FastCompressingCodec
+      - org.apache.lucene.tests.codecs.compressing.FastDecompressionCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.FastDecompressionCompressingCodec
+      - org.apache.lucene.tests.codecs.compressing.HighCompressionCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.HighCompressionCompressingCodec
+      - org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec
+      - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
+      - org.apache.lucene.tests.index.AssertingDirectoryReader → org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
+      - org.apache.lucene.tests.index.AssertingLeafReader → org.gnit.lucenekmp.tests.index.AssertingLeafReader
+      - org.apache.lucene.tests.index.FieldFilterLeafReader → org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
+      - org.apache.lucene.tests.index.MergingCodecReader → org.gnit.lucenekmp.tests.index.MergingCodecReader
+      - org.apache.lucene.tests.index.MergingDirectoryReaderWrapper → org.gnit.lucenekmp.tests.index.MergingDirectoryReaderWrapper
+      - org.apache.lucene.tests.index.MismatchedDirectoryReader → org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
+      - org.apache.lucene.tests.index.MismatchedLeafReader → org.gnit.lucenekmp.tests.index.MismatchedLeafReader
+      - org.apache.lucene.tests.index.MockRandomMergePolicy → org.gnit.lucenekmp.tests.index.MockRandomMergePolicy
+      - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
+      - org.apache.lucene.tests.mockfile.DisableFsyncFS → org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS
+      - org.apache.lucene.tests.mockfile.FilterFileSystem → org.gnit.lucenekmp.tests.mockfile.FilterFileSystem
+      - org.apache.lucene.tests.mockfile.FilterFileSystemProvider → org.gnit.lucenekmp.tests.mockfile.FilterFileSystemProvider
+      - org.apache.lucene.tests.mockfile.FilterPath → org.gnit.lucenekmp.tests.mockfile.FilterPath
+      - org.apache.lucene.tests.mockfile.ShuffleFS → org.gnit.lucenekmp.tests.mockfile.ShuffleFS
+      - org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
+      - org.apache.lucene.tests.search.similarities.AssertingSimilarity → org.gnit.lucenekmp.tests.search.similarities.AssertingSimilarity
+      - org.apache.lucene.tests.util.AbstractBeforeAfterRule → org.gnit.lucenekmp.tests.util.AbstractBeforeAfterRule
+      - org.apache.lucene.tests.util.TestRuleAssertionsRequired → org.gnit.lucenekmp.tests.util.TestRuleAssertionsRequired
+      - org.apache.lucene.tests.util.TestRuleIgnoreTestSuites → org.gnit.lucenekmp.tests.util.TestRuleIgnoreTestSuites
+      - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
+      - org.apache.lucene.util.HotspotVMOptions → org.gnit.lucenekmp.util.HotspotVMOptions
