@@ -10,18 +10,33 @@ private object ThreadLocalStorage {
 /**
  * Native implementation: per-thread storage via a thread-local map.
  */
-actual class CloseableThreadLocal<T> actual constructor() : AutoCloseable {
+actual open class CloseableThreadLocal<T> actual constructor() : AutoCloseable {
+    private object NullSentinel
+
     @Suppress("UNCHECKED_CAST")
     actual fun get(): T? {
-        return ThreadLocalStorage.map[this] as T?
+        val map = ThreadLocalStorage.map
+        if (!map.containsKey(this)) {
+            val iv = initialValue()
+            if (iv != null) {
+                set(iv)
+                return iv
+            }
+            return null
+        }
+        val stored = map[this]
+        if (stored === NullSentinel) {
+            return null
+        }
+        return stored as T?
     }
 
     actual fun set(value: T?) {
-        if (value == null) {
-            ThreadLocalStorage.map.remove(this)
-        } else {
-            ThreadLocalStorage.map[this] = value
-        }
+        ThreadLocalStorage.map[this] = value ?: NullSentinel
+    }
+
+    actual open fun initialValue(): T? {
+        return null
     }
 
     actual override fun close() {
