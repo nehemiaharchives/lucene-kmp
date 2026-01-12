@@ -133,7 +133,7 @@ class SoftDeletesDirectoryReaderWrapper @Throws(IOException::class) private cons
             return numDocsVal
         }
 
-        override val coreCacheHelper: CacheHelper
+        override val coreCacheHelper: CacheHelper?
             get() = reader.coreCacheHelper
 
         override val readerCacheHelper: CacheHelper?
@@ -153,7 +153,7 @@ class SoftDeletesDirectoryReaderWrapper @Throws(IOException::class) private cons
             return numDocsVal
         }
 
-        override val coreCacheHelper: CacheHelper
+        override val coreCacheHelper: CacheHelper?
             get() = reader.coreCacheHelper
 
         override val readerCacheHelper: CacheHelper?

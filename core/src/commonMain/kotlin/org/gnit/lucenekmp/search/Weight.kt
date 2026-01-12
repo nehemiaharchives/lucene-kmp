@@ -65,7 +65,7 @@ abstract class Weight
         if (scorerSupplier == null) {
             return null
         }
-        val scorer: Scorer = scorerSupplier.get(1)
+        val scorer: Scorer = scorerSupplier.get(1)!!
         val twoPhase = scorer.twoPhaseIterator()
         if (twoPhase == null) {
             if (scorer.iterator().advance(doc) != doc) {

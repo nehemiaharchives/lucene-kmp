@@ -56,7 +56,7 @@ protected constructor() : IndexReader() {
      *
      * @lucene.experimental
      */
-    abstract val coreCacheHelper: CacheHelper
+    abstract val coreCacheHelper: CacheHelper?
 
     @Throws(IOException::class)
     override fun docFreq(term: Term): Int {

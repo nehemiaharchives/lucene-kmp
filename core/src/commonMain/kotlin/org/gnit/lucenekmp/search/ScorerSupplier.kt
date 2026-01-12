@@ -18,7 +18,7 @@ abstract class ScorerSupplier {
      * iteration capabilities.
      */
     @Throws(IOException::class)
-    abstract fun get(leadCost: Long): Scorer
+    abstract fun get(leadCost: Long): Scorer?
 
     /**
      * Optional method: Get a scorer that is optimized for bulk-scoring. The default implementation
@@ -27,7 +27,7 @@ abstract class ScorerSupplier {
      */
     @Throws(IOException::class)
     open fun bulkScorer(): BulkScorer? {
-        return DefaultBulkScorer(get(Long.Companion.MAX_VALUE))
+        return DefaultBulkScorer(get(Long.MAX_VALUE)!!)
     }
 
     /**

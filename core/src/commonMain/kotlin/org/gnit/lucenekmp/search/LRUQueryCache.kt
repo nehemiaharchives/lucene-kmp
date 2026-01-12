@@ -704,7 +704,7 @@ open class LRUQueryCache(
             logger.debug { "[LRUQueryCache.CachingWrapperWeight] shouldCache done" }
 
             logger.debug { "[LRUQueryCache.CachingWrapperWeight] cacheHelper start" }
-            val cacheHelper: IndexReader.CacheHelper = context.reader().coreCacheHelper
+            val cacheHelper: IndexReader.CacheHelper? = context.reader().coreCacheHelper
             if (cacheHelper == null) {
                 // this reader has no cache helper
                 logger.debug { "[LRUQueryCache.CachingWrapperWeight] no cacheHelper -> delegate" }
@@ -753,12 +753,12 @@ open class LRUQueryCache(
                         override fun iterator(leadCost: Long): DocIdSetIterator {
                             // skip cache operation which would slow query down too much
                             if (cost / skipCacheFactor > leadCost) {
-                                return supplier.get(leadCost).iterator()
+                                return supplier.get(leadCost)!!.iterator()
                             }
 
                             val cached = cacheImpl(supplier.bulkScorer()!!, maxDoc)
                             runBlocking { putIfAbsent(`in`.query, cached, cacheHelper) }
-                            var disi: DocIdSetIterator = cached.iterator()
+                            var disi: DocIdSetIterator? = cached.iterator()
                             if (disi == null) {
                                 // docIdSet.iterator() is allowed to return null when empty but we want a non-null
                                 // iterator here
@@ -819,7 +819,7 @@ open class LRUQueryCache(
                 return `in`.count(context)
             }
 
-            val cacheHelper: IndexReader.CacheHelper = context.reader().coreCacheHelper
+            val cacheHelper: IndexReader.CacheHelper? = context.reader().coreCacheHelper
             if (cacheHelper == null) {
                 // this reader has no cacheHelper
                 return `in`.count(context)

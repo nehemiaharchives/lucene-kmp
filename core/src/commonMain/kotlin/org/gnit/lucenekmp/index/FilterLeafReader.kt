@@ -301,13 +301,13 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
         get() = delegate.fieldInfos
 
     @Throws(IOException::class)
-    override fun getPointValues(field: String): PointValues {
-        return delegate.getPointValues(field)!!
+    override fun getPointValues(field: String): PointValues? {
+        return delegate.getPointValues(field)
     }
 
     @Throws(IOException::class)
-    override fun getFloatVectorValues(field: String): FloatVectorValues {
-        return delegate.getFloatVectorValues(field)!!
+    override fun getFloatVectorValues(field: String): FloatVectorValues? {
+        return delegate.getFloatVectorValues(field)
     }
 
     @Throws(IOException::class)
@@ -357,7 +357,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
     }
 
     @Throws(IOException::class)
-    override fun terms(field: String): Terms {
+    override fun terms(field: String): Terms? {
         ensureOpen()
         return delegate.terms(field)!!
     }

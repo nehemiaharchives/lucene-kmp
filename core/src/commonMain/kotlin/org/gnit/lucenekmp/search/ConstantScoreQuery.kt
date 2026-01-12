@@ -104,7 +104,7 @@ open class ConstantScoreQuery(val query: Query) : Query() {
                     return object : ScorerSupplier() {
                         @Throws(IOException::class)
                         override fun get(leadCost: Long): Scorer {
-                            val innerScorer: Scorer = innerScorerSupplier.get(leadCost)
+                            val innerScorer: Scorer = innerScorerSupplier.get(leadCost)!!
                             val twoPhaseIterator = innerScorer.twoPhaseIterator()
                             if (twoPhaseIterator == null) {
                                 return ConstantScoreScorer(score(), scoreMode, innerScorer.iterator())

@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.util.FixedBitSet
 
 
 /** Wraps another Collector and checks that order is respected.  */
-internal class AssertingLeafCollector(
+internal open class AssertingLeafCollector(
     collector: LeafCollector,
     private val min: Int,
     private val max: Int

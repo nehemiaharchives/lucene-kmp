@@ -134,9 +134,9 @@ class IndexOrDocValuesQuery
                         // an arbitrary 8x penalty to doc values.
                         val threshold = cost() ushr 3
                         return if (threshold <= leadCost) {
-                            indexScorerSupplier.get(leadCost)
+                            indexScorerSupplier.get(leadCost)!!
                         } else {
-                            dvScorerSupplier.get(leadCost)
+                            dvScorerSupplier.get(leadCost)!!
                         }
                     }
 

@@ -125,7 +125,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
                     override fun get(leadCost: Long): Scorer {
                         val scorers: MutableList<Scorer> = ArrayList()
                         for (ss in scorerSuppliers) {
-                            scorers.add(ss.get(leadCost))
+                            scorers.add(ss.get(leadCost)!!)
                         }
                         return DisjunctionMaxScorer(tieBreakerMultiplier, scorers, scoreMode, leadCost)
                     }

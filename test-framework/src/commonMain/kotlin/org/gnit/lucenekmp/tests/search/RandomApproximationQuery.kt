@@ -45,8 +45,8 @@ class RandomApproximationQuery(private val query: Query, private val random: Ran
         override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
             val scorerSupplier = `in`.scorerSupplier(context) ?: return null
             val subScorer = scorerSupplier.get(Long.MAX_VALUE)
-            val scorer = RandomApproximationScorer(subScorer, Random(random.nextLong()))
-            return Weight.DefaultScorerSupplier(scorer)
+            val scorer = RandomApproximationScorer(subScorer!!, Random(random.nextLong()))
+            return DefaultScorerSupplier(scorer)
         }
     }
 

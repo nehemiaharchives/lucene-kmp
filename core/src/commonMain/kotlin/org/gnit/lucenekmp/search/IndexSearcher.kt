@@ -400,7 +400,7 @@ open class IndexSearcher(
      * clauses.
      */
     @Throws(IOException::class)
-    fun search(query: Query, n: Int): TopDocs {
+    open fun search(query: Query, n: Int): TopDocs {
         return searchAfter(null, query, n)
     }
 
@@ -418,7 +418,7 @@ open class IndexSearcher(
    *     CollectorManager)} due to its support for concurrency in IndexSearcher"""
     )
     @Throws(IOException::class)
-    fun search(query: Query, collector: Collector) {
+    open fun search(query: Query, collector: Collector) {
         var query: Query = query
         query = rewrite(query, collector.scoreMode().needsScores())
         val weight: Weight = createWeight(query, collector.scoreMode(), 1f)
@@ -464,7 +464,7 @@ open class IndexSearcher(
      * @throws IOException if there is a low-level I/O error
      */
     @Throws(IOException::class)
-    fun search(
+    open fun search(
         query: Query,
         n: Int,
         sort: Sort
@@ -558,7 +558,7 @@ open class IndexSearcher(
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    fun <C : Collector, T> search(
+    open fun <C : Collector, T> search(
         query: Query,
         collectorManager: CollectorManager<C, T>
     ): T {
@@ -580,7 +580,7 @@ open class IndexSearcher(
             // there are no segments, nothing to offload to the executor, but we do need to call reduce to
             // create some kind of empty result
             assert(leafContexts.isEmpty())
-            return collectorManager.reduce(mutableListOf(firstCollector))
+            return collectorManager.reduce(mutableListOf(firstCollector))!!
         } else {
             val collectors: MutableList<C> = ArrayList(leafSlices.size)
             collectors.add(firstCollector)
@@ -605,7 +605,7 @@ open class IndexSearcher(
                     })
             }
             val results: MutableList<C> = runBlocking { taskExecutor.invokeAll(listTasks) }
-            return collectorManager.reduce(results)
+            return collectorManager.reduce(results)!!
         }
     }
 
@@ -627,7 +627,7 @@ open class IndexSearcher(
      * clauses.
      */
     @Throws(IOException::class)
-    protected fun search(
+    protected open fun search(
         partitions: Array<LeafReaderContextPartition>,
         weight: Weight,
         collector: Collector
@@ -715,7 +715,7 @@ open class IndexSearcher(
      * clauses.
      */
     @Throws(IOException::class)
-    fun rewrite(original: Query): Query {
+    open fun rewrite(original: Query): Query {
         var query: Query = original
         var rewrittenQuery: Query = query.rewrite(this)
         while (rewrittenQuery !== query
@@ -789,7 +789,7 @@ open class IndexSearcher(
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    fun createWeight(
+    open fun createWeight(
         query: Query,
         scoreMode: ScoreMode,
         boost: Float

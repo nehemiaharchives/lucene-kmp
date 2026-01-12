@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlin.math.abs
+
 object Math {
 
     /**
@@ -42,7 +44,7 @@ object Math {
 
 
     /**
-     * ported from java.lang.Math.toIntExact
+     * ported from Math.toIntExact
      *
      * Returns the value of the `long` argument,
      * throwing an exception if the value overflows an `int`.
@@ -60,7 +62,7 @@ object Math {
     }
 
     /**
-     * ported from java.lang.Math.addExact
+     * ported from Math.addExact
      *
      * Returns true if the argument is a finite floating-point value;
      * returns false otherwise (for NaN and infinity arguments).
@@ -322,7 +324,7 @@ object Math {
 
     /**
      * Multiplies `this` by 2^scaleFactor **with the same edge-case semantics as
-     * `java.lang.Math.scalb` (IEEE 754 scaleB operation)**.  The implementation is
+     * `Math.scalb` (IEEE 754 scaleB operation)**.  The implementation is
      * a direct Kotlin port of the JDK algorithm.  It guarantees:
      *
      * * exact results for all intermediate exponents in [MIN_EXPONENT, MAX_EXPONENT];
@@ -461,4 +463,93 @@ object Math {
         return q
     }
 
+
+    /**
+     * Returns the size of an ulp of the argument.  An ulp, unit in
+     * the last place, of a `float` value is the positive
+     * distance between this floating-point value and the `float` value next larger in magnitude.  Note that for non-NaN
+     * *x*, `ulp(-*x*) == ulp(*x*)`.
+     *
+     *
+     * Special Cases:
+     *
+     *  *  If the argument is NaN, then the result is NaN.
+     *  *  If the argument is positive or negative infinity, then the
+     * result is positive infinity.
+     *  *  If the argument is positive or negative zero, then the result is
+     * `Float.MIN_VALUE`.
+     *  *  If the argument is `Float.MAX_VALUE`, then
+     * the result is equal to 2<sup>104</sup>.
+     *
+     *
+     * @param f the floating-point value whose ulp is to be returned
+     * @return the size of an ulp of the argument
+     * @author Joseph D. Darcy
+     * @since 1.5
+     */
+    fun ulp(f: Float): Float {
+        var exp: Int = getExponent(f)
+
+        return when (exp) {
+            Float.MAX_EXPONENT + 1 -> abs(f)
+            Float.MIN_EXPONENT - 1 -> Float.Companion.MIN_VALUE
+            else -> {
+                assert(exp <= Float.MAX_EXPONENT && exp >= Float.MIN_EXPONENT)
+
+                // ulp(x) is usually 2^(SIGNIFICAND_WIDTH-1)*(2^ilogb(x))
+                exp -= (FloatConsts.SIGNIFICAND_WIDTH - 1)
+                if (exp >= Float.MIN_EXPONENT) {
+                    Math.powerOfTwoF(exp)
+                } else {
+                    // return a subnormal result; left shift integer
+                    // representation of FloatConsts.MIN_VALUE appropriate
+                    // number of positions
+                    Float.intBitsToFloat(
+                        1 shl
+                                (exp - (Float.MIN_EXPONENT - (FloatConsts.SIGNIFICAND_WIDTH - 1)))
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the unbiased exponent used in the representation of a
+     * `float`.  Special cases:
+     *
+     *
+     *  * If the argument is NaN or infinite, then the result is
+     * [Float.MAX_EXPONENT] + 1.
+     *  * If the argument is zero or subnormal, then the result is
+     * [Float.MIN_EXPONENT] - 1.
+     *
+     * @apiNote
+     * This method is analogous to the logB operation defined in IEEE
+     * 754, but returns a different value on subnormal arguments.
+     *
+     * @param f a `float` value
+     * @return the unbiased exponent of the argument
+     * @since 1.6
+     */
+    fun getExponent(f: Float): Int {
+        /*
+         * Bitwise convert f to integer, mask out exponent bits, shift
+         * to the right and then subtract out float's bias adjust to
+         * get true exponent value
+         */
+        return ((Float.floatToRawIntBits(f) and FloatConsts.EXP_BIT_MASK) shr
+                (FloatConsts.SIGNIFICAND_WIDTH - 1)) - FloatConsts.EXP_BIAS
+    }
+
+    /**
+     * Returns a floating-point power of two in the normal range.
+     */
+    fun powerOfTwoF(n: Int): Float {
+        assert(n >= Float.MIN_EXPONENT && n <= Float.MAX_EXPONENT)
+        return Float.intBitsToFloat(
+            ((n + FloatConsts.EXP_BIAS) shl
+                    (FloatConsts.SIGNIFICAND_WIDTH - 1))
+                    and FloatConsts.EXP_BIT_MASK
+        )
+    }
 }

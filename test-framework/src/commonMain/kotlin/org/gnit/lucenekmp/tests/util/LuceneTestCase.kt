@@ -1,12 +1,35 @@
 package org.gnit.lucenekmp.tests.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import okio.IOException
+import org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
+import org.gnit.lucenekmp.tests.index.AssertingLeafReader
+import org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
+import org.gnit.lucenekmp.tests.index.MergingCodecReader
+import org.gnit.lucenekmp.tests.index.MergingDirectoryReaderWrapper
+import org.gnit.lucenekmp.tests.index.MismatchedCodecReader
+import org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
+import org.gnit.lucenekmp.tests.index.MismatchedLeafReader
 import org.gnit.lucenekmp.analysis.Analyzer
+import org.gnit.lucenekmp.index.CodecReader
+import org.gnit.lucenekmp.index.CompositeReader
+import org.gnit.lucenekmp.index.DirectoryReader
+import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.IndexWriterConfig
+import org.gnit.lucenekmp.index.LeafReader
+import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.index.LiveIndexWriterConfig
+import org.gnit.lucenekmp.index.ParallelCompositeReader
+import org.gnit.lucenekmp.index.ParallelLeafReader
+import org.gnit.lucenekmp.jdkport.Collections
+import org.gnit.lucenekmp.jdkport.ExecutorService
+import org.gnit.lucenekmp.search.IndexSearcher
+import org.gnit.lucenekmp.tests.search.AssertingIndexSearcher
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
+import kotlin.math.ln
+import kotlin.math.min
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -187,6 +210,34 @@ open class LuceneTestCase {
         fun atLeast(i: Int): Int {
             return atLeast(Random, i)
         }
+
+        /**
+         * Returns true if something should happen rarely,
+         *
+         *
+         * The actual number returned will be influenced by whether [.TEST_NIGHTLY] is active and
+         * [.RANDOM_MULTIPLIER].
+         */
+        fun rarely(random: Random): Boolean {
+            var p = if (TEST_NIGHTLY) 5 else 1
+            p =
+                (p + (p * ln(RANDOM_MULTIPLIER.toDouble()))).toInt()
+            val min = 100 - min(p, 20) // never more than 20
+            return random.nextInt(100) >= min
+        }
+
+        fun rarely(): Boolean {
+            return rarely(random())
+        }
+
+        fun usually(random: Random): Boolean {
+            return !rarely(random)
+        }
+
+        fun usually(): Boolean {
+            return usually(random())
+        }
+        //↑ line 857 of LuceneTestCase.java
 
 
         // line 943 of LuceneTestCase.java
@@ -426,6 +477,304 @@ open class LuceneTestCase {
                 }
             }
         }
+
+
+        // line 1689
+        @Throws(IOException::class)
+        fun wrapReader(r: IndexReader): IndexReader {
+            var r: IndexReader = r
+            val random: Random = random()
+
+            var i = 0
+            val c: Int = random.nextInt(6) + 1
+            while (i < c) {
+                when (random.nextInt(5)) {
+                    0 -> {
+                        // will create no FC insanity in atomic case, as ParallelLeafReader has own cache key:
+                        if (VERBOSE) {
+                            println("NOTE: LuceneTestCase.wrapReader: wrapping previous reader=$r with ParallelLeaf/CompositeReader")
+                        }
+                        r = if (r is LeafReader)
+                                ParallelLeafReader(r as LeafReader)
+                            else
+                                ParallelCompositeReader(r as CompositeReader)
+                    }
+
+                    1 -> if (r is LeafReader) {
+                        val allFields: MutableList<String> = mutableListOf()
+                        for (fi in r.fieldInfos) {
+                            allFields.add(fi.name)
+                        }
+                        Collections.shuffle(allFields, random)
+                        val end = if (allFields.isEmpty()) 0 else random.nextInt(allFields.size)
+                        val fields: MutableSet<String> = HashSet(allFields.subList(0, end))
+                        // will create no FC insanity as ParallelLeafReader has own cache key:
+                        if (VERBOSE) {
+                            println("NOTE: LuceneTestCase.wrapReader: wrapping previous reader=$r with ParallelLeafReader")
+                        }
+                        r = ParallelLeafReader(
+                                FieldFilterLeafReader(r, fields, false),
+                                FieldFilterLeafReader(r, fields, true)
+                            )
+                    }
+
+                    2 -> {
+                        // Häckidy-Hick-Hack: a standard Reader will cause FC insanity, so we use
+                        // QueryUtils' reader with a fake cache key, so insanity checker cannot walk
+                        // along our reader:
+                        if (LuceneTestCase.VERBOSE) {
+                            println(
+                                ("NOTE: LuceneTestCase.wrapReader: wrapping previous reader="
+                                        + r
+                                        + " with AssertingLeaf/DirectoryReader")
+                            )
+                        }
+                        if (r is LeafReader) {
+                            r = AssertingLeafReader(r as LeafReader)
+                        } else if (r is DirectoryReader) {
+                            r = AssertingDirectoryReader(r as DirectoryReader)
+                        }
+                    }
+
+                    3 -> {
+                        if (LuceneTestCase.VERBOSE) {
+                            println(
+                                ("NOTE: LuceneTestCase.wrapReader: wrapping previous reader="
+                                        + r
+                                        + " with MismatchedLeaf/Directory/CodecReader")
+                            )
+                        }
+                        if (r is LeafReader) {
+                            r = MismatchedLeafReader(r as LeafReader, random)
+                        } else if (r is DirectoryReader) {
+                            r = MismatchedDirectoryReader(r as DirectoryReader, random)
+                        } else if (r is CodecReader) {
+                            r = MismatchedCodecReader(r as CodecReader, random)
+                        }
+                    }
+
+                    4 -> {
+                        if (LuceneTestCase.VERBOSE) {
+                            println(
+                                ("NOTE: LuceneTestCase.wrapReader: wrapping previous reader="
+                                        + r
+                                        + " with MergingCodecReader")
+                            )
+                        }
+                        if (r is CodecReader) {
+                            r = MergingCodecReader(r as CodecReader)
+                        } else if (r is DirectoryReader) {
+                            var allLeavesAreCodecReaders = true
+                            for (ctx in r.leaves()) {
+                                if (ctx.reader() is CodecReader == false) {
+                                    allLeavesAreCodecReaders = false
+                                    break
+                                }
+                            }
+                            if (allLeavesAreCodecReaders) {
+                                r = MergingDirectoryReaderWrapper(r as DirectoryReader)
+                            }
+                        }
+                    }
+
+                    else -> fail("should not get here")
+                }
+                i++
+            }
+
+            if (LuceneTestCase.VERBOSE) {
+                println("wrapReader wrapped: $r")
+            }
+
+            return r
+        }
+
+        /** Sometimes wrap the IndexReader as slow, parallel or filter reader (or combinations of that)  */
+        @Throws(IOException::class)
+        fun maybeWrapReader(r: IndexReader): IndexReader {
+            var r: IndexReader = r
+            if (rarely()) {
+                r = LuceneTestCase.wrapReader(r)
+            }
+            return r
+        }
+        // line 1800
+
+
+        //↓ line 1914 of LuceneTestCase.java
+        /** Create a new searcher over the reader. This searcher might randomly use threads.  */
+        fun newSearcher(r: IndexReader): IndexSearcher {
+            return newSearcher(r, true)
+        }
+
+        /** Create a new searcher over the reader. This searcher might randomly use threads.  */
+        fun newSearcher(
+            r: IndexReader,
+            maybeWrap: Boolean
+        ): IndexSearcher {
+            return newSearcher(r, maybeWrap, true)
+        }
+
+        /**
+         * Create a new searcher over the reader. This searcher might randomly use threads. if `
+         * maybeWrap` is true, this searcher might wrap the reader with one that returns null for
+         * getSequentialSubReaders. If `wrapWithAssertions` is true, this searcher might be an
+         * [AssertingIndexSearcher] instance.
+         */
+        fun newSearcher(
+            r: IndexReader, maybeWrap: Boolean, wrapWithAssertions: Boolean
+        ): IndexSearcher {
+            return LuceneTestCase.newSearcher(
+                r,
+                maybeWrap,
+                wrapWithAssertions,
+                RandomizedTest.randomBoolean()
+            )
+        }
+
+        /**
+         * Create a new searcher over the reader. If `
+         * maybeWrap` is true, this searcher might wrap the reader with one that returns null for
+         * getSequentialSubReaders. If `wrapWithAssertions` is true, this searcher might be an
+         * [AssertingIndexSearcher] instance. The searcher will use threads if `useThreads
+        ` *  is set to true.
+         */
+        fun newSearcher(
+            r: IndexReader,
+            maybeWrap: Boolean,
+            wrapWithAssertions: Boolean,
+            useThreads: Boolean
+        ): IndexSearcher {
+            if (useThreads) {
+                return newSearcher(
+                    r,
+                    maybeWrap,
+                    wrapWithAssertions,
+                    Concurrency.INTRA_SEGMENT
+                )
+            }
+            return newSearcher(
+                r,
+                maybeWrap,
+                wrapWithAssertions,
+                Concurrency.NONE
+            )
+        }
+
+        /** What level of concurrency is supported by the searcher being created  */
+        enum class Concurrency {
+            /** No concurrency, meaning an executor won't be provided to the searcher  */
+            NONE,
+
+            /**
+             * Inter-segment concurrency, meaning an executor will be provided to the searcher and slices
+             * will be randomly created to concurrently search entire segments
+             */
+            INTER_SEGMENT,
+
+            /**
+             * Intra-segment concurrency, meaning an executor will be provided to the searcher and slices
+             * will be randomly created to concurrently search segment partitions
+             */
+            INTRA_SEGMENT
+        }
+
+        fun newSearcher(
+            r: IndexReader,
+            maybeWrap: Boolean,
+            wrapWithAssertions: Boolean,
+            concurrency: Concurrency?
+        ): IndexSearcher {
+            var r: IndexReader = r
+            val random: Random = random()
+            if (concurrency == Concurrency.NONE) {
+                if (maybeWrap) {
+                    try {
+                        r = LuceneTestCase.maybeWrapReader(r)
+                    } catch (e: IOException) {
+                        Rethrow.rethrow(e)
+                    }
+                }
+                // TODO: this whole check is a coverage hack, we should move it to tests for various
+                // filterreaders.
+                // ultimately whatever you do will be checkIndex'd at the end anyway.
+                if (random.nextInt(500) == 0 && r is LeafReader) {
+                    // TODO: not useful to check DirectoryReader (redundant with checkindex)
+                    // but maybe sometimes run this on the other crazy readers maybeWrapReader creates?
+                    try {
+                        TestUtil.checkReader(r)
+                    } catch (e: IOException) {
+                        Rethrow.rethrow(e)
+                    }
+                }
+                val ret: IndexSearcher
+                if (wrapWithAssertions) {
+                    ret =
+                        if (random.nextBoolean())
+                            AssertingIndexSearcher(random, r)
+                        else
+                            AssertingIndexSearcher(random, r.getContext())
+                } else {
+                    ret =
+                        if (random.nextBoolean()) IndexSearcher(r) else IndexSearcher(
+                            r.context
+                        )
+                }
+                ret.similarity = LuceneTestCase.classEnvRule.similarity
+                return ret
+            } else {
+                val ex: ExecutorService?
+                if (random.nextBoolean()) {
+                    ex = null
+                } else {
+                    ex = LuceneTestCase.executor
+                    if (VERBOSE) {
+                        println("NOTE: newSearcher using shared ExecutorService")
+                    }
+                }
+                val ret: IndexSearcher
+                val maxDocPerSlice = if (random.nextBoolean()) 1 else 1 + random.nextInt(1000)
+                val maxSegmentsPerSlice = if (random.nextBoolean()) 1 else 1 + random.nextInt(10)
+                if (wrapWithAssertions) {
+                    if (random.nextBoolean()) {
+                        ret =
+                            object : AssertingIndexSearcher(random, r, ex) {
+                                override fun slices(leaves: MutableList<LeafReaderContext?>?): Array<IndexSearcher.LeafSlice?> {
+                                    return LuceneTestCase.slices(
+                                        leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency
+                                    )
+                                }
+                            }
+                    } else {
+                        ret =
+                            object : AssertingIndexSearcher(random, r.getContext(), ex) {
+                                override fun slices(leaves: MutableList<LeafReaderContext?>?): Array<IndexSearcher.LeafSlice?> {
+                                    return LuceneTestCase.slices(
+                                        leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency
+                                    )
+                                }
+                            }
+                    }
+                } else {
+                    ret =
+                        object : IndexSearcher(r, ex) {
+                            override fun slices(leaves: MutableList<LeafReaderContext?>?): Array<IndexSearcher.LeafSlice?> {
+                                return LuceneTestCase.slices(
+                                    leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency
+                                )
+                            }
+                        }
+                }
+                ret.similarity = LuceneTestCase.classEnvRule.similarity
+                ret.queryCachingPolicy = LuceneTestCase.MAYBE_CACHE_POLICY
+                if (LuceneTestCase.random().nextBoolean()) {
+                    ret.timeout = org.gnit.lucenekmp.index.QueryTimeout { false }
+                }
+                return ret
+            }
+        }
+
+
 
 
         //↓ line 2872 of LuceneTestCase.java

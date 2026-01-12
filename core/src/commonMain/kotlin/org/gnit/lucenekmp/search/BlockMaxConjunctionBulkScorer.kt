@@ -190,9 +190,6 @@ internal class BlockMaxConjunctionBulkScorer(maxDoc: Int, scorers: MutableList<S
         var score: Float = 0f
 
         override var minCompetitiveScore: Float = 0f
-            set(minScore) {
-                this.minCompetitiveScore = minScore
-            }
 
         @Throws(IOException::class)
         override fun score(): Float {

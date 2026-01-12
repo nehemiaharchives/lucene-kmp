@@ -202,7 +202,7 @@ internal class BooleanScorerSupplier(
 
         val prohibited: MutableList<Scorer> = mutableListOf()
         for (ss in subs[Occur.MUST_NOT]!!) {
-            prohibited.add(ss.get(positiveScorerCost))
+            prohibited.add(ss.get(positiveScorerCost)!!)
         }
 
         if (prohibited.isEmpty()) {
@@ -233,7 +233,7 @@ internal class BooleanScorerSupplier(
         if (scoreMode === ScoreMode.TOP_SCORES && minShouldMatch <= 1) {
             val optionalScorers: MutableList<Scorer> = mutableListOf()
             for (ss in subs[Occur.SHOULD]!!) {
-                optionalScorers.add(ss.get(Long.Companion.MAX_VALUE))
+                optionalScorers.add(ss.get(Long.MAX_VALUE)!!)
             }
 
             return MaxScoreBulkScorer(maxDoc, optionalScorers, null)
@@ -253,11 +253,11 @@ internal class BooleanScorerSupplier(
         val cost = cost()
         val optionalScorers: MutableList<Scorer> = mutableListOf()
         for (ss in subs[Occur.SHOULD]!!) {
-            optionalScorers.add(ss.get(cost))
+            optionalScorers.add(ss.get(cost)!!)
         }
         val filters: MutableList<Scorer> = mutableListOf()
         for (ss in subs[Occur.FILTER]!!) {
-            filters.add(ss.get(cost))
+            filters.add(ss.get(cost)!!)
         }
         if (scoreMode === ScoreMode.TOP_SCORES) {
             val filterScorer: Scorer = if (filters.size == 1) {
@@ -308,7 +308,7 @@ internal class BooleanScorerSupplier(
 
         val requiredNoScoring: MutableList<Scorer> = mutableListOf()
         for (ss in subs[Occur.FILTER]!!) {
-            requiredNoScoring.add(ss.get(leadCost))
+            requiredNoScoring.add(ss.get(leadCost)!!)
         }
         var requiredScoring: MutableList<Scorer> = mutableListOf()
         val requiredScoringSupplier: MutableCollection<ScorerSupplier> = subs[Occur.MUST]!!
@@ -316,7 +316,7 @@ internal class BooleanScorerSupplier(
             if (requiredScoringSupplier.size == 1) {
                 ss.setTopLevelScoringClause()
             }
-            requiredScoring.add(ss.get(leadCost))
+            requiredScoring.add(ss.get(leadCost)!!)
         }
         if (scoreMode === ScoreMode.TOP_SCORES && requiredScoring.size > 1 // Only specialize top-level conjunctions for clauses that don't have a two-phase iterator.
             && requiredNoScoring.map(Scorer::twoPhaseIterator).all { obj: Any? -> obj == null }
@@ -393,7 +393,7 @@ internal class BooleanScorerSupplier(
                 (requiredNoScoring.ifEmpty { requiredScoring })
                     .iterator()
                     .next()
-                    .get(leadCost)
+                    .get(leadCost)!!
 
             if (!scoreMode.needsScores()) {
                 return req
@@ -421,10 +421,10 @@ internal class BooleanScorerSupplier(
             val requiredScorers: MutableList<Scorer> = mutableListOf()
             var scoringScorers: MutableList<Scorer> = mutableListOf()
             for (s in requiredNoScoring) {
-                requiredScorers.add(s.get(leadCost))
+                requiredScorers.add(s.get(leadCost)!!)
             }
             for (s in requiredScoring) {
-                val scorer: Scorer = s.get(leadCost)
+                val scorer: Scorer = s.get(leadCost)!!
                 scoringScorers.add(scorer)
             }
             if (scoreMode === ScoreMode.TOP_SCORES && scoringScorers.size > 1 && topLevelScoringClause) {
@@ -459,11 +459,11 @@ internal class BooleanScorerSupplier(
         topLevelScoringClause: Boolean
     ): Scorer {
         if (optional.size == 1) {
-            return optional.iterator().next().get(leadCost)
+            return optional.iterator().next().get(leadCost)!!
         } else {
             val optionalScorers: MutableList<Scorer> = mutableListOf()
             for (scorer in optional) {
-                optionalScorers.add(scorer.get(leadCost))
+                optionalScorers.add(scorer.get(leadCost)!!)
             }
 
             // Technically speaking, WANDScorer should be able to handle the following 3 conditions now

@@ -94,7 +94,7 @@ abstract class FilterCodecReader(
             numDocs: Int
         ): FilterCodecReader {
             return object : FilterCodecReader(reader) {
-                override val coreCacheHelper: CacheHelper
+                override val coreCacheHelper: CacheHelper?
                     get() = reader.coreCacheHelper
 
                 override val readerCacheHelper: CacheHelper?

@@ -34,5 +34,5 @@ interface CollectorManager<C : Collector, T> {
      * called after collection is finished on all provided collectors.
      */
     @Throws(IOException::class)
-    fun reduce(collectors: MutableCollection<C>): T
+    fun reduce(collectors: MutableCollection<C>): T?
 }
