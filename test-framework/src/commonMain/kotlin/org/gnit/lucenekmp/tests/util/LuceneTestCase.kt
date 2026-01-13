@@ -1,15 +1,8 @@
 package org.gnit.lucenekmp.tests.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Runnable
 import okio.IOException
-import org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
-import org.gnit.lucenekmp.tests.index.AssertingLeafReader
-import org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
-import org.gnit.lucenekmp.tests.index.MergingCodecReader
-import org.gnit.lucenekmp.tests.index.MergingDirectoryReaderWrapper
-import org.gnit.lucenekmp.tests.index.MismatchedCodecReader
-import org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
-import org.gnit.lucenekmp.tests.index.MismatchedLeafReader
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.CompositeReader
@@ -21,13 +14,27 @@ import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.index.LiveIndexWriterConfig
 import org.gnit.lucenekmp.index.ParallelCompositeReader
 import org.gnit.lucenekmp.index.ParallelLeafReader
-import org.gnit.lucenekmp.jdkport.Collections
 import org.gnit.lucenekmp.jdkport.ExecutorService
+import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
+import org.gnit.lucenekmp.jdkport.TimeUnit
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.IndexSearcher
+import org.gnit.lucenekmp.search.Query
+import org.gnit.lucenekmp.search.QueryCachingPolicy
+import org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
+import org.gnit.lucenekmp.tests.index.AssertingLeafReader
+import org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
+import org.gnit.lucenekmp.tests.index.MergingCodecReader
+import org.gnit.lucenekmp.tests.index.MergingDirectoryReaderWrapper
+import org.gnit.lucenekmp.tests.index.MismatchedCodecReader
+import org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
+import org.gnit.lucenekmp.tests.index.MismatchedLeafReader
 import org.gnit.lucenekmp.tests.search.AssertingIndexSearcher
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.util.NamedThreadFactory
 import kotlin.math.ln
 import kotlin.math.min
 import kotlin.random.Random
@@ -102,6 +109,9 @@ open class LuceneTestCase {
          */
         val VERBOSE: Boolean = systemPropertyAsBoolean("tests.verbose", false)
 
+        // line 421
+        /** Enables or disables dumping of [InfoStream] messages.  */
+        val INFOSTREAM: Boolean = systemPropertyAsBoolean("tests.infostream", VERBOSE)
 
         // line 484
         /**
@@ -116,6 +126,23 @@ open class LuceneTestCase {
         }
         // line 490
 
+
+        // line 519
+        /** Class environment setup rule.  */
+        val classEnvRule: TestRuleSetupAndRestoreClassEnv? = null
+
+
+        /** A [QueryCachingPolicy] that randomly caches.  */
+        val MAYBE_CACHE_POLICY: QueryCachingPolicy =
+            object : QueryCachingPolicy {
+                override fun onUse(query: Query) {}
+
+                @Throws(IOException::class)
+                override fun shouldCache(query: Query): Boolean {
+                    return random().nextBoolean()
+                }
+            }
+        // line 530
 
         // line 618 of LuceneTestCase.java
         /** Returns random string, including full unicode range.  */
@@ -505,7 +532,7 @@ open class LuceneTestCase {
                         for (fi in r.fieldInfos) {
                             allFields.add(fi.name)
                         }
-                        Collections.shuffle(allFields, random)
+                        allFields.shuffle(random)
                         val end = if (allFields.isEmpty()) 0 else random.nextInt(allFields.size)
                         val fields: MutableSet<String> = HashSet(allFields.subList(0, end))
                         // will create no FC insanity as ParallelLeafReader has own cache key:
@@ -522,7 +549,7 @@ open class LuceneTestCase {
                         // Häckidy-Hick-Hack: a standard Reader will cause FC insanity, so we use
                         // QueryUtils' reader with a fake cache key, so insanity checker cannot walk
                         // along our reader:
-                        if (LuceneTestCase.VERBOSE) {
+                        if (VERBOSE) {
                             println(
                                 ("NOTE: LuceneTestCase.wrapReader: wrapping previous reader="
                                         + r
@@ -537,7 +564,7 @@ open class LuceneTestCase {
                     }
 
                     3 -> {
-                        if (LuceneTestCase.VERBOSE) {
+                        if (VERBOSE) {
                             println(
                                 ("NOTE: LuceneTestCase.wrapReader: wrapping previous reader="
                                         + r
@@ -554,7 +581,7 @@ open class LuceneTestCase {
                     }
 
                     4 -> {
-                        if (LuceneTestCase.VERBOSE) {
+                        if (VERBOSE) {
                             println(
                                 ("NOTE: LuceneTestCase.wrapReader: wrapping previous reader="
                                         + r
@@ -582,7 +609,7 @@ open class LuceneTestCase {
                 i++
             }
 
-            if (LuceneTestCase.VERBOSE) {
+            if (VERBOSE) {
                 println("wrapReader wrapped: $r")
             }
 
@@ -601,7 +628,38 @@ open class LuceneTestCase {
         // line 1800
 
 
-        //↓ line 1914 of LuceneTestCase.java
+        //↓ line 1888 of LuceneTestCase.java
+        private var executor: ExecutorService? = null
+
+        /*@org.junit.BeforeClass*/
+        fun setUpExecutorService() {
+            val threads: Int = TestUtil.nextInt(
+                random(),
+                1,
+                2
+            )
+            executor =
+                ThreadPoolExecutor(
+                    threads,
+                    threads,
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    LinkedBlockingQueue<Runnable>(),
+                    NamedThreadFactory("LuceneTestCase")
+                )
+            // uncomment to intensify LUCENE-3840
+            // executor.prestartAllCoreThreads();
+            if (VERBOSE) {
+                println("NOTE: Created shared ExecutorService with $threads threads")
+            }
+        }
+
+        /*@org.junit.AfterClass*/
+        fun shutdownExecutorService() {
+            TestUtil.shutdownExecutorService(executor!!)
+            executor = null
+        }
+
         /** Create a new searcher over the reader. This searcher might randomly use threads.  */
         fun newSearcher(r: IndexReader): IndexSearcher {
             return newSearcher(r, true)
@@ -624,7 +682,7 @@ open class LuceneTestCase {
         fun newSearcher(
             r: IndexReader, maybeWrap: Boolean, wrapWithAssertions: Boolean
         ): IndexSearcher {
-            return LuceneTestCase.newSearcher(
+            return newSearcher(
                 r,
                 maybeWrap,
                 wrapWithAssertions,
@@ -713,21 +771,21 @@ open class LuceneTestCase {
                         if (random.nextBoolean())
                             AssertingIndexSearcher(random, r)
                         else
-                            AssertingIndexSearcher(random, r.getContext())
+                            AssertingIndexSearcher(random, r.context)
                 } else {
                     ret =
                         if (random.nextBoolean()) IndexSearcher(r) else IndexSearcher(
                             r.context
                         )
                 }
-                ret.similarity = LuceneTestCase.classEnvRule.similarity
+                ret.similarity = classEnvRule!!.similarity!!
                 return ret
             } else {
                 val ex: ExecutorService?
                 if (random.nextBoolean()) {
                     ex = null
                 } else {
-                    ex = LuceneTestCase.executor
+                    ex = executor
                     if (VERBOSE) {
                         println("NOTE: newSearcher using shared ExecutorService")
                     }
@@ -738,19 +796,19 @@ open class LuceneTestCase {
                 if (wrapWithAssertions) {
                     if (random.nextBoolean()) {
                         ret =
-                            object : AssertingIndexSearcher(random, r, ex) {
-                                override fun slices(leaves: MutableList<LeafReaderContext?>?): Array<IndexSearcher.LeafSlice?> {
-                                    return LuceneTestCase.slices(
-                                        leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency
+                            object : AssertingIndexSearcher(random, r, ex!!) {
+                                override fun slices(leaves: MutableList<LeafReaderContext>): Array<IndexSearcher.LeafSlice> {
+                                    return slices(
+                                        leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency!!
                                     )
                                 }
                             }
                     } else {
                         ret =
-                            object : AssertingIndexSearcher(random, r.getContext(), ex) {
-                                override fun slices(leaves: MutableList<LeafReaderContext?>?): Array<IndexSearcher.LeafSlice?> {
-                                    return LuceneTestCase.slices(
-                                        leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency
+                            object : AssertingIndexSearcher(random, r.context, ex!!) {
+                                override fun slices(leaves: MutableList<LeafReaderContext>): Array<LeafSlice> {
+                                    return slices(
+                                        leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency!!
                                     )
                                 }
                             }
@@ -758,23 +816,43 @@ open class LuceneTestCase {
                 } else {
                     ret =
                         object : IndexSearcher(r, ex) {
-                            override fun slices(leaves: MutableList<LeafReaderContext?>?): Array<IndexSearcher.LeafSlice?> {
-                                return LuceneTestCase.slices(
-                                    leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency
+                            override fun slices(leaves: MutableList<LeafReaderContext>): Array<LeafSlice> {
+                                return slices(
+                                    leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency!!
                                 )
                             }
                         }
                 }
-                ret.similarity = LuceneTestCase.classEnvRule.similarity
-                ret.queryCachingPolicy = LuceneTestCase.MAYBE_CACHE_POLICY
-                if (LuceneTestCase.random().nextBoolean()) {
+                ret.similarity = classEnvRule!!.similarity!!
+                ret.queryCachingPolicy = MAYBE_CACHE_POLICY
+                if (random().nextBoolean()) {
                     ret.timeout = org.gnit.lucenekmp.index.QueryTimeout { false }
                 }
                 return ret
             }
         }
 
-
+        /**
+         * Creates leaf slices according to the concurrency argument, that optionally leverage
+         * intra-segment concurrency by splitting segments into multiple partitions according to the
+         * maxDocsPerSlice argument.
+         */
+        private fun slices(
+            leaves: MutableList<LeafReaderContext>,
+            maxDocsPerSlice: Int,
+            maxSegmentsPerSlice: Int,
+            concurrency: Concurrency
+        ): Array<IndexSearcher.LeafSlice> {
+            assert(concurrency != Concurrency.NONE)
+            // Rarely test slices without partitions even though intra-segment concurrency is supported
+            return IndexSearcher.slices(
+                leaves,
+                maxDocsPerSlice,
+                maxSegmentsPerSlice,
+                concurrency == Concurrency.INTRA_SEGMENT && RandomizedTest.frequently()
+            )
+        }
+        // line 2069
 
 
         //↓ line 2872 of LuceneTestCase.java

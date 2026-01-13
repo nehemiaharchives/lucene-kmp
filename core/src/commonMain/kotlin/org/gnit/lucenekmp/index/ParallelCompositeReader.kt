@@ -2,6 +2,8 @@ package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.runBlocking
 import okio.IOException
+import org.gnit.lucenekmp.search.KnnCollector
+import org.gnit.lucenekmp.util.Bits
 
 /**
  * An [CompositeReader] which reads multiple, parallel indexes. Each index added must have the
@@ -139,6 +141,27 @@ class ParallelCompositeReader(
                     // ref-counting
                     object : ParallelLeafReader(true, subs, storedSubs) {
                         override fun doClose() {}
+                        override fun terms(field: String?): Terms? {
+                            TODO("Not yet implemented")
+                        }
+
+                        override fun searchNearestVectors(
+                            field: String,
+                            target: FloatArray,
+                            knnCollector: KnnCollector,
+                            acceptDocs: Bits?
+                        ) {
+                            TODO("Not yet implemented")
+                        }
+
+                        override fun searchNearestVectors(
+                            field: String,
+                            target: ByteArray,
+                            knnCollector: KnnCollector,
+                            acceptDocs: Bits?
+                        ) {
+                            TODO("Not yet implemented")
+                        }
                     }
                 }
 

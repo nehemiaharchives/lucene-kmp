@@ -97,7 +97,7 @@ protected constructor() : LeafReader() {
     }
 
     @Throws(IOException::class)
-    override fun terms(field: String): Terms? {
+    override fun terms(field: String?): Terms? {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
         if (fi == null || fi.indexOptions === IndexOptions.NONE) {
@@ -239,7 +239,7 @@ protected constructor() : LeafReader() {
 
     @Throws(IOException::class)
     override fun searchNearestVectors(
-        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?
     ) {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)
@@ -252,7 +252,7 @@ protected constructor() : LeafReader() {
 
     @Throws(IOException::class)
     override fun searchNearestVectors(
-        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?
     ) {
         ensureOpen()
         val fi: FieldInfo? = fieldInfos.fieldInfo(field)

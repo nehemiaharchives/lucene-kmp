@@ -4292,9 +4292,9 @@ class CheckIndex(
                     checkDVIterator(
                         fi
                     ) { field: FieldInfo ->
-                        dvReader.getSorted(field)
+                        dvReader.getSorted(field)!!
                     }
-                    checkSortedDocValues(fi.name, dvReader.getSorted(fi), dvReader.getSorted(fi))
+                    checkSortedDocValues(fi.name, dvReader.getSorted(fi)!!, dvReader.getSorted(fi)!!)
                 }
 
                 DocValuesType.SORTED_NUMERIC -> {
@@ -4302,10 +4302,10 @@ class CheckIndex(
                     checkDVIterator(
                         fi
                     ) { field: FieldInfo ->
-                        dvReader.getSortedNumeric(field)
+                        dvReader.getSortedNumeric(field)!!
                     }
                     checkSortedNumericDocValues(
-                        fi.name, dvReader.getSortedNumeric(fi), dvReader.getSortedNumeric(fi)
+                        fi.name, dvReader.getSortedNumeric(fi)!!, dvReader.getSortedNumeric(fi)!!
                     )
                 }
 
@@ -4314,9 +4314,9 @@ class CheckIndex(
                     checkDVIterator(
                         fi
                     ) { field: FieldInfo ->
-                        dvReader.getSortedSet(field)
+                        dvReader.getSortedSet(field)!!
                     }
-                    checkSortedSetDocValues(fi.name, dvReader.getSortedSet(fi), dvReader.getSortedSet(fi))
+                    checkSortedSetDocValues(fi.name, dvReader.getSortedSet(fi)!!, dvReader.getSortedSet(fi)!!)
                 }
 
                 DocValuesType.BINARY -> {
@@ -4324,9 +4324,9 @@ class CheckIndex(
                     checkDVIterator(
                         fi
                     ) { field: FieldInfo ->
-                        dvReader.getBinary(field)
+                        dvReader.getBinary(field)!!
                     }
-                    checkBinaryDocValues(fi.name, dvReader.getBinary(fi), dvReader.getBinary(fi))
+                    checkBinaryDocValues(fi.name, dvReader.getBinary(fi)!!, dvReader.getBinary(fi)!!)
                 }
 
                 DocValuesType.NUMERIC -> {
@@ -4334,9 +4334,9 @@ class CheckIndex(
                     checkDVIterator(
                         fi
                     ) { field: FieldInfo ->
-                        dvReader.getNumeric(field)
+                        dvReader.getNumeric(field)!!
                     }
-                    checkNumericDocValues(fi.name, dvReader.getNumeric(fi), dvReader.getNumeric(fi))
+                    checkNumericDocValues(fi.name, dvReader.getNumeric(fi)!!, dvReader.getNumeric(fi)!!)
                 }
 
                 DocValuesType.NONE -> throw AssertionError()

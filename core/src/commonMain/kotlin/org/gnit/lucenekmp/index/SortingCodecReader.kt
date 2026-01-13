@@ -480,7 +480,7 @@ class SortingCodecReader private constructor(
                     return SortingNumericDocValues(
                         getOrCreateDV(
                             field.name
-                        ) { getNumericDocValues(delegate.getNumeric(field)) }
+                        ) { getNumericDocValues(delegate.getNumeric(field)!!) }
                     )
                 }
 
@@ -491,7 +491,7 @@ class SortingCodecReader private constructor(
                             field.name
                         ) {
                             BinaryDocValuesWriter.BinaryDVs(
-                                maxDoc(), docMap, delegate.getBinary(field)
+                                maxDoc(), docMap, delegate.getBinary(field)!!
                             )
                         }
                     )
@@ -499,7 +499,7 @@ class SortingCodecReader private constructor(
 
                 @Throws(IOException::class)
                 override fun getSorted(field: FieldInfo): SortedDocValues {
-                    val oldDocValues: SortedDocValues = delegate.getSorted(field)
+                    val oldDocValues: SortedDocValues = delegate.getSorted(field)!!
                     return SortingSortedDocValues(
                         oldDocValues,
                         getOrCreateDV(
@@ -521,7 +521,7 @@ class SortingCodecReader private constructor(
 
                 @Throws(IOException::class)
                 override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-                    val oldDocValues: SortedNumericDocValues = delegate.getSortedNumeric(field)
+                    val oldDocValues: SortedNumericDocValues = delegate.getSortedNumeric(field)!!
                     return SortingSortedNumericDocValues(
                         oldDocValues,
                         getOrCreateDV(
@@ -536,7 +536,7 @@ class SortingCodecReader private constructor(
 
                 @Throws(IOException::class)
                 override fun getSortedSet(field: FieldInfo): SortedSetDocValues {
-                    val oldDocValues: SortedSetDocValues = delegate.getSortedSet(field)
+                    val oldDocValues: SortedSetDocValues = delegate.getSortedSet(field)!!
                     return SortingSortedSetDocValues(
                         oldDocValues,
                         this@SortingCodecReader.getOrCreateDV(

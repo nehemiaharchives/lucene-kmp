@@ -11,7 +11,7 @@ internal abstract class DocValuesLeafReader : LeafReader() {
         }
 
     @Throws(IOException::class)
-    override fun terms(field: String): Terms {
+    override fun terms(field: String?): Terms {
         throw UnsupportedOperationException()
     }
 
@@ -45,7 +45,7 @@ internal abstract class DocValuesLeafReader : LeafReader() {
         field: String,
         target: FloatArray,
         knnCollector: KnnCollector,
-        acceptDocs: Bits
+        acceptDocs: Bits?
     ) {
         throw UnsupportedOperationException()
     }
@@ -55,7 +55,7 @@ internal abstract class DocValuesLeafReader : LeafReader() {
         field: String,
         target: ByteArray,
         knnCollector: KnnCollector,
-        acceptDocs: Bits
+        acceptDocs: Bits?
     ) {
         throw UnsupportedOperationException()
     }

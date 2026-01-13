@@ -219,7 +219,7 @@ internal class SortedSetDocValuesWriter(
                 object : EmptyDocValuesProducer() {
                     @Throws(IOException::class)
                     override fun getSortedSet(fieldInfo: FieldInfo): SortedSetDocValues {
-                        return DocValues.singleton(singleValueProducer.getSorted(fieldInfo))
+                        return DocValues.singleton(singleValueProducer.getSorted(fieldInfo)!!)
                     }
                 })
             return

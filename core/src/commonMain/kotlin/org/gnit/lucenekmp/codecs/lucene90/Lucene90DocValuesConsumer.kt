@@ -131,7 +131,7 @@ internal class Lucene90DocValuesConsumer(
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
                 override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-                    return DocValues.singleton(valuesProducer.getNumeric(field))
+                    return DocValues.singleton(valuesProducer.getNumeric(field)!!)
                 }
             }
         if (field.docValuesSkipIndexType() !== DocValuesSkipIndexType.NONE) {
@@ -240,7 +240,7 @@ internal class Lucene90DocValuesConsumer(
     private fun writeSkipIndex(field: FieldInfo, valuesProducer: DocValuesProducer) {
         require(field.docValuesSkipIndexType() !== DocValuesSkipIndexType.NONE)
         val start: Long = data!!.filePointer
-        val values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)
+        val values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)!!
         var globalMaxValue = Long.Companion.MIN_VALUE
         var globalMinValue = Long.Companion.MAX_VALUE
         var globalDocCount = 0
@@ -326,13 +326,13 @@ internal class Lucene90DocValuesConsumer(
 
     @Throws(IOException::class)
     private fun writeValues(field: FieldInfo, valuesProducer: DocValuesProducer, ords: Boolean): LongArray {
-        var values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)
+        var values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)!!
         val firstValue: Long = if (values.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
             values.nextValue()
         } else {
             0L
         }
-        values = valuesProducer.getSortedNumeric(field)
+        values = valuesProducer.getSortedNumeric(field)!!
         var numDocsWithValue = 0
         val minMax = MinMaxTracker()
         val blockMinMax = MinMaxTracker()
@@ -399,7 +399,7 @@ internal class Lucene90DocValuesConsumer(
         } else { // meta[data.offset, data.length]: IndexedDISI structure for documents with values
             val offset: Long = data!!.filePointer
             meta?.writeLong(offset) // docsWithFieldOffset
-            values = valuesProducer.getSortedNumeric(field)
+            values = valuesProducer.getSortedNumeric(field)!!
             val jumpTableEntryCount: Short =
                 IndexedDISI.writeBitSet(values, data!!, IndexedDISI.DEFAULT_DENSE_RANK_POWER)
             meta?.writeLong(data!!.filePointer - offset) // docsWithFieldLength
@@ -459,10 +459,10 @@ internal class Lucene90DocValuesConsumer(
         meta?.writeLong(startOffset) // valueOffset
         var jumpTableOffset: Long = -1
         if (doBlocks) {
-            jumpTableOffset = writeValuesMultipleBlocks(valuesProducer.getSortedNumeric(field), gcd)
+            jumpTableOffset = writeValuesMultipleBlocks(valuesProducer.getSortedNumeric(field)!!, gcd)
         } else if (numBitsPerValue != 0) {
             writeValuesSingleBlock(
-                valuesProducer.getSortedNumeric(field), numValues, numBitsPerValue, min, gcd, encode
+                valuesProducer.getSortedNumeric(field)!!, numValues, numBitsPerValue, min, gcd, encode
             )
         }
         meta?.writeLong(data!!.filePointer - startOffset) // valuesLength
@@ -572,11 +572,11 @@ internal class Lucene90DocValuesConsumer(
         meta?.writeInt(field.number)
         meta?.writeByte(Lucene90DocValuesFormat.BINARY)
 
-        var values: BinaryDocValues = valuesProducer.getBinary(field)
+        var values: BinaryDocValues = valuesProducer.getBinary(field)!!
         var start: Long = data!!.filePointer
         meta?.writeLong(start) // dataOffset
         var numDocsWithField = 0
-        var minLength = Int.Companion.MAX_VALUE
+        var minLength = Int.MAX_VALUE
         var maxLength = 0
         var doc: Int = values.nextDoc()
         while (doc != DocIdSetIterator.NO_MORE_DOCS) {
@@ -604,7 +604,7 @@ internal class Lucene90DocValuesConsumer(
         } else {
             val offset: Long = data!!.filePointer
             meta?.writeLong(offset) // docsWithFieldOffset
-            values = valuesProducer.getBinary(field)
+            values = valuesProducer.getBinary(field)!!
             val jumpTableEntryCount: Short =
                 IndexedDISI.writeBitSet(values, data!!, IndexedDISI.DEFAULT_DENSE_RANK_POWER)
             meta?.writeLong(data!!.filePointer - offset) // docsWithFieldLength
@@ -626,7 +626,7 @@ internal class Lucene90DocValuesConsumer(
                 )
             var addr: Long = 0
             writer.add(addr)
-            values = valuesProducer.getBinary(field)
+            values = valuesProducer.getBinary(field)!!
             var doc: Int = values.nextDoc()
             while (doc != DocIdSetIterator.NO_MORE_DOCS
             ) {
@@ -654,7 +654,7 @@ internal class Lucene90DocValuesConsumer(
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
                 override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-                    val sorted: SortedDocValues = valuesProducer.getSorted(field)
+                    val sorted: SortedDocValues = valuesProducer.getSorted(field)!!
                     val sortedOrds: NumericDocValues =
                         object : NumericDocValues() {
                             @Throws(IOException::class)
@@ -695,7 +695,7 @@ internal class Lucene90DocValuesConsumer(
             meta?.writeByte(0.toByte()) // multiValued (0 = singleValued)
         }
         writeValues(field, producer, true)
-        addTermsDict(DocValues.singleton(valuesProducer.getSorted(field)))
+        addTermsDict(DocValues.singleton(valuesProducer.getSorted(field)!!))
     }
 
     @Throws(IOException::class)
@@ -896,7 +896,7 @@ internal class Lucene90DocValuesConsumer(
                 )
             var addr: Long = 0
             addressesWriter.add(addr)
-            val values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)
+            val values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)!!
             var doc: Int = values.nextDoc()
             while (doc != DocIdSetIterator.NO_MORE_DOCS
             ) {
@@ -914,14 +914,14 @@ internal class Lucene90DocValuesConsumer(
         meta?.writeInt(field.number)
         meta?.writeByte(Lucene90DocValuesFormat.SORTED_SET)
 
-        if (isSingleValued(valuesProducer.getSortedSet(field))) {
+        if (isSingleValued(valuesProducer.getSortedSet(field)!!)) {
             doAddSortedField(
                 field,
                 object : EmptyDocValuesProducer() {
                     @Throws(IOException::class)
                     override fun getSorted(field: FieldInfo): SortedDocValues {
                         return SortedSetSelector.wrap(
-                            valuesProducer.getSortedSet(field), SortedSetSelector.Type.MIN
+                            valuesProducer.getSortedSet(field)!!, SortedSetSelector.Type.MIN
                         )
                     }
                 },
@@ -935,7 +935,7 @@ internal class Lucene90DocValuesConsumer(
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
                 override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-                    val values: SortedSetDocValues = valuesProducer.getSortedSet(field)
+                    val values: SortedSetDocValues = valuesProducer.getSortedSet(field)!!
                     return object : SortedNumericDocValues() {
                         var ords: LongArray = LongsRef.EMPTY_LONGS
                         var i: Int = 0
@@ -987,7 +987,7 @@ internal class Lucene90DocValuesConsumer(
             true
         )
 
-        addTermsDict(valuesProducer.getSortedSet(field))
+        addTermsDict(valuesProducer.getSortedSet(field)!!)
     }
 
     companion object {

@@ -114,7 +114,7 @@ protected constructor() : IndexReader() {
 
     /** Returns the [Terms] index for this field, or null if it has none.  */
     @Throws(IOException::class)
-    abstract fun terms(field: String): Terms?
+    abstract fun terms(field: String?): Terms?
 
     /**
      * Returns [PostingsEnum] for the specified term. This will return null if either the field
@@ -347,7 +347,7 @@ protected constructor() : IndexReader() {
      */
     @Throws(IOException::class)
     abstract fun searchNearestVectors(
-        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?
     )
 
     /**
@@ -379,7 +379,7 @@ protected constructor() : IndexReader() {
      */
     @Throws(IOException::class)
     abstract fun searchNearestVectors(
-        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?
     )
 
     /**

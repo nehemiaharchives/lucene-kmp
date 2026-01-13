@@ -253,7 +253,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      */
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(AlreadyClosedException::class)
-    protected fun ensureOpen() {
+    fun ensureOpen() {
         if (refCount.load() <= 0) {
             throw AlreadyClosedException("this IndexReader is closed")
         }

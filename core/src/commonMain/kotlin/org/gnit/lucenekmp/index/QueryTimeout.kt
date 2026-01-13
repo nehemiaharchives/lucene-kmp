@@ -6,7 +6,7 @@ package org.gnit.lucenekmp.index
  * to the searcher through [org.apache.lucene.search.IndexSearcher.setTimeout],
  * in which case bulk scoring will be time-bound. Can also be used in combination with [ ].
  */
-interface QueryTimeout {
+fun interface QueryTimeout {
     /**
      * Called to determine whether to stop processing a query
      *

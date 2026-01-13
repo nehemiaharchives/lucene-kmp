@@ -74,31 +74,31 @@ internal class SegmentDocValuesProducer(
     }
 
     @Throws(IOException::class)
-    override fun getNumeric(field: FieldInfo): NumericDocValues {
+    override fun getNumeric(field: FieldInfo): NumericDocValues? {
         val dvProducer: DocValuesProducer = checkNotNull(dvProducersByField[field.number])
         return dvProducer.getNumeric(field)
     }
 
     @Throws(IOException::class)
-    override fun getBinary(field: FieldInfo): BinaryDocValues {
+    override fun getBinary(field: FieldInfo): BinaryDocValues? {
         val dvProducer: DocValuesProducer = checkNotNull(dvProducersByField[field.number])
         return dvProducer.getBinary(field)
     }
 
     @Throws(IOException::class)
-    override fun getSorted(field: FieldInfo): SortedDocValues {
+    override fun getSorted(field: FieldInfo): SortedDocValues? {
         val dvProducer: DocValuesProducer = checkNotNull(dvProducersByField[field.number])
         return dvProducer.getSorted(field)
     }
 
     @Throws(IOException::class)
-    override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
+    override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues? {
         val dvProducer: DocValuesProducer = checkNotNull(dvProducersByField[field.number])
         return dvProducer.getSortedNumeric(field)
     }
 
     @Throws(IOException::class)
-    override fun getSortedSet(field: FieldInfo): SortedSetDocValues {
+    override fun getSortedSet(field: FieldInfo): SortedSetDocValues? {
         val dvProducer: DocValuesProducer = checkNotNull(dvProducersByField[field.number])
         return dvProducer.getSortedSet(field)
     }

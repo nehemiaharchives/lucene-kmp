@@ -16,7 +16,7 @@ import kotlin.random.Random
  * Helper class that adds some extra checks to ensure correct usage of `IndexSearcher` and
  * `Weight`.
  */
-class AssertingIndexSearcher : IndexSearcher {
+open class AssertingIndexSearcher : IndexSearcher {
     val random: Random
 
     constructor(random: Random, r: IndexReader) : super(r) {

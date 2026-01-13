@@ -225,7 +225,7 @@ open class IndexSearcher(
      * for queries that require segment-level computation ahead of time, such as points/range queries.
      * This is an implementation limitation that we expect to improve in future releases, see [the corresponding github issue](https://github.com/apache/lucene/issues/13745).
      */
-    protected fun slices(leaves: MutableList<LeafReaderContext>): Array<LeafSlice> {
+    protected open fun slices(leaves: MutableList<LeafReaderContext>): Array<LeafSlice> {
         return slices(leaves, MAX_DOCS_PER_SLICE, MAX_SEGMENTS_PER_SLICE, false)
     }
 

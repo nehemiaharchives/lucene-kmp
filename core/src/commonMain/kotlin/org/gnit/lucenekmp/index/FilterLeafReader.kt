@@ -317,14 +317,14 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
 
     @Throws(IOException::class)
     override fun searchNearestVectors(
-        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?
     ) {
         delegate.searchNearestVectors(field, target, knnCollector, acceptDocs)
     }
 
     @Throws(IOException::class)
     override fun searchNearestVectors(
-        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits
+        field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?
     ) {
         delegate.searchNearestVectors(field, target, knnCollector, acceptDocs)
     }
@@ -357,7 +357,7 @@ abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafRe
     }
 
     @Throws(IOException::class)
-    override fun terms(field: String): Terms? {
+    override fun terms(field: String?): Terms? {
         ensureOpen()
         return delegate.terms(field)!!
     }

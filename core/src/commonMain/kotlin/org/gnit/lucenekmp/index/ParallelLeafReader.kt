@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.runBlocking
 import okio.IOException
-import org.gnit.lucenekmp.jdkport.Collections
 import org.gnit.lucenekmp.jdkport.SortedMap
 import org.gnit.lucenekmp.jdkport.TreeMap
 import org.gnit.lucenekmp.search.KnnCollector
@@ -237,7 +236,7 @@ open class ParallelLeafReader(
         }
 
     @Throws(IOException::class)
-    override fun terms(field: String): Terms? {
+    override fun terms(field: String?): Terms? {
         ensureOpen()
         val leafReader: LeafReader? = termsFieldToReader[field]
         return if (leafReader == null) null else leafReader.terms(field)
@@ -438,7 +437,7 @@ open class ParallelLeafReader(
         fieldName: String,
         target: FloatArray,
         knnCollector: KnnCollector,
-        acceptDocs: Bits
+        acceptDocs: Bits?
     ) {
         ensureOpen()
         val reader: LeafReader? = fieldToReader[fieldName]
@@ -452,7 +451,7 @@ open class ParallelLeafReader(
         fieldName: String,
         target: ByteArray,
         knnCollector: KnnCollector,
-        acceptDocs: Bits
+        acceptDocs: Bits?
     ) {
         ensureOpen()
         val reader: LeafReader? = fieldToReader[fieldName]

@@ -258,31 +258,31 @@ protected constructor() : DocValuesFormat(PER_FIELD_NAME) {
         @Throws(IOException::class)
         override fun getNumeric(field: FieldInfo): NumericDocValues {
             val producer: DocValuesProducer? = fields[field.number]
-            return producer!!.getNumeric(field)
+            return producer!!.getNumeric(field)!!
         }
 
         @Throws(IOException::class)
         override fun getBinary(field: FieldInfo): BinaryDocValues {
             val producer: DocValuesProducer? = fields[field.number]
-            return producer!!.getBinary(field)
+            return producer!!.getBinary(field)!!
         }
 
         @Throws(IOException::class)
         override fun getSorted(field: FieldInfo): SortedDocValues {
             val producer: DocValuesProducer? = fields[field.number]
-            return producer!!.getSorted(field)
+            return producer!!.getSorted(field)!!
         }
 
         @Throws(IOException::class)
         override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
             val producer: DocValuesProducer? = fields[field.number]
-            return producer!!.getSortedNumeric(field)
+            return producer!!.getSortedNumeric(field)!!
         }
 
         @Throws(IOException::class)
         override fun getSortedSet(field: FieldInfo): SortedSetDocValues {
             val producer: DocValuesProducer? = fields[field.number]
-            return producer!!.getSortedSet(field)
+            return producer!!.getSortedSet(field)!!
         }
 
         @Throws(IOException::class)

@@ -22,6 +22,7 @@ package org.gnit.lucenekmp.tests.util
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
+import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
@@ -33,16 +34,25 @@ import org.gnit.lucenekmp.codecs.lucene90.Lucene90DocValuesFormat
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsFormat
 import org.gnit.lucenekmp.codecs.perfield.PerFieldDocValuesFormat
 import org.gnit.lucenekmp.codecs.perfield.PerFieldPostingsFormat
+import org.gnit.lucenekmp.index.CheckIndex
+import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.DocValuesType
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.MultiTerms
 import org.gnit.lucenekmp.index.PostingsEnum
+import org.gnit.lucenekmp.index.SlowCodecReaderWrapper
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TermsEnum
+import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
 import org.gnit.lucenekmp.jdkport.CharBuffer
 import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.ExecutorService
+import org.gnit.lucenekmp.jdkport.InterruptedException
+import org.gnit.lucenekmp.jdkport.PrintStream
+import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.StrictMath
+import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.codePointAt
@@ -304,14 +314,14 @@ class TestUtil {
          * This runs the CheckIndex tool on the Reader. If any issues are hit, a RuntimeException is
          * thrown
          */
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun checkReader(reader: IndexReader) {
             for (context in reader.leaves()) {
                 checkReader(context.reader(), CheckIndex.Level.MIN_LEVEL_FOR_SLOW_CHECKS)
             }
-        }*/
+        }
 
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun checkReader(reader: LeafReader, level: Int) {
             val bos: ByteArrayOutputStream = ByteArrayOutputStream(1024)
             val infoStream: PrintStream =
@@ -341,12 +351,12 @@ class TestUtil {
             }
 
             // FieldInfos should be cached at the reader and always return the same instance
-            if (reader.getFieldInfos() !== reader.getFieldInfos()) {
+            if (reader.fieldInfos !== reader.fieldInfos) {
                 throw RuntimeException(
-                    "getFieldInfos() returned different instances for class: " + reader.javaClass
+                    "getFieldInfos() returned different instances for class: " + reader::class.simpleName
                 )
             }
-        }*/
+        }
 
         // used by TestUtil.checkReader to check some things really unrelated to the index,
         // just looking for bugs in indexreader implementations.
@@ -1617,18 +1627,18 @@ class TestUtil {
         }
 
         /** Shutdown [ExecutorService] and wait for its.  */
-        /*fun shutdownExecutorService(ex: java.util.concurrent.ExecutorService) {
+        fun shutdownExecutorService(ex: ExecutorService) {
             if (ex != null) {
                 try {
                     ex.shutdown()
-                    ex.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS)
-                } catch (e: java.lang.InterruptedException) {
+                    runBlocking{ ex.awaitTermination(1, TimeUnit.SECONDS) }
+                } catch (e: InterruptedException) {
                     // Just report it on the syserr.
-                    java.lang.System.err.println("Could not properly close executor service.")
-                    e.printStackTrace(java.lang.System.err)
+                    /*java.lang.System.err.*/println("Could not properly close executor service.")
+                    //e.printStackTrace(java.lang.System.err)
                 }
             }
-        }*/
+        }
 
         /**
          * Returns a valid (compiling) Pattern instance with random stuff inside. Be careful when applying

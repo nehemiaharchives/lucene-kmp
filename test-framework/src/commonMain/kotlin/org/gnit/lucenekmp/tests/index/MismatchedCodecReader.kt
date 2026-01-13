@@ -119,27 +119,27 @@ class MismatchedCodecReader(`in`: CodecReader, random: Random) :
         }
 
         @Throws(IOException::class)
-        override fun getNumeric(field: FieldInfo): NumericDocValues {
+        override fun getNumeric(field: FieldInfo): NumericDocValues? {
             return `in`.getNumeric(remapFieldInfo(field)!!)
         }
 
         @Throws(IOException::class)
-        override fun getBinary(field: FieldInfo): BinaryDocValues {
+        override fun getBinary(field: FieldInfo): BinaryDocValues? {
             return `in`.getBinary(remapFieldInfo(field)!!)
         }
 
         @Throws(IOException::class)
-        override fun getSorted(field: FieldInfo): SortedDocValues {
+        override fun getSorted(field: FieldInfo): SortedDocValues? {
             return `in`.getSorted(remapFieldInfo(field)!!)
         }
 
         @Throws(IOException::class)
-        override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
+        override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues? {
             return `in`.getSortedNumeric(remapFieldInfo(field)!!)
         }
 
         @Throws(IOException::class)
-        override fun getSortedSet(field: FieldInfo): SortedSetDocValues {
+        override fun getSortedSet(field: FieldInfo): SortedSetDocValues? {
             return `in`.getSortedSet(remapFieldInfo(field)!!)
         }
 

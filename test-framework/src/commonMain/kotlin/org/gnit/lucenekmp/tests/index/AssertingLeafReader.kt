@@ -50,7 +50,7 @@ import kotlin.math.max
 class AssertingLeafReader(`in`: LeafReader) :
     FilterLeafReader(`in`) {
     @Throws(IOException::class)
-    override fun terms(field: String): Terms? {
+    override fun terms(field: String?): Terms? {
         val terms: Terms? = super.terms(field)
         return if (terms == null) null else AssertingTerms(terms)
     }

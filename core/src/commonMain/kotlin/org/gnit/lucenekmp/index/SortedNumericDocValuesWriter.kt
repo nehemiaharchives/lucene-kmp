@@ -186,7 +186,7 @@ internal class SortedNumericDocValuesWriter(
                 object : EmptyDocValuesProducer() {
                     @Throws(IOException::class)
                     override fun getSortedNumeric(fieldInfo: FieldInfo): SortedNumericDocValues {
-                        return DocValues.singleton(singleValueProducer.getNumeric(fieldInfo))
+                        return DocValues.singleton(singleValueProducer.getNumeric(fieldInfo)!!)
                     }
                 })
             return

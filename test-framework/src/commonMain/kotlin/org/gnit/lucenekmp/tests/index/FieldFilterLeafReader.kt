@@ -135,7 +135,7 @@ class FieldFilterLeafReader(
     }
 
     @Throws(IOException::class)
-    override fun terms(field: String): Terms? {
+    override fun terms(field: String?): Terms? {
         return if (hasField(field)) super.terms(field) else null
     }
 

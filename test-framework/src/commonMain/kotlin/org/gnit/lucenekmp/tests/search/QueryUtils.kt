@@ -201,7 +201,7 @@ object QueryUtils {
     private fun emptyReader(maxDoc: Int): IndexReader {
         return object : LeafReader() {
             @Throws(IOException::class)
-            override fun terms(field: String): Terms? {
+            override fun terms(field: String?): Terms? {
                 return null
             }
 
@@ -254,7 +254,7 @@ object QueryUtils {
                 field: String,
                 target: FloatArray,
                 knnCollector: KnnCollector,
-                acceptDocs: Bits
+                acceptDocs: Bits?
             ) {
             }
 
@@ -262,7 +262,7 @@ object QueryUtils {
                 field: String,
                 target: ByteArray,
                 knnCollector: KnnCollector,
-                acceptDocs: Bits
+                acceptDocs: Bits?
             ) {
             }
 
