@@ -60,20 +60,35 @@ class ThreadPoolExecutorTest {
     fun submit_runnableAndCallable() = runBlocking {
         val exec = newExecutor()
         try {
-            // Proactively start a core worker to reduce scheduler jitter on CI
+            // Proactively start a core worker to reduce scheduler jitter on CI.
             exec.prestartCoreThread()
+            val runnableStarted = CompletableDeferred<Unit>()
+            val runnableDone = CompletableDeferred<Unit>()
+            val callableStarted = CompletableDeferred<Unit>()
+            val callableDone = CompletableDeferred<Unit>()
             logger.debug { "[TEST] submit_runnableAndCallable: submitting tasks" }
             val f1 = exec.submit {
                 logger.debug { "[TEST] submit_runnableAndCallable: runnable ran" }
+                runnableStarted.complete(Unit)
+                runnableDone.complete(Unit)
             }
             val f2 = exec.submit(Callable {
-                logger.debug { "[TEST] submit_runnableAndCallable: callable ran" }; 7 })
-            logger.debug { "[TEST] submit_runnableAndCallable: submitted; awaiting f1" }
-            withTimeout(5000) { f1.get() }
-            logger.debug { "[TEST] submit_runnableAndCallable: f1 done awaiting f2" }
-            val v = withTimeout(5000) { f2.get() }
-            logger.debug { "[TEST] submit_runnableAndCallable: f2 done value=$v" }
-            assertEquals(7, v)
+                logger.debug { "[TEST] submit_runnableAndCallable: callable ran" }
+                callableStarted.complete(Unit)
+                val result = 7
+                callableDone.complete(Unit)
+                result
+            })
+            withTimeout(20000) {
+                runnableStarted.await()
+                callableStarted.await()
+                runnableDone.await()
+                callableDone.await()
+                f1.get()
+                val v = f2.get()
+                logger.debug { "[TEST] submit_runnableAndCallable: f2 done value=$v" }
+                assertEquals(7, v)
+            }
         } finally {
             exec.shutdown()
             exec.awaitTermination(1, TimeUnit.SECONDS)
