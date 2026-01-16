@@ -1,13 +1,14 @@
 [versions]
-agp = "8.13.2"
+#agp = "8.13.2"
+androidGradlePlugin = "9.0.0"
 kotlin = "2.3.0"
 okio = "3.16.4"
 android-minSdk = "26"
 android-compileSdk = "36"
 android-targetSdk = "36"
 kotlin-coroutines = "1.10.2"
-logback = "1.5.22"
-kotlin-logging = "7.0.13"
+logback = "1.5.24"
+kotlin-logging = "7.0.14"
 kotlinx-datetime = "0.7.1"
 kotlinbignum = "0.3.10"
 kotlinenvvar = "1.0.6"
@@ -27,8 +28,9 @@ kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kot
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 [plugins]
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+#androidLibrary = { id = "com.android.library", version.ref = "agp" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradlePlugin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

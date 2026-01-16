@@ -1,5 +1,13 @@
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
+import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+
 plugins {
-    alias(libs.plugins.androidLibrary) apply false
+    //alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlinMultiplatform) apply  false
     alias(libs.plugins.vanniktech.mavenPublish) apply false
 }
@@ -59,7 +67,7 @@ subprojects {
     }
 
     // Centralized Android configuration for Android library modules
-    pluginManager.withPlugin("com.android.library") {
+    /*pluginManager.withPlugin("com.android.library") {
         extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
             // Stable per-module namespace within the lucenekmp package
             namespace = "${project.group}.lucenekmp.${project.name.replace('-', '.')}"
@@ -71,6 +79,31 @@ subprojects {
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_11
                 targetCompatibility = JavaVersion.VERSION_11
+            }
+        }
+    }*/
+
+    pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
+
+            extensions.configure<KotlinMultiplatformAndroidLibraryExtension>("androidLibrary") {
+                namespace = "${project.group}.lucenekmp.${project.name.replace('-', '.')}"
+                compileSdk = libs.versions.android.compileSdk.get().toInt()
+                minSdk = libs.versions.android.minSdk.get().toInt()
+            }
+
+            targets.withType(KotlinAndroidTarget::class.java).configureEach {
+                @OptIn(ExperimentalKotlinGradlePluginApi::class)
+                compilerOptions {
+                    jvmTarget.set(JvmTarget.JVM_11)
+                }
+            }
+
+            targets.withType(KotlinJvmTarget::class.java).configureEach {
+                @OptIn(ExperimentalKotlinGradlePluginApi::class)
+                compilerOptions {
+                    jvmTarget.set(JvmTarget.JVM_11)
+                }
             }
         }
     }

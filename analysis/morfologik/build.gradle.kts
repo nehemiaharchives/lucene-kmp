@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    //alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.vanniktech.mavenPublish)
     alias(libs.plugins.kover)
 }
@@ -14,13 +14,22 @@ apply(from = rootProject.file("gradle/generateUkrainianDicData.gradle.kts"))
 kotlin {
     jvm()
     //jvmToolchain(23) // we run build on jdk 24, so getting INFO saying "Kotlin does not yet support 24 JDK target, falling back to Kotlin JVM_23 JVM target"
-    androidTarget {
+    /*androidTarget {
         publishLibraryVariants("release")
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+    }*/
+
+    androidLibrary {
+        //withJava() // enable java compilation support
+        withHostTestBuilder {}.configure {}
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+        }
     }
+
     iosArm64()
     iosX64()
     iosSimulatorArm64()
@@ -73,7 +82,7 @@ kotlin {
             // test dependencies which are used both by jvm and android will be here
         }
         jvmTest.get().dependsOn(jvmAndroidTest)
-        androidUnitTest.get().dependsOn(jvmAndroidTest)
+        //androidUnitTest.get().dependsOn(jvmAndroidTest)
 
         // shared source for ios and linux
         val nativeMain by creating {
