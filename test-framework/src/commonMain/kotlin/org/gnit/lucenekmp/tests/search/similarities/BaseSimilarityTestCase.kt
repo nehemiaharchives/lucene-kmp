@@ -43,6 +43,31 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
     /** Return a new similarity with all parameters randomized within valid ranges.  */
     protected abstract fun getSimilarity(random: Random): Similarity
 
+    private inline fun <T> withSingleDocReader(
+        omitNorms: Boolean,
+        crossinline block: (LeafReader) -> T
+    ): T {
+        val dir = newDirectory()
+        var reader: LeafReader? = null
+        try {
+            val writer = RandomIndexWriter(LuceneTestCase.random(), dir)
+            val doc = Document()
+
+            val ft = FieldType(TextField.TYPE_NOT_STORED)
+            ft.setOmitNorms(omitNorms)
+
+            doc.add(LuceneTestCase.newField("field", "value", ft))
+            writer.addDocument<IndexableField>(doc)
+
+            reader = LuceneTestCase.getOnlyLeafReader(writer.reader)
+            writer.close()
+
+            return block(reader)
+        } finally {
+            IOUtils.close(reader, dir)
+        }
+    }
+
     /**
      * Tests scoring across a bunch of random terms/corpora/frequencies for each possible document
      * length. It does the following checks:
@@ -160,12 +185,12 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
     }
 
     companion object {
-        var READER: LeafReader? = null
-        var DIR: Directory? = null
+        /*var READER: LeafReader? = null
+        var DIR: Directory? = null*/
 
         // TODO need to figure out what to do with BeforeClass in common module
         /*@org.junit.BeforeClass*/
-        @Throws(Exception::class)
+        /*@Throws(Exception::class)
         fun beforeClass() {
             // with norms
             /*DIR = LuceneTestCase.newDirectory()
@@ -189,16 +214,16 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
             READER =
                 LuceneTestCase.getOnlyLeafReader(writer.reader)
             writer.close()*/
-        }
+        }*/
 
         // TODO need to figure out what to do with AfterClass in common module
         /*@org.junit.AfterClass*/
-        @Throws(Exception::class)
+        /*@Throws(Exception::class)
         fun afterClass() {
             IOUtils.close(READER, DIR)
             READER = null
             DIR = null
-        }
+        }*/
 
         val MAXDOC_FORTESTING: Long = 1L shl 48
 
@@ -578,7 +603,7 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
                             ) + ")"
                         )
                     }
-                    println("freq=" + freq)
+                    println("freq=$freq")
                 }
             }
         }

@@ -1,12 +1,16 @@
 package org.gnit.lucenekmp.tests.util
 
+//import org.gnit.lucenekmp.store.FileSwitchDirectory
+//import org.gnit.lucenekmp.store.NRTCachingDirectory
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Runnable
 import okio.IOException
+import okio.Path
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.CompositeReader
 import org.gnit.lucenekmp.index.DirectoryReader
+import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.LeafReader
@@ -16,12 +20,23 @@ import org.gnit.lucenekmp.index.ParallelCompositeReader
 import org.gnit.lucenekmp.index.ParallelLeafReader
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.IndexSearcher
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.QueryCachingPolicy
+import org.gnit.lucenekmp.store.ByteBuffersDirectory
+import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FSDirectory
+import org.gnit.lucenekmp.store.FSLockFactory
+import org.gnit.lucenekmp.store.FlushInfo
+import org.gnit.lucenekmp.store.IOContext
+import org.gnit.lucenekmp.store.LockFactory
+import org.gnit.lucenekmp.store.MMapDirectory
+import org.gnit.lucenekmp.store.MergeInfo
+import org.gnit.lucenekmp.store.NIOFSDirectory
 import org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
 import org.gnit.lucenekmp.tests.index.AssertingLeafReader
 import org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
@@ -31,11 +46,16 @@ import org.gnit.lucenekmp.tests.index.MismatchedCodecReader
 import org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
 import org.gnit.lucenekmp.tests.index.MismatchedLeafReader
 import org.gnit.lucenekmp.tests.search.AssertingIndexSearcher
+import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
+import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
+import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
+import org.gnit.lucenekmp.util.CommandLineUtil
 import org.gnit.lucenekmp.util.NamedThreadFactory
 import kotlin.math.ln
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -93,7 +113,7 @@ open class LuceneTestCase {
         /** Whether or not [Nightly] tests should run.  */
         val TEST_NIGHTLY: Boolean = systemPropertyAsBoolean(
             SYSPROP_NIGHTLY,
-            /*Nightly::class.java.getAnnotation<A>(TestGroup::class.java)
+            /*Nightly::class.getAnnotation<A>(TestGroup::class)
                 .enabled()*/ false
         )
 
@@ -113,6 +133,11 @@ open class LuceneTestCase {
         /** Enables or disables dumping of [InfoStream] messages.  */
         val INFOSTREAM: Boolean = systemPropertyAsBoolean("tests.infostream", VERBOSE)
 
+
+        // line 449
+        /** Gets the directory to run tests with  */
+        val TEST_DIRECTORY: String = System.getProperty("tests.directory", "random")!!
+
         // line 484
         /**
          * A random multiplier which you should use when writing random tests: multiply it by the number
@@ -126,6 +151,13 @@ open class LuceneTestCase {
         }
         // line 490
 
+
+        // line 507
+        /** Filesystem-based [Directory] implementations.  */
+        private val FS_DIRECTORIES: MutableList<String> = mutableListOf<String>("NIOFSDirectory", "MMapDirectory")
+
+        /** All [Directory] implementations.  */
+        private val CORE_DIRECTORIES: MutableList<String> = FS_DIRECTORIES.plus(ByteBuffersDirectory::class.simpleName!!).toMutableList()
 
         // line 519
         /** Class environment setup rule.  */
@@ -505,8 +537,403 @@ open class LuceneTestCase {
             }
         }
 
+        // line 1276
+        /**
+         * Returns a new Directory instance. Use this when the test does not care about the specific
+         * Directory implementation (most tests).
+         *
+         *
+         * The Directory is wrapped with [BaseDirectoryWrapper]. this means usually it will be
+         * picky, such as ensuring that you properly close it and all open files in your test. It will
+         * emulate some features of Windows, such as not allowing open files to be overwritten.
+         */
+        fun newDirectory(): BaseDirectoryWrapper {
+            return newDirectory(random())
+        }
 
-        // line 1689
+        /** Like [.newDirectory] except randomly the [VirusCheckingFS] may be installed  */
+        /*fun newMaybeVirusCheckingDirectory(): BaseDirectoryWrapper {
+            if (random().nextInt(5) == 4) {
+                val path: Path =
+                    LuceneTestCase.addVirusChecker(LuceneTestCase.createTempDir())
+                return newFSDirectory(path)
+            } else {
+                return newDirectory(random())
+            }
+        }*/
+
+        /**
+         * Returns a new Directory instance, using the specified random. See [.newDirectory] for
+         * more information.
+         */
+        fun newDirectory(r: Random): BaseDirectoryWrapper {
+            return wrapDirectory(
+                r,
+                newDirectoryImpl(
+                    r,
+                    TEST_DIRECTORY
+                ),
+                rarely(r),
+                false
+            )
+        }
+
+        fun newMockDirectory(): MockDirectoryWrapper {
+            return newMockDirectory(random())
+        }
+
+        fun newMockDirectory(r: Random): MockDirectoryWrapper {
+            return wrapDirectory(
+                r,
+                newDirectoryImpl(
+                    r,
+                    TEST_DIRECTORY
+                ),
+                false,
+                false
+            ) as MockDirectoryWrapper
+        }
+
+        fun newMockDirectory(
+            r: Random,
+            lf: LockFactory
+        ): MockDirectoryWrapper {
+            return wrapDirectory(
+                r,
+                newDirectoryImpl(
+                    r,
+                    TEST_DIRECTORY,
+                    lf
+                ),
+                false,
+                false
+            ) as MockDirectoryWrapper
+        }
+
+        fun newMockFSDirectory(f: Path): MockDirectoryWrapper {
+            return newFSDirectory(
+                f,
+                FSLockFactory.default,
+                false
+            ) as MockDirectoryWrapper
+        }
+
+        fun newMockFSDirectory(
+            f: Path,
+            lf: LockFactory
+        ): MockDirectoryWrapper {
+            return newFSDirectory(
+                f,
+                lf,
+                false
+            ) as MockDirectoryWrapper
+        }
+
+        /*fun addVirusChecker(path: Path): Path {
+            var path: Path = path
+            if (TestUtil.hasVirusChecker(path) == false) {
+                val fs: VirusCheckingFS = VirusCheckingFS(
+                    path.getFileSystem(),
+                    .random().nextLong()
+                )
+                path = fs.wrapPath(path)
+            }
+            return path
+        }*/
+
+        /**
+         * Returns a new Directory instance, with contents copied from the provided directory. See [ ][.newDirectory] for more information.
+         */
+        @Throws(IOException::class)
+        fun newDirectory(d: Directory): BaseDirectoryWrapper {
+            return newDirectory(
+                random(),
+                d
+            )
+        }
+
+        /** Returns a new FSDirectory instance over the given file, which must be a folder.  */
+        fun newFSDirectory(f: Path): BaseDirectoryWrapper {
+            return newFSDirectory(f, FSLockFactory.default)
+        }
+
+        /** Like [.newFSDirectory], but randomly insert [VirusCheckingFS]  */
+        /*fun newMaybeVirusCheckingFSDirectory(f: Path): BaseDirectoryWrapper {
+            var f: Path = f
+            if (.random().nextInt(5) == 4) {
+                f = addVirusChecker(f)
+            }
+            return newFSDirectory(f, FSLockFactory.default)
+        }*/
+
+        /** Returns a new FSDirectory instance over the given file, which must be a folder.  */
+        fun newFSDirectory(
+            f: Path,
+            lf: LockFactory
+        ): BaseDirectoryWrapper {
+            return newFSDirectory(f, lf, rarely())
+        }
+
+        private fun newFSDirectory(
+            f: Path,
+            lf: LockFactory,
+            bare: Boolean
+        ): BaseDirectoryWrapper {
+            var fsdirClass: String = TEST_DIRECTORY
+            if (fsdirClass == "random") {
+                fsdirClass =
+                    RandomPicks.randomFrom<String>(
+                        random(),
+                        FS_DIRECTORIES
+                    )
+            }
+
+            var clazz: KClass<out FSDirectory>
+            try {
+                try {
+                    clazz = CommandLineUtil.loadFSDirectoryClass(fsdirClass)
+                } catch (e: ClassCastException) {
+                    // TEST_DIRECTORY is not a sub-class of FSDirectory, so draw one at random
+                    fsdirClass =
+                        RandomPicks.randomFrom(
+                            random(),
+                            FS_DIRECTORIES
+                        )
+                    clazz = CommandLineUtil.loadFSDirectoryClass(fsdirClass)
+                }
+
+                val fsdir: Directory =
+                    newFSDirectoryImpl(clazz, f, lf)
+                return wrapDirectory(
+                    random(),
+                    fsdir,
+                    bare,
+                    true
+                )
+            } catch (e: Exception) {
+                Rethrow.rethrow(e)
+                throw e // dummy to prevent compiler failure
+            }
+        }
+
+        /*private fun newFileSwitchDirectory(
+            random: Random,
+            dir1: Directory?,
+            dir2: Directory?
+        ): Directory {
+            var fileExtensions = mutableListOf<String?>(
+                "fdt", "fdx", "tim", "tip", "si", "fnm", "pos", "dii", "dim", "nvm", "nvd", "dvm",
+                "dvd"
+            )
+            fileExtensions.shuffle(random)
+            fileExtensions = fileExtensions.subList(0, 1 + random.nextInt(fileExtensions.size))
+            return FileSwitchDirectory(HashSet<String?>(fileExtensions), dir1, dir2, true)
+        }*/
+
+        /**
+         * Returns a new Directory instance, using the specified random with contents copied from the
+         * provided directory. See [.newDirectory] for more information.
+         */
+        @Throws(IOException::class)
+        fun newDirectory(
+            r: Random,
+            d: Directory
+        ): BaseDirectoryWrapper {
+            val impl: Directory =
+                newDirectoryImpl(
+                    r,
+                    TEST_DIRECTORY
+                )
+            for (file in d.listAll()) {
+                if (file.startsWith(IndexFileNames.SEGMENTS)
+                    || IndexFileNames.CODEC_FILE_PATTERN.matches(file)
+                ) {
+                    impl.copyFrom(
+                        d,
+                        file,
+                        file,
+                        LuceneTestCase.newIOContext(r)
+                    )
+                }
+            }
+            return wrapDirectory(
+                r,
+                impl,
+                rarely(r),
+                false
+            )
+        }
+
+        private fun wrapDirectory(
+            random: Random,
+            directory: Directory,
+            bare: Boolean,
+            filesystem: Boolean
+        ): BaseDirectoryWrapper {
+            // IOContext randomization might make NRTCachingDirectory make bad decisions, so avoid
+            // using it if the user requested a filesystem directory.
+            var directory: Directory = directory
+            /*if (rarely(random) && !bare && filesystem == false) {
+                directory = NRTCachingDirectory(directory, random.nextDouble(), random.nextDouble())
+            }*/
+
+            if (bare) {
+                val base: BaseDirectoryWrapper = RawDirectoryWrapper(directory)
+
+                // TODO do something if it breaks without following
+                /*LuceneTestCase.closeAfterSuite<CloseableDirectory>(
+                    CloseableDirectory(
+                        base,
+                        LuceneTestCase.suiteFailureMarker
+                    )
+                )*/
+                return base
+            } else {
+                val mock = MockDirectoryWrapper(random, directory)
+
+                // TODO do something if it breaks without following
+                /*mock.setThrottling(LuceneTestCase.TEST_THROTTLING)
+                LuceneTestCase.closeAfterSuite<CloseableDirectory>(
+                    CloseableDirectory(
+                        mock,
+                        LuceneTestCase.suiteFailureMarker
+                    )
+                )*/
+                return mock
+            }
+        }
+        // line 1440
+
+
+        // line 1610
+        @Throws(IOException::class)
+        private fun newFSDirectoryImpl(
+            clazz: KClass<out FSDirectory>,
+            path: Path,
+            lf: LockFactory
+        ): Directory {
+            var d: FSDirectory? = null
+            try {
+                d = CommandLineUtil.newFSDirectory(clazz, path, lf)
+            } catch (e: /*java.lang.ReflectiveOperation*/Exception) {
+                Rethrow.rethrow(e)
+            }
+            return d!!
+        }
+
+        fun newDirectoryImpl(
+            random: Random,
+            clazzName: String
+        ): Directory {
+            return newDirectoryImpl(
+                random,
+                clazzName,
+                FSLockFactory.default
+            )
+        }
+
+        fun newDirectoryImpl(
+            random: Random,
+            clazzName: String,
+            lf: LockFactory
+        ): Directory {
+            var clazzName = clazzName
+            if (clazzName == "random") {
+                if (rarely(random)) {
+                    clazzName =
+                        RandomPicks.randomFrom<String>(
+                            random,
+                            CORE_DIRECTORIES
+                        )
+                } /*else if (rarely(random)) {
+                    val clazzName1: String =
+                        if (rarely(random))
+                            RandomPicks.randomFrom(
+                                random,
+                                CORE_DIRECTORIES
+                            )
+                        else
+                            ByteBuffersDirectory::class.simpleName!!
+                    val clazzName2: String =
+                        if (rarely(random))
+                            RandomPicks.randomFrom<String>(
+                                random,
+                                CORE_DIRECTORIES
+                            )
+                        else
+                            ByteBuffersDirectory::class.simpleName!!
+                    return LuceneTestCase.newFileSwitchDirectory(
+                        random,
+                        newDirectoryImpl(random, clazzName1, lf),
+                        newDirectoryImpl(random, clazzName2, lf)
+                    )
+                } */else {
+                    clazzName = ByteBuffersDirectory::class.simpleName!!
+                }
+            }
+
+            try {
+                /*val clazz: KClass<out Directory> =
+                    CommandLineUtil.loadDirectoryClass(clazzName)*/
+                // If it is a FSDirectory type, try its ctor(Path)
+                /*if (FSDirectory::class.isAssignableFrom(clazz)) {
+                    val dir: Path =
+                        LuceneTestCase.createTempDir("index-$clazzName")
+                    return newFSDirectoryImpl(
+                        clazz.asSubclass<FSDirectory>(
+                            FSDirectory::class
+                        ), dir, lf
+                    )
+                }*/
+
+                // See if it has a Path/LockFactory ctor even though it's not an
+                // FSDir subclass:
+                /*try {
+                    val pathCtor: java.lang.reflect.Constructor<out Directory> =
+                        clazz.getConstructor(
+                            Path::class,
+                            LockFactory::class
+                        )
+                    val dir: Path? =
+                        LuceneTestCase.createTempDir("index")
+                    return pathCtor.newInstance(dir, lf)
+                } catch (nsme: NoSuchMethodException) {
+                    // Ignore
+                }*/
+
+                // the remaining dirs are no longer filesystem based, so we must check that the
+                // passedLockFactory is not file based:
+                /*if (lf !is FSLockFactory) {
+                    // try ctor with only LockFactory
+                    try {
+                        //"NIOFSDirectory", "MMapDirectory"
+                        return clazz.getConstructor(LockFactory::class).newInstance(lf)
+                    } catch (nsme: *//*NoSuchMethod*//*Exception) {
+                        // Ignore
+                    }
+                }*/
+
+                // try empty ctor
+                //return clazz.getConstructor().newInstance()
+
+
+            } catch (e: Exception) {
+                Rethrow.rethrow(e)
+                /*throw null*/ // dummy to prevent compiler failure
+            }
+
+            // TODO following is walkaround to bypass above
+            val dir: Path =
+                LuceneTestCase.createTempDir("index-$clazzName")
+
+            return when {
+                (clazzName == "ByteBuffersDirectory") -> ByteBuffersDirectory(lockFactory = lf)
+                (clazzName == "NIOFSDirectory") -> NIOFSDirectory(path = dir, lockFactory = lf)
+                (clazzName == "MMapDirectory") -> MMapDirectory(path = dir)
+                else -> throw UnsupportedOperationException()
+            }
+        }
+
         @Throws(IOException::class)
         fun wrapReader(r: IndexReader): IndexReader {
             var r: IndexReader = r
@@ -625,7 +1052,68 @@ open class LuceneTestCase {
             }
             return r
         }
-        // line 1800
+
+        /** TODO: javadoc  */
+        fun newIOContext(random: Random): IOContext {
+            return newIOContext(random, IOContext.DEFAULT)
+        }
+
+        /** TODO: javadoc  */
+        fun newIOContext(
+            random: Random,
+            oldContext: IOContext
+        ): IOContext {
+            if (oldContext === IOContext.READONCE) {
+                return oldContext // don't mess with the READONCE singleton
+            }
+            val randomNumDocs: Int = random.nextInt(4192)
+            val size: Int = random.nextInt(512) * randomNumDocs
+            if (oldContext.flushInfo != null) {
+                // Always return at least the estimatedSegmentSize of
+                // the incoming IOContext:
+                return IOContext(
+                    FlushInfo(
+                        randomNumDocs, max(oldContext.flushInfo!!.estimatedSegmentSize, size.toLong())
+                    )
+                )
+            } else if (oldContext.mergeInfo != null) {
+                // Always return at least the estimatedMergeBytes of
+                // the incoming IOContext:
+                return IOContext(
+                    MergeInfo(
+                        randomNumDocs,
+                        max(oldContext.mergeInfo!!.estimatedMergeBytes, size.toLong()),
+                        random.nextBoolean(),
+                        TestUtil.nextInt(random, 1, 100)
+                    )
+                )
+            } else {
+                // Make a totally random IOContext, except READONCE which has semantic implications
+                val context: IOContext
+                when (random.nextInt(3)) {
+                    0 -> context = IOContext.DEFAULT
+                    1 -> context = IOContext(
+                        MergeInfo(
+                            randomNumDocs,
+                            size.toLong(),
+                            true,
+                            -1
+                        )
+                    )
+
+                    2 -> context = IOContext(
+                        FlushInfo(
+                            randomNumDocs,
+                            size.toLong()
+                        )
+                    )
+
+                    else -> context = IOContext.DEFAULT
+                }
+                return context
+            }
+        }
+        // line 1847
 
 
         //↓ line 1888 of LuceneTestCase.java
@@ -1061,6 +1549,56 @@ open class LuceneTestCase {
             return null
         }
         //↑ line 3056 of LuceneTestCase.java
+
+
+        //↓ line 3071
+        /**
+         * Creates an empty, temporary folder (when the name of the folder is of no importance).
+         *
+         * @see .createTempDir
+         */
+        fun createTempDir(): Path {
+            return createTempDir("tempDir")
+        }
+
+        /**
+         * Creates an empty, temporary folder with the given name prefix.
+         *
+         *
+         * The folder will be automatically removed after the test class completes successfully. The
+         * test should close any file handles that would prevent the folder from being removed.
+         */
+        fun createTempDir(prefix: String): Path {
+            return org.apache.lucene.tests.util.LuceneTestCase.tempFilesCleanupRule.createTempDir(
+                prefix
+            )
+        }
+
+        /**
+         * Creates an empty file with the given prefix and suffix.
+         *
+         *
+         * The file will be automatically removed after the test class completes successfully. The test
+         * should close any file handles that would prevent the folder from being removed.
+         */
+        @Throws(IOException::class)
+        fun createTempFile(prefix: String, suffix: String): Path {
+            return org.apache.lucene.tests.util.LuceneTestCase.tempFilesCleanupRule.createTempFile(
+                prefix,
+                suffix
+            )
+        }
+
+        /**
+         * Creates an empty temporary file.
+         *
+         * @see .createTempFile
+         */
+        @Throws(IOException::class)
+        fun createTempFile(): Path {
+            return createTempFile("tempFile", ".tmp")
+        }
+        //↑ line 30107
 
 
         //TODO: implement the collate() and others of LuceneTestCase.java

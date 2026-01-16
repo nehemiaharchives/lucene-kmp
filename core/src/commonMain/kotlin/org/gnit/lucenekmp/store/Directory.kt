@@ -152,7 +152,7 @@ abstract class Directory : AutoCloseable {
      * @throws IOException in case of I/O error
      */
     @Throws(IOException::class)
-    fun openChecksumInput(name: String): ChecksumIndexInput {
+    open fun openChecksumInput(name: String): ChecksumIndexInput {
         return BufferedChecksumIndexInput(openInput(name, IOContext.READONCE))
     }
 
