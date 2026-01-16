@@ -121,10 +121,12 @@ kotlin {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     dependsOn("generateBreakIteratorKotlin")
+    dependsOn("generateGB2312MappingKotlin")
 }
 
 tasks.matching { it.name == "prepareKotlinIdeaImport" }.configureEach {
     dependsOn("generateBreakIteratorKotlin")
+    dependsOn("generateGB2312MappingKotlin")
 }
 
 tasks.matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }.configureEach {
