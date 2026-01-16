@@ -312,8 +312,7 @@ jobs:
           -x :analysis:morfologik:compileAndroidDeviceTest 
           -x :analysis:morfologik:compileAndroidHostTest
           -x :analysis:morfologik:compileAndroidMain
-          -x :analysis:morfologik:koverGenerateArtifactDebug
-          -x :analysis:morfologik:koverGenerateArtifactRelease
+          -x :analysis:morfologik:koverGenerateArtifactAndroid
 
       - name: Coverage :analysis:smartcn
         run: >
@@ -321,8 +320,7 @@ jobs:
           -x :analysis:smartcn:compileAndroidDeviceTest
           -x :analysis:smartcn:compileAndroidHostTest
           -x :analysis:smartcn:compileAndroidMain
-          -x :analysis:smartcn:koverGenerateArtifactDebug
-          -x :analysis:smartcn:koverGenerateArtifactRelease
+          -x :analysis:smartcn:koverGenerateArtifactAndroid
 
       - name: Coverage :analysis:nori
         run: >
@@ -330,8 +328,7 @@ jobs:
           -x :analysis:nori:compileAndroidDeviceTest
           -x :analysis:nori:compileAndroidHostTest
           -x :analysis:nori:compileAndroidMain
-          -x :analysis:nori:koverGenerateArtifactDebug
-          -x :analysis:nori:koverGenerateArtifactRelease
+          -x :analysis:nori:koverGenerateArtifactAndroid
       
       - name: Coverage :analysis:kuromoji
         run: >
@@ -339,8 +336,7 @@ jobs:
           -x :analysis:kuromoji:compileAndroidDeviceTest
           -x :analysis:kuromoji:compileAndroidHostTest
           -x :analysis:kuromoji:compileAndroidMain
-          -x :analysis:kuromoji:koverGenerateArtifactDebug
-          -x :analysis:kuromoji:koverGenerateArtifactRelease
+          -x :analysis:kuromoji:koverGenerateArtifactAndroid
       
       - name: Coverage :analysis:extra
         run: >
@@ -348,8 +344,7 @@ jobs:
           -x :analysis:extra:compileAndroidDeviceTest
           -x :analysis:extra:compileAndroidHostTest
           -x :analysis:extra:compileAndroidMain
-          -x :analysis:extra:koverGenerateArtifactDebug
-          -x :analysis:extra:koverGenerateArtifactRelease
+          -x :analysis:extra:koverGenerateArtifactAndroid
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
