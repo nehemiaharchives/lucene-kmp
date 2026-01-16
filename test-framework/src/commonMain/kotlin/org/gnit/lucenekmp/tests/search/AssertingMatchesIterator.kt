@@ -49,7 +49,6 @@ internal class AssertingMatchesIterator(private val `in`: MatchesIterator) :
         return `in`.endOffset()
     }
 
-    @get:Throws(IOException::class)
     override val subMatches: MatchesIterator?
         get() {
             assert(state == State.ITERATING) { state }

@@ -148,7 +148,6 @@ class AssertingLeafReader(`in`: LeafReader) :
             return AssertingTermsEnum(termsEnum, hasFreqs())
         }
 
-        @get:Throws(IOException::class)
         override val min: BytesRef?
             get() {
                 assertThread("Terms", creationThread)
@@ -157,7 +156,6 @@ class AssertingLeafReader(`in`: LeafReader) :
                 return v
             }
 
-        @get:Throws(IOException::class)
         override val max: BytesRef?
             get() {
                 assertThread("Terms", creationThread)
@@ -166,7 +164,6 @@ class AssertingLeafReader(`in`: LeafReader) :
                 return v
             }
 
-        @get:Throws(IOException::class)
         override val docCount: Int
             get() {
                 assertThread("Terms", creationThread)
@@ -175,7 +172,6 @@ class AssertingLeafReader(`in`: LeafReader) :
                 return docCount
             }
 
-        @get:Throws(IOException::class)
         override val sumDocFreq: Long
             get() {
                 assertThread("Terms", creationThread)
@@ -184,7 +180,6 @@ class AssertingLeafReader(`in`: LeafReader) :
                 return sumDf
             }
 
-        @get:Throws(IOException::class)
         override val sumTotalTermFreq: Long
             get() {
                 assertThread("Terms", creationThread)
@@ -552,7 +547,6 @@ class AssertingLeafReader(`in`: LeafReader) :
             return super.endOffset()
         }
 
-        @get:Throws(IOException::class)
         override val payload: BytesRef?
             get() {
                 assert(state != DocsEnumState.START) { "getPayload() called before nextDoc()/advance()" }
@@ -601,7 +595,6 @@ class AssertingLeafReader(`in`: LeafReader) :
             `in`.advanceShallow(target)
         }
 
-        @get:Throws(IOException::class)
         override val impacts: Impacts
             get() {
                 assert(
@@ -632,7 +625,6 @@ class AssertingLeafReader(`in`: LeafReader) :
             return assertingPostings.endOffset()
         }
 
-        @get:Throws(IOException::class)
         override val payload: BytesRef?
             get() = assertingPostings.payload
 
@@ -1336,42 +1328,36 @@ class AssertingLeafReader(`in`: LeafReader) :
             assert(`in`.docCount <= maxDoc)
         }
 
-        @get:Throws(IOException::class)
         override val pointTree: PointValues.PointTree
             get() {
                 assertThread("Points", creationThread)
                 return AssertingPointTree(`in`, `in`.pointTree)
             }
 
-        @get:Throws(IOException::class)
         override val minPackedValue: ByteArray
             get() {
                 assertThread("Points", creationThread)
                 return `in`.minPackedValue
             }
 
-        @get:Throws(IOException::class)
         override val maxPackedValue: ByteArray
             get() {
                 assertThread("Points", creationThread)
                 return `in`.maxPackedValue
             }
 
-        @get:Throws(IOException::class)
         override val numDimensions: Int
             get() {
                 assertThread("Points", creationThread)
                 return `in`.numDimensions
             }
 
-        @get:Throws(IOException::class)
         override val numIndexDimensions: Int
             get() {
                 assertThread("Points", creationThread)
                 return `in`.numIndexDimensions
             }
 
-        @get:Throws(IOException::class)
         override val bytesPerDimension: Int
             get() {
                 assertThread("Points", creationThread)

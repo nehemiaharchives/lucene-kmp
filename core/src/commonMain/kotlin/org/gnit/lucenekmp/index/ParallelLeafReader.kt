@@ -66,8 +66,8 @@ open class ParallelLeafReader(
      */
     init {
         require(!(readers.isEmpty() && storedFieldsReaders.isNotEmpty())) { "There must be at least one main reader if storedFieldsReaders are used." }
-        readers.clone().also { val also = it.also { this.parallelReaders = it } }
-        this.storedFieldsReaders = storedFieldsReaders.clone()
+        this.parallelReaders = readers.copyOf()
+        this.storedFieldsReaders = storedFieldsReaders.copyOf()
         if (parallelReaders.isNotEmpty()) {
             val first: LeafReader = parallelReaders[0]
             this.maxDoc = first.maxDoc()
