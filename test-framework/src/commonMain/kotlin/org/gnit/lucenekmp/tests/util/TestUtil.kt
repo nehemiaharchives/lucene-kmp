@@ -524,8 +524,7 @@ class TestUtil {
 
         /** start and end are BOTH inclusive  */
         fun nextInt(r: Random, start: Int, end: Int): Int {
-            require(end >= start)
-            return if (start == end) start else r.nextInt(start, end + 1)
+            return RandomNumbers.randomIntBetween(r, start, end)
         }
 
 

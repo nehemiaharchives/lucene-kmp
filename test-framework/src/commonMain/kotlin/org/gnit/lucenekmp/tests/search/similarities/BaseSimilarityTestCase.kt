@@ -88,7 +88,7 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
      *
      */
     @Throws(Exception::class)
-    fun testRandomScoring() {
+    open fun testRandomScoring() {
         val random: Random = random()
         val iterations: Int = atLeast(1)
         for (i in 0..<iterations) {
@@ -283,7 +283,7 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
             try {
                 upperBound = min(
                     MAXTOKENS_FORTESTING,
-                    Math.multiplyExact(docCount.toInt(), Int.MAX_VALUE).toLong()
+                    Math.multiplyExact(docCount, Int.MAX_VALUE.toLong())
                 )
             } catch (overflow: ArithmeticException) {
                 upperBound = MAXTOKENS_FORTESTING
@@ -358,7 +358,7 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
             try {
                 upperBound = min(
                     corpus.sumTotalTermFreq,
-                    Math.multiplyExact(docFreq.toInt(), Int.MAX_VALUE).toLong()
+                    Math.multiplyExact(docFreq, Int.MAX_VALUE.toLong())
                 )
             } catch (overflow: ArithmeticException) {
                 upperBound = corpus.sumTotalTermFreq

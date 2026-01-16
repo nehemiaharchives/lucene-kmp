@@ -118,6 +118,24 @@ object Math {
     }
 
     /**
+     * Returns the product of the arguments,
+     * throwing an exception if the result overflows a `long`.
+     *
+     * @param x the first value
+     * @param y the second value
+     * @return the result
+     * @throws ArithmeticException if the result overflows a long
+     * @since 1.8
+     */
+    fun multiplyExact(x: Long, y: Long): Long {
+        val r = x * y
+        if (x != 0L && r / x != y) {
+            throw ArithmeticException("long overflow")
+        }
+        return r
+    }
+
+    /**
      * Returns the closest `int` to the argument, with ties
      * rounding to positive infinity.
      *
