@@ -290,14 +290,12 @@ val generateKoreanDictionaryData = tasks.register("generateKoreanDictionaryData"
     outputDir.set(layout.buildDirectory.dir("generated/ko/nori/kotlin"))
 }
 
-afterEvaluate {
-    val kotlinExtension = extensions.findByName("kotlin") as? ExtensionAware ?: return@afterEvaluate
-    val sourceSets = kotlinExtension.extensions.getByName("sourceSets") as NamedDomainObjectContainer<*>
-    sourceSets.getByName("commonMain") as ExtensionAware
+tasks.matching {
+    it.name.startsWith("compile") && it.name.contains("Kotlin")
+}.configureEach {
+    dependsOn(generateKoreanDictionaryData)
+}
 
-    tasks.matching {
-        it.name.startsWith("compile") && it.name.contains("Kotlin")
-    }.configureEach {
-        dependsOn(generateKoreanDictionaryData)
-    }
+tasks.matching { it.name == "compileAndroidMain" }.configureEach {
+    dependsOn(generateKoreanDictionaryData)
 }

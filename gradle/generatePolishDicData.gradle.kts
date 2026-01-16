@@ -1,9 +1,6 @@
 import org.gradle.api.GradleException
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -254,14 +251,12 @@ val generatePolishDictionaryKotlin = tasks.register<GeneratePolishDictionaryKotl
     outputDir.set(generatedKotlinDir)
 }
 
-afterEvaluate {
-    val kotlinExtension = extensions.findByName("kotlin") as? ExtensionAware ?: return@afterEvaluate
-    val sourceSets = kotlinExtension.extensions.getByName("sourceSets") as NamedDomainObjectContainer<*>
-    val commonMain = sourceSets.getByName("commonMain") as ExtensionAware
+tasks.matching {
+    it.name.startsWith("compile") && it.name.contains("Kotlin")
+}.configureEach {
+    dependsOn(generatePolishDictionaryKotlin)
+}
 
-    tasks.matching {
-        it.name.startsWith("compile") && it.name.contains("Kotlin")
-    }.configureEach {
-        dependsOn(generatePolishDictionaryKotlin)
-    }
+tasks.matching { it.name == "compileAndroidMain" }.configureEach {
+    dependsOn(generatePolishDictionaryKotlin)
 }
