@@ -86,7 +86,7 @@
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
 |   org.apache.lucene.search | 149 | 5 | 3% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
-|     org.apache.lucene.search.similarities | 25 | 0 | 0% |
+|     org.apache.lucene.search.similarities | 25 | 3 | 12% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
 |   org.apache.lucene.util | 63 | 41 | 65% |
 |     org.apache.lucene.util.automaton | 15 | 12 | 80% |
@@ -98,7 +98,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 145 | 21% |
+| Total | 673 | 148 | 21% |
 
 
 ## Tests To Port
@@ -558,7 +558,6 @@
 | [org.apache.lucene.search.similarities.TestAxiomaticF3EXP](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestAxiomaticF3EXP.java) | org.gnit.lucenekmp.search.similarities.TestAxiomaticF3EXP |
 | [org.apache.lucene.search.similarities.TestAxiomaticF3LOG](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestAxiomaticF3LOG.java) | org.gnit.lucenekmp.search.similarities.TestAxiomaticF3LOG |
 | [org.apache.lucene.search.similarities.TestAxiomaticSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestAxiomaticSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestAxiomaticSimilarity |
-| [org.apache.lucene.search.similarities.TestBM25Similarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBM25Similarity.java) | org.gnit.lucenekmp.search.similarities.TestBM25Similarity |
 | [org.apache.lucene.search.similarities.TestBasicModelG](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBasicModelG.java) | org.gnit.lucenekmp.search.similarities.TestBasicModelG |
 | [org.apache.lucene.search.similarities.TestBasicModelIF](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBasicModelIF.java) | org.gnit.lucenekmp.search.similarities.TestBasicModelIF |
 | [org.apache.lucene.search.similarities.TestBasicModelIn](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBasicModelIn.java) | org.gnit.lucenekmp.search.similarities.TestBasicModelIn |
@@ -570,8 +569,6 @@
 | [org.apache.lucene.search.similarities.TestIndependenceChiSquared](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceChiSquared.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceChiSquared |
 | [org.apache.lucene.search.similarities.TestIndependenceSaturated](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceSaturated.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceSaturated |
 | [org.apache.lucene.search.similarities.TestIndependenceStandardized](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceStandardized.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceStandardized |
-| [org.apache.lucene.search.similarities.TestIndriDirichletSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndriDirichletSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestIndriDirichletSimilarity |
-| [org.apache.lucene.search.similarities.TestLMDirichletSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestLMDirichletSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestLMDirichletSimilarity |
 | [org.apache.lucene.search.similarities.TestLMJelinekMercerSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestLMJelinekMercerSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestLMJelinekMercerSimilarity |
 | [org.apache.lucene.search.similarities.TestRawTFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestRawTFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestRawTFSimilarity |
 | [org.apache.lucene.search.similarities.TestSimilarity2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarity2.java) | org.gnit.lucenekmp.search.similarities.TestSimilarity2 |
