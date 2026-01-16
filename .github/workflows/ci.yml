@@ -71,49 +71,49 @@ jobs:
             module_name: core
             os: ubuntu-latest
             timeout: 15
-            task: :core:testReleaseUnitTest
+            task: :core:testAndroidHostTest
             artifact: android-core-reports
             needs_android: true
           - platform: android
             module_name: analysis-common
             os: ubuntu-latest
             timeout: 15
-            task: :analysis:common:testReleaseUnitTest
+            task: :analysis:common:testAndroidHostTest
             artifact: android-analysis-common-reports
             needs_android: true
           - platform: android
             module_name: analysis-morfologik
             os: ubuntu-latest
             timeout: 15
-            task: :analysis:morfologik:testReleaseUnitTest
+            task: :analysis:morfologik:testAndroidHostTest
             artifact: android-analysis-morfologik-reports
             needs_android: true
           - platform: android
             module_name: analysis-smartcn
             os: ubuntu-latest
             timeout: 15
-            task: :analysis:smartcn:testReleaseUnitTest
+            task: :analysis:smartcn:testAndroidHostTest
             artifact: android-analysis-smartcn-reports
             needs_android: true
           - platform: android
             module_name: analysis-nori
             os: ubuntu-latest
             timeout: 15
-            task: :analysis:nori:testReleaseUnitTest
+            task: :analysis:nori:testAndroidHostTest
             artifact: android-analysis-nori-reports
             needs_android: true
           - platform: android
             module_name: analysis-kuromoji
             os: ubuntu-latest
             timeout: 15
-            task: :analysis:kuromoji:testReleaseUnitTest
+            task: :analysis:kuromoji:testAndroidHostTest
             artifact: android-analysis-kuromoji-reports
             needs_android: true
           - platform: android
             module_name: analysis-extra
             os: ubuntu-latest
             timeout: 15
-            task: :analysis:extra:testReleaseUnitTest
+            task: :analysis:extra:testAndroidHostTest
             artifact: android-analysis-extra-reports
             needs_android: true
 
