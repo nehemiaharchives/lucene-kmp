@@ -309,50 +309,45 @@ jobs:
       - name: Coverage :analysis:morfologik
         run: >
           ./gradlew :analysis:morfologik:koverXmlReport
-          -x :analysis:morfologik:compileDebugKotlinAndroid
-          -x :analysis:morfologik:compileReleaseKotlinAndroid
-          -x :analysis:morfologik:compileDebugUnitTestKotlinAndroid
-          -x :analysis:morfologik:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:morfologik:compileAndroidDeviceTest 
+          -x :analysis:morfologik:compileAndroidHostTest
+          -x :analysis:morfologik:compileAndroidMain
           -x :analysis:morfologik:koverGenerateArtifactDebug
           -x :analysis:morfologik:koverGenerateArtifactRelease
 
       - name: Coverage :analysis:smartcn
         run: >
           ./gradlew :analysis:smartcn:koverXmlReport
-          -x :analysis:smartcn:compileDebugKotlinAndroid
-          -x :analysis:smartcn:compileReleaseKotlinAndroid
-          -x :analysis:smartcn:compileDebugUnitTestKotlinAndroid
-          -x :analysis:smartcn:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:smartcn:compileAndroidDeviceTest
+          -x :analysis:smartcn:compileAndroidHostTest
+          -x :analysis:smartcn:compileAndroidMain
           -x :analysis:smartcn:koverGenerateArtifactDebug
           -x :analysis:smartcn:koverGenerateArtifactRelease
 
       - name: Coverage :analysis:nori
         run: >
           ./gradlew :analysis:nori:koverXmlReport
-          -x :analysis:nori:compileDebugKotlinAndroid
-          -x :analysis:nori:compileReleaseKotlinAndroid
-          -x :analysis:nori:compileDebugUnitTestKotlinAndroid
-          -x :analysis:nori:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:nori:compileAndroidDeviceTest
+          -x :analysis:nori:compileAndroidHostTest
+          -x :analysis:nori:compileAndroidMain
           -x :analysis:nori:koverGenerateArtifactDebug
           -x :analysis:nori:koverGenerateArtifactRelease
       
       - name: Coverage :analysis:kuromoji
         run: >
           ./gradlew :analysis:kuromoji:koverXmlReport
-          -x :analysis:kuromoji:compileDebugKotlinAndroid
-          -x :analysis:kuromoji:compileReleaseKotlinAndroid
-          -x :analysis:kuromoji:compileDebugUnitTestKotlinAndroid
-          -x :analysis:kuromoji:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:kuromoji:compileAndroidDeviceTest
+          -x :analysis:kuromoji:compileAndroidHostTest
+          -x :analysis:kuromoji:compileAndroidMain
           -x :analysis:kuromoji:koverGenerateArtifactDebug
           -x :analysis:kuromoji:koverGenerateArtifactRelease
       
       - name: Coverage :analysis:extra
         run: >
           ./gradlew :analysis:extra:koverXmlReport
-          -x :analysis:extra:compileDebugKotlinAndroid
-          -x :analysis:extra:compileReleaseKotlinAndroid
-          -x :analysis:extra:compileDebugUnitTestKotlinAndroid
-          -x :analysis:extra:compileReleaseUnitTestKotlinAndroid
+          -x :analysis:extra:compileAndroidDeviceTest
+          -x :analysis:extra:compileAndroidHostTest
+          -x :analysis:extra:compileAndroidMain
           -x :analysis:extra:koverGenerateArtifactDebug
           -x :analysis:extra:koverGenerateArtifactRelease
 
