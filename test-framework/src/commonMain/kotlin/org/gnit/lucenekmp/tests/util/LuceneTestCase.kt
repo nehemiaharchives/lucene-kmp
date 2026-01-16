@@ -7,10 +7,15 @@ import kotlinx.coroutines.Runnable
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.analysis.Analyzer
+import org.gnit.lucenekmp.document.Field
+import org.gnit.lucenekmp.document.FieldType
+import org.gnit.lucenekmp.document.StringField
+import org.gnit.lucenekmp.document.TextField
 import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.CompositeReader
 import org.gnit.lucenekmp.index.DirectoryReader
 import org.gnit.lucenekmp.index.IndexFileNames
+import org.gnit.lucenekmp.index.IndexOptions
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.LeafReader
@@ -133,6 +138,16 @@ open class LuceneTestCase {
         /** Enables or disables dumping of [InfoStream] messages.  */
         val INFOSTREAM: Boolean = systemPropertyAsBoolean("tests.infostream", VERBOSE)
 
+        /** Leave temporary files on disk, even on successful runs. */
+        val LEAVE_TEMPORARY: Boolean = run {
+            var defaultValue = false
+            val props = listOf("tests.leaveTemporary", "tests.leavetemporary", "tests.leavetmpdir")
+            for (property in props) {
+                defaultValue = defaultValue || systemPropertyAsBoolean(property, false)
+            }
+            defaultValue
+        }
+
 
         // line 449
         /** Gets the directory to run tests with  */
@@ -175,6 +190,13 @@ open class LuceneTestCase {
                 }
             }
         // line 530
+
+        internal const val TEMP_NAME_RETRY_THRESHOLD: Int = 9999
+
+        /**
+         * This is lucene-kmp original to walkaround the use of tempFilesCleanupRule
+         */
+        private val tempFilesCleanup = TempFilesCleanup()
 
         // line 618 of LuceneTestCase.java
         /** Returns random string, including full unicode range.  */
@@ -221,6 +243,11 @@ open class LuceneTestCase {
         }
         // line 657
 
+
+        // line 674
+        private val fieldToType: MutableMap<String, FieldType> = HashMap<String, FieldType>()
+
+
         // line 725
 
         // -----------------------------------------------------------------
@@ -252,7 +279,45 @@ open class LuceneTestCase {
             return Random.Default
         }
 
-        // line 820 of LuceneTestCase.java
+
+
+        // line 799 of LuceneTestCase.java
+        /**
+         * Some tests expect the directory to contain a single segment, and want to do tests on that
+         * segment's reader. This is an utility method to help them.
+         */
+        /*
+          public static SegmentReader getOnlySegmentReader(DirectoryReader reader) {
+            List<LeafReaderContext> subReaders = reader.leaves();
+            if (subReaders.size() != 1) {
+              throw new IllegalArgumentException(reader + " has " + subReaders.size() + " segments instead of exactly one");
+            }
+            final LeafReader r = subReaders.get(0).reader();
+            assertTrue("expected a SegmentReader but got " + r, r instanceof SegmentReader);
+            return (SegmentReader) r;
+          }
+            */
+        /**
+         * Some tests expect the directory to contain a single segment, and want to do tests on that
+         * segment's reader. This is an utility method to help them.
+         */
+        fun getOnlyLeafReader(reader: IndexReader): LeafReader {
+            val subReaders: MutableList<LeafReaderContext> = reader.leaves()
+            require(subReaders.size == 1) { reader.toString() + " has " + subReaders.size + " segments instead of exactly one" }
+            return subReaders[0].reader()
+        }
+
+        /**
+         * Returns true if and only if the calling thread is the primary thread executing the test case.
+         */
+        /*protected fun isTestThread(): Boolean {
+            org.junit.Assert.assertNotNull(
+                "Test case thread not set?",
+                threadAndTestNameRule.testCaseThread
+            )
+            return java.lang.Thread.currentThread() === threadAndTestNameRule.testCaseThread
+        }*/
+
         /**
          * Returns a number of at least `i`
          *
@@ -802,7 +867,182 @@ open class LuceneTestCase {
                 return mock
             }
         }
-        // line 1440
+
+        fun newStringField(
+            name: String,
+            value: String?,
+            stored: Field.Store
+        ): Field {
+            return newField(
+                random(),
+                name,
+                value,
+                if (stored == Field.Store.YES) StringField.TYPE_STORED else StringField.TYPE_NOT_STORED
+            )
+        }
+
+        fun newStringField(
+            name: String,
+            value: BytesRef?,
+            stored: Field.Store
+        ): Field {
+            return newField(
+                random(),
+                name,
+                value,
+                if (stored == Field.Store.YES) StringField.TYPE_STORED else StringField.TYPE_NOT_STORED
+            )
+        }
+
+        fun newTextField(
+            name: String,
+            value: String?,
+            stored: Field.Store
+        ): Field {
+            return newField(
+                random(),
+                name,
+                value,
+                if (stored == Field.Store.YES) TextField.TYPE_STORED else TextField.TYPE_NOT_STORED
+            )
+        }
+
+        fun newStringField(
+            random: Random,
+            name: String,
+            value: String?,
+            stored: Field.Store
+        ): Field {
+            return newField(
+                random,
+                name,
+                value,
+                if (stored == Field.Store.YES) StringField.TYPE_STORED else StringField.TYPE_NOT_STORED
+            )
+        }
+
+        fun newStringField(
+            random: Random,
+            name: String,
+            value: BytesRef?,
+            stored: Field.Store
+        ): Field {
+            return newField(
+                random,
+                name,
+                value,
+                if (stored == Field.Store.YES) StringField.TYPE_STORED else StringField.TYPE_NOT_STORED
+            )
+        }
+
+        fun newTextField(
+            random: Random,
+            name: String,
+            value: String?,
+            stored: Field.Store
+        ): Field {
+            return newField(
+                random,
+                name,
+                value,
+                if (stored == Field.Store.YES) TextField.TYPE_STORED else TextField.TYPE_NOT_STORED
+            )
+        }
+
+        fun newField(
+            name: String,
+            value: String?,
+            type: FieldType
+        ): Field {
+            return newField(LuceneTestCase.random(), name, value, type)
+        }
+
+        // TODO: if we can pull out the "make term vector options
+        // consistent across all instances of the same field name"
+        // write-once schema sort of helper class then we can
+        // remove the sync here.  We can also fold the random
+        // "enable norms" (now commented out, below) into that:
+        /*@Synchronized*/
+        fun newField(
+            random: Random,
+            name: String,
+            value: Any?,
+            type: FieldType
+        ): Field {
+            // Defeat any consumers that illegally rely on intern'd
+            // strings (we removed this from Lucene a while back):
+
+            val name = name
+            /*name = java.lang.String(name) as String*/
+
+            val prevType: FieldType? = fieldToType[name]
+
+            if (prevType != null) {
+                // always use the same fieldType for the same field name
+                return createField(name, value, prevType)
+            }
+
+            // TODO: once all core & test codecs can index
+            // offsets, sometimes randomly turn on offsets if we are
+            // already indexing positions...
+            val newType: FieldType =
+                FieldType(type)
+            if (!newType.stored() && random.nextBoolean()) {
+                newType.setStored(true) // randomly store it
+            }
+            if (newType.indexOptions() != IndexOptions.NONE) {
+                if (!newType.storeTermVectors() && random.nextBoolean()) {
+                    newType.setStoreTermVectors(true)
+                    if (!newType.storeTermVectorPositions()) {
+                        newType.setStoreTermVectorPositions(random.nextBoolean())
+                        if (newType.storeTermVectorPositions()) {
+                            if (!newType.storeTermVectorPayloads()) {
+                                newType.setStoreTermVectorPayloads(random.nextBoolean())
+                            }
+                        }
+                    }
+                    // Check for strings as offsets are disallowed on binary fields
+                    if (value is String && !newType.storeTermVectorOffsets()) {
+                        newType.setStoreTermVectorOffsets(random.nextBoolean())
+                    }
+
+                    if (VERBOSE) {
+                        println("NOTE: LuceneTestCase: upgrade name=$name type=$newType")
+                    }
+                }
+            }
+            newType.freeze()
+            fieldToType[name] = newType
+
+            // TODO: we need to do this, but smarter, ie, most of
+            // the time we set the same value for a given field but
+            // sometimes (rarely) we change it up:
+            /*
+            if (newType.omitNorms()) {
+              newType.setOmitNorms(random.nextBoolean());
+            }
+            */
+            return createField(name, value, newType)
+        }
+
+        private fun createField(
+            name: String,
+            value: Any?,
+            fieldType: FieldType
+        ): Field {
+            if (value is String) {
+                return Field(name, value, fieldType)
+            } else if (value is BytesRef) {
+                return Field(
+                    name,
+                    value as BytesRef,
+                    fieldType
+                )
+            } else {
+                throw IllegalArgumentException("value must be String or BytesRef")
+            }
+        }
+        // line 1565
 
 
         // line 1610
@@ -923,14 +1163,17 @@ open class LuceneTestCase {
             }
 
             // TODO following is walkaround to bypass above
-            val dir: Path =
-                LuceneTestCase.createTempDir("index-$clazzName")
-
-            return when {
-                (clazzName == "ByteBuffersDirectory") -> ByteBuffersDirectory(lockFactory = lf)
-                (clazzName == "NIOFSDirectory") -> NIOFSDirectory(path = dir, lockFactory = lf)
-                (clazzName == "MMapDirectory") -> MMapDirectory(path = dir)
-                else -> throw UnsupportedOperationException()
+            return when (clazzName) {
+                "ByteBuffersDirectory" -> ByteBuffersDirectory(lockFactory = lf)
+                "NIOFSDirectory" -> {
+                    val dir: Path = createTempDir("index-$clazzName")
+                    NIOFSDirectory(path = dir, lockFactory = lf)
+                }
+                "MMapDirectory" -> {
+                    val dir: Path = createTempDir("index-$clazzName")
+                    MMapDirectory(path = dir)
+                }
+                else -> throw UnsupportedOperationException("Unsupported directory: $clazzName")
             }
         }
 
@@ -1569,9 +1812,7 @@ open class LuceneTestCase {
          * test should close any file handles that would prevent the folder from being removed.
          */
         fun createTempDir(prefix: String): Path {
-            return org.apache.lucene.tests.util.LuceneTestCase.tempFilesCleanupRule.createTempDir(
-                prefix
-            )
+            return tempFilesCleanup.createTempDir(prefix)
         }
 
         /**
@@ -1583,10 +1824,7 @@ open class LuceneTestCase {
          */
         @Throws(IOException::class)
         fun createTempFile(prefix: String, suffix: String): Path {
-            return org.apache.lucene.tests.util.LuceneTestCase.tempFilesCleanupRule.createTempFile(
-                prefix,
-                suffix
-            )
+            return tempFilesCleanup.createTempFile(prefix, suffix)
         }
 
         /**
@@ -1599,7 +1837,6 @@ open class LuceneTestCase {
             return createTempFile("tempFile", ".tmp")
         }
         //↑ line 30107
-
 
         //TODO: implement the collate() and others of LuceneTestCase.java
 

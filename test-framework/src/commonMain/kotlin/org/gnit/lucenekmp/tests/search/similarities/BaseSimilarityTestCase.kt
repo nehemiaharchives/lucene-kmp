@@ -16,7 +16,6 @@ import org.gnit.lucenekmp.search.TermStatistics
 import org.gnit.lucenekmp.search.similarities.IndriDirichletSimilarity
 import org.gnit.lucenekmp.search.similarities.Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity.SimScorer
-import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.index.RandomIndexWriter
 import org.gnit.lucenekmp.tests.search.CheckHits
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -25,8 +24,6 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.SmallFloat
 import kotlin.math.min
-import kotlin.math.nextDown
-import kotlin.math.nextUp
 import kotlin.random.Random
 import kotlin.test.DefaultAsserter.assertTrue
 import kotlin.test.assertFalse
@@ -50,16 +47,16 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
         val dir = newDirectory()
         var reader: LeafReader? = null
         try {
-            val writer = RandomIndexWriter(LuceneTestCase.random(), dir)
+            val writer = RandomIndexWriter(random(), dir)
             val doc = Document()
 
             val ft = FieldType(TextField.TYPE_NOT_STORED)
             ft.setOmitNorms(omitNorms)
 
-            doc.add(LuceneTestCase.newField("field", "value", ft))
-            writer.addDocument<IndexableField>(doc)
+            doc.add(newField("field", "value", ft))
+            writer.addDocument(doc)
 
-            reader = LuceneTestCase.getOnlyLeafReader(writer.reader)
+            reader = getOnlyLeafReader(writer.reader)
             writer.close()
 
             return block(reader)
@@ -92,8 +89,8 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
      */
     @Throws(Exception::class)
     fun testRandomScoring() {
-        val random: Random = LuceneTestCase.random()
-        val iterations: Int = LuceneTestCase.atLeast(1)
+        val random: Random = random()
+        val iterations: Int = atLeast(1)
         for (i in 0..<iterations) {
             // pull a new similarity to switch up parameters
             val similarity: Similarity = getSimilarity(random)
@@ -172,10 +169,10 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
                                 boost = 1f
 
                             3 ->                 // maximum value (not enforceD)
-                                boost = Int.Companion.MAX_VALUE.toFloat()
+                                boost = Int.MAX_VALUE.toFloat()
 
                             else ->                 // random value
-                                boost = random.nextFloat() * Int.Companion.MAX_VALUE
+                                boost = random.nextFloat() * Int.MAX_VALUE
                         }
                         doTestScoring(similarity, corpus, term, boost, freq, k)
                     }
@@ -225,10 +222,10 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
             DIR = null
         }*/
 
-        val MAXDOC_FORTESTING: Long = 1L shl 48
+        const val MAXDOC_FORTESTING: Long = 1L shl 48
 
         // must be at least MAXDOC_FORTESTING + Integer.MAX_VALUE
-        val MAXTOKENS_FORTESTING: Long = 1L shl 49
+        const val MAXTOKENS_FORTESTING: Long = 1L shl 49
 
         /**
          * returns a random corpus that is at least possible given the norm value for a single document.
@@ -509,7 +506,7 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
                     if (prevNormScore.toDouble() != prevNormExplanation.value.toDouble()) {
                         fail("expected: $prevNormScore, got: $prevNormExplanation")
                     }
-                    if (LuceneTestCase.rarely()) {
+                    if (rarely()) {
                         CheckHits.verifyExplanation(
                             "test query (prevNorm)", 0, prevNormScore, true, prevNormExplanation
                         )
@@ -537,14 +534,12 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
                 // check score(term-1), given the same freq/norm it should be >= score(term) [scores
                 // non-decreasing as terms get rarer]
                 if (term.docFreq > 1 && freq < term.totalTermFreq) {
-                    val prevTerm: TermStatistics =
-                        TermStatistics(
+                    val prevTerm = TermStatistics(
                             term.term,
                             term.docFreq - 1,
                             term.totalTermFreq - 1
                         )
-                    val prevTermScorer: Similarity.SimScorer =
-                        similarity.scorer(boost, corpus, term)
+                    val prevTermScorer: SimScorer = similarity.scorer(boost, corpus, term)
                     val prevTermScore: Float = prevTermScorer.score(freq, norm.toLong())
                     // check that score isn't infinite or negative
                     assertTrue(Float.isFinite(prevTermScore))
@@ -562,7 +557,7 @@ abstract class BaseSimilarityTestCase : LuceneTestCase() {
                     if (prevTermScore.toDouble() != prevTermExplanation.value.toDouble()) {
                         fail("expected: $prevTermScore, got: $prevTermExplanation")
                     }
-                    if (LuceneTestCase.rarely()) {
+                    if (rarely()) {
                         CheckHits.verifyExplanation(
                             "test query (prevTerm)", 0, prevTermScore, true, prevTermExplanation
                         )
