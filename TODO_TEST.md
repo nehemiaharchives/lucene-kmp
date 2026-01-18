@@ -2,13 +2,12 @@
 
 From PROGRESS2.md → Progress Table for Unit Test Classes:
 
-## Depth 4
-- org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings -> org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings
+## Depth 3 
+- org.apache.lucene.tests.util.TestRuleAssertionsRequired -> org.apache.lucene.tests.util.TestRuleAssertionsRequired *
+- org.apache.lucene.tests.util.TestRuleIgnoreTestSuites -> org.apache.lucene.tests.util.TestRuleIgnoreTestSuites *
+- org.apache.lucene.tests.util.TestRuleLimitSysouts -> org.apache.lucene.tests.util.TestRuleLimitSysouts *
 
-## Depth 3
-- org.apache.lucene.tests.util.TestRuleAssertionsRequired -> org.apache.lucene.tests.util.TestRuleAssertionsRequired
-- org.apache.lucene.tests.util.TestRuleIgnoreTestSuites -> org.apache.lucene.tests.util.TestRuleIgnoreTestSuites
-- org.apache.lucene.tests.util.TestRuleLimitSysouts -> org.apache.lucene.tests.util.TestRuleLimitSysouts
+*(TODO need to think what to do with junit specific rule apis which is not applied to kmp test infrastructure)
 
 ## Depth 2
 - org.apache.lucene.index.TestExitableDirectoryReader -> org.apache.lucene.index.ExitableDirectoryReader
