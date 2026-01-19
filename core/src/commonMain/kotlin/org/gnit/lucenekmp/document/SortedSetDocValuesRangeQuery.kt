@@ -74,7 +74,6 @@ internal class SortedSetDocValuesRangeQuery(
             .toString()
     }
 
-    @Throws(IOException::class)
     override fun rewrite(indexSearcher: IndexSearcher): Query {
         if (lowerValue == null && upperValue == null) {
             return FieldExistsQuery(field)
@@ -82,7 +81,6 @@ internal class SortedSetDocValuesRangeQuery(
         return super.rewrite(indexSearcher)
     }
 
-    @Throws(IOException::class)
     override fun createWeight(
         searcher: IndexSearcher,
         scoreMode: ScoreMode,
