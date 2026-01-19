@@ -44,7 +44,7 @@ import kotlin.test.assertSame
  */
 class TestSort : LuceneTestCase() {
     private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
-    private fun assertEquals(a: Sort, b: Sort) {
+    private fun assertEqualsInTestSort(a: Sort, b: Sort) {
         /*LuceneTestCase.*/assertEquals(a, b)
         /*LuceneTestCase.*/assertEquals(b, a)
         /*LuceneTestCase.*/assertEquals(
@@ -63,7 +63,7 @@ class TestSort : LuceneTestCase() {
     fun testEquals() {
         val sortField1 = SortField("foo", SortField.Type.STRING)
         var sortField2 = SortField("foo", SortField.Type.STRING)
-        assertEquals(Sort(sortField1), Sort(sortField2))
+        assertEqualsInTestSort(Sort(sortField1), Sort(sortField2))
 
         sortField2 = SortField("bar", SortField.Type.STRING)
         assertDifferent(Sort(sortField1), Sort(sortField2))
@@ -76,7 +76,7 @@ class TestSort : LuceneTestCase() {
         assertDifferent(Sort(sortField1), Sort(sortField2))
 
         sortField2 = SortField("foo", SortField.Type.STRING, false)
-        assertEquals(Sort(sortField1), Sort(sortField2))
+        assertEqualsInTestSort(Sort(sortField1), Sort(sortField2))
 
         sortField2 = SortField("foo", SortField.Type.STRING, true)
         assertDifferent(Sort(sortField1), Sort(sortField2))

@@ -69,7 +69,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.test.*
 
-open class LuceneTestCase {
+open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherits from junit Assert but in kmp it is not pssible.
 
 
     //↓ line 2860 of LuceneTestCase.java
