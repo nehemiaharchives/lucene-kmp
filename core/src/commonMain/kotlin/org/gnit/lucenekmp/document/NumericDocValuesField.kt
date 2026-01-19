@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.search.Query
  *
  * If you also need to store the value, you should add a separate [StoredField] instance.
  */
-class NumericDocValuesField(name: String, value: Long, fieldType: FieldType) :
+open class NumericDocValuesField(name: String, value: Long, fieldType: FieldType) :
     Field(name, fieldType) {
     /**
      * Creates a new DocValues field with the specified 64-bit long value

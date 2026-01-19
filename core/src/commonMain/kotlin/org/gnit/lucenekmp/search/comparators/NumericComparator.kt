@@ -141,7 +141,7 @@ abstract class NumericComparator<T : Number> protected constructor(
          * @throws IOException If there is a low-level I/O error
          */
         @Throws(IOException::class)
-        protected fun getNumericDocValues(context: LeafReaderContext, field: String): NumericDocValues {
+        protected open fun getNumericDocValues(context: LeafReaderContext, field: String): NumericDocValues {
             return DocValues.getNumeric(context.reader(), field)
         }
 

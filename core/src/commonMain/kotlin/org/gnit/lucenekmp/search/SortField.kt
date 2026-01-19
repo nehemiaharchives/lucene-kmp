@@ -48,7 +48,7 @@ import kotlin.jvm.JvmName
  * @since lucene 1.4
  * @see Sort
  */
-class SortField {
+open class SortField {
 
     /** Specifies the type of the terms to be sorted, or special types such as CUSTOM  */
     enum class Type {
@@ -137,7 +137,36 @@ class SortField {
      * Return the value to use for documents that don't have a value. A value of `null`
      * indicates that default should be used.
      */
-    protected var missingValue: Any? = null
+    open var missingValue: Any? = null
+    /** Set the value to use for documents that don't have a value.  */
+        set(missingValue) {
+            if (type == Type.STRING || type == Type.STRING_VAL) {
+                require(!(missingValue !== STRING_FIRST && missingValue !== STRING_LAST)) { "For STRING type, missing value must be either STRING_FIRST or STRING_LAST" }
+            } else if (type == Type.INT) {
+                require(!(missingValue != null && missingValue::class != Int::class)) {
+                    ("Missing values for Type.INT can only be of type java.lang.Integer, but got "
+                            + missingValue!!::class)
+                }
+            } else if (type == Type.LONG) {
+                require(!(missingValue != null && missingValue::class != Long::class)) {
+                    ("Missing values for Type.LONG can only be of type java.lang.Long, but got "
+                            + missingValue!!::class)
+                }
+            } else if (type == Type.FLOAT) {
+                require(!(missingValue != null && missingValue::class != Float::class)) {
+                    ("Missing values for Type.FLOAT can only be of type java.lang.Float, but got "
+                            + missingValue!!::class)
+                }
+            } else if (type == Type.DOUBLE) {
+                require(!(missingValue != null && missingValue::class != Double::class)) {
+                    ("Missing values for Type.DOUBLE can only be of type java.lang.Double, but got "
+                            + missingValue!!::class)
+                }
+            } else {
+                throw IllegalArgumentException("Missing value only works for numeric or STRING types")
+            }
+            field = missingValue
+        }
 
     /**
      * Enables/disables numeric sort optimization to use the indexed data.
@@ -210,16 +239,16 @@ class SortField {
                     Type.STRING -> {
                         val missingString: Int = `in`.readInt()
                         if (missingString == 1) {
-                            sf.setMissingValue(STRING_FIRST)
+                            sf.missingValue = STRING_FIRST
                         } else {
-                            sf.setMissingValue(STRING_LAST)
+                            sf.missingValue = STRING_LAST
                         }
                     }
 
-                    Type.INT -> sf.setMissingValue(`in`.readInt())
-                    Type.LONG -> sf.setMissingValue(`in`.readLong())
-                    Type.FLOAT -> sf.setMissingValue(NumericUtils.sortableIntToFloat(`in`.readInt()))
-                    Type.DOUBLE -> sf.setMissingValue(NumericUtils.sortableLongToDouble(`in`.readLong()))
+                    Type.INT -> sf.missingValue = `in`.readInt()
+                    Type.LONG -> sf.missingValue = `in`.readLong()
+                    Type.FLOAT -> sf.missingValue = NumericUtils.sortableIntToFloat(`in`.readInt())
+                    Type.DOUBLE -> sf.missingValue = NumericUtils.sortableLongToDouble(`in`.readLong())
                     Type.CUSTOM, Type.DOC, Type.REWRITEABLE, Type.STRING_VAL, Type.SCORE -> throw IllegalArgumentException(
                         "Cannot deserialize sort of type " + sf.type
                     )
@@ -273,37 +302,6 @@ class SortField {
                 else -> throw IllegalArgumentException("Cannot serialize SortField of type $type")
             }
         }
-    }
-
-    /** Set the value to use for documents that don't have a value.  */
-    @JvmName("setMissingValueKt")
-    fun setMissingValue(missingValue: Any) {
-        if (type == Type.STRING || type == Type.STRING_VAL) {
-            require(!(missingValue !== STRING_FIRST && missingValue !== STRING_LAST)) { "For STRING type, missing value must be either STRING_FIRST or STRING_LAST" }
-        } else if (type == Type.INT) {
-            require(!(missingValue != null && missingValue::class != Int::class)) {
-                ("Missing values for Type.INT can only be of type java.lang.Integer, but got "
-                        + missingValue::class)
-            }
-        } else if (type == Type.LONG) {
-            require(!(missingValue != null && missingValue::class != Long::class)) {
-                ("Missing values for Type.LONG can only be of type java.lang.Long, but got "
-                        + missingValue::class)
-            }
-        } else if (type == Type.FLOAT) {
-            require(!(missingValue != null && missingValue::class != Float::class)) {
-                ("Missing values for Type.FLOAT can only be of type java.lang.Float, but got "
-                        + missingValue::class)
-            }
-        } else if (type == Type.DOUBLE) {
-            require(!(missingValue != null && missingValue::class != Double::class)) {
-                ("Missing values for Type.DOUBLE can only be of type java.lang.Double, but got "
-                        + missingValue::class)
-            }
-        } else {
-            throw IllegalArgumentException("Missing value only works for numeric or STRING types")
-        }
-        this.missingValue = missingValue
     }
 
     /**
@@ -473,12 +471,12 @@ class SortField {
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    fun rewrite(searcher: IndexSearcher): SortField {
+    open fun rewrite(searcher: IndexSearcher): SortField {
         return this
     }
 
     /** Whether the relevance score is needed to sort documents.  */
-    fun needsScores(): Boolean {
+    open fun needsScores(): Boolean {
         return type == Type.SCORE
     }
 

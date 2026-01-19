@@ -13,7 +13,7 @@ import kotlin.jvm.JvmName
  * Comparator based on [Long.compare] for `numHits`. This comparator provides a skipping
  * functionality – an iterator that can skip over non-competitive documents.
  */
-class LongComparator(numHits: Int, field: String, missingValue: Long, reverse: Boolean, pruning: Pruning) :
+open class LongComparator(numHits: Int, field: String, missingValue: Long, reverse: Boolean, pruning: Pruning) :
     NumericComparator<Long>(
         field, if (missingValue != null) missingValue else 0L, reverse, pruning, Long.SIZE_BYTES
     ) {
@@ -54,7 +54,7 @@ class LongComparator(numHits: Int, field: String, missingValue: Long, reverse: B
     }
 
     /** Leaf comparator for [LongComparator] that provides skipping functionality  */
-    inner class LongLeafComparator(context: LeafReaderContext) : NumericLeafComparator(context) {
+    open inner class LongLeafComparator(context: LeafReaderContext) : NumericLeafComparator(context) {
         @Throws(IOException::class)
         private fun getValueForDoc(doc: Int): Long {
             if (docValues.advanceExact(doc)) {
