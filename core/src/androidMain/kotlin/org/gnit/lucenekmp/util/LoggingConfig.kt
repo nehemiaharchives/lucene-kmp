@@ -1,5 +1,5 @@
 package org.gnit.lucenekmp.util
 
 actual fun configureTestLogging() {
-    // no-op
+    System.setProperty("kotlin-logging-to-android-native", "true")
 }

@@ -8,12 +8,15 @@ android-compileSdk = "36"
 android-targetSdk = "36"
 kotlin-coroutines = "1.10.2"
 logback = "1.5.24"
+slf4j = "2.0.13"
 kotlin-logging = "7.0.14"
+kotlin-logging-android = "7.0.14"
 kotlinx-datetime = "0.7.1"
 kotlinbignum = "0.3.10"
 kotlinenvvar = "1.0.6"
 vanniktech-maven-publish = "0.35.0"
 kover = "0.9.4"
+androidx-test-runner = "1.5.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -27,7 +30,10 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
 kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
 kotlin-logging-linuxx64 = { module = "io.github.oshai:kotlin-logging-linuxx64", version.ref = "kotlin-logging" }
+kotlin-logging-android = { module = "io.github.oshai:kotlin-logging-android", version.ref = "kotlin-logging-android" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

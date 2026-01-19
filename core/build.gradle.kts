@@ -39,6 +39,14 @@ kotlin {
         }
     }
 
+    android {
+        packaging {
+            resources {
+                excludes += "META-INF/INDEX.LIST"
+            }
+        }
+    }
+
     iosArm64()
     iosX64()
     iosSimulatorArm64()
@@ -75,12 +83,17 @@ kotlin {
         val jvmAndroidMain by creating {
             dependsOn(commonMain)
             // dependencies which are used both by jvm and android will be here
-            dependencies {
-                implementation(libs.logback)
-            }
         }
         jvmMain.get().dependsOn(jvmAndroidMain)
+        jvmMain.get().dependencies {
+            implementation(libs.kotlin.logging.jvm)
+            implementation(libs.logback)
+        }
         androidMain.get().dependsOn(jvmAndroidMain)
+        androidMain.get().dependencies {
+            implementation(libs.kotlin.logging.android)
+            implementation(libs.slf4j.api)
+        }
 
         val jvmAndroidTest by creating {
             dependsOn(commonTest)
@@ -88,6 +101,12 @@ kotlin {
         }
         jvmTest.get().dependsOn(jvmAndroidTest)
         androidUnitTest.get().dependsOn(jvmAndroidTest)
+
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.runner)
+            }
+        }
 
         // shared source for ios and linux
         val nativeMain by creating {

@@ -30,6 +30,14 @@ kotlin {
         }
     }
 
+    android {
+        packaging {
+            resources {
+                excludes += "META-INF/INDEX.LIST"
+            }
+        }
+    }
+
     iosArm64()
     iosX64()
     iosSimulatorArm64()
@@ -70,11 +78,11 @@ kotlin {
         val jvmAndroidMain by creating {
             dependsOn(commonMain)
             // dependencies which are used both by jvm and android will be here
-            dependencies {
-                implementation(libs.logback)
-            }
         }
         jvmMain.get().dependsOn(jvmAndroidMain)
+        jvmMain.get().dependencies {
+            implementation(libs.logback)
+        }
         androidMain.get().dependsOn(jvmAndroidMain)
 
         val jvmAndroidTest by creating {

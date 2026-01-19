@@ -27,7 +27,7 @@ fun isFoo(ch: Char): Boolean {
 class CharacterDataLatin1Test {
 
     @Test
-    fun `A table should contain 256 values all Ints and reasonable property bits`() {
+    fun testTableHas256ValuesAllIntsAndReasonablePropertyBits() {
         assertTrue(A.size == 256, "A table size must be 256")
         for ((i, v) in A.withIndex()) {
             // Example checks - adapt depending on your needs
@@ -42,7 +42,7 @@ class CharacterDataLatin1Test {
     }
 
     @Test
-    fun `B table should contain 256 Char values`() {
+    fun testTableHas256CharValues() {
         assertEquals(256, B.size, "B table size must be 256")
         for ((i, v) in B.withIndex()) {
             // CharArray always contains Chars, but you can add value checks if needed
@@ -51,7 +51,7 @@ class CharacterDataLatin1Test {
     }
 
     @Test
-    fun `A and B contract vs function should match across all 0 to 255`() {
+    fun testContractVsFunctionMatchAcrossAll0To255() {
         var foundMismatch = false
         for (code in 0..255) {
             val ch = code.toChar()
