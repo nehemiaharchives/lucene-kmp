@@ -14,7 +14,7 @@ import kotlin.jvm.JvmName
  * Comparator based on [Double.compare] for `numHits`. This comparator provides a
  * skipping functionality - an iterator that can skip over non-competitive documents.
  */
-open class DoubleComparator(numHits: Int, field: String, missingValue: Double, reverse: Boolean, pruning: Pruning) :
+open class DoubleComparator(numHits: Int, field: String, missingValue: Double?, reverse: Boolean, pruning: Pruning) :
     NumericComparator<Double>(
         field, if (missingValue != null) missingValue else 0.0, reverse, pruning, Double.SIZE_BYTES
     ) {

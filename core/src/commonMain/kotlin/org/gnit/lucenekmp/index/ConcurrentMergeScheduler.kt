@@ -238,10 +238,10 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun removeMergeThread() {
-        val currentThread = Job() /*java.lang.Thread.currentThread()*/
+        val currentThread = runBlocking { currentCoroutineContext()[Job] }
         // Paranoia: don't trust Thread.equals:
         for (i in mergeThreads.indices) {
-            if (mergeThreads[i] === currentThread) {
+            if (mergeThreads[i].job === currentThread) {
                 mergeThreads.removeAt(i)
                 return
             }
@@ -263,7 +263,8 @@ open class ConcurrentMergeScheduler
         merge: OneMerge,
         `in`: Directory
     ): Directory {
-        val mergeThread = Job()
+        val currentJob = runBlocking { currentCoroutineContext()[Job] }
+        val mergeThread = mergeThreads.firstOrNull { it.job === currentJob }
 
         // TODO not sure what to do here, synchronized is not supported in KMP
         /*if (!MergeThread::class.java.isInstance(mergeThread)) {
@@ -276,7 +277,10 @@ open class ConcurrentMergeScheduler
         // Note: the rate limiter is only per thread. So, if there are multiple merge threads running
         // and throttling is required, each thread will be throttled independently.
         // The implication of this, is that the total IO rate could be higher than the target rate.
-        val rateLimiter: RateLimiter = (mergeThread as MergeThread).rateLimiter
+        if (mergeThread == null) {
+            return `in`
+        }
+        val rateLimiter: RateLimiter = mergeThread.rateLimiter
         return object : FilterDirectory(`in`) {
             @Throws(IOException::class)
             override fun createOutput(

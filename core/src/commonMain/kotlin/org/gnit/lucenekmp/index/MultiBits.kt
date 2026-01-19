@@ -13,11 +13,11 @@ import org.gnit.lucenekmp.util.Bits
  * @lucene.experimental
  */
 class MultiBits private constructor(
-    subs: Array<Bits>,
+    subs: Array<Bits?>,
     starts: IntArray,
     defaultValue: Boolean
 ) : Bits {
-    private val subs: Array<Bits>
+    private val subs: Array<Bits?>
 
     // length is 1+subs.length (the last entry has the maxDoc):
     private val starts: IntArray
@@ -51,7 +51,7 @@ class MultiBits private constructor(
     override fun get(index: Int): Boolean {
         val reader: Int = ReaderUtil.subIndex(index, starts)
         assert(reader != -1)
-        val bits: Bits = subs[reader]
+        val bits: Bits? = subs[reader]
         if (bits == null) {
             return defaultValue
         } else {
@@ -73,7 +73,7 @@ class MultiBits private constructor(
                 b.append("s=")
                     .append(starts[i])
                     .append(" l=")
-                    .append(subs[i].length())
+                    .append(subs[i]!!.length())
                     .append(" b=")
                     .append(subs[i])
             }
@@ -103,13 +103,12 @@ class MultiBits private constructor(
                 if (size == 1) {
                     return leaves[0].reader().liveDocs
                 }
-                val liveDocs: Array<Bits> =
-                    kotlin.arrayOfNulls<Bits>(size) as Array<Bits>
+                val liveDocs: Array<Bits?> = arrayOfNulls(size)
                 val starts = IntArray(size + 1)
                 for (i in 0..<size) {
                     // record all liveDocs, even if they are null
                     val ctx: LeafReaderContext = leaves[i]
-                    liveDocs[i] = ctx.reader().liveDocs!!
+                    liveDocs[i] = ctx.reader().liveDocs
                     starts[i] = ctx.docBase
                 }
                 starts[size] = reader.maxDoc()

@@ -17,6 +17,7 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
@@ -33,6 +34,7 @@ class FrozenBufferedUpdates(
     // non-null iff this frozen packet represents
     val privateSegment: SegmentCommitInfo?
 ) {
+    private val logger = KotlinLogging.logger {}
     // Terms, in sorted order:
     val deleteTerms: PrefixCodedTerms
 
@@ -101,17 +103,24 @@ class FrozenBufferedUpdates(
      * @return true if the lock was successfully acquired. otherwise false.
      */
     fun tryLock(): Boolean {
-        return applyLock.tryLock()
+        val locked = applyLock.tryLock()
+        if (locked) {
+            logger.debug { "FrozenBufferedUpdates.tryLock: acquired delGen=$delGen" }
+        }
+        return locked
     }
 
     /** locks this buffered update instance  */
     fun lock() {
+        logger.debug { "FrozenBufferedUpdates.lock: start delGen=$delGen" }
         applyLock.lock()
+        logger.debug { "FrozenBufferedUpdates.lock: acquired delGen=$delGen" }
     }
 
     /** Releases the lock of this buffered update instance  */
     fun unlock() {
         applyLock.unlock()
+        logger.debug { "FrozenBufferedUpdates.unlock: delGen=$delGen" }
     }
 
     /** Returns true iff this buffered updates instance was already applied  */
@@ -379,25 +388,25 @@ class FrozenBufferedUpdates(
 
         internal fun interface TermsProvider {
             @Throws(IOException::class)
-            fun terms(field: String): Terms
+            fun terms(field: String): Terms?
         }
 
         constructor(
             fields: Fields,
             sortedTerms: Boolean
-        ) : this(TermsProvider { field: String -> fields.terms(field)!! }, sortedTerms)
+        ) : this(TermsProvider { field: String -> fields.terms(field) }, sortedTerms)
 
         constructor(
             reader: LeafReader,
             sortedTerms: Boolean
-        ) : this(TermsProvider { field: String -> reader.terms(field)!! }, sortedTerms)
+        ) : this(TermsProvider { field: String -> reader.terms(field) }, sortedTerms)
 
         @Throws(IOException::class)
         private fun setField(field: String) {
             if (this.field == null || this.field != field) {
                 this.field = field
 
-                val terms: Terms = provider.terms(field)
+                val terms: Terms? = provider.terms(field)
                 if (terms != null) {
                     termsEnum = terms.iterator()
                     if (sortedTerms) {

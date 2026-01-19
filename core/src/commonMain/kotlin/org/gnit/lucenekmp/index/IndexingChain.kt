@@ -38,6 +38,7 @@ import org.gnit.lucenekmp.util.InfoStream
 import org.gnit.lucenekmp.util.IntBlockPool
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.Version
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.time.Clock
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -52,6 +53,7 @@ class IndexingChain(
     indexWriterConfig: LiveIndexWriterConfig,
     abortingExceptionConsumer: (Throwable) -> Unit,
 ) : Accountable {
+    private val logger = KotlinLogging.logger {}
     val bytesUsed: Counter = Counter.newCounter()
     val fieldInfosBuilder: FieldInfos.Builder
 
@@ -142,7 +144,7 @@ class IndexingChain(
     private val docValuesLeafReader: LeafReader
         get() = object : DocValuesLeafReader() {
             override fun getNumericDocValues(field: String): NumericDocValues? {
-                val pf: PerField = getPerField(field)
+                val pf = getPerField(field)
                 if (pf == null) {
                     return null
                 }
@@ -153,7 +155,7 @@ class IndexingChain(
             }
 
             override fun getBinaryDocValues(field: String): BinaryDocValues? {
-                val pf: PerField = getPerField(field)
+                val pf = getPerField(field)
                 if (pf == null) {
                     return null
                 }
@@ -165,7 +167,7 @@ class IndexingChain(
 
             @Throws(IOException::class)
             override fun getSortedDocValues(field: String): SortedDocValues? {
-                val pf: PerField = getPerField(field)
+                val pf = getPerField(field)
                 if (pf == null) {
                     return null
                 }
@@ -177,7 +179,7 @@ class IndexingChain(
 
             @Throws(IOException::class)
             override fun getSortedNumericDocValues(field: String): SortedNumericDocValues? {
-                val pf: PerField = getPerField(field)
+                val pf = getPerField(field)
                 if (pf == null) {
                     return null
                 }
@@ -189,7 +191,7 @@ class IndexingChain(
 
             @Throws(IOException::class)
             override fun getSortedSetDocValues(field: String): SortedSetDocValues? {
-                val pf: PerField = getPerField(field)
+                val pf = getPerField(field)
                 if (pf == null) {
                     return null
                 }
@@ -1005,13 +1007,16 @@ class IndexingChain(
     }
 
     /** Returns a previously created [PerField], or null if this field name wasn't seen yet.  */
-    private fun getPerField(name: String): PerField {
+    private fun getPerField(name: String): PerField? {
         val hashPos = name.hashCode() and hashMask
         var fp = fieldHash[hashPos]
         while (fp != null && fp.fieldName != name) {
             fp = fp.next
         }
-        return fp!!
+        if (fp == null) {
+            logger.debug { "getPerField: field not found name=$name hashPos=$hashPos totalFieldCount=$totalFieldCount" }
+        }
+        return fp
     }
 
     override fun ramBytesUsed(): Long {
@@ -1324,17 +1329,19 @@ class IndexingChain(
     }
 
     fun getHasDocValues(field: String): DocIdSetIterator? {
-        val perField: PerField = getPerField(field)
-        if (perField != null) {
-            if (perField.docValuesWriter != null) {
-                if (perField.fieldInfo!!.docValuesType == DocValuesType.NONE) {
-                    return null
-                }
-
-                return perField.docValuesWriter!!.docValues
-            }
+        val perField = getPerField(field)
+        if (perField == null) {
+            logger.debug { "getHasDocValues: no PerField for field=$field" }
+            return null
         }
-        return null
+        if (perField.docValuesWriter == null) {
+            logger.debug { "getHasDocValues: no docValuesWriter for field=$field" }
+            return null
+        }
+        if (perField.fieldInfo!!.docValuesType == DocValuesType.NONE) {
+            return null
+        }
+        return perField.docValuesWriter!!.docValues
     }
 
     private class IntBlockAllocator(private val bytesUsed: Counter) :

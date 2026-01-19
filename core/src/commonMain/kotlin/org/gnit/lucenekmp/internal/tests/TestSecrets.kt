@@ -50,6 +50,7 @@ object TestSecrets {
     fun getIndexPackageAccess(): IndexPackageAccess {
 
         // ensureCaller() // TODO implement if needed
+        ensureIndexWriterAccessInitialized()
         return requireNotNull(indexPackageAccess)
     }
 
@@ -72,6 +73,7 @@ object TestSecrets {
     fun getIndexWriterAccess(): IndexWriterAccess {
 
         // ensureCaller() // TODO implement if needed
+        ensureIndexWriterAccessInitialized()
         return requireNotNull<IndexWriterAccess>(indexWriterAccess)
     }
 
@@ -118,6 +120,15 @@ object TestSecrets {
                 "The accessor is already set. It can only be called from inside Lucene Core."
             )
         }
+    }
+
+    private fun ensureIndexWriterAccessInitialized() {
+        if (indexWriterAccess != null && indexPackageAccess != null) {
+            return
+        }
+        // Touch IndexWriter's companion object to trigger its init block.
+        @Suppress("UNUSED_VARIABLE")
+        val unused = IndexWriter.actualMaxDocs
     }
 
     /*private fun ensureCaller() {

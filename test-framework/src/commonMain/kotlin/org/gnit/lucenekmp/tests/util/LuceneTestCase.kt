@@ -51,6 +51,8 @@ import org.gnit.lucenekmp.tests.index.MismatchedCodecReader
 import org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
 import org.gnit.lucenekmp.tests.index.MismatchedLeafReader
 import org.gnit.lucenekmp.tests.search.AssertingIndexSearcher
+import org.gnit.lucenekmp.tests.search.similarities.AssertingSimilarity
+import org.gnit.lucenekmp.tests.search.similarities.RandomSimilarity
 import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
@@ -169,14 +171,26 @@ open class LuceneTestCase {
 
         // line 507
         /** Filesystem-based [Directory] implementations.  */
-        private val FS_DIRECTORIES: MutableList<String> = mutableListOf<String>("NIOFSDirectory", "MMapDirectory")
+        private val FS_DIRECTORIES: MutableList<String> = mutableListOf<String>("NIOFSDirectory")
 
         /** All [Directory] implementations.  */
         private val CORE_DIRECTORIES: MutableList<String> = FS_DIRECTORIES.plus(ByteBuffersDirectory::class.simpleName!!).toMutableList()
 
         // line 519
         /** Class environment setup rule.  */
-        val classEnvRule: TestRuleSetupAndRestoreClassEnv? = null
+        private var classEnvRule: TestRuleSetupAndRestoreClassEnv? = null
+
+        private fun getClassEnvRule(): TestRuleSetupAndRestoreClassEnv {
+            var rule = classEnvRule
+            if (rule == null) {
+                rule = TestRuleSetupAndRestoreClassEnv()
+                classEnvRule = rule
+            }
+            if (rule.similarity == null) {
+                rule.similarity = AssertingSimilarity(RandomSimilarity(random()))
+            }
+            return rule
+        }
 
 
         /** A [QueryCachingPolicy] that randomly caches.  */
@@ -1164,7 +1178,13 @@ open class LuceneTestCase {
 
             // TODO following is walkaround to bypass above
             return when (clazzName) {
-                "ByteBuffersDirectory" -> ByteBuffersDirectory(lockFactory = lf)
+                "ByteBuffersDirectory" -> {
+                    if (lf is FSLockFactory) {
+                        ByteBuffersDirectory()
+                    } else {
+                        ByteBuffersDirectory(lockFactory = lf)
+                    }
+                }
                 "NIOFSDirectory" -> {
                     val dir: Path = createTempDir("index-$clazzName")
                     NIOFSDirectory(path = dir, lockFactory = lf)
@@ -1509,7 +1529,7 @@ open class LuceneTestCase {
                             r.context
                         )
                 }
-                ret.similarity = classEnvRule!!.similarity!!
+                ret.similarity = getClassEnvRule().similarity!!
                 return ret
             } else {
                 val ex: ExecutorService?
@@ -1527,7 +1547,7 @@ open class LuceneTestCase {
                 if (wrapWithAssertions) {
                     if (random.nextBoolean()) {
                         ret =
-                            object : AssertingIndexSearcher(random, r, ex!!) {
+                            object : AssertingIndexSearcher(random, r, ex) {
                                 override fun slices(leaves: MutableList<LeafReaderContext>): Array<IndexSearcher.LeafSlice> {
                                     return slices(
                                         leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency!!
@@ -1536,7 +1556,7 @@ open class LuceneTestCase {
                             }
                     } else {
                         ret =
-                            object : AssertingIndexSearcher(random, r.context, ex!!) {
+                            object : AssertingIndexSearcher(random, r.context, ex) {
                                 override fun slices(leaves: MutableList<LeafReaderContext>): Array<LeafSlice> {
                                     return slices(
                                         leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency!!
@@ -1554,7 +1574,7 @@ open class LuceneTestCase {
                             }
                         }
                 }
-                ret.similarity = classEnvRule!!.similarity!!
+                ret.similarity = getClassEnvRule().similarity!!
                 ret.queryCachingPolicy = MAYBE_CACHE_POLICY
                 if (random().nextBoolean()) {
                     ret.timeout = org.gnit.lucenekmp.index.QueryTimeout { false }

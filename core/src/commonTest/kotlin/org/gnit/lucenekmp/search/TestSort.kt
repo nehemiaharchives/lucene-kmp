@@ -43,6 +43,7 @@ import kotlin.test.assertSame
  *       \./
  */
 class TestSort : LuceneTestCase() {
+    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     private fun assertEquals(a: Sort, b: Sort) {
         /*LuceneTestCase.*/assertEquals(a, b)
         /*LuceneTestCase.*/assertEquals(b, a)
@@ -1063,6 +1064,7 @@ class TestSort : LuceneTestCase() {
 
     @Throws(IOException::class)
     private fun doTestFloatGhost(indexed: Boolean) {
+        logger.debug { "testFloatGhost: start indexed=$indexed" }
         val dir: Directory = newDirectory()
         val writer = IndexWriter(dir, IndexWriterConfig())
         val doc = Document()
@@ -1071,25 +1073,33 @@ class TestSort : LuceneTestCase() {
             doc.add(FloatPoint("value", 1.25f))
         }
         doc.add(StringField("id", "0", Store.NO))
+        logger.debug { "testFloatGhost: add docs indexed=$indexed" }
         writer.addDocument(doc)
         writer.addDocument(Document())
         writer.flush()
         writer.addDocument(Document())
         writer.flush()
+        logger.debug { "testFloatGhost: delete id=0 indexed=$indexed" }
         writer.deleteDocuments(Term("id", "0"))
+        logger.debug { "testFloatGhost: forceMerge start indexed=$indexed" }
         writer.forceMerge(1)
+        logger.debug { "testFloatGhost: forceMerge done indexed=$indexed" }
         val ir: IndexReader = DirectoryReader.open(writer)
+        logger.debug { "testFloatGhost: opened reader indexed=$indexed maxDoc=${ir.maxDoc()}" }
         writer.close()
 
         val searcher: IndexSearcher = newSearcher(ir)
         val sort = Sort(SortField("value", SortField.Type.FLOAT))
 
+        logger.debug { "testFloatGhost: search start indexed=$indexed" }
         val td: TopFieldDocs = searcher.search(MatchAllDocsQuery(), 10, sort)
+        logger.debug { "testFloatGhost: search done indexed=$indexed totalHits=${td.totalHits.value}" }
         assertEquals(2, td.totalHits.value)
         assertEquals(0.0f, (td.scoreDocs[0] as FieldDoc).fields!![0])
         assertEquals(0.0f, (td.scoreDocs[1] as FieldDoc).fields!![0])
 
         ir.close()
         dir.close()
+        logger.debug { "testFloatGhost: end indexed=$indexed" }
     }
 }

@@ -218,7 +218,7 @@ class Lucene101PostingsWriter internal constructor(state: SegmentWriteState, pri
         fieldHasNorms = fieldInfo.hasNorms()
     }
 
-    override fun startTerm(norms: NumericDocValues) {
+    override fun startTerm(norms: NumericDocValues?) {
         docStartFP = docOut!!.filePointer
         if (writePositions) {
             posStartFP = posOut!!.filePointer

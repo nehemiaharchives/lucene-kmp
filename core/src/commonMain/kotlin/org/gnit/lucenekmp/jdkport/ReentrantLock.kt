@@ -19,8 +19,14 @@ class ReentrantLock: Lock {
     private var holdCount = 0
 
     override fun tryLock(): Boolean {
+        if (holdCount > 0) {
+            holdCount++
+            return true
+        }
         val locked = mutex.tryLock()
-        if (locked) holdCount = 1
+        if (locked) {
+            holdCount = 1
+        }
         return locked
     }
 
@@ -30,13 +36,20 @@ class ReentrantLock: Lock {
     }
 
     override fun lock() {
+        if (holdCount > 0) {
+            holdCount++
+            return
+        }
         runBlocking { mutex.lock() }
         holdCount = 1
     }
 
     override fun unlock() {
-        if (holdCount > 0) {
-            holdCount = 0
+        if (holdCount <= 0) {
+            return
+        }
+        holdCount--
+        if (holdCount == 0) {
             mutex.unlock()
         }
     }

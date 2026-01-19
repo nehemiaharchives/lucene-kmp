@@ -146,7 +146,7 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
          * @return a comparator for sorting leaf readers
          */
         get(): Comparator<LeafReader>? {
-            return leafSorter
+            return field
         }
 
     /** Returns the field names involved in the index sort  */

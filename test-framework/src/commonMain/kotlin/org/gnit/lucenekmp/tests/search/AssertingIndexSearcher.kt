@@ -33,7 +33,7 @@ open class AssertingIndexSearcher : IndexSearcher {
     constructor(
         random: Random,
         r: IndexReader,
-        ex: ExecutorService
+        ex: ExecutorService?
     ) : super(r, ex) {
         this.random = Random(random.nextLong())
     }
@@ -41,7 +41,7 @@ open class AssertingIndexSearcher : IndexSearcher {
     constructor(
         random: Random,
         context: IndexReaderContext,
-        ex: ExecutorService
+        ex: ExecutorService?
     ) : super(context, ex) {
         this.random = Random(random.nextLong())
     }

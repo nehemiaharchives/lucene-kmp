@@ -432,11 +432,11 @@ open class SortField {
                 IntComparator(numHits, field!!, missingValue as Int?, reverse, pruning)
 
             Type.FLOAT -> fieldComparator =
-                FloatComparator(numHits, field!!, missingValue as Float, reverse, pruning)
+                FloatComparator(numHits, field!!, missingValue as Float?, reverse, pruning)
 
-            Type.LONG -> fieldComparator = LongComparator(numHits, field!!, missingValue as Long, reverse, pruning)
+            Type.LONG -> fieldComparator = LongComparator(numHits, field!!, missingValue as Long?, reverse, pruning)
             Type.DOUBLE -> fieldComparator =
-                DoubleComparator(numHits, field!!, missingValue as Double, reverse, pruning)
+                DoubleComparator(numHits, field!!, missingValue as Double?, reverse, pruning)
 
             Type.CUSTOM -> {
                 checkNotNull(comparatorSource)
