@@ -237,17 +237,18 @@ open class ConcurrentMergeScheduler
     /** Removes the calling thread from the active merge threads.  */
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
-    fun removeMergeThread() {
-        val currentThread = runBlocking { currentCoroutineContext()[Job] }
+    fun removeMergeThread(currentJob: Job?) {
         // Paranoia: don't trust Thread.equals:
         for (i in mergeThreads.indices) {
-            if (mergeThreads[i].job === currentThread) {
+            if (mergeThreads[i].job === currentJob) {
                 mergeThreads.removeAt(i)
                 return
             }
         }
 
-        assert(false) { "merge thread $currentThread was not found" }
+        if (verbose()) {
+            message("merge thread $currentJob was not found")
+        }
     }
 
     override fun getIntraMergeExecutor(merge: OneMerge): Executor {
@@ -677,7 +678,8 @@ open class ConcurrentMergeScheduler
         // the merge call as well as the merge thread handling in the finally
         // block must be sync'd on CMS otherwise stalling decisions might cause
         // us to miss pending merges
-        assert(mergeThreads.any { it.job === currentCoroutineContext()[Job] }) { "caller is not a merge thread" }
+        val currentJob = currentCoroutineContext()[Job]
+        assert(mergeThreads.any { it.job === currentJob }) { "caller is not a merge thread" }
         // Let CMS run new merges if necessary:
         try {
             merge(mergeSource, MergeTrigger.MERGE_FINISHED)
@@ -686,7 +688,7 @@ open class ConcurrentMergeScheduler
         } catch (ioe: IOException) {
             throw UncheckedIOException(ioe)
         } finally {
-            removeMergeThread()
+            removeMergeThread(currentJob)
             updateMergeThreads()
             // In case we had stalled indexing, we can now wake up and possibly unstall:
             // (this as java.lang.Object).notifyAll()
