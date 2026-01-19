@@ -41,8 +41,8 @@ internal class SortedDocValuesWriter(
     private var lastDocID = -1
 
     private var finalOrds: PackedLongValues? = null
-    private lateinit var finalSortedValues: IntArray
-    private lateinit var finalOrdMap: IntArray
+    private var finalSortedValues: IntArray? = null
+    private var finalOrdMap: IntArray? = null
 
     init {
         bytesUsed = pending.ramBytesUsed() + docsWithField.ramBytesUsed()
@@ -100,7 +100,7 @@ internal class SortedDocValuesWriter(
             finalOrds = pending.build()
             finalOrdMap = IntArray(valueCount)
             for (ord in 0..<valueCount) {
-                finalOrdMap[finalSortedValues[ord]] = ord
+                finalOrdMap!![finalSortedValues!![ord]] = ord
             }
         }
     }
@@ -109,7 +109,7 @@ internal class SortedDocValuesWriter(
         get() {
             finish()
             return BufferedSortedDocValues(
-                hash, finalOrds!!, finalSortedValues, finalOrdMap, docsWithField.iterator()
+                hash, finalOrds!!, finalSortedValues!!, finalOrdMap!!, docsWithField.iterator()
             )
         }
 
@@ -124,7 +124,7 @@ internal class SortedDocValuesWriter(
         dvConsumer.addSortedField(
             fieldInfo,
             getDocValuesProducer(
-                fieldInfo, hash, finalOrds!!, finalSortedValues, finalOrdMap, docsWithField, sortMap
+                fieldInfo, hash, finalOrds!!, finalSortedValues!!, finalOrdMap!!, docsWithField, sortMap
             )
         )
     }
