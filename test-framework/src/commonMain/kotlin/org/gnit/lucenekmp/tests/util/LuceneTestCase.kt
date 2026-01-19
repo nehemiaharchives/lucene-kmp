@@ -59,6 +59,7 @@ import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
+//import org.gnit.lucenekmp.util.configureTestLogging
 import org.gnit.lucenekmp.util.CommandLineUtil
 import org.gnit.lucenekmp.util.NamedThreadFactory
 import kotlin.math.ln
@@ -71,6 +72,10 @@ import kotlin.test.*
 
 open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherits from junit Assert but in kmp it is not pssible.
 
+    // uncomment only when debugging kotlin/native linuxX64 using KotlinLogging
+    /*init {
+        configureTestLogging()
+    }*/
 
     //↓ line 2860 of LuceneTestCase.java
     /** A runnable that can throw any checked exception.  */

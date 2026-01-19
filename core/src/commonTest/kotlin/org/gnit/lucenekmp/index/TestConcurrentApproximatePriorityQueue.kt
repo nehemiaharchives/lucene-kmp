@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -42,7 +43,7 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
         pq.add(3, 3)
         pq.add(10, 10)
         pq.add(7, 7)
-        val job = launch {
+        val job = launch(Dispatchers.Default) {
             assertEquals(10, pq.poll { true })
             assertEquals(7, pq.poll { true })
             assertEquals(3, pq.poll { true })
@@ -63,7 +64,7 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
         pq.add(3, 3)
         val takeLock = CompletableDeferred<Unit>()
         val releaseLock = CompletableDeferred<Unit>()
-        val job = launch {
+        val job = launch(Dispatchers.Default) {
             var queueIndex = -1
             for (i in 0 until pq.queues.size) {
                 if (!pq.queues[i].isEmpty) {
@@ -85,4 +86,3 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
         assertNull(pq.poll { true })
     }
 }
-

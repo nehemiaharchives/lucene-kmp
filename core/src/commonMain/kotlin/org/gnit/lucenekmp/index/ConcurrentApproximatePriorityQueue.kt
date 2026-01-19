@@ -1,10 +1,9 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.coroutines.Job
 import org.gnit.lucenekmp.jdkport.Lock
 import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.currentThreadId
 import org.gnit.lucenekmp.jdkport.assert
-import kotlin.coroutines.coroutineContext
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -44,7 +43,7 @@ internal class ConcurrentApproximatePriorityQueue<T> @JvmOverloads constructor(c
         // Seed the order in which to look at entries based on the current thread. This helps distribute
         // entries across queues and gives a bit of thread affinity between entries and threads, which
         // can't hurt.
-        val threadHash = coroutineContext[Job]?.hashCode()?.and(0xFFFF)?:0 /*java.lang.Thread.currentThread().hashCode() and 0xFFFF*/
+        val threadHash = currentThreadId().toInt().and(0xFFFF)
         for (i in 0..<concurrency) {
             val index = (threadHash + i) % concurrency
             val lock: Lock = locks[index]
@@ -70,7 +69,7 @@ internal class ConcurrentApproximatePriorityQueue<T> @JvmOverloads constructor(c
     }
 
     suspend fun poll(predicate: (T) -> Boolean): T? {
-        val threadHash = coroutineContext[Job]?.hashCode()?.and(0xFFFF)?:0 /*java.lang.Thread.currentThread().hashCode() and 0xFFFF*/
+        val threadHash = currentThreadId().toInt().and(0xFFFF)
         for (i in 0..<concurrency) {
             val index = (threadHash + i) % concurrency
             val lock: Lock = locks[index]

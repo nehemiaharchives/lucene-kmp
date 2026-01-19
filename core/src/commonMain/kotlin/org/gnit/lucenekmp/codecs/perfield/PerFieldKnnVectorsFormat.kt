@@ -183,12 +183,16 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
                             val format: KnnVectorsFormat = forName(formatName)
                             val segmentSuffix =
                                 getFullSegmentSuffix(readState.segmentSuffix, getSuffix(formatName, suffix))
-                            if (!formats.containsKey(segmentSuffix)) {
-                                formats.put(
-                                    segmentSuffix,
-                                    format.fieldsReader(SegmentReadState(readState, segmentSuffix))
-                                )
-                            }
+                                if (!formats.containsKey(segmentSuffix)) {
+                                    logger.debug {
+                                        "PerFieldKnnVectorsFormat: before fieldsReader format=$formatName segmentSuffix=$segmentSuffix"
+                                    }
+                                    val reader = format.fieldsReader(SegmentReadState(readState, segmentSuffix))
+                                    logger.debug {
+                                        "PerFieldKnnVectorsFormat: after fieldsReader format=$formatName segmentSuffix=$segmentSuffix"
+                                    }
+                                    formats.put(segmentSuffix, reader)
+                                }
                             fields.put(fi.number, formats[segmentSuffix])
                         }
                     }

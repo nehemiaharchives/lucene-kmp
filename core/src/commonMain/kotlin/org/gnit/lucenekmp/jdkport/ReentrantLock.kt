@@ -11,20 +11,29 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.concurrent.Volatile
 
 class ReentrantLock: Lock {
 
     private val mutex = Mutex()
-    // Track lock depth for simple condition checks; not owner-specific
-    private var holdCount = 0
+    @Volatile
+    private var ownerThreadId: Long = NO_OWNER
+    @Volatile
+    private var holdCount: Int = 0
 
     override fun tryLock(): Boolean {
-        if (holdCount > 0) {
-            holdCount++
+        val current = currentThreadId()
+        if (ownerThreadId == current) {
+            val next = holdCount + 1
+            if (next < 0) {
+                throw Error("Maximum lock count exceeded")
+            }
+            holdCount = next
             return true
         }
         val locked = mutex.tryLock()
         if (locked) {
+            ownerThreadId = current
             holdCount = 1
         }
         return locked
@@ -36,27 +45,38 @@ class ReentrantLock: Lock {
     }
 
     override fun lock() {
-        if (holdCount > 0) {
-            holdCount++
+        val current = currentThreadId()
+        if (ownerThreadId == current) {
+            val next = holdCount + 1
+            if (next < 0) {
+                throw Error("Maximum lock count exceeded")
+            }
+            holdCount = next
             return
         }
         runBlocking { mutex.lock() }
+        ownerThreadId = current
         holdCount = 1
     }
 
     override fun unlock() {
-        if (holdCount <= 0) {
-            return
+        val current = currentThreadId()
+        if (ownerThreadId != current) {
+            throw IllegalMonitorStateException()
         }
-        holdCount--
-        if (holdCount == 0) {
+        val next = holdCount - 1
+        if (next == 0) {
+            holdCount = 0
+            ownerThreadId = NO_OWNER
             mutex.unlock()
+        } else {
+            holdCount = next
         }
     }
 
     // Best-effort check whether the lock is currently held (by anyone)
     fun isHeldByCurrentThread(): Boolean {
-        return holdCount > 0
+        return ownerThreadId == currentThreadId()
     }
 
     override fun newCondition(): Condition {
@@ -72,12 +92,14 @@ class ReentrantLock: Lock {
                 ensureLocked()
                 val saved = lock.holdCount
                 lock.holdCount = 0
+                lock.ownerThreadId = NO_OWNER
                 lock.mutex.unlock()
                 return saved
             }
 
             private fun fullyLock(saved: Int) {
                 runBlocking { lock.mutex.lock() }
+                lock.ownerThreadId = currentThreadId()
                 lock.holdCount = saved
             }
 
@@ -142,5 +164,9 @@ class ReentrantLock: Lock {
 
     override fun lockInterruptibly() {
         throw NotImplementedError("Not yet implemented")
+    }
+
+    private companion object {
+        private const val NO_OWNER: Long = -1L
     }
 }

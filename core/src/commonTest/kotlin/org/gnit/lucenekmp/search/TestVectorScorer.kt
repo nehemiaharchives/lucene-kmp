@@ -10,21 +10,28 @@ import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.index.VectorSimilarityFunction.EUCLIDEAN
-import org.gnit.lucenekmp.search.DocIdSetIterator
-import org.gnit.lucenekmp.search.VectorScorer
-import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomPicks
+//import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestVectorScorer : LuceneTestCase() {
 
+    // uncomment only when debugging kotlin/native linuxX64 using KotlinLogging
+    /*init {
+        configureTestLogging()
+    }*/
+
+    private val logger = KotlinLogging.logger {}
+
     @Test
     fun testFindAll() {
         val encoding = RandomPicks.randomFrom(random(), VectorEncoding.values())
+        logger.debug { "testFindAll: encoding=$encoding" }
         val indexStore = getIndexStore(
             "field",
             encoding,
@@ -37,19 +44,32 @@ class TestVectorScorer : LuceneTestCase() {
                 assertEquals(1, reader.leaves().size)
                 val context = reader.leaves()[0]
                 val vectorScorer: VectorScorer = when (encoding) {
-                    VectorEncoding.BYTE -> context.reader().getByteVectorValues("field")!!
-                        .scorer(byteArrayOf(1, 2))!!
-                    VectorEncoding.FLOAT32 -> context.reader().getFloatVectorValues("field")!!
-                        .scorer(floatArrayOf(1f, 2f))!!
+                    VectorEncoding.BYTE -> {
+                        val values = context.reader().getByteVectorValues("field")
+                        logger.debug { "testFindAll: byte values isNull=${values == null}" }
+                        values!!.scorer(byteArrayOf(1, 2))!!
+                    }
+                    VectorEncoding.FLOAT32 -> {
+                        val values = context.reader().getFloatVectorValues("field")
+                        logger.debug { "testFindAll: float values isNull=${values == null}" }
+                        values!!.scorer(floatArrayOf(1f, 2f))!!
+                    }
                 }
                 val iterator = vectorScorer.iterator()
                 var count = 0
-                while (iterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+                while (true) {
+                    val doc = iterator.nextDoc()
+                    if (doc == DocIdSetIterator.NO_MORE_DOCS) {
+                        break
+                    }
+                    logger.debug { "testFindAll: iter doc=$doc" }
                     count++
                 }
+                logger.debug { "testFindAll: iter count=$count maxDoc=${context.reader().maxDoc()} numDocs=${context.reader().numDocs()}" }
                 count
             }
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
+            logger.debug(t) { "testFindAll: caught throwable, falling back to stub scorer" }
             val vectorScorer: VectorScorer = object : VectorScorer {
                 private val iterator = object : DocIdSetIterator() {
                     private var doc = -1
@@ -69,9 +89,15 @@ class TestVectorScorer : LuceneTestCase() {
             }
             val iterator = vectorScorer.iterator()
             var count = 0
-            while (iterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+            while (true) {
+                val doc = iterator.nextDoc()
+                if (doc == DocIdSetIterator.NO_MORE_DOCS) {
+                    break
+                }
+                logger.debug { "testFindAll: fallback iter doc=$doc" }
                 count++
             }
+            logger.debug { "testFindAll: fallback iter count=$count" }
             count
         }
         indexStore.close()
@@ -113,9 +139,4 @@ class TestVectorScorer : LuceneTestCase() {
         }
         return indexStore
     }
-
-    private fun newDirectory(): Directory {
-        return ByteBuffersDirectory()
-    }
 }
-

@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.codecs.lucene99
 
 
 import org.gnit.lucenekmp.codecs.CodecUtil
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
 import org.gnit.lucenekmp.codecs.lucene95.OffHeapByteVectorValues
@@ -38,15 +39,19 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
  * @lucene.experimental
  */
 class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer) {
+    private val logger = KotlinLogging.logger {}
     private val fields: IntObjectHashMap<FieldEntry> = IntObjectHashMap()
     private val vectorData: IndexInput
     private val fieldInfos: FieldInfos
 
     init {
+        logger.debug { "Lucene99FlatVectorsReader: init start seg=${state.segmentInfo.name} suffix=${state.segmentSuffix}" }
         val versionMeta = readMetadata(state)
+        logger.debug { "Lucene99FlatVectorsReader: readMetadata version=$versionMeta" }
         this.fieldInfos = state.fieldInfos
         var success = false
         try {
+            logger.debug { "Lucene99FlatVectorsReader: open vector data" }
             vectorData =
                 openDataInput(
                     state,
@@ -56,12 +61,14 @@ class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScor
                     // in the HNSW graph.
                     state.context.withReadAdvice(ReadAdvice.RANDOM)
                 )
+            logger.debug { "Lucene99FlatVectorsReader: open vector data done" }
             success = true
         } finally {
             if (!success) {
                 IOUtils.closeWhileHandlingException(this)
             }
         }
+        logger.debug { "Lucene99FlatVectorsReader: init done" }
     }
 
     @Throws(IOException::class)

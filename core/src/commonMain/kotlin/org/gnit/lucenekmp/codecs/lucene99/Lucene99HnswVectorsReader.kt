@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.codecs.lucene99
 
 
 import org.gnit.lucenekmp.codecs.CodecUtil
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.KnnVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.HnswGraphProvider
@@ -47,12 +48,14 @@ import kotlin.math.min
  * @lucene.experimental
  */
 class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, HnswGraphProvider {
+    private val logger = KotlinLogging.logger {}
     private val flatVectorsReader: FlatVectorsReader
     private val fieldInfos: FieldInfos
     private val fields: IntObjectHashMap<FieldEntry>
     private val vectorIndex: IndexInput
 
     constructor(state: SegmentReadState, flatVectorsReader: FlatVectorsReader) {
+        logger.debug { "Lucene99HnswVectorsReader: init start seg=${state.segmentInfo.name} suffix=${state.segmentSuffix}" }
         this.fields = IntObjectHashMap()
         this.flatVectorsReader = flatVectorsReader
         var success = false
@@ -63,6 +66,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
             )
         var versionMeta = -1
         try {
+            logger.debug { "Lucene99HnswVectorsReader: open meta file=$metaFileName" }
             state.directory.openChecksumInput(metaFileName).use { meta ->
                 var priorE: Throwable? = null
                 try {
@@ -75,12 +79,14 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                             state.segmentInfo.getId(),
                             state.segmentSuffix
                         )
+                    logger.debug { "Lucene99HnswVectorsReader: header ok version=$versionMeta" }
                     readFields(meta)
                 } catch (exception: Throwable) {
                     priorE = exception
                 } finally {
                     CodecUtil.checkFooter(meta, priorE)
                 }
+                logger.debug { "Lucene99HnswVectorsReader: open vector index file" }
                 this.vectorIndex =
                     openDataInput(
                         state,
@@ -89,6 +95,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                         Lucene99HnswVectorsFormat.VECTOR_INDEX_CODEC_NAME,
                         state.context.withReadAdvice(ReadAdvice.RANDOM)
                     )
+                logger.debug { "Lucene99HnswVectorsReader: open vector index done" }
                 success = true
             }
         } finally {
@@ -96,6 +103,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                 IOUtils.closeWhileHandlingException(this)
             }
         }
+        logger.debug { "Lucene99HnswVectorsReader: init done" }
     }
 
     private constructor(reader: Lucene99HnswVectorsReader, flatVectorsReader: FlatVectorsReader) {
@@ -118,6 +126,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
         var fieldNumber: Int = meta.readInt()
         while (fieldNumber != -1) {
             val info: FieldInfo? = fieldInfos.fieldInfo(fieldNumber)
+            logger.debug { "Lucene99HnswVectorsReader: read fieldNumber=$fieldNumber infoNull=${info == null}" }
             if (info == null) {
                 throw CorruptIndexException("Invalid field number: $fieldNumber", meta)
             }
