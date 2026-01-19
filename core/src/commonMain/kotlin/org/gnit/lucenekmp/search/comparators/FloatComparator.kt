@@ -59,7 +59,7 @@ class FloatComparator(numHits: Int, field: String, missingValue: Float?, reverse
         @Throws(IOException::class)
         private fun getValueForDoc(doc: Int): Float {
             if (docValues.advanceExact(doc)) {
-                return Float.intBitsToFloat(docValues.longValue() as Int)
+                return Float.intBitsToFloat(docValues.longValue().toInt())
             } else {
                 return missingValue
             }
