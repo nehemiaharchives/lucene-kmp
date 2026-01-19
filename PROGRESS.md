@@ -84,7 +84,7 @@
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
 |     org.apache.lucene.internal.tests | 1 | 0 | 0% |
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 5 | 3% |
+|   org.apache.lucene.search | 149 | 6 | 4% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 3 | 12% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
@@ -98,7 +98,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 148 | 21% |
+| Total | 673 | 149 | 22% |
 
 
 ## Tests To Port
@@ -520,7 +520,6 @@
 | [org.apache.lucene.search.TestSimpleSearchEquivalence](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSimpleSearchEquivalence.java) | org.gnit.lucenekmp.search.TestSimpleSearchEquivalence |
 | [org.apache.lucene.search.TestSloppyPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSloppyPhraseQuery.java) | org.gnit.lucenekmp.search.TestSloppyPhraseQuery |
 | [org.apache.lucene.search.TestSloppyPhraseQuery2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSloppyPhraseQuery2.java) | org.gnit.lucenekmp.search.TestSloppyPhraseQuery2 |
-| [org.apache.lucene.search.TestSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSort.java) | org.gnit.lucenekmp.search.TestSort |
 | [org.apache.lucene.search.TestSortOptimization](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSortOptimization.java) | org.gnit.lucenekmp.search.TestSortOptimization |
 | [org.apache.lucene.search.TestSortRandom](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSortRandom.java) | org.gnit.lucenekmp.search.TestSortRandom |
 | [org.apache.lucene.search.TestSortRescorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestSortRescorer.java) | org.gnit.lucenekmp.search.TestSortRescorer |
