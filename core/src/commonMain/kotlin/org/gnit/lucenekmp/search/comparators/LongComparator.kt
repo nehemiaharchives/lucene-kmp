@@ -36,7 +36,7 @@ open class LongComparator(numHits: Int, field: String, missingValue: Long?, reve
         topValue = value
     }
 
-    override fun value(slot: Int): Long {
+    override fun value(slot: Int): Long? {
         return values[slot]
     }
 

@@ -37,7 +37,7 @@ class FloatComparator(numHits: Int, field: String, missingValue: Float?, reverse
         topValue = value
     }
 
-    override fun value(slot: Int): Float {
+    override fun value(slot: Int): Float? {
         return values[slot]
     }
 

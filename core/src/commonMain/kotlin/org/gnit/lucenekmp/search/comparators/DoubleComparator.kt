@@ -37,7 +37,7 @@ open class DoubleComparator(numHits: Int, field: String, missingValue: Double?, 
         topValue = value
     }
 
-    override fun value(slot: Int): Double {
+    override fun value(slot: Int): Double? {
         return values[slot]
     }
 

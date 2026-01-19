@@ -69,7 +69,7 @@ abstract class FieldComparator<T> {
      * @param slot the value
      * @return value in this slot
      */
-    abstract fun value(slot: Int): T
+    abstract fun value(slot: Int): T?
 
     /**
      * Get a per-segment [LeafFieldComparator] to collect the given [ ]. All docIDs supplied to this [ ] are relative to the current reader (you must add docBase if you need to
@@ -88,7 +88,7 @@ abstract class FieldComparator<T> {
      * be sure to override this method if your FieldComparator's type isn't a Comparable or if your
      * values may sometimes be null
      */
-    open fun compareValues(first: T, second: T): Int {
+    open fun compareValues(first: T?, second: T?): Int {
         if (first == null) {
             if (second == null) {
                 return 0
@@ -162,12 +162,17 @@ abstract class FieldComparator<T> {
             this.scorer = scorer
         }
 
-        override fun value(slot: Int): Float {
+        override fun value(slot: Int): Float? {
             return scores[slot]
         }
 
         // Override because we sort reverse of natural Float order:
-        override fun compareValues(first: Float, second: Float): Int {
+        override fun compareValues(first: Float?, second: Float?): Int {
+            if (first == null) {
+                return if (second == null) 0 else 1
+            } else if (second == null) {
+                return -1
+            }
             // Reversed intentionally because relevance by default
             // sorts descending:
             return second.compareTo(first)
@@ -252,11 +257,11 @@ abstract class FieldComparator<T> {
             topValue = value
         }
 
-        override fun value(slot: Int): BytesRef {
-            return values[slot]!!
+        override fun value(slot: Int): BytesRef? {
+            return values[slot]
         }
 
-        override fun compareValues(val1: BytesRef, val2: BytesRef): Int {
+        override fun compareValues(val1: BytesRef?, val2: BytesRef?): Int {
             // missing always sorts first:
             if (val1 == null) {
                 if (val2 == null) {

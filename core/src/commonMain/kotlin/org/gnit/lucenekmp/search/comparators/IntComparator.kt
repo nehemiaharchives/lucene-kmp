@@ -36,7 +36,7 @@ class IntComparator(numHits: Int, field: String, missingValue: Int?, reverse: Bo
         topValue = value
     }
 
-    override fun value(slot: Int): Int {
+    override fun value(slot: Int): Int? {
         return values[slot]
     }
 

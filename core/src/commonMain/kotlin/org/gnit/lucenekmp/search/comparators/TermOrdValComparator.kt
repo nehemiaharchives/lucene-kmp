@@ -145,11 +145,11 @@ open class TermOrdValComparator(
         // System.out.println("setTopValue " + topValue);
     }
 
-    override fun value(slot: Int): BytesRef {
-        return values[slot]!!
+    override fun value(slot: Int): BytesRef? {
+        return values[slot]
     }
 
-    override fun compareValues(val1: BytesRef, val2: BytesRef): Int {
+    override fun compareValues(val1: BytesRef?, val2: BytesRef?): Int {
         if (val1 == null) {
             if (val2 == null) {
                 return 0

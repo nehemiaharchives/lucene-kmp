@@ -44,7 +44,7 @@ class DocComparator(numHits: Int, reverse: Boolean, pruning: Pruning) : FieldCom
         topValueSet = true
     }
 
-    override fun value(slot: Int): Int {
+    override fun value(slot: Int): Int? {
         return docIDs[slot]
     }
 
