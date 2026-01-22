@@ -539,7 +539,7 @@ class Lucene90BlockTreeTermsWriter(
                 } else {
                     val block = ent as PendingBlock
                     assert(block.prefix.length > prefixLength)
-                    suffixLeadLabel = (block.prefix.bytes[block.prefix.offset + prefixLength] and 0xff.toByte()).toInt()
+                    suffixLeadLabel = block.prefix.bytes[block.prefix.offset + prefixLength].toInt() and 0xff
                 }
 
                 // if (DEBUG) System.out.println("  i=" + i + " ent=" + ent + " suffixLeadLabel=" +
@@ -790,15 +790,10 @@ class Lucene90BlockTreeTermsWriter(
                         // ToStringUtils.bytesRefToString(suffixBytes) + " subFP=" + block.fp + " subCode=" +
                         // (startFP-block.fp) + " floor=" + block.isFloor);
                         // }
+                        val suffixLead = block.prefix.bytes[prefixLength].toInt() and 0xff
                         assert(
-                            floorLeadLabel == -1
-                                    || (block.prefix.bytes[prefixLength] and 0xff.toByte()) >= floorLeadLabel
-                        ) {
-                            ("floorLeadLabel="
-                                    + floorLeadLabel
-                                    + " suffixLead="
-                                    + (block.prefix.bytes[prefixLength] and 0xff.toByte()))
-                        }
+                            floorLeadLabel == -1 || suffixLead >= floorLeadLabel
+                        ) { "floorLeadLabel=$floorLeadLabel suffixLead=$suffixLead" }
                         assert(block.fp < startFP)
 
                         suffixLengthsWriter.writeVLong(startFP - block.fp)
