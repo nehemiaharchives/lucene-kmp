@@ -85,7 +85,7 @@ protected constructor() : DocValuesIterator() {
      * supports [TermsEnum.ord].
      */
     @Throws(IOException::class)
-    fun intersect(automaton: CompiledAutomaton): TermsEnum? {
+    open fun intersect(automaton: CompiledAutomaton): TermsEnum? {
         val `in` = termsEnum()
         when (automaton.type) {
             AUTOMATON_TYPE.NONE -> return TermsEnum.EMPTY

@@ -3,10 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 4
-- org.apache.lucene.index.FilterBinaryDocValues → org.gnit.lucenekmp.index.FilterBinaryDocValues
-- org.apache.lucene.index.FilterSortedDocValues → org.gnit.lucenekmp.index.FilterSortedDocValues
-- org.apache.lucene.index.FilterSortedNumericDocValues → org.gnit.lucenekmp.index.FilterSortedNumericDocValues
-- org.apache.lucene.index.FilterSortedSetDocValues → org.gnit.lucenekmp.index.FilterSortedSetDocValues
 - org.apache.lucene.search.SortedSetSortField → org.gnit.lucenekmp.search.SortedSetSortField
 - org.apache.lucene.search.similarities.Axiomatic → org.gnit.lucenekmp.search.similarities.Axiomatic
 - org.apache.lucene.search.similarities.BooleanSimilarity → org.gnit.lucenekmp.search.similarities.BooleanSimilarity
