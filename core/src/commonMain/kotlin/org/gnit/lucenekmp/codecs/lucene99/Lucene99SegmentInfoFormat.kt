@@ -198,7 +198,7 @@ class Lucene99SegmentInfoFormat
         output.writeVInt(numSortFields)
         for (i in 0..<numSortFields) {
             val sortField: SortField = indexSort!!.sort[i]
-            val sorter: IndexSorter? = sortField.getIndexSorter()
+            val sorter: IndexSorter? = sortField.indexSorter
             requireNotNull(sorter) { "cannot serialize SortField $sortField" }
             output.writeString(sorter.providerName)
             SortFieldProvider.write(sortField, output)

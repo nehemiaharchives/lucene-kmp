@@ -80,7 +80,7 @@ abstract class SortFieldProvider protected constructor(override val name: String
         /** Writes a SortField to a DataOutput  */
         @Throws(IOException::class)
         fun write(sf: SortField, output: DataOutput) {
-            val sorter: IndexSorter = sf.getIndexSorter()!!
+            val sorter: IndexSorter = sf.indexSorter!!
             requireNotNull(sorter) { "Cannot serialize sort field $sf" }
             val provider = forName(sorter.providerName)
             provider.writeSortField(sf, output)

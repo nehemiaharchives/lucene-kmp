@@ -29,7 +29,7 @@ internal object MultiSorter {
             kotlin.arrayOfNulls<Array<ComparableProvider>>(fields.size)
         val reverseMuls = IntArray(fields.size)
         for (i in fields.indices) {
-            val sorter: IndexSorter = fields[i].getIndexSorter()!!
+            val sorter: IndexSorter = fields[i].indexSorter!!
             requireNotNull(sorter) { "Cannot use sort field " + fields[i] + " for index sorting" }
             comparables[i] = sorter.getComparableProviders(readers)
             for (j in readers.indices) {

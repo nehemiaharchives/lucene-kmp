@@ -128,7 +128,7 @@ class Sorter internal constructor(sort: Sort) {
         }
 
         for (i in fields.indices) {
-            val sorter: IndexSorter? = fields[i].getIndexSorter()
+            val sorter: IndexSorter? = fields[i].indexSorter
             requireNotNull(sorter) { "Cannot use sortfield + " + fields[i] + " to sort indexes" }
             comparators[i] = comparatorWrapper(sorter.getDocComparator(reader, reader.maxDoc()))
         }

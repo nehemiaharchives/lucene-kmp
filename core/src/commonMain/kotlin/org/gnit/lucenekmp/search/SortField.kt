@@ -423,7 +423,7 @@ open class SortField {
      * @param pruning controls how can the comparator to skip documents via [     ][LeafFieldComparator.competitiveIterator]
      * @return [FieldComparator] to use when sorting
      */
-    fun getComparator(numHits: Int, pruning: Pruning): FieldComparator<*> {
+    open fun getComparator(numHits: Int, pruning: Pruning): FieldComparator<*> {
         val fieldComparator: FieldComparator<*>
         when (type) {
             Type.SCORE -> fieldComparator = RelevanceComparator(numHits)
@@ -492,13 +492,14 @@ open class SortField {
      *
      * @lucene.experimental
      */
-    fun getIndexSorter(): IndexSorter? {
+    open val indexSorter: IndexSorter? = null
+    get() {
         // Early return if field is null
         if (field == null) {
             return null
         }
 
-        val fieldName = field!! // Safe to use non-null assertion as we checked above
+        val fieldName = this.field!! // Safe to use non-null assertion as we checked above
 
         when (type) {
             Type.STRING -> {

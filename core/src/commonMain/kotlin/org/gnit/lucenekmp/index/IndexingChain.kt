@@ -8,7 +8,6 @@ import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.codecs.NormsConsumer
 import org.gnit.lucenekmp.codecs.NormsFormat
-import org.gnit.lucenekmp.codecs.NormsProducer
 import org.gnit.lucenekmp.codecs.PointsFormat
 import org.gnit.lucenekmp.codecs.PointsWriter
 import org.gnit.lucenekmp.document.InvertableType
@@ -248,7 +247,7 @@ class IndexingChain(
         val comparators: MutableList<IndexSorter.DocComparator> = mutableListOf()
         for (i in indexSort.sort.indices) {
             val sortField: SortField = indexSort.sort[i]
-            val sorter: IndexSorter? = sortField.getIndexSorter()
+            val sorter: IndexSorter? = sortField.indexSorter
             if (sorter == null) {
                 throw UnsupportedOperationException("Cannot sort index using sort field $sortField")
             }
@@ -334,7 +333,7 @@ class IndexingChain(
             var perField = fieldHash[i]
             while (perField != null) {
                 if (perField.invertState != null) {
-                    fieldsToFlush.put(perField.fieldInfo!!.name, perField.termsHashPerField!!)
+                    fieldsToFlush[perField.fieldInfo!!.name] = perField.termsHashPerField!!
                 }
                 perField = perField.next
             }
@@ -871,7 +870,7 @@ class IndexingChain(
         dvType: DocValuesType
     ) {
         for (sortField in indexSort.sort) {
-            val sorter: IndexSorter? = sortField.getIndexSorter()
+            val sorter: IndexSorter? = sortField.indexSorter
             checkNotNull(sorter) { "Cannot sort index with sort order $sortField" }
             sorter.getDocComparator(
                 object : DocValuesLeafReader() {
@@ -1422,7 +1421,7 @@ class IndexingChain(
         }
 
         fun updateAttributes(attrs: MutableMap<String, String>) {
-            attrs.forEach { (k: String, v: String) -> this.attributes.put(k, v) }
+            attrs.forEach { (k: String, v: String) -> this.attributes[k] = v }
         }
 
         fun setIndexOptions(

@@ -85,7 +85,7 @@ interface IndexSorter {
     }
 
     /** Provide a SortedDocValues instance for a LeafReader  */
-    interface SortedDocValuesProvider {
+    fun interface SortedDocValuesProvider {
         /** Returns the SortedDocValues instance for this LeafReader  */
         @Throws(IOException::class)
         fun get(reader: LeafReader): SortedDocValues

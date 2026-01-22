@@ -325,7 +325,7 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
     /** Set the [Sort] order to use for all (flushed and merged) segments.  */
     fun setIndexSort(sort: Sort): IndexWriterConfig {
         for (sortField in sort.sort) {
-            requireNotNull(sortField.getIndexSorter()) { "Cannot sort index with sort field $sortField" }
+            requireNotNull(sortField.indexSorter) { "Cannot sort index with sort field $sortField" }
         }
         this.indexSort = sort
         this.indexSortFields = sort.sort.map { it.field }.toMutableSet()

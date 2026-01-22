@@ -126,7 +126,7 @@ open class TermOrdValComparator(
 
     /** Retrieves the SortedDocValues for the field in this segment  */
     @Throws(IOException::class)
-    protected fun getSortedDocValues(context: LeafReaderContext, field: String): SortedDocValues {
+    protected open fun getSortedDocValues(context: LeafReaderContext, field: String): SortedDocValues {
         return DocValues.getSorted(context.reader(), field)
     }
 
