@@ -77,12 +77,12 @@ object TestSecrets {
         return requireNotNull<IndexWriterAccess>(indexWriterAccess)
     }
 
-    /*val filterInputIndexAccess: FilterIndexInputAccess
-        *//** Return the accessor to internal secrets for an [FilterIndexInput].  *//*
+    val filterInputIndexAccess: FilterIndexInputAccess
+        // Return the accessor to internal secrets for an [FilterIndexInput].
         get() {
             ensureCaller()
             return requireNotNull<FilterIndexInputAccess>(filterIndexInputAccess)
-        }*/
+        }
 
     /** For internal initialization only.  */
     fun setIndexWriterAccess(indexWriterAccess: IndexWriterAccess) {
@@ -109,10 +109,10 @@ object TestSecrets {
     }
 
     /** For internal initialization only.  */
-    /*fun setFilterInputIndexAccess(filterIndexInputAccess: FilterIndexInputAccess) {
+    fun setFilterInputIndexAccess(filterIndexInputAccess: FilterIndexInputAccess) {
         ensureNull(TestSecrets.filterIndexInputAccess)
         TestSecrets.filterIndexInputAccess = filterIndexInputAccess
-    }*/
+    }
 
     private fun ensureNull(ob: Any?) {
         if (ob != null) {
