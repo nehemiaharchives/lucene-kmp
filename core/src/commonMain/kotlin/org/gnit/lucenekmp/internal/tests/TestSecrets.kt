@@ -4,9 +4,6 @@ package org.gnit.lucenekmp.internal.tests
 import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.SegmentReader
 //import org.gnit.lucenekmp.internal.tests.ConcurrentMergeSchedulerAccess
-//import org.gnit.lucenekmp.internal.tests.FilterIndexInputAccess
-import org.gnit.lucenekmp.internal.tests.IndexPackageAccess
-import org.gnit.lucenekmp.internal.tests.IndexWriterAccess
 //import org.gnit.lucenekmp.store.FilterIndexInput
 
 /**
@@ -44,7 +41,20 @@ object TestSecrets {
 
     private var indexWriterAccess: IndexWriterAccess? = null
 
-    //private var filterIndexInputAccess: FilterIndexInputAccess? = null
+    private var filterIndexInputAccess: FilterIndexInputAccess? = null
+
+    /**
+     * Common-code replacement for StackWalker-based caller checks.
+     *
+     * The test framework should set this to true during its initialization.
+     * In production code it should remain false.
+     */
+    private var testFrameworkEnabled: Boolean = false
+
+    /** Called by the (ported) test framework during startup. */
+    fun enableTestFrameworkAccess() {
+        testFrameworkEnabled = true
+    }
 
     /** Return the accessor to internal secrets for an [IndexReader].  */
     fun getIndexPackageAccess(): IndexPackageAccess {
@@ -74,14 +84,14 @@ object TestSecrets {
 
         // ensureCaller() // TODO implement if needed
         ensureIndexWriterAccessInitialized()
-        return requireNotNull<IndexWriterAccess>(indexWriterAccess)
+        return requireNotNull(indexWriterAccess)
     }
 
     val filterInputIndexAccess: FilterIndexInputAccess
         // Return the accessor to internal secrets for an [FilterIndexInput].
         get() {
             ensureCaller()
-            return requireNotNull<FilterIndexInputAccess>(filterIndexInputAccess)
+            return requireNotNull(filterIndexInputAccess)
         }
 
     /** For internal initialization only.  */
@@ -131,20 +141,11 @@ object TestSecrets {
         val unused = IndexWriter.actualMaxDocs
     }
 
-    /*private fun ensureCaller() {
-        val validCaller: Boolean =
-            java.lang.StackWalker.getInstance()
-                .walk<Boolean>(
-                    java.util.function.Function { s: java.util.stream.Stream<java.lang.StackWalker.StackFrame> ->
-                        s.skip(2)
-                            .limit(1)
-                            .map<String> { obj: java.lang.StackWalker.StackFrame -> obj.getClassName() }
-                            .allMatch { c: String -> c!!.startsWith("org.apache.lucene.tests.") }
-                    })
-        if (!validCaller) {
+    private fun ensureCaller() {
+        if (!testFrameworkEnabled) {
             throw UnsupportedOperationException(
                 "Lucene TestSecrets can only be used by the test-framework."
             )
         }
-    }*/
+    }
 }

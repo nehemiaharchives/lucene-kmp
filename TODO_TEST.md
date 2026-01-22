@@ -3,7 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 4
-- org.apache.lucene.codecs.TermStats → org.gnit.lucenekmp.codecs.TermStats
 - org.apache.lucene.index.FilterBinaryDocValues → org.gnit.lucenekmp.index.FilterBinaryDocValues
 - org.apache.lucene.index.FilterSortedDocValues → org.gnit.lucenekmp.index.FilterSortedDocValues
 - org.apache.lucene.index.FilterSortedNumericDocValues → org.gnit.lucenekmp.index.FilterSortedNumericDocValues

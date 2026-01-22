@@ -27,7 +27,6 @@ class FilterIndexInput(resourceDescription: String, `in`: IndexInput) :
         /** Gets the delegate that was passed in on creation  */
         get() = `in`
 
-    @Throws(IOException::class)
     override fun close() {
         `in`.close()
     }

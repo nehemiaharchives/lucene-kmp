@@ -39,7 +39,7 @@ abstract class AbstractBlockPackedWriter protected constructor(out: DataOutput, 
 
     /** Append a new long.  */
     @Throws(IOException::class)
-    fun add(l: Long) {
+    open fun add(l: Long) {
         checkNotFinished()
         if (off == values.size) {
             flush()
