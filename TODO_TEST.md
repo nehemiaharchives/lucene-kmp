@@ -3,7 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 4
-- org.apache.lucene.search.SortedSetSortField → org.gnit.lucenekmp.search.SortedSetSortField
 - org.apache.lucene.search.similarities.Axiomatic → org.gnit.lucenekmp.search.similarities.Axiomatic
 - org.apache.lucene.search.similarities.BooleanSimilarity → org.gnit.lucenekmp.search.similarities.BooleanSimilarity
 - org.apache.lucene.search.similarities.Normalization → org.gnit.lucenekmp.search.similarities.Normalization

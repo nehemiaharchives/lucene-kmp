@@ -24,10 +24,20 @@ fun File.collectSources(ext: String): List<Source> =
         .filter { it.isFile && it.extension == ext }
         .map { f ->
             val pkgLine = f.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
-            val pkg = pkgLine?.removePrefix("package ")?.trim()?.trimEnd(';') ?: ""
+            val pkg = pkgLine?.let(::parsePackageLine) ?: ""
             val fqn = if (pkg.isEmpty()) f.nameWithoutExtension else "$pkg.${f.nameWithoutExtension}"
             Source(fqn, f)
         }.toList()
+
+fun parsePackageLine(line: String): String {
+    var s = line.removePrefix("package ").trim()
+    val lineComment = s.indexOf("//")
+    if (lineComment >= 0) s = s.substring(0, lineComment).trim()
+    val blockComment = s.indexOf("/*")
+    if (blockComment >= 0) s = s.substring(0, blockComment).trim()
+    s = s.trimEnd(';').trim()
+    return s
+}
 
 // Helper functions to create markdown links for Java FQNs
 fun markdownLinkForJavaFQN(javaFqn: String): String {
@@ -252,7 +262,7 @@ class Progress : CliktCommand() {
             .forEach { file ->
                 // Read package from file content
                 val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
-                val pkg = pkgLine?.removePrefix("package ")?.trim()?.trimEnd(';') ?: ""
+                val pkg = pkgLine?.let(::parsePackageLine) ?: ""
                 val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
                 javaTests.add(Source(fqn, file))
             }
@@ -263,7 +273,7 @@ class Progress : CliktCommand() {
             .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
             .forEach { file ->
                 val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
-                val pkg = pkgLine?.removePrefix("package ")?.trim() ?: ""
+                val pkg = pkgLine?.let(::parsePackageLine) ?: ""
                 val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
                 ktTestMap[fqn] = Source(fqn, file)
             }
@@ -385,7 +395,7 @@ class Progress : CliktCommand() {
         )
         markDown.appendLine(mdTable)
     }
-    private fun renderPackageStats(depSet: Set<String>, kmpSet: Set<String>) {
+    private fun renderPackageStats(depSet: Set<String>, kmpSet: Set<String>, section: String) {
         // Exclude notToPort classes from statistics
         val filteredDepSet = depSet.minus(notToPort)
         val grouped = filteredDepSet.groupBy { it.substringBeforeLast('.', "<default>") }
@@ -414,7 +424,6 @@ class Progress : CliktCommand() {
         // Using the class-level indent function now
         val allRows = listOf(Triple("org.apache.lucene", overallTotal, overallPort)) + rows
 
-        val section = "## Package statistics (priority‑1 deps)"
         term.println(bold(section))
         markDown.appendLine(section)
 
@@ -547,8 +556,13 @@ class Progress : CliktCommand() {
         term.println(bold(section))
         markDown.appendLine(section)
 
-        renderPackageStats(deps, kmpSet)
+        renderPackageStats(deps, kmpSet, "## Package statistics (priority‑1 deps)")
         renderPriorityStats(kmpSet)
+
+        val allDeps = javaIndex.keys
+            .filter { it.startsWith("org.apache.lucene.") && it !in notToPort }
+            .toSet()
+        renderPackageStats(allDeps, kmpSet, "## Package statistics (all deps)")
         val missingDeps = deps.filter { dep ->
             val outer = dep.substringBefore('$')
             val mappedDep = mapToKmp(dep)
