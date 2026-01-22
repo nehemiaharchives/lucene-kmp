@@ -35,7 +35,7 @@ open class ParallelLeafReader(
     override lateinit var fieldInfos: FieldInfos
     private val parallelReaders: Array<LeafReader>
     private val storedFieldsReaders: Array<LeafReader>
-    private val completeReaderSet: MutableSet<LeafReader> = mutableMapOf<LeafReader, Unit>().keys
+    private val completeReaderSet: MutableSet<LeafReader> = mutableSetOf()
     private val maxDoc: Int
     private val numDocs: Int
     private val hasDeletions: Boolean
