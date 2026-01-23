@@ -1727,7 +1727,7 @@ class AssertingLeafReader(`in`: LeafReader) :
         }
     }
 
-    override val liveDocs: Bits
+    override val liveDocs: Bits?
         get() {
             var liveDocs: Bits? = super.liveDocs
             if (liveDocs != null) {
@@ -1737,7 +1737,7 @@ class AssertingLeafReader(`in`: LeafReader) :
                 assert(maxDoc() == numDocs())
                 assert(!hasDeletions())
             }
-            return liveDocs!!
+            return liveDocs
         }
 
     override val coreCacheHelper: CacheHelper?
