@@ -442,6 +442,28 @@ class Progress : CliktCommand() {
 
     val ps = ProgressPrintStream(Terminal(), StringBuilder())
 
+    data class TodoTestEntry(val depth: Int, val javaFqn: String, val kmpFqn: String)
+
+    private fun buildTodoTestMarkdown(entries: List<TodoTestEntry>): String {
+        val grouped = entries.groupBy { it.depth }
+        return buildString {
+            appendLine("# TODO: Unported Unit Test Classes")
+            appendLine()
+            appendLine("From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).")
+            appendLine()
+
+            grouped.keys.sortedDescending().forEach { depth ->
+                val depthEntries = grouped[depth].orEmpty().sortedBy { it.javaFqn }
+                if (depthEntries.isEmpty()) return@forEach
+                appendLine("## Depth $depth")
+                depthEntries.forEach { entry ->
+                    appendLine("- ${entry.javaFqn} → ${entry.kmpFqn}")
+                }
+                appendLine()
+            }
+        }
+    }
+
     override fun run() {
         val javaRoot = File(javaDir).canonicalFile
         val kmpRoot = File(kmpDir).canonicalFile
@@ -884,6 +906,21 @@ class Progress : CliktCommand() {
         }
 
         ps.printTable(unitTestHeaders, unitTestTableRows)
+
+        // #
+        // #  TODO_TEST.md OUTPUT
+        // #
+        val unportedUnitTestEntries = javaUnitTestClasses.entries.mapNotNull { (javaFqn, javaClassWithDepth) ->
+            val kmpFqn = mapToKmp(javaFqn)
+            if (kmpUnitTestClasses.containsKey(kmpFqn)) {
+                null
+            } else {
+                TodoTestEntry(javaClassWithDepth.depth, javaFqn, kmpFqn)
+            }
+        }
+        val todoTestFile = File("$kmpDir/TODO_TEST.md")
+        todoTestFile.writeText(buildTodoTestMarkdown(unportedUnitTestEntries))
+        ps.println("\nTODO_TEST written to: ${todoTestFile.absolutePath}")
 
         // #
         // #  SUMMARY
