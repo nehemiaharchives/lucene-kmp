@@ -1869,7 +1869,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         //synchronized(this) {
         resetMergeExceptions()
         segmentsToMerge.clear()
-        for (info in segmentInfos) {
+        val segmentInfosSnapshot = segmentInfos.toList()
+        for (info in segmentInfosSnapshot) {
             //checkNotNull(info)
             segmentsToMerge[info] = true
         }
@@ -1877,7 +1878,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         // Now mark all pending & running merges for forced
         // merge:
-        for (merge in pendingMerges) {
+        val pendingMergesSnapshot = pendingMerges.toList()
+        for (merge in pendingMergesSnapshot) {
             merge.maxNumSegments = maxNumSegments
             if (merge.info != null) {
                 // this can be null since we register the merge under lock before we then do the actual
@@ -1886,7 +1888,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 segmentsToMerge[merge.info!!] = true
             }
         }
-        for (merge in runningMerges) {
+        val runningMergesSnapshot = runningMerges.toList()
+        for (merge in runningMergesSnapshot) {
             merge.maxNumSegments = maxNumSegments
             if (merge.info != null) {
                 // this can be null since we put the merge on runningMerges before we do the actual merge
