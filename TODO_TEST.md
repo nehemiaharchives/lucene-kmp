@@ -3,16 +3,12 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 6
-- org.apache.lucene.index.FilterNumericDocValues → org.gnit.lucenekmp.index.FilterNumericDocValues
 - org.apache.lucene.search.similarities.TFIDFSimilarity → org.gnit.lucenekmp.search.similarities.TFIDFSimilarity
 - org.apache.lucene.tests.mockfile.FilterInputStream2 → org.gnit.lucenekmp.tests.mockfile.FilterInputStream2
 - org.apache.lucene.tests.mockfile.FilterOutputStream2 → org.gnit.lucenekmp.tests.mockfile.FilterOutputStream2
 - org.apache.lucene.tests.mockfile.FilterSeekableByteChannel → org.gnit.lucenekmp.tests.mockfile.FilterSeekableByteChannel
 
 ## Depth 5
-- org.apache.lucene.search.IndexSortSortedNumericDocValuesRangeQuery → org.gnit.lucenekmp.search.IndexSortSortedNumericDocValuesRangeQuery
-- org.apache.lucene.search.SortedNumericSelector → org.gnit.lucenekmp.search.SortedNumericSelector
-- org.apache.lucene.search.SortedNumericSortField → org.gnit.lucenekmp.search.SortedNumericSortField
 - org.apache.lucene.search.similarities.BooleanSimilarity → org.gnit.lucenekmp.search.similarities.BooleanSimilarity
 - org.apache.lucene.search.similarities.Normalization → org.gnit.lucenekmp.search.similarities.Normalization
 - org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat
@@ -86,7 +82,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 
 ## Depth 3
 - org.apache.lucene.codecs.FilterCodec → org.gnit.lucenekmp.codecs.FilterCodec
-- org.apache.lucene.document.IntField → org.gnit.lucenekmp.document.IntField
 - org.apache.lucene.document.KeywordField → org.gnit.lucenekmp.document.KeywordField
 - org.apache.lucene.index.LogByteSizeMergePolicy → org.gnit.lucenekmp.index.LogByteSizeMergePolicy
 - org.apache.lucene.index.LogDocMergePolicy → org.gnit.lucenekmp.index.LogDocMergePolicy
