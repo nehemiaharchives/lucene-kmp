@@ -78,7 +78,7 @@ interface IndexSorter {
     val providerName: String
 
     /** Provide a NumericDocValues instance for a LeafReader  */
-    interface NumericDocValuesProvider {
+    fun interface NumericDocValuesProvider {
         /** Returns the NumericDocValues instance for this LeafReader  */
         @Throws(IOException::class)
         fun get(reader: LeafReader): NumericDocValues

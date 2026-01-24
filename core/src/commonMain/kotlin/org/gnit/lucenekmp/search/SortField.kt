@@ -120,7 +120,7 @@ open class SortField {
      */
     var field: String? = null
 
-    lateinit var type: Type // defaults to determining type dynamically
+    open lateinit var type: Type // defaults to determining type dynamically
 
     /**
      * Returns whether the sort should be reversed.
@@ -620,7 +620,7 @@ open class SortField {
         val FIELD_DOC: SortField = SortField(null, Type.DOC)
 
         @Throws(IOException::class)
-        protected fun readType(`in`: DataInput): Type {
+        fun readType(`in`: DataInput): Type {
             val type: String = `in`.readString()
             try {
                 return Type.valueOf(type)

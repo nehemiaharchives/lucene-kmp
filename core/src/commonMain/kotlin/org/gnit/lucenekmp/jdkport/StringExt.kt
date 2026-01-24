@@ -56,6 +56,32 @@ fun CharSequence.codePointSequence(): Sequence<Int> = sequence {
     }
 }
 
+
+/**
+ * mimics ```byte[] String.getBytes(Charset charset)``` of jdk
+ *
+ * Encodes this `String` into a sequence of bytes
+ * using the given [charset][Charset], storing the result into a new
+ * byte array.
+ *
+ * @param  charset
+ * The [charset][Charset] to be used to encode
+ * the `String`
+ *
+ * @return  A byte array containing the resulting bytes
+ *
+ * @since  1.6
+ */
+fun String.toByteArray(charset: Charset): ByteArray {
+    val encoder = charset.newEncoder()
+        .onMalformedInput(CodingErrorAction.REPLACE)
+        .onUnmappableCharacter(CodingErrorAction.REPLACE)
+    val byteBuffer = encoder.encode(CharBuffer.wrap(this))
+    val byteArray = ByteArray(byteBuffer.remaining())
+    byteBuffer.get(byteArray)
+    return byteArray
+}
+
 /**
  * mimics ```String(byte[] bytes, Charset charset)``` of jdk
  *

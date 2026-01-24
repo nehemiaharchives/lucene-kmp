@@ -41,6 +41,26 @@ class StringExtTest {
     }
 
     @Test
+    fun testToByteArray(){
+        val s = "Hello, 世界"
+        val utf8Bytes = s.toByteArray(Charset.UTF_8)
+        val latin1Bytes = s.toByteArray(Charset.ISO_8859_1)
+
+        val expectedUtf8 = byteArrayOf(
+            0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20,
+            0xE4.toByte(), 0xB8.toByte(), 0x96.toByte(),
+            0xE7.toByte(), 0x95.toByte(), 0x8C.toByte()
+        )
+        val expectedLatin1 = byteArrayOf(
+            0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20,
+            0x3F, 0x3F // '世' and '界' cannot be represented in Latin-1
+        )
+
+        assertContentEquals(expectedUtf8, utf8Bytes)
+        assertContentEquals(expectedLatin1, latin1Bytes)
+    }
+
+    @Test
     fun testFromCharArrayLatin1() {
         val arr = charArrayOf('a', 'b', 'c', 'd', 'e')
         val str = String.fromCharArray(arr, 1, 3)

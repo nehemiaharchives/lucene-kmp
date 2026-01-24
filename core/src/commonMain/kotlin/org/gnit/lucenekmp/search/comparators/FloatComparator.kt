@@ -14,7 +14,7 @@ import kotlin.jvm.JvmName
  * Comparator based on [Float.compare] for `numHits`. This comparator provides a
  * skipping functionality – an iterator that can skip over non-competitive documents.
  */
-class FloatComparator(numHits: Int, field: String, missingValue: Float?, reverse: Boolean, pruning: Pruning) :
+open class FloatComparator(numHits: Int, field: String, missingValue: Float?, reverse: Boolean, pruning: Pruning) :
     NumericComparator<Float>(
         field, if (missingValue != null) missingValue else 0.0f, reverse, pruning, Float.SIZE_BYTES
     ) {
@@ -55,7 +55,7 @@ class FloatComparator(numHits: Int, field: String, missingValue: Float?, reverse
     }
 
     /** Leaf comparator for [FloatComparator] that provides skipping functionality  */
-    inner class FloatLeafComparator(context: LeafReaderContext) : NumericLeafComparator(context) {
+    open inner class FloatLeafComparator(context: LeafReaderContext) : NumericLeafComparator(context) {
         @Throws(IOException::class)
         private fun getValueForDoc(doc: Int): Float {
             if (docValues.advanceExact(doc)) {

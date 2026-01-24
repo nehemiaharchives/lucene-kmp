@@ -42,6 +42,7 @@ import org.gnit.lucenekmp.store.LockFactory
 import org.gnit.lucenekmp.store.MMapDirectory
 import org.gnit.lucenekmp.store.MergeInfo
 import org.gnit.lucenekmp.store.NIOFSDirectory
+import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
 import org.gnit.lucenekmp.tests.index.AssertingLeafReader
 import org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
@@ -383,7 +384,17 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         //↑ line 857 of LuceneTestCase.java
 
 
-        // line 943 of LuceneTestCase.java
+        // line 932 of LuceneTestCase.java
+        /** create a new index writer config with random defaults  */
+        fun newIndexWriterConfig(): IndexWriterConfig {
+            return newIndexWriterConfig(MockAnalyzer(random()))
+        }
+
+        /** create a new index writer config with random defaults  */
+        fun newIndexWriterConfig(a: Analyzer): IndexWriterConfig {
+            return newIndexWriterConfig(random(), a)
+        }
+
         /** create a new index writer config with random defaults using the specified random  */
         fun newIndexWriterConfig(
             r: Random,
