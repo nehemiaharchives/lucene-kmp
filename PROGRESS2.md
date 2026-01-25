@@ -25,10 +25,10 @@
 ### Total Unit Test and their Dependencies: 959
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 947
+### Total KMP classes: 948
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1197
+### Total KMP Unit Test classes: 1201
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11428,7 +11428,7 @@
 | [org.apache.lucene.search.similarities.BasicModelIn](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelIn.java) | org.gnit.lucenekmp.search.similarities.BasicModelIn | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.BasicModelIne](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelIne.java) | org.gnit.lucenekmp.search.similarities.BasicModelIne | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.BasicStats](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicStats.java) | org.gnit.lucenekmp.search.similarities.BasicStats | Depth 5 | [x] | 0 | 0 | 0% |
-| [org.apache.lucene.search.similarities.BooleanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BooleanSimilarity.java) | org.gnit.lucenekmp.search.similarities.BooleanSimilarity | Depth 5 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.search.similarities.BooleanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BooleanSimilarity.java) | org.gnit.lucenekmp.search.similarities.BooleanSimilarity | Depth 5 | [x] | 2 | 2 | 76% |
 | [org.apache.lucene.search.similarities.DFISimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/DFISimilarity.java) | org.gnit.lucenekmp.search.similarities.DFISimilarity | Depth 4 | [] | 8 | 0 | 0% |
 | [org.apache.lucene.search.similarities.DFRSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/DFRSimilarity.java) | org.gnit.lucenekmp.search.similarities.DFRSimilarity | Depth 4 | [] | 8 | 0 | 0% |
 | [org.apache.lucene.search.similarities.Distribution](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/Distribution.java) | org.gnit.lucenekmp.search.similarities.Distribution | Depth 4 | [] | 2 | 0 | 0% |
@@ -11534,8 +11534,8 @@
 | [org.apache.lucene.tests.mockfile.FilterFileStore](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileStore.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileStore | Depth 5 | [] | 4 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterFileSystem](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileSystem.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileSystem | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterFileSystemProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileSystemProvider.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileSystemProvider | Depth 4 | [] | 1 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.FilterInputStream2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterInputStream2.java) | org.gnit.lucenekmp.tests.mockfile.FilterInputStream2 | Depth 6 | [] | 7 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.FilterOutputStream2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterOutputStream2.java) | org.gnit.lucenekmp.tests.mockfile.FilterOutputStream2 | Depth 6 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.tests.mockfile.FilterInputStream2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterInputStream2.java) | org.gnit.lucenekmp.tests.mockfile.FilterInputStream2 | Depth 6 | [x] | 7 | 12 | 59% |
+| [org.apache.lucene.tests.mockfile.FilterOutputStream2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterOutputStream2.java) | org.gnit.lucenekmp.tests.mockfile.FilterOutputStream2 | Depth 6 | [x] | 5 | 5 | 89% |
 | [org.apache.lucene.tests.mockfile.FilterPath](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterPath.java) | org.gnit.lucenekmp.tests.mockfile.FilterPath | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterSeekableByteChannel](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterSeekableByteChannel.java) | org.gnit.lucenekmp.tests.mockfile.FilterSeekableByteChannel | Depth 6 | [] | 5 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.HandleLimitFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/HandleLimitFS.java) | org.gnit.lucenekmp.tests.mockfile.HandleLimitFS | Depth 3 | [] | 31 | 0 | 0% |
@@ -11753,8 +11753,8 @@ TODO_TEST written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 959
-- Ported Unit Test Classes: 854
+- Ported Unit Test Classes: 857
 - Unit Test Porting Progress: 89%
-- **Unit Test Semantic Completion: 47%**
+- **Unit Test Semantic Completion: 48%**
 - Total Test Core Methods Needed: 7124
-- Test Core Methods Implemented: 3415
+- Test Core Methods Implemented: 3429

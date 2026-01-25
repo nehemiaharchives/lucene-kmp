@@ -3,12 +3,9 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 6
-- org.apache.lucene.tests.mockfile.FilterInputStream2 → org.gnit.lucenekmp.tests.mockfile.FilterInputStream2
-- org.apache.lucene.tests.mockfile.FilterOutputStream2 → org.gnit.lucenekmp.tests.mockfile.FilterOutputStream2
 - org.apache.lucene.tests.mockfile.FilterSeekableByteChannel → org.gnit.lucenekmp.tests.mockfile.FilterSeekableByteChannel
 
 ## Depth 5
-- org.apache.lucene.search.similarities.BooleanSimilarity → org.gnit.lucenekmp.search.similarities.BooleanSimilarity
 - org.apache.lucene.search.similarities.Normalization → org.gnit.lucenekmp.search.similarities.Normalization
 - org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat
 - org.apache.lucene.tests.codecs.asserting.AssertingLiveDocsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingLiveDocsFormat

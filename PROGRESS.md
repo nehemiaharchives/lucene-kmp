@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 975 | 71% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 978 | 71% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -88,7 +88,7 @@
 |   org.apache.lucene.search |       org.gnit.lucenekmp.search | 197 | 165 | 83% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 9 | 8 | 88% | [ ] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
-|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 18 | 37% | [ ] |
+|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 19 | 39% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 42 | 82% | [ ] |
 |     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 15 | 51% | [ ] |
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 0 | 0% | [ ] |
@@ -107,7 +107,7 @@
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
 |     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 12 | 30% | [ ] |
-|     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 0 | 0% | [ ] |
+|     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 2 | 9% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
 |     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 5 | 38% | [ ] |
@@ -153,7 +153,7 @@
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
 |   org.apache.lucene.search | 149 | 6 | 4% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
-|     org.apache.lucene.search.similarities | 25 | 10 | 40% |
+|     org.apache.lucene.search.similarities | 25 | 11 | 44% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
 |   org.apache.lucene.util | 63 | 41 | 65% |
 |     org.apache.lucene.util.automaton | 15 | 12 | 80% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 158 | 23% |
+| Total | 673 | 159 | 23% |
 
 
 ## Tests To Port
@@ -620,7 +620,6 @@
 | [org.apache.lucene.search.similarities.TestBasicModelIF](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBasicModelIF.java) | org.gnit.lucenekmp.search.similarities.TestBasicModelIF |
 | [org.apache.lucene.search.similarities.TestBasicModelIn](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBasicModelIn.java) | org.gnit.lucenekmp.search.similarities.TestBasicModelIn |
 | [org.apache.lucene.search.similarities.TestBasicModelIne](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBasicModelIne.java) | org.gnit.lucenekmp.search.similarities.TestBasicModelIne |
-| [org.apache.lucene.search.similarities.TestBooleanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestBooleanSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestBooleanSimilarity |
 | [org.apache.lucene.search.similarities.TestDistributionLL](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestDistributionLL.java) | org.gnit.lucenekmp.search.similarities.TestDistributionLL |
 | [org.apache.lucene.search.similarities.TestDistributionSPL](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestDistributionSPL.java) | org.gnit.lucenekmp.search.similarities.TestDistributionSPL |
 | [org.apache.lucene.search.similarities.TestIndependenceChiSquared](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceChiSquared.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceChiSquared |
