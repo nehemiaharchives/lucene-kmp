@@ -3,7 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 6
-- org.apache.lucene.search.similarities.TFIDFSimilarity → org.gnit.lucenekmp.search.similarities.TFIDFSimilarity
 - org.apache.lucene.tests.mockfile.FilterInputStream2 → org.gnit.lucenekmp.tests.mockfile.FilterInputStream2
 - org.apache.lucene.tests.mockfile.FilterOutputStream2 → org.gnit.lucenekmp.tests.mockfile.FilterOutputStream2
 - org.apache.lucene.tests.mockfile.FilterSeekableByteChannel → org.gnit.lucenekmp.tests.mockfile.FilterSeekableByteChannel
@@ -37,7 +36,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.similarities.BasicModelIF → org.gnit.lucenekmp.search.similarities.BasicModelIF
 - org.apache.lucene.search.similarities.BasicModelIn → org.gnit.lucenekmp.search.similarities.BasicModelIn
 - org.apache.lucene.search.similarities.BasicModelIne → org.gnit.lucenekmp.search.similarities.BasicModelIne
-- org.apache.lucene.search.similarities.ClassicSimilarity → org.gnit.lucenekmp.search.similarities.ClassicSimilarity
 - org.apache.lucene.search.similarities.DFISimilarity → org.gnit.lucenekmp.search.similarities.DFISimilarity
 - org.apache.lucene.search.similarities.DFRSimilarity → org.gnit.lucenekmp.search.similarities.DFRSimilarity
 - org.apache.lucene.search.similarities.Distribution → org.gnit.lucenekmp.search.similarities.Distribution

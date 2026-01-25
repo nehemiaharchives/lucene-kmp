@@ -25,10 +25,10 @@
 ### Total Unit Test and their Dependencies: 959
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 942
+### Total KMP classes: 944
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1187
+### Total KMP Unit Test classes: 1190
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11432,7 +11432,6 @@
 | [org.apache.lucene.search.similarities.BasicModelIne](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelIne.java) | org.gnit.lucenekmp.search.similarities.BasicModelIne | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.BasicStats](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicStats.java) | org.gnit.lucenekmp.search.similarities.BasicStats | Depth 5 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.search.similarities.BooleanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BooleanSimilarity.java) | org.gnit.lucenekmp.search.similarities.BooleanSimilarity | Depth 5 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.ClassicSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/ClassicSimilarity.java) | org.gnit.lucenekmp.search.similarities.ClassicSimilarity | Depth 4 | [] | 7 | 0 | 0% |
 | [org.apache.lucene.search.similarities.DFISimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/DFISimilarity.java) | org.gnit.lucenekmp.search.similarities.DFISimilarity | Depth 4 | [] | 8 | 0 | 0% |
 | [org.apache.lucene.search.similarities.DFRSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/DFRSimilarity.java) | org.gnit.lucenekmp.search.similarities.DFRSimilarity | Depth 4 | [] | 8 | 0 | 0% |
 | [org.apache.lucene.search.similarities.Distribution](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/Distribution.java) | org.gnit.lucenekmp.search.similarities.Distribution | Depth 4 | [] | 2 | 0 | 0% |
@@ -11456,7 +11455,7 @@
 | [org.apache.lucene.search.similarities.NormalizationH3](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/NormalizationH3.java) | org.gnit.lucenekmp.search.similarities.NormalizationH3 | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.NormalizationZ](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/NormalizationZ.java) | org.gnit.lucenekmp.search.similarities.NormalizationZ | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.SimilarityBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/SimilarityBase.java) | org.gnit.lucenekmp.search.similarities.SimilarityBase | Depth 6 | [x] | 3 | 1 | 0% |
-| [org.apache.lucene.search.similarities.TFIDFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/TFIDFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TFIDFSimilarity | Depth 6 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.search.similarities.TFIDFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/TFIDFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TFIDFSimilarity | Depth 6 | [x] | 3 | 3 | 83% |
 | [org.apache.lucene.store.AlreadyClosedException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/AlreadyClosedException.java) | org.gnit.lucenekmp.store.AlreadyClosedException | Depth 2 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.store.BaseDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/BaseDirectory.java) | org.gnit.lucenekmp.store.BaseDirectory | Depth 3 | [x] | 15 | 14 | 89% |
 | [org.apache.lucene.store.BufferedChecksumIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/BufferedChecksumIndexInput.java) | org.gnit.lucenekmp.store.BufferedChecksumIndexInput | Depth 2 | [x] | 27 | 27 | 96% |
@@ -11757,8 +11756,8 @@ TODO_TEST written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 959
-- Ported Unit Test Classes: 846
+- Ported Unit Test Classes: 848
 - Unit Test Porting Progress: 88%
 - **Unit Test Semantic Completion: 47%**
 - Total Test Core Methods Needed: 7124
-- Test Core Methods Implemented: 3367
+- Test Core Methods Implemented: 3377

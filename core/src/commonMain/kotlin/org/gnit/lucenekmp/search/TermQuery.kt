@@ -39,10 +39,10 @@ class TermQuery : Query {
             this.termStates = termStates
             this.similarity = searcher.similarity
 
-            val collectionStats: CollectionStatistics
+            val collectionStats: CollectionStatistics?
             val termStats: TermStatistics?
             if (scoreMode.needsScores()) {
-                collectionStats = searcher.collectionStatistics(term.field())!!
+                collectionStats = searcher.collectionStatistics(term.field())
                 termStats =
                     if (termStates!!.docFreq() > 0)
                         searcher.termStatistics(term, termStates.docFreq(), termStates.totalTermFreq())
@@ -61,7 +61,10 @@ class TermQuery : Query {
                 // allocations in case default BM25Scorer is used.
                 // See: https://github.com/apache/lucene/issues/12297
                 if (scoreMode.needsScores()) {
-                    this.simScorer = similarity.scorer(boost, collectionStats, termStats)
+                    val stats = checkNotNull(collectionStats) {
+                        "collectionStatistics is required when scores are needed"
+                    }
+                    this.simScorer = similarity.scorer(boost, stats, termStats)
                 } else {
                     // Assigning a dummy scorer as this is not expected to be called since scores are not
                     // needed.
