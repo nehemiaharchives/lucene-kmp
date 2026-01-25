@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.store.FileSwitchDirectory
 //import org.gnit.lucenekmp.store.NRTCachingDirectory
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Runnable
+import kotlinx.datetime.TimeZone
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.analysis.Analyzer
@@ -21,8 +21,13 @@ import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.index.LiveIndexWriterConfig
+import org.gnit.lucenekmp.index.LogByteSizeMergePolicy
+import org.gnit.lucenekmp.index.LogDocMergePolicy
+import org.gnit.lucenekmp.index.LogMergePolicy
+import org.gnit.lucenekmp.index.MergePolicy
 import org.gnit.lucenekmp.index.ParallelCompositeReader
 import org.gnit.lucenekmp.index.ParallelLeafReader
+import org.gnit.lucenekmp.index.TieredMergePolicy
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
 import org.gnit.lucenekmp.jdkport.System
@@ -43,6 +48,7 @@ import org.gnit.lucenekmp.store.MMapDirectory
 import org.gnit.lucenekmp.store.MergeInfo
 import org.gnit.lucenekmp.store.NIOFSDirectory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
+import org.gnit.lucenekmp.tests.index.AlcoholicMergePolicy
 import org.gnit.lucenekmp.tests.index.AssertingDirectoryReader
 import org.gnit.lucenekmp.tests.index.AssertingLeafReader
 import org.gnit.lucenekmp.tests.index.FieldFilterLeafReader
@@ -51,6 +57,7 @@ import org.gnit.lucenekmp.tests.index.MergingDirectoryReaderWrapper
 import org.gnit.lucenekmp.tests.index.MismatchedCodecReader
 import org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader
 import org.gnit.lucenekmp.tests.index.MismatchedLeafReader
+import org.gnit.lucenekmp.tests.index.MockRandomMergePolicy
 import org.gnit.lucenekmp.tests.search.AssertingIndexSearcher
 import org.gnit.lucenekmp.tests.search.similarities.AssertingSimilarity
 import org.gnit.lucenekmp.tests.search.similarities.RandomSimilarity
@@ -498,7 +505,147 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             return c
         }
 
-        //↓ line 1143 of LuceneTestCase.java
+        fun newMergePolicy(r: Random): MergePolicy {
+            return newMergePolicy(r, true)
+        }
+
+        fun newMergePolicy(
+            r: Random,
+            includeMockMP: Boolean
+        ): MergePolicy {
+            if (includeMockMP && rarely(r)) {
+                return MockRandomMergePolicy(r)
+            } else if (r.nextBoolean()) {
+                return newTieredMergePolicy(r)
+            } else if (rarely(r)) {
+                return newAlcoholicMergePolicy(
+                    r,
+                    classEnvRule!!.timeZone!!
+                )
+            }
+            return newLogMergePolicy(r)
+        }
+
+        fun newMergePolicy(): MergePolicy {
+            return newMergePolicy(random())
+        }
+
+        fun newLogMergePolicy(): LogMergePolicy {
+            return newLogMergePolicy(random())
+        }
+
+        fun newTieredMergePolicy(): TieredMergePolicy {
+            return newTieredMergePolicy(random())
+        }
+
+        fun newAlcoholicMergePolicy(): AlcoholicMergePolicy {
+            return newAlcoholicMergePolicy(
+                random(),
+                classEnvRule!!.timeZone!!
+            )
+        }
+
+        fun newAlcoholicMergePolicy(
+            r: Random,
+            tz: TimeZone
+        ): AlcoholicMergePolicy {
+            return AlcoholicMergePolicy(tz, Random(r.nextLong()))
+        }
+
+        fun newLogMergePolicy(r: Random): LogMergePolicy {
+            val logmp: LogMergePolicy =
+                if (r.nextBoolean()) LogDocMergePolicy() else LogByteSizeMergePolicy()
+            logmp.calibrateSizeByDeletes = r.nextBoolean()
+            logmp.targetSearchConcurrency = TestUtil.nextInt(random(), 1, 16)
+            if (rarely(r)) {
+                logmp.mergeFactor = TestUtil.nextInt(r, 2, 9)
+            } else {
+                logmp.mergeFactor = TestUtil.nextInt(r, 10, 50)
+            }
+            configureRandom(r, logmp)
+            return logmp
+        }
+
+        private fun configureRandom(
+            r: Random,
+            mergePolicy: MergePolicy
+        ) {
+            if (r.nextBoolean()) {
+                mergePolicy.noCFSRatio = 0.1 + r.nextDouble() * 0.8
+            } else {
+                mergePolicy.noCFSRatio = if (r.nextBoolean()) 1.0 else 0.0
+            }
+
+            if (rarely(r)) {
+                mergePolicy.maxCFSSegmentSizeMB = 0.2 + r.nextDouble() * 2.0
+            } else {
+                mergePolicy.maxCFSSegmentSizeMB = Double.POSITIVE_INFINITY
+            }
+        }
+
+        fun newTieredMergePolicy(r: Random): TieredMergePolicy {
+            val tmp = TieredMergePolicy()
+            if (rarely(r)) {
+                tmp.setMaxMergedSegmentMB(0.2 + r.nextDouble() * 2.0)
+            } else {
+                tmp.setMaxMergedSegmentMB(10 + r.nextDouble() * 100)
+            }
+            tmp.setFloorSegmentMB(0.2 + r.nextDouble() * 2.0)
+            tmp.setForceMergeDeletesPctAllowed(0.0 + r.nextDouble() * 30.0)
+            if (rarely(r)) {
+                tmp.setSegmentsPerTier(
+                    TestUtil.nextInt(r, 2, 20).toDouble()
+                )
+            } else {
+                tmp.setSegmentsPerTier(
+                    TestUtil.nextInt(r, 10, 50).toDouble()
+                )
+            }
+            if (rarely(r)) {
+                tmp.setTargetSearchConcurrency(
+                    TestUtil.nextInt(
+                        r,
+                        10,
+                        50
+                    )
+                )
+            } else {
+                tmp.setTargetSearchConcurrency(
+                    TestUtil.nextInt(
+                        r,
+                        2,
+                        20
+                    )
+                )
+            }
+
+            configureRandom(r, tmp)
+            tmp.setDeletesPctAllowed(
+                20 + random().nextDouble() * 30
+            )
+            return tmp
+        }
+
+        fun newLogMergePolicy(useCFS: Boolean): MergePolicy {
+            val logmp: MergePolicy = newLogMergePolicy()
+            logmp.noCFSRatio = if (useCFS) 1.0 else 0.0
+            return logmp
+        }
+
+        fun newLogMergePolicy(useCFS: Boolean, mergeFactor: Int): LogMergePolicy {
+            val logmp: LogMergePolicy = newLogMergePolicy()
+            logmp.noCFSRatio = if (useCFS) 1.0 else 0.0
+            logmp.mergeFactor = mergeFactor
+            return logmp
+        }
+
+        fun newLogMergePolicy(mergeFactor: Int): LogMergePolicy {
+            val logmp: LogMergePolicy = newLogMergePolicy()
+            logmp.mergeFactor = mergeFactor
+            return logmp
+        }
+
+
         // if you want it in LiveIndexWriterConfig: it must and will be tested here.
         fun maybeChangeLiveIndexWriterConfig(r: Random, c: LiveIndexWriterConfig) {
             var didChange = false
@@ -581,11 +728,11 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                 if (mp is LogMergePolicy) {
                     mp.setCalibrateSizeByDeletes(r.nextBoolean())
                     if (LuceneTestCase.rarely(r)) {
-                        mp.setMergeFactor(TestUtil.nextInt(r, 2, 9))
+                        mp.mergeFactor = TestUtil.nextInt(r, 2, 9)
                     } else {
-                        mp.setMergeFactor(TestUtil.nextInt(r, 10, 50))
+                        mp.mergeFactor = TestUtil.nextInt(r, 10, 50)
                     }
-                } else if (mp is org.apache.lucene.index.TieredMergePolicy) {
+                } else if (mp is TieredMergePolicy) {
                     if (LuceneTestCase.rarely(r)) {
                         mp.setMaxMergedSegmentMB(0.2 + r.nextDouble() * 2.0)
                     } else {
@@ -777,7 +924,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             var fsdirClass: String = TEST_DIRECTORY
             if (fsdirClass == "random") {
                 fsdirClass =
-                    RandomPicks.randomFrom<String>(
+                    RandomPicks.randomFrom(
                         random(),
                         FS_DIRECTORIES
                     )
@@ -847,7 +994,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                         d,
                         file,
                         file,
-                        LuceneTestCase.newIOContext(r)
+                        newIOContext(r)
                     )
                 }
             }
@@ -984,7 +1131,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             value: String?,
             type: FieldType
         ): Field {
-            return newField(LuceneTestCase.random(), name, value, type)
+            return newField(random(), name, value, type)
         }
 
         // TODO: if we can pull out the "make term vector options
@@ -1015,8 +1162,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             // TODO: once all core & test codecs can index
             // offsets, sometimes randomly turn on offsets if we are
             // already indexing positions...
-            val newType: FieldType =
-                FieldType(type)
+            val newType = FieldType(type)
             if (!newType.stored() && random.nextBoolean()) {
                 newType.setStored(true) // randomly store it
             }
@@ -1065,7 +1211,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             } else if (value is BytesRef) {
                 return Field(
                     name,
-                    value as BytesRef,
+                    value,
                     fieldType
                 )
             } else {
@@ -1111,7 +1257,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             if (clazzName == "random") {
                 if (rarely(random)) {
                     clazzName =
-                        RandomPicks.randomFrom<String>(
+                        RandomPicks.randomFrom(
                             random,
                             CORE_DIRECTORIES
                         )
@@ -1228,7 +1374,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                             println("NOTE: LuceneTestCase.wrapReader: wrapping previous reader=$r with ParallelLeaf/CompositeReader")
                         }
                         r = if (r is LeafReader)
-                                ParallelLeafReader(r as LeafReader)
+                                ParallelLeafReader(r)
                             else
                                 ParallelCompositeReader(r as CompositeReader)
                     }
@@ -1263,9 +1409,9 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                             )
                         }
                         if (r is LeafReader) {
-                            r = AssertingLeafReader(r as LeafReader)
+                            r = AssertingLeafReader(r)
                         } else if (r is DirectoryReader) {
-                            r = AssertingDirectoryReader(r as DirectoryReader)
+                            r = AssertingDirectoryReader(r)
                         }
                     }
 
@@ -1278,11 +1424,11 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                             )
                         }
                         if (r is LeafReader) {
-                            r = MismatchedLeafReader(r as LeafReader, random)
+                            r = MismatchedLeafReader(r, random)
                         } else if (r is DirectoryReader) {
-                            r = MismatchedDirectoryReader(r as DirectoryReader, random)
+                            r = MismatchedDirectoryReader(r, random)
                         } else if (r is CodecReader) {
-                            r = MismatchedCodecReader(r as CodecReader, random)
+                            r = MismatchedCodecReader(r, random)
                         }
                     }
 
@@ -1295,7 +1441,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                             )
                         }
                         if (r is CodecReader) {
-                            r = MergingCodecReader(r as CodecReader)
+                            r = MergingCodecReader(r)
                         } else if (r is DirectoryReader) {
                             var allLeavesAreCodecReaders = true
                             for (ctx in r.leaves()) {
@@ -1305,7 +1451,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                                 }
                             }
                             if (allLeavesAreCodecReaders) {
-                                r = MergingDirectoryReaderWrapper(r as DirectoryReader)
+                                r = MergingDirectoryReaderWrapper(r)
                             }
                         }
                     }
@@ -1327,7 +1473,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         fun maybeWrapReader(r: IndexReader): IndexReader {
             var r: IndexReader = r
             if (rarely()) {
-                r = LuceneTestCase.wrapReader(r)
+                r = wrapReader(r)
             }
             return r
         }
@@ -1411,7 +1557,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                     threads,
                     0L,
                     TimeUnit.MILLISECONDS,
-                    LinkedBlockingQueue<Runnable>(),
+                    LinkedBlockingQueue(),
                     NamedThreadFactory("LuceneTestCase")
                 )
             // uncomment to intensify LUCENE-3840
@@ -1515,7 +1661,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             if (concurrency == Concurrency.NONE) {
                 if (maybeWrap) {
                     try {
-                        r = LuceneTestCase.maybeWrapReader(r)
+                        r = maybeWrapReader(r)
                     } catch (e: IOException) {
                         Rethrow.rethrow(e)
                     }
@@ -1564,7 +1710,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                     if (random.nextBoolean()) {
                         ret =
                             object : AssertingIndexSearcher(random, r, ex) {
-                                override fun slices(leaves: MutableList<LeafReaderContext>): Array<IndexSearcher.LeafSlice> {
+                                override fun slices(leaves: MutableList<LeafReaderContext>): Array<LeafSlice> {
                                     return slices(
                                         leaves, maxDocPerSlice, maxSegmentsPerSlice, concurrency!!
                                     )
@@ -1627,7 +1773,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         fun <T : Throwable> expectThrows(
             expectedType: KClass<T>, runnable: ThrowingRunnable
         ): T {
-            return expectThrows<T>(
+            return expectThrows(
                 expectedType,
                 "Expected exception " + expectedType.simpleName + " but no exception was thrown",
                 runnable
@@ -1706,7 +1852,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             runnable: ThrowingRunnable
         ): TW {
             val thrown: Throwable? =
-                _expectThrows(mutableListOf<KClass<TO>>(expectedOuterType), runnable)
+                _expectThrows(mutableListOf(expectedOuterType), runnable)
             if (null == thrown) {
                 fail(
                     message = "Expected outer exception "
@@ -1953,7 +2099,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             bytesIn.copyInto(bytes, startOffset, offset, offset + length)
 
             logger.debug { "LTC:  return bytes.length=" + bytes.size + " startOffset=" + startOffset + " length=" + length }
-            val it: BytesRef = BytesRef(bytes, startOffset, length)
+            val it = BytesRef(bytes, startOffset, length)
             assertTrue(it.isValid())
 
             if (Random.nextInt(1, 17) == 7) {

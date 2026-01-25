@@ -28,7 +28,7 @@ class TestIndexWriterConfig : LuceneTestCase() {
 
     private class MyMergePolicy : MergePolicy() {
         override fun findMerges(
-            mergeTrigger: MergeTrigger,
+            mergeTrigger: MergeTrigger?,
             segmentInfos: SegmentInfos,
             mergeContext: MergeContext
         ): MergeSpecification? {

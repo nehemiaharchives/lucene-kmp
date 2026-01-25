@@ -14,7 +14,7 @@ class NoMergePolicy private constructor() : MergePolicy() {
     }
 
     override fun findMerges(
-        mergeTrigger: MergeTrigger,
+        mergeTrigger: MergeTrigger?,
         segmentInfos: SegmentInfos,
         mergeContext: MergeContext
     ): MergeSpecification? {

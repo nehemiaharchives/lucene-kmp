@@ -12,12 +12,11 @@ import okio.IOException
 open class FilterMergePolicy(
     /** The wrapped [MergePolicy].  */
     protected val `in`: MergePolicy
-) : MergePolicy(),
-    Unwrappable<MergePolicy> {
+) : MergePolicy(), Unwrappable<MergePolicy> {
 
     @Throws(IOException::class)
     override fun findMerges(
-        mergeTrigger: MergeTrigger,
+        mergeTrigger: MergeTrigger?,
         segmentInfos: SegmentInfos,
         mergeContext:MergeContext
     ):MergeSpecification? {

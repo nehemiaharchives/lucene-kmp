@@ -631,7 +631,7 @@ abstract class MergePolicy
      */
     @Throws(IOException::class)
     abstract fun findMerges(
-        mergeTrigger: MergeTrigger, segmentInfos: SegmentInfos, mergeContext: MergeContext
+        mergeTrigger: MergeTrigger?, segmentInfos: SegmentInfos, mergeContext: MergeContext
     ): MergeSpecification?
 
     /**

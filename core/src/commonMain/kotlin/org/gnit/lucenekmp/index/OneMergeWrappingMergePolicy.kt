@@ -15,7 +15,7 @@ class OneMergeWrappingMergePolicy(
 
     @Throws(IOException::class)
     override fun findMerges(
-        mergeTrigger: MergeTrigger,
+        mergeTrigger: MergeTrigger?,
         segmentInfos: SegmentInfos,
         mergeContext: MergeContext
     ): MergeSpecification? {

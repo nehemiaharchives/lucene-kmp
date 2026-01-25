@@ -17,15 +17,15 @@ class TestOneMergeWrappingMergePolicy : LuceneTestCase() {
     private fun newDirectory(): Directory = ByteBuffersDirectory()
 
     private class PredeterminedMergePolicy(
-        private val merges: MergePolicy.MergeSpecification?,
-        private val forcedMerges: MergePolicy.MergeSpecification?,
-        private val forcedDeletesMerges: MergePolicy.MergeSpecification?
+        private val merges: MergeSpecification?,
+        private val forcedMerges: MergeSpecification?,
+        private val forcedDeletesMerges: MergeSpecification?
     ) : MergePolicy() {
         @Throws(IOException::class)
         override fun findMerges(
-            mergeTrigger: MergeTrigger,
+            mergeTrigger: MergeTrigger?,
             segmentInfos: SegmentInfos,
-            mergeContext: MergePolicy.MergeContext
+            mergeContext: MergeContext
         ): MergeSpecification? {
             return merges
         }
@@ -35,7 +35,7 @@ class TestOneMergeWrappingMergePolicy : LuceneTestCase() {
             segmentInfos: SegmentInfos,
             maxSegmentCount: Int,
             segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-            mergeContext: MergePolicy.MergeContext
+            mergeContext: MergeContext
         ): MergeSpecification? {
             return forcedMerges
         }
@@ -43,7 +43,7 @@ class TestOneMergeWrappingMergePolicy : LuceneTestCase() {
         @Throws(IOException::class)
         override fun findForcedDeletesMerges(
             segmentInfos: SegmentInfos,
-            mergeContext: MergePolicy.MergeContext
+            mergeContext: MergeContext
         ): MergeSpecification? {
             return forcedDeletesMerges
         }
@@ -103,7 +103,7 @@ class TestOneMergeWrappingMergePolicy : LuceneTestCase() {
             val originalOM = originalMS.merges[ii]
             val testOM = testMS.merges[ii]
             assertTrue(testOM is WrappedOneMerge)
-            val wrappedOM = testOM as WrappedOneMerge
+            val wrappedOM = testOM
             assertEquals(originalOM, wrappedOM.original)
         }
     }

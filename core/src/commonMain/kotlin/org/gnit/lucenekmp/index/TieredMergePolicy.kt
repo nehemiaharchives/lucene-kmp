@@ -264,7 +264,7 @@ open class TieredMergePolicy
 
     @Throws(IOException::class)
     override fun findMerges(
-        mergeTrigger: MergeTrigger,
+        mergeTrigger: MergeTrigger?,
         infos: SegmentInfos,
         mergeContext: MergeContext
     ): MergeSpecification? {

@@ -22,7 +22,7 @@ import org.gnit.lucenekmp.util.FilterIterator
  * reader.
  */
 class FieldFilterLeafReader(
-    val `in`: LeafReader,
+    override val `in`: LeafReader,
     private val fields: MutableSet<String>,
     private val negate: Boolean
 ) : FilterLeafReader(`in`) {

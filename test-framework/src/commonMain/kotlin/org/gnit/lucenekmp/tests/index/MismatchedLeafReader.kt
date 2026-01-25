@@ -13,7 +13,7 @@ import kotlin.random.Random
  * Shuffles field numbers around to try to trip bugs where field numbers are assumed to always be
  * consistent across segments.
  */
-class MismatchedLeafReader(val `in`: LeafReader, random: Random) :
+class MismatchedLeafReader(override val `in`: LeafReader, random: Random) :
     FilterLeafReader(`in`) {
     val shuffled: FieldInfos = shuffleInfos(`in`.fieldInfos, random)
 

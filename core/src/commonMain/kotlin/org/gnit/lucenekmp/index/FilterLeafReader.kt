@@ -23,7 +23,7 @@ import org.gnit.lucenekmp.util.Unwrappable
  * **NOTE**: If this [FilterLeafReader] does not change the content the contained
  * reader, you could consider delegating calls to [.getCoreCacheHelper] and [ ][.getReaderCacheHelper].
  */
-abstract class FilterLeafReader protected constructor(`in`: LeafReader) : LeafReader() {
+abstract class FilterLeafReader protected constructor(open val `in`: LeafReader) : LeafReader() {
     /** Base class for filtering [Fields] implementations.  */
     abstract class FilterFields protected constructor(`in`: Fields) : Fields() {
         /** The underlying Fields instance.  */

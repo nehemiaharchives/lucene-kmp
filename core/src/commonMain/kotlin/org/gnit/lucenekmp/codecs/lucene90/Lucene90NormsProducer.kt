@@ -319,7 +319,7 @@ internal class Lucene90NormsProducer(
     }
 
     @Throws(IOException::class)
-    private fun getDisiJumpTable(field: FieldInfo, entry: NormsEntry): RandomAccessInput {
+    private fun getDisiJumpTable(field: FieldInfo, entry: NormsEntry): RandomAccessInput? {
         var jumpTable: RandomAccessInput? = null
         if (merging) {
             jumpTable = disiJumpTables!![field.number]
@@ -336,7 +336,7 @@ internal class Lucene90NormsProducer(
                 disiJumpTables!!.put(field.number, jumpTable)
             }
         }
-        return jumpTable!!
+        return jumpTable
     }
 
     @Throws(IOException::class)
@@ -391,7 +391,7 @@ internal class Lucene90NormsProducer(
         } else {
             // sparse
             val disiInput: IndexInput = getDisiInput(field, entry)
-            val disiJumpTable: RandomAccessInput = getDisiJumpTable(field, entry)
+            val disiJumpTable: RandomAccessInput? = getDisiJumpTable(field, entry)
             val disi =
                 IndexedDISI(
                     disiInput,
@@ -459,48 +459,48 @@ internal class Lucene90NormsProducer(
         return this::class.simpleName + "(fields=" + norms.size() + ")"
     }
 
-override fun clone(): Lucene90NormsProducer {
-    val clone = Lucene90NormsProducer(
-        state,
-        dataCodec,
-        dataExtension,
-        metaCodec,
-        metaExtension
-    )
+    override fun clone(): Lucene90NormsProducer {
+        val clone = Lucene90NormsProducer(
+            state,
+            dataCodec,
+            dataExtension,
+            metaCodec,
+            metaExtension
+        )
 
-    // Copy the norms map
-    norms.forEach { entry ->
-        clone.norms.put(entry.key, entry.value)
-    }
+        // Copy the norms map
+        norms.forEach { entry ->
+            clone.norms.put(entry.key, entry.value)
+        }
 
-    clone.data = data.clone()
-    clone.merging = merging
+        clone.data = data.clone()
+        clone.merging = merging
 
-    // Copy maps if they exist
-    if (disiInputs != null) {
-        clone.disiInputs = IntObjectHashMap<IndexInput>().apply {
-            disiInputs!!.forEach { entry ->
-                put(entry.key, entry.value)
+        // Copy maps if they exist
+        if (disiInputs != null) {
+            clone.disiInputs = IntObjectHashMap<IndexInput>().apply {
+                disiInputs!!.forEach { entry ->
+                    put(entry.key, entry.value)
+                }
             }
         }
-    }
 
-    if (disiJumpTables != null) {
-        clone.disiJumpTables = IntObjectHashMap<RandomAccessInput>().apply {
-            disiJumpTables!!.forEach { entry ->
-                put(entry.key, entry.value)
+        if (disiJumpTables != null) {
+            clone.disiJumpTables = IntObjectHashMap<RandomAccessInput>().apply {
+                disiJumpTables!!.forEach { entry ->
+                    put(entry.key, entry.value)
+                }
             }
         }
-    }
 
-    if (dataInputs != null) {
-        clone.dataInputs = IntObjectHashMap<RandomAccessInput>().apply {
-            dataInputs!!.forEach { entry ->
-                put(entry.key, entry.value)
+        if (dataInputs != null) {
+            clone.dataInputs = IntObjectHashMap<RandomAccessInput>().apply {
+                dataInputs!!.forEach { entry ->
+                    put(entry.key, entry.value)
+                }
             }
         }
-    }
 
-    return clone
-}
+        return clone
+    }
 }
