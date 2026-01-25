@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 969 | 70% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 975 | 71% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -81,7 +81,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 5 | 4 | 80% | [ ] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 40 | 44% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 181 | 90% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 184 | 92% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 16 | 61% | [ ] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 3 | 2 | 66% | [ ] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 6 | 5 | 83% | [ ] |
@@ -106,7 +106,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 9 | 22% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 12 | 30% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
@@ -147,7 +147,7 @@
 |     org.apache.lucene.codecs.perfield | 4 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 3 | 6% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
-|   org.apache.lucene.index | 197 | 8 | 4% |
+|   org.apache.lucene.index | 197 | 9 | 4% |
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
 |     org.apache.lucene.internal.tests | 1 | 0 | 0% |
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 157 | 23% |
+| Total | 673 | 158 | 23% |
 
 
 ## Tests To Port
@@ -399,7 +399,6 @@
 | [org.apache.lucene.index.TestNoDeletionPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestNoDeletionPolicy.java) | org.gnit.lucenekmp.index.TestNoDeletionPolicy |
 | [org.apache.lucene.index.TestNoMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestNoMergePolicy.java) | org.gnit.lucenekmp.index.TestNoMergePolicy |
 | [org.apache.lucene.index.TestNoMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestNoMergeScheduler.java) | org.gnit.lucenekmp.index.TestNoMergeScheduler |
-| [org.apache.lucene.index.TestNorms](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestNorms.java) | org.gnit.lucenekmp.index.TestNorms |
 | [org.apache.lucene.index.TestNumericDocValuesUpdates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestNumericDocValuesUpdates.java) | org.gnit.lucenekmp.index.TestNumericDocValuesUpdates |
 | [org.apache.lucene.index.TestOmitNorms](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestOmitNorms.java) | org.gnit.lucenekmp.index.TestOmitNorms |
 | [org.apache.lucene.index.TestOmitPositions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestOmitPositions.java) | org.gnit.lucenekmp.index.TestOmitPositions |

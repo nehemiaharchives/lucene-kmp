@@ -25,10 +25,10 @@
 ### Total Unit Test and their Dependencies: 959
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 944
+### Total KMP classes: 947
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1190
+### Total KMP Unit Test classes: 1197
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11222,9 +11222,6 @@
 | [org.apache.lucene.index.LeafReaderContext](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/LeafReaderContext.java) | org.gnit.lucenekmp.index.LeafReaderContext | Depth 2 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.index.LiveIndexWriterConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/LiveIndexWriterConfig.java) | org.gnit.lucenekmp.index.LiveIndexWriterConfig | Depth 2 | [x] | 6 | 6 | 52% |
 | [org.apache.lucene.index.LockableConcurrentApproximatePriorityQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/LockableConcurrentApproximatePriorityQueue.java) | org.gnit.lucenekmp.index.LockableConcurrentApproximatePriorityQueue | Depth 5 | [x] | 4 | 1 | 0% |
-| [org.apache.lucene.index.LogByteSizeMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/LogByteSizeMergePolicy.java) | org.gnit.lucenekmp.index.LogByteSizeMergePolicy | Depth 3 | [] | 20 | 0 | 0% |
-| [org.apache.lucene.index.LogDocMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/LogDocMergePolicy.java) | org.gnit.lucenekmp.index.LogDocMergePolicy | Depth 3 | [] | 20 | 0 | 0% |
-| [org.apache.lucene.index.LogMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java) | org.gnit.lucenekmp.index.LogMergePolicy | Depth 3 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.index.MappedMultiFields](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/MappedMultiFields.java) | org.gnit.lucenekmp.index.MappedMultiFields | Depth 5 | [x] | 6 | 11 | 0% |
 | [org.apache.lucene.index.MappingMultiPostingsEnum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/MappingMultiPostingsEnum.java) | org.gnit.lucenekmp.index.MappingMultiPostingsEnum | Depth 7 | [x] | 2 | 2 | 40% |
 | [org.apache.lucene.index.MergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/MergePolicy.java) | org.gnit.lucenekmp.index.MergePolicy | Depth 2 | [x] | 0 | 1 | 0% |
@@ -11514,19 +11511,19 @@
 | [org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/LZ4WithPresetCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec | Depth 4 | [] | 18 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/dummy/DummyCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec | Depth 5 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/mockrandom/MockRandomPostingsFormat.java) | org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat | Depth 4 | [] | 1 | 0 | 0% |
-| [org.apache.lucene.tests.index.AlcoholicMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/AlcoholicMergePolicy.java) | org.gnit.lucenekmp.tests.index.AlcoholicMergePolicy | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.tests.index.AlcoholicMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/AlcoholicMergePolicy.java) | org.gnit.lucenekmp.tests.index.AlcoholicMergePolicy | Depth 3 | [x] | 1 | 1 | 50% |
 | [org.apache.lucene.tests.index.AssertingLeafReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/AssertingLeafReader.java) | org.gnit.lucenekmp.tests.index.AssertingLeafReader | Depth 4 | [x] | 9 | 1 | 0% |
 | [org.apache.lucene.tests.index.BaseIndexFileFormatTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/BaseIndexFileFormatTestCase.java) | org.gnit.lucenekmp.tests.index.BaseIndexFileFormatTestCase | Depth 3 | [] | 3 | 0 | 0% |
 | [org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/BaseKnnVectorsFormatTestCase.java) | org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase | Depth 2 | [] | 14 | 0 | 0% |
 | [org.apache.lucene.tests.index.FieldFilterLeafReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/FieldFilterLeafReader.java) | org.gnit.lucenekmp.tests.index.FieldFilterLeafReader | Depth 4 | [x] | 3 | 3 | 93% |
 | [org.apache.lucene.tests.index.ForceMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/ForceMergePolicy.java) | org.gnit.lucenekmp.tests.index.ForceMergePolicy | Depth 2 | [] | 16 | 0 | 0% |
-| [org.apache.lucene.tests.index.MergeReaderWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MergeReaderWrapper.java) | org.gnit.lucenekmp.tests.index.MergeReaderWrapper | Depth 5 | [] | 38 | 0 | 0% |
+| [org.apache.lucene.tests.index.MergeReaderWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MergeReaderWrapper.java) | org.gnit.lucenekmp.tests.index.MergeReaderWrapper | Depth 5 | [x] | 38 | 42 | 80% |
 | [org.apache.lucene.tests.index.MergingCodecReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MergingCodecReader.java) | org.gnit.lucenekmp.tests.index.MergingCodecReader | Depth 4 | [x] | 5 | 3 | 73% |
 | [org.apache.lucene.tests.index.MismatchedCodecReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MismatchedCodecReader.java) | org.gnit.lucenekmp.tests.index.MismatchedCodecReader | Depth 3 | [x] | 9 | 6 | 28% |
 | [org.apache.lucene.tests.index.MismatchedDirectoryReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MismatchedDirectoryReader.java) | org.gnit.lucenekmp.tests.index.MismatchedDirectoryReader | Depth 4 | [x] | 2 | 2 | 76% |
 | [org.apache.lucene.tests.index.MismatchedLeafReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MismatchedLeafReader.java) | org.gnit.lucenekmp.tests.index.MismatchedLeafReader | Depth 4 | [x] | 9 | 4 | 0% |
 | [org.apache.lucene.tests.index.MockIndexWriterEventListener](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MockIndexWriterEventListener.java) | org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.tests.index.MockRandomMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MockRandomMergePolicy.java) | org.gnit.lucenekmp.tests.index.MockRandomMergePolicy | Depth 4 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.tests.index.MockRandomMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/MockRandomMergePolicy.java) | org.gnit.lucenekmp.tests.index.MockRandomMergePolicy | Depth 4 | [x] | 2 | 42 | 0% |
 | [org.apache.lucene.tests.index.RandomCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/RandomCodec.java) | org.gnit.lucenekmp.tests.index.RandomCodec | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.index.RandomIndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/RandomIndexWriter.java) | org.gnit.lucenekmp.tests.index.RandomIndexWriter | Depth 3 | [x] | 1 | 3 | 0% |
 | [org.apache.lucene.tests.mockfile.DisableFsyncFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/DisableFsyncFS.java) | org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS | Depth 4 | [] | 15 | 0 | 0% |
@@ -11756,8 +11753,8 @@ TODO_TEST written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 959
-- Ported Unit Test Classes: 848
-- Unit Test Porting Progress: 88%
+- Ported Unit Test Classes: 854
+- Unit Test Porting Progress: 89%
 - **Unit Test Semantic Completion: 47%**
 - Total Test Core Methods Needed: 7124
-- Test Core Methods Implemented: 3377
+- Test Core Methods Implemented: 3415

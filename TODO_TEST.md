@@ -18,7 +18,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.asserting.AssertingTermVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingTermVectorsFormat
 - org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings → org.gnit.lucenekmp.tests.codecs.bloom.TestBloomFilteredLucenePostings
 - org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec
-- org.apache.lucene.tests.index.MergeReaderWrapper → org.gnit.lucenekmp.tests.index.MergeReaderWrapper
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
 - org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
 - org.apache.lucene.tests.mockfile.FilterFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterFileChannel
@@ -65,7 +64,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.compressing.HighCompressionCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.HighCompressionCompressingCodec
 - org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec
 - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
-- org.apache.lucene.tests.index.MockRandomMergePolicy → org.gnit.lucenekmp.tests.index.MockRandomMergePolicy
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.mockfile.DisableFsyncFS → org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS
 - org.apache.lucene.tests.mockfile.FilterFileSystem → org.gnit.lucenekmp.tests.mockfile.FilterFileSystem
@@ -81,16 +79,12 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 ## Depth 3
 - org.apache.lucene.codecs.FilterCodec → org.gnit.lucenekmp.codecs.FilterCodec
 - org.apache.lucene.document.KeywordField → org.gnit.lucenekmp.document.KeywordField
-- org.apache.lucene.index.LogByteSizeMergePolicy → org.gnit.lucenekmp.index.LogByteSizeMergePolicy
-- org.apache.lucene.index.LogDocMergePolicy → org.gnit.lucenekmp.index.LogDocMergePolicy
-- org.apache.lucene.index.LogMergePolicy → org.gnit.lucenekmp.index.LogMergePolicy
 - org.apache.lucene.index.NoDeletionPolicy → org.gnit.lucenekmp.index.NoDeletionPolicy
 - org.apache.lucene.store.FileSwitchDirectory → org.gnit.lucenekmp.store.FileSwitchDirectory
 - org.apache.lucene.store.NRTCachingDirectory → org.gnit.lucenekmp.store.NRTCachingDirectory
 - org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
 - org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec → org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec
 - org.apache.lucene.tests.codecs.compressing.CompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.CompressingCodec
-- org.apache.lucene.tests.index.AlcoholicMergePolicy → org.gnit.lucenekmp.tests.index.AlcoholicMergePolicy
 - org.apache.lucene.tests.index.BaseIndexFileFormatTestCase → org.gnit.lucenekmp.tests.index.BaseIndexFileFormatTestCase
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener
 - org.apache.lucene.tests.mockfile.ExtrasFS → org.gnit.lucenekmp.tests.mockfile.ExtrasFS
