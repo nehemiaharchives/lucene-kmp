@@ -7342,7 +7342,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     }
 
                     override fun newFieldInfosBuilder(
-                        softDeletesFieldName: String, parentFieldName: String
+                        softDeletesFieldName: String?, parentFieldName: String?
                     ): IndexPackageAccess.FieldInfosBuilder {
                         return object : IndexPackageAccess.FieldInfosBuilder {
                             private val builder: FieldInfos.Builder =

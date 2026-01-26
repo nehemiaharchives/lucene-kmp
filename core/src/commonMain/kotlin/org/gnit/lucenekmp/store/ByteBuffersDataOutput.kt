@@ -369,7 +369,7 @@ class ByteBuffersDataOutput @JvmOverloads constructor(
         }
     }
 
-    override fun writeMapOfStrings(map: MutableMap<String, String>) {
+    override fun writeMapOfStrings(map: /*Mutable*/Map<String, String>) {
         try {
             super.writeMapOfStrings(map)
         } catch (e: IOException) {

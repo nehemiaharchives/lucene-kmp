@@ -26,7 +26,7 @@ class FieldInfo(
     docValues: DocValuesType,
     docValuesSkipIndex: DocValuesSkipIndexType,
     dvGen: Long,
-    attributes: MutableMap<String, String>,
+    attributes: /*Mutable*/Map<String, String>,
     pointDimensionCount: Int,
     pointIndexDimensionCount: Int,
     pointNumBytes: Int,
@@ -46,7 +46,7 @@ class FieldInfo(
     val indexOptions: IndexOptions
     private var storePayloads = false // whether this field stores payloads together with term positions
 
-    private var attributes: MutableMap<String, String>
+    private var attributes: /*Mutable*/Map<String, String>
 
     private var dvGen: Long
 
@@ -140,7 +140,7 @@ class FieldInfo(
             this.omitNorms = false
         }
         this.dvGen = dvGen
-        this.attributes = requireNotNull<MutableMap<String, String>>(attributes)
+        this.attributes = requireNotNull</*Mutable*/Map<String, String>>(attributes)
         this.pointDimensionCount = pointDimensionCount
         this.pointIndexDimensionCount = pointIndexDimensionCount
         this.pointNumBytes = pointNumBytes
@@ -418,17 +418,14 @@ class FieldInfo(
      * after merge is undefined.
      */
     fun putAttribute(key: String, value: String): String? {
-        val newMap: MutableMap<String, String> = attributes
-        val oldValue: String? = newMap[key]
-        newMap[key] = value
-        // This needs to be thread-safe as multiple threads may be updating (different) attributes
-        // concurrently due to concurrent merging.
-        attributes = newMap
+        val oldValue: String? = attributes[key]
+        // create a new map with the updated entry and atomically replace the reference
+        attributes = attributes + (key to value)
         return oldValue
     }
 
     /** Returns internal codec attributes map.  */
-    fun attributes(): MutableMap<String, String> {
+    fun attributes(): Map<String, String> {
         return attributes
     }
 

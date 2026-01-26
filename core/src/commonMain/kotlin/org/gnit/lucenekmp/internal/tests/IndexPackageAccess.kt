@@ -15,7 +15,7 @@ interface IndexPackageAccess {
 
     fun setIndexWriterMaxDocs(limit: Int)
 
-    fun newFieldInfosBuilder(softDeletesFieldName: String, parentFieldName: String): FieldInfosBuilder
+    fun newFieldInfosBuilder(softDeletesFieldName: String?, parentFieldName: String?): FieldInfosBuilder
 
     fun checkImpacts(impacts: Impacts, max: Int)
 

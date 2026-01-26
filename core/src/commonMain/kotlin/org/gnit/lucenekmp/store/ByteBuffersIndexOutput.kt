@@ -125,7 +125,7 @@ class ByteBuffersIndexOutput(
     }
 
     @Throws(IOException::class)
-    override fun writeMapOfStrings(map: MutableMap<String, String>) {
+    override fun writeMapOfStrings(map: /*Mutable*/Map<String, String>) {
         ensureOpen()
         delegate!!.writeMapOfStrings(map)
     }

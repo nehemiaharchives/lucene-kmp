@@ -302,7 +302,7 @@ abstract class DataOutput {
      * @throws NullPointerException if `map` is null.
      */
     @Throws(IOException::class)
-    open fun writeMapOfStrings(map: MutableMap<String, String>) {
+    open fun writeMapOfStrings(map: /*Mutable*/Map<String, String>) {
         writeVInt(map.size)
         for (entry in map.entries) {
             writeString(entry.key)

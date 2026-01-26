@@ -237,7 +237,7 @@ class SimpleTextFieldInfosFormat : FieldInfosFormat() {
 
     private fun readString(offset: Int, scratch: BytesRefBuilder): String {
         val bytes = scratch.bytes().copyOfRange(offset, scratch.length())
-        return String.fromByteArray(bytes, StandardCharsets.UTF_8)
+        return bytes.decodeToString()
     }
 
     @Throws(IOException::class)

@@ -663,7 +663,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
          */
         fun add(fi: FieldInfo, dvGen: Long): FieldInfo {
             val curFi = fieldInfo(fi.name)
-            val attributes: MutableMap<String, String> = fi.attributes()
+            val attributes: /*Mutable*/Map<String, String> = fi.attributes()
             if (curFi != null) {
                 curFi.verifySameSchema(fi)
                 if (attributes != null) {

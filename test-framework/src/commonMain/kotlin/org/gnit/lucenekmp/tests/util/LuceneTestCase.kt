@@ -1780,10 +1780,65 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         // line 2069
 
 
-        //↓ line 2872 of LuceneTestCase.java
+        //↓ line 2824 of LuceneTestCase.java
+        private data class StackFrame(val className: String, val methodName: String)
+
+        private fun parseStackFrames(trace: String): List<StackFrame> {
+            val frames = mutableListOf<StackFrame>()
+            val pattern = Regex("""\s*at\s+([^\s(]+)""")
+            for (line in trace.lineSequence().drop(1)) { // skip header line
+                val match = pattern.find(line) ?: continue
+                val fqMethod = match.groupValues[1]
+                val lastDot = fqMethod.lastIndexOf('.')
+                if (lastDot <= 0 || lastDot == fqMethod.length - 1) {
+                    continue
+                }
+                val className = fqMethod.substring(0, lastDot)
+                val methodName = fqMethod.substring(lastDot + 1)
+                frames.add(StackFrame(className, methodName))
+            }
+            return if (frames.size > 1) frames.drop(1) else emptyList() // drop this helper frame
+        }
+
+        /** Inspects stack trace to figure out if a method of a specific class called us.  */
+        fun callStackContains(clazz: KClass<*>, methodName: String): Boolean {
+            val className = clazz.qualifiedName ?: clazz.toString()
+            val trace = Throwable().stackTraceToString()
+            val frames = parseStackFrames(trace)
+            if (frames.isNotEmpty()) {
+                return frames.any { it.className == className && it.methodName == methodName }
+            }
+            return trace.contains(className) && trace.contains(methodName)
+        }
+
+        /**
+         * Inspects stack trace to figure out if one of the given method names (no class restriction)
+         * called us.
+         */
+        fun callStackContainsAnyOf(vararg methodNames: String): Boolean {
+            val methods = methodNames.toSet()
+            val trace = Throwable().stackTraceToString()
+            val frames = parseStackFrames(trace)
+            if (frames.isNotEmpty()) {
+                return frames.any { it.methodName in methods }
+            }
+            return methods.any { trace.contains(it) }
+        }
+
+        /** Inspects stack trace if the given class called us.  */
+        fun callStackContains(clazz: KClass<*>): Boolean {
+            val className = clazz.qualifiedName ?: clazz.toString()
+            val trace = Throwable().stackTraceToString()
+            val frames = parseStackFrames(trace)
+            if (frames.isNotEmpty()) {
+                return frames.any { it.className == className }
+            }
+            return trace.contains(className)
+        }
+
         /** Checks a specific exception class is thrown by the given runnable, and returns it.  */
         fun <T : Throwable> expectThrows(
-            expectedType: KClass<T>, runnable: ThrowingRunnable
+            expectedType: KClass<T>, runnable: LuceneTestCase.ThrowingRunnable
         ): T {
             return expectThrows(
                 expectedType,
@@ -1796,7 +1851,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         fun <T : Throwable> expectThrows(
             expectedType: KClass<T>,
             noExceptionMessage: String?,
-            runnable: ThrowingRunnable
+            runnable: LuceneTestCase.ThrowingRunnable
         ): T {
             val thrown: Throwable? =
                 _expectThrows(mutableListOf(expectedType), runnable)
@@ -1819,7 +1874,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         /** Checks a specific exception class is thrown by the given runnable, and returns it.  */
         fun <T : Throwable> expectThrowsAnyOf(
             expectedTypes: MutableList<KClass<out T>>,
-            runnable: ThrowingRunnable
+            runnable: LuceneTestCase.ThrowingRunnable
         ): T {
             if (expectedTypes.isEmpty()) {
                 throw AssertionError("At least one expected exception type is required?")
@@ -1861,7 +1916,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         fun <TO : Throwable, TW : Throwable> expectThrows(
             expectedOuterType: KClass<TO>,
             expectedWrappedType: KClass<TW>,
-            runnable: ThrowingRunnable
+            runnable: LuceneTestCase.ThrowingRunnable
         ): TW {
             val thrown: Throwable? =
                 _expectThrows(mutableListOf(expectedOuterType), runnable)
@@ -1907,7 +1962,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          */
         fun <TO : Throwable, TW : Throwable> expectThrowsAnyOf(
             expectedOuterToWrappedTypes: Map<KClass<out TO>, MutableList<KClass<out TW>>>,
-            runnable: ThrowingRunnable
+            runnable: LuceneTestCase.ThrowingRunnable
         ): TO? {
             val outerClasses: MutableList<KClass<out TO>> = expectedOuterToWrappedTypes.keys.toMutableList()
             val thrown: Throwable? = _expectThrows(outerClasses, runnable)
@@ -1962,7 +2017,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          */
         private fun _expectThrows(
             expectedTypes: MutableList<out KClass<*>>,
-            runnable: ThrowingRunnable
+            runnable: LuceneTestCase.ThrowingRunnable
         ): Throwable? {
             try {
                 runnable.run()

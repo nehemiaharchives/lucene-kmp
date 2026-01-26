@@ -1135,10 +1135,10 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
      * registered with the mock directory. After register, each object will be invoked once for each
      * first write of a file, giving the object a chance to throw an IOException.
      */
-    class Failure {
+    open class Failure {
         /** eval is called on the first write of every new file.  */
         @Throws(IOException::class)
-        fun eval(dir: MockDirectoryWrapper) {
+        open fun eval(dir: MockDirectoryWrapper) {
         }
 
         /**
