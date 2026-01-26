@@ -11833,13 +11833,21 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ## Summary
 
-### Lucene Classes (Semantic Analysis)
+### Lucene Priority-1 Classes (Semantic Analysis)
 - Total Priority-1 Classes: 668
-- Ported Classes: 666
-- Class Porting Progress: 99%
+- Ported Priority-1 Classes: 666
+- Priority-1 Class Porting Progress: 99%
 - **Semantic Completion Progress: 55%**
 - Total Core Methods Needed: 4987
 - Core Methods Implemented: 2769
+
+### Lucene Classes (Semantic Analysis)
+- Total Classes: 3100
+- Ported Classes: 932
+- Class Porting Progress: 30%
+- **Semantic Completion Progress: 10%**
+- Total Core Methods Needed: 29487
+- Core Methods Implemented: 2979
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1078

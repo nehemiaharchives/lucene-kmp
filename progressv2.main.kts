@@ -929,10 +929,10 @@ class Progress : CliktCommand() {
         ps.println("## Summary")
 
         ps.println("")
-        ps.println("### Lucene Classes (Semantic Analysis)")
-        val totalClasses = javaPr1Classes.size
-        val portedClasses = totalClasses - luceneTableRows.count { it[3] == "[]" }
-        val classPortingProgress = if (totalClasses > 0) (portedClasses * 100) / totalClasses else 0
+        ps.println("### Lucene Priority-1 Classes (Semantic Analysis)")
+        val totalPri1Classes = javaPr1Classes.size
+        val portedPri1Classes = totalPri1Classes - luceneTableRows.count { it[3] == "[]" }
+        val pri1ClassPortingProgress = if (totalPri1Classes > 0) (portedPri1Classes * 100) / totalPri1Classes else 0
 
         // Calculate semantic completion metrics
         var totalCoreMethodsNeeded = 0
@@ -959,12 +959,52 @@ class Progress : CliktCommand() {
             100
         }
 
-        ps.println("- Total Priority-1 Classes: $totalClasses")
-        ps.println("- Ported Classes: $portedClasses")
-        ps.println("- Class Porting Progress: $classPortingProgress%")
+        ps.println("- Total Priority-1 Classes: $totalPri1Classes")
+        ps.println("- Ported Priority-1 Classes: $portedPri1Classes")
+        ps.println("- Priority-1 Class Porting Progress: $pri1ClassPortingProgress%")
         ps.println("- **Semantic Completion Progress: $semanticCompletionPercent%**")
         ps.println("- Total Core Methods Needed: $totalCoreMethodsNeeded")
         ps.println("- Core Methods Implemented: $totalCoreMethodsImplemented")
+
+        ps.println("")
+        ps.println("### Lucene Classes (Semantic Analysis)")
+        val totalAllClasses = javaLucene.allClasses.size
+        val portedAllClasses = javaLucene.allClasses.count { classInfo ->
+            val kmpFqn = mapToKmp(classInfo.name)
+            kmpClasses.containsKey(kmpFqn)
+        }
+        val allClassPortingProgress = if (totalAllClasses > 0) (portedAllClasses * 100) / totalAllClasses else 0
+
+        var totalAllCoreMethodsNeeded = 0
+        var totalAllCoreMethodsImplemented = 0
+        javaLucene.allClasses.forEach { classInfo ->
+            val javaAnalysis = analyzeClassMethods(classInfo)
+            val kmpFqn = mapToKmp(classInfo.name)
+            val kmpClassInfo = kmpClasses[kmpFqn]
+            val kmpAnalysis = if (kmpClassInfo != null) analyzeClassMethods(kmpClassInfo) else null
+
+            totalAllCoreMethodsNeeded += javaAnalysis.coreBusinessLogic.size
+            if (kmpAnalysis != null) {
+                totalAllCoreMethodsImplemented += javaAnalysis.coreBusinessLogic.count { javaMethod ->
+                    kmpAnalysis.coreBusinessLogic.any { kmpMethod ->
+                        methodsSemanticMatch(javaMethod, kmpMethod)
+                    }
+                }
+            }
+        }
+
+        val allSemanticCompletionPercent = if (totalAllCoreMethodsNeeded > 0) {
+            (totalAllCoreMethodsImplemented * 100) / totalAllCoreMethodsNeeded
+        } else {
+            100
+        }
+
+        ps.println("- Total Classes: $totalAllClasses")
+        ps.println("- Ported Classes: $portedAllClasses")
+        ps.println("- Class Porting Progress: $allClassPortingProgress%")
+        ps.println("- **Semantic Completion Progress: $allSemanticCompletionPercent%**")
+        ps.println("- Total Core Methods Needed: $totalAllCoreMethodsNeeded")
+        ps.println("- Core Methods Implemented: $totalAllCoreMethodsImplemented")
 
         ps.println("")
         ps.println("### Unit Test Classes (Semantic Analysis)")
