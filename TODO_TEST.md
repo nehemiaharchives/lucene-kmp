@@ -3,7 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 4
-- org.apache.lucene.search.similarities.Normalization → org.gnit.lucenekmp.search.similarities.Normalization
 - org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat
 - org.apache.lucene.tests.codecs.asserting.AssertingLiveDocsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingLiveDocsFormat
 - org.apache.lucene.tests.codecs.asserting.AssertingNormsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingNormsFormat
@@ -21,16 +20,13 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
 - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
 - org.apache.lucene.search.MultiCollector → org.gnit.lucenekmp.search.MultiCollector
-- org.apache.lucene.search.similarities.AfterEffect → org.gnit.lucenekmp.search.similarities.AfterEffect
 - org.apache.lucene.search.similarities.AfterEffectB → org.gnit.lucenekmp.search.similarities.AfterEffectB
 - org.apache.lucene.search.similarities.AfterEffectL → org.gnit.lucenekmp.search.similarities.AfterEffectL
-- org.apache.lucene.search.similarities.BasicModel → org.gnit.lucenekmp.search.similarities.BasicModel
 - org.apache.lucene.search.similarities.BasicModelG → org.gnit.lucenekmp.search.similarities.BasicModelG
 - org.apache.lucene.search.similarities.BasicModelIF → org.gnit.lucenekmp.search.similarities.BasicModelIF
 - org.apache.lucene.search.similarities.BasicModelIn → org.gnit.lucenekmp.search.similarities.BasicModelIn
 - org.apache.lucene.search.similarities.BasicModelIne → org.gnit.lucenekmp.search.similarities.BasicModelIne
 - org.apache.lucene.search.similarities.DFISimilarity → org.gnit.lucenekmp.search.similarities.DFISimilarity
-- org.apache.lucene.search.similarities.DFRSimilarity → org.gnit.lucenekmp.search.similarities.DFRSimilarity
 - org.apache.lucene.search.similarities.Distribution → org.gnit.lucenekmp.search.similarities.Distribution
 - org.apache.lucene.search.similarities.DistributionLL → org.gnit.lucenekmp.search.similarities.DistributionLL
 - org.apache.lucene.search.similarities.DistributionSPL → org.gnit.lucenekmp.search.similarities.DistributionSPL
