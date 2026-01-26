@@ -142,7 +142,7 @@ class ParallelCompositeReader(
                     object : ParallelLeafReader(true, subs, storedSubs) {
                         override fun doClose() {}
                         override fun terms(field: String?): Terms? {
-                            TODO("Not yet implemented")
+                            return super.terms(field)
                         }
 
                         override fun searchNearestVectors(
@@ -151,7 +151,7 @@ class ParallelCompositeReader(
                             knnCollector: KnnCollector,
                             acceptDocs: Bits?
                         ) {
-                            TODO("Not yet implemented")
+                            super.searchNearestVectors(field, target, knnCollector, acceptDocs)
                         }
 
                         override fun searchNearestVectors(
@@ -160,7 +160,7 @@ class ParallelCompositeReader(
                             knnCollector: KnnCollector,
                             acceptDocs: Bits?
                         ) {
-                            TODO("Not yet implemented")
+                            super.searchNearestVectors(field, target, knnCollector, acceptDocs)
                         }
                     }
                 }
