@@ -142,7 +142,7 @@
 |     org.apache.lucene.codecs.lucene90 | 14 | 3 | 21% |
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 0 | 0% |
-|     org.apache.lucene.codecs.lucene94 | 1 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene99 | 6 | 1 | 16% |
 |     org.apache.lucene.codecs.perfield | 4 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 3 | 6% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 165 | 24% |
+| Total | 673 | 166 | 24% |
 
 
 ## Tests To Port
@@ -215,7 +215,6 @@
 | [org.apache.lucene.codecs.lucene90.compressing.TestCompressingStoredFieldsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/compressing/TestCompressingStoredFieldsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.compressing.TestCompressingStoredFieldsFormat |
 | [org.apache.lucene.codecs.lucene90.compressing.TestCompressingTermVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/compressing/TestCompressingTermVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.compressing.TestCompressingTermVectorsFormat |
 | [org.apache.lucene.codecs.lucene90.compressing.TestStoredFieldsInt](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/compressing/TestStoredFieldsInt.java) | org.gnit.lucenekmp.codecs.lucene90.compressing.TestStoredFieldsInt |
-| [org.apache.lucene.codecs.lucene94.TestLucene94FieldInfosFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene94/TestLucene94FieldInfosFormat.java) | org.gnit.lucenekmp.codecs.lucene94.TestLucene94FieldInfosFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99HnswQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99HnswVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99HnswVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswVectorsFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat |
