@@ -1,4 +1,4 @@
-package org.gnit.lucenekmp.tests.codex.bloom
+package org.gnit.lucenekmp.tests.codecs.bloom
 
 import okio.IOException
 import org.gnit.lucenekmp.codecs.FieldsConsumer
@@ -11,7 +11,6 @@ import org.gnit.lucenekmp.index.FieldInfo
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.tests.util.TestUtil
-
 
 /**
  * A class used for testing [BloomFilteringPostingsFormat] with a concrete delegate

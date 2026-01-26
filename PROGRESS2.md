@@ -11575,7 +11575,7 @@
 | [org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneFixedGap.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap | Depth 2 | [] | 5 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneVarGapDocFreqInterval.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval | Depth 3 | [] | 5 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneVarGapFixedInterval.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval | Depth 3 | [] | 5 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/bloom/TestBloomFilteredLucenePostings.java) | org.gnit.lucenekmp.tests.codecs.bloom.TestBloomFilteredLucenePostings | Depth 4 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/bloom/TestBloomFilteredLucenePostings.java) | org.gnit.lucenekmp.tests.codecs.bloom.TestBloomFilteredLucenePostings | Depth 4 | [x] | 2 | 3 | 66% |
 | [org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/cheapbastard/CheapBastardCodec.java) | org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec | Depth 2 | [] | 14 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.compressing.CompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/CompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.CompressingCodec | Depth 2 | [] | 18 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.compressing.DeflateWithPresetCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/DeflateWithPresetCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.DeflateWithPresetCompressingCodec | Depth 3 | [] | 18 | 0 | 0% |
@@ -11851,8 +11851,8 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1078
-- Ported Unit Test Classes: 952
+- Ported Unit Test Classes: 953
 - Unit Test Porting Progress: 88%
 - **Unit Test Semantic Completion: 41%**
 - Total Test Core Methods Needed: 9333
-- Test Core Methods Implemented: 3839
+- Test Core Methods Implemented: 3841
