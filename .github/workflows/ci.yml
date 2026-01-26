@@ -7,11 +7,16 @@ on:
     paths-ignore:
       - '**.md'
       - '**.sh'
+      - 'progress.main.kts'
+      - 'progressv2.main.kts'
+      - 'progressv3.main.kts'
   pull_request:
     branches: [ master ]
     paths-ignore:
       - '**.md'
       - '**.sh'
+      - 'progressv2.main.kts'
+      - 'progressv3.main.kts'
 
 jobs:
   tests:
