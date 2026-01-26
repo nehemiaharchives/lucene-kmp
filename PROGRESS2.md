@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 1078
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 952
+### Total KMP classes: 962
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1208
+### Total KMP Unit Test classes: 1223
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11488,17 +11488,11 @@
 | [org.apache.lucene.search.comparators.NumericComparator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/comparators/NumericComparator.java) | org.gnit.lucenekmp.search.comparators.NumericComparator | Depth 4 | [x] | 11 | 4 | 0% |
 | [org.apache.lucene.search.comparators.TermOrdValComparator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/comparators/TermOrdValComparator.java) | org.gnit.lucenekmp.search.comparators.TermOrdValComparator | Depth 3 | [x] | 9 | 6 | 0% |
 | [org.apache.lucene.search.knn.MultiLeafKnnCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/knn/MultiLeafKnnCollector.java) | org.gnit.lucenekmp.search.knn.MultiLeafKnnCollector | Depth 1 | [x] | 7 | 3 | 0% |
-| [org.apache.lucene.search.similarities.AfterEffectB](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/AfterEffectB.java) | org.gnit.lucenekmp.search.similarities.AfterEffectB | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.AfterEffectL](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/AfterEffectL.java) | org.gnit.lucenekmp.search.similarities.AfterEffectL | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.Axiomatic](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/Axiomatic.java) | org.gnit.lucenekmp.search.similarities.Axiomatic | Depth 4 | [x] | 17 | 16 | 88% |
 | [org.apache.lucene.search.similarities.AxiomaticF1EXP](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/AxiomaticF1EXP.java) | org.gnit.lucenekmp.search.similarities.AxiomaticF1EXP | Depth 3 | [x] | 17 | 16 | 88% |
 | [org.apache.lucene.search.similarities.AxiomaticF1LOG](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/AxiomaticF1LOG.java) | org.gnit.lucenekmp.search.similarities.AxiomaticF1LOG | Depth 3 | [x] | 17 | 16 | 88% |
 | [org.apache.lucene.search.similarities.AxiomaticF2EXP](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/AxiomaticF2EXP.java) | org.gnit.lucenekmp.search.similarities.AxiomaticF2EXP | Depth 3 | [x] | 17 | 16 | 88% |
 | [org.apache.lucene.search.similarities.AxiomaticF2LOG](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/AxiomaticF2LOG.java) | org.gnit.lucenekmp.search.similarities.AxiomaticF2LOG | Depth 3 | [x] | 17 | 16 | 88% |
-| [org.apache.lucene.search.similarities.BasicModelG](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelG.java) | org.gnit.lucenekmp.search.similarities.BasicModelG | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.BasicModelIF](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelIF.java) | org.gnit.lucenekmp.search.similarities.BasicModelIF | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.BasicModelIn](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelIn.java) | org.gnit.lucenekmp.search.similarities.BasicModelIn | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.BasicModelIne](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicModelIne.java) | org.gnit.lucenekmp.search.similarities.BasicModelIne | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.BasicStats](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BasicStats.java) | org.gnit.lucenekmp.search.similarities.BasicStats | Depth 4 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.search.similarities.BooleanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/BooleanSimilarity.java) | org.gnit.lucenekmp.search.similarities.BooleanSimilarity | Depth 4 | [x] | 2 | 2 | 76% |
 | [org.apache.lucene.search.similarities.DFISimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/DFISimilarity.java) | org.gnit.lucenekmp.search.similarities.DFISimilarity | Depth 3 | [] | 8 | 0 | 0% |
@@ -11518,10 +11512,6 @@
 | [org.apache.lucene.search.similarities.LambdaDF](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/LambdaDF.java) | org.gnit.lucenekmp.search.similarities.LambdaDF | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.LambdaTTF](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/LambdaTTF.java) | org.gnit.lucenekmp.search.similarities.LambdaTTF | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.MultiSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/MultiSimilarity.java) | org.gnit.lucenekmp.search.similarities.MultiSimilarity | Depth 5 | [x] | 2 | 2 | 0% |
-| [org.apache.lucene.search.similarities.NormalizationH1](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/NormalizationH1.java) | org.gnit.lucenekmp.search.similarities.NormalizationH1 | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.NormalizationH2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/NormalizationH2.java) | org.gnit.lucenekmp.search.similarities.NormalizationH2 | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.NormalizationH3](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/NormalizationH3.java) | org.gnit.lucenekmp.search.similarities.NormalizationH3 | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.search.similarities.NormalizationZ](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/NormalizationZ.java) | org.gnit.lucenekmp.search.similarities.NormalizationZ | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.RawTFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/RawTFSimilarity.java) | org.gnit.lucenekmp.search.similarities.RawTFSimilarity | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.search.similarities.SimilarityBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/SimilarityBase.java) | org.gnit.lucenekmp.search.similarities.SimilarityBase | Depth 5 | [x] | 3 | 1 | 0% |
 | [org.apache.lucene.search.similarities.TFIDFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/similarities/TFIDFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TFIDFSimilarity | Depth 3 | [x] | 3 | 3 | 83% |
@@ -11853,8 +11843,8 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1078
-- Ported Unit Test Classes: 932
-- Unit Test Porting Progress: 86%
+- Ported Unit Test Classes: 942
+- Unit Test Porting Progress: 87%
 - **Unit Test Semantic Completion: 40%**
 - Total Test Core Methods Needed: 9333
-- Test Core Methods Implemented: 3798
+- Test Core Methods Implemented: 3818

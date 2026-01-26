@@ -4,7 +4,6 @@ import okio.IOException
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.FieldType
 import org.gnit.lucenekmp.document.TextField
-import org.gnit.lucenekmp.index.IndexableField
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.assert

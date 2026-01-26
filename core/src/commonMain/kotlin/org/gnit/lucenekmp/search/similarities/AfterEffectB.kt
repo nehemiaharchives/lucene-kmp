@@ -1,0 +1,54 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.gnit.lucenekmp.search.similarities
+
+import org.gnit.lucenekmp.search.Explanation
+
+/**
+ * Model of the information gain based on the ratio of two Bernoulli processes.
+ *
+ * @lucene.experimental
+ */
+class AfterEffectB : AfterEffect {
+
+    /** Sole constructor: parameter-free */
+    constructor()
+
+    override fun scoreTimes1pTfn(stats: BasicStats): Double {
+        val F = stats.totalTermFreq + 1
+        val n = stats.docFreq + 1
+        return (F + 1.0) / n
+    }
+
+    final override fun explain(stats: BasicStats, tfn: Double): Explanation {
+        return Explanation.match(
+            (scoreTimes1pTfn(stats) / (1 + tfn)).toFloat(),
+            this::class.simpleName + ", computed as (F + 1) / (n * (tfn + 1)) from:",
+            Explanation.match(tfn.toFloat(), "tfn, normalized term frequency"),
+            Explanation.match(
+                stats.totalTermFreq,
+                "F, total number of occurrences of term across all documents + 1"
+            ),
+            Explanation.match(stats.docFreq, "n, number of documents containing term + 1"),
+            Explanation.match(tfn.toFloat(), "tfn, normalized term frequency")
+        )
+    }
+
+    override fun toString(): String {
+        return "B"
+    }
+}
