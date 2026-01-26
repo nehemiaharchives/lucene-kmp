@@ -3,12 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 4
-- org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat
-- org.apache.lucene.tests.codecs.asserting.AssertingLiveDocsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingLiveDocsFormat
-- org.apache.lucene.tests.codecs.asserting.AssertingNormsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingNormsFormat
-- org.apache.lucene.tests.codecs.asserting.AssertingPointsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingPointsFormat
-- org.apache.lucene.tests.codecs.asserting.AssertingStoredFieldsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingStoredFieldsFormat
-- org.apache.lucene.tests.codecs.asserting.AssertingTermVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingTermVectorsFormat
 - org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings → org.gnit.lucenekmp.tests.codecs.bloom.TestBloomFilteredLucenePostings
 - org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
@@ -16,7 +10,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
 
 ## Depth 3
-- org.apache.lucene.codecs.FilterCodec → org.gnit.lucenekmp.codecs.FilterCodec
 - org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
 - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
 - org.apache.lucene.search.MultiCollector → org.gnit.lucenekmp.search.MultiCollector
@@ -35,9 +28,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.similarities.LambdaTTF → org.gnit.lucenekmp.search.similarities.LambdaTTF
 - org.apache.lucene.search.similarities.RawTFSimilarity → org.gnit.lucenekmp.search.similarities.RawTFSimilarity
 - org.apache.lucene.store.LockReleaseFailedException → org.gnit.lucenekmp.store.LockReleaseFailedException
-- org.apache.lucene.tests.codecs.asserting.AssertingCodec → org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
-- org.apache.lucene.tests.codecs.asserting.AssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingDocValuesFormat
-- org.apache.lucene.tests.codecs.asserting.AssertingPostingsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingPostingsFormat
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
 - org.apache.lucene.tests.codecs.compressing.DeflateWithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.DeflateWithPresetCompressingCodec

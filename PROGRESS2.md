@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 1078
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 962
+### Total KMP classes: 963
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1223
+### Total KMP Unit Test classes: 1233
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11074,7 +11074,7 @@
 | [org.apache.lucene.codecs.DocValuesConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/DocValuesConsumer.java) | org.gnit.lucenekmp.codecs.DocValuesConsumer | Depth 4 | [x] | 8 | 12 | 0% |
 | [org.apache.lucene.codecs.DocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/DocValuesFormat.java) | org.gnit.lucenekmp.codecs.DocValuesFormat | Depth 3 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.codecs.FieldsProducer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/FieldsProducer.java) | org.gnit.lucenekmp.codecs.FieldsProducer | Depth 2 | [x] | 3 | 3 | 96% |
-| [org.apache.lucene.codecs.FilterCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/FilterCodec.java) | org.gnit.lucenekmp.codecs.FilterCodec | Depth 3 | [] | 14 | 0 | 0% |
+| [org.apache.lucene.codecs.FilterCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/FilterCodec.java) | org.gnit.lucenekmp.codecs.FilterCodec | Depth 3 | [x] | 14 | 11 | 93% |
 | [org.apache.lucene.codecs.KnnFieldVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/KnnFieldVectorsWriter.java) | org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter | Depth 2 | [x] | 3 | 3 | 88% |
 | [org.apache.lucene.codecs.KnnVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/KnnVectorsFormat.java) | org.gnit.lucenekmp.codecs.KnnVectorsFormat | Depth 2 | [x] | 6 | 0 | 0% |
 | [org.apache.lucene.codecs.KnnVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/KnnVectorsWriter.java) | org.gnit.lucenekmp.codecs.KnnVectorsWriter | Depth 3 | [x] | 0 | 0 | 0% |
@@ -11563,15 +11563,15 @@
 | [org.apache.lucene.tests.analysis.Token](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/Token.java) | org.gnit.lucenekmp.tests.analysis.Token | Depth 1 | [x] | 24 | 2 | 13% |
 | [org.apache.lucene.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/standard/EmojiTokenizationTestUnicode_12_1.java) | org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1 | Depth 1 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.tests.analysis.standard.WordBreakTestUnicode_12_1_0](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/standard/WordBreakTestUnicode_12_1_0.java) | org.gnit.lucenekmp.tests.analysis.standard.WordBreakTestUnicode_12_1_0 | Depth 1 | [] | 1 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingCodec.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec | Depth 3 | [] | 8 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingDocValuesFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingDocValuesFormat | Depth 3 | [] | 16 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingKnnVectorsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat | Depth 4 | [] | 8 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingLiveDocsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingLiveDocsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingLiveDocsFormat | Depth 4 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingNormsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingNormsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingNormsFormat | Depth 4 | [] | 4 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingPointsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingPointsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingPointsFormat | Depth 4 | [] | 3 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingPostingsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingPostingsFormat | Depth 3 | [] | 3 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingStoredFieldsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingStoredFieldsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingStoredFieldsFormat | Depth 4 | [] | 6 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.asserting.AssertingTermVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingTermVectorsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingTermVectorsFormat | Depth 4 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingCodec.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec | Depth 3 | [x] | 8 | 3 | 86% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingDocValuesFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingDocValuesFormat | Depth 3 | [x] | 16 | 8 | 11% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingKnnVectorsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat | Depth 4 | [x] | 8 | 8 | 11% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingLiveDocsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingLiveDocsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingLiveDocsFormat | Depth 4 | [x] | 2 | 2 | 77% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingNormsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingNormsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingNormsFormat | Depth 4 | [x] | 4 | 3 | 26% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingPointsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingPointsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingPointsFormat | Depth 4 | [x] | 3 | 5 | 20% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingPostingsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingPostingsFormat | Depth 3 | [x] | 3 | 3 | 19% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingStoredFieldsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingStoredFieldsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingStoredFieldsFormat | Depth 4 | [x] | 6 | 1 | 0% |
+| [org.apache.lucene.tests.codecs.asserting.AssertingTermVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/asserting/AssertingTermVectorsFormat.java) | org.gnit.lucenekmp.tests.codecs.asserting.AssertingTermVectorsFormat | Depth 4 | [x] | 5 | 1 | 0% |
 | [org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneFixedGap.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap | Depth 2 | [] | 5 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneVarGapDocFreqInterval.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval | Depth 3 | [] | 5 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneVarGapFixedInterval.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval | Depth 3 | [] | 5 | 0 | 0% |
@@ -11843,16 +11843,16 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Lucene Classes (Semantic Analysis)
 - Total Classes: 3100
-- Ported Classes: 932
+- Ported Classes: 933
 - Class Porting Progress: 30%
 - **Semantic Completion Progress: 10%**
 - Total Core Methods Needed: 29487
-- Core Methods Implemented: 2979
+- Core Methods Implemented: 2990
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1078
-- Ported Unit Test Classes: 942
-- Unit Test Porting Progress: 87%
-- **Unit Test Semantic Completion: 40%**
+- Ported Unit Test Classes: 952
+- Unit Test Porting Progress: 88%
+- **Unit Test Semantic Completion: 41%**
 - Total Test Core Methods Needed: 9333
-- Test Core Methods Implemented: 3818
+- Test Core Methods Implemented: 3839

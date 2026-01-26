@@ -29,7 +29,7 @@ protected constructor() : AutoCloseable {
      */
     @Throws(IOException::class) abstract fun getValues(field: String): PointValues?
 
-    val mergeInstance: PointsReader
+    open val mergeInstance: PointsReader
         /**
          * Returns an instance optimized for merging. This instance may only be used in the thread that
          * acquires it.

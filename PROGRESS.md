@@ -62,12 +62,12 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 993 | 72% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1003 | 73% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 17 | 68% | [ ] |
-|   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 36 | 87% | [ ] |
+|   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 37 | 90% | [ ] |
 |     org.apache.lucene.codecs.compressing |         org.gnit.lucenekmp.codecs.compressing | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.hnsw |         org.gnit.lucenekmp.codecs.hnsw | 10 | 9 | 90% | [ ] |
 |     org.apache.lucene.codecs.lucene101 |         org.gnit.lucenekmp.codecs.lucene101 | 10 | 8 | 80% | [ ] |
@@ -93,7 +93,7 @@
 |     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 15 | 51% | [ ] |
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
-|       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 0 | 0% | [ ] |
+|       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 9 | 90% | [ ] |
 |       org.apache.lucene.tests.codecs.blockterms |           org.gnit.lucenekmp.tests.codecs.blockterms | 4 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.bloom |           org.gnit.lucenekmp.tests.codecs.bloom | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.cheapbastard |           org.gnit.lucenekmp.tests.codecs.cheapbastard | 2 | 0 | 0% | [ ] |

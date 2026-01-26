@@ -74,7 +74,7 @@ protected constructor() : AutoCloseable, Accountable {
 
     /** Called after a term and all its positions have been added.  */
     @Throws(IOException::class)
-    fun finishTerm() {
+    open fun finishTerm() {
     }
 
     /** Adds a term position and offsets  */
