@@ -44,7 +44,7 @@ abstract class BaseCompoundFormatTestCase :
     BaseIndexFileFormatTestCase() {
     // test that empty CFS is empty
     @Throws(IOException::class)
-    fun testEmpty() {
+    open fun testEmpty() {
         val dir: Directory =
             newDirectory()
 
@@ -63,7 +63,7 @@ abstract class BaseCompoundFormatTestCase :
      * 1, 10, 100 bytes.
      */
     @Throws(IOException::class)
-    fun testSingleFile() {
+    open fun testSingleFile() {
         val data = intArrayOf(0, 1, 10, 100)
         for (i in data.indices) {
             val testfile = "_$i.test"
@@ -96,7 +96,7 @@ abstract class BaseCompoundFormatTestCase :
 
     /** This test creates compound file based on two files.  */
     @Throws(IOException::class)
-    fun testTwoFiles() {
+    open fun testTwoFiles() {
         val files = arrayOf<String>("_123.d1", "_123.d2")
         val dir: Directory =
             newDirectory()
@@ -130,7 +130,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // test that a second call to close() behaves according to Closeable
     @Throws(IOException::class)
-    fun testDoubleClose() {
+    open fun testDoubleClose() {
         val testfile = "_123.test"
 
         val dir: Directory =
@@ -153,7 +153,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // LUCENE-5724: things like NRTCachingDir rely upon IOContext being properly passed down
     @Throws(IOException::class)
-    fun testPassIOContext() {
+    open fun testPassIOContext() {
         val testfile = "_123.test"
         val myContext: IOContext = IOContext.DEFAULT
 
@@ -182,7 +182,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // LUCENE-5724: actually test we play nice with NRTCachingDir and massive file
     @Throws(IOException::class)
-    fun testLargeCFS() {
+    open fun testLargeCFS() {
         val testfile = "_123.test"
         val context: IOContext = IOContext(
             FlushInfo(
@@ -214,7 +214,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // Just tests that we can open all files returned by listAll
     @Throws(Exception::class)
-    fun testListAll() {
+    open fun testListAll() {
         val dir: Directory =
             newDirectory()
         // riw should sometimes create docvalues fields, etc
@@ -267,7 +267,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // test that cfs reader is read-only
     @Throws(IOException::class)
-    fun testCreateOutputDisabled() {
+    open fun testCreateOutputDisabled() {
         val dir: Directory = newDirectory()
         val si: SegmentInfo = newSegmentInfo(dir, "_123")
         si.setFiles(mutableListOf())
@@ -284,7 +284,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // test that cfs reader is read-only
     @Throws(IOException::class)
-    fun testDeleteFileDisabled() {
+    open fun testDeleteFileDisabled() {
         val testfile = "_123.test"
 
         val dir: Directory = newDirectory()
@@ -308,7 +308,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // test that cfs reader is read-only
     @Throws(IOException::class)
-    fun testRenameFileDisabled() {
+    open fun testRenameFileDisabled() {
         val testfile = "_123.test"
 
         val dir: Directory = newDirectory()
@@ -332,7 +332,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // test that cfs reader is read-only
     @Throws(IOException::class)
-    fun testSyncDisabled() {
+    open fun testSyncDisabled() {
         val testfile = "_123.test"
 
         val dir: Directory = newDirectory()
@@ -356,7 +356,7 @@ abstract class BaseCompoundFormatTestCase :
 
     // test that cfs reader is read-only
     @Throws(IOException::class)
-    fun testMakeLockDisabled() {
+    open fun testMakeLockDisabled() {
         val testfile = "_123.test"
 
         val dir: Directory = newDirectory()
@@ -385,7 +385,7 @@ abstract class BaseCompoundFormatTestCase :
      * length of the buffer used internally by the compound file logic.
      */
     @Throws(IOException::class)
-    fun testRandomFiles() {
+    open fun testRandomFiles() {
         val dir: Directory = newDirectory()
         // Setup the test segment
         val segment = "_123"
@@ -436,7 +436,7 @@ abstract class BaseCompoundFormatTestCase :
     // Make sure we don't somehow use more than 1 descriptor
     // when reading a CFS with many subs:
     @Throws(IOException::class)
-    fun testManySubFiles() {
+    open fun testManySubFiles() {
         val dir: MockDirectoryWrapper = newMockFSDirectory(createTempDir("CFSManySubFiles"))
 
         val FILE_COUNT: Int = atLeast(500)
@@ -507,7 +507,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(IOException::class)
-    fun testClonedStreamsClosing() {
+    open fun testClonedStreamsClosing() {
         val dir: Directory = newDirectory()
         val cr: Directory = createLargeCFS(dir)
 
@@ -539,7 +539,7 @@ abstract class BaseCompoundFormatTestCase :
      * independent of each other.
      */
     @Throws(IOException::class)
-    fun testRandomAccess() {
+    open fun testRandomAccess() {
         val dir: Directory = newDirectory()
         val cr: Directory = createLargeCFS(dir)
 
@@ -633,7 +633,7 @@ abstract class BaseCompoundFormatTestCase :
      * independent of each other.
      */
     @Throws(IOException::class)
-    fun testRandomAccessClones() {
+    open fun testRandomAccessClones() {
         val dir: Directory = newDirectory()
         val cr: Directory = createLargeCFS(dir)
 
@@ -717,7 +717,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(IOException::class)
-    fun testFileNotFound() {
+    open fun testFileNotFound() {
         val dir: Directory = newDirectory()
         val cr: Directory = createLargeCFS(dir)
 
@@ -736,7 +736,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(IOException::class)
-    fun testReadPastEOF() {
+    open fun testReadPastEOF() {
         val dir: Directory = newDirectory()
         val cr: Directory = createLargeCFS(dir)
         val `is`: IndexInput = cr.openInput(
@@ -778,14 +778,14 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(Exception::class)
-    override fun testMergeStability() {
+    open override fun testMergeStability() {
         assumeTrue("test does not work with CFS", true)
     }
 
     // LUCENE-6311: make sure the resource name inside a compound file confesses that it's inside a
     // compound file
     @Throws(Exception::class)
-    fun testResourceNameInsideCompoundFile() {
+    open fun testResourceNameInsideCompoundFile() {
         val dir: Directory = newDirectory()
         val subFile = "_123.xyz"
         val si: SegmentInfo = newSegmentInfo(dir, "_123")
@@ -802,7 +802,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(Exception::class)
-    fun testMissingCodecHeadersAreCaught() {
+    open fun testMissingCodecHeadersAreCaught() {
         val dir: Directory = newDirectory()
         val subFile = "_123.xyz"
 
@@ -824,7 +824,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(Exception::class)
-    fun testCorruptFilesAreCaught() {
+    open fun testCorruptFilesAreCaught() {
         val dir: Directory = newDirectory()
         val subFile = "_123.xyz"
 
@@ -858,7 +858,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(IOException::class)
-    fun testCheckIntegrity() {
+    open fun testCheckIntegrity() {
         val dir: Directory = newDirectory()
         val subFile = "_123.xyz"
         val si: SegmentInfo = newSegmentInfo(dir, "_123")
