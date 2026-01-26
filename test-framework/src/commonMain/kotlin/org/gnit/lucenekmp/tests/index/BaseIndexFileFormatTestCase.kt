@@ -212,7 +212,7 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
      * runs.
      */
     @Throws(Exception::class)
-    fun testMergeStability() {
+    open fun testMergeStability() {
         assumeTrue(
             "merge is not stable",
             mergeIsStable()
