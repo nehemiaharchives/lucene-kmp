@@ -75,5 +75,8 @@ Style 6. Use idiomatic kotlin: Get advantage of the kotlin language to write sim
     Style 6.2. Two comparisons should be converted to a range check: e.g. `assert docID >= 0 && docID < maxDoc;` to be `assert(docID in 0..<maxDoc)` 
 Style 7. Avoid numeric value mismatch: in Java Byte and Int or Long and Double is implicitly widened, but in Kotlin they are not; use explicit toX conversions or parentheses to preserve numeric type and operator behavior.
 Style 8. Junit Test method/function inheritance: in unit tests defined in Java Junit super classes are executed in sub test classes, but in Kotlin unit testing using kotlin.test, super class unit test functions needs to be explicitly inherited in sub classes to be executed. So find all `fun testXXX()` methods in super test class and add `@Test` annotation and define inherited class `override fun testXXX() = super.testXXX()` where XXX is the name of the test function.
-Style 9. Atomics: Add `@OptIn(ExperimentalAtomicApi::class)` to var/val/function when you use classes in `kotlin.concurrent.atomics`, `fun incrementAndGet()`: Int is deprecated. Use `incrementAndFetch()` instead.
+Style 9. Atomics: Add `@OptIn(ExperimentalAtomicApi::class)` to var/val/function when you use classes in `kotlin.concurrent.atomics`
+    Style 9.1 `fun incrementAndGet()`: Int is deprecated. Use `incrementAndFetch()` instead.
+    Style 9.2 do not use `fun get()`, use `fun load()` instead
+    Style 9.3 do not use `fun addAndGet()`, use `fun addAndFetch()` instead
 Style 10. assert keyword in java need to be replaced with `assert()` function with `import org.gnit.lucenekmp.jdkport.assert`
