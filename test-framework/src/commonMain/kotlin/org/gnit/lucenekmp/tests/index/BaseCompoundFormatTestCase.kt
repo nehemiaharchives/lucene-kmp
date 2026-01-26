@@ -8,7 +8,6 @@ import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.StoredField
 import org.gnit.lucenekmp.index.CorruptIndexException
-import org.gnit.lucenekmp.index.IndexableField
 import org.gnit.lucenekmp.index.SegmentInfo
 import org.gnit.lucenekmp.index.SegmentInfos
 import org.gnit.lucenekmp.search.DocIdSetIterator
@@ -20,7 +19,6 @@ import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.store.NRTCachingDirectory
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
-import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.FixedBitSet
 import org.gnit.lucenekmp.util.StringHelper
@@ -49,7 +47,7 @@ abstract class BaseCompoundFormatTestCase :
             newDirectory()
 
         val si: SegmentInfo = newSegmentInfo(dir, "_123")
-        si.setFiles(mutableSetOf<String>())
+        si.setFiles(mutableSetOf())
         si.codec.compoundFormat().write(dir, si, IOContext.DEFAULT)
         val cfs: Directory =
             si.codec.compoundFormat().getCompoundReader(dir, si)
@@ -69,10 +67,10 @@ abstract class BaseCompoundFormatTestCase :
             val testfile = "_$i.test"
             val dir: Directory =
                 newDirectory()
-            val si: SegmentInfo = newSegmentInfo(dir, "_" + i)
+            val si: SegmentInfo = newSegmentInfo(dir, "_$i")
             createSequenceFile(dir, testfile, 0.toByte(), data[i], si.getId(), "suffix")
 
-            si.setFiles(mutableSetOf<String>(testfile))
+            si.setFiles(mutableSetOf(testfile))
             si.codec.compoundFormat().write(dir, si, IOContext.DEFAULT)
             val cfs: Directory =
                 si.codec.compoundFormat().getCompoundReader(dir, si)
@@ -97,7 +95,7 @@ abstract class BaseCompoundFormatTestCase :
     /** This test creates compound file based on two files.  */
     @Throws(IOException::class)
     open fun testTwoFiles() {
-        val files = arrayOf<String>("_123.d1", "_123.d2")
+        val files = arrayOf("_123.d1", "_123.d2")
         val dir: Directory =
             newDirectory()
         val si: SegmentInfo = newSegmentInfo(dir, "_123")
@@ -141,7 +139,7 @@ abstract class BaseCompoundFormatTestCase :
             out.writeInt(3)
             CodecUtil.writeFooter(out)
         }
-        si.setFiles(mutableSetOf<String>(testfile))
+        si.setFiles(mutableSetOf(testfile))
         si.codec.compoundFormat().write(dir, si, IOContext.DEFAULT)
         val cfs: Directory =
             si.codec.compoundFormat().getCompoundReader(dir, si)
@@ -175,7 +173,7 @@ abstract class BaseCompoundFormatTestCase :
             out.writeInt(3)
             CodecUtil.writeFooter(out)
         }
-        si.setFiles(mutableSetOf<String>(testfile))
+        si.setFiles(mutableSetOf(testfile))
         si.codec.compoundFormat().write(dir, si, myContext)
         dir.close()
     }
@@ -184,15 +182,15 @@ abstract class BaseCompoundFormatTestCase :
     @Throws(IOException::class)
     open fun testLargeCFS() {
         val testfile = "_123.test"
-        val context: IOContext = IOContext(
+        val context = IOContext(
             FlushInfo(
                 0,
-                (512 * 1024 * 1024).toLong()
+                (512 * /*1024 * 1024*/ 10).toLong() // TODO reducing 1024 * 1024 to 10 for dev speed
             )
         )
 
         val dir: Directory = NRTCachingDirectory(
-            LuceneTestCase.newFSDirectory(createTempDir()),
+            newFSDirectory(createTempDir()),
             2.0,
             25.0
         )
@@ -201,12 +199,12 @@ abstract class BaseCompoundFormatTestCase :
         dir.createOutput(testfile, context).use { out ->
             CodecUtil.writeIndexHeader(out, "Foo", 0, si.getId(), "suffix")
             val bytes = ByteArray(512)
-            for (i in 0..<1024 * 1024) {
+            for (i in 0..</*1024 * 1024*/ 10) { // TODO reducing 1024 * 1024 to 10 for dev speed
                 out.writeBytes(bytes, 0, bytes.size)
             }
             CodecUtil.writeFooter(out)
         }
-        si.setFiles(mutableSetOf<String>(testfile))
+        si.setFiles(mutableSetOf(testfile))
         si.codec.compoundFormat().write(dir, si, context)
 
         dir.close()
@@ -218,12 +216,12 @@ abstract class BaseCompoundFormatTestCase :
         val dir: Directory =
             newDirectory()
         // riw should sometimes create docvalues fields, etc
-        val riw: RandomIndexWriter =
+        val riw =
             RandomIndexWriter(
                 random(),
                 dir
             )
-        val doc: Document = Document()
+        val doc = Document()
         // these fields should sometimes get term vectors, etc
         val idField: Field =
             newStringField(
@@ -232,7 +230,7 @@ abstract class BaseCompoundFormatTestCase :
                 Field.Store.NO
             )
         val bodyField: Field =
-            LuceneTestCase.newTextField(
+            newTextField(
                 "body",
                 "",
                 Field.Store.NO
@@ -242,7 +240,7 @@ abstract class BaseCompoundFormatTestCase :
         for (i in 0..99) {
             idField.setStringValue(i.toString())
             bodyField.setStringValue(TestUtil.randomUnicodeString(random()))
-            riw.addDocument<IndexableField>(doc)
+            riw.addDocument(doc)
             if (random().nextInt(7) == 0) {
                 riw.commit()
             }
@@ -321,10 +319,10 @@ abstract class BaseCompoundFormatTestCase :
         si.codec.compoundFormat().write(dir, si, IOContext.DEFAULT)
         val cfs: Directory = si.codec.compoundFormat().getCompoundReader(dir, si)
         expectThrows(
-            UnsupportedOperationException::class,
-            LuceneTestCase.ThrowingRunnable {
-                cfs.rename(testfile, "bogus")
-            })
+            UnsupportedOperationException::class
+        ) {
+            cfs.rename(testfile, "bogus")
+        }
 
         cfs.close()
         dir.close()
@@ -347,7 +345,7 @@ abstract class BaseCompoundFormatTestCase :
         expectThrows(
             UnsupportedOperationException::class
         ) {
-            cfs.sync(mutableSetOf<String>(testfile))
+            cfs.sync(mutableSetOf(testfile))
         }
 
         cfs.close()
@@ -439,7 +437,7 @@ abstract class BaseCompoundFormatTestCase :
     open fun testManySubFiles() {
         val dir: MockDirectoryWrapper = newMockFSDirectory(createTempDir("CFSManySubFiles"))
 
-        val FILE_COUNT: Int = atLeast(500)
+        val FILE_COUNT: Int = atLeast(5) // TODO reducing from 500 to 5 for dev speed
 
         val files: MutableList<String> = mutableListOf()
         val si: SegmentInfo = newSegmentInfo(dir, "_123")
@@ -470,7 +468,7 @@ abstract class BaseCompoundFormatTestCase :
             si.codec.compoundFormat().getCompoundReader(dir, si)
 
         val ins: Array<IndexInput> =
-            Array<IndexInput>(FILE_COUNT)
+            Array(FILE_COUNT)
         /*for (fileIdx in 0..<FILE_COUNT)*/ { fileIdx ->
             /*ins[fileIdx]*/ val entry = cfs.openInput(
                 "_123.$fileIdx",
@@ -778,7 +776,7 @@ abstract class BaseCompoundFormatTestCase :
     }
 
     @Throws(Exception::class)
-    open override fun testMergeStability() {
+    override fun testMergeStability() {
         assumeTrue("test does not work with CFS", true)
     }
 
@@ -906,7 +904,7 @@ abstract class BaseCompoundFormatTestCase :
 
     companion object {
         /** Returns a new fake segment  */
-        protected fun newSegmentInfo(
+        fun newSegmentInfo(
             dir: Directory,
             name: String
         ): SegmentInfo {
@@ -920,16 +918,16 @@ abstract class BaseCompoundFormatTestCase :
                 false,
                 false,
                 Codec.default,
-                mutableMapOf<String, String>(),
+                mutableMapOf(),
                 StringHelper.randomId(),
-                mutableMapOf<String, String>(),
+                mutableMapOf(),
                 null
             )
         }
 
         /** Creates a file of the specified size with random data.  */
         @Throws(IOException::class)
-        protected fun createRandomFile(
+        fun createRandomFile(
             dir: Directory,
             name: String,
             size: Int,

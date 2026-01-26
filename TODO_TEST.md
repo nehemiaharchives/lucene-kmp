@@ -107,7 +107,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.ReferenceManager → org.gnit.lucenekmp.search.ReferenceManager
 - org.apache.lucene.search.TestConjunctions → org.gnit.lucenekmp.search.TestConjunctions
 - org.apache.lucene.store.FileSwitchDirectory → org.gnit.lucenekmp.store.FileSwitchDirectory
-- org.apache.lucene.store.NRTCachingDirectory → org.gnit.lucenekmp.store.NRTCachingDirectory
 - org.apache.lucene.store.SimpleFSLockFactory → org.gnit.lucenekmp.store.SimpleFSLockFactory
 - org.apache.lucene.tests.analysis.MockSynonymFilter → org.gnit.lucenekmp.tests.analysis.MockSynonymFilter
 - org.apache.lucene.tests.analysis.MockUTF16TermAttributeImpl → org.gnit.lucenekmp.tests.analysis.MockUTF16TermAttributeImpl

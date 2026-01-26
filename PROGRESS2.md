@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 1215
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 967
+### Total KMP classes: 968
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1289
+### Total KMP Unit Test classes: 1293
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -12179,7 +12179,7 @@
 | [org.apache.lucene.store.LockValidatingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockValidatingDirectoryWrapper.java) | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper | Depth 2 | [x] | 16 | 14 | 96% |
 | [org.apache.lucene.store.MMapDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/MMapDirectory.java) | org.gnit.lucenekmp.store.MMapDirectory | Depth 2 | [x] | 3 | 2 | 0% |
 | [org.apache.lucene.store.MergeInfo](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/MergeInfo.java) | org.gnit.lucenekmp.store.MergeInfo | Depth 2 | [x] | 3 | 0 | 28% |
-| [org.apache.lucene.store.NRTCachingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NRTCachingDirectory.java) | org.gnit.lucenekmp.store.NRTCachingDirectory | Depth 2 | [] | 22 | 0 | 0% |
+| [org.apache.lucene.store.NRTCachingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NRTCachingDirectory.java) | org.gnit.lucenekmp.store.NRTCachingDirectory | Depth 2 | [x] | 22 | 4 | 0% |
 | [org.apache.lucene.store.NativeFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NativeFSLockFactory.java) | org.gnit.lucenekmp.store.NativeFSLockFactory | Depth 4 | [x] | 2 | 2 | 47% |
 | [org.apache.lucene.store.OutputStreamIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/OutputStreamIndexOutput.java) | org.gnit.lucenekmp.store.OutputStreamIndexOutput | Depth 2 | [x] | 5 | 11 | 32% |
 | [org.apache.lucene.store.RandomAccessInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/RandomAccessInput.java) | org.gnit.lucenekmp.store.RandomAccessInput | Depth 1 | [x] | 6 | 2 | 0% |
@@ -12493,7 +12493,7 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Lucene Classes (Semantic Analysis)
 - Total Classes: 3554
-- Ported Classes: 949
+- Ported Classes: 950
 - Class Porting Progress: 26%
 - **Semantic Completion Progress: 9%**
 - Total Core Methods Needed: 32846
@@ -12501,7 +12501,7 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1215
-- Ported Unit Test Classes: 1039
+- Ported Unit Test Classes: 1040
 - Unit Test Porting Progress: 85%
 - **Unit Test Semantic Completion: 39%**
 - Total Test Core Methods Needed: 10370
