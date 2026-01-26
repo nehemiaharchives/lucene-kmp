@@ -612,29 +612,14 @@ class Progress : CliktCommand() {
             }
         }
 
-        val pr1UnitTestDependenciesDepth1 = mutableSetOf<ClassInfo>()
-
-        javaLuceneUnitTest.classDependencyMap.entries
-            .filter { (classInfo, dependencies) ->
-                pr1UnitTestClasses.any { it.name == classInfo.name }
-            }
-            .forEach { (classInfo, dependencies) ->
-                if (dependencies.isNotEmpty()) {
-                    // Add the class itself and all its dependencies to the set
-                    pr1UnitTestDependenciesDepth1.addAll(dependencies)
-                }
-            }
-
         val allSeenUnitTestDependencies = mutableSetOf<ClassInfo>()
 
-        // Add initial depth-1 dependencies
-        allSeenUnitTestDependencies.addAll(pr1UnitTestDependenciesDepth1)
+        // Depth-1 is the unit test classes themselves
         allSeenUnitTestDependencies.addAll(pr1UnitTestClasses)
-
-        val unitTestTempSet = pr1UnitTestDependenciesDepth1.toMutableSet()
+        val unitTestTempSet = pr1UnitTestClasses.toMutableSet()
 
         var unitTestDepth = 1
-        pr1UnitTestDepthToDependencyClassMap[unitTestDepth] = pr1UnitTestDependenciesDepth1.toSet()
+        pr1UnitTestDepthToDependencyClassMap[unitTestDepth] = pr1UnitTestClasses.toSet()
         unitTestDepth++
 
         while (unitTestTempSet.isNotEmpty()) {

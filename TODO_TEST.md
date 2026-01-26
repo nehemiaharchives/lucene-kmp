@@ -2,20 +2,20 @@
 
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
-## Depth 6
+## Depth 7
 - org.apache.lucene.codecs.blocktreeords.OrdsIntersectTermsEnumFrame → org.gnit.lucenekmp.codecs.blocktreeords.OrdsIntersectTermsEnumFrame
 - org.apache.lucene.codecs.blocktreeords.OrdsSegmentTermsEnum → org.gnit.lucenekmp.codecs.blocktreeords.OrdsSegmentTermsEnum
 - org.apache.lucene.codecs.blocktreeords.OrdsSegmentTermsEnumFrame → org.gnit.lucenekmp.codecs.blocktreeords.OrdsSegmentTermsEnumFrame
 - org.apache.lucene.queryparser.surround.query.SimpleTermRewriteQuery → org.gnit.lucenekmp.queryparser.surround.query.SimpleTermRewriteQuery
 
-## Depth 5
+## Depth 6
 - org.apache.lucene.codecs.blocktreeords.OrdsIntersectTermsEnum → org.gnit.lucenekmp.codecs.blocktreeords.OrdsIntersectTermsEnum
 - org.apache.lucene.codecs.memory.FSTTermOutputs → org.gnit.lucenekmp.codecs.memory.FSTTermOutputs
 - org.apache.lucene.queryparser.flexible.messages.NLSException → org.gnit.lucenekmp.queryparser.flexible.messages.NLSException
 - org.apache.lucene.queryparser.surround.query.RewriteQuery → org.gnit.lucenekmp.queryparser.surround.query.RewriteQuery
 - org.apache.lucene.queryparser.surround.query.SimpleTerm → org.gnit.lucenekmp.queryparser.surround.query.SimpleTerm
 
-## Depth 4
+## Depth 5
 - org.apache.lucene.codecs.bitvectors.FlatBitVectorsScorer → org.gnit.lucenekmp.codecs.bitvectors.FlatBitVectorsScorer
 - org.apache.lucene.codecs.blocktreeords.FSTOrdsOutputs → org.gnit.lucenekmp.codecs.blocktreeords.FSTOrdsOutputs
 - org.apache.lucene.codecs.blocktreeords.OrdsBlockTreeTermsWriter → org.gnit.lucenekmp.codecs.blocktreeords.OrdsBlockTreeTermsWriter
@@ -34,7 +34,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
 
-## Depth 3
+## Depth 4
 - org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat
 - org.apache.lucene.codecs.blocktreeords.OrdsBlockTreeTermsReader → org.gnit.lucenekmp.codecs.blocktreeords.OrdsBlockTreeTermsReader
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
@@ -89,7 +89,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleIgnoreTestSuites → org.gnit.lucenekmp.tests.util.TestRuleIgnoreTestSuites
 - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
 
-## Depth 2
+## Depth 3
 - org.apache.lucene.codecs.blocktreeords.BlockTreeOrdsPostingsFormat → org.gnit.lucenekmp.codecs.blocktreeords.BlockTreeOrdsPostingsFormat
 - org.apache.lucene.document.KeywordField → org.gnit.lucenekmp.document.KeywordField
 - org.apache.lucene.index.SnapshotDeletionPolicy → org.gnit.lucenekmp.index.SnapshotDeletionPolicy
@@ -140,7 +140,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.HotspotVMOptions → org.gnit.lucenekmp.util.HotspotVMOptions
 - org.apache.lucene.util.IgnoreRandomChains → org.gnit.lucenekmp.util.IgnoreRandomChains
 
-## Depth 1
+## Depth 2
 - org.apache.lucene.analysis.TestCachingTokenFilter → org.gnit.lucenekmp.analysis.TestCachingTokenFilter
 - org.apache.lucene.analysis.standard.SpoonFeedMaxCharsReaderWrapper → org.gnit.lucenekmp.analysis.standard.SpoonFeedMaxCharsReaderWrapper
 - org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
@@ -188,4 +188,37 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.RecyclingByteBlockAllocator → org.gnit.lucenekmp.util.RecyclingByteBlockAllocator
 - org.apache.lucene.util.SuppressForbidden → org.gnit.lucenekmp.util.SuppressForbidden
 - org.apache.lucene.util.TestCloseableThreadLocal → org.gnit.lucenekmp.util.TestCloseableThreadLocal
+
+## Depth 1
+- org.apache.lucene.analysis.TestWordlistLoader → org.gnit.lucenekmp.analysis.TestWordlistLoader
+- org.apache.lucene.document.TestDocValuesLongHashSet → org.gnit.lucenekmp.document.TestDocValuesLongHashSet
+- org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
+- org.apache.lucene.document.TestFieldType → org.gnit.lucenekmp.document.TestFieldType
+- org.apache.lucene.index.TestApproximatePriorityQueue → org.gnit.lucenekmp.index.TestApproximatePriorityQueue
+- org.apache.lucene.index.TestByteSliceReader → org.gnit.lucenekmp.index.TestByteSliceReader
+- org.apache.lucene.index.TestDocsWithFieldSet → org.gnit.lucenekmp.index.TestDocsWithFieldSet
+- org.apache.lucene.index.TestDocumentsWriterPerThreadPool → org.gnit.lucenekmp.index.TestDocumentsWriterPerThreadPool
+- org.apache.lucene.index.TestFieldUpdatesBuffer → org.gnit.lucenekmp.index.TestFieldUpdatesBuffer
+- org.apache.lucene.index.TestFilterIndexInput → org.gnit.lucenekmp.index.TestFilterIndexInput
+- org.apache.lucene.index.TestFilterMergePolicy → org.gnit.lucenekmp.index.TestFilterMergePolicy
+- org.apache.lucene.index.TestIndexOptions → org.gnit.lucenekmp.index.TestIndexOptions
+- org.apache.lucene.index.TestMergePolicy → org.gnit.lucenekmp.index.TestMergePolicy
+- org.apache.lucene.index.TestMergeRateLimiter → org.gnit.lucenekmp.index.TestMergeRateLimiter
+- org.apache.lucene.index.TestPrefixCodedTerms → org.gnit.lucenekmp.index.TestPrefixCodedTerms
+- org.apache.lucene.index.TestTerm → org.gnit.lucenekmp.index.TestTerm
+- org.apache.lucene.index.TestTermsEnumIndex → org.gnit.lucenekmp.index.TestTermsEnumIndex
+- org.apache.lucene.internal.tests.TestTestSecrets → org.gnit.lucenekmp.internal.tests.TestTestSecrets
+- org.apache.lucene.internal.vectorization.TestPostingDecodingUtil → org.gnit.lucenekmp.internal.vectorization.TestPostingDecodingUtil
+- org.apache.lucene.internal.vectorization.TestVectorUtilSupport → org.gnit.lucenekmp.internal.vectorization.TestVectorUtilSupport
+- org.apache.lucene.search.TestBoostQuery → org.gnit.lucenekmp.search.TestBoostQuery
+- org.apache.lucene.search.TestMaxScoreAccumulator → org.gnit.lucenekmp.search.TestMaxScoreAccumulator
+- org.apache.lucene.search.TestPrefixQuery → org.gnit.lucenekmp.search.TestPrefixQuery
+- org.apache.lucene.search.TestTotalHits → org.gnit.lucenekmp.search.TestTotalHits
+- org.apache.lucene.search.TestWildcardQuery → org.gnit.lucenekmp.search.TestWildcardQuery
+- org.apache.lucene.search.knn.TestMultiLeafKnnCollector → org.gnit.lucenekmp.search.knn.TestMultiLeafKnnCollector
+- org.apache.lucene.store.TestTrackingDirectoryWrapper → org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper
+- org.apache.lucene.util.TestClassLoaderUtils → org.gnit.lucenekmp.util.TestClassLoaderUtils
+- org.apache.lucene.util.TestNamedSPILoader → org.gnit.lucenekmp.util.TestNamedSPILoader
+- org.apache.lucene.util.TestPagedBytes → org.gnit.lucenekmp.util.TestPagedBytes
+- org.apache.lucene.util.TestVersion → org.gnit.lucenekmp.util.TestVersion
 
