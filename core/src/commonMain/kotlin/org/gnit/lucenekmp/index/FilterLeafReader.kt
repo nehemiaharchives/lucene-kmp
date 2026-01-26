@@ -23,7 +23,7 @@ import org.gnit.lucenekmp.util.Unwrappable
  * **NOTE**: If this [FilterLeafReader] does not change the content the contained
  * reader, you could consider delegating calls to [.getCoreCacheHelper] and [ ][.getReaderCacheHelper].
  */
-abstract class FilterLeafReader protected constructor(open val `in`: LeafReader) : LeafReader() {
+abstract class FilterLeafReader protected constructor(inReader: LeafReader) : LeafReader() {
     /** Base class for filtering [Fields] implementations.  */
     abstract class FilterFields protected constructor(`in`: Fields) : Fields() {
         /** The underlying Fields instance.  */
@@ -274,6 +274,7 @@ abstract class FilterLeafReader protected constructor(open val `in`: LeafReader)
     /** Returns the wrapped [LeafReader].  */
     /** The underlying LeafReader.  */
     val delegate: LeafReader
+    val `in`: LeafReader
 
     /**
      * Construct a FilterLeafReader based on the specified base reader.
@@ -284,11 +285,12 @@ abstract class FilterLeafReader protected constructor(open val `in`: LeafReader)
      * @param in specified base reader.
      */
     init {
-        if (`in` == null) {
+        if (inReader == null) {
             throw NullPointerException("incoming LeafReader must not be null")
         }
-        this.delegate = `in`
-        `in`.registerParentReader(this)
+        this.delegate = inReader
+        this.`in` = inReader
+        inReader.registerParentReader(this)
     }
 
     override val liveDocs: Bits?
