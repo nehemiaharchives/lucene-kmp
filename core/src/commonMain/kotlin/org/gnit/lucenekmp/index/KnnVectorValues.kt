@@ -163,7 +163,7 @@ abstract class KnnVectorValues {
          * Creates an iterator from a DocIdSetIterator indicating which docs have values, and for which
          * ordinals increase monotonically with docid.
          */
-        protected fun fromDISI(docsWithField: DocIdSetIterator): DocIndexIterator {
+        fun fromDISI(docsWithField: DocIdSetIterator): DocIndexIterator {
             return object : DocIndexIterator() {
                 var ord: Int = -1
 

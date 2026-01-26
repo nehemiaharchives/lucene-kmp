@@ -30,7 +30,7 @@ class RateLimitedIndexOutput(
     override fun writeByte(b: Byte) {
         bytesSinceLastPause++
         checkRate()
-        out.writeByte(b)
+        out!!.writeByte(b)
     }
 
     @Throws(IOException::class)
@@ -41,28 +41,28 @@ class RateLimitedIndexOutput(
         // This can cause instant write rate to breach rate limit if there have
         // been no writes for enough time to keep the average write rate within limit.
         // See https://issues.apache.org/jira/browse/LUCENE-10448
-        out.writeBytes(b, offset, length)
+        out!!.writeBytes(b, offset, length)
     }
 
     @Throws(IOException::class)
     override fun writeInt(i: Int) {
         bytesSinceLastPause += Int.SIZE_BYTES.toLong()
         checkRate()
-        out.writeInt(i)
+        out!!.writeInt(i)
     }
 
     @Throws(IOException::class)
     override fun writeShort(i: Short) {
         bytesSinceLastPause += Short.SIZE_BYTES.toLong()
         checkRate()
-        out.writeShort(i)
+        out!!.writeShort(i)
     }
 
     @Throws(IOException::class)
     override fun writeLong(i: Long) {
         bytesSinceLastPause += Long.SIZE_BYTES.toLong()
         checkRate()
-        out.writeLong(i)
+        out!!.writeLong(i)
     }
 
     @Throws(IOException::class)

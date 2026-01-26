@@ -1,10 +1,5 @@
 package org.gnit.lucenekmp.util
 
-import org.gnit.lucenekmp.index.Term
-import org.gnit.lucenekmp.search.BooleanClause
-import org.gnit.lucenekmp.search.BooleanQuery
-import org.gnit.lucenekmp.search.DisjunctionMaxQuery
-import org.gnit.lucenekmp.search.TermQuery
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RamUsageTester.ramUsed
 import kotlin.test.Test
@@ -17,8 +12,6 @@ class TestRamUsageEstimator : LuceneTestCase() {
     companion object {
         private val strings = arrayOf("test string", "hollow", "catchmaster")
     }
-
-
 
     @Test
     fun testStaticOverloads() {

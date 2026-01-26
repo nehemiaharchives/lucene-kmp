@@ -1,9 +1,10 @@
 package org.gnit.lucenekmp.util
 
 /**
- * A simplified port of Lucene's CharsRef.
+ * Represents char[], as a slice (offset + length) into an existing char[]. The {@link #chars}
+ * member should never be null; use {@link #EMPTY_CHARS} if necessary.
  *
- * Represents a slice of a char array and supports lexicographic comparison.
+ * @lucene.internal
  */
 class CharsRef(
     var chars: CharArray,
@@ -25,16 +26,19 @@ class CharsRef(
             len = value
         }
 
-    override val length: Int
+    override var length: Int
         get() = len
+        set(value) {
+            len = value
+        }
 
     override fun get(index: Int): Char {
-        if (index < 0 || index >= len) throw IndexOutOfBoundsException(index.toString())
+        if (index !in 0..<len) throw IndexOutOfBoundsException(index.toString())
         return chars[offset + index]
     }
 
     override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
-        if (startIndex < 0 || endIndex < startIndex || endIndex > len) {
+        if (startIndex !in 0..endIndex || endIndex > len) {
             throw IndexOutOfBoundsException("start=$startIndex end=$endIndex length=$len")
         }
         return CharsRef(chars, offset + startIndex, endIndex - startIndex)

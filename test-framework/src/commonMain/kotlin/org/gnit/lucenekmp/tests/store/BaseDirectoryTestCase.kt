@@ -1011,7 +1011,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
             val iters = LuceneTestCase.atLeast(50)
             for (iter in 0 until iters) {
                 val out = dir.createTempOutput("foo", "bar", IOContext.DEFAULT)
-                names.add(out.name)
+                names.add(out.name!!)
                 out.writeVInt(iter)
                 out.close()
             }
@@ -1097,7 +1097,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
                 )
                 if (Random.nextInt(5) == 1) {
                     dir.createTempOutput(name, "foo", IOContext.DEFAULT).use { out ->
-                        names.add(out.name)
+                        names.add(out.name!!)
                     }
                 } else if (!names.contains(name)) {
                     dir.createOutput(name, IOContext.DEFAULT).use { }

@@ -120,7 +120,7 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * [ReadAdvice].
      */
     @Throws(IOException::class)
-    fun slice(sliceDescription: String, offset: Long, length: Long, readAdvice: ReadAdvice): IndexInput {
+    open fun slice(sliceDescription: String, offset: Long, length: Long, readAdvice: ReadAdvice): IndexInput {
         return slice(sliceDescription, offset, length)
     }
 
@@ -222,10 +222,10 @@ abstract class IndexInput protected constructor(resourceDescription: String) : D
      * The default implementation is a no-op.
      */
     @Throws(IOException::class)
-    fun updateReadAdvice(readAdvice: ReadAdvice?) {
+    open fun updateReadAdvice(readAdvice: ReadAdvice?) {
     }
 
-    val isLoaded: Optional<Boolean?>
+    open val isLoaded: Optional<Boolean?>
         /**
          * Returns a hint whether all the contents of this input are resident in physical memory. It's a
          * hint because the operating system may have paged out some of the data by the time this method

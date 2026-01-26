@@ -120,4 +120,19 @@ class StringExtTest {
         val str = String.fromByteArray(bytes, Charset.UTF_8)
         assertEquals("ΑΒΓΔΕ", str)
     }
+
+    @Test
+    fun testFromByteArrayWithOffsetAndLength() {
+        val prefix = byteArrayOf(0x00, 0x00)
+        val bytes = byteArrayOf(
+            0xCE.toByte(), 0x91.toByte(), // 'Α'
+            0xCE.toByte(), 0x92.toByte(), // 'Β'
+            0xCE.toByte(), 0x93.toByte()  // 'Γ'
+        )
+        val suffix = byteArrayOf(0x00)
+        val all = prefix + bytes + suffix
+
+        val str = String.fromByteArray(all, 2, bytes.size, Charset.UTF_8)
+        assertEquals("ΑΒΓ", str)
+    }
 }

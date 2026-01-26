@@ -80,11 +80,11 @@ internal class Lucene90NormsConsumer(
 
     @Throws(IOException::class)
     override fun addNormsField(field: FieldInfo, normsProducer: NormsProducer) {
-        var values: NumericDocValues = normsProducer.getNorms(field)
+        var values: NumericDocValues? = normsProducer.getNorms(field)
         var numDocsWithValue = 0
-        var min = Long.Companion.MAX_VALUE
-        var max = Long.Companion.MIN_VALUE
-        var doc: Int = values.nextDoc()
+        var min = Long.MAX_VALUE
+        var max = Long.MIN_VALUE
+        var doc: Int = values!!.nextDoc()
         while (doc != DocIdSetIterator.NO_MORE_DOCS) {
             numDocsWithValue++
             val v: Long = values.longValue()
@@ -111,7 +111,7 @@ internal class Lucene90NormsConsumer(
             meta?.writeLong(offset) // docsWithFieldOffset
             values = normsProducer.getNorms(field)
             val jumpTableEntryCount =
-                IndexedDISI.writeBitSet(values, data!!, IndexedDISI.DEFAULT_DENSE_RANK_POWER)
+                IndexedDISI.writeBitSet(values!!, data!!, IndexedDISI.DEFAULT_DENSE_RANK_POWER)
             meta?.writeLong(data!!.filePointer - offset) // docsWithFieldLength
             meta?.writeShort(jumpTableEntryCount)
             meta?.writeByte(IndexedDISI.DEFAULT_DENSE_RANK_POWER)
@@ -126,18 +126,18 @@ internal class Lucene90NormsConsumer(
         } else {
             meta?.writeLong(data!!.filePointer) // normsOffset
             values = normsProducer.getNorms(field)
-            writeValues(values, numBytesPerValue, data!!)
+            writeValues(values!!, numBytesPerValue, data!!)
         }
     }
 
     private fun numBytesPerValue(min: Long, max: Long): Int {
         return if (min >= max) {
             0
-        } else if (min >= Byte.Companion.MIN_VALUE && max <= Byte.Companion.MAX_VALUE) {
+        } else if (min >= Byte.MIN_VALUE && max <= Byte.MAX_VALUE) {
             1
-        } else if (min >= Short.Companion.MIN_VALUE && max <= Short.Companion.MAX_VALUE) {
+        } else if (min >= Short.MIN_VALUE && max <= Short.MAX_VALUE) {
             2
-        } else if (min >= Int.Companion.MIN_VALUE && max <= Int.Companion.MAX_VALUE) {
+        } else if (min >= Int.MIN_VALUE && max <= Int.MAX_VALUE) {
             4
         } else {
             8

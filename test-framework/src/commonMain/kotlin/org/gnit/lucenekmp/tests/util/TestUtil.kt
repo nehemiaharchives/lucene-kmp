@@ -63,6 +63,7 @@ import org.gnit.lucenekmp.jdkport.isNaN
 import org.gnit.lucenekmp.jdkport.valueOf
 import org.gnit.lucenekmp.search.TopDocs
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.NoLockFactory
 import org.gnit.lucenekmp.util.Attribute
 import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.BytesRef
@@ -258,21 +259,21 @@ class TestUtil {
          * This runs the CheckIndex tool on the index in. If any issues are hit, a RuntimeException is
          * thrown; else, true is returned.
          */
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun checkIndex(dir: Directory): CheckIndex.Status {
             return checkIndex(dir, CheckIndex.Level.MIN_LEVEL_FOR_SLOW_CHECKS)
-        }*/
+        }
 
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun checkIndex(dir: Directory, level: Int): CheckIndex.Status {
             return checkIndex(dir, level, false, true, null)
-        }*/
+        }
 
         /**
          * If failFast is true, then throw the first exception when index corruption is hit, instead of
          * moving on to other fields/segments to look for any other corruption.
          */
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun checkIndex(
             dir: Directory,
             level: Int,
@@ -286,7 +287,7 @@ class TestUtil {
             }
             CheckIndex(dir, NoLockFactory.INSTANCE.obtainLock(dir, "bogus")).use { checker ->
                 checker.setLevel(level)
-                checker.setFailFast(failFast)
+                checker.failFast = failFast
                 checker.setInfoStream(
                     PrintStream(output, false, StandardCharsets.UTF_8),
                     false
@@ -308,7 +309,7 @@ class TestUtil {
                     return indexStatus
                 }
             }
-        }*/
+        }
 
         /**
          * This runs the CheckIndex tool on the Reader. If any issues are hit, a RuntimeException is

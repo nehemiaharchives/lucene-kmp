@@ -234,7 +234,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
         val vectorDataOffset: Long = vectorData!!.alignFilePointer(Float.SIZE_BYTES)
         val tempVectorData: IndexOutput =
             segmentWriteState.directory.createTempOutput(
-                vectorData.name, "temp", segmentWriteState.context
+                vectorData.name!!, "temp", segmentWriteState.context
             )
         var vectorDataInput: IndexInput? = null
         var success = false
@@ -264,7 +264,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             // to perform random reads.
             vectorDataInput =
                 segmentWriteState.directory.openInput(
-                    tempVectorData.name, IOContext.DEFAULT.withReadAdvice(ReadAdvice.RANDOM)
+                    tempVectorData.name!!, IOContext.DEFAULT.withReadAdvice(ReadAdvice.RANDOM)
                 )
             // copy the temporary file vectors to the actual data file
             vectorData.copyBytes(vectorDataInput, vectorDataInput.length() - CodecUtil.footerLength())
@@ -308,7 +308,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             return FlatCloseableRandomVectorScorerSupplier(
                 AutoCloseable {
                     IOUtils.close(finalVectorDataInput)
-                    segmentWriteState.directory.deleteFile(tempVectorData.name)
+                    segmentWriteState.directory.deleteFile(tempVectorData.name!!)
                 },
                 docsWithField.cardinality(),
                 randomVectorScorerSupplier
@@ -317,7 +317,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             if (!success) {
                 IOUtils.closeWhileHandlingException(vectorDataInput!!, tempVectorData)
                 IOUtils.deleteFilesIgnoringExceptions(
-                    segmentWriteState.directory, tempVectorData.name
+                    segmentWriteState.directory, tempVectorData.name!!
                 )
             }
         }

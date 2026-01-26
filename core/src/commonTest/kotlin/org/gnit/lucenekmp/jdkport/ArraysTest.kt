@@ -274,6 +274,18 @@ class ArraysTest {
     }
 
     @Test
+    fun testToStringIntArray() {
+        assertEquals("", Arrays.toString(IntArray(0)))
+        assertEquals("1, 2, 3", Arrays.toString(intArrayOf(1, 2, 3)))
+    }
+
+    @Test
+    fun testToStringFloatArray() {
+        assertEquals("", Arrays.toString(FloatArray(0)))
+        assertEquals("1.5, -2.0, 3.25", Arrays.toString(floatArrayOf(1.5f, -2.0f, 3.25f)))
+    }
+
+    @Test
     fun testFillArrayOfIntArray() {
         val arr = Array(3) { intArrayOf(1, 2) }
         val fillVal = intArrayOf(9, 9)

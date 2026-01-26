@@ -5,7 +5,7 @@ import kotlin.random.Random
 
 
 /** *
- * ported from package com.carrotsearch.randomizedtesting.RandomizedTest
+ * ported from package RandomizedTest
  */
 open class RandomizedTest {
     companion object {
@@ -20,7 +20,7 @@ open class RandomizedTest {
          * It is recommended that specific methods are used to pick random values.
          */
         fun random(): Random {
-            //return com.carrotsearch.randomizedtesting.RandomizedTest.getContext().getRandom()
+            //return RandomizedTest.getContext().getRandom()
             return Random
         }
 
@@ -71,6 +71,61 @@ open class RandomizedTest {
             )
         }
 
+        /**
+         * A random long from 0..max (inclusive).
+         */
+        @Deprecated("")
+        fun randomLong(max: Long): Long {
+            return RandomNumbers.randomLongBetween(
+                random(),
+                0,
+                max
+            )
+        }
+
+        /**
+         * A random integer from `min` to `max` (inclusive).
+         *
+         * @see .scaledRandomIntBetween
+         */
+        fun randomIntBetween(min: Int, max: Int): Int {
+            return RandomNumbers.randomIntBetween(
+                random(),
+                min,
+                max
+            )
+        }
+
+        /**
+         * An alias for [.randomIntBetween].
+         *
+         * @see .scaledRandomIntBetween
+         */
+        fun between(min: Int, max: Int): Int {
+            return randomIntBetween(min, max)
+        }
+
+        /**
+         * A random long from `min` to `max` (inclusive).
+         */
+        fun randomLongBetween(min: Long, max: Long): Long {
+            return RandomNumbers.randomLongBetween(
+                random(),
+                min,
+                max
+            )
+        }
+
+        /**
+         * An alias for [.randomLongBetween].
+         */
+        fun between(min: Long, max: Long): Long {
+            return randomLongBetween(min, max)
+        }
+        // line 201
+
+
+
 
         //↓ line 236
         /**
@@ -89,6 +144,50 @@ open class RandomizedTest {
         }
         //↑ line 245
 
+
+        //↓ line
+        //↑ line
+
+
+        //↓ line 742
+        /**
+         * @param condition
+         * If `false` an [AssumptionViolatedException] is
+         * thrown by this method and the test case (should be) ignored (or
+         * rather technically, flagged as a failure not passing a certain
+         * assumption). Tests that are assumption-failures do not break
+         * builds (again: typically).
+         * @param message
+         * Message to be included in the exception's string.
+         */
+        fun assumeTrue(message: String, condition: Boolean) {
+            if (!condition) {
+                // @see {@link Rants#RANT_2}.
+                throw /*AssumptionViolated*/Exception(message)
+            }
+        }
+
+        /**
+         * Reverse of [.assumeTrue].
+         */
+        fun assumeFalse(message: String, condition: Boolean) {
+            assumeTrue(message, !condition)
+        }
+
+        /**
+         * Assume `t` is `null`.
+         */
+        fun assumeNoException(msg: String, t: Throwable?) {
+            if (t != null) {
+                // This does chain the exception as the cause.
+                throw /*AssumptionViolated*/Exception(msg, t)
+            }
+        }
+        //↑ line 764
+
+
+        //↓ line
+        //↑ line
 
 
         //↓ line 814 of RandomizedTest.java

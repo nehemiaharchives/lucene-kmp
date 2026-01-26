@@ -37,6 +37,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":core"))
+                implementation(project(":codecs"))
                 implementation(libs.kotlin.test)
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)

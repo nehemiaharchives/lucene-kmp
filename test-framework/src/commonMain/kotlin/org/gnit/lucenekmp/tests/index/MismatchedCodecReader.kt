@@ -190,7 +190,7 @@ class MismatchedCodecReader(`in`: CodecReader, random: Random) :
         }
 
         @Throws(IOException::class)
-        override fun getNorms(field: FieldInfo): NumericDocValues {
+        override fun getNorms(field: FieldInfo): NumericDocValues? {
             return `in`.getNorms(remapFieldInfo(field)!!)
         }
 

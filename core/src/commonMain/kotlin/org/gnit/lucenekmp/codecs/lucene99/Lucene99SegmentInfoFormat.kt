@@ -183,7 +183,7 @@ class Lucene99SegmentInfoFormat
 
         output.writeByte((if (si.useCompoundFile) SegmentInfo.YES else SegmentInfo.NO).toByte())
         output.writeByte((if (si.hasBlocks) SegmentInfo.YES else SegmentInfo.NO).toByte())
-        output.writeMapOfStrings(si.getDiagnostics())
+        output.writeMapOfStrings(si.diagnostics)
         val files: MutableSet<String> = si.files()
         for (file in files) {
             require(

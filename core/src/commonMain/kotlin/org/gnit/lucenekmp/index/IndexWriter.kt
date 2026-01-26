@@ -3476,7 +3476,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 info.info.useCompoundFile,
                 info.info.hasBlocks,
                 info.info.codec,
-                info.info.getDiagnostics(),
+                info.info.diagnostics,
                 info.info.getId(),
                 info.info.attributes,
                 info.info.indexSort
@@ -7255,7 +7255,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             if (details != null) {
                 diagnostics.putAll(details)
             }
-            info.setDiagnostics(diagnostics)
+            info.diagnostics = diagnostics
         }
 
         /**

@@ -78,7 +78,7 @@ class FieldsIndexWriter internal constructor(
             metaOut.writeInt(totalChunks + 1)
             metaOut.writeLong(dataOut.filePointer)
 
-            dir.openChecksumInput(docsOut!!.name).use { docsIn ->
+            dir.openChecksumInput(docsOut!!.name!!).use { docsIn ->
                 CodecUtil.checkHeader(docsIn, codecName + "Docs", VERSION_CURRENT, VERSION_CURRENT)
                 var priorE: Throwable? = null
                 try {
@@ -100,11 +100,11 @@ class FieldsIndexWriter internal constructor(
                     CodecUtil.checkFooter(docsIn, priorE)
                 }
             }
-            dir.deleteFile(docsOut!!.name)
+            dir.deleteFile(docsOut!!.name!!)
             docsOut = null
 
             metaOut.writeLong(dataOut.filePointer)
-            dir.openChecksumInput(filePointersOut!!.name).use { filePointersIn ->
+            dir.openChecksumInput(filePointersOut!!.name!!).use { filePointersIn ->
                 CodecUtil.checkHeader(
                     filePointersIn, codecName + "FilePointers", VERSION_CURRENT, VERSION_CURRENT
                 )
@@ -128,7 +128,7 @@ class FieldsIndexWriter internal constructor(
                     CodecUtil.checkFooter(filePointersIn, priorE)
                 }
             }
-            dir.deleteFile(filePointersOut!!.name)
+            dir.deleteFile(filePointersOut!!.name!!)
             filePointersOut = null
 
             metaOut.writeLong(dataOut.filePointer)
@@ -143,10 +143,10 @@ class FieldsIndexWriter internal constructor(
         } finally {
             val fileNames: MutableList<String> = ArrayList()
             if (docsOut != null) {
-                fileNames.add(docsOut!!.name)
+                fileNames.add(docsOut!!.name!!)
             }
             if (filePointersOut != null) {
-                fileNames.add(filePointersOut!!.name)
+                fileNames.add(filePointersOut!!.name!!)
             }
             try {
                 IOUtils.deleteFiles(dir, fileNames)

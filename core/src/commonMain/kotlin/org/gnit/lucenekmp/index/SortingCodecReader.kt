@@ -452,7 +452,7 @@ class SortingCodecReader private constructor(
                     return SortingNumericDocValues(
                         getOrCreateNorms(
                             field.name
-                        ) { getNumericDocValues(delegate.getNorms(field)) }
+                        ) { getNumericDocValues(delegate.getNorms(field)!!) }
                     )
                 }
 

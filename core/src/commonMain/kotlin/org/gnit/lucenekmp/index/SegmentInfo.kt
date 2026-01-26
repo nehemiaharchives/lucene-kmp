@@ -61,7 +61,13 @@ class SegmentInfo(
             return codecNullable!!
         }
 
-    private var diagnostics: MutableMap<String, String>
+    var diagnostics: MutableMap<String, String> = mutableMapOf()
+        get() {
+            return field
+        }
+        set(newDiagnostics){
+            field = HashMap(newDiagnostics)
+        }
 
     /**
      * Returns the internal codec attributes map.
@@ -98,9 +104,9 @@ class SegmentInfo(
     var hasBlocks: Boolean
         private set
 
-    fun setDiagnostics(diagnostics: MutableMap<String, String>) {
+    /*fun setDiagnostics(diagnostics: MutableMap<String, String>) {
         this.diagnostics = HashMap(diagnostics)
-    }
+    }*/
 
     /**
      * Adds or modifies this segment's diagnostics.
@@ -115,13 +121,13 @@ class SegmentInfo(
         requireNotNull(diagnostics)
         val copy: MutableMap<String, String> = HashMap<String, String>(this.diagnostics)
         copy.putAll(diagnostics)
-        setDiagnostics(copy)
+        this.diagnostics = HashMap(copy)
     }
 
     /** Returns diagnostics saved into the segment when it was written. The map is immutable.  */
-    fun getDiagnostics(): MutableMap<String, String> {
+    /*fun getDiagnostics(): MutableMap<String, String> {
         return diagnostics
-    }
+    }*/
 
     /** Sets the hasBlocks property to true. This setting is viral and can't be unset.  */
     fun setHasBlocks() {

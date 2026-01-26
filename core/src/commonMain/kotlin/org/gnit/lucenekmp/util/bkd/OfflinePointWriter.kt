@@ -22,7 +22,7 @@ open class OfflinePointWriter(
     val expectedCount: Long
 ) : PointWriter {
     val out: IndexOutput = tempDir.createTempOutput(tempFileNamePrefix, "bkd_$desc", IOContext.DEFAULT)
-    val name: String = out.name
+    val name: String = out.name!!
     var count: Long = 0
     private var closed = false
 

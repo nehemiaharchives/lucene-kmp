@@ -17,7 +17,7 @@ class TrackingTmpOutputDirectoryWrapper(`in`: Directory) :
         context: IOContext
     ): IndexOutput {
         val output: IndexOutput = super.createTempOutput(name, "", context)
-        fileNames.put(name, output.name)
+        fileNames.put(name, output.name!!)
         return output
     }
 

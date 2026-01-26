@@ -120,7 +120,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @see DataOutput.writeZInt
      */
     @Throws(IOException::class)
-    fun readZInt(): Int {
+    open fun readZInt(): Int {
         return BitUtil.zigZagDecode(readVInt())
     }
 
@@ -207,7 +207,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @see DataOutput.writeZLong
      */
     @Throws(IOException::class)
-    fun readZLong(): Long {
+    open fun readZLong(): Long {
         return BitUtil.zigZagDecode(readVLong())
     }
 
@@ -217,7 +217,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @see DataOutput.writeString
      */
     @Throws(IOException::class)
-    fun readString(): String {
+    open fun readString(): String {
         val length = readVInt()
         val bytes = ByteArray(length)
         readBytes(bytes, 0, length)
@@ -245,7 +245,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @return An immutable map containing the written contents.
      */
     @Throws(IOException::class)
-    fun readMapOfStrings(): MutableMap<String, String> {
+    open fun readMapOfStrings(): MutableMap<String, String> {
         val count = readVInt()
         if (count == 0) {
             return mutableMapOf<String, String>()
@@ -269,7 +269,7 @@ import org.gnit.lucenekmp.util.GroupVIntUtil
      * @return An immutable set containing the written contents.
      */
     @Throws(IOException::class)
-    fun readSetOfStrings(): MutableSet<String> {
+    open fun readSetOfStrings(): MutableSet<String> {
         val count = readVInt()
         if (count == 0) {
             return mutableSetOf<String>()

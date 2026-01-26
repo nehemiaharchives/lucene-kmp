@@ -499,7 +499,8 @@ class CheckIndex(
 
         msg(infoStream!!, "Checking index with threadCount: $threadCount")
         try {
-            return checkIndex(onlySegments!!, executorService!!)
+            val segments = onlySegments ?: mutableListOf()
+            return checkIndex(segments, executorService)
         } finally {
             if (executorService != null) {
 
@@ -536,7 +537,7 @@ class CheckIndex(
     @Throws(IOException::class)
     fun checkIndex(
         onlySegments: MutableList<String>,
-        executorService: ExecutorService
+        executorService: ExecutorService?
     ): Status {
         ensureOpen()
         val startNS: Long = System.nanoTime()
@@ -792,7 +793,7 @@ class CheckIndex(
                             info,
                             stream
                         )
-                    }, executorService)
+                    }, executorService!!)
             }
 
             for (i in 0..<numSegments) {
@@ -957,7 +958,7 @@ class CheckIndex(
             //synchronized(nf) {
             msg(infoStream, "    size (MB)= ${segInfoStat.sizeMB}")
             //}
-            val diagnostics: MutableMap<String, String> = info.info.getDiagnostics()
+            val diagnostics: MutableMap<String, String> = info.info.diagnostics
             segInfoStat.diagnostics = diagnostics
             if (diagnostics.isNotEmpty()) {
                 msg(infoStream, "    diagnostics = $diagnostics")
@@ -1850,7 +1851,7 @@ class CheckIndex(
                 }
                 for (info in reader.fieldInfos) {
                     if (info.hasNorms()) {
-                        checkNumericDocValues(info.name, normsReader!!.getNorms(info), normsReader.getNorms(info))
+                        checkNumericDocValues(info.name, normsReader!!.getNorms(info)!!, normsReader.getNorms(info)!!)
                         ++status.totFields
                     }
                 }
@@ -2714,12 +2715,12 @@ class CheckIndex(
                     }
 
                     if (fieldInfo.hasNorms() && !isVectors) {
-                        val norms: NumericDocValues = normsProducer!!.getNorms(fieldInfo)
+                        val norms: NumericDocValues? = normsProducer!!.getNorms(fieldInfo)
                         // count of valid norm values found for the field
                         var actualCount = 0
                         // Cross-check terms with norms
                         run {
-                            var doc: Int = norms.nextDoc()
+                            var doc: Int = norms!!.nextDoc()
                             while (doc != DocIdSetIterator.NO_MORE_DOCS
                             ) {
                                 if (liveDocs != null && !liveDocs.get(doc)) {

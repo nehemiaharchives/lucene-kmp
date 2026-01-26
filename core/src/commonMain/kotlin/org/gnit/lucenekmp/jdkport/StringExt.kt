@@ -108,7 +108,7 @@ fun String.toByteArray(charset: Charset): ByteArray {
  * @since  1.6
  */
 fun String.Companion.fromByteArray(bytes: ByteArray, charset: Charset): String {
-    return fromByteArray(charset, bytes, 0, bytes.size)
+    return fromByteArray0(charset, bytes, 0, bytes.size)
 }
 
 private enum class Coder(val value: Byte) {
@@ -118,13 +118,25 @@ private enum class Coder(val value: Byte) {
 }
 
 /**
+ * mimics `public String(byte[] bytes, int offset, int length, Charset charset)`
+ */
+fun String.Companion.fromByteArray(bytes: ByteArray, offset: Int, length: Int, charset: Charset): String {
+    return fromByteArray0(
+        charset = charset,
+        bytes = bytes,
+        offset = offset,
+        length = length
+    )
+}
+
+/**
  * This method does not do any precondition checks on its arguments.
  *
  *
  * Important: parameter order of this method is deliberately changed in order to
  * disambiguate it against other similar methods of this class.
  */
-private fun fromByteArray(charset: Charset, bytes: ByteArray, offset: Int, length: Int): String {
+private fun fromByteArray0(charset: Charset, bytes: ByteArray, offset: Int, length: Int): String {
     lateinit var this_value: ByteArray
     lateinit var this_coder: Coder
 

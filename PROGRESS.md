@@ -62,12 +62,12 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1011 | 73% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1021 | 74% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 17 | 68% | [ ] |
-|   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 37 | 90% | [ ] |
+|   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 40 | 97% | [ ] |
 |     org.apache.lucene.codecs.compressing |         org.gnit.lucenekmp.codecs.compressing | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.hnsw |         org.gnit.lucenekmp.codecs.hnsw | 10 | 9 | 90% | [ ] |
 |     org.apache.lucene.codecs.lucene101 |         org.gnit.lucenekmp.codecs.lucene101 | 10 | 8 | 80% | [ ] |
@@ -81,7 +81,7 @@
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 5 | 4 | 80% | [ ] |
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 40 | 44% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 184 | 92% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 185 | 92% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 16 | 61% | [ ] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 3 | 2 | 66% | [ ] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 6 | 5 | 83% | [ ] |
@@ -106,12 +106,12 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 12 | 30% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 13 | 32% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
-|     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 5 | 38% | [ ] |
-|     org.apache.lucene.tests.util |         org.gnit.lucenekmp.tests.util | 36 | 13 | 36% | [ ] |
+|     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 9 | 69% | [ ] |
+|     org.apache.lucene.tests.util |         org.gnit.lucenekmp.tests.util | 36 | 14 | 38% | [ ] |
 |       org.apache.lucene.tests.util.automaton |           org.gnit.lucenekmp.tests.util.automaton | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.util.fst |           org.gnit.lucenekmp.tests.util.fst | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.util.hnsw |           org.gnit.lucenekmp.tests.util.hnsw | 1 | 0 | 0% | [ ] |

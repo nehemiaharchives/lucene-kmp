@@ -14,7 +14,7 @@ import org.gnit.lucenekmp.jdkport.bitCount
  *
  * @see IndexInput
  */
-abstract class IndexOutput protected constructor(resourceDescription: String, name: String) : DataOutput(),
+abstract class IndexOutput protected constructor(resourceDescription: String, name: String?) : DataOutput(),
     AutoCloseable {
     /**
      * Full description of this output, e.g. which class such as `FSIndexOutput`, and the full
@@ -28,7 +28,7 @@ abstract class IndexOutput protected constructor(resourceDescription: String, na
      */
     // TODO: can we somehow use this as the default resource description or something?
     /** Just the name part from `resourceDescription`  */
-    val name: String
+    open var name: String? = null
 
     /**
      * Sole constructor. resourceDescription should be non-null, opaque string describing this

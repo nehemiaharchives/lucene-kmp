@@ -97,12 +97,12 @@ class Lucene99ScalarQuantizedVectorsWriter private constructor(
 
     init {
         val metaFileName = IndexFileNames.segmentFileName(
-            segmentWriteState.segmentInfo.name,
+            segmentWriteState.segmentInfo.name!!,
             segmentWriteState.segmentSuffix,
             Lucene99ScalarQuantizedVectorsFormat.META_EXTENSION
         )
         val quantizedVectorDataFileName = IndexFileNames.segmentFileName(
-            segmentWriteState.segmentInfo.name,
+            segmentWriteState.segmentInfo.name!!,
             segmentWriteState.segmentSuffix,
             Lucene99ScalarQuantizedVectorsFormat.VECTOR_DATA_EXTENSION
         )
@@ -414,7 +414,7 @@ class Lucene99ScalarQuantizedVectorsWriter private constructor(
         val vectorDataOffset = quantizedVectorData.alignFilePointer(Float.SIZE_BYTES)
         val tempQuantizedVectorData =
             segmentWriteState.directory.createTempOutput(
-                quantizedVectorData.name,
+                quantizedVectorData.name!!,
                 "temp",
                 segmentWriteState.context
             )
@@ -433,7 +433,7 @@ class Lucene99ScalarQuantizedVectorsWriter private constructor(
             IOUtils.close(tempQuantizedVectorData)
             quantizationDataInput =
                 segmentWriteState.directory.openInput(
-                    tempQuantizedVectorData.name,
+                    tempQuantizedVectorData.name!!,
                     segmentWriteState.context
                 )
             quantizedVectorData.copyBytes(
@@ -459,7 +459,7 @@ class Lucene99ScalarQuantizedVectorsWriter private constructor(
             return ScalarQuantizedCloseableRandomVectorScorerSupplier(
                 {
                     IOUtils.close(finalQuantizationDataInput)
-                    segmentWriteState.directory.deleteFile(tempQuantizedVectorData.name)
+                    segmentWriteState.directory.deleteFile(tempQuantizedVectorData.name!!)
                 },
                 docsWithField.cardinality(),
                 vectorScorer.getRandomVectorScorerSupplier(
@@ -480,7 +480,7 @@ class Lucene99ScalarQuantizedVectorsWriter private constructor(
                 IOUtils.closeWhileHandlingException(tempQuantizedVectorData, quantizationDataInput)
                 IOUtils.deleteFilesIgnoringExceptions(
                     segmentWriteState.directory,
-                    tempQuantizedVectorData.name
+                    tempQuantizedVectorData.name!!
                 )
             }
         }

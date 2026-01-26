@@ -1,68 +1,139 @@
 package org.gnit.lucenekmp.util
 
-/** A minimal port of Lucene's CharsRefBuilder. */
-class CharsRefBuilder {
-    private var chars: CharArray = CharArray(0)
-    var len: Int = 0
+import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.assert
 
-    fun clear() {
-        len = 0
+/**
+ * A builder for [CharsRef] instances.
+ *
+ * @lucene.internal
+ */
+class CharsRefBuilder : Appendable {
+    private val ref: CharsRef = CharsRef()
+
+    /** Return a reference to the chars of this builder.  */
+    fun chars(): CharArray {
+        return ref.chars
     }
 
-    fun length(): Int = len
+    /** Return the number of chars in this buffer.  */
+    fun length(): Int {
+        return ref.length
+    }
 
     /** Set the length.  */
     fun setLength(length: Int) {
-        len = length
+        this.ref.length = length
     }
 
-    fun chars(): CharArray = chars
+    /** Return the char at the given offset.  */
+    fun charAt(offset: Int): Char {
+        return ref.chars[offset]
+    }
 
-    fun get(): CharsRef = CharsRef(chars, 0, len)
+    /** Set a char.  */
+    fun setCharAt(offset: Int, b: Char) {
+        ref.chars[offset] = b
+    }
 
-    fun append(seq: CharSequence) {
-        grow(len + seq.length)
-        for (i in 0 until seq.length) {
-            chars[len + i] = seq[i]
+    /** Reset this builder to the empty state.  */
+    fun clear() {
+        ref.length = 0
+    }
+
+    override fun append(csq: CharSequence?): CharsRefBuilder {
+        if (csq == null) {
+            return append(NULL_STRING)
         }
-        len += seq.length
+        return append(csq, 0, csq.length)
     }
 
-    fun append(buffer: CharArray, offset: Int, length: Int) {
-        if (length == 0) return
-        grow(len + length)
-        buffer.copyInto(chars, destinationOffset = len, startIndex = offset, endIndex = offset + length)
-        len += length
+    override fun append(csq: CharSequence?, start: Int, end: Int): CharsRefBuilder {
+        if (csq == null) {
+            return append(NULL_STRING)
+        }
+        grow(ref.length + end - start)
+        for (i in start..<end) {
+            setCharAt(ref.length++, csq.get(i))
+        }
+        return this
     }
 
-    fun copyChars(seq: CharSequence) {
-        clear()
-        append(seq)
+    override fun append(c: Char): CharsRefBuilder {
+        grow(ref.length + 1)
+        setCharAt(ref.length++, c)
+        return this
     }
 
-    fun copyChars(buffer: CharArray, offset: Int, length: Int) {
-        clear()
-        append(buffer, offset, length)
+    /** Copies the given [CharsRef] referenced content into this instance.  */
+    fun copyChars(other: CharsRef) {
+        copyChars(other.chars, other.offset, other.length)
     }
 
-    /** Copies UTF-8 bytes into this builder as UTF-16 chars. */
-    fun copyUTF8Bytes(ref: BytesRef) {
-        val utf16 = CharArray(ref.length)
-        val utf16Len = UnicodeUtil.UTF8toUTF16(ref.bytes, ref.offset, ref.length, utf16)
-        copyChars(utf16, 0, utf16Len)
-    }
-
-    override fun toString(): String = chars.concatToString(0, len)
-
-    /** Ensures internal buffer can hold at least newLength characters. */
+    /** Used to grow the reference array.  */
     fun grow(newLength: Int) {
-        if (chars.size < newLength) {
-            val newSize = maxOf(newLength, chars.size * 2 + 1)
-            chars = chars.copyOf(newSize)
-        }
+        ref.chars = ArrayUtil.grow(ref.chars, newLength)
     }
 
-    private fun growInternal(newLength: Int) {
-        grow(newLength)
+    /** Copy the provided bytes, interpreted as UTF-8 bytes.  */
+    fun copyUTF8Bytes(bytes: ByteArray, offset: Int, length: Int) {
+        grow(length)
+        ref.length = UnicodeUtil.UTF8toUTF16(bytes, offset, length, ref.chars)
+    }
+
+    /** Copy the provided bytes, interpreted as UTF-8 bytes.  */
+    fun copyUTF8Bytes(bytes: BytesRef) {
+        copyUTF8Bytes(bytes.bytes, bytes.offset, bytes.length)
+    }
+
+    /** Copies the given array into this instance.  */
+    fun copyChars(otherChars: CharArray, otherOffset: Int, otherLength: Int) {
+        grow(otherLength)
+        System.arraycopy(otherChars, otherOffset, ref.chars, 0, otherLength)
+        ref.length = otherLength
+    }
+
+    /** Appends the given array to this CharsRef  */
+    fun append(otherChars: CharArray, otherOffset: Int, otherLength: Int) {
+        val newLen: Int = ref.length + otherLength
+        grow(newLen)
+        System.arraycopy(otherChars, otherOffset, ref.chars, ref.length, otherLength)
+        ref.length = newLen
+    }
+
+    /**
+     * Return a [CharsRef] that points to the internal content of this builder. Any update to
+     * the content of this builder might invalidate the provided `ref` and vice-versa.
+     */
+    fun get(): CharsRef {
+        assert(ref.offset == 0) { "Modifying the offset of the returned ref is illegal" }
+        return ref
+    }
+
+    /** Build a new [CharsRef] that has the same content as this builder.  */
+    fun toCharsRef(): CharsRef {
+        return CharsRef(
+            ArrayUtil.copyOfSubArray(
+                ref.chars,
+                0,
+                ref.length
+            ), 0, ref.length
+        )
+    }
+
+    override fun toString(): String {
+        return get().toString()
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun hashCode(): Int {
+        throw UnsupportedOperationException()
+    }
+
+    companion object {
+        private const val NULL_STRING = "null"
     }
 }

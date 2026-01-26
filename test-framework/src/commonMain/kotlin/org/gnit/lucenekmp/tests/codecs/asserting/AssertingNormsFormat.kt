@@ -53,11 +53,11 @@ class AssertingNormsFormat : NormsFormat() {
     ) : NormsConsumer() {
         @Throws(IOException::class)
         override fun addNormsField(field: FieldInfo, valuesProducer: NormsProducer) {
-            val values: NumericDocValues = valuesProducer.getNorms(field)
+            val values: NumericDocValues? = valuesProducer.getNorms(field)
 
             var lastDocID = -1
             while (true) {
-                val docID = values.nextDoc()
+                val docID = values!!.nextDoc()
                 if (docID == NO_MORE_DOCS) {
                     break
                 }
@@ -95,8 +95,8 @@ class AssertingNormsFormat : NormsFormat() {
                 AssertingCodec.assertThread("NormsProducer", creationThread)
             }
             assert(field.hasNorms())
-            val values: NumericDocValues = `in`.getNorms(field)
-            return AssertingLeafReader.AssertingNumericDocValues(values, maxDoc)
+            val values: NumericDocValues? = `in`.getNorms(field)
+            return AssertingLeafReader.AssertingNumericDocValues(values!!, maxDoc)
         }
 
         @Throws(IOException::class)

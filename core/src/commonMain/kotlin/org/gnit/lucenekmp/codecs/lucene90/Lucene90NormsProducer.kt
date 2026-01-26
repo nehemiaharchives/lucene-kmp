@@ -468,12 +468,16 @@ internal class Lucene90NormsProducer(
             metaExtension
         )
 
+        // Close the data opened by the constructor to avoid leaking file handles.
+        IOUtils.closeWhileHandlingException(clone.data)
+
         // Copy the norms map
         norms.forEach { entry ->
             clone.norms.put(entry.key, entry.value)
         }
 
-        clone.data = data.clone()
+        // Shallow copy, getMergeInstance will replace with a cloned input.
+        clone.data = data
         clone.merging = merging
 
         // Copy maps if they exist

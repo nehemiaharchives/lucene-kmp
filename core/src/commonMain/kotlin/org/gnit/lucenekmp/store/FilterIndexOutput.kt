@@ -11,10 +11,10 @@ import okio.IOException
  */
 open class FilterIndexOutput protected constructor(
     resourceDescription: String,
-    name: String,
-    out: IndexOutput
+    name: String?,
+    out: IndexOutput?
 ) : IndexOutput(resourceDescription, name) {
-    protected val out: IndexOutput
+    protected val out: IndexOutput?
 
     /**
      * Creates a FilterIndexOutput with a resource description, name, and wrapped delegate IndexOutput
@@ -23,27 +23,27 @@ open class FilterIndexOutput protected constructor(
         this.out = out
     }
 
-    val delegate: IndexOutput
+    val delegate: IndexOutput?
         /** Gets the delegate that was passed in on creation  */
         get() = out
 
     override fun close() {
-        out.close()
+        out!!.close()
     }
 
     override val filePointer: Long
-        get() = out.filePointer
+        get() = out!!.filePointer
 
-    override fun getChecksum() = out.getChecksum()
+    override fun getChecksum() = out!!.getChecksum()
 
     @Throws(IOException::class)
     override fun writeByte(b: Byte) {
-        out.writeByte(b)
+        out!!.writeByte(b)
     }
 
     @Throws(IOException::class)
     override fun writeBytes(b: ByteArray, offset: Int, length: Int) {
-        out.writeBytes(b, offset, length)
+        out!!.writeBytes(b, offset, length)
     }
 
     companion object {
@@ -51,8 +51,8 @@ open class FilterIndexOutput protected constructor(
          * Unwraps all FilterIndexOutputs until the first non-FilterIndexOutput IndexOutput instance and
          * returns it
          */
-        fun unwrap(out: IndexOutput): IndexOutput {
-            var out: IndexOutput = out
+        fun unwrap(out: IndexOutput): IndexOutput? {
+            var out: IndexOutput? = out
             while (out is FilterIndexOutput) {
                 out = out.out
             }

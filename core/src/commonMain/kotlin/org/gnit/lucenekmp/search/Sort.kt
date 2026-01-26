@@ -54,7 +54,7 @@ class Sort(vararg fields: SortField) {
     @Throws(IOException::class)
     fun rewrite(searcher: IndexSearcher?): Sort {
         var changed = false
-        val rewrittenSortFields: Array<SortField?> = kotlin.arrayOfNulls<SortField>(fields.size)
+        val rewrittenSortFields: Array<SortField?> = kotlin.arrayOfNulls(fields.size)
         for (i in fields.indices) {
             rewrittenSortFields[i] = fields[i].rewrite(searcher!!)
             if (fields[i] !== rewrittenSortFields[i]) {

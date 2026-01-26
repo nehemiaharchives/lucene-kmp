@@ -23,7 +23,7 @@ class TrackingDirectoryWrapper(`in`: Directory) : FilterDirectory(`in`) {
     @Throws(IOException::class)
     override fun createTempOutput(prefix: String, suffix: String, context: IOContext): IndexOutput {
         val tempOutput: IndexOutput = `in`.createTempOutput(prefix, suffix, context)
-        createdFileNames.add(tempOutput.name)
+        createdFileNames.add(tempOutput.name!!)
         return tempOutput
     }
 

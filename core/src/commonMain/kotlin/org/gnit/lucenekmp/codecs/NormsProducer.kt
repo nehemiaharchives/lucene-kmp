@@ -19,7 +19,7 @@ protected constructor() : AutoCloseable {
      * have norms enabled on its [FieldInfo]. The return value is never `null`.
      */
     @Throws(IOException::class)
-    abstract fun getNorms(field: FieldInfo): NumericDocValues
+    abstract fun getNorms(field: FieldInfo): NumericDocValues?
 
     /**
      * Checks consistency of this producer

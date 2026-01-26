@@ -1437,7 +1437,7 @@ open class BKDWriter(
             try {
                 tempInput!!.close()
             } finally {
-                tempDir.deleteFile(tempInput!!.name)
+                tempDir.deleteFile(tempInput!!.name!!)
                 tempInput = null
             }
         }

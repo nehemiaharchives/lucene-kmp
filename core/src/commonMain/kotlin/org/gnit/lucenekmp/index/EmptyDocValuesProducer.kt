@@ -9,7 +9,7 @@ abstract class EmptyDocValuesProducer
 /** Sole constructor  */
 protected constructor() : DocValuesProducer() {
     @Throws(IOException::class)
-    override fun getNumeric(field: FieldInfo): NumericDocValues {
+    override fun getNumeric(field: FieldInfo): NumericDocValues? {
         throw UnsupportedOperationException()
     }
 

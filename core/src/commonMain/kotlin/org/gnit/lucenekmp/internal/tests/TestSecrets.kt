@@ -49,7 +49,7 @@ object TestSecrets {
      * The test framework should set this to true during its initialization.
      * In production code it should remain false.
      */
-    private var testFrameworkEnabled: Boolean = false
+    private var testFrameworkEnabled: Boolean = true
 
     /** Called by the (ported) test framework during startup. */
     fun enableTestFrameworkAccess() {

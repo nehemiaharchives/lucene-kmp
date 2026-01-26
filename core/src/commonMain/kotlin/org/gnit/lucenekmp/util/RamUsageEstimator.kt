@@ -458,11 +458,17 @@ class RamUsageEstimator {
          */
         fun shallowSizeOf(obj: Any?): Long {
             if (obj == null) return 0
-            val clz: KClass<*> = obj::class
-            return if (clz is Array<*>) {
-                shallowSizeOfArray(obj)
-            } else {
-                shallowSizeOfInstance(clz)
+            return when (obj) {
+                is ByteArray -> shallowSizeOf(obj)
+                is BooleanArray -> shallowSizeOf(obj)
+                is CharArray -> shallowSizeOf(obj)
+                is ShortArray -> shallowSizeOf(obj)
+                is IntArray -> shallowSizeOf(obj)
+                is FloatArray -> shallowSizeOf(obj)
+                is LongArray -> shallowSizeOf(obj)
+                is DoubleArray -> shallowSizeOf(obj)
+                is Array<*> -> shallowSizeOfArray(obj)
+                else -> shallowSizeOfInstance(obj::class)
             }
         }
 
@@ -512,9 +518,9 @@ class RamUsageEstimator {
 
 
         /** Return shallow size of any `array`.  */
-        private fun shallowSizeOfArray(array: Any): Long {
+        private fun shallowSizeOfArray(array: Array<*>): Long {
             var size = NUM_BYTES_ARRAY_HEADER.toLong()
-            val len: Int = (array as Array<*>).size
+            val len: Int = array.size
             if (len > 0) {
 
                 // TODO not possible with kotlin common code, need walk around
@@ -525,7 +531,7 @@ class RamUsageEstimator {
                     NUM_BYTES_OBJECT_REF.toLong() * len
                 }*/
 
-                NUM_BYTES_OBJECT_REF.toLong() * len
+                size += NUM_BYTES_OBJECT_REF.toLong() * len
             }
             return alignObjectSize(size)
         }

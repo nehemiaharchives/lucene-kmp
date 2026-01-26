@@ -52,8 +52,9 @@ private val pri1Names get() = coreWrite + coreSearch
 val modulesToPort = listOf(
     "core",
     "test-framework",
-    // "analysis",
-    // "codecs",
+    "queryparser",
+    "analysis",
+    "codecs",
 )
 
 val srcDirMap = mapOf(

@@ -2,14 +2,64 @@
 
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
+## Depth 6
+- org.apache.lucene.codecs.blocktreeords.OrdsIntersectTermsEnumFrame → org.gnit.lucenekmp.codecs.blocktreeords.OrdsIntersectTermsEnumFrame
+- org.apache.lucene.codecs.blocktreeords.OrdsSegmentTermsEnum → org.gnit.lucenekmp.codecs.blocktreeords.OrdsSegmentTermsEnum
+- org.apache.lucene.codecs.blocktreeords.OrdsSegmentTermsEnumFrame → org.gnit.lucenekmp.codecs.blocktreeords.OrdsSegmentTermsEnumFrame
+- org.apache.lucene.queryparser.surround.query.SimpleTermRewriteQuery → org.gnit.lucenekmp.queryparser.surround.query.SimpleTermRewriteQuery
+
+## Depth 5
+- org.apache.lucene.codecs.blocktreeords.OrdsIntersectTermsEnum → org.gnit.lucenekmp.codecs.blocktreeords.OrdsIntersectTermsEnum
+- org.apache.lucene.codecs.memory.FSTTermOutputs → org.gnit.lucenekmp.codecs.memory.FSTTermOutputs
+- org.apache.lucene.queryparser.flexible.messages.NLSException → org.gnit.lucenekmp.queryparser.flexible.messages.NLSException
+- org.apache.lucene.queryparser.surround.query.RewriteQuery → org.gnit.lucenekmp.queryparser.surround.query.RewriteQuery
+- org.apache.lucene.queryparser.surround.query.SimpleTerm → org.gnit.lucenekmp.queryparser.surround.query.SimpleTerm
+
 ## Depth 4
+- org.apache.lucene.codecs.bitvectors.FlatBitVectorsScorer → org.gnit.lucenekmp.codecs.bitvectors.FlatBitVectorsScorer
+- org.apache.lucene.codecs.blocktreeords.FSTOrdsOutputs → org.gnit.lucenekmp.codecs.blocktreeords.FSTOrdsOutputs
+- org.apache.lucene.codecs.blocktreeords.OrdsBlockTreeTermsWriter → org.gnit.lucenekmp.codecs.blocktreeords.OrdsBlockTreeTermsWriter
+- org.apache.lucene.codecs.blocktreeords.OrdsFieldReader → org.gnit.lucenekmp.codecs.blocktreeords.OrdsFieldReader
+- org.apache.lucene.codecs.memory.DirectPostingsFormat → org.gnit.lucenekmp.codecs.memory.DirectPostingsFormat
+- org.apache.lucene.codecs.memory.FSTTermsReader → org.gnit.lucenekmp.codecs.memory.FSTTermsReader
+- org.apache.lucene.codecs.memory.FSTTermsWriter → org.gnit.lucenekmp.codecs.memory.FSTTermsWriter
+- org.apache.lucene.queryparser.flexible.core.QueryNodeException → org.gnit.lucenekmp.queryparser.flexible.core.QueryNodeException
+- org.apache.lucene.queryparser.flexible.messages.NLS → org.gnit.lucenekmp.queryparser.flexible.messages.NLS
+- org.apache.lucene.queryparser.surround.query.ComposedQuery → org.gnit.lucenekmp.queryparser.surround.query.ComposedQuery
+- org.apache.lucene.queryparser.surround.query.DistanceRewriteQuery → org.gnit.lucenekmp.queryparser.surround.query.DistanceRewriteQuery
+- org.apache.lucene.queryparser.surround.query.DistanceSubQuery → org.gnit.lucenekmp.queryparser.surround.query.DistanceSubQuery
+- org.apache.lucene.queryparser.surround.query.SpanNearClauseFactory → org.gnit.lucenekmp.queryparser.surround.query.SpanNearClauseFactory
+- org.apache.lucene.queryparser.surround.query.SrndBooleanQuery → org.gnit.lucenekmp.queryparser.surround.query.SrndBooleanQuery
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
 - org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
 
 ## Depth 3
+- org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat
+- org.apache.lucene.codecs.blocktreeords.OrdsBlockTreeTermsReader → org.gnit.lucenekmp.codecs.blocktreeords.OrdsBlockTreeTermsReader
+- org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
 - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
+- org.apache.lucene.queryparser.flexible.core.QueryNodeParseException → org.gnit.lucenekmp.queryparser.flexible.core.QueryNodeParseException
+- org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages → org.gnit.lucenekmp.queryparser.flexible.core.messages.QueryParserMessages
+- org.apache.lucene.queryparser.flexible.messages.Message → org.gnit.lucenekmp.queryparser.flexible.messages.Message
+- org.apache.lucene.queryparser.flexible.messages.MessageImpl → org.gnit.lucenekmp.queryparser.flexible.messages.MessageImpl
+- org.apache.lucene.queryparser.flexible.standard.parser.Token → org.gnit.lucenekmp.queryparser.flexible.standard.parser.Token
+- org.apache.lucene.queryparser.surround.parser.ParseException → org.gnit.lucenekmp.queryparser.surround.parser.ParseException
+- org.apache.lucene.queryparser.surround.parser.QueryParser → org.gnit.lucenekmp.queryparser.surround.parser.QueryParser
+- org.apache.lucene.queryparser.surround.parser.QueryParserConstants → org.gnit.lucenekmp.queryparser.surround.parser.QueryParserConstants
+- org.apache.lucene.queryparser.surround.parser.QueryParserTokenManager → org.gnit.lucenekmp.queryparser.surround.parser.QueryParserTokenManager
+- org.apache.lucene.queryparser.surround.parser.Token → org.gnit.lucenekmp.queryparser.surround.parser.Token
+- org.apache.lucene.queryparser.surround.parser.TokenMgrError → org.gnit.lucenekmp.queryparser.surround.parser.TokenMgrError
+- org.apache.lucene.queryparser.surround.query.AndQuery → org.gnit.lucenekmp.queryparser.surround.query.AndQuery
+- org.apache.lucene.queryparser.surround.query.DistanceQuery → org.gnit.lucenekmp.queryparser.surround.query.DistanceQuery
+- org.apache.lucene.queryparser.surround.query.FieldsQuery → org.gnit.lucenekmp.queryparser.surround.query.FieldsQuery
+- org.apache.lucene.queryparser.surround.query.NotQuery → org.gnit.lucenekmp.queryparser.surround.query.NotQuery
+- org.apache.lucene.queryparser.surround.query.OrQuery → org.gnit.lucenekmp.queryparser.surround.query.OrQuery
+- org.apache.lucene.queryparser.surround.query.SrndPrefixQuery → org.gnit.lucenekmp.queryparser.surround.query.SrndPrefixQuery
+- org.apache.lucene.queryparser.surround.query.SrndTermQuery → org.gnit.lucenekmp.queryparser.surround.query.SrndTermQuery
+- org.apache.lucene.queryparser.surround.query.SrndTruncQuery → org.gnit.lucenekmp.queryparser.surround.query.SrndTruncQuery
+- org.apache.lucene.queryparser.surround.query.TooManyBasicQueries → org.gnit.lucenekmp.queryparser.surround.query.TooManyBasicQueries
 - org.apache.lucene.search.MultiCollector → org.gnit.lucenekmp.search.MultiCollector
 - org.apache.lucene.search.similarities.DFISimilarity → org.gnit.lucenekmp.search.similarities.DFISimilarity
 - org.apache.lucene.search.similarities.Distribution → org.gnit.lucenekmp.search.similarities.Distribution
@@ -29,7 +79,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
 - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
-- org.apache.lucene.tests.index.BaseIndexFileFormatTestCase → org.gnit.lucenekmp.tests.index.BaseIndexFileFormatTestCase
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.mockfile.DisableFsyncFS → org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS
 - org.apache.lucene.tests.mockfile.FilterFileSystem → org.gnit.lucenekmp.tests.mockfile.FilterFileSystem
@@ -41,11 +90,18 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
 
 ## Depth 2
+- org.apache.lucene.codecs.blocktreeords.BlockTreeOrdsPostingsFormat → org.gnit.lucenekmp.codecs.blocktreeords.BlockTreeOrdsPostingsFormat
 - org.apache.lucene.document.KeywordField → org.gnit.lucenekmp.document.KeywordField
 - org.apache.lucene.index.SnapshotDeletionPolicy → org.gnit.lucenekmp.index.SnapshotDeletionPolicy
 - org.apache.lucene.index.SoftDeletesRetentionMergePolicy → org.gnit.lucenekmp.index.SoftDeletesRetentionMergePolicy
 - org.apache.lucene.index.TestExitableDirectoryReader → org.gnit.lucenekmp.index.TestExitableDirectoryReader
 - org.apache.lucene.index.TestFilterLeafReader → org.gnit.lucenekmp.index.TestFilterLeafReader
+- org.apache.lucene.queryparser.flexible.standard.parser.ParseException → org.gnit.lucenekmp.queryparser.flexible.standard.parser.ParseException
+- org.apache.lucene.queryparser.surround.query.BasicQueryFactory → org.gnit.lucenekmp.queryparser.surround.query.BasicQueryFactory
+- org.apache.lucene.queryparser.surround.query.BooleanQueryTestFacade → org.gnit.lucenekmp.queryparser.surround.query.BooleanQueryTestFacade
+- org.apache.lucene.queryparser.surround.query.SingleFieldTestDb → org.gnit.lucenekmp.queryparser.surround.query.SingleFieldTestDb
+- org.apache.lucene.queryparser.surround.query.SrndQuery → org.gnit.lucenekmp.queryparser.surround.query.SrndQuery
+- org.apache.lucene.queryparser.util.QueryParserTestBase → org.gnit.lucenekmp.queryparser.util.QueryParserTestBase
 - org.apache.lucene.search.BaseKnnVectorQueryTestCase → org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase
 - org.apache.lucene.search.NamedMatches → org.gnit.lucenekmp.search.NamedMatches
 - org.apache.lucene.search.ReferenceManager → org.gnit.lucenekmp.search.ReferenceManager
@@ -53,6 +109,8 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.FileSwitchDirectory → org.gnit.lucenekmp.store.FileSwitchDirectory
 - org.apache.lucene.store.NRTCachingDirectory → org.gnit.lucenekmp.store.NRTCachingDirectory
 - org.apache.lucene.store.SimpleFSLockFactory → org.gnit.lucenekmp.store.SimpleFSLockFactory
+- org.apache.lucene.tests.analysis.MockSynonymFilter → org.gnit.lucenekmp.tests.analysis.MockSynonymFilter
+- org.apache.lucene.tests.analysis.MockUTF16TermAttributeImpl → org.gnit.lucenekmp.tests.analysis.MockUTF16TermAttributeImpl
 - org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
 - org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec → org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
@@ -67,10 +125,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
 - org.apache.lucene.tests.search.DummyTotalHitCountCollector → org.gnit.lucenekmp.tests.search.DummyTotalHitCountCollector
 - org.apache.lucene.tests.search.FixedBitSetCollector → org.gnit.lucenekmp.tests.search.FixedBitSetCollector
-- org.apache.lucene.tests.store.MockIndexInputWrapper → org.gnit.lucenekmp.tests.store.MockIndexInputWrapper
-- org.apache.lucene.tests.store.MockIndexOutputWrapper → org.gnit.lucenekmp.tests.store.MockIndexOutputWrapper
-- org.apache.lucene.tests.store.SlowClosingMockIndexInputWrapper → org.gnit.lucenekmp.tests.store.SlowClosingMockIndexInputWrapper
-- org.apache.lucene.tests.store.SlowOpeningMockIndexInputWrapper → org.gnit.lucenekmp.tests.store.SlowOpeningMockIndexInputWrapper
 - org.apache.lucene.tests.util.FailureMarker → org.gnit.lucenekmp.tests.util.FailureMarker
 - org.apache.lucene.tests.util.LineFileDocs → org.gnit.lucenekmp.tests.util.LineFileDocs
 - org.apache.lucene.tests.util.LuceneJUnit3MethodProvider → org.gnit.lucenekmp.tests.util.LuceneJUnit3MethodProvider
@@ -83,16 +137,16 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleSetupTeardownChained → org.gnit.lucenekmp.tests.util.TestRuleSetupTeardownChained
 - org.apache.lucene.tests.util.TestRuleStoreClassName → org.gnit.lucenekmp.tests.util.TestRuleStoreClassName
 - org.apache.lucene.tests.util.TestRuleThreadAndTestName → org.gnit.lucenekmp.tests.util.TestRuleThreadAndTestName
-- org.apache.lucene.tests.util.ThrottledIndexOutput → org.gnit.lucenekmp.tests.util.ThrottledIndexOutput
 - org.apache.lucene.tests.util.VerifyTestClassNamingConvention → org.gnit.lucenekmp.tests.util.VerifyTestClassNamingConvention
 - org.apache.lucene.util.HotspotVMOptions → org.gnit.lucenekmp.util.HotspotVMOptions
+- org.apache.lucene.util.IgnoreRandomChains → org.gnit.lucenekmp.util.IgnoreRandomChains
 
 ## Depth 1
+- org.apache.lucene.analysis.TestCachingTokenFilter → org.gnit.lucenekmp.analysis.TestCachingTokenFilter
 - org.apache.lucene.analysis.standard.SpoonFeedMaxCharsReaderWrapper → org.gnit.lucenekmp.analysis.standard.SpoonFeedMaxCharsReaderWrapper
 - org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestPackedTokenAttributeImpl
 - org.apache.lucene.document.SortedSetDocValuesField → org.gnit.lucenekmp.document.SortedSetDocValuesField
-- org.apache.lucene.index.NoDeletionPolicy → org.gnit.lucenekmp.index.NoDeletionPolicy
 - org.apache.lucene.index.QueryTimeoutImpl → org.gnit.lucenekmp.index.QueryTimeoutImpl
 - org.apache.lucene.index.TestByteSlicePool → org.gnit.lucenekmp.index.TestByteSlicePool
 - org.apache.lucene.index.TestCachingMergeContext → org.gnit.lucenekmp.index.TestCachingMergeContext
@@ -106,16 +160,24 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestPendingSoftDeletes → org.gnit.lucenekmp.index.TestPendingSoftDeletes
 - org.apache.lucene.internal.vectorization.BaseVectorizationTestCase → org.gnit.lucenekmp.internal.vectorization.BaseVectorizationTestCase
 - org.apache.lucene.internal.vectorization.TestVectorScorer → org.gnit.lucenekmp.internal.vectorization.TestVectorScorer
+- org.apache.lucene.queryparser.classic.TestQueryParser → org.gnit.lucenekmp.queryparser.classic.TestQueryParser
 - org.apache.lucene.search.SearcherFactory → org.gnit.lucenekmp.search.SearcherFactory
 - org.apache.lucene.search.SearcherManager → org.gnit.lucenekmp.search.SearcherManager
+- org.apache.lucene.search.TestAutomatonQuery → org.gnit.lucenekmp.search.TestAutomatonQuery
 - org.apache.lucene.search.TestBooleanQuery → org.gnit.lucenekmp.search.TestBooleanQuery
 - org.apache.lucene.search.TestCollectorManager → org.gnit.lucenekmp.search.TestCollectorManager
+- org.apache.lucene.search.TestFuzzyQuery → org.gnit.lucenekmp.search.TestFuzzyQuery
 - org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
 - org.apache.lucene.search.TestKnnByteVectorQuery → org.gnit.lucenekmp.search.TestKnnByteVectorQuery
 - org.apache.lucene.search.TestKnnFloatVectorQuery → org.gnit.lucenekmp.search.TestKnnFloatVectorQuery
 - org.apache.lucene.search.TestMatchesIterator → org.gnit.lucenekmp.search.TestMatchesIterator
+- org.apache.lucene.search.TestRegexpQuery → org.gnit.lucenekmp.search.TestRegexpQuery
+- org.apache.lucene.search.TestTermRangeQuery → org.gnit.lucenekmp.search.TestTermRangeQuery
 - org.apache.lucene.search.TestTermScorer → org.gnit.lucenekmp.search.TestTermScorer
 - org.apache.lucene.search.TestTopDocsCollector → org.gnit.lucenekmp.search.TestTopDocsCollector
+- org.apache.lucene.tests.analysis.MockBytesAnalyzer → org.gnit.lucenekmp.tests.analysis.MockBytesAnalyzer
+- org.apache.lucene.tests.analysis.MockSynonymAnalyzer → org.gnit.lucenekmp.tests.analysis.MockSynonymAnalyzer
+- org.apache.lucene.tests.analysis.TestToken → org.gnit.lucenekmp.tests.analysis.TestToken
 - org.apache.lucene.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1 → org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1
 - org.apache.lucene.tests.analysis.standard.WordBreakTestUnicode_12_1_0 → org.gnit.lucenekmp.tests.analysis.standard.WordBreakTestUnicode_12_1_0
 - org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper

@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  *
  * @lucene.internal
  */
-class FilterIndexInput(resourceDescription: String, `in`: IndexInput) :
+open class FilterIndexInput(resourceDescription: String, `in`: IndexInput) :
     IndexInput(resourceDescription) {
     protected val `in`: IndexInput
 

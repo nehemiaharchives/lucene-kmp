@@ -388,7 +388,19 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         fun usually(): Boolean {
             return usually(random())
         }
-        //↑ line 857 of LuceneTestCase.java
+
+        fun assumeTrue(msg: String, condition: Boolean) {
+            RandomizedTest.assumeTrue(msg, condition)
+        }
+
+        fun assumeFalse(msg: String, condition: Boolean) {
+            RandomizedTest.assumeFalse(msg, condition)
+        }
+
+        fun assumeNoException(msg: String, e: Exception) {
+            RandomizedTest.assumeNoException(msg, e)
+        }
+        //↑ line 871 of LuceneTestCase.java
 
 
         // line 932 of LuceneTestCase.java
@@ -1995,6 +2007,14 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          */
         fun createTempDir(prefix: String): Path {
             return tempFilesCleanup.createTempDir(prefix)
+        }
+
+        /**
+         * Returns true if the file exists in the directory (slow for some Directory impls).
+         */
+        @Throws(IOException::class)
+        fun slowFileExists(dir: Directory, fileName: String): Boolean {
+            return dir.listAll().contains(fileName)
         }
 
         /**
