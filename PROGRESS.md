@@ -139,7 +139,7 @@
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene101 | 6 | 4 | 66% |
 |     org.apache.lucene.codecs.lucene102 | 2 | 0 | 0% |
-|     org.apache.lucene.codecs.lucene90 | 14 | 2 | 14% |
+|     org.apache.lucene.codecs.lucene90 | 14 | 3 | 21% |
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 0 | 0% |
 |     org.apache.lucene.codecs.lucene94 | 1 | 0 | 0% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 164 | 24% |
+| Total | 673 | 165 | 24% |
 
 
 ## Tests To Port
@@ -203,7 +203,6 @@
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatVariableSkipInterval.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval |
-| [org.apache.lucene.codecs.lucene90.TestLucene90FieldInfosFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90FieldInfosFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90FieldInfosFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90LiveDocsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90LiveDocsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90LiveDocsFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90NormsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90NormsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90NormsFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90NormsFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormatMergeInstance |

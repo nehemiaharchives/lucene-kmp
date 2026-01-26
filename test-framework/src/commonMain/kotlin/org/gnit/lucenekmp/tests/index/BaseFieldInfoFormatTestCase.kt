@@ -45,7 +45,7 @@ abstract class BaseFieldInfoFormatTestCase : BaseIndexFileFormatTestCase() {
     /**
      * Override and return `false` if the format does not support setting doc values skip index.
      */
-    protected fun supportDocValuesSkipIndex(): Boolean {
+    protected open fun supportDocValuesSkipIndex(): Boolean {
         return true
     }
 

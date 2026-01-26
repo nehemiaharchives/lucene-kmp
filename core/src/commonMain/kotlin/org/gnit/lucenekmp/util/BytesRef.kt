@@ -215,16 +215,9 @@ class BytesRef : Comparable<BytesRef> {
                 bytes[byteIndex++] = (0x80 or (codePoint and 0x3F)).toByte()
                 i++
             }
-            // Three bytes (1110xxxx 10xxxxxx 10xxxxxx): characters in range 0x800-0xFFFF (most common for non-ASCII)
-            else if (codePoint < 0x10000) {
-                bytes[byteIndex++] = (0xE0 or (codePoint shr 12)).toByte()
-                bytes[byteIndex++] = (0x80 or ((codePoint shr 6) and 0x3F)).toByte()
-                bytes[byteIndex++] = (0x80 or (codePoint and 0x3F)).toByte()
-                i++
-            }
             // Four bytes (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx): surrogate pairs
             // This handles surrogate pairs that represent code points in range 0x10000-0x10FFFF
-            else if (i + 1 < text.length && char.isHighSurrogate() && text[i + 1].isLowSurrogate()) {
+            else if (char.isHighSurrogate() && i + 1 < text.length && text[i + 1].isLowSurrogate()) {
                 val highSurrogate = char.code
                 val lowSurrogate = text[i + 1].code
                 val codePoint = 0x10000 + ((highSurrogate - 0xD800) shl 10) + (lowSurrogate - 0xDC00)
@@ -235,6 +228,16 @@ class BytesRef : Comparable<BytesRef> {
                 bytes[byteIndex++] = (0x80 or (codePoint and 0x3F)).toByte()
 
                 i += 2 // Skip both high and low surrogates
+            }
+            // Three bytes (1110xxxx 10xxxxxx 10xxxxxx): characters in range 0x800-0xFFFF
+            else if (codePoint < 0x10000) {
+                // Unpaired surrogate falls here and will be replaced with UTF-8 for U+FFFD.
+                val safeCodePoint =
+                    if (char.isSurrogate()) 0xFFFD else codePoint
+                bytes[byteIndex++] = (0xE0 or (safeCodePoint shr 12)).toByte()
+                bytes[byteIndex++] = (0x80 or ((safeCodePoint shr 6) and 0x3F)).toByte()
+                bytes[byteIndex++] = (0x80 or (safeCodePoint and 0x3F)).toByte()
+                i++
             } else {
                 // Handle invalid characters
                 i++

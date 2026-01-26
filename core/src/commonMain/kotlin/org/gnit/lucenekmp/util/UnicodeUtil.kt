@@ -235,12 +235,11 @@ object UnicodeUtil {
                     // confirm valid low surrogate and write pair
                     if (utf32 >= 0xDC00 && utf32 <= 0xDFFF) {
                         utf32 = (code shl 10) + utf32 + SURROGATE_OFFSET
-                        i++
                         out[upto++] = (0xF0 or (utf32 shr 18)).toByte()
                         out[upto++] = (0x80 or ((utf32 shr 12) and 0x3F)).toByte()
                         out[upto++] = (0x80 or ((utf32 shr 6) and 0x3F)).toByte()
                         out[upto++] = (0x80 or (utf32 and 0x3F)).toByte()
-                        i++
+                        i += 2
                         continue
                     }
                 }
