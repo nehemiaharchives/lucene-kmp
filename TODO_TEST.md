@@ -2,10 +2,7 @@
 
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
-## Depth 6
-- org.apache.lucene.tests.mockfile.FilterSeekableByteChannel → org.gnit.lucenekmp.tests.mockfile.FilterSeekableByteChannel
-
-## Depth 5
+## Depth 4
 - org.apache.lucene.search.similarities.Normalization → org.gnit.lucenekmp.search.similarities.Normalization
 - org.apache.lucene.tests.codecs.asserting.AssertingKnnVectorsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingKnnVectorsFormat
 - org.apache.lucene.tests.codecs.asserting.AssertingLiveDocsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingLiveDocsFormat
@@ -17,13 +14,13 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
 - org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
-- org.apache.lucene.tests.mockfile.FilterFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterFileChannel
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
-- org.apache.lucene.tests.mockfile.HandleTrackingFS → org.gnit.lucenekmp.tests.mockfile.HandleTrackingFS
 
-## Depth 4
+## Depth 3
+- org.apache.lucene.codecs.FilterCodec → org.gnit.lucenekmp.codecs.FilterCodec
+- org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
 - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
-- org.apache.lucene.index.SnapshotDeletionPolicy → org.gnit.lucenekmp.index.SnapshotDeletionPolicy
+- org.apache.lucene.search.MultiCollector → org.gnit.lucenekmp.search.MultiCollector
 - org.apache.lucene.search.similarities.AfterEffect → org.gnit.lucenekmp.search.similarities.AfterEffect
 - org.apache.lucene.search.similarities.AfterEffectB → org.gnit.lucenekmp.search.similarities.AfterEffectB
 - org.apache.lucene.search.similarities.AfterEffectL → org.gnit.lucenekmp.search.similarities.AfterEffectL
@@ -50,6 +47,8 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.similarities.NormalizationH2 → org.gnit.lucenekmp.search.similarities.NormalizationH2
 - org.apache.lucene.search.similarities.NormalizationH3 → org.gnit.lucenekmp.search.similarities.NormalizationH3
 - org.apache.lucene.search.similarities.NormalizationZ → org.gnit.lucenekmp.search.similarities.NormalizationZ
+- org.apache.lucene.search.similarities.RawTFSimilarity → org.gnit.lucenekmp.search.similarities.RawTFSimilarity
+- org.apache.lucene.store.LockReleaseFailedException → org.gnit.lucenekmp.store.LockReleaseFailedException
 - org.apache.lucene.tests.codecs.asserting.AssertingCodec → org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
 - org.apache.lucene.tests.codecs.asserting.AssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingDocValuesFormat
 - org.apache.lucene.tests.codecs.asserting.AssertingPostingsFormat → org.gnit.lucenekmp.tests.codecs.asserting.AssertingPostingsFormat
@@ -61,40 +60,51 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.compressing.HighCompressionCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.HighCompressionCompressingCodec
 - org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec
 - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
+- org.apache.lucene.tests.index.BaseIndexFileFormatTestCase → org.gnit.lucenekmp.tests.index.BaseIndexFileFormatTestCase
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.mockfile.DisableFsyncFS → org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS
 - org.apache.lucene.tests.mockfile.FilterFileSystem → org.gnit.lucenekmp.tests.mockfile.FilterFileSystem
 - org.apache.lucene.tests.mockfile.FilterFileSystemProvider → org.gnit.lucenekmp.tests.mockfile.FilterFileSystemProvider
-- org.apache.lucene.tests.mockfile.FilterPath → org.gnit.lucenekmp.tests.mockfile.FilterPath
+- org.apache.lucene.tests.mockfile.HandleTrackingFS → org.gnit.lucenekmp.tests.mockfile.HandleTrackingFS
 - org.apache.lucene.tests.mockfile.ShuffleFS → org.gnit.lucenekmp.tests.mockfile.ShuffleFS
-- org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
 - org.apache.lucene.tests.util.TestRuleAssertionsRequired → org.gnit.lucenekmp.tests.util.TestRuleAssertionsRequired
 - org.apache.lucene.tests.util.TestRuleIgnoreTestSuites → org.gnit.lucenekmp.tests.util.TestRuleIgnoreTestSuites
 - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
-- org.apache.lucene.util.HotspotVMOptions → org.gnit.lucenekmp.util.HotspotVMOptions
 
-## Depth 3
-- org.apache.lucene.codecs.FilterCodec → org.gnit.lucenekmp.codecs.FilterCodec
+## Depth 2
 - org.apache.lucene.document.KeywordField → org.gnit.lucenekmp.document.KeywordField
-- org.apache.lucene.index.NoDeletionPolicy → org.gnit.lucenekmp.index.NoDeletionPolicy
+- org.apache.lucene.index.SnapshotDeletionPolicy → org.gnit.lucenekmp.index.SnapshotDeletionPolicy
+- org.apache.lucene.index.SoftDeletesRetentionMergePolicy → org.gnit.lucenekmp.index.SoftDeletesRetentionMergePolicy
+- org.apache.lucene.index.TestExitableDirectoryReader → org.gnit.lucenekmp.index.TestExitableDirectoryReader
+- org.apache.lucene.index.TestFilterLeafReader → org.gnit.lucenekmp.index.TestFilterLeafReader
+- org.apache.lucene.search.BaseKnnVectorQueryTestCase → org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase
+- org.apache.lucene.search.NamedMatches → org.gnit.lucenekmp.search.NamedMatches
+- org.apache.lucene.search.ReferenceManager → org.gnit.lucenekmp.search.ReferenceManager
+- org.apache.lucene.search.TestConjunctions → org.gnit.lucenekmp.search.TestConjunctions
 - org.apache.lucene.store.FileSwitchDirectory → org.gnit.lucenekmp.store.FileSwitchDirectory
 - org.apache.lucene.store.NRTCachingDirectory → org.gnit.lucenekmp.store.NRTCachingDirectory
+- org.apache.lucene.store.SimpleFSLockFactory → org.gnit.lucenekmp.store.SimpleFSLockFactory
 - org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
 - org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec → org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec
 - org.apache.lucene.tests.codecs.compressing.CompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.CompressingCodec
-- org.apache.lucene.tests.index.BaseIndexFileFormatTestCase → org.gnit.lucenekmp.tests.index.BaseIndexFileFormatTestCase
+- org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
+- org.apache.lucene.tests.index.ForceMergePolicy → org.gnit.lucenekmp.tests.index.ForceMergePolicy
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener
-- org.apache.lucene.tests.mockfile.ExtrasFS → org.gnit.lucenekmp.tests.mockfile.ExtrasFS
+- org.apache.lucene.tests.index.SuppressingConcurrentMergeScheduler → org.gnit.lucenekmp.tests.index.SuppressingConcurrentMergeScheduler
+- org.apache.lucene.tests.mockfile.FilterFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterFileChannel
+- org.apache.lucene.tests.mockfile.FilterPath → org.gnit.lucenekmp.tests.mockfile.FilterPath
 - org.apache.lucene.tests.mockfile.HandleLimitFS → org.gnit.lucenekmp.tests.mockfile.HandleLimitFS
-- org.apache.lucene.tests.mockfile.LeakFS → org.gnit.lucenekmp.tests.mockfile.LeakFS
 - org.apache.lucene.tests.mockfile.VerboseFS → org.gnit.lucenekmp.tests.mockfile.VerboseFS
 - org.apache.lucene.tests.mockfile.VirusCheckingFS → org.gnit.lucenekmp.tests.mockfile.VirusCheckingFS
-- org.apache.lucene.tests.mockfile.WindowsFS → org.gnit.lucenekmp.tests.mockfile.WindowsFS
+- org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
+- org.apache.lucene.tests.search.DummyTotalHitCountCollector → org.gnit.lucenekmp.tests.search.DummyTotalHitCountCollector
+- org.apache.lucene.tests.search.FixedBitSetCollector → org.gnit.lucenekmp.tests.search.FixedBitSetCollector
 - org.apache.lucene.tests.store.MockIndexInputWrapper → org.gnit.lucenekmp.tests.store.MockIndexInputWrapper
 - org.apache.lucene.tests.store.MockIndexOutputWrapper → org.gnit.lucenekmp.tests.store.MockIndexOutputWrapper
 - org.apache.lucene.tests.store.SlowClosingMockIndexInputWrapper → org.gnit.lucenekmp.tests.store.SlowClosingMockIndexInputWrapper
 - org.apache.lucene.tests.store.SlowOpeningMockIndexInputWrapper → org.gnit.lucenekmp.tests.store.SlowOpeningMockIndexInputWrapper
 - org.apache.lucene.tests.util.FailureMarker → org.gnit.lucenekmp.tests.util.FailureMarker
+- org.apache.lucene.tests.util.LineFileDocs → org.gnit.lucenekmp.tests.util.LineFileDocs
 - org.apache.lucene.tests.util.LuceneJUnit3MethodProvider → org.gnit.lucenekmp.tests.util.LuceneJUnit3MethodProvider
 - org.apache.lucene.tests.util.QuickPatchThreadsFilter → org.gnit.lucenekmp.tests.util.QuickPatchThreadsFilter
 - org.apache.lucene.tests.util.RunListenerPrintReproduceInfo → org.gnit.lucenekmp.tests.util.RunListenerPrintReproduceInfo
@@ -107,10 +117,46 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleThreadAndTestName → org.gnit.lucenekmp.tests.util.TestRuleThreadAndTestName
 - org.apache.lucene.tests.util.ThrottledIndexOutput → org.gnit.lucenekmp.tests.util.ThrottledIndexOutput
 - org.apache.lucene.tests.util.VerifyTestClassNamingConvention → org.gnit.lucenekmp.tests.util.VerifyTestClassNamingConvention
+- org.apache.lucene.util.HotspotVMOptions → org.gnit.lucenekmp.util.HotspotVMOptions
 
-## Depth 2
-- org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
-- org.apache.lucene.tests.index.ForceMergePolicy → org.gnit.lucenekmp.tests.index.ForceMergePolicy
+## Depth 1
+- org.apache.lucene.analysis.standard.SpoonFeedMaxCharsReaderWrapper → org.gnit.lucenekmp.analysis.standard.SpoonFeedMaxCharsReaderWrapper
+- org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
+- org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestPackedTokenAttributeImpl
+- org.apache.lucene.document.SortedSetDocValuesField → org.gnit.lucenekmp.document.SortedSetDocValuesField
+- org.apache.lucene.index.NoDeletionPolicy → org.gnit.lucenekmp.index.NoDeletionPolicy
+- org.apache.lucene.index.QueryTimeoutImpl → org.gnit.lucenekmp.index.QueryTimeoutImpl
+- org.apache.lucene.index.TestByteSlicePool → org.gnit.lucenekmp.index.TestByteSlicePool
+- org.apache.lucene.index.TestCachingMergeContext → org.gnit.lucenekmp.index.TestCachingMergeContext
+- org.apache.lucene.index.TestDirectoryReader → org.gnit.lucenekmp.index.TestDirectoryReader
+- org.apache.lucene.index.TestDocumentsWriterStallControl → org.gnit.lucenekmp.index.TestDocumentsWriterStallControl
+- org.apache.lucene.index.TestFlushByRamOrCountsPolicy → org.gnit.lucenekmp.index.TestFlushByRamOrCountsPolicy
+- org.apache.lucene.index.TestIndexCommit → org.gnit.lucenekmp.index.TestIndexCommit
+- org.apache.lucene.index.TestIndexWriter → org.gnit.lucenekmp.index.TestIndexWriter
+- org.apache.lucene.index.TestIndexableField → org.gnit.lucenekmp.index.TestIndexableField
+- org.apache.lucene.index.TestMultiFields → org.gnit.lucenekmp.index.TestMultiFields
+- org.apache.lucene.index.TestPendingSoftDeletes → org.gnit.lucenekmp.index.TestPendingSoftDeletes
+- org.apache.lucene.internal.vectorization.BaseVectorizationTestCase → org.gnit.lucenekmp.internal.vectorization.BaseVectorizationTestCase
+- org.apache.lucene.internal.vectorization.TestVectorScorer → org.gnit.lucenekmp.internal.vectorization.TestVectorScorer
+- org.apache.lucene.search.SearcherFactory → org.gnit.lucenekmp.search.SearcherFactory
+- org.apache.lucene.search.SearcherManager → org.gnit.lucenekmp.search.SearcherManager
+- org.apache.lucene.search.TestBooleanQuery → org.gnit.lucenekmp.search.TestBooleanQuery
+- org.apache.lucene.search.TestCollectorManager → org.gnit.lucenekmp.search.TestCollectorManager
+- org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
+- org.apache.lucene.search.TestKnnByteVectorQuery → org.gnit.lucenekmp.search.TestKnnByteVectorQuery
+- org.apache.lucene.search.TestKnnFloatVectorQuery → org.gnit.lucenekmp.search.TestKnnFloatVectorQuery
+- org.apache.lucene.search.TestMatchesIterator → org.gnit.lucenekmp.search.TestMatchesIterator
+- org.apache.lucene.search.TestTermScorer → org.gnit.lucenekmp.search.TestTermScorer
+- org.apache.lucene.search.TestTopDocsCollector → org.gnit.lucenekmp.search.TestTopDocsCollector
+- org.apache.lucene.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1 → org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1
+- org.apache.lucene.tests.analysis.standard.WordBreakTestUnicode_12_1_0 → org.gnit.lucenekmp.tests.analysis.standard.WordBreakTestUnicode_12_1_0
+- org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper
+- org.apache.lucene.tests.mockfile.ExtrasFS → org.gnit.lucenekmp.tests.mockfile.ExtrasFS
+- org.apache.lucene.tests.mockfile.LeakFS → org.gnit.lucenekmp.tests.mockfile.LeakFS
+- org.apache.lucene.tests.mockfile.WindowsFS → org.gnit.lucenekmp.tests.mockfile.WindowsFS
+- org.apache.lucene.tests.search.MatchesTestBase → org.gnit.lucenekmp.tests.search.MatchesTestBase
 - org.apache.lucene.tests.util.TestRuleTemporaryFilesCleanup → org.gnit.lucenekmp.tests.util.TestRuleTemporaryFilesCleanup
+- org.apache.lucene.util.RecyclingByteBlockAllocator → org.gnit.lucenekmp.util.RecyclingByteBlockAllocator
 - org.apache.lucene.util.SuppressForbidden → org.gnit.lucenekmp.util.SuppressForbidden
+- org.apache.lucene.util.TestCloseableThreadLocal → org.gnit.lucenekmp.util.TestCloseableThreadLocal
 
