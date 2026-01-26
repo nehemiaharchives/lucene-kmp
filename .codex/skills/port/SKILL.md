@@ -63,8 +63,9 @@ Step 9. If there are no missing `jdkport` class, and if there are no un-ported-d
 
 ## Code Style of Port
 Style 1. Ease of side by side comparison: The property names, var/val names, method/function names, inner class names, all the names should be exactly same and appear in exact order as java lucene counter part so that those who read the class can easily compare the logic and behavior of the code when porting and debugging.  
-Style 2. Do not add function/property/value/class/interface which is not in java lucene. This will make it difficult to compare the logic and behavior.  
-Style 3. Comment: port also the comments. Javadoc need to be translated to Kdoc. Block comments and slash comments need to be ported exactly same order as it appear in java lucene code. 
-Style 4. Companion object: java's static methods or static classes needs to be ported into kotlin's `companion object {}` and breaks the side by side style rule 1 but allowed.
-Style 5. Nullability: Get advantage of the kotlin language of null handling as much as possible by trying to use none-nullable var, val as much as possible. if a java lucene specifically inserts `null` to the val/var, then it can be nullable to mimic the behavior. 
-Style 6. Use idiomatic kotlin: Get advantage of the kotlin language to write simple, concise, smart, easy to understand code while following the exact same logic and behavior while porting.
+Style 2. Do not add function/property/value/class/interface which is not in java lucene. This will make it difficult to compare the logic and behavior.
+Style 3. getters and setters: java's ordinal getters and setters should be replaced with get() and set() of kotlin val/var to avoid compilation error. 
+Style 4. Comment: port also the comments. Javadoc need to be translated to Kdoc. Block comments and slash comments need to be ported exactly same order as it appear in java lucene code. 
+Style 5. Companion object: java's static methods or static classes needs to be ported into kotlin's `companion object {}` and breaks the side by side style rule 1 but allowed.
+Style 6. Nullability: Get advantage of the kotlin language of null handling as much as possible by trying to use none-nullable var, val as much as possible. if a java lucene specifically inserts `null` to the val/var, then it can be nullable to mimic the behavior. 
+Style 7. Use idiomatic kotlin: Get advantage of the kotlin language to write simple, concise, smart, easy to understand code while following the exact same logic and behavior while porting.
