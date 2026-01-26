@@ -26,7 +26,7 @@
 ### Total KMP classes: 963
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1233
+### Total KMP Unit Test classes: 1240
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11577,13 +11577,12 @@
 | [org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/blockterms/LuceneVarGapFixedInterval.java) | org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval | Depth 3 | [] | 5 | 0 | 0% |
 | [org.apache.lucene.tests.codecs.bloom.TestBloomFilteredLucenePostings](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/bloom/TestBloomFilteredLucenePostings.java) | org.gnit.lucenekmp.tests.codecs.bloom.TestBloomFilteredLucenePostings | Depth 4 | [x] | 2 | 3 | 66% |
 | [org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/cheapbastard/CheapBastardCodec.java) | org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec | Depth 2 | [] | 14 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.CompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/CompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.CompressingCodec | Depth 2 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.DeflateWithPresetCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/DeflateWithPresetCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.DeflateWithPresetCompressingCodec | Depth 3 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.FastCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/FastCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.FastCompressingCodec | Depth 3 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.FastDecompressionCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/FastDecompressionCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.FastDecompressionCompressingCodec | Depth 3 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.HighCompressionCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/HighCompressionCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.HighCompressionCompressingCodec | Depth 3 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/LZ4WithPresetCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec | Depth 3 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/dummy/DummyCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec | Depth 4 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.tests.codecs.compressing.DeflateWithPresetCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/DeflateWithPresetCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.DeflateWithPresetCompressingCodec | Depth 3 | [x] | 18 | 11 | 93% |
+| [org.apache.lucene.tests.codecs.compressing.FastCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/FastCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.FastCompressingCodec | Depth 3 | [x] | 18 | 11 | 93% |
+| [org.apache.lucene.tests.codecs.compressing.FastDecompressionCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/FastDecompressionCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.FastDecompressionCompressingCodec | Depth 3 | [x] | 18 | 11 | 93% |
+| [org.apache.lucene.tests.codecs.compressing.HighCompressionCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/HighCompressionCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.HighCompressionCompressingCodec | Depth 3 | [x] | 18 | 11 | 93% |
+| [org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/LZ4WithPresetCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec | Depth 3 | [x] | 18 | 11 | 93% |
+| [org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/compressing/dummy/DummyCompressingCodec.java) | org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec | Depth 4 | [x] | 2 | 1 | 0% |
 | [org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/codecs/mockrandom/MockRandomPostingsFormat.java) | org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat | Depth 3 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.tests.index.AlcoholicMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/AlcoholicMergePolicy.java) | org.gnit.lucenekmp.tests.index.AlcoholicMergePolicy | Depth 2 | [x] | 1 | 1 | 50% |
 | [org.apache.lucene.tests.index.AssertingLeafReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/AssertingLeafReader.java) | org.gnit.lucenekmp.tests.index.AssertingLeafReader | Depth 3 | [x] | 9 | 1 | 0% |
@@ -11851,8 +11850,8 @@ TODO_TEST written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO_TEST.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 1078
-- Ported Unit Test Classes: 953
-- Unit Test Porting Progress: 88%
+- Ported Unit Test Classes: 960
+- Unit Test Porting Progress: 89%
 - **Unit Test Semantic Completion: 41%**
 - Total Test Core Methods Needed: 9333
-- Test Core Methods Implemented: 3841
+- Test Core Methods Implemented: 3900

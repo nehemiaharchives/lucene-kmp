@@ -3,7 +3,6 @@
 From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependency depth (higher first).
 
 ## Depth 4
-- org.apache.lucene.tests.codecs.compressing.dummy.DummyCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
 - org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
@@ -29,11 +28,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.LockReleaseFailedException → org.gnit.lucenekmp.store.LockReleaseFailedException
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
-- org.apache.lucene.tests.codecs.compressing.DeflateWithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.DeflateWithPresetCompressingCodec
-- org.apache.lucene.tests.codecs.compressing.FastCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.FastCompressingCodec
-- org.apache.lucene.tests.codecs.compressing.FastDecompressionCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.FastDecompressionCompressingCodec
-- org.apache.lucene.tests.codecs.compressing.HighCompressionCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.HighCompressionCompressingCodec
-- org.apache.lucene.tests.codecs.compressing.LZ4WithPresetCompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.LZ4WithPresetCompressingCodec
 - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
 - org.apache.lucene.tests.index.BaseIndexFileFormatTestCase → org.gnit.lucenekmp.tests.index.BaseIndexFileFormatTestCase
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
@@ -61,7 +55,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.SimpleFSLockFactory → org.gnit.lucenekmp.store.SimpleFSLockFactory
 - org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
 - org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec → org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec
-- org.apache.lucene.tests.codecs.compressing.CompressingCodec → org.gnit.lucenekmp.tests.codecs.compressing.CompressingCodec
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
 - org.apache.lucene.tests.index.ForceMergePolicy → org.gnit.lucenekmp.tests.index.ForceMergePolicy
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener

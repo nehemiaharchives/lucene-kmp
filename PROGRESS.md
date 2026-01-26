@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1003 | 73% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1011 | 73% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -95,10 +95,10 @@
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 9 | 90% | [ ] |
 |       org.apache.lucene.tests.codecs.blockterms |           org.gnit.lucenekmp.tests.codecs.blockterms | 4 | 0 | 0% | [ ] |
-|       org.apache.lucene.tests.codecs.bloom |           org.gnit.lucenekmp.tests.codecs.bloom | 2 | 0 | 0% | [ ] |
+|       org.apache.lucene.tests.codecs.bloom |           org.gnit.lucenekmp.tests.codecs.bloom | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.codecs.cheapbastard |           org.gnit.lucenekmp.tests.codecs.cheapbastard | 2 | 0 | 0% | [ ] |
-|       org.apache.lucene.tests.codecs.compressing |           org.gnit.lucenekmp.tests.codecs.compressing | 7 | 0 | 0% | [ ] |
-|         org.apache.lucene.tests.codecs.compressing.dummy |             org.gnit.lucenekmp.tests.codecs.compressing.dummy | 2 | 0 | 0% | [ ] |
+|       org.apache.lucene.tests.codecs.compressing |           org.gnit.lucenekmp.tests.codecs.compressing | 7 | 6 | 85% | [ ] |
+|         org.apache.lucene.tests.codecs.compressing.dummy |             org.gnit.lucenekmp.tests.codecs.compressing.dummy | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.codecs.cranky |           org.gnit.lucenekmp.tests.codecs.cranky | 12 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.mockrandom |           org.gnit.lucenekmp.tests.codecs.mockrandom | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.ramonly |           org.gnit.lucenekmp.tests.codecs.ramonly | 2 | 0 | 0% | [ ] |
