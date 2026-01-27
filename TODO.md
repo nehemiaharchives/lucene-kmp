@@ -311,7 +311,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
 - org.apache.lucene.tests.index.BaseLiveDocsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseLiveDocsFormatTestCase
 - org.apache.lucene.tests.index.BaseMergePolicyTestCase → org.gnit.lucenekmp.tests.index.BaseMergePolicyTestCase
-- org.apache.lucene.tests.index.BaseNormsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseNormsFormatTestCase
 - org.apache.lucene.tests.index.BasePointsFormatTestCase → org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
 - org.apache.lucene.tests.index.BasePostingsFormatTestCase → org.gnit.lucenekmp.tests.index.BasePostingsFormatTestCase
 - org.apache.lucene.tests.index.BaseSegmentInfoFormatTestCase → org.gnit.lucenekmp.tests.index.BaseSegmentInfoFormatTestCase
@@ -667,7 +666,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextLiveDocsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextLiveDocsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextNormsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextNormsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPostingsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPostingsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat
