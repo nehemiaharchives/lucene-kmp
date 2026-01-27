@@ -493,59 +493,17 @@ class Progress : CliktCommand() {
             .scan()
 
         // Collect depth-1 dependencies for priority-1 classes
-        val pr1DependenciesDepth1 = mutableSetOf<ClassInfo>()
+        val pr1DependenciesDepth1 = javaLucene.classDependencyMap.entries
+            .filter { (classInfo, _) -> classInfo.name in pri1Names }
+            .flatMap { (_, dependencies) -> dependencies }
+            .toSet()
 
-        javaLucene.classDependencyMap.entries
-            .filter { (classInfo, dependencies) ->
-                classInfo.name in pri1Names
-            }
-            .forEach { (classInfo, dependencies) ->
-                if (dependencies.isNotEmpty()) {
-                    // Add the class itself and all its dependencies to the set
-                    pr1DependenciesDepth1.addAll(dependencies)
-                }
-            }
-
-        val pr1DepthToDependencyClassMap = mutableMapOf<Int/* depth */, Set<ClassInfo>>()
-
-        var depth = 1
-        pr1DepthToDependencyClassMap[depth] = pr1DependenciesDepth1.toSet()
-        depth++
-
-        val tempSet = pr1DependenciesDepth1.toMutableSet()
-        val allSeenDependencies = mutableSetOf<ClassInfo>()
         val pri1Classes = javaLucene.allClasses.filter { it.name in pri1Names }
-
-        // Add initial depth-1 dependencies
-        allSeenDependencies.addAll(pr1DependenciesDepth1)
-        allSeenDependencies.addAll(pri1Classes)
-
-        while (tempSet.isNotEmpty()) {
-
-            val dependencies = mutableSetOf<ClassInfo>()
-
-            // Collect dependencies for current depth classes
-            tempSet.forEach { classInfo ->
-                val classDependencies = javaLucene.classDependencyMap[classInfo]
-                if (classDependencies != null && classDependencies.isNotEmpty()) {
-                    dependencies.addAll(classDependencies)
-                }
-            }
-
-            // Remove already seen dependencies to avoid duplicates
-            dependencies.removeAll(allSeenDependencies)
-
-            if (dependencies.isNotEmpty()) {
-                pr1DepthToDependencyClassMap[depth] = dependencies.toSet()
-            }
-
-            // Update tracking sets for next iteration
-            allSeenDependencies.addAll(dependencies)
-            tempSet.clear()
-            tempSet.addAll(dependencies)
-
-            depth++
-        }
+        val pr1DepthToDependencyClassMap = buildDependencyDepthMap(
+            initial = pr1DependenciesDepth1,
+            seedSeen = pr1DependenciesDepth1 + pri1Classes,
+            dependencyProvider = { classInfo -> javaLucene.classDependencyMap[classInfo].orEmpty().toSet() }
+        )
 
         pr1DepthToDependencyClassMap.entries.forEach { (depth, classes) ->
             ps.println("* Dependencies: ${classes.size} at Depth $depth")
@@ -601,52 +559,28 @@ class Progress : CliktCommand() {
 
         ps.println("### total unit test classes: ${javaLuceneUnitTest.allClasses.size}")
 
-        // Collect all unit test dependencies with depth tracking
-        val pr1UnitTestDepthToDependencyClassMap = mutableMapOf<Int/* depth */, Set<ClassInfo>>()
+        val classNeedsUnitTestTopNames = (pri1Classes.map { it.name } + javaPr1Classes.keys).toSet()
+        val expectedTestNames = classNeedsUnitTestTopNames
+            .map { fqn -> "Test${fqn.substringAfterLast('.')}" }
+            .toSet()
 
-        val classNeedsUnitTest = pri1Classes.toMutableSet().plus(javaPr1Classes.values.map { it.classInfo })
-
-        val pr1UnitTestClasses = javaLuceneUnitTest.allClasses.filter { unitTestClassInfo ->
-            classNeedsUnitTest.any { pri1ClassInfo ->
-                "Test${pri1ClassInfo.simpleName}" == unitTestClassInfo.simpleName
-            }
+        val testClasses = javaLuceneUnitTest.allClasses.filter { classInfo ->
+            classInfo.classpathElementURL.toString().contains("/build/classes/java/test/")
         }
 
-        val allSeenUnitTestDependencies = mutableSetOf<ClassInfo>()
-
-        // Depth-1 is the unit test classes themselves
-        allSeenUnitTestDependencies.addAll(pr1UnitTestClasses)
-        val unitTestTempSet = pr1UnitTestClasses.toMutableSet()
-
-        var unitTestDepth = 1
-        pr1UnitTestDepthToDependencyClassMap[unitTestDepth] = pr1UnitTestClasses.toSet()
-        unitTestDepth++
-
-        while (unitTestTempSet.isNotEmpty()) {
-            val unitTestDependencies = mutableSetOf<ClassInfo>()
-
-            // Collect dependencies for current depth classes
-            unitTestTempSet.forEach { classInfo ->
-                val classDependencies = javaLuceneUnitTest.classDependencyMap[classInfo]
-                if (classDependencies != null && classDependencies.isNotEmpty()) {
-                    unitTestDependencies.addAll(classDependencies)
-                }
-            }
-
-            // Remove already seen dependencies to avoid duplicates
-            unitTestDependencies.removeAll(allSeenUnitTestDependencies)
-
-            if (unitTestDependencies.isNotEmpty()) {
-                pr1UnitTestDepthToDependencyClassMap[unitTestDepth] = unitTestDependencies.toSet()
-            }
-
-            // Update tracking sets for next iteration
-            allSeenUnitTestDependencies.addAll(unitTestDependencies)
-            unitTestTempSet.clear()
-            unitTestTempSet.addAll(unitTestDependencies)
-
-            unitTestDepth++
+        val pr1UnitTestClasses = testClasses.filter { unitTestClassInfo ->
+            val matchesByName = unitTestClassInfo.simpleName in expectedTestNames
+            val matchesByDependency = javaLuceneUnitTest.classDependencyMap[unitTestClassInfo]
+                ?.any { dependency -> dependency.name?.substringBefore("$") in classNeedsUnitTestTopNames }
+                ?: false
+            matchesByName || matchesByDependency
         }
+
+        val pr1UnitTestDepthToDependencyClassMap = buildDependencyDepthMap(
+            initial = pr1UnitTestClasses.toSet(),
+            seedSeen = pr1UnitTestClasses.toSet(),
+            dependencyProvider = { classInfo -> javaLuceneUnitTest.classDependencyMap[classInfo].orEmpty().toSet() }
+        )
 
         pr1UnitTestDepthToDependencyClassMap.entries.forEach { (depth, classes) ->
             ps.println("* Unit Test Dependencies: ${classes.size} at Depth $depth")
@@ -894,7 +828,7 @@ class Progress : CliktCommand() {
         ps.printTable(unitTestHeaders, unitTestTableRows)
 
         // #
-        // #  TODO_TEST.md OUTPUT
+        // #  TODO.md OUTPUT
         // #
         val unportedUnitTestEntries = javaUnitTestClasses.entries.mapNotNull { (javaFqn, javaClassWithDepth) ->
             val kmpFqn = mapToKmp(javaFqn)
@@ -904,9 +838,9 @@ class Progress : CliktCommand() {
                 TodoTestEntry(javaClassWithDepth.depth, javaFqn, kmpFqn)
             }
         }
-        val todoTestFile = File("$kmpDir/TODO_TEST.md")
+        val todoTestFile = File("$kmpDir/TODO.md")
         todoTestFile.writeText(buildTodoTestMarkdown(unportedUnitTestEntries))
-        ps.println("\nTODO_TEST written to: ${todoTestFile.absolutePath}")
+        ps.println("\nTODO.md written to: ${todoTestFile.absolutePath}")
 
         // #
         // #  SUMMARY
@@ -1047,3 +981,27 @@ class Progress : CliktCommand() {
 }
 
 Progress().main(args)
+
+fun buildDependencyDepthMap(
+    initial: Set<ClassInfo>,
+    seedSeen: Set<ClassInfo> = emptySet(),
+    dependencyProvider: (ClassInfo) -> Set<ClassInfo>
+): Map<Int, Set<ClassInfo>> {
+    if (initial.isEmpty()) return emptyMap()
+    val seen = seedSeen.toMutableSet()
+    seen.addAll(initial)
+
+    return generateSequence(initial) { current ->
+        val next = current
+            .asSequence()
+            .flatMap { dependencyProvider(it).asSequence() }
+            .toSet()
+            .minus(seen)
+        if (next.isEmpty()) null else {
+            seen.addAll(next)
+            next
+        }
+    }
+        .mapIndexed { index, classes -> (index + 1) to classes }
+        .toMap()
+}
