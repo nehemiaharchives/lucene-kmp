@@ -1,0 +1,152 @@
+# Release notes — 10.2.0-alpha10
+
+Overview
+
+This release contains the porting progress and improvements in the kotlin-multiplatform `lucene-kmp` module since `10.2.0-alpha09`. Key work includes: adding/porting many SimpleText codec classes and tests, porting several similarities (TF/DFR/Axiomatic/Classic/Boolean), porting BKD and points writers/readers, improvements to test-framework asserting codecs and index-format test cases, adding language analyzers (BibleMarathi, BibleJapanese), JDK-port helpers (Arrays, StringExt) and numerous other core/index/store/util classes.
+
+Notable commits
+
+- Add codecs module to CI and related CI/progress updates
+- Port/enable many SimpleText codec classes and tests (compound format, norms, fieldInfos, stored fields, term vectors, postings, points, knn vectors)
+- Port several similarity implementations and accompanying tests (TFIDF, Classic, Boolean, DFR, Axiomatic family)
+- Port BKD writer/point/quantized vector classes and supporting code
+- Port test-framework asserting codecs and several Base* test cases used by format tests
+- Add BibleMarathiAnalyzer and BibleJapaneseAnalyzer (extra analyzers)
+- JDK port additions: Arrays, StringExt, channel/IO helpers
+
+- SimpleText codecs, BKD and kNN vectors (new files ported):
+  - SimpleTextBKDReader
+  - SimpleTextBKDWriter
+  - SimpleTextCodec
+  - SimpleTextCompoundFormat
+  - SimpleTextDocValuesFormat
+  - SimpleTextDocValuesReader
+  - SimpleTextDocValuesWriter
+  - SimpleTextFieldInfosFormat
+  - SimpleTextFieldsReader
+  - SimpleTextFieldsWriter
+  - SimpleTextKnnVectorsFormat
+  - SimpleTextKnnVectorsReader
+  - SimpleTextKnnVectorsWriter
+  - SimpleTextLiveDocsFormat
+  - SimpleTextNormsFormat
+  - SimpleTextPointsFormat
+  - SimpleTextPointsReader
+  - SimpleTextPointsWriter
+  - SimpleTextPostingsFormat
+  - SimpleTextSegmentInfoFormat
+  - SimpleTextSkipReader
+  - SimpleTextSkipWriter
+  - SimpleTextStoredFieldsFormat
+  - SimpleTextStoredFieldsReader
+  - SimpleTextStoredFieldsWriter
+  - SimpleTextTermVectorsFormat
+  - SimpleTextTermVectorsReader
+  - SimpleTextTermVectorsWriter
+  - SimpleTextUtil
+  - SimpleTextDocsEnum
+  - SimpleTextPostingsEnum
+  - SimpleTextTerms
+  - SimpleTextTermsEnum
+  - SimpleTextPointTree
+  - BufferingKnnVectorsWriter
+
+- Similarities, models and scoring (new files ported):
+  - Axiomatic
+  - AxiomaticF1EXP
+  - AxiomaticF1LOG
+  - AxiomaticF2EXP
+  - AxiomaticF2LOG
+  - AxiomaticF3EXP
+  - AxiomaticF3LOG
+  - AxiomaticTestCase
+  - BasicModel
+  - BasicModelG
+  - BasicModelIF
+  - BasicModelIn
+  - BasicModelIne
+  - BasicModelTestCase
+  - BooleanSimilarity
+  - ClassicSimilarity
+  - DFRSimilarity
+  - TFIDFSimilarity
+  - Normalization
+  - NormalizationH1
+  - NormalizationH2
+  - NormalizationH3
+  - NormalizationZ
+
+- Test-framework, jdkport, IO and misc utilities (new files ported):
+  - AssertingDocValuesFormat
+  - AssertingKnnVectorsFormat
+  - AssertingLiveDocsFormat
+  - AssertingNormsFormat
+  - AssertingPointsFormat
+  - AssertingPostingsFormat
+  - AssertingStoredFieldsFormat
+  - AssertingTermVectorsFormat
+  - AsynchronousCloseException
+  - ByteChannel
+  - Channel
+  - ClosedByInterruptException
+  - ClosedChannelException
+  - CompressingCodec
+  - DeflateWithPresetCompressingCodec
+  - DummyCompressingCodec
+  - FastCompressingCodec
+  - FastDecompressionCompressingCodec
+  - FilterCodec
+  - FilterInputStream2
+  - FilterNumericDocValues
+  - FilterOutputStream2
+  - FilterSeekableByteChannel
+  - FloatField
+  - HighCompressionCompressingCodec
+  - IndexSortSortedNumericDocValuesRangeQuery
+  - InterruptibleChannel
+  - IntField
+  - LogByteSizeMergePolicy
+  - LogDocMergePolicy
+  - LogMergePolicy
+  - LongDistanceFeatureQuery
+  - LongField
+  - LZ4WithPresetCompressingCodec
+  - MergeReaderWrapper
+  - MockIndexInputWrapper
+  - MockIndexOutputWrapper
+  - MockRandomMergePolicy
+  - MultiLevelSkipListReader
+  - MultiLevelSkipListWriter
+  - NoDeletionPolicy
+  - NRTCachingDirectory
+  - ReadableByteChannel
+  - SeekableByteChannel
+  - SlowClosingMockIndexInputWrapper
+  - SlowOpeningMockIndexInputWrapper
+  - SortedNumericSelector
+  - SortedNumericSortField
+  - TestAxiomaticF1EXP
+  - TestAxiomaticF1LOG
+  - TestAxiomaticF2EXP
+  - TestAxiomaticF2LOG
+  - TestAxiomaticF3EXP
+  - TestAxiomaticF3LOG
+  - TestBasicModelG
+  - TestBasicModelIF
+  - TestBasicModelIn
+  - TestBasicModelIne
+  - TestBibleJapaneseAnalyzer
+  - TestBibleMarathiAnalyzer
+  - TestBooleanSimilarity
+  - TestClassicSimilarity
+  - TestField
+  - TestLucene90CompoundFormat
+  - TestLucene90FieldInfosFormat
+  - TestLucene94FieldInfosFormat
+  - TestNorms
+  - TestSimpleTextCompoundFormat
+  - TestSimpleTextFieldInfoFormat
+  - TestSimpleTextNormsFormat
+  - TFIDFSimilarity
+  - ThrottledIndexOutput
+  - WritableByteChannel
