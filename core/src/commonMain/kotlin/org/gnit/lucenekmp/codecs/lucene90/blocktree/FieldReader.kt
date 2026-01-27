@@ -157,7 +157,7 @@ class FieldReader internal constructor(
             this,
             compiled.getTransitionAccessor()!!,
             compiled.getByteRunnable()!!,
-            compiled.commonSuffixRef!!,
+            compiled.commonSuffixRef,
             startTerm
         )
     }

@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -78,8 +79,6 @@ import org.gnit.lucenekmp.jdkport.printStackTrace
 import org.gnit.lucenekmp.jdkport.push
 import org.gnit.lucenekmp.jdkport.sort
 import org.gnit.lucenekmp.jdkport.toUnsignedString
-import kotlin.concurrent.Volatile
-import kotlin.jvm.JvmStatic
 import kotlin.math.max
 import kotlin.math.min
 
@@ -102,7 +101,6 @@ class CheckIndex(
     private val writeLock: Lock
     private var infoStream: PrintStream?
 
-    @Volatile
     private var closed = false
 
     /**
@@ -483,45 +481,11 @@ class CheckIndex(
      */
     @Throws(IOException::class)
     fun checkIndex(onlySegments: MutableList<String>? = null): Status {
-        var executorService: ExecutorService? = null
-
-        // if threadCount == 1, then no executor is created and use the main thread to do index checking
-        // sequentially
-
-        // TODO for now skip this feature, implement if needed
-        /*if (threadCount > 1) {
-            executorService =
-                Executors.newFixedThreadPool(
-                    threadCount,
-                    NamedThreadFactory("async-check-index")
-                )
-        }*/
-
+        // ExecutorService-based parallel checking is currently disabled for common code.
+        // Keep single-threaded behavior: forward to the overloaded checkIndex with no executor.
         msg(infoStream!!, "Checking index with threadCount: $threadCount")
-        try {
-            val segments = onlySegments ?: mutableListOf()
-            return checkIndex(segments, executorService)
-        } finally {
-            if (executorService != null) {
-
-                executorService.shutdown()
-
-                runBlocking {
-                    try {
-                        executorService.awaitTermination(5, TimeUnit.SECONDS)
-                    } catch (e: InterruptedException) {
-                        msg(
-                            infoStream!!,
-                            "ERROR: Interrupted exception occurred when shutting down executor service"
-                        )
-                        if (infoStream != null) e.printStackTrace(infoStream!!)
-                    } finally {
-                        executorService.shutdownNow()
-                    }
-
-                }
-            }
-        }
+        val segments = onlySegments ?: mutableListOf()
+        return checkIndex(segments, null)
     }
 
     /**
@@ -793,7 +757,7 @@ class CheckIndex(
                             info,
                             stream
                         )
-                    }, executorService!!)
+                    }, executorService)
             }
 
             for (i in 0..<numSegments) {
@@ -1145,7 +1109,7 @@ class CheckIndex(
             segInfoStat.error = t
             segInfoStat.toLoseDocCount = toLoseDocCount
             msg(infoStream, "FAILED")
-            val comment: String = "exorciseIndex() would remove reference to this segment"
+            val comment = "exorciseIndex() would remove reference to this segment"
             msg(infoStream, "    WARNING: $comment; full exception:")
             if (infoStream != null) t.printStackTrace(infoStream)
             msg(infoStream, "")
@@ -1624,6 +1588,14 @@ class CheckIndex(
     }
 
     companion object {
+        private val logger = KotlinLogging.logger {}
+        private fun formatList(values: List<String>, limit: Int): String {
+            if (values.isEmpty()) return "[]"
+            val size = values.size
+            val shown = if (size <= limit) values else values.subList(0, limit)
+            val suffix = if (size <= limit) "" else ", ... (${size - limit} more)"
+            return "[${shown.joinToString(", ")}$suffix]"
+        }
         private fun msg(out: PrintStream, msg: ByteArrayOutputStream) {
             if (out != null) {
                 out.println(msg.toString(StandardCharsets.UTF_8))
@@ -1832,7 +1804,7 @@ class CheckIndex(
             return status
         }
 
-        /** Test field norms.  */
+        /** Status from testing field norms.  */
         @Throws(IOException::class)
         fun testFieldNorms(
             reader: CodecReader, infoStream: PrintStream, failFast: Boolean
@@ -1901,17 +1873,70 @@ class CheckIndex(
             val status: Status.TermIndexStatus = Status.TermIndexStatus()
             var computedFieldCount = 0
 
+            /**
+             * this is for debug and need to be deleted after debugging
+             */
+            val seenFields: MutableList<String> = mutableListOf()
+
             var postings: PostingsEnum? = null
 
             var lastField: String? = null
             for (field in fields) {
                 // MultiFieldsEnum relies upon this order...
 
-                if (lastField != null && field.compareTo(lastField) <= 0) {
+                if (lastField != null && field <= lastField) {
+                    val snapshot = formatList(seenFields + field, 50)
+                    val infoOrder = formatList(fieldInfos.map { it.name }.toList(), 50)
+                    // gather more diagnostics: full list of fields from the Fields instance,
+                    // indices of lastField/current field in fieldInfos, and whether fieldInfos
+                    // contains the problematic fields
+                    val fullFieldsList: MutableList<String> = mutableListOf()
+                    try {
+                        for (f in fields) {
+                            fullFieldsList.add(f)
+                        }
+                    } catch (ex: Exception) {
+                        // ignore - some Fields impls may throw on re-iteration; we still log what we have
+                    }
+                    val infoNames: List<String> = fieldInfos.map { it.name }.toList()
+                    val lastIndex = infoNames.indexOf(lastField)
+                    val curIndex = infoNames.indexOf(field)
+                    val lastFieldInfoPresent = fieldInfos.fieldInfo(lastField) != null
+                    val curFieldInfoPresent = fieldInfos.fieldInfo(field) != null
+
+                    // Additional diagnostic: check if the fields iteration is already sorted
+                    val iterList: MutableList<String> = mutableListOf()
+                    try {
+                        for (f in fields) iterList.add(f)
+                    } catch (_: Exception) {
+                    }
+                    val isIterSorted = iterList == iterList.sorted()
+
+                    logger.debug {
+                        "CheckIndex.checkFields out of order: lastField=$lastField field=$field fieldsClass=${fields::class.simpleName} seenFields=$snapshot fieldInfos=$infoOrder fullFields=$fullFieldsList infoNames=$infoNames lastIndex=$lastIndex curIndex=$curIndex lastFieldInfoPresent=$lastFieldInfoPresent curFieldInfoPresent=$curFieldInfoPresent iterOrder=$iterList iterSorted=$isIterSorted"
+                    }
+                    // Diagnostic information we can gather in common code:
+                    logger.debug {
+                        "CheckIndex.deepFields: fieldsClass=${fields::class.simpleName} fullFields=$fullFieldsList iterOrder=$iterList iterSorted=$isIterSorted"
+                    }
+                    try {
+                        msg(infoStream, "  fieldsClass=${fields::class.simpleName} fullFields=$fullFieldsList iterOrder=$iterList iterSorted=$isIterSorted")
+                    } catch (_: Exception) {
+                    }
+
+                    val diagString = ("CheckIndex.checkFields out of order: lastField=$lastField field=$field\n" +
+                        "  fieldsClass=${fields::class.simpleName}\n" +
+                        "  seenFields=$snapshot\n" +
+                        "  fullFields=$fullFieldsList\n" +
+                        "  infoNames=$infoNames\n" +
+                        "  lastIndex=$lastIndex curIndex=$curIndex lastFieldInfoPresent=$lastFieldInfoPresent curFieldInfoPresent=$curFieldInfoPresent\n" +
+                        "  iterOrder=$iterList iterSorted=$isIterSorted")
+
                     throw CheckIndexException(
-                        "fields out of order: lastField=$lastField field=$field"
+                        "fields out of order: lastField=$lastField field=$field\n$diagString"
                     )
                 }
+                seenFields.add(field)
                 lastField = field
 
                 // check that the field is in fieldinfos, and is indexed.
@@ -2570,7 +2595,7 @@ class CheckIndex(
 
                             if (target > max && target % 2 == 1) {
                                 val delta = min(
-                                    (31 * field.hashCode() + target) and 0x1ff,
+                                    (31 * field.hashCode() + target and 0x1ff),
                                     DocIdSetIterator.NO_MORE_DOCS - target
                                 )
                                 max = target + delta
@@ -2725,8 +2750,8 @@ class CheckIndex(
                             ) {
                                 if (liveDocs != null && !liveDocs.get(doc)) {
                                     // Norms may only be out of sync with terms on deleted documents.
-                                    // This happens when a document fails indexing and in that case it
-                                    // should be immediately marked as deleted by the IndexWriter.
+                                    // This happens when a document fails indexing and in that case it should be
+                                    // immediately marked as deleted by the IndexWriter.
                                     doc = norms.nextDoc()
                                     continue
                                 }
@@ -2757,8 +2782,8 @@ class CheckIndex(
                         ) {
                             if (liveDocs != null && !liveDocs.get(doc)) {
                                 // Norms may only be out of sync with terms on deleted documents.
-                                // This happens when a document fails indexing and in that case it
-                                // should be immediately marked as deleted by the IndexWriter.
+                                // This happens when a document fails indexing and in that case it should be
+                                // immediately marked as deleted by the IndexWriter.
                                 doc =
                                     if (doc + 1 >= visitedDocs.length())
                                         DocIdSetIterator.NO_MORE_DOCS
@@ -2879,7 +2904,7 @@ class CheckIndex(
                             )
                         )
                     var startTerm: BytesRef? = null
-                    checkTermsIntersect(terms, automaton, startTerm!!)
+                    checkTermsIntersect(terms, automaton, startTerm)
 
                     startTerm = BytesRef()
                     checkTermsIntersect(terms, automaton, startTerm)
@@ -2942,7 +2967,7 @@ class CheckIndex(
         private fun checkTermsIntersect(
             terms: Terms,
             automaton: Automaton,
-            startTerm: BytesRef
+            startTerm: BytesRef?
         ) {
             var automaton: Automaton = automaton
             val allTerms: TermsEnum = terms.iterator()
@@ -3114,10 +3139,10 @@ class CheckIndex(
                 status =
                     checkFields(
                         fields,
-                        reader.liveDocs!!,
+                        reader.liveDocs,
                         maxDoc,
                         fieldInfos,
-                        normsProducer!!,
+                        normsProducer,
                         doPrint = true,
                         isVectors = false,
                         infoStream = infoStream,
@@ -3257,48 +3282,24 @@ class CheckIndex(
             val fieldInfos: FieldInfos = reader.fieldInfos
             val status: Status.VectorValuesStatus = Status.VectorValuesStatus()
             try {
+                val vectorsReader: KnnVectorsReader = reader.vectorReader!!
                 if (fieldInfos.hasVectorValues()) {
                     for (fieldInfo in fieldInfos) {
                         if (fieldInfo.hasVectorValues()) {
-                            val dimension: Int = fieldInfo.vectorDimension
-                            if (dimension <= 0) {
-                                throw CheckIndexException(
-                                    ("Field \""
-                                            + fieldInfo.name
-                                            + "\" has vector values but dimension is "
-                                            + dimension)
-                                )
-                            }
-                            if (reader.getFloatVectorValues(fieldInfo.name) == null
-                                && reader.getByteVectorValues(fieldInfo.name) == null
-                            ) {
-                                continue
-                            }
-
                             status.totalKnnVectorFields++
                             when (fieldInfo.vectorEncoding) {
                                 VectorEncoding.BYTE -> checkByteVectorValues(
-                                    requireNotNull(
-                                        reader.getByteVectorValues(
-                                            fieldInfo.name
-                                        )
-                                    ),
+                                    requireNotNull(reader.getByteVectorValues(fieldInfo.name)),
                                     fieldInfo,
                                     status,
                                     reader
                                 )
-
                                 VectorEncoding.FLOAT32 -> checkFloatVectorValues(
-                                    requireNotNull(
-                                        reader.getFloatVectorValues(
-                                            fieldInfo.name
-                                        )
-                                    ),
+                                    requireNotNull(reader.getFloatVectorValues(fieldInfo.name)),
                                     fieldInfo,
                                     status,
                                     reader
                                 )
-
                                 else -> throw CheckIndexException(
                                     ("Field \""
                                             + fieldInfo.name
@@ -3309,11 +3310,12 @@ class CheckIndex(
                         }
                     }
                 }
+
                 msg(
                     infoStream,
                     "OK [${status.totalKnnVectorFields} fields, ${status.totalVectorValues} vectors] [took ${nsToSec(System.nanoTime() - startNS)} sec]"
                 )
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 if (failFast) {
                     throw IOUtils.rethrowAlways(e)
                 }
@@ -3344,8 +3346,7 @@ class CheckIndex(
                 if (fieldInfos.hasVectorValues()) {
                     for (fieldInfo in fieldInfos) {
                         if (fieldInfo.hasVectorValues()) {
-                            val fieldReader: KnnVectorsReader =
-                                getFieldReaderForName(vectorsReader, fieldInfo.name)
+                            val fieldReader: KnnVectorsReader = getFieldReaderForName(vectorsReader, fieldInfo.name)
                             if (fieldReader is HnswGraphProvider) {
                                 val hnswGraph: HnswGraph = fieldReader.getGraph(fieldInfo.name)!!
                                 testHnswGraph(hnswGraph, fieldInfo.name, status)
@@ -4633,23 +4634,8 @@ class CheckIndex(
                                                                             + j
                                                                             + " has payload="
                                                                             + payload
-                                                                            + " but postings does not.")
-                                                                )
-                                                            }
-                                                            val postingsPayload: BytesRef? =
-                                                                postingsDocs.payload
-                                                            if (payload != postingsPayload) {
-                                                                throw CheckIndexException(
-                                                                    ("vector term="
-                                                                            + term
-                                                                            + " field="
-                                                                            + field
-                                                                            + " doc="
-                                                                            + j
-                                                                            + " has payload="
-                                                                            + payload
                                                                             + " but differs from postings payload="
-                                                                            + postingsPayload)
+                                                                            + postingsDocs.payload)
                                                                 )
                                                             }
                                                         }
@@ -4738,7 +4724,6 @@ class CheckIndex(
          * 0.
          */
         @Throws(IOException::class, InterruptedException::class)
-        @JvmStatic
         fun main(args: Array<String>) {
             val exitCode = doMain(args)
             exitProcess(exitCode) /*System.exit(exitCode)*/

@@ -30,7 +30,7 @@ internal class IntersectTermsEnum(
     val fr: FieldReader,
     automaton: TransitionAccessor,
     runAutomaton: ByteRunnable,
-    commonSuffix: BytesRef,
+    commonSuffix: BytesRef?,
     startTerm: BytesRef?
 ) : BaseTermsEnum() {
     // static boolean DEBUG = BlockTreeTermsWriter.DEBUG;

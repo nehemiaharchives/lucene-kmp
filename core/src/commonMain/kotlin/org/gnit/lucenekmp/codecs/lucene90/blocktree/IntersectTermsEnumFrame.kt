@@ -24,7 +24,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
     // State in automaton
     var state: Int = 0
         set(state) {
-            this.state = state
+            field = state
             transitionIndex = 0
             transitionCount = ite.automaton.getNumTransitions(state)
             if (transitionCount != 0) {
