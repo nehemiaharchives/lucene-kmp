@@ -67,6 +67,12 @@ jobs:
             timeout: 10
             task: :analysis:extra:jvmTest
             artifact: jvm-analysis-extra-reports
+          - platform: jvm
+            module_name: codecs
+            os: ubuntu-latest
+            timeout: 10
+            task: :codecs:jvmTest
+            artifact: jvm-codecs-reports
 
           # Android
           - platform: android
@@ -117,6 +123,13 @@ jobs:
             timeout: 15
             task: :analysis:extra:testAndroidHostTest
             artifact: android-analysis-extra-reports
+            needs_android: true
+          - platform: android
+            module_name: codecs
+            os: ubuntu-latest
+            timeout: 15
+            task: :codecs:testAndroidHostTest
+            artifact: android-codecs-reports
             needs_android: true
 
           # iOS
@@ -169,6 +182,13 @@ jobs:
             task: :analysis:extra:iosSimulatorArm64Test
             artifact: ios-analysis-extra-reports
             needs_konan_cache: true
+          - platform: ios
+            module_name: codecs
+            os: macos-latest
+            timeout: 20
+            task: :codecs:iosSimulatorArm64Test
+            artifact: ios-codecs-reports
+            needs_konan_cache: true
 
           # Linux
           - platform: linux
@@ -219,6 +239,13 @@ jobs:
             timeout: 20
             task: :analysis:extra:linuxX64Test
             artifact: linux-analysis-extra-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: codecs
+            os: ubuntu-latest
+            timeout: 20
+            task: :codecs:linuxX64Test
+            artifact: linux-codecs-reports
             needs_konan_cache: true
 
     steps:
@@ -347,6 +374,13 @@ jobs:
           -x :analysis:extra:compileAndroidHostTest
           -x :analysis:extra:compileAndroidMain
           -x :analysis:extra:koverGenerateArtifactAndroid
+      - name: Coverage :codecs
+        run: >
+          ./gradlew :codecs:koverXmlReport
+          -x :codecs:compileAndroidDeviceTest
+          -x :codecs:compileAndroidHostTest
+          -x :codecs:compileAndroidMain
+          -x :codecs:koverGenerateArtifactAndroid
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
@@ -360,6 +394,7 @@ jobs:
             analysis/nori/build/reports/kover/report.xml
             analysis/kuromoji/build/reports/kover/report.xml
             analysis/extra/build/reports/kover/report.xml
+            codecs/build/reports/kover/report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build reports
@@ -375,4 +410,5 @@ jobs:
             analysis/nori/build/reports/kover/
             analysis/kuromoji/build/reports/kover/
             analysis/extra/build/reports/kover/
+            codecs/build/reports/kover/
             build/reports/
