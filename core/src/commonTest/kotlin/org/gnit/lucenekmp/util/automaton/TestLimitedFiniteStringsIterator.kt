@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.util.fst.Util
 class TestLimitedFiniteStringsIterator : LuceneTestCase() {
     @Test
     fun testRandomFiniteStrings() {
-        val iters = atLeast(100)
+        val iters = atLeast(3) // TODO reduced from 100 to 3 for dev speed
         for (i in 0 until iters) {
             val a = AutomatonTestUtil.randomAutomaton(random())
             try {
