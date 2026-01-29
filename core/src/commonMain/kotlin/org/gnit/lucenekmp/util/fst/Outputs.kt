@@ -64,7 +64,7 @@ abstract class Outputs<T> {
      * [.readFinalOutput] and discarding the result.
      */
     @Throws(IOException::class)
-    fun skipFinalOutput(`in`: DataInput) {
+    open fun skipFinalOutput(`in`: DataInput) {
         skipOutput(`in`)
     }
 

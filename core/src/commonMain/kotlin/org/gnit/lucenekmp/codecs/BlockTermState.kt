@@ -10,8 +10,7 @@ import org.gnit.lucenekmp.index.TermState
  * @lucene.internal
  */
 open class BlockTermState
-/** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
-protected constructor() : OrdTermState() {
+/** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */() : OrdTermState() {
     /** how many docs have this term  */
     var docFreq: Int = 0
 
