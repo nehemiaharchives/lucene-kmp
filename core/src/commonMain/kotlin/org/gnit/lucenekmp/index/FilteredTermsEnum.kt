@@ -182,7 +182,7 @@ abstract class FilteredTermsEnum protected constructor(tenum: TermsEnum, startWi
     }
 
     @Throws(IOException::class)
-    override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
+    override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum? {
         return tenum.postings(reuse, flags)
     }
 

@@ -262,7 +262,7 @@ class MultiPhraseQuery private constructor(
                                 termsEnum.postings(
                                     null,
                                     (if (exposeOffsets) PostingsEnum.ALL else PostingsEnum.POSITIONS).toInt()
-                                )
+                                )!!
                             )
                             totalMatchCost += PhraseQuery.termPositionsCost(termsEnum)
                         }

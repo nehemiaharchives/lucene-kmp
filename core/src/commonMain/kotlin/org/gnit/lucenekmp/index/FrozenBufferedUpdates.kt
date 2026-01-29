@@ -475,7 +475,7 @@ class FrozenBufferedUpdates(
             get() {
                 checkNotNull(termsEnum)
                 return termsEnum!!.postings(postingsEnum, PostingsEnum.NONE.toInt())
-                    .also { postingsEnum = it }
+                    .also { postingsEnum = it }!!
             }
     }
 

@@ -35,7 +35,7 @@ internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
                     for (t in collectedTerms) {
                         termsEnum2.seekExact(t.term, t.state)
                         docs = termsEnum2.postings(docs, PostingsEnum.NONE.toInt())
-                        builder.add(docs)
+                        builder.add(docs!!)
                     }
                 }
 
@@ -57,7 +57,7 @@ internal class MultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>
                         val weight: Weight? = searcher.rewrite(q).createWeight(searcher, scoreMode, score())
                         return WeightOrDocIdSetIterator(weight!!)
                     }
-                    builder.add(docs)
+                    builder.add(docs!!)
                 } while (termsEnum.next() != null)
 
                 return WeightOrDocIdSetIterator(builder.build().iterator())

@@ -150,7 +150,7 @@ protected constructor() : BytesRefIterator {
      * @see .postings
      */
     @Throws(IOException::class)
-    fun postings(reuse: PostingsEnum): PostingsEnum {
+    fun postings(reuse: PostingsEnum?): PostingsEnum? {
         return postings(reuse, PostingsEnum.FREQS.toInt())
     }
 
@@ -167,7 +167,7 @@ protected constructor() : BytesRefIterator {
      * @param flags specifies which optional per-document values you require; see [     ][PostingsEnum.FREQS]
      */
     @Throws(IOException::class)
-    abstract fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum
+    abstract fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum?
 
     /**
      * Return a [ImpactsEnum].

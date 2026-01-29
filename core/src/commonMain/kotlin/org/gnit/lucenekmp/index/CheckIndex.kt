@@ -2169,7 +2169,7 @@ class CheckIndex(
                     var hasNonDeletedDocs = false
                     var totalTermFreq: Long = 0
                     while (true) {
-                        val doc: Int = postings.nextDoc()
+                        val doc: Int = postings!!.nextDoc()
                         if (doc == DocIdSetIterator.NO_MORE_DOCS) {
                             break
                         }
@@ -2370,7 +2370,7 @@ class CheckIndex(
                         for (idx in 0..6) {
                             val skipDocID = (((idx + 1) * maxDoc.toLong()) / 8).toInt()
                             postings = termsEnum.postings(postings, PostingsEnum.ALL.toInt())
-                            val docID: Int = postings.advance(skipDocID)
+                            val docID: Int = postings!!.advance(skipDocID)
                             if (docID == DocIdSetIterator.NO_MORE_DOCS) {
                                 break
                             } else {
@@ -2491,7 +2491,7 @@ class CheckIndex(
                         for (idx in 0..6) {
                             val skipDocID = (((idx + 1) * maxDoc.toLong()) / 8).toInt()
                             postings = termsEnum.postings(postings, PostingsEnum.NONE.toInt())
-                            val docID: Int = postings.advance(skipDocID)
+                            val docID: Int = postings!!.advance(skipDocID)
                             if (docID == DocIdSetIterator.NO_MORE_DOCS) {
                                 break
                             } else {
@@ -2537,7 +2537,7 @@ class CheckIndex(
                             postings = termsEnum.postings(postings, PostingsEnum.FREQS.toInt())
                             var doc: Int = impactsEnum.nextDoc()
                             while (true) {
-                                if (postings.nextDoc() != doc) {
+                                if (postings!!.nextDoc() != doc) {
                                     throw CheckIndexException(
                                         "Wrong next doc: " + doc + ", expected " + postings.docID()
                                     )
@@ -2619,7 +2619,7 @@ class CheckIndex(
                                 impactsEnum.nextDoc()
                             }
 
-                            if (postings.advance(target) != doc) {
+                            if (postings!!.advance(target) != doc) {
                                 throw CheckIndexException(
                                     ("Impacts do not advance to the same document as postings for target "
                                             + target
@@ -2821,7 +2821,7 @@ class CheckIndex(
 
                         val expectedDocFreq: Int = termsEnum.docFreq()
                         val d: PostingsEnum =
-                            termsEnum.postings(null, PostingsEnum.NONE.toInt())
+                            termsEnum.postings(null, PostingsEnum.NONE.toInt())!!
                         var docFreq = 0
                         while (d.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
                             docFreq++
@@ -4489,7 +4489,7 @@ class CheckIndex(
                                             PostingsEnum.ALL.toInt()
                                         )
 
-                                        val advanceDoc: Int = postingsDocs.advance(j)
+                                        val advanceDoc: Int = postingsDocs!!.advance(j)
                                         if (advanceDoc != j) {
                                             throw CheckIndexException(
                                                 ("vector term="
@@ -4504,7 +4504,7 @@ class CheckIndex(
                                             )
                                         }
 
-                                        val doc: Int = postings.nextDoc()
+                                        val doc: Int = postings!!.nextDoc()
 
                                         if (doc != 0) {
                                             throw CheckIndexException(

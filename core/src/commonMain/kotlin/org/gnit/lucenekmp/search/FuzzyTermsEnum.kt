@@ -286,7 +286,7 @@ class FuzzyTermsEnum private constructor(
         reuse: PostingsEnum?,
         flags: Int
     ): PostingsEnum {
-        return actualEnum!!.postings(reuse, flags)
+        return actualEnum!!.postings(reuse, flags)!!
     }
 
     @Throws(IOException::class)

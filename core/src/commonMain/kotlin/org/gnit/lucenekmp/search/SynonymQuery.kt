@@ -315,7 +315,7 @@ class SynonymQuery private constructor(
                                 impacts.add(impactsEnum)
                             } else {
                                 val postingsEnum: PostingsEnum =
-                                    termsEnum.postings(null, PostingsEnum.FREQS.toInt())
+                                    termsEnum.postings(null, PostingsEnum.FREQS.toInt())!!
                                 iterators.add(postingsEnum)
                                 impacts.add(SlowImpactsEnum(postingsEnum))
                             }

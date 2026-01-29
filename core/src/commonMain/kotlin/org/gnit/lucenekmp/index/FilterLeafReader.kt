@@ -182,7 +182,7 @@ abstract class FilterLeafReader protected constructor(inReader: LeafReader) : Le
         }
 
         @Throws(IOException::class)
-        override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum {
+        override fun postings(reuse: PostingsEnum?, flags: Int): PostingsEnum? {
             return `in`.postings(reuse, flags)
         }
 

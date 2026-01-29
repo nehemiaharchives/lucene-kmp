@@ -122,7 +122,7 @@ internal class SimpleTextFieldsWriter(writeState: SegmentWriteState) : FieldsCon
 
                 // for each doc in field+term
                 while (true) {
-                    val doc = postingsEnum.nextDoc()
+                    val doc = postingsEnum!!.nextDoc()
                     if (doc == DocIdSetIterator.NO_MORE_DOCS) {
                         break
                     }

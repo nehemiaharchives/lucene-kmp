@@ -54,7 +54,7 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
             var term: BytesRef? = terms.next()
             while (term != null) {
                 if (te.seekExact(term)) {
-                    val pe: PostingsEnum = te.postings(reuse, PostingsEnum.OFFSETS.toInt())
+                    val pe: PostingsEnum = te.postings(reuse, PostingsEnum.OFFSETS.toInt())!!
                     if (pe.advance(doc) == doc) {
                         mis.add(TermMatchesIterator(query, pe))
                         reuse = null
@@ -222,7 +222,7 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
                     val pe: PostingsEnum = te.postings(
                         reuse = reuse,
                         flags = PostingsEnum.OFFSETS.toInt()
-                    )
+                    )!!
                     if (pe.advance(doc) == doc) {
                         return TermsEnumDisjunctionMatchesIterator(
                             TermMatchesIterator(query, pe), terms, te, doc, query

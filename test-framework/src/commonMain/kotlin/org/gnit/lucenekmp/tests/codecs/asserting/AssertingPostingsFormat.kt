@@ -157,7 +157,7 @@ class AssertingPostingsFormat : PostingsFormat("Asserting") {
                     var lastDocID = -1
 
                     while (true) {
-                        val docID = postingsEnum.nextDoc()
+                        val docID = postingsEnum!!.nextDoc()
                         if (docID == NO_MORE_DOCS) {
                             break
                         }

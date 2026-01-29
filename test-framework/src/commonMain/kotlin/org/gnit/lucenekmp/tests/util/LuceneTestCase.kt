@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.tests.util
 
 //import org.gnit.lucenekmp.store.FileSwitchDirectory
 //import org.gnit.lucenekmp.store.NRTCachingDirectory
+//import org.gnit.lucenekmp.util.configureTestLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.TimeZone
 import okio.IOException
@@ -64,10 +65,11 @@ import org.gnit.lucenekmp.tests.search.similarities.RandomSimilarity
 import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
+import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.TEST_DIRECTORY
+import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.VERBOSE
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
-//import org.gnit.lucenekmp.util.configureTestLogging
 import org.gnit.lucenekmp.util.CommandLineUtil
 import org.gnit.lucenekmp.util.NamedThreadFactory
 import kotlin.math.ln
@@ -129,16 +131,8 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         // ↑ line 294 of LuceneTestCase.java
 
 
-        // line 457
-        /** Whether or not [Nightly] tests should run.  */
-        val TEST_NIGHTLY: Boolean = systemPropertyAsBoolean(
-            SYSPROP_NIGHTLY,
-            /*Nightly::class.getAnnotation<A>(TestGroup::class)
-                .enabled()*/ false
-        )
 
-
-        // line 408
+        // ↓ line 408
         // -----------------------------------------------------------------
         // Truly immutable fields and constants, initialized once and valid
         // for all suites ever since.
@@ -163,10 +157,54 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             defaultValue
         }
 
+        val TEST_ASSERTS_ENABLED: Boolean =
+            systemPropertyAsBoolean(
+                "tests.asserts",
+                true
+            )
 
-        // line 449
+        /**
+         * The default (embedded resource) lines file.
+         *
+         * @see .TEST_LINE_DOCS_FILE
+         */
+        const val DEFAULT_LINE_DOCS_FILE: String = "europarl.lines.txt.gz"
+
+        /**
+         * Random sample from enwiki used in tests. See `help/tests.txt`. gradle task downloading
+         * this data set: `gradlew getEnWikiRandomLines`.
+         */
+        const val JENKINS_LARGE_LINE_DOCS_FILE: String = "enwiki.random.lines.txt"
+
+        /** Gets the codec to run tests with.  */
+        val TEST_CODEC: String = System.getProperty("tests.codec", "random")!!
+
+        /** Gets the postingsFormat to run tests with.  */
+        val TEST_POSTINGSFORMAT: String =
+            System.getProperty("tests.postingsformat", "random")!!
+
+        /** Gets the docValuesFormat to run tests with  */
+        val TEST_DOCVALUESFORMAT: String =
+            System.getProperty("tests.docvaluesformat", "random")!!
+
         /** Gets the directory to run tests with  */
         val TEST_DIRECTORY: String = System.getProperty("tests.directory", "random")!!
+
+        /** The line file used in tests (by [LineFileDocs]).  */
+        val TEST_LINE_DOCS_FILE: String = System.getProperty(
+            "tests.linedocsfile",
+            DEFAULT_LINE_DOCS_FILE
+        )!!
+
+        /** Whether or not [Nightly] tests should run.  */
+        val TEST_NIGHTLY: Boolean = systemPropertyAsBoolean(
+            SYSPROP_NIGHTLY,
+            /*Nightly::class.getAnnotation<A>(TestGroup::class)
+                .enabled()*/ false
+        )
+        // ↑ line 459
+
+
 
         // line 484
         /**

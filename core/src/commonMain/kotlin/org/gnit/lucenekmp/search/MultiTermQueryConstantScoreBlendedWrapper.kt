@@ -43,9 +43,9 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
                         termsEnum2.seekExact(t.term, t.state)
                         reuse = termsEnum2.postings(reuse, PostingsEnum.NONE.toInt())
                         if (t.docFreq <= POSTINGS_PRE_PROCESS_THRESHOLD) {
-                            otherTerms.add(reuse)
+                            otherTerms.add(reuse!!)
                         } else {
-                            highFrequencyTerms.add(reuse)
+                            highFrequencyTerms.add(reuse!!)
                             reuse = null // can't reuse since we haven't processed the postings
                         }
                     }
@@ -71,9 +71,9 @@ internal class MultiTermQueryConstantScoreBlendedWrapper<Q : MultiTermQuery>(que
                     }
 
                     if (docFreq <= POSTINGS_PRE_PROCESS_THRESHOLD) {
-                        otherTerms.add(reuse)
+                        otherTerms.add(reuse!!)
                     } else {
-                        val dropped: PostingsEnum? = highFrequencyTerms.insertWithOverflow(reuse)
+                        val dropped: PostingsEnum? = highFrequencyTerms.insertWithOverflow(reuse!!)
                         if (dropped != null) {
                             otherTerms.add(dropped)
                         }

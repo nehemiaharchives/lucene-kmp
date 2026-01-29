@@ -1601,11 +1601,11 @@ class TestUtil {
                         2 -> posFlags = PostingsEnum.PAYLOADS.toInt()
                         else -> posFlags = PostingsEnum.ALL.toInt()
                     }
-                    return termsEnum.postings(null, posFlags)
+                    return termsEnum.postings(null, posFlags)!!
                 }
                 flags = flags or PostingsEnum.FREQS.toInt()
             }
-            return termsEnum.postings(reuse, flags)
+            return termsEnum.postings(reuse, flags)!!
         }
 
         fun stringToCharSequence(string: String, random: Random): CharSequence {

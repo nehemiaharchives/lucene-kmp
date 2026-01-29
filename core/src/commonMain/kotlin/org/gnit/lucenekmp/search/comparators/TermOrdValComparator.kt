@@ -557,7 +557,7 @@ open class TermOrdValComparator(
                 val minTerm: BytesRef = docValuesTerms.term()!!
                 val terms: TermsEnum = context.reader().terms(field)!!.iterator()
                 check(terms.seekExact(minTerm)) { "Term $minTerm exists in doc values but not in the terms index" }
-                postings!!.add(PostingsEnumAndOrd(terms.postings(null, PostingsEnum.NONE.toInt()), minOrd))
+                postings!!.add(PostingsEnumAndOrd(terms.postings(null, PostingsEnum.NONE.toInt())!!, minOrd))
                 for (ord in minOrd + 1..maxOrd) {
                     val next: BytesRef? = terms.next()
                     checkNotNull(next) {
@@ -568,7 +568,7 @@ open class TermOrdValComparator(
                                 + " terms")
                     }
                     require(docValuesTerms.seekExact(next) && docValuesTerms.ord() == ord.toLong())
-                    postings!!.add(PostingsEnumAndOrd(terms.postings(null, PostingsEnum.NONE.toInt()), ord))
+                    postings!!.add(PostingsEnumAndOrd(terms.postings(null, PostingsEnum.NONE.toInt())!!, ord))
                 }
             }
             disjunction =

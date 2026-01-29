@@ -431,7 +431,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
                             te.postings(
                                 null,
                                 (if (exposeOffsets) PostingsEnum.OFFSETS else PostingsEnum.POSITIONS).toInt()
-                            )
+                            )!!
                         impactsEnum = SlowImpactsEnum(postingsEnum)
                     }
                     postingsFreqs[i] = PostingsAndFreq(postingsEnum, impactsEnum, positions[i], t)

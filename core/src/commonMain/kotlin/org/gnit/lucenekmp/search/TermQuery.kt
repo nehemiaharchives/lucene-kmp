@@ -84,7 +84,7 @@ class TermQuery : Query {
                 return null
             }
 
-            val pe: PostingsEnum = te.postings(null, PostingsEnum.OFFSETS.toInt())
+            val pe: PostingsEnum = te.postings(null, PostingsEnum.OFFSETS.toInt())!!
             if (pe.advance(doc) != doc) {
                 return null
             }
@@ -148,7 +148,7 @@ class TermQuery : Query {
                             termsEnum.impacts(PostingsEnum.FREQS.toInt()), simScorer!!, norms, topLevelScoringClause)
                     } else {
                         val flags: Int = if (scoreMode.needsScores()) PostingsEnum.FREQS.toInt() else PostingsEnum.NONE.toInt()
-                        return TermScorer(termsEnum.postings(null, flags), simScorer!!, norms)
+                        return TermScorer(termsEnum.postings(null, flags)!!, simScorer!!, norms)
                     }
                 }
 

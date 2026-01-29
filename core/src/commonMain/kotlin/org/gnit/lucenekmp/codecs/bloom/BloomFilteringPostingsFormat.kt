@@ -343,7 +343,7 @@ class BloomFilteringPostingsFormat @JvmOverloads constructor(
             override fun postings(
                 reuse: PostingsEnum?,
                 flags: Int
-            ): PostingsEnum {
+            ): PostingsEnum? {
                 return delegate()!!.postings(reuse, flags)
             }
 
@@ -422,7 +422,7 @@ class BloomFilteringPostingsFormat @JvmOverloads constructor(
                     }
                     // Make sure there's at least one doc for this term:
                     postingsEnum = termsEnum.postings(postingsEnum, 0)
-                    if (postingsEnum.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+                    if (postingsEnum!!.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
                         bloomFilter.addValue(term)
                     }
                 }

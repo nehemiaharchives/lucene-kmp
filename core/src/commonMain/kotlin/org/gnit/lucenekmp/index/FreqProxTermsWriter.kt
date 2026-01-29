@@ -177,7 +177,7 @@ class FreqProxTermsWriter(
                     inReuse = reuse
                 }
 
-                val inDocsAndPositions: PostingsEnum = `in`.postings(inReuse, flags)
+                val inDocsAndPositions: PostingsEnum? = `in`.postings(inReuse, flags)
                 // we ignore the fact that positions/offsets may be stored but not asked for,
                 // since this code is expected to be used during addIndexes which will
                 // ask for everything. if that assumption changes in the future, we can
@@ -202,7 +202,7 @@ class FreqProxTermsWriter(
                 inReuse = reuse
             }
 
-            val inDocs: PostingsEnum = `in`.postings(inReuse, flags)
+            val inDocs: PostingsEnum = `in`.postings(inReuse, flags)!!
             wrapReuse.reset(docMap, inDocs)
             return wrapReuse
         }
@@ -360,7 +360,7 @@ class FreqProxTermsWriter(
         private var pos = 0
         private var startOffset = 0
         private var endOffset = 0
-        override var payload: BytesRef? = BytesRef()
+        override val payload: BytesRef?
             get(): BytesRef? {
                 return if (payload!!.length == 0) null else payload
             }
@@ -373,7 +373,7 @@ class FreqProxTermsWriter(
         @Throws(IOException::class)
         fun reset(
             docMap: Sorter.DocMap,
-            `in`: PostingsEnum,
+            `in`: PostingsEnum?,
             storePositions: Boolean,
             storeOffsets: Boolean
         ) {
@@ -391,7 +391,7 @@ class FreqProxTermsWriter(
             buffer.reset()
             var doc: Int
             var i = 0
-            while ((`in`.nextDoc().also { doc = it }) != NO_MORE_DOCS) {
+            while ((`in`!!.nextDoc().also { doc = it }) != NO_MORE_DOCS) {
                 if (i == docs.size) {
                     val newLength: Int = ArrayUtil.oversize(i + 1, 4)
                     docs = ArrayUtil.growExact(docs, newLength)
