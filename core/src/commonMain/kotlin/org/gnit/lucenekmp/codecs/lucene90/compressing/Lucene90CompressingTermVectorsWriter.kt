@@ -188,7 +188,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
 
     override fun close() {
         try {
-            IOUtils.close(metaStream!!, vectorsStream!!, indexWriter!!)
+            IOUtils.close(metaStream, vectorsStream, indexWriter)
         } finally {
             metaStream = null
             vectorsStream = null

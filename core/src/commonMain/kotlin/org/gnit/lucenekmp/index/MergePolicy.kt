@@ -273,7 +273,7 @@ abstract class MergePolicy
             val readers: MutableList<MergeReader> = ArrayList(codecReaders.size)
             var totalDocs = 0
             for (r in codecReaders) {
-                readers.add(MergeReader(r, r.liveDocs!!))
+                readers.add(MergeReader(r, r.liveDocs))
                 totalDocs += r.numDocs()
             }
             this.mergeReader = readers.toMutableList()

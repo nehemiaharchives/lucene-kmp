@@ -69,9 +69,9 @@ internal class Lucene90NormsConsumer(
             success = true
         } finally {
             if (success) {
-                IOUtils.close(data!!, meta!!)
+                IOUtils.close(data, meta)
             } else {
-                IOUtils.closeWhileHandlingException(data!!, meta!!)
+                IOUtils.closeWhileHandlingException(data, meta)
             }
             data = null
             meta = data

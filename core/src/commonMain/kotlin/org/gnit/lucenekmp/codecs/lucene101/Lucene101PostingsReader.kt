@@ -343,7 +343,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 return if (!needsPayloads || payloadLength == 0) {
                     null
                 } else {
-                    payload
+                    field
                 }
             }
 

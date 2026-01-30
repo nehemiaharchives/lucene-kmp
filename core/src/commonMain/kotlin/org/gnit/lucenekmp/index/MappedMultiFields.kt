@@ -15,7 +15,7 @@ class MappedMultiFields(val mergeState: MergeState, multiFields: MultiFields) : 
 
     @Throws(IOException::class)
     override fun terms(field: String?): Terms? {
-        val terms: MultiTerms? = `in`.terms(field) as MultiTerms
+        val terms: MultiTerms? = `in`.terms(field) as MultiTerms?
         return if (terms == null) {
             null
         } else {

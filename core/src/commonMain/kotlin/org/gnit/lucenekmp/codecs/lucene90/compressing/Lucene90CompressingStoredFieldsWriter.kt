@@ -72,7 +72,7 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
 
     override fun close() {
         try {
-            IOUtils.close(metaStream!!, fieldsStream!!, indexWriter!!, compressor!!)
+            IOUtils.close(metaStream, fieldsStream, indexWriter, compressor)
         } finally {
             metaStream = null
             fieldsStream = null
