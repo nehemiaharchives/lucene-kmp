@@ -60,7 +60,7 @@ import kotlin.jvm.JvmOverloads
  *
  * @lucene.experimental
  */
-class BloomFilteringPostingsFormat @JvmOverloads constructor(
+class BloomFilteringPostingsFormat(
     delegatePostingsFormat: PostingsFormat? = null,
     bloomFilterFactory: BloomFilterFactory = DefaultBloomFilterFactory()
 ) : PostingsFormat(

@@ -59,6 +59,8 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -89,8 +91,25 @@ import kotlin.test.assertTrue
 */
 @OptIn(ExperimentalAtomicApi::class)
 abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
+
+    var postingsTester: RandomPostingsTester? = null
+
+    // TODO maybe instead of @BeforeClass just make a single test run: build postings & index & test
+    @BeforeTest
+    @Throws(IOException::class)
+    fun createPostings() {
+        postingsTester =
+            RandomPostingsTester(random())
+    }
+
+    @AfterTest
     @Throws(Exception::class)
-    fun testDocsOnly() {
+    fun afterClass() {
+        postingsTester = null
+    }
+
+    @Throws(Exception::class)
+    open fun testDocsOnly() {
         postingsTester!!.testFull(
             codec,
             createTempDir("testPostingsFormat.testExact"),
@@ -100,7 +119,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDocsAndFreqs() {
+    open fun testDocsAndFreqs() {
         postingsTester!!.testFull(
             codec,
             createTempDir("testPostingsFormat.testExact"),
@@ -110,7 +129,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDocsAndFreqsAndPositions() {
+    open fun testDocsAndFreqsAndPositions() {
         postingsTester!!.testFull(
             codec,
             createTempDir("testPostingsFormat.testExact"),
@@ -120,7 +139,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDocsAndFreqsAndPositionsAndPayloads() {
+    open fun testDocsAndFreqsAndPositionsAndPayloads() {
         postingsTester!!.testFull(
             codec,
             createTempDir("testPostingsFormat.testExact"),
@@ -130,7 +149,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDocsAndFreqsAndPositionsAndOffsets() {
+    open fun testDocsAndFreqsAndPositionsAndOffsets() {
         postingsTester!!.testFull(
             codec,
             createTempDir("testPostingsFormat.testExact"),
@@ -140,7 +159,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDocsAndFreqsAndPositionsAndOffsetsAndPayloads() {
+    open fun testDocsAndFreqsAndPositionsAndOffsetsAndPayloads() {
         postingsTester!!.testFull(
             codec,
             createTempDir("testPostingsFormat.testExact"),
@@ -150,7 +169,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRandom() {
+    open fun testRandom() {
         val iters = 5
 
         for (iter in 0..<iters) {
@@ -196,7 +215,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         get() = true
 
     @Throws(Exception::class)
-    fun testPostingsEnumReuse() {
+    open fun testPostingsEnumReuse() {
         val path: Path =
             createTempDir("testPostingsEnumReuse")
         val dir: Directory =
@@ -238,7 +257,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testJustEmptyField() {
+    open fun testJustEmptyField() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -278,7 +297,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testEmptyFieldAndEmptyTerm() {
+    open fun testEmptyFieldAndEmptyTerm() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -315,7 +334,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDidntWantFreqsButAskedAnyway() {
+    open fun testDidntWantFreqsButAskedAnyway() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -356,7 +375,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAskForPositionsWhenNotThere() {
+    open fun testAskForPositionsWhenNotThere() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -399,7 +418,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     // tests that ghost fields still work
     // TODO: can this be improved
     @Throws(Exception::class)
-    fun testGhosts() {
+    open fun testGhosts() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -452,7 +471,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // Test seek in disorder.
     @Throws(Exception::class)
-    fun testDisorder() {
+    open fun testDisorder() {
         val dir: Directory =
             newDirectory()
 
@@ -506,7 +525,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testBinarySearchTermLeaf() {
+    open fun testBinarySearchTermLeaf() {
         val dir: Directory =
             newDirectory()
 
@@ -588,7 +607,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // tests that level 2 ghost fields still work
     @Throws(Exception::class)
-    fun testLevel2Ghosts() {
+    open fun testLevel2Ghosts() {
         val dir: Directory =
             newDirectory()
 
@@ -676,7 +695,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     // LUCENE-5123: make sure we can visit postings twice
     // during flush/merge
     @Throws(Exception::class)
-    fun testInvertedWrite() {
+    open fun testInvertedWrite() {
         val dir: Directory =
             newDirectory()
         val analyzer =
@@ -696,7 +715,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         // threads iterates over the map while the flushing
         // thread might be adding to it:
         val termFreqs: MutableMap<String, TermFreqs> =
-            /*java.util.concurrent.Concurrent*/HashMap<String, TermFreqs>()
+            /*java.util.concurrent.Concurrent*/HashMap()
 
         val sumDocFreq = AtomicLong(0)
         val sumTotalTermFreq = AtomicLong(0)
@@ -982,7 +1001,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPostingsEnumDocsOnly() {
+    open fun testPostingsEnumDocsOnly() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -1064,7 +1083,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPostingsEnumFreqs() {
+    open fun testPostingsEnumFreqs() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -1178,7 +1197,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPostingsEnumPositions() {
+    open fun testPostingsEnumPositions() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -1435,7 +1454,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPostingsEnumOffsets() {
+    open fun testPostingsEnumOffsets() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -1705,7 +1724,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPostingsEnumPayloads() {
+    open fun testPostingsEnumPayloads() {
         val dir: Directory = newDirectory()
         val iwc = IndexWriterConfig(/*null*/)
         val iw = IndexWriter(dir, iwc)
@@ -2012,7 +2031,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testPostingsEnumAll() {
+    open fun testPostingsEnumAll() {
         val dir: Directory =
             newDirectory()
         val iwc =
@@ -2372,7 +2391,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     /** Test realistic data, which is often better at uncovering real bugs.  */
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/ // this test takes a few seconds
     @Throws(IOException::class)
-    fun testLineFileDocs() {
+    open fun testLineFileDocs() {
         // Use a FS dir and a non-randomized IWC to not slow down indexing
         newFSDirectory(createTempDir())
             .use { dir ->
@@ -2415,7 +2434,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testMismatchedFields() {
+    open fun testMismatchedFields() {
         val dir1: Directory =
             newDirectory()
         val w1 = IndexWriter(
@@ -2483,23 +2502,6 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     companion object {
-        var postingsTester: RandomPostingsTester? = null
-
-        // TODO maybe instead of @BeforeClass just make a single test run: build postings & index & test
-        // it
-        /*@org.junit.BeforeClass*/
-        @Throws(IOException::class)
-        fun createPostings() {
-            postingsTester =
-                RandomPostingsTester(random())
-        }
-
-        /*@org.junit.AfterClass*/
-        @Throws(Exception::class)
-        fun afterClass() {
-            postingsTester = null
-        }
-
         @Throws(IOException::class)
         protected fun checkReuse(
             termsEnum: TermsEnum,

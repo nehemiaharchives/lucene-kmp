@@ -39,6 +39,7 @@ kotlin {
                 implementation(project(":core"))
                 implementation(project(":codecs"))
                 implementation(libs.kotlin.test)
+                implementation(libs.kotlin.test.annotationsCommon)
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
                 implementation(libs.kotlinbignum)
@@ -64,6 +65,7 @@ kotlin {
         }
         jvmMain.get().dependsOn(jvmAndroidMain)
         jvmMain.get().dependencies {
+            implementation(libs.kotlin.test.junit)
             implementation(libs.kotlin.logging.jvm)
             implementation(libs.logback)
         }

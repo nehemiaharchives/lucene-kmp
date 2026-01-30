@@ -1,13 +1,12 @@
 package org.gnit.lucenekmp.codecs
 
-
 import okio.IOException
+import org.gnit.lucenekmp.codecs.bloom.BloomFilteringPostingsFormat
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.util.NamedSPILoader
-
 
 /**
  * Encodes/decodes terms, postings, and proximity data.
@@ -86,28 +85,45 @@ abstract class PostingsFormat protected constructor(override val name: String) :
         /** Zero-length `PostingsFormat` array.  */
         val EMPTY: Array<PostingsFormat> = emptyArray<PostingsFormat>()
 
+        private val registry: MutableMap<String, () -> PostingsFormat> = mutableMapOf(
+            "Lucene101" to { Lucene101PostingsFormat() },
+            "BloomFilter" to { BloomFilteringPostingsFormat() },
+        )
+
+        /**
+         * Registers a postings format factory by name. This is the KMP-safe alternative to SPI.
+         *
+         * Only adds new names; existing registrations are left untouched.
+         */
+        fun registerPostingsFormat(name: String, factory: () -> PostingsFormat) {
+            NamedSPILoader.checkServiceName(name)
+            if (!registry.containsKey(name)) {
+                registry[name] = factory
+            }
+        }
+
         /** looks up a format by name  */
         fun forName(name: String): PostingsFormat {
-            // First try hardcoded built-ins (no SPI in KMP):
-            return when (name) {
-                "Lucene101" -> Lucene101PostingsFormat()
-                else -> {
-                    // Fallback to SPI loader if available, otherwise throw consistent error
-                    try {
-                        Holder.loader.lookup(name)
-                    } catch (e: Throwable) {
-                        throw UnsupportedOperationException(
-                            "PostingsFormat '$name' is not available. Known built-ins: [Lucene101].",
-                            e
-                        )
-                    }
-                }
+            registry[name]?.let { factory ->
+                return factory()
+            }
+            // Fallback to SPI loader if available, otherwise throw consistent error
+            try {
+                return Holder.loader.lookup(name)
+            } catch (e: Throwable) {
+                val known = registry.keys.sorted()
+                throw UnsupportedOperationException(
+                    "PostingsFormat '$name' is not available. Known built-ins: $known.",
+                    e
+                )
             }
         }
 
         /** returns a list of all available format names  */
         fun availablePostingsFormats(): MutableSet<String> {
-            return Holder.loader.availableServices()
+            val services = Holder.loader.availableServices()
+            services.addAll(registry.keys)
+            return services
         }
 
         /**

@@ -33,7 +33,7 @@ import org.gnit.lucenekmp.util.CloseableThreadLocal
 import kotlinx.coroutines.Job
 
 /** Acts like the default codec but with additional asserts. */
-class AssertingCodec : FilterCodec("Asserting", TestUtil.getDefaultCodec()) {
+open class AssertingCodec : FilterCodec("Asserting", TestUtil.getDefaultCodec()) {
 
     companion object {
         // Mirrors java.lang.Thread.currentThread() checks by tracking the current coroutine Job
@@ -142,7 +142,7 @@ class AssertingCodec : FilterCodec("Asserting", TestUtil.getDefaultCodec()) {
      *
      * <p>The default implementation always returns "Asserting"
      */
-    fun getPostingsFormatForField(field: String): PostingsFormat {
+    open fun getPostingsFormatForField(field: String): PostingsFormat {
         return defaultFormat
     }
 

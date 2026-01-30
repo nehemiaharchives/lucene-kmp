@@ -64,6 +64,7 @@ import org.gnit.lucenekmp.jdkport.valueOf
 import org.gnit.lucenekmp.search.TopDocs
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.NoLockFactory
+import org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
 import org.gnit.lucenekmp.util.Attribute
 import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.BytesRef
@@ -1247,19 +1248,19 @@ class TestUtil {
          * Return a Codec that can read any of the default codecs and formats, but always writes in the
          * specified format.
          */
-        /*fun alwaysPostingsFormat(format: PostingsFormat): Codec {
+        fun alwaysPostingsFormat(format: PostingsFormat): Codec {
             // TODO: we really need for postings impls etc to announce themselves
             // (and maybe their params, too) to infostream on flush and merge.
             // otherwise in a real debugging situation we won't know whats going on!
             if (LuceneTestCase.VERBOSE) {
-                println("forcing postings format to:" + format)
+                println("forcing postings format to:$format")
             }
             return object : AssertingCodec() {
                 override fun getPostingsFormatForField(field: String): PostingsFormat {
                     return format
                 }
             }
-        }*/
+        }
 
         /**
          * Return a Codec that can read any of the default codecs and formats, but always writes in the
