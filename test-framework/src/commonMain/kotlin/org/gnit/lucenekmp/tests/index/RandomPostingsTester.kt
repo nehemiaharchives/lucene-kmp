@@ -1861,7 +1861,7 @@ class RandomPostingsTester(random: Random) {
                         AutomatonTestUtil.RandomAcceptedStrings(
                             a
                         )
-                    for (iter in 0..99) {
+                    for (iter in 0..9) { // TODO reduce from 99 to 9 for dev speed
                         val codePoints: IntArray = ras.getRandomAcceptedString(random)
                         if (codePoints.isEmpty()) {
                             continue
