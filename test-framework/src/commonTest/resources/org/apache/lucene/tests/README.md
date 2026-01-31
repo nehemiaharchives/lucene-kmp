@@ -1,0 +1,1 @@
+org.apache.lucene.tests package of resources directory

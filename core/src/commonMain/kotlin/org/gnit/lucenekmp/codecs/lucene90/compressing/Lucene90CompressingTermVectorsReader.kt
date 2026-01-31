@@ -53,7 +53,6 @@ import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.intBitsToFloat
 import kotlin.experimental.and
-import kotlin.jvm.JvmRecord
 
 /**
  * [TermVectorsReader] for [Lucene90CompressingTermVectorsFormat].
@@ -522,7 +521,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
 
         val positionIndex = positionIndex(skip.toInt(), numFields.toInt(), numTerms, termFreqs)
         val positions: Array<IntArray?>
-        val startOffsets: Array<IntArray>
+        val startOffsets: Array<IntArray?>
         val lengths: Array<IntArray?>
         if (totalPositions > 0) {
             positions =
@@ -535,7 +534,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                     POSITIONS,
                     totalPositions,
                     positionIndex
-                ) as Array<IntArray?>
+                )
         } else {
             positions = kotlin.arrayOfNulls<IntArray>(numFields.toInt())
         }
@@ -553,7 +552,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             lengths =
                 readPositions(
                     skip.toInt(), numFields.toInt(), flags, numTerms, termFreqs, OFFSETS, totalOffsets, positionIndex
-                ) as Array<IntArray?>
+                )
 
             for (i in 0..<numFields.toInt()) {
                 val fStartOffsets: IntArray? = startOffsets[i]
@@ -561,7 +560,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                 // patch offsets from positions
                 if (fStartOffsets != null && fPositions != null) {
                     val fieldCharsPerTerm = charsPerTerm[fieldNumOffs[i].toInt()]
-                    for (j in startOffsets[i].indices) {
+                    for (j in fStartOffsets.indices) {
                         fStartOffsets[j] += (fieldCharsPerTerm * fPositions[j]).toInt()
                     }
                 }
@@ -569,15 +568,18 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                     val fPrefixLengths = prefixLengths[i]
                     val fSuffixLengths = suffixLengths[i]
                     val fLengths = lengths[i]
+                    if (fLengths == null) {
+                        continue
+                    }
                     var j = 0
                     val end = numTerms.get(skip + i).toInt()
                     while (j < end) {
                         // delta-decode start offsets and  patch lengths using term lengths
                         val termLength = fPrefixLengths!![j] + fSuffixLengths!![j]
-                        lengths[i]!![positionIndex[i][j]] += termLength
+                        fLengths[positionIndex[i][j]] += termLength
                         for (k in positionIndex[i][j] + 1..<positionIndex[i][j + 1]) {
                             fStartOffsets[k] += fStartOffsets[k - 1]
-                            fLengths!![k] += termLength
+                            fLengths[k] += termLength
                         }
                         ++j
                     }
@@ -585,7 +587,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             }
         } else {
             lengths = kotlin.arrayOfNulls<IntArray>(numFields.toInt())
-            startOffsets = lengths as Array<IntArray>
+            startOffsets = lengths
         }
         if (totalPositions > 0) {
             // delta-decode positions
@@ -719,11 +721,11 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             suffixLengths as Array<IntArray>,
             fieldTermFreqs as Array<IntArray>,
             positionIndex,
-            positions as Array<IntArray>,
+            positions as Array<IntArray?>,
             startOffsets,
-            lengths as Array<IntArray>,
+            lengths as Array<IntArray?>,
             payloadBytes,
-            payloadIndex as Array<IntArray>,
+            payloadIndex as Array<IntArray?>,
             suffixBytes
         )
     }
@@ -758,7 +760,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         flag: Int,
         totalPositions: Int,
         positionIndex: Array<IntArray>
-    ): Array<IntArray> {
+    ): Array<IntArray?> {
         val positions: Array<IntArray?> = kotlin.arrayOfNulls<IntArray>(numFields)
         reader.reset(vectorsStream, totalPositions.toLong())
         // skip
@@ -795,7 +797,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             termIndex += termCount
         }
         reader.skip(totalPositions - reader.ord())
-        return positions as Array<IntArray>
+        return positions
     }
 
     private inner class TVFields(
@@ -808,14 +810,14 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         private val suffixLengths: Array<IntArray>,
         private val termFreqs: Array<IntArray>,
         private val positionIndex: Array<IntArray>,
-        private val positions: Array<IntArray>,
-        private val startOffsets: Array<IntArray>,
-        private val lengths: Array<IntArray>,
+        private val positions: Array<IntArray?>,
+        private val startOffsets: Array<IntArray?>,
+        private val lengths: Array<IntArray?>,
         payloadBytes: BytesRef,
-        payloadIndex: Array<IntArray>,
+        payloadIndex: Array<IntArray?>,
         suffixBytes: BytesRef
     ) : Fields() {
-        private val payloadIndex: Array<IntArray>
+        private val payloadIndex: Array<IntArray?>
         private val suffixBytes: BytesRef
         private val payloadBytes: BytesRef
 
@@ -904,10 +906,10 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         private val suffixLengths: IntArray,
         private val termFreqs: IntArray,
         private val positionIndex: IntArray,
-        private val positions: IntArray,
-        private val startOffsets: IntArray,
-        private val lengths: IntArray,
-        private val payloadIndex: IntArray,
+        private val positions: IntArray?,
+        private val startOffsets: IntArray?,
+        private val lengths: IntArray?,
+        private val payloadIndex: IntArray?,
         payloadBytes: BytesRef,
         termBytes: BytesRef
     ) : Terms() {
@@ -938,7 +940,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                 positions,
                 startOffsets,
                 lengths,
-                payloadIndex,
+            payloadIndex,
                 payloadBytes,
                 ByteArrayDataInput(termBytes.bytes, termBytes.offset, termBytes.length)
             )
@@ -979,10 +981,10 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         private lateinit var suffixLengths: IntArray
         private lateinit var termFreqs: IntArray
         private lateinit var positionIndex: IntArray
-        private lateinit var positions: IntArray
-        private lateinit var startOffsets: IntArray
-        private lateinit var lengths: IntArray
-        private lateinit var payloadIndex: IntArray
+        private var positions: IntArray? = null
+        private var startOffsets: IntArray? = null
+        private var lengths: IntArray? = null
+        private var payloadIndex: IntArray? = null
         private var `in`: ByteArrayDataInput? = null
         private var payloads: BytesRef? = null
         private val term: BytesRef = BytesRef(16)
@@ -994,10 +996,10 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             suffixLengths: IntArray,
             termFreqs: IntArray,
             positionIndex: IntArray,
-            positions: IntArray,
-            startOffsets: IntArray,
-            lengths: IntArray,
-            payloadIndex: IntArray,
+            positions: IntArray?,
+            startOffsets: IntArray?,
+            lengths: IntArray?,
+            payloadIndex: IntArray?,
             payloads: BytesRef,
             `in`: ByteArrayDataInput
         ) {
@@ -1123,32 +1125,34 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         private var doc = -1
         private var termFreq = 0
         private var positionIndex = 0
-        private lateinit var positions: IntArray
-        private lateinit var startOffsets: IntArray
-        private lateinit var lengths: IntArray
+        private var positions: IntArray? = null
+        private var startOffsets: IntArray? = null
+        private var lengths: IntArray? = null
+
+        private val payloadRef: BytesRef = BytesRef()
 
         override val payload: BytesRef?
             get() {
                 checkPosition()
-                return if (payload!!.length == 0) {
+                return if (payloadRef.length == 0) {
                     null
                 } else {
-                    payload
+                    payloadRef
                 }
             }
 
-        private lateinit var payloadIndex: IntArray
+        private var payloadIndex: IntArray? = null
         private var basePayloadOffset = 0
         private var i = 0
 
         fun reset(
             freq: Int,
             positionIndex: Int,
-            positions: IntArray,
-            startOffsets: IntArray,
-            lengths: IntArray,
+            positions: IntArray?,
+            startOffsets: IntArray?,
+            lengths: IntArray?,
             payloads: BytesRef,
-            payloadIndex: IntArray
+            payloadIndex: IntArray?
         ) {
             this.termFreq = freq
             this.positionIndex = positionIndex
@@ -1156,9 +1160,9 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             this.startOffsets = startOffsets
             this.lengths = lengths
             this.basePayloadOffset = payloads.offset
-            this.payload!!.bytes = payloads.bytes
-            payload!!.length = 0
-            payload!!.offset = payload!!.length
+            this.payloadRef.bytes = payloads.bytes
+            payloadRef.length = 0
+            payloadRef.offset = 0
             this.payloadIndex = payloadIndex
 
             i = -1
@@ -1184,34 +1188,40 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             ++i
 
             if (payloadIndex != null) {
-                payload!!.offset = basePayloadOffset + payloadIndex[positionIndex + i]
-                payload!!.length = payloadIndex[positionIndex + i + 1] - payloadIndex[positionIndex + i]
+                payloadRef.offset = basePayloadOffset + payloadIndex!![positionIndex + i]
+                payloadRef.length = payloadIndex!![positionIndex + i + 1] - payloadIndex!![positionIndex + i]
+            } else {
+                payloadRef.length = 0
             }
 
-            if (positions == null) {
+            val positionsLocal = positions
+            if (positionsLocal == null) {
                 return -1
             } else {
-                return positions[positionIndex + i]
+                return positionsLocal[positionIndex + i]
             }
         }
 
         @Throws(IOException::class)
         override fun startOffset(): Int {
             checkPosition()
-            if (startOffsets == null) {
+            val startOffsetsLocal = startOffsets
+            if (startOffsetsLocal == null) {
                 return -1
             } else {
-                return startOffsets[positionIndex + i]
+                return startOffsetsLocal[positionIndex + i]
             }
         }
 
         @Throws(IOException::class)
         override fun endOffset(): Int {
             checkPosition()
-            if (startOffsets == null) {
+            val startOffsetsLocal = startOffsets
+            val lengthsLocal = lengths
+            if (startOffsetsLocal == null || lengthsLocal == null) {
                 return -1
             } else {
-                return startOffsets[positionIndex + i] + lengths[positionIndex + i]
+                return startOffsetsLocal[positionIndex + i] + lengthsLocal[positionIndex + i]
             }
         }
 

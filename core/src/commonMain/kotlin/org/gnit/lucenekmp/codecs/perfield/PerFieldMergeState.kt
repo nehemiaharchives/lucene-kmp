@@ -197,7 +197,7 @@ internal object PerFieldMergeState {
         private val filtered: MutableList<String> = ArrayList(filterFields)
 
         override fun iterator(): MutableIterator<String> {
-            return filtered.iterator()
+            return asUnmodifiableIterator(filtered.iterator())
         }
 
         @Throws(IOException::class)

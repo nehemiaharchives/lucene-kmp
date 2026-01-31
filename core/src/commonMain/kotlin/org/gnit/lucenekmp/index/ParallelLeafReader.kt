@@ -205,7 +205,7 @@ open class ParallelLeafReader(
         }
 
         override fun iterator(): MutableIterator<String> {
-            return fields.keys.iterator()
+            return asUnmodifiableIterator(fields.keys.iterator())
         }
 
         override fun terms(field: String?): Terms? {

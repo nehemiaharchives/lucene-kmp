@@ -306,7 +306,7 @@ object SlowCodecReaderWrapper {
         indexedFields.sort()
         return object : FieldsProducer() {
             override fun iterator(): MutableIterator<String> {
-                return indexedFields.iterator()
+                return asUnmodifiableIterator(indexedFields.iterator())
             }
 
             @Throws(IOException::class)

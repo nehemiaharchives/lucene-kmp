@@ -168,7 +168,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          *
          * @see .TEST_LINE_DOCS_FILE
          */
-        const val DEFAULT_LINE_DOCS_FILE: String = "europarl.lines.txt.gz"
+        const val DEFAULT_LINE_DOCS_FILE: String = "../test-framework/src/commonTest/resources/org/apache/lucene/tests/util/europarl.lines.txt.gz"
 
         /**
          * Random sample from enwiki used in tests. See `help/tests.txt`. gradle task downloading

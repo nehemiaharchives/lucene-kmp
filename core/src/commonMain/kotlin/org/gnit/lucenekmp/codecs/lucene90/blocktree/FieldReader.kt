@@ -119,6 +119,10 @@ class FieldReader internal constructor(
         /** For debugging -- used by CheckIndex too  */
         get() = SegmentTermsEnum(this).computeBlockStats()
 
+    override fun getStats(): Any {
+        return stats
+    }
+
     override fun hasFreqs(): Boolean {
         return fieldInfo.indexOptions >= IndexOptions.DOCS_AND_FREQS
     }

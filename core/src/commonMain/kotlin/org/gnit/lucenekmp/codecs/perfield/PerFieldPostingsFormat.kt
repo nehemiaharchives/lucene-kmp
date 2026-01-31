@@ -79,7 +79,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
                     val maskedFields: Fields =
                         object : FilterFields(fields) {
                             override fun iterator(): MutableIterator<String> {
-                                return group.fields.iterator()
+                                return asUnmodifiableIterator(group.fields.iterator())
                             }
                         }
 
@@ -262,7 +262,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
         }
 
         override fun iterator(): MutableIterator<String> {
-            return fields.keys.iterator()
+            return asUnmodifiableIterator(fields.keys.iterator())
         }
 
         @Throws(IOException::class)

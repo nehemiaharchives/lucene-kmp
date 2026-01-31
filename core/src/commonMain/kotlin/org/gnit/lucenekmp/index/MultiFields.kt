@@ -29,7 +29,8 @@ class MultiFields(private val subs: Array<Fields>, subSlices: Array<ReaderSlice>
         for (i in subs.indices) {
             subIterators[i] = subs[i].iterator()
         }
-        return MergedIterator(*(subIterators as Array<MutableIterator<String>>)) as MutableIterator<String>
+        val merged = MergedIterator(*(subIterators as Array<MutableIterator<String>>)) as MutableIterator<String>
+        return asUnmodifiableIterator(merged)
     }
 
     @Throws(IOException::class)

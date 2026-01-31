@@ -239,7 +239,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
     }
 
     override fun iterator(): MutableIterator<String> {
-        return fieldList.iterator()
+        return asUnmodifiableIterator(fieldList.iterator())
     }
 
     @Throws(IOException::class)

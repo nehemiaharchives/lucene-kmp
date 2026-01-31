@@ -298,7 +298,7 @@ class SortingCodecReader private constructor(
                 }
 
                 override fun iterator(): MutableIterator<String> {
-                    return postingsReader.iterator()
+                    return asUnmodifiableIterator(postingsReader.iterator())
                 }
 
                 @Throws(IOException::class)

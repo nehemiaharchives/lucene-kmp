@@ -90,6 +90,10 @@ internal class TempFilesCleanup {
             val path = base.resolve("${prefix}-${attemptStr}${suffix}")
             try {
                 if (isDirectory) {
+                    // createDirectories succeeds if the directory already exists, so guard for uniqueness
+                    if (Files.getFileSystem().exists(path)) {
+                        throw IOException("Path already exists: $path")
+                    }
                     Files.createDirectories(path)
                 } else {
                     Files.createFile(path)

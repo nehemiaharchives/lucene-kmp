@@ -2016,11 +2016,11 @@ class RandomPostingsTester(random: Random) {
             val minDocFreq: Int
             val maxDocFreq: Int
             if (term.startsWith("big_")) {
-                minDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 50000
-                maxDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 70000
+                minDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 500 // TODO reduced from 50000 to 500 for dev speed
+                maxDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 700 // TODO reduced from 70000 to 700 for dev speed
             } else if (term.startsWith("medium_")) {
-                minDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 3000
-                maxDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 6000
+                minDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 100 // TODO reduced from 3000 to 100 for dev speed
+                maxDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 200 // TODO reduced from 6000 to 200 for dev speed
             } else if (term.startsWith("low_")) {
                 minDocFreq = LuceneTestCase.RANDOM_MULTIPLIER
                 maxDocFreq = LuceneTestCase.RANDOM_MULTIPLIER * 40

@@ -42,7 +42,7 @@ abstract class FilterLeafReader protected constructor(inReader: LeafReader) : Le
         }
 
         override fun iterator(): MutableIterator<String> {
-            return `in`.iterator()
+            return asUnmodifiableIterator(`in`.iterator())
         }
 
         @Throws(IOException::class)

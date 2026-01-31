@@ -164,7 +164,7 @@ class BloomFilteringPostingsFormat(
         }
 
         override fun iterator(): MutableIterator<String> {
-            return delegateFieldsProducer!!.iterator()
+            return asUnmodifiableIterator(delegateFieldsProducer!!.iterator())
         }
 
         override fun close() {

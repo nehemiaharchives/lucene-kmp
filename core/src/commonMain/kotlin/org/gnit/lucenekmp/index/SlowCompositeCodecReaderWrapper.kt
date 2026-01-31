@@ -457,7 +457,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
         }
 
         override fun iterator(): MutableIterator<String> {
-            return fields.iterator()
+            return asUnmodifiableIterator(fields.iterator())
         }
 
         @Throws(IOException::class)

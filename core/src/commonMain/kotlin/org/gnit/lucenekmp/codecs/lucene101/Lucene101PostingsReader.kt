@@ -1164,9 +1164,17 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         private fun accumulatePayloadAndOffsets() {
             if (needsPayloads) {
                 payloadLength = payloadLengthBuffer!![posBufferUpto]
-                payload!!.bytes = payloadBytes!!
-                payload!!.offset = payloadByteUpto
-                payload!!.length = payloadLength
+                if (payloadLength != 0) {
+                    if (payloadBytes == null) {
+                        payloadBytes = ByteArray(128)
+                    }
+                    if (payload == null) {
+                        payload = BytesRef()
+                    }
+                    payload!!.bytes = payloadBytes!!
+                    payload!!.offset = payloadByteUpto
+                    payload!!.length = payloadLength
+                }
                 payloadByteUpto += payloadLength
             }
 

@@ -16,6 +16,16 @@ protected constructor() : Iterable<String> {
     /** Returns an iterator that will step through all fields names. This will not return null.  */
     abstract override fun iterator(): MutableIterator<String>
 
+    protected fun asUnmodifiableIterator(iterator: Iterator<String>): MutableIterator<String> {
+        return object : MutableIterator<String> {
+            override fun hasNext(): Boolean = iterator.hasNext()
+            override fun next(): String = iterator.next()
+            override fun remove() {
+                throw UnsupportedOperationException()
+            }
+        }
+    }
+
     /** Get the [Terms] for this field. This will return null if the field does not exist.  */
     @Throws(IOException::class)
     abstract fun terms(field: String?): Terms?

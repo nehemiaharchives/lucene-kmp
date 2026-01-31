@@ -84,7 +84,7 @@ class CompetitiveImpactAccumulator {
         for (i in maxFreqs.indices) {
             val maxFreq = maxFreqs[i]
             if (maxFreq > maxFreqForLowerNorms) {
-                impacts.add(Impact(maxFreq, i.toLong()))
+                impacts.add(Impact(maxFreq, i.toByte().toLong()))
                 maxFreqForLowerNorms = maxFreq
             }
         }

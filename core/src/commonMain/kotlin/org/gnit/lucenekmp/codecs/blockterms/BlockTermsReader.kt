@@ -105,7 +105,7 @@ class BlockTermsReader(
     }
 
     override fun iterator(): MutableIterator<String> {
-        return fields.keys.iterator()
+        return asUnmodifiableIterator(fields.keys.iterator())
     }
 
     @Throws(IOException::class)

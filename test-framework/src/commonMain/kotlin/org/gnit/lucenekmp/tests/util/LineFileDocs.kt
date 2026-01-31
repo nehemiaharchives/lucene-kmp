@@ -1,8 +1,16 @@
 package org.gnit.lucenekmp.tests.util
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import okio.FileSystem
+import okio.BufferedSource
+import okio.Buffer
+import okio.EOFException
+import okio.GzipSource
 import okio.IOException
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.SYSTEM
+import okio.buffer
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.FieldType
@@ -20,8 +28,10 @@ import org.gnit.lucenekmp.jdkport.CodingErrorAction
 import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.InputStream
 import org.gnit.lucenekmp.jdkport.InputStreamReader
+import org.gnit.lucenekmp.jdkport.OkioSourceInputStream
 import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.set
+import org.gnit.lucenekmp.jdkport.toRealPath
 import org.gnit.lucenekmp.util.CloseableThreadLocal
 import org.gnit.lucenekmp.util.IOUtils
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -37,6 +47,9 @@ class LineFileDocs(
     random: Random,
     private val path: String = LuceneTestCase.TEST_LINE_DOCS_FILE
 ) : AutoCloseable {
+
+    private val logger = KotlinLogging.logger{}
+
     private var reader: BufferedReader? = null
     private val id: AtomicInteger = AtomicInteger(0)
     private val random: Random
@@ -65,46 +78,26 @@ class LineFileDocs(
 
         var size = 0L
         var seekTo = 0L
+        val isGzip = path.endsWith(".gz")
+        var file: Path? = null
         if (`is` == null) {
             // if it's not in classpath, we load it as absolute filesystem path (e.g. Jenkins' home dir)
-            val file: Path = path.toPath()
+            file = path.toPath()
             size = Files.size(file)
-            if (path.endsWith(".gz")) {
-                // if it is a gzip file, we need to use InputStream and seek to one of the pre-computed skip
-                // points:
-                `is` = Files.newInputStream(file)
-                needSkip = true
+            if (isGzip) {
+                // For now, always start at the beginning of the gzip stream.
+                // Okio's GzipSource does not allow arbitrary mid-stream starts.
+                `is` = openInputStream(file, 0L, true)
+                needSkip = false
             } else {
-                // file is not compressed: optimized seek using SeekableByteChannel
-
-                // TODO implement later if needed
-                /*seekTo = randomSeekPos(random, size)
-                val channel: java.nio.channels.SeekableByteChannel =
-                    Files.newByteChannel(file)
-                if (LuceneTestCase.VERBOSE) {
-                    println("TEST: LineFileDocs: file seek to fp=$seekTo on open")
-                }
-                channel.position(seekTo)
-                `is` = java.nio.channels.Channels.newInputStream(channel)
-
-                // read until newline char, otherwise we may hit "java.nio.charset.MalformedInputException:
-                // Input length = 1"
-                // exception in readline() below, because we seeked part way through a multi-byte (in UTF-8)
-                // encoded
-                // unicode character:
-                if (seekTo > 0L) {
-                    var b: Int
-                    do {
-                        b = `is`.read()
-                    } while (b >= 0 && b != 13 && b != 10)
-                }
-
-                needSkip = false*/
+                // file is not compressed: just open from the start
+                `is` = Files.newInputStream(file)
+                needSkip = false
             }
         } else {
             // if the file comes from Classpath:
             size = `is`.available().toLong()
-            needSkip = true
+            needSkip = false
         }
 
         if (needSkip) {
@@ -144,14 +137,17 @@ class LineFileDocs(
 
                 // dev-tools/scripts/create_line_file_docs.py ensures this is a "safe" skip point, and we
                 // can begin gunziping from here:
-
-                // TODO implement later if needed
-                /*`is`.skip(seekTo)
-                `is` = java.util.zip.GZIPInputStream(`is`)
+                if (`is` == null && file != null) {
+                    `is` = openInputStream(file, seekTo, isGzip)
+                }
                 if (LuceneTestCase.VERBOSE) {
-                    println("TEST: LineFileDocs: stream skip to fp=" + seekTo + " on open")
-                }*/
+                    println("TEST: LineFileDocs: stream skip to fp=$seekTo on open")
+                }
             }
+        }
+
+        if (`is` == null && file != null) {
+            `is` = openInputStream(file, seekTo, isGzip)
         }
 
         val decoder: CharsetDecoder =
@@ -160,6 +156,80 @@ class LineFileDocs(
                 .onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT)
         reader = BufferedReader(InputStreamReader(`is`!!, decoder), BUFFER_SIZE)
+    }
+
+    private fun openInputStream(file: Path, seekTo: Long, gzip: Boolean): InputStream {
+        val raw = FileSystem.SYSTEM.source(file).buffer()
+        if (seekTo > 0L) {
+            raw.skip(seekTo)
+        }
+        val source = if (gzip) GzipSource(raw).buffer() else raw
+        return if (gzip) LenientGzipInputStream(source) else OkioSourceInputStream(source)
+    }
+
+    // Okio's GzipSource throws if the gzip member ends with trailing bytes.
+    // Treat that condition as EOF to match java.util.zip.GZIPInputStream behavior.
+    private class LenientGzipInputStream(private val source: BufferedSource) : InputStream() {
+        private var finished = false
+
+        override fun read(): Int {
+            if (finished) return -1
+            return try {
+                source.readByte().toInt() and 0xFF
+            } catch (e: EOFException) {
+                finished = true
+                -1
+            } catch (e: IOException) {
+                if (isTrailingGzipBytes(e)) {
+                    finished = true
+                    -1
+                } else {
+                    throw e
+                }
+            }
+        }
+
+        override fun read(b: ByteArray, off: Int, len: Int): Int {
+            if (finished) return -1
+            if (len == 0) return 0
+            val bytesRead = try {
+                source.read(b, off, len)
+            } catch (e: EOFException) {
+                finished = true
+                -1
+            } catch (e: IOException) {
+                if (isTrailingGzipBytes(e)) {
+                    finished = true
+                    -1
+                } else {
+                    throw e
+                }
+            }
+
+            if (bytesRead != -1) {
+                return bytesRead
+            }
+
+            return if (source.exhausted()) {
+                finished = true
+                -1
+            } else {
+                0
+            }
+        }
+
+        override fun available(): Int {
+            return (source as? Buffer)?.size?.toInt() ?: 0
+        }
+
+        override fun close() {
+            finished = true
+            source.close()
+        }
+
+        private fun isTrailingGzipBytes(e: IOException): Boolean {
+            return e.message?.contains("gzip finished without exhausting source") == true
+        }
     }
 
     /*@Synchronized*/
