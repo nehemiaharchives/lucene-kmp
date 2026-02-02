@@ -2391,7 +2391,6 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     /** Test realistic data, which is often better at uncovering real bugs.  */
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/ // this test takes a few seconds
-    @Throws(IOException::class)
     open fun testLineFileDocs() {
         // Use a FS dir and a non-randomized IWC to not slow down indexing
         newFSDirectory(createTempDir())

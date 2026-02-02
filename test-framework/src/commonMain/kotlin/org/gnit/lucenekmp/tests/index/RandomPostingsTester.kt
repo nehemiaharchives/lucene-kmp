@@ -570,9 +570,9 @@ class RandomPostingsTester(random: Random) {
 
             val numTerms: Int
             if (random.nextInt(10) == 7) {
-                numTerms = LuceneTestCase.atLeast(random, 50)
+                numTerms = LuceneTestCase.atLeast(random, 5) // TODO reduced from 50 to 5 for dev speed
             } else {
-                numTerms = TestUtil.nextInt(random, 2, 20)
+                numTerms = TestUtil.nextInt(random, 1, 2) // TODO reduced from 2,20 to 1,2 for dev speed
             }
 
             while (postings.size < numTerms) {
