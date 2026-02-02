@@ -59,7 +59,7 @@ protected constructor() {
                     if (term == null) {
                         term = startTerm
                     }
-                    return super.nextSeekTerm(term)!!
+                    return super.nextSeekTerm(term)
                 }
             }
         }

@@ -10,7 +10,6 @@ import org.gnit.lucenekmp.util.automaton.ByteRunnable
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 import org.gnit.lucenekmp.util.automaton.Transition
 import org.gnit.lucenekmp.util.automaton.TransitionAccessor
-import kotlin.experimental.and
 
 
 /**
@@ -74,7 +73,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
         this.finite = compiled.finite
         this.byteRunnable = compiled.getByteRunnable()!!
         this.transitionAccessor = compiled.getTransitionAccessor()!!
-        this.commonSuffixRef = compiled.commonSuffixRef!!
+        this.commonSuffixRef = compiled.commonSuffixRef
 
         // No need to track visited states for a finite language without loops.
         visited = if (finite) null else ShortArray(byteRunnable.size)
@@ -151,15 +150,15 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
         var maxInterval = 0xff
         // System.out.println("setLinear pos=" + position + " seekbytesRef=" + seekBytesRef);
         for (i in 0..<position) {
-            state = byteRunnable.step(state, (seekBytesRef.byteAt(i) and 0xff.toByte()).toInt())
+            state = byteRunnable.step(state, seekBytesRef.byteAt(i).toInt() and 0xFF)
             require(state >= 0) { "state=$state" }
         }
         val numTransitions: Int = transitionAccessor.getNumTransitions(state)
         transitionAccessor.initTransition(state, transition)
         for (i in 0..<numTransitions) {
             transitionAccessor.getNextTransition(transition)
-            if (transition.min <= (seekBytesRef.byteAt(position) and 0xff.toByte())
-                && (seekBytesRef.byteAt(position) and 0xff.toByte()) <= transition.max
+            if (transition.min <= (seekBytesRef.byteAt(position).toInt() and 0xFF)
+                && (seekBytesRef.byteAt(position).toInt() and 0xFF) <= transition.max
             ) {
                 maxInterval = transition.max
                 break
@@ -213,7 +212,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
             state = savedStates.intAt(pos)
             while (pos < seekBytesRef.length()) {
                 setVisited(state)
-                val nextState: Int = byteRunnable.step(state, (seekBytesRef.byteAt(pos) and 0xff.toByte()).toInt())
+                val nextState: Int = byteRunnable.step(state, seekBytesRef.byteAt(pos).toInt() and 0xFF)
                 if (nextState == -1) break
                 savedStates.setIntAt(pos + 1, nextState)
                 // we found a loop, record it for faster enumeration
@@ -235,7 +234,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
                     return false
                 }
                 val newState: Int =
-                    byteRunnable.step(savedStates.intAt(pos), (seekBytesRef.byteAt(pos) and 0xff.toByte()).toInt())
+                    byteRunnable.step(savedStates.intAt(pos), seekBytesRef.byteAt(pos).toInt() and 0xFF)
                 if (newState >= 0 && byteRunnable.isAccept(newState)) {
                     /* String is good to go as-is */
                     return true
@@ -276,7 +275,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
         var state = state
         var c = 0
         if (position < seekBytesRef.length()) {
-            c = (seekBytesRef.byteAt(position) and 0xff.toByte()).toInt()
+            c = seekBytesRef.byteAt(position).toInt() and 0xFF
             // if the next byte is 0xff and is not part of the useful portion,
             // then by definition it puts us in a reject state, and therefore this
             // path is dead. there cannot be any higher transitions. backtrack.
@@ -336,7 +335,7 @@ open class AutomatonTermsEnum(tenum: TermsEnum?, compiled: CompiledAutomaton) : 
     private fun backtrack(position: Int): Int {
         var position = position
         while (position-- > 0) {
-            var nextChar: Int = (seekBytesRef.byteAt(position) and 0xff.toByte()).toInt()
+            var nextChar: Int = seekBytesRef.byteAt(position).toInt() and 0xFF
             // if a character is 0xff it's a dead-end too,
             // because there is no higher character in binary sort order.
             if (nextChar++ != 0xff) {

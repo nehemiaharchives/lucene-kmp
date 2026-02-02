@@ -850,7 +850,7 @@ internal class SimpleTextFieldsReader(state: SegmentReadState) : FieldsProducer(
     }
 
     override fun iterator(): MutableIterator<String> {
-        return fields.keys.iterator()
+        return asUnmodifiableIterator(fields.keys.iterator())
     }
 
     private val termsCache: MutableMap<String, SimpleTextTerms> = HashMap()

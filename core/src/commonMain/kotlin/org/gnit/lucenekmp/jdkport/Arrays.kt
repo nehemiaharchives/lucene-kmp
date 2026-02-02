@@ -791,7 +791,7 @@ object Arrays {
     }
 
     fun binarySearch(a: Array<String>, key: String): Int {
-        return binarySearch(a, key)
+        return binarySearch0(a as Array<Any?>, fromIndex = 0, toIndex = a.size, key)
     }
 
     /**
