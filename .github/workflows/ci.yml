@@ -7,13 +7,13 @@ on:
     paths-ignore:
       - '**.md'
       - '**.sh'
-      - '**.kts'
+      - '**.main.kts'
   pull_request:
     branches: [ master ]
     paths-ignore:
       - '**.md'
       - '**.sh'
-      - '**.kts'
+      - '**.main.kts'
 
 jobs:
   tests:
