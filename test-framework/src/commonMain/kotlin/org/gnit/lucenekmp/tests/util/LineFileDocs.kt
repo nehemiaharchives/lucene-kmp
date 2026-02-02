@@ -68,8 +68,6 @@ class LineFileDocs(
         }
     }
 
-    enum class Module { ANALYSIS, CODECS, CORE, QUERY_PARSER, TEST_FRAMEWORK }
-
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun open() {
@@ -86,31 +84,17 @@ class LineFileDocs(
             // if it's not in classpath, we load it as absolute filesystem path (e.g. Jenkins' home dir)
 
             if(path == "europarl.lines.txt.gz"){
-                val toReplace = "../test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
-                val fs = FileSystem.SYSTEM
-                val currentDir = "./".toPath()
-                val currentLs = fs.list(currentDir).map { it.toString() }
-
-                val moduleMd = currentLs.find { it.endsWith(".md") }
-                logger.debug { "LineFileDocs.open() moduleMd: $moduleMd" }
-                val module = Module.entries.find { "$it.md" == moduleMd }
-                logger.debug { "LineFileDocs.open() module: $module" }
-
-                val path = when(module){
-                    Module.TEST_FRAMEWORK -> "src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
-                    else -> toReplace
-                }
-
-                logger.debug { "LineFileDocs.open() path: $path" }
-
-                file = path.toPath()
+                val simplePath =
+                    "../test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
+                logger.debug { "LineFileDocs.open() path: $simplePath" }
+                file = simplePath.toPath()
             }else{
                 file = path.toPath()
             }
 
             logger.debug { "LineFileDocs.open() file: $file" }
 
-            size = Files.size(file)
+            size = FileSystem.SYSTEM.metadata(file).size ?: throw IOException("File does not exist or size is not available")
             if (isGzip) {
                 // For now, always start at the beginning of the gzip stream.
                 // Okio's GzipSource does not allow arbitrary mid-stream starts.
@@ -118,7 +102,7 @@ class LineFileDocs(
                 needSkip = false
             } else {
                 // file is not compressed: just open from the start
-                `is` = Files.newInputStream(file)
+                `is` = OkioSourceInputStream(FileSystem.SYSTEM.source(file).buffer())
                 needSkip = false
             }
         } else {
@@ -139,7 +123,7 @@ class LineFileDocs(
             val seekFilePath: String = path.take(index) + ".seek"
             var seekIS: InputStream? = /*javaClass.getResourceAsStream(seekFilePath)*/ null
             if (seekIS == null) {
-                seekIS = Files.newInputStream(seekFilePath.toPath())
+                seekIS = OkioSourceInputStream(FileSystem.SYSTEM.source(seekFilePath.toPath()).buffer())
             }
 
             BufferedReader(

@@ -621,7 +621,6 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
     override fun testPostingsEnumAll() = super.testPostingsEnumAll()
 
     @Test
-    @Throws(Exception::class)
     override fun testLineFileDocs() = super.testLineFileDocs()
 
     @Test

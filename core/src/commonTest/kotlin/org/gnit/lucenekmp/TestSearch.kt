@@ -51,23 +51,26 @@ class TestSearch : LuceneTestCase() {
     fun testSearch() {
         val fs = FakeFileSystem()
         Files.setFileSystem(fs)
+        try {
+            var sw = StringWriter()
+            //var pw: PrintWriter = PrintWriter(sw, true)
+            doTestSearch(random(), /*pw,*/ false, fs)
+            //pw.close()
+            sw.close()
+            val multiFileOutput: String = sw.toString()
 
-        var sw = StringWriter()
-        //var pw: PrintWriter = PrintWriter(sw, true)
-        doTestSearch(random(), /*pw,*/ false, fs)
-        //pw.close()
-        sw.close()
-        val multiFileOutput: String = sw.toString()
+            // System.out.println(multiFileOutput);
+            sw = StringWriter()
+            //pw = PrintWriter(sw, true)
+            doTestSearch(random(), /*pw,*/ true, fs)
+            //pw.close()
+            sw.close()
+            val singleFileOutput: String = sw.toString()
 
-        // System.out.println(multiFileOutput);
-        sw = StringWriter()
-        //pw = PrintWriter(sw, true)
-        doTestSearch(random(), /*pw,*/ true, fs)
-        //pw.close()
-        sw.close()
-        val singleFileOutput: String = sw.toString()
-
-        assertEquals(multiFileOutput, singleFileOutput)
+            assertEquals(multiFileOutput, singleFileOutput)
+        } finally {
+            Files.resetFileSystem()
+        }
     }
 
     private fun doTestSearch(random: Random, /*out: PrintWriter, */useCompoundFile: Boolean, fs: FakeFileSystem) {
