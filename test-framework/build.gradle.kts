@@ -71,6 +71,7 @@ kotlin {
         }
         androidMain.get().dependsOn(jvmAndroidMain)
         androidMain.get().dependencies {
+            implementation(libs.kotlin.test.junit)
             implementation(libs.kotlin.logging.android)
             implementation(libs.slf4j.api)
         }
