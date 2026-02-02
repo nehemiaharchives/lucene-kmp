@@ -50,15 +50,15 @@ class FrequencyTrackingRingBuffer(maxSize: Int, sentinel: Int) : Accountable {
     fun add(i: Int) {
         // remove the previous value
         val removed = buffer[position]
-        logger.debug { "[FrequencyTrackingRingBuffer.add] remove start removed=$removed pos=$position" }
+        //logger.debug { "[FrequencyTrackingRingBuffer.add] remove start removed=$removed pos=$position" }
         val removedFromBag = frequencies.remove(removed)
-        logger.debug { "[FrequencyTrackingRingBuffer.add] remove done removed=$removed ok=$removedFromBag" }
+        //logger.debug { "[FrequencyTrackingRingBuffer.add] remove done removed=$removed ok=$removedFromBag" }
         assert(removedFromBag)
         // add the new value
         buffer[position] = i
-        logger.debug { "[FrequencyTrackingRingBuffer.add] add start value=$i pos=$position" }
+        //logger.debug { "[FrequencyTrackingRingBuffer.add] add start value=$i pos=$position" }
         frequencies.add(i)
-        logger.debug { "[FrequencyTrackingRingBuffer.add] add done value=$i pos=$position" }
+        //logger.debug { "[FrequencyTrackingRingBuffer.add] add done value=$i pos=$position" }
         // increment the position
         position += 1
         if (position == maxSize) {
