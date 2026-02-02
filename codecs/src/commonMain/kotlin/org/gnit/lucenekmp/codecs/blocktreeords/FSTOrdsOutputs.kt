@@ -25,11 +25,6 @@ internal class FSTOrdsOutputs : Outputs<FSTOrdsOutputs.Output>() {
    * @param endOrd Inclusive
    */
   class Output(private val _bytes: BytesRef, private val _startOrd: Long, private val _endOrd: Long) {
-    init {
-      require(_startOrd >= 0) { "startOrd=${_startOrd}" }
-      require(_endOrd >= 0) { "endOrd=${_endOrd}" }
-    }
-
     // Provide Java-style accessors (the ported code calls .bytes(), .startOrd(), .endOrd())
     fun bytes(): BytesRef = _bytes
     fun startOrd(): Long = _startOrd

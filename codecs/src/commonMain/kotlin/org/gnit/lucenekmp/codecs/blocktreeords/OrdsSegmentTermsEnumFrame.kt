@@ -244,35 +244,32 @@ internal class OrdsSegmentTermsEnumFrame internal constructor(
 
   /** Seek to the floor sub-block that contains the given term ordinal. */
   fun scanToFloorFrame(targetOrd: Long) {
-    if (!isFloor) return
-    // rewind the floorDataReader and walk floor entries until we reach the block that
-    // contains targetOrd (mirrors Java logic sufficiently for seek-by-ord)
-    floorDataReader.rewind()
-    numFollowFloorBlocks = floorDataReader.readVInt()
-    var curLabel = floorDataReader.readByte().toInt() and 0xff
-    var curTermOrd = termOrdOrig + floorDataReader.readVLong()
+    if (!isFloor || targetOrd < nextFloorTermOrd) return
+    check(numFollowFloorBlocks != 0)
+    var lastFloorTermOrd = nextFloorTermOrd
     var newFP = fpOrig
-    var lastTermOrd = curTermOrd
     while (numFollowFloorBlocks > 0) {
       val code = floorDataReader.readVLong()
       newFP = fpOrig + (code ushr 1)
-      val has = (code and 1L) != 0L
+      hasTerms = (code and 1L) != 0L
       isLastInFloor = numFollowFloorBlocks == 1
       numFollowFloorBlocks--
-      lastTermOrd = curTermOrd
+      lastFloorTermOrd = nextFloorTermOrd
       if (isLastInFloor) {
-        curLabel = 256
-        curTermOrd = Long.MAX_VALUE
+        nextFloorLabel = 256
+        nextFloorTermOrd = Long.MAX_VALUE
         break
       } else {
-        curLabel = floorDataReader.readByte().toInt() and 0xff
-        curTermOrd += floorDataReader.readVLong()
-        if (targetOrd < curTermOrd) break
+        nextFloorLabel = floorDataReader.readByte().toInt() and 0xff
+        nextFloorTermOrd += floorDataReader.readVLong()
+        if (targetOrd < nextFloorTermOrd) break
       }
     }
-    fp = newFP
-    nextEnt = -1
-    termOrd = lastTermOrd
+    if (newFP != fp) {
+      fp = newFP
+      nextEnt = -1
+      termOrd = lastFloorTermOrd
+    }
   }
 
   fun decodeMetaData() {

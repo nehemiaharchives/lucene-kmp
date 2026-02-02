@@ -90,6 +90,12 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         configureTestLogging()
     }*/
 
+    @BeforeTest
+    fun resetPerTestFieldTypes() {
+        // Keep per-field type randomization scoped to a single test method, like Lucene's test runner.
+        fieldToType.clear()
+    }
+
     //↓ line 2860 of LuceneTestCase.java
     /** A runnable that can throw any checked exception.  */
     fun interface ThrowingRunnable {

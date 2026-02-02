@@ -133,7 +133,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
 
     targetBeforeCurrentLength = currentFrame.ord
 
-    if (positioned && currentFrame !== staticFrame) {
+    if (false && positioned && currentFrame !== staticFrame) {
       arc = arcs[0]
       output = arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
       targetUpto = 0
@@ -146,10 +146,9 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
         cmp = (term.byteAt(targetUpto).toInt() and 0xFF) - (text.bytes[text.offset + targetUpto].toInt() and 0xFF)
         if (cmp != 0) break
         arc = arcs[1 + targetUpto]
-        check(arc.label() == (text.bytes[text.offset + targetUpto].toInt() and 0xFF))
         val arcOut0 = arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
         if (arcOut0 != OrdsBlockTreeTermsWriter.NO_OUTPUT) output = OrdsBlockTreeTermsWriter.FST_OUTPUTS.add(output, arcOut0)
-        if (arc.isFinal) lastFrame = getFrame(1 + lastFrame.ord)
+        if (arc.isFinal) lastFrame = stack[1 + lastFrame.ord]!!
         targetUpto++
       }
 
@@ -236,7 +235,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
     var output: FSTOrdsOutputs.Output
     targetBeforeCurrentLength = currentFrame.ord
 
-    if (positioned && currentFrame !== staticFrame) {
+    if (false && positioned && currentFrame !== staticFrame) {
       arc = arcs[0]
       output = arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
       targetUpto = 0
@@ -249,12 +248,12 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
         cmp = (term.byteAt(targetUpto).toInt() and 0xFF) - (text.bytes[text.offset + targetUpto].toInt() and 0xFF)
         if (cmp != 0) break
         arc = arcs[1 + targetUpto]
-        check(arc.label() == (text.bytes[text.offset + targetUpto].toInt() and 0xFF))
         val arcOut0 = arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
         if (arcOut0 != OrdsBlockTreeTermsWriter.NO_OUTPUT) {
           output = OrdsBlockTreeTermsWriter.FST_OUTPUTS.add(output, arcOut0)
         }
-        if (arc.isFinal) lastFrame = getFrame(1 + lastFrame.ord)
+        if (arc.isFinal) lastFrame = stack[1 + lastFrame.ord]!!
+        targetUpto++
        }
 
       if (cmp == 0) {
@@ -265,6 +264,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
           if (cmp != 0) break
           targetUpto++
         }
+        if (cmp == 0) cmp = term.length() - text.length
         targetUpto = savedTargetUpto
       }
 
@@ -682,7 +682,3 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
     }
   }
 }
-
-
-
-

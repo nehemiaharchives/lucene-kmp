@@ -37,10 +37,16 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
     fun testBasic() {
         val dir: Directory =
             newDirectory()
+        val iwc =
+            IndexWriterConfig(
+                MockAnalyzer(random())
+            )
+        iwc.setCodec(codec)
         val w =
             RandomIndexWriter(
                 random(),
-                dir
+                dir,
+                iwc
             )
         val doc = Document()
         doc.add(
@@ -90,10 +96,16 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
     fun testTwoBlocks() {
         val dir: Directory =
             newDirectory()
+        val iwc =
+            IndexWriterConfig(
+                MockAnalyzer(random())
+            )
+        iwc.setCodec(codec)
         val w =
             RandomIndexWriter(
                 random(),
-                dir
+                dir,
+                iwc
             )
         val terms: MutableList<String> = mutableListOf()
         for (i in 0..35) {
@@ -147,7 +159,10 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
         for (i in terms.indices.reversed()) {
             te.seekExact(i.toLong())
             assertEquals(i.toLong(), te.ord())
-            assertEquals(terms[i], te.term()!!.utf8ToString())
+            val actual = te.term()!!.utf8ToString()
+            if (terms[i] != actual) {
+                error("ord=$i expected='${terms[i]}' expectedBytes=${BytesRef(terms[i])} actual='${actual}' actualBytes=${te.term()}")
+            }
         }
 
         val iters: Int = atLeast(1000)
@@ -189,10 +204,16 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
     fun testThreeBlocks() {
         val dir: Directory =
             newDirectory()
+        val iwc =
+            IndexWriterConfig(
+                MockAnalyzer(random())
+            )
+        iwc.setCodec(codec)
         val w =
             RandomIndexWriter(
                 random(),
-                dir
+                dir,
+                iwc
             )
         val terms: MutableList<String> = mutableListOf()
         for (i in 0..35) {
@@ -301,6 +322,7 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
             IndexWriterConfig(
                 MockAnalyzer(random())
             )
+        iwc.setCodec(codec)
         val w = IndexWriter(dir, iwc)
         for (i in 0..127) {
             val doc = Document()
@@ -356,6 +378,7 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
             IndexWriterConfig(
                 MockAnalyzer(random())
             )
+        iwc.setCodec(codec)
         val w = IndexWriter(dir, iwc)
         val terms: MutableList<String> = mutableListOf()
         for (i in 0..35) {
@@ -425,6 +448,7 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
             IndexWriterConfig(
                 MockAnalyzer(random())
             )
+        iwc.setCodec(codec)
         val w = IndexWriter(dir, iwc)
         val terms: MutableList<String> = mutableListOf()
         for (i in 0..29) {
@@ -476,10 +500,16 @@ class TestOrdsBlockTree : BasePostingsFormatTestCase() {
     fun testSeekCeilNotFound() {
         val dir: Directory =
             newDirectory()
+        val iwc =
+            IndexWriterConfig(
+                MockAnalyzer(random())
+            )
+        iwc.setCodec(codec)
         val w =
             RandomIndexWriter(
                 random(),
-                dir
+                dir,
+                iwc
             )
         var doc = Document()
         // Get empty string in there!
