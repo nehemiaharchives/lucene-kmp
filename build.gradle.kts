@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
     //alias(libs.plugins.androidLibrary) apply false
@@ -106,5 +107,16 @@ subprojects {
                 }
             }
         }
+    }
+
+    val testLineDocsPath = rootProject.layout.projectDirectory
+        .file("test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz")
+        .asFile
+        .absolutePath
+
+    tasks.withType<KotlinNativeTest>().configureEach {
+        // iOS simulator tests are launched via `simctl spawn`; forward env to child process.
+        environment("tests.linedocsfile", testLineDocsPath)
+        environment("SIMCTL_CHILD_tests.linedocsfile", testLineDocsPath)
     }
 }
