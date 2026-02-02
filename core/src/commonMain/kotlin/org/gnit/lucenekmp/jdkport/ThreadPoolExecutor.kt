@@ -567,8 +567,7 @@ open class ThreadPoolExecutor(
             state = -1 // inhibit interrupts until runWorker
             this.firstTask = firstTask
             this.thread = threadFactory.newThread(this)
-            println("[DBG][Worker] created worker id=${this.hashCode()} hasFirstTask=${firstTask!=null} job=$thread")
-            logger.debug { "[Worker] created id=${this.hashCode()} hasFirstTask=${firstTask!=null} job=$thread" }
+            //logger.debug { "[Worker] created id=${this.hashCode()} hasFirstTask=${firstTask!=null} job=$thread" }
         }
 
         /** Delegates main run loop to outer runWorker.  */
@@ -578,11 +577,9 @@ open class ThreadPoolExecutor(
         }
 
         override suspend fun runSuspending() {
-            println("[DBG][Worker] runSuspending enter worker id=${this.hashCode()} firstTaskWasNull=${firstTask==null}")
-            logger.debug { "[Worker] enter runSuspending id=${this.hashCode()} firstTaskWasNull=${firstTask==null}" }
+            //logger.debug { "[Worker] enter runSuspending id=${this.hashCode()} firstTaskWasNull=${firstTask==null}" }
             runWorker(this@Worker)
-            println("[DBG][Worker] runSuspending exit worker id=${this.hashCode()}")
-            logger.debug { "[Worker] exit runSuspending id=${this.hashCode()}" }
+            //logger.debug { "[Worker] exit runSuspending id=${this.hashCode()}" }
         }
 
         override val isHeldExclusively: Boolean
@@ -727,13 +724,11 @@ open class ThreadPoolExecutor(
                 val t: Job = w.thread
                 val lockedAttempt = runBlocking { w.tryLock() }
                 val currentlyLocked = !lockedAttempt && w.isLocked
-                println("[DBG][interruptIdleWorkers] considering worker id=${w.hashCode()} cancelled=${t.isCancelled} acquired=$lockedAttempt isLocked=${w.isLocked} onlyOne=$onlyOne")
-                logger.debug { "[interruptIdleWorkers] considering id=${w.hashCode()} cancelled=${t.isCancelled} acquired=$lockedAttempt isLocked=${w.isLocked} onlyOne=$onlyOne" }
+                //logger.debug { "[interruptIdleWorkers] considering id=${w.hashCode()} cancelled=${t.isCancelled} acquired=$lockedAttempt isLocked=${w.isLocked} onlyOne=$onlyOne" }
                 // Idle if not holding lock (in our port, worker holds lock only while running a task)
                 val idle = !w.isLocked
                 if (!t.isCancelled && idle) {
-                    println("[DBG][interruptIdleWorkers] cancelling IDLE worker id=${w.hashCode()}")
-                    logger.debug { "[interruptIdleWorkers] cancelling IDLE id=${w.hashCode()}" }
+                    //logger.debug { "[interruptIdleWorkers] cancelling IDLE id=${w.hashCode()}" }
                     t.cancel()
                 }
                 // release if we actually acquired
@@ -754,12 +749,10 @@ open class ThreadPoolExecutor(
             val t: Job = w.thread
             val lockedAttempt = runBlocking { w.tryLock() }
             val currentlyLocked = !lockedAttempt && w.isLocked
-            println("[DBG][interruptIdleWorkers*] (underLock) considering worker id=${w.hashCode()} cancelled=${t.isCancelled} acquired=$lockedAttempt isLocked=${w.isLocked} onlyOne=$onlyOne")
-            logger.debug { "[interruptIdleWorkers*] underLock considering id=${w.hashCode()} cancelled=${t.isCancelled} acquired=$lockedAttempt isLocked=${w.isLocked} onlyOne=$onlyOne" }
+            //logger.debug { "[interruptIdleWorkers*] underLock considering id=${w.hashCode()} cancelled=${t.isCancelled} acquired=$lockedAttempt isLocked=${w.isLocked} onlyOne=$onlyOne" }
             val idle = !w.isLocked
             if (!t.isCancelled && idle) {
-                println("[DBG][interruptIdleWorkers*] (underLock) cancelling IDLE worker id=${w.hashCode()}")
-                logger.debug { "[interruptIdleWorkers*] underLock cancelling IDLE id=${w.hashCode()}" }
+                //logger.debug { "[interruptIdleWorkers*] underLock cancelling IDLE id=${w.hashCode()}" }
                 t.cancel()
             }
             if (lockedAttempt) w.unlock()
@@ -836,8 +829,7 @@ open class ThreadPoolExecutor(
      */
     @OptIn(ExperimentalAtomicApi::class)
     private fun addWorker(firstTask: Runnable?, core: Boolean): Boolean {
-    println("[DBG][addWorker] request firstTask=${firstTask!=null} core=$core currentWorkers=${workerCountOf(ctl.load())}")
-    logger.debug { "[addWorker] request firstTask=${firstTask!=null} core=$core currentWorkers=${workerCountOf(ctl.load())}" }
+    //logger.debug { "[addWorker] request firstTask=${firstTask!=null} core=$core currentWorkers=${workerCountOf(ctl.load())}" }
         var c = ctl.load()
         retry@ while (true) {
             // Check if queue empty only if necessary.
@@ -887,8 +879,7 @@ open class ThreadPoolExecutor(
                     mainLock.unlock()
                 }
                 if (workerAdded) {
-                    println("[DBG][addWorker] starting worker id=${w.hashCode()} firstTask=${firstTask!=null} core=$core workersNow=${workers.size}")
-                    logger.debug { "[addWorker] starting id=${w.hashCode()} firstTask=${firstTask!=null} core=$core workersNow=${workers.size}" }
+                    //logger.debug { "[addWorker] starting id=${w.hashCode()} firstTask=${firstTask!=null} core=$core workersNow=${workers.size}" }
                     container.start(t)
                     workerStarted = true
                 }
@@ -943,8 +934,7 @@ open class ThreadPoolExecutor(
         try {
             completedTaskCount += w.completedTasks
             workers.remove(w)
-            println("[DBG][processWorkerExit] removed worker id=${w.hashCode()} abrupt=$completedAbruptly workersNow=${workers.size} completedTasks=${w.completedTasks}")
-            logger.debug { "[processWorkerExit] removed id=${w.hashCode()} abrupt=$completedAbruptly workersNow=${workers.size} completedTasks=${w.completedTasks}" }
+            //logger.debug { "[processWorkerExit] removed id=${w.hashCode()} abrupt=$completedAbruptly workersNow=${workers.size} completedTasks=${w.completedTasks}" }
         } finally {
             mainLock.unlock()
         }
@@ -952,8 +942,7 @@ open class ThreadPoolExecutor(
         try {
             tryTerminate()
         } catch (t: Throwable) {
-            println("[DBG][processWorkerExit] tryTerminate threw ${t::class.simpleName}: ${t.message}")
-            logger.debug { "[processWorkerExit] tryTerminate threw ${t::class.simpleName}: ${t.message}" }
+            //logger.debug { "[processWorkerExit] tryTerminate threw ${t::class.simpleName}: ${t.message}" }
             throw t
         }
 
@@ -963,13 +952,11 @@ open class ThreadPoolExecutor(
                 var min = if (allowCoreThreadTimeOut) 0 else corePoolSize
                 if (min == 0 && !workQueue.isEmpty()) min = 1
                 if (workerCountOf(c) >= min) {
-                    println("[DBG][processWorkerExit] no replacement needed state=${runStateOf(c)} wc=${workerCountOf(c)} min=$min queueEmpty=${workQueue.isEmpty()}")
-                    logger.debug { "[processWorkerExit] no replacement needed state=${runStateOf(c)} wc=${workerCountOf(c)} min=$min queueEmpty=${workQueue.isEmpty()}" }
+                    //logger.debug { "[processWorkerExit] no replacement needed state=${runStateOf(c)} wc=${workerCountOf(c)} min=$min queueEmpty=${workQueue.isEmpty()}" }
                     return  // replacement not needed
                 }
             }
-            println("[DBG][processWorkerExit] adding replacement worker state=${runStateOf(c)} wc=${workerCountOf(c)} core=$corePoolSize queueEmpty=${workQueue.isEmpty()}")
-            logger.debug { "[processWorkerExit] adding replacement worker state=${runStateOf(c)} wc=${workerCountOf(c)} core=$corePoolSize queueEmpty=${workQueue.isEmpty()}" }
+            //logger.debug { "[processWorkerExit] adding replacement worker state=${runStateOf(c)} wc=${workerCountOf(c)} core=$corePoolSize queueEmpty=${workQueue.isEmpty()}" }
             addWorker(null, false)
         }
     }
@@ -983,48 +970,43 @@ open class ThreadPoolExecutor(
             val wc = workerCountOf(c)
             val queueSize = workQueue.size
             val timed = allowCoreThreadTimeOut || wc > corePoolSize
-            println("[DBG][getTask] loop state=$state wc=$wc queueSize=$queueSize timed=$timed timedOutPreviously=$timedOut")
-            logger.debug { "[getTask] loop state=$state wc=$wc queueSize=$queueSize timed=$timed timedOutPreviously=$timedOut" }
+            //logger.debug { "[getTask] loop state=$state wc=$wc queueSize=$queueSize timed=$timed timedOutPreviously=$timedOut" }
 
             if (runStateAtLeast(c, SHUTDOWN) && (runStateAtLeast(c, STOP) || workQueue.isEmpty())) {
-                println("[DBG][getTask] exit due to state>=SHUTDOWN and queueEmpty=${workQueue.isEmpty()} state=$state wc=$wc -> decrement & return null")
-                logger.debug { "[getTask] exit state>=SHUTDOWN queueEmpty=${workQueue.isEmpty()} state=$state wc=$wc -> decrement & return null" }
+                //logger.debug { "[getTask] exit state>=SHUTDOWN queueEmpty=${workQueue.isEmpty()} state=$state wc=$wc -> decrement & return null" }
                 decrementWorkerCount()
                 return null
             }
 
             if ((wc > maximumPoolSize || (timed && timedOut)) && (wc > 1 || workQueue.isEmpty())) {
                 if (compareAndDecrementWorkerCount(c)) {
-                    println("[DBG][getTask] exit due to culling wc=$wc max=$maximumPoolSize timed=$timed timedOut=$timedOut queueEmpty=${workQueue.isEmpty()}")
-                    logger.debug { "[getTask] exit culling wc=$wc max=$maximumPoolSize timed=$timed timedOut=$timedOut queueEmpty=${workQueue.isEmpty()}" }
+                    //logger.debug { "[getTask] exit culling wc=$wc max=$maximumPoolSize timed=$timed timedOut=$timedOut queueEmpty=${workQueue.isEmpty()}" }
                     return null
                 }
-                println("[DBG][getTask] CAS to decrement failed; retry loop")
-                logger.debug { "[getTask] CAS decrement failed; retry loop" }
+                //logger.debug { "[getTask] CAS decrement failed; retry loop" }
                 continue
             }
 
             try {
                 val r: Runnable? = if (timed) {
                     val rlocal = workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS)
-                    if (rlocal != null) println("[DBG][getTask] obtained timed task") else println("[DBG][getTask] poll timed out (no task)")
-                    if (rlocal != null) logger.debug { "[getTask] obtained timed task" } else logger.debug { "[getTask] poll timed out (no task)" }
+                    if (rlocal != null) {
+                        //logger.debug { "[getTask] obtained timed task" }
+                    }else{
+                        //logger.debug { "[getTask] poll timed out (no task)" }
+                    }
                     rlocal
                 } else {
-                    println("[DBG][getTask] invoking take (may suspend)")
-                    logger.debug { "[getTask] invoking take (may suspend)" }
+                    //logger.debug { "[getTask] invoking take (may suspend)" }
                     val rlocal = workQueue.take()
-                    println("[DBG][getTask] obtained task via take")
-                    logger.debug { "[getTask] obtained task via take" }
+                    //logger.debug { "[getTask] obtained task via take" }
                     rlocal
                 }
                 if (r != null) return r
                 timedOut = true
             } catch (retry: InterruptedException) {
-                println("[DBG][getTask] interrupted while waiting; retry")
                 timedOut = false
             } catch (retry: CancellationException) {
-                println("[DBG][getTask] cancellation caught; decrement & return null")
                 decrementWorkerCount()
                 return null
             }
@@ -1080,13 +1062,11 @@ open class ThreadPoolExecutor(
         var task: Runnable? = w.firstTask
         w.firstTask = null
         w.unlock() // allow interrupts
-    println("[DBG][runWorker] enter worker id=${w.hashCode()} initialTaskPresent=${task!=null}")
         var completedAbruptly = true
         try {
             while (task != null || (getTask().also { task = it }) != null) {
-                println("[DBG][runWorker] worker id=${w.hashCode()} executing taskClass=${task!!::class.simpleName}")
                 if (task is FutureTask<*>) {
-                    println("[DBG][runWorker] about to run FutureTask hash=${task.hashCode()}")
+                    //logger.debug { "[runWorker] about to run FutureTask hash=${task.hashCode()}" }
                 }
                 // Temporarily bypass worker lock (AQS) to diagnose hang
                 // println("[DBG][runWorker] attempting to lock worker id=${w.hashCode()}")
@@ -1107,8 +1087,10 @@ open class ThreadPoolExecutor(
                         beforeExecute(wt, current)
                         try {
                             current.run()
-                            println("[DBG][runWorker] worker id=${w.hashCode()} task run complete")
-                            if (current is FutureTask<*>) println("[DBG][runWorker] FutureTask run complete hash=${current.hashCode()}")
+                            //logger.debug { "worker id=${w.hashCode()} task run complete" }
+                            if (current is FutureTask<*>) {
+                                //logger.debug { "[DBG][runWorker] FutureTask run complete hash=${current.hashCode()}" }
+                            }
                             afterExecute(current, null)
                         } catch (ex: Throwable) {
                             afterExecute(current, ex)
@@ -1122,7 +1104,7 @@ open class ThreadPoolExecutor(
             }
             completedAbruptly = false
         } finally {
-            println("[DBG][runWorker] exit worker id=${w.hashCode()} completedAbruptly=$completedAbruptly")
+            //logger.debug { "[runWorker] exit worker id=${w.hashCode()} completedAbruptly=$completedAbruptly" }
             processWorkerExit(w, completedAbruptly)
         }
     }
@@ -1302,18 +1284,30 @@ open class ThreadPoolExecutor(
          * and so reject the task.
          */
         var c = ctl.load()
-        logger.debug { "[execute] enter workers=${workerCountOf(c)} core=$corePoolSize max=$maximumPoolSize queueSize=${workQueue.size}" }
+        //logger.debug { "[execute] enter workers=${workerCountOf(c)} core=$corePoolSize max=$maximumPoolSize queueSize=${workQueue.size}" }
         if (workerCountOf(c) < corePoolSize) {
-            if (addWorker(command, true)) { logger.debug { "[execute] started core worker with first task" } ; return }
+            if (addWorker(command, true)) {
+                //logger.debug { "[execute] started core worker with first task" }
+                return
+            }
             c = ctl.load()
         }
         if (isRunning(c) && workQueue.offer(command)) {
             val recheck = ctl.load()
-            if (!isRunning(recheck) && runBlocking { remove(command) }) { logger.debug { "[execute] removed task after detecting not running; rejecting" } ; reject(command) }
-            else if (workerCountOf(recheck) == 0) { logger.debug { "[execute] no workers -> add non-core worker" } ; addWorker(null, false) }
-            logger.debug { "[execute] queued task queueSize=${workQueue.size}" }
-        } else if (!addWorker(command, false)) { logger.debug { "[execute] addWorker(non-core) failed -> reject" } ; reject(command) } else {
-            logger.debug { "[execute] started non-core worker with first task" }
+            if (!isRunning(recheck) && runBlocking { remove(command) }) {
+                //logger.debug { "[execute] removed task after detecting not running; rejecting" }
+                reject(command)
+            }
+            else if (workerCountOf(recheck) == 0) {
+                //logger.debug { "[execute] no workers -> add non-core worker" }
+                addWorker(null, false)
+            }
+            //logger.debug { "[execute] queued task queueSize=${workQueue.size}" }
+        } else if (!addWorker(command, false)) {
+            //logger.debug { "[execute] addWorker(non-core) failed -> reject" }
+            reject(command)
+        } else {
+            //logger.debug { "[execute] started non-core worker with first task" }
         }
     }
 
@@ -1332,18 +1326,18 @@ open class ThreadPoolExecutor(
         val mainLock: ReentrantLock = this.mainLock
         mainLock.lock()
         try {
-            logger.debug { "[shutdown] advancing run state to SHUTDOWN" }
+            //logger.debug { "[shutdown] advancing run state to SHUTDOWN" }
             advanceRunState(SHUTDOWN)
-            logger.debug { "[shutdown] interrupting idle workers size=${workers.size}" }
+            //logger.debug { "[shutdown] interrupting idle workers size=${workers.size}" }
             // Avoid attempting to re-acquire mainLock inside interruptIdleWorkers (our lock may not be truly reentrant in this port)
             interruptIdleWorkersUnderLock()
             onShutdown() // hook for ScheduledThreadPoolExecutor
         } finally {
             mainLock.unlock()
         }
-        logger.debug { "[shutdown] invoking tryTerminate" }
+        //logger.debug { "[shutdown] invoking tryTerminate" }
         runBlocking { tryTerminate() }
-        logger.debug { "[shutdown] completed tryTerminate state=${runStateOf(ctl.load())} wc=${workerCountOf(ctl.load())}" }
+        //logger.debug { "[shutdown] completed tryTerminate state=${runStateOf(ctl.load())} wc=${workerCountOf(ctl.load())}" }
     }
 
     /**

@@ -5,8 +5,11 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.util.configureTestLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.TimeZone
+import okio.FileSystem
 import okio.IOException
 import okio.Path
+import okio.Path.Companion.toPath
+import okio.SYSTEM
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.FieldType
@@ -102,6 +105,8 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
     //↑ line 2870 of LuceneTestCase.java
 
     companion object {
+        val logger = KotlinLogging.logger {}
+
 
         // ↓ line 277 of LuceneTestCase.java
         // --------------------------------------------------------------------
@@ -168,7 +173,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          *
          * @see .TEST_LINE_DOCS_FILE
          */
-        const val DEFAULT_LINE_DOCS_FILE: String = "../test-framework/src/commonTest/resources/org/apache/lucene/tests/util/europarl.lines.txt.gz"
+        const val DEFAULT_LINE_DOCS_FILE: String = "europarl.lines.txt.gz"
 
         /**
          * Random sample from enwiki used in tests. See `help/tests.txt`. gradle task downloading
@@ -2183,9 +2188,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          * non-zero end-padding, to tickle latent bugs that fail to look at `BytesRef.offset`.
          */
         fun newBytesRef(bytesIn: ByteArray, offset: Int, length: Int): BytesRef {
-            val logger = KotlinLogging.logger {}
-
-            logger.debug { "LTC.newBytesRef!  bytesIn.length=" + bytesIn.size + " offset=" + offset + " length=" + length }
+            //logger.debug { "LTC.newBytesRef!  bytesIn.length=" + bytesIn.size + " offset=" + offset + " length=" + length }
 
             assertTrue(
                 "got offset=" + offset + " length=" + length + " bytesIn.length=" + bytesIn.size
@@ -2211,7 +2214,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
 
             bytesIn.copyInto(bytes, startOffset, offset, offset + length)
 
-            logger.debug { "LTC:  return bytes.length=" + bytes.size + " startOffset=" + startOffset + " length=" + length }
+            //logger.debug { "LTC:  return bytes.length=" + bytes.size + " startOffset=" + startOffset + " length=" + length }
             val it = BytesRef(bytes, startOffset, length)
             assertTrue(it.isValid())
 

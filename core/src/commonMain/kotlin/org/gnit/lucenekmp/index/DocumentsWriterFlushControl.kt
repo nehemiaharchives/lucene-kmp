@@ -299,7 +299,7 @@ class DocumentsWriterFlushControl(
         try {
             flushingWriters.remove(dwpt)
             this.flushingBytes -= dwpt.lastCommittedBytesUsed
-            logger.debug { "DWFC.doAfterFlush() seg=${dwpt.getSegmentInfo().name} flushingWriters=${flushingWriters.size} flushingBytes=$flushingBytes" }
+            //logger.debug { "DWFC.doAfterFlush() seg=${dwpt.getSegmentInfo().name} flushingWriters=${flushingWriters.size} flushingBytes=$flushingBytes" }
             assert(assertMemory())
         } finally {
             try {
@@ -353,17 +353,17 @@ class DocumentsWriterFlushControl(
     // TODO Syncronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun waitForFlush() {
-        logger.debug { "DWFC.waitForFlush() enter: flushingWriters=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush" }
+        //logger.debug { "DWFC.waitForFlush() enter: flushingWriters=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush" }
         while (flushingWriters.isNotEmpty()) {
             try {
                 /*(this as java.lang.Object).wait()*/
                 // TODO notifyAll is not supported in KMP, need to think what to do here
-                logger.debug { "DWFC.waitForFlush() loop: flushingWriters=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
+                //logger.debug { "DWFC.waitForFlush() loop: flushingWriters=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
             } catch (e: CancellationException) {
                 throw ThreadInterruptedException(e)
             }
         }
-        logger.debug { "DWFC.waitForFlush() exit" }
+        //logger.debug { "DWFC.waitForFlush() exit" }
     }
 
     /**
@@ -380,7 +380,7 @@ class DocumentsWriterFlushControl(
             this.flushingBytes += bytes
             activeBytes -= bytes
             numPending++ // write access synced
-            logger.debug { "DWFC.setFlushPending() seg=${perThread.getSegmentInfo().name} numDocs=${perThread.numDocsInRAM} numPending=$numPending activeBytes=$activeBytes flushingBytes=$flushingBytes" }
+            //logger.debug { "DWFC.setFlushPending() seg=${perThread.getSegmentInfo().name} numDocs=${perThread.numDocsInRAM} numPending=$numPending activeBytes=$activeBytes flushingBytes=$flushingBytes" }
             assert(assertMemory())
         } // don't assert on numDocs since we could hit an abort excp. while selecting that dwpt for
 
@@ -438,7 +438,7 @@ class DocumentsWriterFlushControl(
             numPending-- // write access synced
             val checkedOut: Boolean = perThreadPool.checkout(perThread)
             assert(checkedOut)
-            logger.debug { "DWFC.checkOutForFlush() seg=${perThread.getSegmentInfo().name} numPending=$numPending flushingWriters=${flushingWriters.size}" }
+            //logger.debug { "DWFC.checkOutForFlush() seg=${perThread.getSegmentInfo().name} numPending=$numPending flushingWriters=${flushingWriters.size}" }
             return perThread
         } finally {
             updateStallState()
@@ -448,7 +448,7 @@ class DocumentsWriterFlushControl(
     private fun addFlushingDWPT(perThread: DocumentsWriterPerThread) {
         assert(!flushingWriters.contains(perThread)) { "DWPT is already flushing" }
         flushingWriters.add(perThread)
-        logger.debug { "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWriters=${flushingWriters.size}" }
+        //logger.debug { "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWriters=${flushingWriters.size}" }
     }
 
     /**
@@ -508,7 +508,7 @@ class DocumentsWriterFlushControl(
         assert(!fullFlushMarkDone) { "full flush collection marker is still set to true" }
         this.isFullFlush = true
         val flushingQueue: DocumentsWriterDeleteQueue = documentsWriter.deleteQueue
-        logger.debug { "DWFC.markForFullFlush() enter: activeBytes=$activeBytes flushingBytes=$flushingBytes numPending=$numPending" }
+        //logger.debug { "DWFC.markForFullFlush() enter: activeBytes=$activeBytes flushingBytes=$flushingBytes numPending=$numPending" }
         // Set a new delete queue - all subsequent DWPT will use this queue until
         // we do another full flush
         perThreadPool
@@ -548,13 +548,13 @@ class DocumentsWriterFlushControl(
         pruneBlockedQueue(flushingQueue)
         assert(assertBlockedFlushes(documentsWriter.deleteQueue))
         flushQueue.addAll(fullFlushBuffer)
-        logger.debug { "DWFC.markForFullFlush() collected: toFlush=${fullFlushBuffer.size} queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
+        //logger.debug { "DWFC.markForFullFlush() collected: toFlush=${fullFlushBuffer.size} queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
         updateStallState()
         fullFlushMarkDone = true
         //}
         assert(assertActiveDeleteQueue(documentsWriter.deleteQueue))
         assert(flushingQueue.lastSequenceNumber <= flushingQueue.maxSeqNo)
-        logger.debug { "DWFC.markForFullFlush() exit: seqNo will be set by resetDeleteQueue" }
+        //logger.debug { "DWFC.markForFullFlush() exit: seqNo will be set by resetDeleteQueue" }
         return seqNo
     }
 
@@ -599,7 +599,7 @@ class DocumentsWriterFlushControl(
         } finally {
             this.isFullFlush = false
             fullFlushMarkDone = this.isFullFlush
-            logger.debug { "DWFC.finishFullFlush(): fullFlush cleared" }
+            //logger.debug { "DWFC.finishFullFlush(): fullFlush cleared" }
             updateStallState()
         }
     }
@@ -650,7 +650,7 @@ class DocumentsWriterFlushControl(
                 }
             }
         } finally {
-            logger.debug { "DWFC.abortPendingFlushes(): clearing queues queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
+            //logger.debug { "DWFC.abortPendingFlushes(): clearing queues queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
             flushQueue.clear()
             blockedFlushes.clear()
             updateStallState()
@@ -779,13 +779,13 @@ class DocumentsWriterFlushControl(
 
     /** Retrieve next pending DWPT to flush, if any (typically during full flush). */
     fun nextPendingFlush(): DocumentsWriterPerThread? {
-        logger.debug { "DWFC.nextPendingFlush() called" }
+        //logger.debug { "DWFC.nextPendingFlush() called" }
         val next = flushQueue.poll()
         if (next == null) {
-            logger.debug { "DWFC.nextPendingFlush() poll was null. queued=${flushQueue.size} fullFlush=$isFullFlush numPending=$numPending" }
+            //logger.debug { "DWFC.nextPendingFlush() poll was null. queued=${flushQueue.size} fullFlush=$isFullFlush numPending=$numPending" }
             return null
         }
-        logger.debug { "DWFC.nextPendingFlush() -> seg=${next.getSegmentInfo().name} docsInRAM=${next.numDocsInRAM}" }
+        //logger.debug { "DWFC.nextPendingFlush() -> seg=${next.getSegmentInfo().name} docsInRAM=${next.numDocsInRAM}" }
         return next
     }
 

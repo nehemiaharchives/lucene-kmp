@@ -821,13 +821,13 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 return NO_MORE_DOCS
             }
             debugCalls++
-            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
                 logger.debug {
                     "[BlockPostingsEnum.nextDoc] enter doc=$doc level0LastDocID=$level0LastDocID " +
                         "needsRefilling=$needsRefilling docBufferUpto=$docBufferUpto docBufferSize=$docBufferSize " +
                         "encoding=$encoding"
                 }
-            }
+            }*/
             if (doc == level0LastDocID || needsRefilling) {
                 if (needsRefilling) {
                     refillDocs()
@@ -852,12 +852,12 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             }
 
             ++docBufferUpto
-            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
                 logger.debug { "[BlockPostingsEnum.nextDoc] exit doc=$doc docBufferUpto=$docBufferUpto" }
             }
             if (doc == NO_MORE_DOCS) {
                 logger.debug { "[BlockPostingsEnum.nextDoc] reached NO_MORE_DOCS" }
-            }
+            }*/
             return this.doc
         }
 
@@ -867,13 +867,13 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 return NO_MORE_DOCS
             }
             debugCalls++
-            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
                 logger.debug {
                     "[BlockPostingsEnum.advance] enter target=$target doc=$doc level0LastDocID=$level0LastDocID " +
                         "needsRefilling=$needsRefilling docBufferUpto=$docBufferUpto docBufferSize=$docBufferSize " +
                         "encoding=$encoding"
                 }
-            }
+            }*/
             if (target > level0LastDocID || needsRefilling) {
                 if (target > level0LastDocID) {
                     doAdvanceShallow(target)
@@ -916,12 +916,12 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 }
             }
 
-            if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
+            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
                 logger.debug { "[BlockPostingsEnum.advance] exit doc=$doc docBufferUpto=$docBufferUpto" }
             }
             if (doc == NO_MORE_DOCS) {
                 logger.debug { "[BlockPostingsEnum.advance] reached NO_MORE_DOCS target=$target" }
-            }
+            }*/
             return doc
         }
 

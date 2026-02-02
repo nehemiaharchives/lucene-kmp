@@ -68,6 +68,8 @@ class LineFileDocs(
         }
     }
 
+    enum class Module { ANALYSIS, CODECS, CORE, QUERY_PARSER, TEST_FRAMEWORK }
+
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun open() {
@@ -82,7 +84,32 @@ class LineFileDocs(
         var file: Path? = null
         if (`is` == null) {
             // if it's not in classpath, we load it as absolute filesystem path (e.g. Jenkins' home dir)
-            file = path.toPath()
+
+            if(path == "europarl.lines.txt.gz"){
+                val toReplace = "../test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
+                val fs = FileSystem.SYSTEM
+                val currentDir = "./".toPath()
+                val currentLs = fs.list(currentDir).map { it.toString() }
+
+                val moduleMd = currentLs.find { it.endsWith(".md") }
+                logger.debug { "LineFileDocs.open() moduleMd: $moduleMd" }
+                val module = Module.entries.find { "$it.md" == moduleMd }
+                logger.debug { "LineFileDocs.open() module: $module" }
+
+                val path = when(module){
+                    Module.TEST_FRAMEWORK -> "src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
+                    else -> toReplace
+                }
+
+                logger.debug { "LineFileDocs.open() path: $path" }
+
+                file = path.toPath()
+            }else{
+                file = path.toPath()
+            }
+
+            logger.debug { "LineFileDocs.open() file: $file" }
+
             size = Files.size(file)
             if (isGzip) {
                 // For now, always start at the beginning of the gzip stream.

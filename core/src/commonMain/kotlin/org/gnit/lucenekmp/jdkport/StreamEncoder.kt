@@ -139,7 +139,7 @@ class StreamEncoder : Writer {
 
     @Throws(IOException::class)
     private fun writeBytes() {
-        logger.debug {"writeBytes() bb.position=${bb.position}, bb[0]=${bb.array()[0]}" }
+        //logger.debug {"writeBytes() bb.position=${bb.position}, bb[0]=${bb.array()[0]}" }
 
         bb.flip()
         val lim: Int = bb.limit

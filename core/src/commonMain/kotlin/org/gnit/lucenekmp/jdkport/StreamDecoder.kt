@@ -32,41 +32,41 @@ class StreamDecoder : Reader {
         }
 
     override fun read(): Int {
-        logger.debug { "StreamDecoder.read() called" }
+        //logger.debug { "StreamDecoder.read() called" }
         // Return the leftover char, if there is one
         if (haveLeftoverChar) {
-            logger.debug { "StreamDecoder.read() returning leftover char: ${leftoverChar.code}" }
+            //logger.debug { "StreamDecoder.read() returning leftover char: ${leftoverChar.code}" }
             haveLeftoverChar = false
             return leftoverChar.code
         }
 
         // Convert more bytes
         val cb = CharArray(2)
-        logger.debug { "StreamDecoder.read() calling read(cb, 0, 2)" }
+        //logger.debug { "StreamDecoder.read() calling read(cb, 0, 2)" }
         val n = read(cb, 0, 2)
-        logger.debug { "StreamDecoder.read() returning n: $n" }
+        //logger.debug { "StreamDecoder.read() returning n: $n" }
         when (n) {
             -1 -> {
-                logger.debug { "StreamDecoder.read() returning -1 (EOF)" }
+                //logger.debug { "StreamDecoder.read() returning -1 (EOF)" }
                 return -1
             }
 
             2 -> {
-                logger.debug { "StreamDecoder.read() returning ${cb[0].code}, saving leftover char: ${cb[1].code}" }
+                //logger.debug { "StreamDecoder.read() returning ${cb[0].code}, saving leftover char: ${cb[1].code}" }
                 leftoverChar = cb[1]
                 haveLeftoverChar = true
                 return cb[0].code
             }
 
             1 -> {
-                logger.debug { "StreamDecoder.read() returning ${cb[0].code}" }
+                //logger.debug { "StreamDecoder.read() returning ${cb[0].code}" }
                 return cb[0].code
             }
 
             0 -> {
                 // If no characters were read but we're not at EOF, try again
                 // This helps handle cases where decoder.decode() didn't fully decode the bytes
-                logger.debug { "StreamDecoder.read() got zero chars, trying again" }
+                //logger.debug { "StreamDecoder.read() got zero chars, trying again" }
                 return read()
             }
 
@@ -78,7 +78,7 @@ class StreamDecoder : Reader {
     }
 
     override fun read(cbuf: CharArray, offset: Int, length: Int): Int {
-        logger.debug { "StreamDecoder.read(${cbuf.toCodeString()}, $offset, $length) called" }
+        //logger.debug { "StreamDecoder.read(${cbuf.toCodeString()}, $offset, $length) called" }
         var off = offset
         var len = length
 
@@ -93,26 +93,26 @@ class StreamDecoder : Reader {
         var n = 0
 
         if (haveLeftoverChar) {
-            logger.debug { "StreamDecoder.read(cbuf, offset, length) using leftover char: ${leftoverChar.code}" }
+            //logger.debug { "StreamDecoder.read(cbuf, offset, length) using leftover char: ${leftoverChar.code}" }
             cbuf[off] = leftoverChar
             off++
             len--
             haveLeftoverChar = false
             n = 1
             if ((len == 0) || !implReady()) {
-                logger.debug { "StreamDecoder.read(cbuf, offset, length) returning $n (only leftover char)" }
+                //logger.debug { "StreamDecoder.read(cbuf, offset, length) returning $n (only leftover char)" }
                 return n
             }
         }
 
         // Always use implRead for remaining chars (len >= 1)
-        logger.debug { "StreamDecoder.read(cbuf, offset, length) calling implRead(${cbuf.toCodeString()}, $off, ${off + len})" }
+        //logger.debug { "StreamDecoder.read(cbuf, offset, length) calling implRead(${cbuf.toCodeString()}, $off, ${off + len})" }
         val nr = implRead(cbuf, off, off + len)
-        logger.debug { "StreamDecoder.read(cbuf, offset, length) implRead returned $nr" }
+        //logger.debug { "StreamDecoder.read(cbuf, offset, length) implRead returned $nr" }
 
         // If leftover char was used and implRead returns -1 (EOF), return n (do not lose leftover char)
         val result = if (nr < 0) (if (n == 1) 1 else -1) else (n + nr)
-        logger.debug { "StreamDecoder.read(cbuf, offset, length) returning $result" }
+        //logger.debug { "StreamDecoder.read(cbuf, offset, length) returning $result" }
         return result
     }
 
@@ -154,11 +154,11 @@ class StreamDecoder : Reader {
             .onMalformedInput(CodingErrorAction.REPLACE)
             .onUnmappableCharacter(CodingErrorAction.REPLACE)
     ){
-        println("[DEBUG] StreamDecoder constructor called with Charset: ${cs.name()}")
+        //logger.debug { "StreamDecoder constructor called with Charset: ${cs.name()}"  }
     }
 
     internal constructor(`in`: InputStream?, lock: Any, dec: CharsetDecoder) : super(/*lock*/) {
-        println("[DEBUG] StreamDecoder constructor called with CharsetDecoder from Charset: ${dec.charset().name()}")
+        //logger.debug { "StreamDecoder constructor called with CharsetDecoder from Charset: ${dec.charset().name()}" }
 
         this.cs = dec.charset()
         this.decoder = dec
@@ -169,7 +169,7 @@ class StreamDecoder : Reader {
             limit(0)
         }
 
-        println("[DEBUG] ByteBuffer created: capacity=${bb.capacity}, position=${bb.position}, limit=${bb.limit}")
+        logger.debug { "ByteBuffer created: capacity=${bb.capacity}, position=${bb.position}, limit=${bb.limit}" }
         // Don't flip the buffer initially, so it can be filled with bytes
     }
 
@@ -192,39 +192,39 @@ class StreamDecoder : Reader {
 
     @Throws(IOException::class)
     private fun readBytes(): Int {
-        logger.debug { "readBytes() called" }
-        logger.debug { "Before compact: bb.position=${bb.position}, bb.limit=${bb.limit}, bb.capacity=${bb.capacity}" }
+        //logger.debug { "readBytes() called" }
+        //logger.debug { "Before compact: bb.position=${bb.position}, bb.limit=${bb.limit}, bb.capacity=${bb.capacity}" }
         bb.compact()
-        logger.debug { "Before readBytes: bb.position=${bb.position}, bb.limit=${bb.limit}, bb.capacity=${bb.capacity}" }
+        //logger.debug { "Before readBytes: bb.position=${bb.position}, bb.limit=${bb.limit}, bb.capacity=${bb.capacity}" }
         try {
             // Read from the input stream, and then update the buffer
             val lim: Int = bb.limit
             val pos: Int = bb.position
             require(pos <= lim)
             val rem = (if (pos <= lim) lim - pos else 0)
-            logger.debug { "Before read: lim=$lim, pos=$pos, rem=$rem, arrayOffset=${bb.arrayOffset()}" }
+            //logger.debug { "Before read: lim=$lim, pos=$pos, rem=$rem, arrayOffset=${bb.arrayOffset()}" }
 
-            logger.debug { "ByteBuffer array content before read: ${bb.array().joinToString(", ") { it.toString() }}" }
+            //logger.debug { "ByteBuffer array content before read: ${bb.array().joinToString(", ") { it.toString() }}" }
 
             // This is the critical line where reading happens
             val bytesRead = if (`in` != null) {
                 // Log the input stream details
-                logger.debug { "Reading from input stream: ${`in`!!::class.simpleName}" }
+                //logger.debug { "Reading from input stream: ${`in`!!::class.simpleName}" }
 
                 // Attempt to read directly from input stream
                 val tempBytes = ByteArray(rem)
                 val read = `in`!!.read(tempBytes, 0, rem)
-                logger.debug { "Raw input stream read result: $read bytes" }
+                //logger.debug { "Raw input stream read result: $read bytes" }
 
                 if (read > 0) {
-                    logger.debug { "Bytes read from input stream: ${tempBytes.slice(0 until read).joinToString(", ") { it.toString() }}" }
+                    //logger.debug { "Bytes read from input stream: ${tempBytes.slice(0 until read).joinToString(", ") { it.toString() }}" }
 
                     // Copy to our buffer
                     //System.arraycopy(tempBytes, 0, bb.array(), bb.arrayOffset() + pos, read)
                     for(i in 0 until read){
                         bb.put(pos + i, tempBytes[i])
                     }
-                    logger.debug { "Copied bytes to ByteBuffer at position $pos" }
+                    //logger.debug { "Copied bytes to ByteBuffer at position $pos" }
 
                     read
                 } else {
@@ -232,29 +232,29 @@ class StreamDecoder : Reader {
                 }
             } else -1
 
-            logger.debug { "Bytes read: $bytesRead" }
+            //logger.debug { "Bytes read: $bytesRead" }
 
             // Add debug after read to verify the buffer was updated
-            logger.debug { "ByteBuffer array after read: ${bb.array().joinToString(", ") { it.toString() }}" }
+            //logger.debug { "ByteBuffer array after read: ${bb.array().joinToString(", ") { it.toString() }}" }
 
             if (bytesRead < 0) return bytesRead
             if (bytesRead == 0) throw IOException("Underlying input stream returned zero bytes")
             require(bytesRead <= rem) { "bytesRead = $bytesRead, rem = $rem" }
 
             bb.position(pos + bytesRead)
-            logger.debug { "After setting position: bb.position=${bb.position}, bb.limit=${bb.limit}" }
+            //logger.debug { "After setting position: bb.position=${bb.position}, bb.limit=${bb.limit}" }
 
         } finally {
             // Flip even when an IOException is thrown,
             // otherwise the stream will stutter
-            logger.debug { "Before flip: bb.position=${bb.position}, bb.limit=${bb.limit}" }
+            //logger.debug { "Before flip: bb.position=${bb.position}, bb.limit=${bb.limit}" }
             bb.flip()
-            logger.debug { "After flip: bb.position=${bb.position}, bb.limit=${bb.limit}" }
+            //logger.debug { "After flip: bb.position=${bb.position}, bb.limit=${bb.limit}" }
         }
 
         val rem: Int = bb.remaining()
-        logger.debug { "Final ByteBuffer remaining: $rem" }
-        logger.debug { "Final ByteBuffer content: ${bb.array().slice(bb.position until bb.limit).joinToString(", ") { it.toString() }}" }
+        //logger.debug { "Final ByteBuffer remaining: $rem" }
+        //logger.debug { "Final ByteBuffer content: ${bb.array().slice(bb.position until bb.limit).joinToString(", ") { it.toString() }}" }
 
         require(rem != 0) { rem }
         return rem
@@ -262,7 +262,7 @@ class StreamDecoder : Reader {
 
     @Throws(IOException::class)
     fun implRead(cbuf: CharArray, off: Int, end: Int): Int {
-        logger.debug { "StreamDecoder.implRead(${cbuf.toCodeString()}, $off, $end) called" }
+        //logger.debug { "StreamDecoder.implRead(${cbuf.toCodeString()}, $off, $end) called" }
 
         // In order to handle surrogate pairs, this method requires that
         // the invoker attempt to read at least two characters.  Saving the
@@ -272,7 +272,7 @@ class StreamDecoder : Reader {
         require(end - off > 1)
 
         var cb: CharBuffer = CharBuffer.wrap(cbuf, off, end - off)
-        logger.debug { "CharBuffer contents before implRead: ${cb.array().slice(cb.position until cb.limit).toCharArray().toCodeString()}" }
+        //logger.debug { "CharBuffer contents before implRead: ${cb.array().slice(cb.position until cb.limit).toCharArray().toCodeString()}" }
         if (cb.position() != 0) {
             // Ensure that cb[0] == cbuf[off]
             cb = cb.slice()
@@ -280,16 +280,16 @@ class StreamDecoder : Reader {
 
         var eof = false
         while (true) {
-            logger.debug { "ByteBuffer contents before decode: " + bb.array().slice(bb.position until bb.limit).joinToString { it.toUByte().toString() } }
+            //logger.debug { "ByteBuffer contents before decode: " + bb.array().slice(bb.position until bb.limit).joinToString { it.toUByte().toString() } }
             val cr: CoderResult = decoder.decode(bb, cb, eof)
-            logger.debug { "CharBuffer contents after decode: " + CharArray(cb.remaining()) { i -> cb.get(cb.position() + i) }.joinToString { "${it.code}" } }
-            logger.debug { "CoderResult cr:$cr isUnderflow: ${cr.isUnderflow}, cb.position=${cb.position()}, cb.remaining=${cb.remaining()}, eof=$eof" }
+            //logger.debug { "CharBuffer contents after decode: " + CharArray(cb.remaining()) { i -> cb.get(cb.position() + i) }.joinToString { "${it.code}" } }
+            //logger.debug { "CoderResult cr:$cr isUnderflow: ${cr.isUnderflow}, cb.position=${cb.position()}, cb.remaining=${cb.remaining()}, eof=$eof" }
             if (cr.isUnderflow) {
                 if (eof) break
                 if (!cb.hasRemaining()) break
                 if ((cb.position() > 0) && !inReady()) break // Block at most once
 
-                logger.debug { "implRead: calling readBytes()" }
+                //logger.debug { "implRead: calling readBytes()" }
                 val n = readBytes()
                 if (n < 0) {
                     eof = true
