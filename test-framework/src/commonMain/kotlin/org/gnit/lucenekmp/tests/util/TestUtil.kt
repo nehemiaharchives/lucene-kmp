@@ -1567,7 +1567,7 @@ class TestUtil {
             r: IndexReader,
             field: String,
             term: BytesRef,
-            reuse: PostingsEnum,
+            reuse: PostingsEnum?,
             flags: Int
         ): PostingsEnum? {
             val terms: Terms? = MultiTerms.getTerms(r, field)
@@ -1586,7 +1586,7 @@ class TestUtil {
         fun docs(
             random: Random,
             termsEnum: TermsEnum,
-            reuse: PostingsEnum,
+            reuse: PostingsEnum?,
             flags: Int
         ): PostingsEnum {
             // TODO: simplify this method it would be easier to randomly either use the flags passed, or do

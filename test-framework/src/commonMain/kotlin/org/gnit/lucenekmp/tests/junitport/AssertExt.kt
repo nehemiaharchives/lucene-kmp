@@ -95,3 +95,27 @@ fun assertArrayEquals(
         )
     }
 }
+
+/**
+ * Asserts that two object arrays are equal. If they are not, an
+ * [AssertionError] is thrown. If `expected` and
+ * `actual` are `null`, they are considered
+ * equal.
+ *
+ * @param expecteds Object array or array of arrays (multi-dimensional array) with
+ * expected values
+ * @param actuals Object array or array of arrays (multi-dimensional array) with
+ * actual values
+ */
+fun assertArrayEquals(expecteds: Array<String?>, actuals: Array<String?>, message: String? = null) {
+    assertEquals(expecteds.size, actuals.size, "${message ?: ""} size mismatch: expected ${expecteds.size} elements, got ${actuals.size}")
+
+    for (i in expecteds.indices) {
+        assertEquals(
+            expecteds[i],
+            actuals[i],
+            "${message ?: ""} arrays differ at index $i: expected=${expecteds[i]}, actual=${actuals[i]}"
+        )
+    }
+}
+
