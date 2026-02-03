@@ -1299,6 +1299,12 @@ object Arrays {
         )
     }
 
+    fun fill(a: CharArray, value: Char) {
+        a.fill(
+            element = value
+        )
+    }
+
     fun <T> fill(a: Array<T>, value: T) {
         a.fill(
             element = value

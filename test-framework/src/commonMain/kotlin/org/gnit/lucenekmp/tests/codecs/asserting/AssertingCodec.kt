@@ -152,7 +152,7 @@ open class AssertingCodec : FilterCodec("Asserting", TestUtil.getDefaultCodec())
      *
      * <p>The default implementation always returns "Asserting"
      */
-    fun getDocValuesFormatForField(field: String): DocValuesFormat {
+    open fun getDocValuesFormatForField(field: String): DocValuesFormat {
         return defaultDVFormat
     }
 

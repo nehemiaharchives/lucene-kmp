@@ -100,7 +100,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testOneNumber() {
+    open fun testOneNumber() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -136,7 +136,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testOneFloat() {
+    open fun testOneFloat() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -174,7 +174,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoNumbers() {
+    open fun testTwoNumbers() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -214,7 +214,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoBinaryValues() {
+    open fun testTwoBinaryValues() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -256,7 +256,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testVariouslyCompressibleBinaryValues() {
+    open fun testVariouslyCompressibleBinaryValues() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val numDocs: Int = 1 + random().nextInt(100)
@@ -309,7 +309,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoFieldsMixed() {
+    open fun testTwoFieldsMixed() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -349,7 +349,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testThreeFieldsMixed() {
+    open fun testThreeFieldsMixed() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -395,7 +395,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testThreeFieldsMixed2() {
+    open fun testThreeFieldsMixed2() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -443,7 +443,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoDocumentsNumeric() {
+    open fun testTwoDocumentsNumeric() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -473,7 +473,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoDocumentsMerged() {
+    open fun testTwoDocumentsMerged() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -515,7 +515,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testBigNumericRange() {
+    open fun testBigNumericRange() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -545,7 +545,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testBigNumericRange2() {
+    open fun testBigNumericRange2() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -575,7 +575,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testBytes() {
+    open fun testBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -615,7 +615,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testBytesTwoDocumentsMerged() {
+    open fun testBytesTwoDocumentsMerged() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -657,7 +657,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testBytesMergeAwayAllValues() {
+    open fun testBytesMergeAwayAllValues() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -686,7 +686,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedBytes() {
+    open fun testSortedBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -727,7 +727,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedBytesTwoDocuments() {
+    open fun testSortedBytesTwoDocuments() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -759,7 +759,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedBytesThreeDocuments() {
+    open fun testSortedBytesThreeDocuments() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -799,7 +799,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedBytesTwoDocumentsMerged() {
+    open fun testSortedBytesTwoDocumentsMerged() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -853,7 +853,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedMergeAwayAllValues() {
+    open fun testSortedMergeAwayAllValues() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -887,7 +887,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testBytesWithNewline() {
+    open fun testBytesWithNewline() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -911,7 +911,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testMissingSortedBytes() {
+    open fun testMissingSortedBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -938,7 +938,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedTermsEnum() {
+    open fun testSortedTermsEnum() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -1027,7 +1027,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testEmptySortedBytes() {
+    open fun testEmptySortedBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -1059,7 +1059,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testEmptyBytes() {
+    open fun testEmptyBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -1089,7 +1089,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testVeryLargeButLegalBytes() {
+    open fun testVeryLargeButLegalBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -1117,7 +1117,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testVeryLargeButLegalSortedBytes() {
+    open fun testVeryLargeButLegalSortedBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -1143,7 +1143,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testCodecUsesOwnBytes() {
+    open fun testCodecUsesOwnBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -1167,7 +1167,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testCodecUsesOwnSortedBytes() {
+    open fun testCodecUsesOwnSortedBytes() {
         val analyzer: Analyzer = MockAnalyzer(random())
 
         val directory: Directory = newDirectory()
@@ -1196,7 +1196,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
    * Simple test case to show how to use the API
    */
     @Throws(IOException::class)
-    fun testDocValuesSimple() {
+    open fun testDocValuesSimple() {
         val dir: Directory = newDirectory()
         val analyzer: Analyzer =
             MockAnalyzer(random())
@@ -1244,7 +1244,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testRandomSortedBytes() {
+    open fun testRandomSortedBytes() {
         val dir: Directory = newDirectory()
         val cfg = newIndexWriterConfig(MockAnalyzer(random()))
         val w = RandomIndexWriter(random(), dir, cfg)
@@ -1559,7 +1559,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testBooleanNumericsVsStoredFields() {
+    open fun testBooleanNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1571,7 +1571,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseBooleanNumericsVsStoredFields() {
+    open fun testSparseBooleanNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1583,7 +1583,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testByteNumericsVsStoredFields() {
+    open fun testByteNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1599,7 +1599,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseByteNumericsVsStoredFields() {
+    open fun testSparseByteNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1615,7 +1615,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testShortNumericsVsStoredFields() {
+    open fun testShortNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1631,7 +1631,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseShortNumericsVsStoredFields() {
+    open fun testSparseShortNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1647,7 +1647,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testIntNumericsVsStoredFields() {
+    open fun testIntNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1659,7 +1659,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseIntNumericsVsStoredFields() {
+    open fun testSparseIntNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1671,7 +1671,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testLongNumericsVsStoredFields() {
+    open fun testLongNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1683,7 +1683,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseLongNumericsVsStoredFields() {
+    open fun testSparseLongNumericsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestNumericsVsStoredFields(
@@ -1784,12 +1784,12 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testBinaryFixedLengthVsStoredFields() {
+    open fun testBinaryFixedLengthVsStoredFields() {
         doTestBinaryFixedLengthVsStoredFields(1.0)
     }
 
     @Throws(Exception::class)
-    fun testSparseBinaryFixedLengthVsStoredFields() {
+    open fun testSparseBinaryFixedLengthVsStoredFields() {
         doTestBinaryFixedLengthVsStoredFields(
             random().nextDouble()
         )
@@ -1815,12 +1815,12 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testBinaryVariableLengthVsStoredFields() {
+    open fun testBinaryVariableLengthVsStoredFields() {
         doTestBinaryVariableLengthVsStoredFields(1.0)
     }
 
     @Throws(Exception::class)
-    fun testSparseBinaryVariableLengthVsStoredFields() {
+    open fun testSparseBinaryVariableLengthVsStoredFields() {
         doTestBinaryVariableLengthVsStoredFields(
             random().nextDouble()
         )
@@ -1935,7 +1935,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedFixedLengthVsStoredFields() {
+    open fun testSortedFixedLengthVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             val fixedLength: Int = TestUtil.nextInt(
@@ -1953,7 +1953,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseSortedFixedLengthVsStoredFields() {
+    open fun testSparseSortedFixedLengthVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             val fixedLength: Int = TestUtil.nextInt(
@@ -1971,7 +1971,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedVariableLengthVsStoredFields() {
+    open fun testSortedVariableLengthVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedVsStoredFields(
@@ -1984,7 +1984,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSparseSortedVariableLengthVsStoredFields() {
+    open fun testSparseSortedVariableLengthVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedVsStoredFields(
@@ -2012,7 +2012,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetOneValue() {
+    open fun testSortedSetOneValue() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
 
@@ -2037,7 +2037,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoFields() {
+    open fun testSortedSetTwoFields() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
 
@@ -2072,7 +2072,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoDocumentsMerged() {
+    open fun testSortedSetTwoDocumentsMerged() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2114,7 +2114,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoValues() {
+    open fun testSortedSetTwoValues() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
 
@@ -2144,7 +2144,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoValuesUnordered() {
+    open fun testSortedSetTwoValuesUnordered() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
 
@@ -2174,7 +2174,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetThreeValuesTwoDocs() {
+    open fun testSortedSetThreeValuesTwoDocs() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2223,7 +2223,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoDocumentsLastMissing() {
+    open fun testSortedSetTwoDocumentsLastMissing() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2255,7 +2255,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoDocumentsLastMissingMerge() {
+    open fun testSortedSetTwoDocumentsLastMissingMerge() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2289,7 +2289,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoDocumentsFirstMissing() {
+    open fun testSortedSetTwoDocumentsFirstMissing() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2322,7 +2322,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTwoDocumentsFirstMissingMerge() {
+    open fun testSortedSetTwoDocumentsFirstMissingMerge() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2356,7 +2356,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetMergeAwayAllValues() {
+    open fun testSortedSetMergeAwayAllValues() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2390,7 +2390,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetTermsEnum() {
+    open fun testSortedSetTermsEnum() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -2660,7 +2660,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetFixedLengthVsStoredFields() {
+    open fun testSortedSetFixedLengthVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             val fixedLength: Int = TestUtil.nextInt(
@@ -2679,7 +2679,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedNumericsSingleValuedVsStoredFields() {
+    open fun testSortedNumericsSingleValuedVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedNumericsVsStoredFields(
@@ -2691,7 +2691,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedNumericsSingleValuedMissingVsStoredFields() {
+    open fun testSortedNumericsSingleValuedMissingVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedNumericsVsStoredFields(
@@ -2705,7 +2705,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedNumericsMultipleValuesVsStoredFields() {
+    open fun testSortedNumericsMultipleValuesVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedNumericsVsStoredFields(
@@ -2723,7 +2723,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedNumericsFewUniqueSetsVsStoredFields() {
+    open fun testSortedNumericsFewUniqueSetsVsStoredFields() {
         val values = LongArray(
             TestUtil.nextInt(
                 random(),
@@ -2752,7 +2752,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetVariableLengthVsStoredFields() {
+    open fun testSortedSetVariableLengthVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
@@ -2766,7 +2766,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetFixedLengthSingleValuedVsStoredFields() {
+    open fun testSortedSetFixedLengthSingleValuedVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             val fixedLength: Int = TestUtil.nextInt(
@@ -2785,7 +2785,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetVariableLengthSingleValuedVsStoredFields() {
+    open fun testSortedSetVariableLengthSingleValuedVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
@@ -2799,7 +2799,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetFixedLengthFewUniqueSetsVsStoredFields() {
+    open fun testSortedSetFixedLengthFewUniqueSetsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
@@ -2813,7 +2813,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetVariableLengthFewUniqueSetsVsStoredFields() {
+    open fun testSortedSetVariableLengthFewUniqueSetsVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
@@ -2827,7 +2827,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetVariableLengthManyValuesPerDocVsStoredFields() {
+    open fun testSortedSetVariableLengthManyValuesPerDocVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
@@ -2841,7 +2841,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetFixedLengthManyValuesPerDocVsStoredFields() {
+    open fun testSortedSetFixedLengthManyValuesPerDocVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
@@ -2855,12 +2855,12 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testGCDCompression() {
+    open fun testGCDCompression() {
         doTestGCDCompression(1.0)
     }
 
     @Throws(Exception::class)
-    fun testSparseGCDCompression() {
+    open fun testSparseGCDCompression() {
         doTestGCDCompression(random().nextDouble())
     }
 
@@ -2880,19 +2880,19 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testZeros() {
+    open fun testZeros() {
         doTestNumericsVsStoredFields(1.0, /*java.util.function.LongSupplier*/ { 0 })
     }
 
     @Throws(Exception::class)
-    fun testSparseZeros() {
+    open fun testSparseZeros() {
         doTestNumericsVsStoredFields(
             random().nextDouble(),
             /*java.util.function.LongSupplier*/ { 0 })
     }
 
     @Throws(Exception::class)
-    fun testZeroOrMin() {
+    open fun testZeroOrMin() {
         // try to make GCD compression fail if the format did not anticipate that
         // the GCD of 0 and MIN_VALUE is negative
         val numIterations: Int = atLeast(1)
@@ -2907,7 +2907,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoNumbersOneMissing() {
+    open fun testTwoNumbersOneMissing() {
         val directory: Directory = newDirectory()
         val conf = newIndexWriterConfig(/*null*/)
         conf.setMergePolicy(newLogMergePolicy())
@@ -2935,7 +2935,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoNumbersOneMissingWithMerging() {
+    open fun testTwoNumbersOneMissingWithMerging() {
         val directory: Directory = newDirectory()
         val conf = newIndexWriterConfig(/*null*/)
         conf.setMergePolicy(newLogMergePolicy())
@@ -2963,7 +2963,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testThreeNumbersOneMissingWithMerging() {
+    open fun testThreeNumbersOneMissingWithMerging() {
         val directory: Directory = newDirectory()
         val conf = newIndexWriterConfig(/*null*/)
         conf.setMergePolicy(newLogMergePolicy())
@@ -2996,7 +2996,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoBytesOneMissing() {
+    open fun testTwoBytesOneMissing() {
         val directory: Directory = newDirectory()
         val conf = newIndexWriterConfig(/*null*/)
         conf.setMergePolicy(newLogMergePolicy())
@@ -3023,7 +3023,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoBytesOneMissingWithMerging() {
+    open fun testTwoBytesOneMissingWithMerging() {
         val directory: Directory = newDirectory()
         val conf = newIndexWriterConfig(/*null*/)
         conf.setMergePolicy(newLogMergePolicy())
@@ -3051,7 +3051,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testThreeBytesOneMissingWithMerging() {
+    open fun testThreeBytesOneMissingWithMerging() {
         val directory: Directory = newDirectory()
         val conf = newIndexWriterConfig(/*null*/)
         conf.setMergePolicy(newLogMergePolicy())
@@ -3086,7 +3086,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     /** Tests dv against stored fields with threads (binary/numeric/sorted, no missing)  */
     @Throws(Exception::class)
-    fun testThreads() = runTest {
+    open fun testThreads() = runTest {
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
@@ -3175,7 +3175,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     /** Tests dv against stored fields with threads (all types + missing)  */
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testThreads2() = runTest {
+    open fun testThreads2() = runTest {
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
@@ -3329,7 +3329,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testThreads3() = runTest {
+    open fun testThreads3() = runTest {
         val dir: Directory = newFSDirectory(createTempDir())
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
@@ -3408,7 +3408,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     // LUCENE-5218
     @Throws(Exception::class)
-    fun testEmptyBinaryValueOnPageSizes() {
+    open fun testEmptyBinaryValueOnPageSizes() {
         // Test larger and larger power-of-two sized values,
         // followed by empty string value:
         for (i in 0..19) {
@@ -3442,7 +3442,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testOneSortedNumber() {
+    open fun testOneSortedNumber() {
         val directory: Directory = newDirectory()
         val writer = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -3463,7 +3463,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testOneSortedNumberOneMissing() {
+    open fun testOneSortedNumberOneMissing() {
         val directory: Directory = newDirectory()
         val writer = IndexWriter(directory, IndexWriterConfig(/*null*/))
         val doc = Document()
@@ -3486,7 +3486,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testNumberMergeAwayAllValues() {
+    open fun testNumberMergeAwayAllValues() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3515,7 +3515,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoSortedNumber() {
+    open fun testTwoSortedNumber() {
         val directory: Directory = newDirectory()
         val writer = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -3538,7 +3538,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoSortedNumberSameValue() {
+    open fun testTwoSortedNumberSameValue() {
         val directory: Directory = newDirectory()
         val writer = RandomIndexWriter(random(), directory)
         val doc = Document()
@@ -3561,7 +3561,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testTwoSortedNumberOneMissing() {
+    open fun testTwoSortedNumberOneMissing() {
         val directory: Directory = newDirectory()
         val writer = IndexWriter(directory, IndexWriterConfig(/*null*/))
         val doc = Document()
@@ -3586,7 +3586,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedNumberMerge() {
+    open fun testSortedNumberMerge() {
         val directory: Directory = newDirectory()
         val iwc = IndexWriterConfig(/*null*/)
         iwc.setMergePolicy(newLogMergePolicy())
@@ -3617,7 +3617,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedNumberMergeAwayAllValues() {
+    open fun testSortedNumberMergeAwayAllValues() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3649,7 +3649,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedEnumAdvanceIndependently() {
+    open fun testSortedEnumAdvanceIndependently() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3679,7 +3679,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetEnumAdvanceIndependently() {
+    open fun testSortedSetEnumAdvanceIndependently() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3789,7 +3789,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     // same as testSortedMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testSortedMergeAwayAllValuesLargeSegment() {
+    open fun testSortedMergeAwayAllValuesLargeSegment() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3825,7 +3825,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     // same as testSortedSetMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testSortedSetMergeAwayAllValuesLargeSegment() {
+    open fun testSortedSetMergeAwayAllValuesLargeSegment() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3864,7 +3864,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     // same as testNumericMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testNumericMergeAwayAllValuesLargeSegment() {
+    open fun testNumericMergeAwayAllValuesLargeSegment() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3896,7 +3896,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     // same as testSortedNumericMergeAwayAllValues but on more than 1024 docs to have sparse encoding
     // on
     @Throws(IOException::class)
-    fun testSortedNumericMergeAwayAllValuesLargeSegment() {
+    open fun testSortedNumericMergeAwayAllValuesLargeSegment() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3930,7 +3930,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     // same as testBinaryMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testBinaryMergeAwayAllValuesLargeSegment() {
+    open fun testBinaryMergeAwayAllValuesLargeSegment() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig = newIndexWriterConfig(analyzer)
@@ -3963,7 +3963,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testRandomAdvanceNumeric() {
+    open fun testRandomAdvanceNumeric() {
         val longRange: Long
         if (random().nextBoolean()) {
             longRange = TestUtil.nextInt(
@@ -3999,7 +3999,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testRandomAdvanceBinary() {
+    open fun testRandomAdvanceBinary() {
         doTestRandomAdvance(
             object : FieldCreator {
                 override fun next(): Field {
@@ -4024,7 +4024,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
      */
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testHighOrdsSortedSetDV() {
+    open fun testHighOrdsSortedSetDV() {
         assumeFalse(
             "This test with SimpleTextCodec requires a lot of memory",
             codec is SimpleTextCodec

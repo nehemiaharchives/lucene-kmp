@@ -65,7 +65,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedMergeAwayAllValuesWithSkipper() {
+    open fun testSortedMergeAwayAllValuesWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -104,7 +104,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedSetMergeAwayAllValuesWithSkipper() {
+    open fun testSortedSetMergeAwayAllValuesWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -143,7 +143,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testNumberMergeAwayAllValuesWithSkipper() {
+    open fun testNumberMergeAwayAllValuesWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -177,7 +177,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(IOException::class)
-    fun testSortedNumberMergeAwayAllValuesWithSkipper() {
+    open fun testSortedNumberMergeAwayAllValuesWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -212,7 +212,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     // same as testSortedMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testSortedMergeAwayAllValuesLargeSegmentWithSkipper() {
+    open fun testSortedMergeAwayAllValuesLargeSegmentWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -253,7 +253,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     // same as testSortedSetMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testSortedSetMergeAwayAllValuesLargeSegmentWithSkipper() {
+    open fun testSortedSetMergeAwayAllValuesLargeSegmentWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -294,7 +294,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     // same as testNumericMergeAwayAllValues but on more than 1024 docs to have sparse encoding on
     @Throws(IOException::class)
-    fun testNumericMergeAwayAllValuesLargeSegmentWithSkipper() {
+    open fun testNumericMergeAwayAllValuesLargeSegmentWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -331,7 +331,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     // same as testSortedNumericMergeAwayAllValues but on more than 1024 docs to have sparse encoding
     // on
     @Throws(IOException::class)
-    fun testSortedNumericMergeAwayAllValuesLargeSegmentWithSkipper() {
+    open fun testSortedNumericMergeAwayAllValuesLargeSegmentWithSkipper() {
         val directory: Directory = newDirectory()
         val analyzer: Analyzer = MockAnalyzer(random())
         val iwconfig: IndexWriterConfig = newIndexWriterConfig(analyzer)
@@ -366,14 +366,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testNumericDocValuesWithSkipperSmall() {
+    open fun testNumericDocValuesWithSkipperSmall() {
         doTestNumericDocValuesWithSkipper(
             random().nextInt(1, 1000)
         )
     }
 
     @Throws(Exception::class)
-    fun testNumericDocValuesWithSkipperMedium() {
+    open fun testNumericDocValuesWithSkipperMedium() {
         doTestNumericDocValuesWithSkipper(
             random().nextInt(1000, 20000)
         )
@@ -381,7 +381,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testNumericDocValuesWithSkipperBig() {
+    open fun testNumericDocValuesWithSkipperBig() {
         doTestNumericDocValuesWithSkipper(
             random().nextInt(50000, 100000)
         )
@@ -435,14 +435,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedNumericDocValuesWithSkipperSmall() {
+    open fun testSortedNumericDocValuesWithSkipperSmall() {
         doTestSortedNumericDocValuesWithSkipper(
             random().nextInt(1, 1000)
         )
     }
 
     @Throws(Exception::class)
-    fun testSortedNumericDocValuesWithSkipperMedium() {
+    open fun testSortedNumericDocValuesWithSkipperMedium() {
         doTestSortedNumericDocValuesWithSkipper(
             random().nextInt(1000, 20000)
         )
@@ -450,7 +450,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testSortedNumericDocValuesWithSkipperBig() {
+    open fun testSortedNumericDocValuesWithSkipperBig() {
         doTestSortedNumericDocValuesWithSkipper(
             random().nextInt(50000, 100000)
         )
@@ -526,14 +526,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedDocValuesWithSkipperSmall() {
+    open fun testSortedDocValuesWithSkipperSmall() {
         doTestSortedDocValuesWithSkipper(
             random().nextInt(1, 1000)
         )
     }
 
     @Throws(Exception::class)
-    fun testSortedDocValuesWithSkipperMedium() {
+    open fun testSortedDocValuesWithSkipperMedium() {
         doTestSortedDocValuesWithSkipper(
             random().nextInt(1000, 20000)
         )
@@ -541,7 +541,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testSortedDocValuesWithSkipperBig() {
+    open fun testSortedDocValuesWithSkipperBig() {
         doTestSortedDocValuesWithSkipper(
             random().nextInt(50000, 100000)
         )
@@ -595,14 +595,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testSortedSetDocValuesWithSkipperSmall() {
+    open fun testSortedSetDocValuesWithSkipperSmall() {
         doTestSortedSetDocValuesWithSkipper(
             random().nextInt(1, 1000)
         )
     }
 
     @Throws(Exception::class)
-    fun testSortedSetDocValuesWithSkipperMedium() {
+    open fun testSortedSetDocValuesWithSkipperMedium() {
         doTestSortedSetDocValuesWithSkipper(
             random().nextInt(10000, 20000)
         )
@@ -610,7 +610,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testSortedSetDocValuesWithSkipperBig() {
+    open fun testSortedSetDocValuesWithSkipperBig() {
         doTestSortedSetDocValuesWithSkipper(
             random().nextInt(50000, 100000)
         )
@@ -842,7 +842,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     }
 
     @Throws(Exception::class)
-    fun testMismatchedFields() {
+    open fun testMismatchedFields() {
         val dir1: Directory = newDirectory()
         val w1 = IndexWriter(dir1, newIndexWriterConfig())
         val doc = Document()

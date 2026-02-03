@@ -28,6 +28,7 @@ import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.KnnVectorsFormat
 import org.gnit.lucenekmp.codecs.PostingsFormat
+import org.gnit.lucenekmp.codecs.blocktreeords.BlockTreeOrdsPostingsFormat
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101Codec
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat
 import org.gnit.lucenekmp.codecs.lucene90.Lucene90DocValuesFormat
@@ -65,6 +66,7 @@ import org.gnit.lucenekmp.search.TopDocs
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.NoLockFactory
 import org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
+import org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
 import org.gnit.lucenekmp.util.Attribute
 import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.BytesRef
@@ -1327,13 +1329,13 @@ class TestUtil {
         }
 
         /** Returns a random postings format that supports term ordinals  */
-        /*fun getPostingsFormatWithOrds(r: Random): PostingsFormat {
+        fun getPostingsFormatWithOrds(r: Random): PostingsFormat {
             when (r.nextInt(2)) {
                 0 -> return LuceneFixedGap()
                 1 -> return BlockTreeOrdsPostingsFormat()
                 else -> throw AssertionError()
             }
-        }*/
+        }
 
         /**
          * Returns the actual default docvalues format (e.g. LuceneMNDocValuesFormat) for this version of
