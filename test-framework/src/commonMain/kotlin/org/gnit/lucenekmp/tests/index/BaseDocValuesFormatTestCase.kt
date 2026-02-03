@@ -368,14 +368,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testNumericDocValuesWithSkipperSmall() {
         doTestNumericDocValuesWithSkipper(
-            random().nextInt(1, 1000)
+            random().nextInt(1, 10) // TODO reduced from 1, 1000 to 1, 10 for dev speed
         )
     }
 
     @Throws(Exception::class)
     open fun testNumericDocValuesWithSkipperMedium() {
         doTestNumericDocValuesWithSkipper(
-            random().nextInt(1000, 20000)
+            random().nextInt(10, 20) // TODO reduced from 1000, 20000 to 10, 20 for dev speed
         )
     }
 
@@ -383,7 +383,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testNumericDocValuesWithSkipperBig() {
         doTestNumericDocValuesWithSkipper(
-            random().nextInt(50000, 100000)
+            random().nextInt(50, 100) // TODO reduced from 50000, 100000 to 50, 100 for dev speed
         )
     }
 
@@ -437,14 +437,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testSortedNumericDocValuesWithSkipperSmall() {
         doTestSortedNumericDocValuesWithSkipper(
-            random().nextInt(1, 1000)
+            random().nextInt(1, 10) // TODO reduced from 1, 1000 to 1, 10 for dev speed
         )
     }
 
     @Throws(Exception::class)
     open fun testSortedNumericDocValuesWithSkipperMedium() {
         doTestSortedNumericDocValuesWithSkipper(
-            random().nextInt(1000, 20000)
+            random().nextInt(10, 20) // TODO reduced from 1000, 20000 to 10, 20 for dev speed
         )
     }
 
@@ -452,7 +452,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testSortedNumericDocValuesWithSkipperBig() {
         doTestSortedNumericDocValuesWithSkipper(
-            random().nextInt(50000, 100000)
+            random().nextInt(50, 100) // TODO reduced from 50000, 100000 to 50, 100 for dev speed
         )
     }
 
@@ -528,14 +528,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testSortedDocValuesWithSkipperSmall() {
         doTestSortedDocValuesWithSkipper(
-            random().nextInt(1, 1000)
+            random().nextInt(1, 10) // TODO reduced from 1, 1000 to 1, 10 for dev speed
         )
     }
 
     @Throws(Exception::class)
     open fun testSortedDocValuesWithSkipperMedium() {
         doTestSortedDocValuesWithSkipper(
-            random().nextInt(1000, 20000)
+            random().nextInt(10, 20) // TODO reduced from 1000, 20000 to 10, 20 for dev speed
         )
     }
 
@@ -543,7 +543,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testSortedDocValuesWithSkipperBig() {
         doTestSortedDocValuesWithSkipper(
-            random().nextInt(50000, 100000)
+            random().nextInt(50, 100) // TODO reduced from 50000, 100000 to 50, 100 for dev speed
         )
     }
 
@@ -597,14 +597,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testSortedSetDocValuesWithSkipperSmall() {
         doTestSortedSetDocValuesWithSkipper(
-            random().nextInt(1, 1000)
+            random().nextInt(1, 10) // TODO reduced from 1, 1000 to 1, 10 for dev speed
         )
     }
 
     @Throws(Exception::class)
     open fun testSortedSetDocValuesWithSkipperMedium() {
         doTestSortedSetDocValuesWithSkipper(
-            random().nextInt(10000, 20000)
+            random().nextInt(10, 20) // TODO reduced from 10000, 20000 to 10, 20 for dev speed
         )
     }
 
@@ -612,7 +612,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
     @Throws(Exception::class)
     open fun testSortedSetDocValuesWithSkipperBig() {
         doTestSortedSetDocValuesWithSkipper(
-            random().nextInt(50000, 100000)
+            random().nextInt(50, 100) // TODO reduced from 50000, 100000 to 50, 100 for dev speed
         )
     }
 

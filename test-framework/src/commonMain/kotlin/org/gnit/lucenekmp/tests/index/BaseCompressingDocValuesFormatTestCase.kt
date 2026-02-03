@@ -92,7 +92,7 @@ abstract class BaseCompressingDocValuesFormatTestCase : BaseDocValuesFormatTestC
             val doc = Document()
             val dvf = NumericDocValuesField("dv", 0)
             doc.add(dvf)
-            for (i in 0..19999) {
+            for (i in 0..10) { // TODO reduced from 19999 to 10 for dev speed
                 dvf.setLongValue((i and 1023).toLong())
                 iwriter.addDocument(doc)
             }

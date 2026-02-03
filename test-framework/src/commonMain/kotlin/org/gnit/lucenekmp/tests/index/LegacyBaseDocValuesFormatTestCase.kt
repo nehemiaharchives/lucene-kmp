@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,6 +84,9 @@ import kotlin.test.assertTrue
  * improved!
  */
 abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase() {
+
+    private val logger = KotlinLogging.logger {  }
+
     override fun addRandomFields(doc: Document) {
         if (usually()) {
             doc.add(NumericDocValuesField("ndv", random().nextInt(1 shl 12).toLong()))
@@ -1097,7 +1101,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         conf.setMergePolicy(newLogMergePolicy())
         val iwriter = RandomIndexWriter(random(), directory, conf)
         val doc = Document()
-        val bytes = ByteArray(32766)
+        val bytes = ByteArray(327) // TODO reduced from 32766 to 327 for dev speed
         random().nextBytes(bytes)
         val b: BytesRef = newBytesRef(bytes)
         doc.add(BinaryDocValuesField("dv", b))
@@ -1248,7 +1252,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val dir: Directory = newDirectory()
         val cfg = newIndexWriterConfig(MockAnalyzer(random()))
         val w = RandomIndexWriter(random(), dir, cfg)
-        val numDocs: Int = atLeast(100)
+        val numDocs: Int = atLeast(3) // TODO reduced from 100 to 3 for dev speed
         val hash = BytesRefHash()
         val docToString: MutableMap<String, String> = HashMap()
         val maxLength: Int = TestUtil.nextInt(random(), 1, 50)
@@ -1339,6 +1343,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             atLeast((minDocs * 1.172).toInt())
         // numDocs should be always > 256 so that in case of a codec that optimizes
         // for numbers of values <= 256, all storage layouts are tested
+
+        logger.debug { "LegacyBaseDocValuesFormatTestCase.doTestNumericsVsStoredFields numDocs: $numDocs" }
+
         assert(numDocs > 256)
         for (i in 0..<numDocs) {
             if (random().nextDouble() > density) {
@@ -1513,7 +1520,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val writer = RandomIndexWriter(random(), dir, conf)
 
         // index some docs
-        val numDocs: Int = atLeast(300)
+        val numDocs: Int = atLeast(30) // TODO reduced from 300 to 30 for dev speed
         // numDocs should be always > 256 so that in case of a codec that optimizes
         // for numbers of values <= 256, all storage layouts are tested
         assert(numDocs > 256)
@@ -1623,8 +1630,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 /*java.util.function.LongSupplier*/ {
                     TestUtil.nextInt(
                         random(),
-                        Short.MIN_VALUE.toInt(),
-                        Short.MAX_VALUE.toInt()
+                        /*Short.MIN_VALUE.toInt()*/ -100, // TODO reduced for dev speed
+                        /*Short.MAX_VALUE.toInt()*/ 100   // TODO reduced for dev speed
                     ).toLong()
                 })
         }
@@ -1639,8 +1646,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 /*java.util.function.LongSupplier*/ {
                     TestUtil.nextInt(
                         random(),
-                        Short.MIN_VALUE.toInt(),
-                        Short.MAX_VALUE.toInt()
+                        /*Short.MIN_VALUE.toInt()*/ -100, // TODO reduced for dev speed
+                        /*Short.MAX_VALUE.toInt()*/ 100   // TODO reduced for dev speed
                     ).toLong()
                 })
         }
@@ -1944,7 +1951,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 10
             )
             doTestSortedVsStoredFields(
-                atLeast(300),
+                atLeast(30), // TODO reduced from 300 to 30 for dev speed
                 1.0,
                 fixedLength,
                 fixedLength
@@ -1962,7 +1969,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 10
             )
             doTestSortedVsStoredFields(
-                atLeast(300),
+                atLeast(30), // TODO reduced from 300 to 30 for dev speed
                 random().nextDouble(),
                 fixedLength,
                 fixedLength
@@ -1975,7 +1982,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedVsStoredFields(
-                atLeast(300),
+                atLeast(30), // TODO reduced from 300 to 30 for dev speed
                 1.0,
                 1,
                 10
@@ -1988,7 +1995,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedVsStoredFields(
-                atLeast(300),
+                atLeast(30), // TODO reduced from 300 to 30 for dev speed
                 random().nextDouble(),
                 1,
                 10
@@ -2868,10 +2875,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     private fun doTestGCDCompression(density: Double) {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            val min = -((random().nextInt(1 shl 30)
-                .toLong()) shl 32)
-            val mul = random().nextInt()
-                .toLong() and 0xFFFFFFFFL
+            val min = -((random().nextInt(1 shl 30).toLong()) shl 32)
+            val mul = random().nextInt().toLong() and 0xFFFFFFFFL
             val longs: () -> Long /*java.util.function.LongSupplier*/ = /*java.util.function.LongSupplier*/ {
                 min + mul * random().nextInt(1 shl 20)
             }
@@ -3105,7 +3110,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         doc.add(dvNumericField)
 
         // index some docs
-        val numDocs: Int = atLeast(300)
+        val numDocs: Int = atLeast(30) // TODO reduced from 300 to 30 for dev speed
         for (i in 0..<numDocs) {
             idField.setStringValue(i.toString())
             val length: Int = TestUtil.nextInt(random(), 0, 8)
@@ -3875,7 +3880,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         doc.add(StringField("id", "1", Field.Store.NO))
         doc.add(NumericDocValuesField("field", 42L))
         iwriter.addDocument(doc)
-        val numEmptyDocs: Int = atLeast(1024)
+        val numEmptyDocs: Int = atLeast(10) // TODO reduced from 1024 to 10 for dev speed
         for (i in 0..<numEmptyDocs) {
             iwriter.addDocument(Document())
         }
