@@ -1,5 +1,10 @@
 package org.gnit.lucenekmp.tests.index
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
 import okio.IOException
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.codecs.Codec
@@ -36,7 +41,6 @@ import org.gnit.lucenekmp.index.TermsEnum
 import org.gnit.lucenekmp.index.TermsEnum.SeekStatus
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
-import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.jdkport.PrintStream
 import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.TreeSet
@@ -121,7 +125,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(hits.scoreDocs[i].doc)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv")!!
+            val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv")!!
             val docID: Int = hits.scoreDocs[i].doc
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             assertEquals(5, dv.longValue())
@@ -160,7 +164,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
 
-            val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv")!!
+            val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             assertEquals(Float.floatToRawIntBits(5.7f).toLong(), dv.longValue())
         }
@@ -197,10 +201,10 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(docID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            var dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv1")!!
+            var dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv1")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             assertEquals(5, dv.longValue())
-            dv = ireader.leaves().get(0).reader().getNumericDocValues("dv2")!!
+            dv = ireader.leaves()[0].reader().getNumericDocValues("dv2")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             assertEquals(17, dv.longValue())
         }
@@ -237,11 +241,11 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(hitDocID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            var dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv1")!!
+            var dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv1")!!
             assertEquals(hitDocID.toLong(), dv.advance(hitDocID).toLong())
             var scratch: BytesRef? = dv.binaryValue()
             assertEquals(newBytesRef(longTerm), scratch)
-            dv = ireader.leaves().get(0).reader().getBinaryDocValues("dv2")!!
+            dv = ireader.leaves()[0].reader().getBinaryDocValues("dv2")!!
             assertEquals(hitDocID.toLong(), dv.advance(hitDocID).toLong())
             scratch = dv.binaryValue()
             assertEquals(newBytesRef(text), scratch)
@@ -294,10 +298,10 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(hitDocID)
             assertEquals(id, hitDoc.get("id"))
             assert(ireader.leaves().size == 1)
-            val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv1")!!
+            val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv1")!!
             assertEquals(hitDocID.toLong(), dv.advance(hitDocID).toLong())
             val scratch: BytesRef = dv.binaryValue()!!
-            assertEquals(writtenValues.get(i), scratch)
+            assertEquals(writtenValues[i], scratch)
         }
 
         ireader.close()
@@ -332,10 +336,10 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(docID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv1")!!
+            val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv1")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             assertEquals(5, dv.longValue())
-            val dv2: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv2")!!
+            val dv2: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv2")!!
             assertEquals(docID.toLong(), dv2.advance(docID).toLong())
             assertEquals(newBytesRef("hello world"), dv2.binaryValue())
         }
@@ -373,15 +377,15 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(docID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv1")!!
+            val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv1")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             val ord: Int = dv.ordValue()
             val scratch: BytesRef? = dv.lookupOrd(ord)
             assertEquals(newBytesRef("hello hello"), scratch)
-            val dv2: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv2")!!
+            val dv2: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv2")!!
             assertEquals(docID.toLong(), dv2.advance(docID).toLong())
             assertEquals(5, dv2.longValue())
-            val dv3: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv3")!!
+            val dv3: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv3")!!
             assertEquals(docID.toLong(), dv3.advance(docID).toLong())
             assertEquals(newBytesRef("hello world"), dv3.binaryValue())
         }
@@ -421,15 +425,15 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(docID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv2")!!
+            val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv2")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             val ord: Int = dv.ordValue()
             scratch = dv.lookupOrd(ord)!!
             assertEquals(newBytesRef("hello hello"), scratch)
-            val dv2: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv3")!!
+            val dv2: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv3")!!
             assertEquals(docID.toLong(), dv2.advance(docID).toLong())
             assertEquals(5, dv2.longValue())
-            val dv3: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv1")!!
+            val dv3: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv1")!!
             assertEquals(docID.toLong(), dv3.advance(docID).toLong())
             assertEquals(newBytesRef("hello world"), dv3.binaryValue())
         }
@@ -458,7 +462,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv")!!
+        val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(1, dv.longValue())
         assertEquals(1, dv.nextDoc().toLong())
@@ -491,9 +495,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv")!!
+        val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv")!!
         val storedFields: StoredFields =
-            ireader.leaves().get(0).reader().storedFields()
+            ireader.leaves()[0].reader().storedFields()
         for (i in 0..1) {
             val doc2 = storedFields.document(i)
             val expected: Long
@@ -530,7 +534,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv")!!
+        val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(Long.MIN_VALUE, dv.longValue())
         assertEquals(1, dv.nextDoc().toLong())
@@ -560,7 +564,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: NumericDocValues = ireader.leaves().get(0).reader().getNumericDocValues("dv")!!
+        val dv: NumericDocValues = ireader.leaves()[0].reader().getNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(-8841491950446638677L, dv.longValue())
         assertEquals(1, dv.nextDoc().toLong())
@@ -601,7 +605,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(hitDocID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv")!!
+            val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv")!!
             assertEquals(hitDocID.toLong(), dv.advance(hitDocID).toLong())
             assertEquals(newBytesRef("hello world"), dv.binaryValue())
         }
@@ -633,9 +637,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv")!!
+        val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv")!!
         val storedFields: StoredFields =
-            ireader.leaves().get(0).reader().storedFields()
+            ireader.leaves()[0].reader().storedFields()
         for (i in 0..1) {
             val doc2 = storedFields.document(i)
             val expected: String
@@ -712,7 +716,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val hitDoc = storedFields.document(docID)
             assertEquals(text, hitDoc.get("fieldname"))
             assert(ireader.leaves().size == 1)
-            val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv")!!
+            val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv")!!
             assertEquals(docID.toLong(), dv.advance(docID).toLong())
             scratch = dv.lookupOrd(dv.ordValue())!!
             assertEquals(newBytesRef("hello world"), scratch)
@@ -742,10 +746,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv")!!
-        var scratch: BytesRef
+        val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
-        scratch = dv.lookupOrd(dv.ordValue())!!
+        var scratch: BytesRef = dv.lookupOrd(dv.ordValue())!!
         assertEquals("hello world 1", scratch.utf8ToString())
         assertEquals(1, dv.nextDoc().toLong())
         scratch = dv.lookupOrd(dv.ordValue())!!
@@ -778,7 +781,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv")!!
+        val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv")!!
         assertEquals(2, dv.valueCount.toLong())
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(0, dv.ordValue().toLong())
@@ -818,7 +821,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv")!!
+        val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv")!!
         assertEquals(2, dv.valueCount.toLong()) // 2 ords
         assertEquals(0, dv.nextDoc().toLong())
         var scratch: BytesRef? = dv.lookupOrd(dv.ordValue())
@@ -829,7 +832,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             scratch
         )
         val storedFields: StoredFields =
-            ireader.leaves().get(0).reader().storedFields()
+            ireader.leaves()[0].reader().storedFields()
         for (i in 0..1) {
             val doc2 = storedFields.document(i)
             val expected: String
@@ -899,7 +902,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv")!!
+        val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(newBytesRef("hello\nworld\r1"), dv.binaryValue())
 
@@ -925,7 +928,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv")!!
+        val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         val scratch: BytesRef = dv.lookupOrd(dv.ordValue())!!
         assertEquals(newBytesRef("hello world 2"), scratch)
@@ -1043,7 +1046,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: SortedDocValues = ireader.leaves().get(0).reader().getSortedDocValues("dv")!!
+        val dv: SortedDocValues = ireader.leaves()[0].reader().getSortedDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(0, dv.ordValue().toLong())
         assertEquals(1, dv.nextDoc().toLong())
@@ -1075,7 +1078,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv")!!
+        val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals("", dv.binaryValue()!!.utf8ToString())
         assertEquals(1, dv.nextDoc().toLong())
@@ -1105,7 +1108,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val ireader: IndexReader =
             maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv")!!
+        val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(newBytesRef(bytes), dv.binaryValue())
 
@@ -1132,7 +1135,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: SortedDocValues = DocValues.getSorted(ireader.leaves().get(0).reader(), "dv")
+        val dv: SortedDocValues = DocValues.getSorted(ireader.leaves()[0].reader(), "dv")
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(newBytesRef(bytes), dv.lookupOrd(dv.ordValue()))
         ireader.close()
@@ -1155,7 +1158,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val ireader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory)) // read-only=true
         assert(ireader.leaves().size == 1)
-        val dv: BinaryDocValues = ireader.leaves().get(0).reader().getBinaryDocValues("dv")!!
+        val dv: BinaryDocValues = ireader.leaves()[0].reader().getBinaryDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals("boo!", dv.binaryValue()!!.utf8ToString())
 
@@ -1409,7 +1412,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 // no stored values at all
                 for (doc in 0..<reader.maxDoc()) {
                     assertArrayEquals(
-                        kotlin.arrayOfNulls<String>(0),
+                        kotlin.arrayOfNulls(0),
                         storedFields.document(doc).getValues(storedField)
                     )
                 }
@@ -1999,14 +2002,13 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     ) {
         doTestSortedVsStoredFields(
             numDocs,
-            density,
-            {
-                val length: Int = TestUtil.nextInt(random(), minLength, maxLength)
-                val buffer = ByteArray(length)
-                random().nextBytes(buffer)
-                buffer
-            }
-        )
+            density
+        ) {
+            val length: Int = TestUtil.nextInt(random(), minLength, maxLength)
+            val buffer = ByteArray(length)
+            random().nextBytes(buffer)
+            buffer
+        }
     }
 
     @Throws(IOException::class)
@@ -2617,7 +2619,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             // create a random set of strings
             val values: MutableSet<String> = TreeSet()
             for (v in 0..<numValues) {
-                values.add(RandomPicks.randomFrom<String>(random(), uniqueValues))
+                values.add(RandomPicks.randomFrom(random(), uniqueValues))
             }
 
             // add ordered to the stored field
@@ -2626,7 +2628,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             }
 
             // add in any order to the dv field
-            val unordered: ArrayList<String> = ArrayList<String>(values)
+            val unordered: ArrayList<String> = ArrayList(values)
             unordered.shuffle(random())
             for (v in unordered) {
                 doc.add(SortedSetDocValuesField("dv", newBytesRef(v)))
@@ -2923,7 +2925,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val ir: IndexReader =
             maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assertEquals(1, ir.leaves().size.toLong())
-        val ar: LeafReader = ir.leaves().get(0).reader()
+        val ar: LeafReader = ir.leaves()[0].reader()
         val dv: NumericDocValues = ar.getNumericDocValues("dv1")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(0, dv.longValue())
@@ -2951,7 +2953,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         val ir: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assertEquals(1, ir.leaves().size.toLong())
-        val ar: LeafReader = ir.leaves().get(0).reader()
+        val ar: LeafReader = ir.leaves()[0].reader()
         val dv: NumericDocValues = ar.getNumericDocValues("dv1")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(0, dv.longValue())
@@ -2983,7 +2985,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         val ir: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assertEquals(1, ir.leaves().size.toLong())
-        val ar: LeafReader = ir.leaves().get(0).reader()
+        val ar: LeafReader = ir.leaves()[0].reader()
         val dv: NumericDocValues = ar.getNumericDocValues("dv1")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(0, dv.longValue())
@@ -3011,7 +3013,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         val ir: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assertEquals(1, ir.leaves().size.toLong())
-        val ar: LeafReader = ir.leaves().get(0).reader()
+        val ar: LeafReader = ir.leaves()[0].reader()
         val dv: BinaryDocValues = ar.getBinaryDocValues("dv1")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(newBytesRef(), dv.binaryValue())
@@ -3039,7 +3041,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         val ir: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assertEquals(1, ir.leaves().size.toLong())
-        val ar: LeafReader = ir.leaves().get(0).reader()
+        val ar: LeafReader = ir.leaves()[0].reader()
         val dv: BinaryDocValues = ar.getBinaryDocValues("dv1")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(newBytesRef(), dv.binaryValue())
@@ -3071,7 +3073,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         val ir: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assertEquals(1, ir.leaves().size.toLong())
-        val ar: LeafReader = ir.leaves().get(0).reader()
+        val ar: LeafReader = ir.leaves()[0].reader()
         val dv: BinaryDocValues = ar.getBinaryDocValues("dv1")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(newBytesRef(), dv.binaryValue())
@@ -3084,7 +3086,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     /** Tests dv against stored fields with threads (binary/numeric/sorted, no missing)  */
     @Throws(Exception::class)
-    fun testThreads() {
+    fun testThreads() = runTest {
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
@@ -3132,46 +3134,39 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // compare
         val ir: DirectoryReader = maybeWrapWithMergingReader(DirectoryReader.open(dir))
         val numThreads: Int = TestUtil.nextInt(random(), 2, 7)
-        val threads: Array<java.lang.Thread> = kotlin.arrayOfNulls<java.lang.Thread>(numThreads)
-        val startingGun: CountDownLatch =
-            CountDownLatch(1)
-
-        for (i in threads.indices) {
-            threads[i] =
-                object : java.lang.Thread() {
-                    override fun run() {
-                        try {
-                            startingGun.await()
-                            for (context in ir.leaves()) {
-                                val r: LeafReader = context.reader()
-                                val storedFields: StoredFields = r.storedFields()
-                                val binaries: BinaryDocValues = r.getBinaryDocValues("dvBin")!!
-                                val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
-                                val numerics: NumericDocValues = r.getNumericDocValues("dvNum")!!
-                                for (j in 0..<r.maxDoc()) {
-                                    val binaryValue: BytesRef = storedFields.document(j).getBinaryValue("storedBin")!!
-                                    assertEquals(j.toLong(), binaries.nextDoc().toLong())
-                                    var scratch: BytesRef = binaries.binaryValue()!!
-                                    assertEquals(binaryValue, scratch)
-                                    assertEquals(j.toLong(), sorted.nextDoc().toLong())
-                                    scratch = sorted.lookupOrd(sorted.ordValue())!!
-                                    assertEquals(binaryValue, scratch)
-                                    val expected: String = storedFields.document(j).get("storedNum")!!
-                                    assertEquals(j.toLong(), numerics.nextDoc().toLong())
-                                    assertEquals(expected.toLong(), numerics.longValue())
-                                }
-                            }
-                            TestUtil.checkReader(ir)
-                        } catch (e: Exception) {
-                            throw RuntimeException(e)
+        val startSignal = CompletableDeferred<Unit>()
+        val jobs: Array<Job> = Array(numThreads) {
+            launch(Dispatchers.Default) {
+                startSignal.await()
+                try {
+                    for (context in ir.leaves()) {
+                        val r: LeafReader = context.reader()
+                        val storedFields: StoredFields = r.storedFields()
+                        val binaries: BinaryDocValues = r.getBinaryDocValues("dvBin")!!
+                        val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
+                        val numerics: NumericDocValues = r.getNumericDocValues("dvNum")!!
+                        for (j in 0..<r.maxDoc()) {
+                            val binaryValue: BytesRef = storedFields.document(j).getBinaryValue("storedBin")!!
+                            assertEquals(j.toLong(), binaries.nextDoc().toLong())
+                            var scratch: BytesRef = binaries.binaryValue()!!
+                            assertEquals(binaryValue, scratch)
+                            assertEquals(j.toLong(), sorted.nextDoc().toLong())
+                            scratch = sorted.lookupOrd(sorted.ordValue())!!
+                            assertEquals(binaryValue, scratch)
+                            val expected: String = storedFields.document(j).get("storedNum")!!
+                            assertEquals(j.toLong(), numerics.nextDoc().toLong())
+                            assertEquals(expected.toLong(), numerics.longValue())
                         }
                     }
+                    TestUtil.checkReader(ir)
+                } catch (e: Exception) {
+                    throw RuntimeException(e)
                 }
-            threads[i].start()
+            }
         }
-        startingGun.countDown()
-        for (t in threads) {
-            t.join()
+        startSignal.complete(Unit)
+        for (job in jobs) {
+            job.join()
         }
         ir.close()
         dir.close()
@@ -3180,7 +3175,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     /** Tests dv against stored fields with threads (all types + missing)  */
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testThreads2() {
+    fun testThreads2() = runTest {
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
@@ -3260,81 +3255,73 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             2,
             7
         )
-        val threads: Array<java.lang.Thread> = kotlin.arrayOfNulls<java.lang.Thread>(numThreads)
-        val startingGun: CountDownLatch =
-            CountDownLatch(1)
-
-        for (i in threads.indices) {
-            threads[i] =
-                object : java.lang.Thread() {
-                    override fun run() {
-                        try {
-                            startingGun.await()
-                            for (context in ir.leaves()) {
-                                val r: LeafReader = context.reader()
-                                val storedFields: StoredFields =
-                                    r.storedFields()
-                                val binaries: BinaryDocValues? = r.getBinaryDocValues("dvBin")
-                                val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
-                                val numerics: NumericDocValues? = r.getNumericDocValues("dvNum")
-                                val sortedSet: SortedSetDocValues = r.getSortedSetDocValues("dvSortedSet")!!
-                                val sortedNumeric: SortedNumericDocValues = r.getSortedNumericDocValues("dvSortedNumeric")!!
-                                for (j in 0..<r.maxDoc()) {
-                                    val binaryValue: BytesRef? = storedFields.document(j).getBinaryValue("storedBin")
-                                    if (binaryValue != null) {
-                                        if (binaries != null) {
-                                            assertEquals(j.toLong(), binaries.nextDoc().toLong())
-                                            var scratch: BytesRef? = binaries.binaryValue()
-                                            assertEquals(binaryValue, scratch)
-                                            assertEquals(j.toLong(), sorted.nextDoc().toLong())
-                                            scratch = sorted.lookupOrd(sorted.ordValue())
-                                            assertEquals(binaryValue, scratch)
-                                        }
-                                    }
-
-                                    val number: String? = storedFields.document(j).get("storedNum")
-                                    if (number != null) {
-                                        if (numerics != null) {
-                                            assertEquals(j.toLong(), numerics.advance(j).toLong())
-                                            assertEquals(number.toLong(), numerics.longValue())
-                                        }
-                                    }
-
-                                    val values: Array<String?> = storedFields.document(j).getValues("storedSortedSet")
-                                    if (values.isNotEmpty()) {
-                                        assertNotNull(sortedSet)
-                                        assertEquals(j.toLong(), sortedSet.nextDoc().toLong())
-                                        assertEquals(values.size.toLong(), sortedSet.docValueCount().toLong())
-                                        for (s in values) {
-                                            val ord: Long = sortedSet.nextOrd()
-                                            val value: BytesRef = sortedSet.lookupOrd(ord)!!
-                                            assertEquals(s, value.utf8ToString())
-                                        }
-                                    }
-
-                                    val numValues: Array<String?> = storedFields.document(j).getValues("storedSortedNumeric")
-                                    if (numValues.isNotEmpty()) {
-                                        assertNotNull(sortedNumeric)
-                                        assertEquals(j.toLong(), sortedNumeric.nextDoc().toLong())
-                                        assertEquals(numValues.size.toLong(), sortedNumeric.docValueCount().toLong())
-                                        for (numValue in numValues) {
-                                            val v: Long = sortedNumeric.nextValue()
-                                            assertEquals(numValue, v.toString())
-                                        }
-                                    }
+        val startSignal = CompletableDeferred<Unit>()
+        val jobs: Array<Job> = Array(numThreads) {
+            launch(Dispatchers.Default) {
+                startSignal.await()
+                try {
+                    for (context in ir.leaves()) {
+                        val r: LeafReader = context.reader()
+                        val storedFields: StoredFields =
+                            r.storedFields()
+                        val binaries: BinaryDocValues? = r.getBinaryDocValues("dvBin")
+                        val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
+                        val numerics: NumericDocValues? = r.getNumericDocValues("dvNum")
+                        val sortedSet: SortedSetDocValues = r.getSortedSetDocValues("dvSortedSet")!!
+                        val sortedNumeric: SortedNumericDocValues = r.getSortedNumericDocValues("dvSortedNumeric")!!
+                        for (j in 0..<r.maxDoc()) {
+                            val binaryValue: BytesRef? = storedFields.document(j).getBinaryValue("storedBin")
+                            if (binaryValue != null) {
+                                if (binaries != null) {
+                                    assertEquals(j.toLong(), binaries.nextDoc().toLong())
+                                    var scratch: BytesRef? = binaries.binaryValue()
+                                    assertEquals(binaryValue, scratch)
+                                    assertEquals(j.toLong(), sorted.nextDoc().toLong())
+                                    scratch = sorted.lookupOrd(sorted.ordValue())
+                                    assertEquals(binaryValue, scratch)
                                 }
                             }
-                            TestUtil.checkReader(ir)
-                        } catch (e: Exception) {
-                            throw RuntimeException(e)
+
+                            val number: String? = storedFields.document(j).get("storedNum")
+                            if (number != null) {
+                                if (numerics != null) {
+                                    assertEquals(j.toLong(), numerics.advance(j).toLong())
+                                    assertEquals(number.toLong(), numerics.longValue())
+                                }
+                            }
+
+                            val values: Array<String?> = storedFields.document(j).getValues("storedSortedSet")
+                            if (values.isNotEmpty()) {
+                                assertNotNull(sortedSet)
+                                assertEquals(j.toLong(), sortedSet.nextDoc().toLong())
+                                assertEquals(values.size.toLong(), sortedSet.docValueCount().toLong())
+                                for (s in values) {
+                                    val ord: Long = sortedSet.nextOrd()
+                                    val value: BytesRef = sortedSet.lookupOrd(ord)!!
+                                    assertEquals(s, value.utf8ToString())
+                                }
+                            }
+                            val numValues: Array<String?> = storedFields.document(j).getValues("storedSortedNumeric")
+                            if (numValues.isNotEmpty()) {
+                                assertNotNull(sortedNumeric)
+                                assertEquals(j.toLong(), sortedNumeric.nextDoc().toLong())
+                                assertEquals(numValues.size.toLong(), sortedNumeric.docValueCount().toLong())
+                                for (numValue in numValues) {
+                                    val v: Long = sortedNumeric.nextValue()
+                                    assertEquals(numValue, v.toString())
+                                }
+                            }
                         }
                     }
+                    TestUtil.checkReader(ir)
+                } catch (e: Exception) {
+                    throw RuntimeException(e)
                 }
-            threads[i].start()
+            }
         }
-        startingGun.countDown()
-        for (t in threads) {
-            t.join()
+        startSignal.complete(Unit)
+        for (job in jobs) {
+            job.join()
         }
         ir.close()
         dir.close()
@@ -3342,7 +3329,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
-    fun testThreads3() {
+    fun testThreads3() = runTest {
         val dir: Directory = newFSDirectory(createTempDir())
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
@@ -3376,52 +3363,43 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         for (i in 0..9) {
             val r: DirectoryReader =
                 maybeWrapWithMergingReader(DirectoryReader.open(dir))
-            val startingGun: CountDownLatch =
-                CountDownLatch(1)
-            val threads: Array<java.lang.Thread> = kotlin.arrayOfNulls<java.lang.Thread>(
-                TestUtil.nextInt(
-                    random(),
-                    4,
-                    10
-                )
+            val numThreads: Int = TestUtil.nextInt(
+                random(),
+                4,
+                10
             )
-            for (tid in threads.indices) {
-                threads[tid] =
-                    object : java.lang.Thread() {
-                        override fun run() {
-                            try {
-                                val bos: ByteArrayOutputStream =
-                                    ByteArrayOutputStream(1024)
-                                val infoStream: PrintStream = PrintStream(
-                                    bos,
-                                    false,
-                                    StandardCharsets.UTF_8
+            val startSignal = CompletableDeferred<Unit>()
+            val jobs: Array<Job> = Array(numThreads) {
+                launch(Dispatchers.Default) {
+                    try {
+                        val bos = ByteArrayOutputStream(1024)
+                        val infoStream = PrintStream(
+                            bos,
+                            false,
+                            StandardCharsets.UTF_8
+                        )
+                        startSignal.await()
+                        for (leaf in r.leaves()) {
+                            val status: CheckIndex.Status.DocValuesStatus =
+                                CheckIndex.testDocValues(
+                                    leaf.reader() as CodecReader,
+                                    infoStream,
+                                    true
                                 )
-                                startingGun.await()
-                                for (leaf in r.leaves()) {
-                                    val status: CheckIndex.Status.DocValuesStatus =
-                                        CheckIndex.testDocValues(
-                                            leaf.reader() as CodecReader,
-                                            infoStream,
-                                            true
-                                        )
-                                    if (status.error != null) {
-                                        throw status.error
-                                    }
-                                }
-                            } catch (e: Throwable) {
-                                throw RuntimeException(e)
+                            val error: Throwable? = status.error
+                            if (error != null) {
+                                throw error
                             }
                         }
+                    } catch (e: Throwable) {
+                        throw RuntimeException(e)
                     }
+                }
             }
-            for (thread in threads) {
-                thread.start()
-            }
-            startingGun.countDown()
-            for (thread in threads) {
-                thread.join()
-            }
+            startSignal.complete(Unit)
+            for (job in jobs) {
+                job.join()
+                            }
             r.close()
         }
 
@@ -3475,7 +3453,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val reader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assert(reader.leaves().size == 1)
-        val dv: SortedNumericDocValues = reader.leaves().get(0).reader().getSortedNumericDocValues("dv")!!
+        val dv: SortedNumericDocValues = reader.leaves()[0].reader().getSortedNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(1, dv.docValueCount().toLong())
         assertEquals(5, dv.nextValue())
@@ -3497,7 +3475,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val reader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assert(reader.leaves().size == 1)
-        val dv: SortedNumericDocValues = reader.leaves().get(0).reader().getSortedNumericDocValues("dv")!!
+        val dv: SortedNumericDocValues = reader.leaves()[0].reader().getSortedNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(1, dv.docValueCount().toLong())
         assertEquals(5, dv.nextValue())
@@ -3549,7 +3527,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val reader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assert(reader.leaves().size == 1)
-        val dv: SortedNumericDocValues = reader.leaves().get(0).reader().getSortedNumericDocValues("dv")!!
+        val dv: SortedNumericDocValues = reader.leaves()[0].reader().getSortedNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(2, dv.docValueCount().toLong())
         assertEquals(-5, dv.nextValue())
@@ -3572,7 +3550,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val reader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assert(reader.leaves().size == 1)
-        val dv: SortedNumericDocValues = reader.leaves().get(0).reader().getSortedNumericDocValues("dv")!!
+        val dv: SortedNumericDocValues = reader.leaves()[0].reader().getSortedNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(2, dv.docValueCount().toLong())
         assertEquals(11, dv.nextValue())
@@ -3596,7 +3574,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val reader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assert(reader.leaves().size == 1)
-        val dv: SortedNumericDocValues = reader.leaves().get(0).reader().getSortedNumericDocValues("dv")!!
+        val dv: SortedNumericDocValues = reader.leaves()[0].reader().getSortedNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(2, dv.docValueCount().toLong())
         assertEquals(-5, dv.nextValue())
@@ -3626,7 +3604,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // Now search the index:
         val reader: IndexReader = maybeWrapWithMergingReader(DirectoryReader.open(directory))
         assert(reader.leaves().size == 1)
-        val dv: SortedNumericDocValues = reader.leaves().get(0).reader().getSortedNumericDocValues("dv")!!
+        val dv: SortedNumericDocValues = reader.leaves()[0].reader().getSortedNumericDocValues("dv")!!
         assertEquals(0, dv.nextDoc().toLong())
         assertEquals(1, dv.docValueCount().toLong())
         assertEquals(11, dv.nextValue())
@@ -3763,7 +3741,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         term2.copyBytes(enum2.next()!!)
         val seekTerm = BytesRefBuilder()
-        seekTerm.append(terms.get(0))
+        seekTerm.append(terms[0])
         seekTerm.append(0.toByte())
         enum1.seekCeil(seekTerm.get())
         term1.copyBytes(enum1.term()!!)
@@ -3778,7 +3756,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         term2 = BytesRefBuilder()
 
         term2.copyBytes(enum2.next()!!)
-        enum1.seekCeil(terms.get(1))
+        enum1.seekCeil(terms[1])
         term1.copyBytes(enum1.term()!!)
 
         assertEquals(term1.get(), enum1.term())
@@ -3791,7 +3769,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         term2 = BytesRefBuilder()
 
         term2.copyBytes(enum2.next()!!)
-        val found: Boolean = enum1.seekExact(terms.get(1))
+        val found: Boolean = enum1.seekExact(terms[1])
         assertTrue(found)
         term1.copyBytes(enum1.term()!!)
 
