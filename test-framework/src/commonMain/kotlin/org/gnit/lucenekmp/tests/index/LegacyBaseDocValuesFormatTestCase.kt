@@ -994,7 +994,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         assertEquals("beer", termsEnum.term()!!.utf8ToString())
         assertEquals(0, termsEnum.ord())
         assertTrue(termsEnum.seekExact(newBytesRef("hello")))
-        assertEquals(Codec.default.toString(), "hello", termsEnum.term()!!.utf8ToString())
+        assertEquals("hello", termsEnum.term()!!.utf8ToString(), Codec.default.toString())
         assertEquals(1, termsEnum.ord())
         assertTrue(termsEnum.seekExact(newBytesRef("world")))
         assertEquals("world", termsEnum.term()!!.utf8ToString())
@@ -3272,8 +3272,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                         val binaries: BinaryDocValues? = r.getBinaryDocValues("dvBin")
                         val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
                         val numerics: NumericDocValues? = r.getNumericDocValues("dvNum")
-                        val sortedSet: SortedSetDocValues = r.getSortedSetDocValues("dvSortedSet")!!
-                        val sortedNumeric: SortedNumericDocValues = r.getSortedNumericDocValues("dvSortedNumeric")!!
+                        val sortedSet: SortedSetDocValues? = r.getSortedSetDocValues("dvSortedSet")
+                        val sortedNumeric: SortedNumericDocValues? = r.getSortedNumericDocValues("dvSortedNumeric")
                         for (j in 0..<r.maxDoc()) {
                             val binaryValue: BytesRef? = storedFields.document(j).getBinaryValue("storedBin")
                             if (binaryValue != null) {

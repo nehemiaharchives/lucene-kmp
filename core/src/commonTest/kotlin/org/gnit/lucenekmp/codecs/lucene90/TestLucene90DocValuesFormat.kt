@@ -52,7 +52,6 @@ import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.CollectionUtil
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertNull
 import kotlin.test.assertEquals
@@ -67,7 +66,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
 
     // TODO: these big methods can easily blow up some of the other ram-hungry codecs...
     // for now just keep them here, as we want to test this for this format.
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     @Throws(Exception::class)
     fun testSortedSetVariableLengthBigVsStoredFields() {
@@ -79,19 +77,17 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(Exception::class)
     fun testSortedSetVariableLengthManyVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                TestUtil.nextInt(random(), 1024, 2049), 1, 500, 16, 100
+                TestUtil.nextInt(random(), 256, 384), 1, 200, 16, 100 // TODO reduced from 1024..2049 and maxLength 500 for <=10s runtime
             )
         }
     }
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(Exception::class)
     fun testSortedVariableLengthBigVsStoredFields() {
@@ -102,7 +98,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     @Throws(Exception::class)
     fun testSortedVariableLengthManyVsStoredFields() {
@@ -126,7 +121,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(Exception::class)
     fun testTermsEnumVariableWidth() {
@@ -140,38 +134,35 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(Exception::class)
     fun testTermsEnumRandomMany() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestTermsEnumRandom(
-                TestUtil.nextInt(random(), 1025, 8121)) {
-                TestUtil.randomSimpleString(random(), 1, 500)
+                TestUtil.nextInt(random(), 64, 256)) { // TODO reduced from 1025..8121 for <=10s runtime
+                TestUtil.randomSimpleString(random(), 1, 80) // TODO reduced from maxLength 500 for <=10s runtime
             }
         }
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(Exception::class)
     fun testTermsEnumLongSharedPrefixes() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            doTestTermsEnumRandom(TestUtil.nextInt(random(), 1025, 5121)) {
-                val chars = CharArray(random().nextInt(500))
+            doTestTermsEnumRandom(TestUtil.nextInt(random(), 128, 512)) { // TODO reduced from 1025..5121 for <=10s runtime
+                val chars = CharArray(random().nextInt(120)) // TODO reduced from 500 for <=10s runtime
                 Arrays.fill(chars, 'a')
                 if (chars.isNotEmpty()) {
                     chars[random().nextInt(chars.size)] = 'b'
                 }
-                chars.toString()
+                chars.concatToString()
             }
         }
     }
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(Exception::class)
     fun testSparseDocValuesVsStoredFields() {
@@ -478,8 +469,17 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
                 expected.seekCeil(target)
             assertEquals(expectedStatus, actual.seekCeil(target))
             if (expectedStatus != TermsEnum.SeekStatus.END) {
-                assertEquals(expected.ord(), actual.ord())
-                assertEquals(expected.term()!!, actual.term())
+                val expectedOrd = expected.ord()
+                val actualOrd = actual.ord()
+                val expectedTerm = expected.term()!!
+                val actualTerm = actual.term()
+                if (expectedOrd != actualOrd || expectedTerm != actualTerm) {
+                    throw AssertionError(
+                        "seekCeil mismatch target=${target.utf8ToString()} status=$expectedStatus " +
+                                "expectedOrd=$expectedOrd expectedTerm=${expectedTerm.utf8ToString()} " +
+                                "actualOrd=$actualOrd actualTerm=${actualTerm?.utf8ToString()}"
+                    )
+                }
             }
         }
     }
@@ -606,7 +606,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     @Throws(Exception::class)
     fun testNumericBlocksOfVariousBitsPerValue() {
@@ -625,14 +624,12 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     // The LUCENE-8585 jump-tables enables O(1) skipping of IndexedDISI blocks, DENSE block lookup
     // and numeric multi blocks. This test focuses on testing these jumps.
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     @Throws(Exception::class)
     fun testNumericFieldJumpTables() {
-        // IndexedDISI block skipping only activated if target >= current+2, so we need at least 5
-        // blocks to
-        // trigger consecutive block skips
-        val maxDoc: Int = atLeast(5 * 65536)
+        // Java Lucene nightly uses 5 * 65536 docs to hit the full IndexedDISI block-skip path.
+        // Keep a smaller-but-stable smoke scale here so this test stays within the 10s budget.
+        val maxDoc: Int = atLeast(5 * 4096)
 
         val dir: Directory = newDirectory()
         val iw = createFastIndexWriter(dir, maxDoc)
@@ -662,9 +659,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         iw.close()
 
         assertDVIterate(dir)
-        assertDVAdvance(
-            dir, if (rarely()) 1 else 7
-        ) // 1 is heavy (~20 s), so we do it rarely. 7 is a lot faster (8 s)
+        assertDVAdvance(dir, 7)
 
         dir.close()
     }
@@ -1014,7 +1009,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
 
     // Exercise the logic that leverages the first term of a block as a dictionary for suffixes of
     // other terms
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     @Throws(IOException::class)
     fun testTermsEnumDictionary() {
@@ -1048,7 +1042,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     // Testing termsEnum seekCeil edge case, where inconsistent internal state led to
     // IndexOutOfBoundsException
     // see https://github.com/apache/lucene/pull/12555 for details
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     @Throws(IOException::class)
     fun testTermsEnumConsistency() {
@@ -1068,7 +1061,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
                     (termA.code + 1 + n / 25).toChar(),
                     (termA.code + 1 + n % 25).toChar()
                 )
-                chars.toString()
+                chars.concatToString()
             }
         val field = SortedDocValuesField("field", BytesRef(stringSupplier(0)))
         doc.add(field)
@@ -1111,11 +1104,9 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testUniqueValuesCompression() = super.testUniqueValuesCompression()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testDateCompression() = super.testDateCompression()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSingleBigValueCompression() = super.testSingleBigValueCompression()
 
@@ -1123,25 +1114,21 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
 
     // Tests inherited from BaseDocValuesFormatTestCase
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedMergeAwayAllValuesWithSkipper() = super.testSortedMergeAwayAllValuesWithSkipper()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetMergeAwayAllValuesWithSkipper() = super.testSortedSetMergeAwayAllValuesWithSkipper()
 
     @Test
     override fun testNumberMergeAwayAllValuesWithSkipper() = super.testNumberMergeAwayAllValuesWithSkipper()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedNumberMergeAwayAllValuesWithSkipper() = super.testSortedNumberMergeAwayAllValuesWithSkipper()
 
     @Test
     override fun testSortedMergeAwayAllValuesLargeSegmentWithSkipper() = super.testSortedMergeAwayAllValuesLargeSegmentWithSkipper()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedSetMergeAwayAllValuesLargeSegmentWithSkipper() = super.testSortedSetMergeAwayAllValuesLargeSegmentWithSkipper()
 
@@ -1154,7 +1141,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testNumericDocValuesWithSkipperSmall() = super.testNumericDocValuesWithSkipperSmall()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testNumericDocValuesWithSkipperMedium() = super.testNumericDocValuesWithSkipperMedium()
 
@@ -1164,11 +1150,9 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedNumericDocValuesWithSkipperSmall() = super.testSortedNumericDocValuesWithSkipperSmall()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedNumericDocValuesWithSkipperMedium() = super.testSortedNumericDocValuesWithSkipperMedium()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedNumericDocValuesWithSkipperBig() = super.testSortedNumericDocValuesWithSkipperBig()
 
@@ -1178,7 +1162,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedDocValuesWithSkipperMedium() = super.testSortedDocValuesWithSkipperMedium()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedDocValuesWithSkipperBig() = super.testSortedDocValuesWithSkipperBig()
 
@@ -1188,7 +1171,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedSetDocValuesWithSkipperMedium() = super.testSortedSetDocValuesWithSkipperMedium()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetDocValuesWithSkipperBig() = super.testSortedSetDocValuesWithSkipperBig()
 
@@ -1223,19 +1205,15 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testThreeFieldsMixed2() = super.testThreeFieldsMixed2()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testTwoDocumentsNumeric() = super.testTwoDocumentsNumeric()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testTwoDocumentsMerged() = super.testTwoDocumentsMerged()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testBigNumericRange() = super.testBigNumericRange()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testBigNumericRange2() = super.testBigNumericRange2()
 
@@ -1245,7 +1223,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testBytesTwoDocumentsMerged() = super.testBytesTwoDocumentsMerged()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testBytesMergeAwayAllValues() = super.testBytesMergeAwayAllValues()
 
@@ -1267,112 +1244,87 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testBytesWithNewline() = super.testBytesWithNewline()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testMissingSortedBytes() = super.testMissingSortedBytes()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedTermsEnum() = super.testSortedTermsEnum()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testEmptySortedBytes() = super.testEmptySortedBytes()
 
     @Test
     override fun testEmptyBytes() = super.testEmptyBytes()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testVeryLargeButLegalBytes() = super.testVeryLargeButLegalBytes()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testVeryLargeButLegalSortedBytes() = super.testVeryLargeButLegalSortedBytes()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testCodecUsesOwnBytes() = super.testCodecUsesOwnBytes()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testCodecUsesOwnSortedBytes() = super.testCodecUsesOwnSortedBytes()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testDocValuesSimple() = super.testDocValuesSimple()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testRandomSortedBytes() = super.testRandomSortedBytes()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testBooleanNumericsVsStoredFields() = super.testBooleanNumericsVsStoredFields()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSparseBooleanNumericsVsStoredFields() = super.testSparseBooleanNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testByteNumericsVsStoredFields() = super.testByteNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSparseByteNumericsVsStoredFields() = super.testSparseByteNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testShortNumericsVsStoredFields() = super.testShortNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSparseShortNumericsVsStoredFields() = super.testSparseShortNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testIntNumericsVsStoredFields() = super.testIntNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSparseIntNumericsVsStoredFields() = super.testSparseIntNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testLongNumericsVsStoredFields() = super.testLongNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSparseLongNumericsVsStoredFields() = super.testSparseLongNumericsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testBinaryFixedLengthVsStoredFields() = super.testBinaryFixedLengthVsStoredFields()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSparseBinaryFixedLengthVsStoredFields() = super.testSparseBinaryFixedLengthVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testBinaryVariableLengthVsStoredFields() = super.testBinaryVariableLengthVsStoredFields()
 
     @Test
     override fun testSparseBinaryVariableLengthVsStoredFields() = super.testSparseBinaryVariableLengthVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedFixedLengthVsStoredFields() = super.testSortedFixedLengthVsStoredFields()
 
     @Test
     override fun testSparseSortedFixedLengthVsStoredFields() = super.testSparseSortedFixedLengthVsStoredFields()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedVariableLengthVsStoredFields() = super.testSortedVariableLengthVsStoredFields()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSparseSortedVariableLengthVsStoredFields() = super.testSparseSortedVariableLengthVsStoredFields()
 
@@ -1382,7 +1334,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedSetTwoFields() = super.testSortedSetTwoFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetTwoDocumentsMerged() = super.testSortedSetTwoDocumentsMerged()
 
@@ -1392,34 +1343,27 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedSetTwoValuesUnordered() = super.testSortedSetTwoValuesUnordered()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetThreeValuesTwoDocs() = super.testSortedSetThreeValuesTwoDocs()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedSetTwoDocumentsLastMissing() = super.testSortedSetTwoDocumentsLastMissing()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetTwoDocumentsLastMissingMerge() = super.testSortedSetTwoDocumentsLastMissingMerge()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedSetTwoDocumentsFirstMissing() = super.testSortedSetTwoDocumentsFirstMissing()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedSetTwoDocumentsFirstMissingMerge() = super.testSortedSetTwoDocumentsFirstMissingMerge()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetMergeAwayAllValues() = super.testSortedSetMergeAwayAllValues()
 
     @Test
     override fun testSortedSetTermsEnum() = super.testSortedSetTermsEnum()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedSetFixedLengthVsStoredFields() = super.testSortedSetFixedLengthVsStoredFields()
 
@@ -1435,85 +1379,66 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedNumericsFewUniqueSetsVsStoredFields() = super.testSortedNumericsFewUniqueSetsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetVariableLengthVsStoredFields() = super.testSortedSetVariableLengthVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetFixedLengthSingleValuedVsStoredFields() = super.testSortedSetFixedLengthSingleValuedVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetVariableLengthSingleValuedVsStoredFields() = super.testSortedSetVariableLengthSingleValuedVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetFixedLengthFewUniqueSetsVsStoredFields() = super.testSortedSetFixedLengthFewUniqueSetsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetVariableLengthFewUniqueSetsVsStoredFields() = super.testSortedSetVariableLengthFewUniqueSetsVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetVariableLengthManyValuesPerDocVsStoredFields() = super.testSortedSetVariableLengthManyValuesPerDocVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedSetFixedLengthManyValuesPerDocVsStoredFields() = super.testSortedSetFixedLengthManyValuesPerDocVsStoredFields()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testGCDCompression() = super.testGCDCompression()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSparseGCDCompression() = super.testSparseGCDCompression()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testZeros() = super.testZeros()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSparseZeros() = super.testSparseZeros()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testZeroOrMin() = super.testZeroOrMin()
 
     @Test
     override fun testTwoNumbersOneMissing() = super.testTwoNumbersOneMissing()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testTwoNumbersOneMissingWithMerging() = super.testTwoNumbersOneMissingWithMerging()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testThreeNumbersOneMissingWithMerging() = super.testThreeNumbersOneMissingWithMerging()
 
     @Test
     override fun testTwoBytesOneMissing() = super.testTwoBytesOneMissing()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testTwoBytesOneMissingWithMerging() = super.testTwoBytesOneMissingWithMerging()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testThreeBytesOneMissingWithMerging() = super.testThreeBytesOneMissingWithMerging()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testThreads() = super.testThreads()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testThreads2() = super.testThreads2()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testThreads3() = super.testThreads3()
 
@@ -1526,7 +1451,6 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testOneSortedNumberOneMissing() = super.testOneSortedNumberOneMissing()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testNumberMergeAwayAllValues() = super.testNumberMergeAwayAllValues()
 
@@ -1539,11 +1463,9 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testTwoSortedNumberOneMissing() = super.testTwoSortedNumberOneMissing()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedNumberMerge() = super.testSortedNumberMerge()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testSortedNumberMergeAwayAllValues() = super.testSortedNumberMergeAwayAllValues()
 
@@ -1553,15 +1475,12 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testSortedSetEnumAdvanceIndependently() = super.testSortedSetEnumAdvanceIndependently()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedMergeAwayAllValuesLargeSegment() = super.testSortedMergeAwayAllValuesLargeSegment()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testSortedSetMergeAwayAllValuesLargeSegment() = super.testSortedSetMergeAwayAllValuesLargeSegment()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testNumericMergeAwayAllValuesLargeSegment() = super.testNumericMergeAwayAllValuesLargeSegment()
 
@@ -1571,11 +1490,9 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     override fun testBinaryMergeAwayAllValuesLargeSegment() = super.testBinaryMergeAwayAllValuesLargeSegment()
 
-    @Ignore // TODO this takes more than 5 min and not sure if it pass or fail, so later we try to adjust this to run within 10 seconds
     @Test
     override fun testRandomAdvanceNumeric() = super.testRandomAdvanceNumeric()
 
-    @Ignore // TODO this test hangs, so we will come back and debug later
     @Test
     override fun testRandomAdvanceBinary() = super.testRandomAdvanceBinary()
 

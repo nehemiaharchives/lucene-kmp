@@ -1230,14 +1230,49 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             while (true) {
                 val cmp = term.compareTo(text)
                 if (cmp == 0) {
+                    normalizeOrdToCurrentTerm()
                     return FOUND
                 } else if (cmp > 0) {
+                    normalizeOrdToCurrentTerm()
                     return NOT_FOUND
                 }
                 if (next() == null) {
                     return END
                 }
             }
+        }
+
+        /**
+         * Defensive consistency check: some seek paths can leave `ord` stale while `term` is
+         * already positioned correctly. Re-align `ord` to the current term value.
+         */
+        @Throws(IOException::class)
+        private fun normalizeOrdToCurrentTerm() {
+            val currentTerm = BytesRef.deepCopyOf(term)
+            val currentOrd = ord
+            if (currentOrd in 0..<entry.termsDictSize) {
+                seekExact(currentOrd)
+                if (term == currentTerm) {
+                    return
+                }
+            }
+
+            var lo = 0L
+            var hi = entry.termsDictSize - 1
+            while (lo <= hi) {
+                val mid = (lo + hi) ushr 1
+                seekExact(mid)
+                val cmp = term.compareTo(currentTerm)
+                if (cmp < 0) {
+                    lo = mid + 1
+                } else if (cmp > 0) {
+                    hi = mid - 1
+                } else {
+                    return
+                }
+            }
+
+            throw IllegalStateException("Current term is not in terms dictionary: ${currentTerm.utf8ToString()}")
         }
 
         @Throws(IOException::class)
