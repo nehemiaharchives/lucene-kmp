@@ -3148,7 +3148,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                         val r: LeafReader = context.reader()
                         val storedFields: StoredFields = r.storedFields()
                         val binaries: BinaryDocValues = r.getBinaryDocValues("dvBin")!!
-                        val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
+                        val sorted: SortedDocValues? = r.getSortedDocValues("dvSorted")
                         val numerics: NumericDocValues = r.getNumericDocValues("dvNum")!!
                         for (j in 0..<r.maxDoc()) {
                             val binaryValue: BytesRef = storedFields.document(j).getBinaryValue("storedBin")!!
@@ -3278,6 +3278,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                             val binaryValue: BytesRef? = storedFields.document(j).getBinaryValue("storedBin")
                             if (binaryValue != null) {
                                 if (binaries != null) {
+                                    assertNotNull(sorted)
                                     assertEquals(j.toLong(), binaries.nextDoc().toLong())
                                     var scratch: BytesRef? = binaries.binaryValue()
                                     assertEquals(binaryValue, scratch)
