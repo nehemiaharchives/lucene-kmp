@@ -398,38 +398,38 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
                 @Throws(IOException::class)
                 override fun docValuesWrapper(leafReader: LeafReader): DocValuesWrapper {
-                    val numericDocValues: NumericDocValues =
-                        leafReader.getNumericDocValues("test")!!
+                    val numericDocValues: NumericDocValues? =
+                        leafReader.getNumericDocValues("test")
                     return object : DocValuesWrapper {
                         @Throws(IOException::class)
                         override fun advance(target: Int): Int {
-                            return numericDocValues.advance(target)
+                            return numericDocValues!!.advance(target)
                         }
 
                         @Throws(IOException::class)
                         override fun advanceExact(target: Int): Boolean {
-                            return numericDocValues.advanceExact(target)
+                            return numericDocValues!!.advanceExact(target)
                         }
 
                         @Throws(IOException::class)
                         override fun maxValue(): Long {
-                            return numericDocValues.longValue()
+                            return numericDocValues!!.longValue()
                         }
 
                         @Throws(IOException::class)
                         override fun minValue(): Long {
-                            return numericDocValues.longValue()
+                            return numericDocValues!!.longValue()
                         }
 
                         override fun docID(): Int {
-                            return numericDocValues.docID()
+                            return numericDocValues!!.docID()
                         }
                     }
                 }
 
                 @Throws(IOException::class)
-                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper {
-                    return leafReader.getDocValuesSkipper("test")!!
+                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper? {
+                    return leafReader.getDocValuesSkipper("test")
                 }
             })
     }
@@ -469,15 +469,15 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
                 @Throws(IOException::class)
                 override fun docValuesWrapper(leafReader: LeafReader): DocValuesWrapper {
-                    val sortedNumericDocValues: SortedNumericDocValues =
-                        leafReader.getSortedNumericDocValues("test")!!
+                    val sortedNumericDocValues: SortedNumericDocValues? =
+                        leafReader.getSortedNumericDocValues("test")
                     return object : DocValuesWrapper {
                         var max: Long = 0
                         var min: Long = 0
 
                         @Throws(IOException::class)
                         override fun advance(target: Int): Int {
-                            val doc: Int = sortedNumericDocValues.advance(target)
+                            val doc: Int = sortedNumericDocValues!!.advance(target)
                             if (doc != DocIdSetIterator.NO_MORE_DOCS) {
                                 readValues()
                             }
@@ -486,7 +486,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
                         @Throws(IOException::class)
                         override fun advanceExact(target: Int): Boolean {
-                            if (sortedNumericDocValues.advanceExact(target)) {
+                            if (sortedNumericDocValues!!.advanceExact(target)) {
                                 readValues()
                                 return true
                             }
@@ -497,7 +497,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
                         fun readValues() {
                             max = Long.MIN_VALUE
                             min = Long.MAX_VALUE
-                            for (i in 0..<sortedNumericDocValues.docValueCount()) {
+                            for (i in 0..<sortedNumericDocValues!!.docValueCount()) {
                                 val value: Long = sortedNumericDocValues.nextValue()
                                 max = max(max, value)
                                 min = min(min, value)
@@ -513,14 +513,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
                         }
 
                         override fun docID(): Int {
-                            return sortedNumericDocValues.docID()
+                            return sortedNumericDocValues!!.docID()
                         }
                     }
                 }
 
                 @Throws(IOException::class)
-                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper {
-                    return leafReader.getDocValuesSkipper("test")!!
+                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper? {
+                    return leafReader.getDocValuesSkipper("test")
                 }
             })
     }
@@ -558,38 +558,38 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
                 @Throws(IOException::class)
                 override fun docValuesWrapper(leafReader: LeafReader): DocValuesWrapper {
-                    val sortedDocValues: SortedDocValues =
-                        leafReader.getSortedDocValues("test")!!
+                    val sortedDocValues: SortedDocValues? =
+                        leafReader.getSortedDocValues("test")
                     return object : DocValuesWrapper {
                         @Throws(IOException::class)
                         override fun advance(target: Int): Int {
-                            return sortedDocValues.advance(target)
+                            return sortedDocValues!!.advance(target)
                         }
 
                         @Throws(IOException::class)
                         override fun advanceExact(target: Int): Boolean {
-                            return sortedDocValues.advanceExact(target)
+                            return sortedDocValues!!.advanceExact(target)
                         }
 
                         @Throws(IOException::class)
                         override fun maxValue(): Long {
-                            return sortedDocValues.ordValue().toLong()
+                            return sortedDocValues!!.ordValue().toLong()
                         }
 
                         @Throws(IOException::class)
                         override fun minValue(): Long {
-                            return sortedDocValues.ordValue().toLong()
+                            return sortedDocValues!!.ordValue().toLong()
                         }
 
                         override fun docID(): Int {
-                            return sortedDocValues.docID()
+                            return sortedDocValues!!.docID()
                         }
                     }
                 }
 
                 @Throws(IOException::class)
-                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper {
-                    return leafReader.getDocValuesSkipper("test")!!
+                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper? {
+                    return leafReader.getDocValuesSkipper("test")
                 }
             })
     }
@@ -629,15 +629,15 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
                 @Throws(IOException::class)
                 override fun docValuesWrapper(leafReader: LeafReader): DocValuesWrapper {
-                    val sortedSetDocValues: SortedSetDocValues =
-                        leafReader.getSortedSetDocValues("test")!!
+                    val sortedSetDocValues: SortedSetDocValues? =
+                        leafReader.getSortedSetDocValues("test")
                     return object : DocValuesWrapper {
                         var max: Long = 0
                         var min: Long = 0
 
                         @Throws(IOException::class)
                         override fun advance(target: Int): Int {
-                            val doc: Int = sortedSetDocValues.advance(target)
+                            val doc: Int = sortedSetDocValues!!.advance(target)
                             if (doc != DocIdSetIterator.NO_MORE_DOCS) {
                                 readValues()
                             }
@@ -646,7 +646,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
 
                         @Throws(IOException::class)
                         override fun advanceExact(target: Int): Boolean {
-                            if (sortedSetDocValues.advanceExact(target)) {
+                            if (sortedSetDocValues!!.advanceExact(target)) {
                                 readValues()
                                 return true
                             }
@@ -657,7 +657,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
                         fun readValues() {
                             max = Long.MIN_VALUE
                             min = Long.MAX_VALUE
-                            for (i in 0..<sortedSetDocValues.docValueCount()) {
+                            for (i in 0..<sortedSetDocValues!!.docValueCount()) {
                                 val value: Long = sortedSetDocValues.nextOrd()
                                 max = max(max, value)
                                 min = min(min, value)
@@ -673,14 +673,14 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
                         }
 
                         override fun docID(): Int {
-                            return sortedSetDocValues.docID()
+                            return sortedSetDocValues!!.docID()
                         }
                     }
                 }
 
                 @Throws(IOException::class)
-                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper {
-                    return leafReader.getDocValuesSkipper("test")!!
+                override fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper? {
+                    return leafReader.getDocValuesSkipper("test")
                 }
             })
     }
@@ -822,7 +822,7 @@ abstract class BaseDocValuesFormatTestCase : LegacyBaseDocValuesFormatTestCase()
         fun docValuesWrapper(leafReader: LeafReader): DocValuesWrapper
 
         @Throws(IOException::class)
-        fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper
+        fun docValuesSkipper(leafReader: LeafReader): DocValuesSkipper?
     }
 
     private interface DocValuesWrapper {
