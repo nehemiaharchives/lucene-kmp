@@ -245,7 +245,11 @@ protected constructor() : AutoCloseable {
                         @Throws(IOException::class)
                         override fun nextDoc(): Int {
                             current = docIDMerger.next()
-                            current?.let { docID = it.mappedDocID }
+                            if (current == null) {
+                                docID = NO_MORE_DOCS
+                            } else {
+                                docID = current!!.mappedDocID
+                            }
                             return docID
                         }
 
@@ -359,7 +363,11 @@ protected constructor() : AutoCloseable {
                         @Throws(IOException::class)
                         override fun nextDoc(): Int {
                             currentSub = docIDMerger.next()
-                            currentSub?.let { docID = it.mappedDocID }
+                            if (currentSub == null) {
+                                docID = NO_MORE_DOCS
+                            } else {
+                                docID = currentSub!!.mappedDocID
+                            }
 
                             return docID
                         }
@@ -710,7 +718,11 @@ protected constructor() : AutoCloseable {
                         @Throws(IOException::class)
                         override fun nextDoc(): Int {
                             currentSub = docIDMerger.next()
-                            currentSub?.let { docID = it.mappedDocID }
+                            if (currentSub == null) {
+                                docID = NO_MORE_DOCS
+                            } else {
+                                docID = currentSub!!.mappedDocID
+                            }
 
                             return docID
                         }

@@ -3966,8 +3966,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             reader: CodecReader,
                             dir: Directory,
                             executor: Executor
-                        ): DocMap {
-                            return toWrap.reorder(reader, dir, executor)!! // must delegate
+                        ): DocMap? {
+                            return toWrap.reorder(reader, dir, executor) // must delegate
                         }
 
                         override fun setMergeInfo(info: SegmentCommitInfo) {

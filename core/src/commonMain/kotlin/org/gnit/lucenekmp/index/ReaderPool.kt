@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.compare
@@ -30,6 +32,7 @@ internal class ReaderPool(
     reader: StandardDirectoryReader?
 ) : AutoCloseable {
     private val readerMap: MutableMap<SegmentCommitInfo, ReadersAndUpdates> = mutableMapOf()
+    private val readerMapMutex = Mutex()
 
     // This is a "write once" variable (like the organic dye
     // on a DVD-R that may or may not be heated by a laser and
@@ -82,12 +85,7 @@ internal class ReaderPool(
      * // TODO Synchronized is not possible in kmp, need to think what to doinfo still exists in IW's segment infos  */
     /*@Synchronized*/
     fun assertInfoIsLive(info: SegmentCommitInfo): Boolean {
-        val idx: Int = segmentInfos.indexOf(info)
-        assert(idx != -1) { "info=$info isn't live" }
-        assert(
-            segmentInfos.info(idx) === info
-        ) { "info=$info doesn't match live info in segmentInfos" }
-        return true
+        return withReaderMapLock { assertInfoIsLiveUnsafe(info) }
     }
 
     /**
@@ -98,14 +96,16 @@ internal class ReaderPool(
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
     suspend fun drop(info: SegmentCommitInfo): Boolean {
-        val rld: ReadersAndUpdates? = readerMap[info]
-        if (rld != null) {
-            assert(info === rld.info)
-            readerMap.remove(info)
-            rld.dropReaders()
-            return true
+        return withReaderMapLockSuspend {
+            val rld: ReadersAndUpdates? = readerMap[info]
+            if (rld != null) {
+                assert(info === rld.info)
+                readerMap.remove(info)
+                rld.dropReaders()
+                return@withReaderMapLockSuspend true
+            }
+            false
         }
-        return false
     }
 
     /** Returns the s
@@ -113,11 +113,13 @@ internal class ReaderPool(
     /*@Synchronized*/
     @OptIn(ExperimentalAtomicApi::class)
     fun ramBytesUsed(): Long {
-        var bytes: Long = 0
-        for (rld in readerMap.values) {
-            bytes += rld.ramBytesUsed.load()
+        return withReaderMapLock {
+            var bytes: Long = 0
+            for (rld in readerMap.values) {
+                bytes += rld.ramBytesUsed.load()
+            }
+            bytes
         }
-        return bytes
     }
 
     /**
@@ -127,12 +129,14 @@ internal class ReaderPool(
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
     fun anyDeletions(): Boolean {
-        for (rld in readerMap.values) {
-            if (rld.delCount > 0) {
-                return true
+        return withReaderMapLock {
+            for (rld in readerMap.values) {
+                if (rld.delCount > 0) {
+                    return@withReaderMapLock true
+                }
             }
+            false
         }
-        return false
     }
 
     /**
@@ -152,51 +156,53 @@ internal class ReaderPool(
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
     suspend fun release(rld: ReadersAndUpdates, assertInfoLive: Boolean): Boolean {
-        var changed = false
-        // Matches incRef in get:
-        rld.decRef()
+        return withReaderMapLockSuspend {
+            var changed = false
+            // Matches incRef in get:
+            rld.decRef()
 
-        if (rld.refCount() == 0) {
-            // This happens if the segment was just merged away,
-            // while a buffered deletes packet was still applying deletes/updates to it.
-            assert(
-                !readerMap.containsKey(rld.info)
-            ) { "seg=" + rld.info + " has refCount 0 but still unexpectedly exists in the reader pool" }
-        } else {
-            // Pool still holds a ref:
+            if (rld.refCount() == 0) {
+                // This happens if the segment was just merged away,
+                // while a buffered deletes packet was still applying deletes/updates to it.
+                assert(
+                    !readerMap.containsKey(rld.info)
+                ) { "seg=" + rld.info + " has refCount 0 but still unexpectedly exists in the reader pool" }
+            } else {
+                // Pool still holds a ref:
 
-            assert(rld.refCount() > 0) { "refCount=" + rld.refCount() + " reader=" + rld.info }
+                assert(rld.refCount() > 0) { "refCount=" + rld.refCount() + " reader=" + rld.info }
 
-            if (!this.isReaderPoolingEnabled && rld.refCount() == 1 && readerMap.containsKey(rld.info)) {
-                // This is the last ref to this RLD, and we're not
-                // pooling, so remove it:
-                if (rld.writeLiveDocs(directory)) {
-                    // Make sure we only write del docs for a live segment:
-                    assert(!assertInfoLive || assertInfoIsLive(rld.info))
-                    // Must checkpoint because we just
-                    // created new _X_N.del and field updates files;
-                    // don't call IW.checkpoint because that also
-                    // increments SIS.version, which we do not want to
-                    // do here: it was done previously (after we
-                    // invoked BDS.applyDeletes), whereas here all we
-                    // did was move the state to disk:
-                    changed = true
-                }
-                if (rld.writeFieldUpdates(
-                        directory, fieldNumbers, completedDelGenSupplier(), infoStream
-                    )
-                ) {
-                    changed = true
-                }
-                if (rld.numDVUpdates == 0L) {
-                    rld.dropReaders()
-                    readerMap.remove(rld.info)
-                } else {
-                    // We are forced to pool this segment until its deletes fully apply (no delGen gaps)
+                if (!this.isReaderPoolingEnabled && rld.refCount() == 1 && readerMap.containsKey(rld.info)) {
+                    // This is the last ref to this RLD, and we're not
+                    // pooling, so remove it:
+                    if (rld.writeLiveDocs(directory)) {
+                        // Make sure we only write del docs for a live segment:
+                        assert(!assertInfoLive || assertInfoIsLiveUnsafe(rld.info))
+                        // Must checkpoint because we just
+                        // created new _X_N.del and field updates files;
+                        // don't call IW.checkpoint because that also
+                        // increments SIS.version, which we do not want to
+                        // do here: it was done previously (after we
+                        // invoked BDS.applyDeletes), whereas here all we
+                        // did was move the state to disk:
+                        changed = true
+                    }
+                    if (rld.writeFieldUpdates(
+                            directory, fieldNumbers, completedDelGenSupplier(), infoStream
+                        )
+                    ) {
+                        changed = true
+                    }
+                    if (rld.numDVUpdates == 0L) {
+                        rld.dropReaders()
+                        readerMap.remove(rld.info)
+                    } else {
+                        // We are forced to pool this segment until its deletes fully apply (no delGen gaps)
+                    }
                 }
             }
+            changed
         }
-        return changed
     }
 
     // TODO Synchronized is not possible in kmp, need to think what to do
@@ -215,12 +221,8 @@ internal class ReaderPool(
      * @return `true` iff any files where written
      */
     suspend fun writeAllDocValuesUpdates(): Boolean {
-        // TODO Synchronized is not possible in kmp, need to think what to do
-        //synchronized(this) {
-            // this needs to be protected by the reader pool lock otherwise we hit
-            // ConcurrentModificationException
-        val copy = HashSet(readerMap.values)
-        //}
+        // this needs to be protected by the reader pool lock otherwise we hit ConcurrentModificationException
+        val copy = withReaderMapLock { HashSet(readerMap.values) }
         var any = false
         for (rld in copy) {
             any = any or
@@ -265,22 +267,21 @@ internal class ReaderPool(
                 val ramBytesUsed: Long = updates.ramBytesUsed.load()
             }
 
-            val readersByRam: ArrayList<RamRecordingHolder>
-            // TODO Synchronized is not possible in kmp, need to think what to do
-            //synchronized(this) {
+            val readersByRam: ArrayList<RamRecordingHolder> = withReaderMapLock {
                 if (readerMap.isEmpty()) {
-                    return mutableListOf()
+                    return@withReaderMapLock ArrayList(0)
                 }
-                readersByRam = ArrayList<RamRecordingHolder>(readerMap.size)
+                val snapshot = ArrayList<RamRecordingHolder>(readerMap.size)
                 for (rld in readerMap.values) {
                     // we have to record the RAM usage once and then sort
                     // since the RAM usage can change concurrently and that will confuse the sort or hit an
                     // assertion
                     // the we can acquire here is not enough we would need to lock all ReadersAndUpdates to make
                     // sure it doesn't change
-                    readersByRam.add(RamRecordingHolder(rld))
+                    snapshot.add(RamRecordingHolder(rld))
                 }
-            //}
+                snapshot
+            }
             // Sort this outside of the lock by largest ramBytesUsed:
             CollectionUtil.introSort<RamRecordingHolder>(
                 readersByRam
@@ -296,31 +297,33 @@ internal class ReaderPool(
      * // TODO Synchronized is not possible in kmp, need to think what to dor references to readers, and commits any pending changes.  */
     /*@Synchronized*/
     suspend fun dropAll() {
-        var priorE: Throwable? = null
-        val it: MutableIterator<MutableMap.MutableEntry<SegmentCommitInfo, ReadersAndUpdates>> =
-            readerMap.entries.iterator()
-        while (it.hasNext()) {
-            val rld: ReadersAndUpdates = it.next().value
+        withReaderMapLockSuspend {
+            var priorE: Throwable? = null
+            val it: MutableIterator<MutableMap.MutableEntry<SegmentCommitInfo, ReadersAndUpdates>> =
+                readerMap.entries.iterator()
+            while (it.hasNext()) {
+                val rld: ReadersAndUpdates = it.next().value
 
-            // Important to remove as-we-go, not with .clear()
-            // in the end, in case we hit an exception;
-            // otherwise we could over-decref if close() is
-            // called again:
-            it.remove()
+                // Important to remove as-we-go, not with .clear()
+                // in the end, in case we hit an exception;
+                // otherwise we could over-decref if close() is
+                // called again:
+                it.remove()
 
-            // NOTE: it is allowed that these decRefs do not
-            // actually close the SRs; this happens when a
-            // near real-time reader is kept open after the
-            // IndexWriter instance is closed:
-            try {
-                rld.dropReaders()
-            } catch (t: Throwable) {
-                priorE = IOUtils.useOrSuppress(priorE, t)
+                // NOTE: it is allowed that these decRefs do not
+                // actually close the SRs; this happens when a
+                // near real-time reader is kept open after the
+                // IndexWriter instance is closed:
+                try {
+                    rld.dropReaders()
+                } catch (t: Throwable) {
+                    priorE = IOUtils.useOrSuppress(priorE, t)
+                }
             }
-        }
-        assert(readerMap.isEmpty())
-        if (priorE != null) {
-            throw IOUtils.rethrowAlways(priorE)
+            assert(readerMap.isEmpty())
+            if (priorE != null) {
+                throw IOUtils.rethrowAlways(priorE)
+            }
         }
     }
 
@@ -332,33 +335,35 @@ internal class ReaderPool(
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
     suspend fun commit(infos: SegmentInfos): Boolean {
-        var atLeastOneChange = false
-        for (info in infos) {
-            val rld: ReadersAndUpdates? = readerMap[info]
-            if (rld != null) {
-                assert(rld.info === info)
-                var changed: Boolean = rld.writeLiveDocs(directory)
-                changed = changed or
-                        rld.writeFieldUpdates(
-                            directory, fieldNumbers, completedDelGenSupplier(), infoStream
-                        )
+        return withReaderMapLockSuspend {
+            var atLeastOneChange = false
+            for (info in infos) {
+                val rld: ReadersAndUpdates? = readerMap[info]
+                if (rld != null) {
+                    assert(rld.info === info)
+                    var changed: Boolean = rld.writeLiveDocs(directory)
+                    changed = changed or
+                            rld.writeFieldUpdates(
+                                directory, fieldNumbers, completedDelGenSupplier(), infoStream
+                            )
 
-                if (changed) {
-                    // Make sure we only write del docs for a live segment:
-                    assert(assertInfoIsLive(info))
+                    if (changed) {
+                        // Make sure we only write del docs for a live segment:
+                        assert(assertInfoIsLiveUnsafe(info))
 
-                    // Must checkpoint because we just
-                    // created new _X_N.del and field updates files;
-                    // don't call IW.checkpoint because that also
-                    // increments SIS.version, which we do not want to
-                    // do here: it was done previously (after we
-                    // invoked BDS.applyDeletes), whereas here all we
-                    // did was move the state to disk:
-                    atLeastOneChange = true
+                        // Must checkpoint because we just
+                        // created new _X_N.del and field updates files;
+                        // don't call IW.checkpoint because that also
+                        // increments SIS.version, which we do not want to
+                        // do here: it was done previously (after we
+                        // invoked BDS.applyDeletes), whereas here all we
+                        // did was move the state to disk:
+                        atLeastOneChange = true
+                    }
                 }
             }
+            atLeastOneChange
         }
-        return atLeastOneChange
     }
 
     /**
@@ -368,13 +373,15 @@ internal class ReaderPool(
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
     fun anyDocValuesChanges(): Boolean {
-        for (rld in readerMap.values) {
-            // NOTE: we don't check for pending deletes because deletes carry over in RAM to NRT readers
-            if (rld.numDVUpdates != 0L) {
-                return true
+        return withReaderMapLock {
+            for (rld in readerMap.values) {
+                // NOTE: we don't check for pending deletes because deletes carry over in RAM to NRT readers
+                if (rld.numDVUpdates != 0L) {
+                    return@withReaderMapLock true
+                }
             }
+            false
         }
-        return false
     }
 
     /**
@@ -388,48 +395,50 @@ internal class ReaderPool(
         info: SegmentCommitInfo,
         create: Boolean
     ): ReadersAndUpdates? {
-        assert(
-            info.info.dir === originalDirectory
-        ) { "info.dir=" + info.info.dir + " vs " + originalDirectory }
-        if (closed.load()) {
-            assert(readerMap.isEmpty()) { "Reader map is not empty: $readerMap" }
-            throw AlreadyClosedException("ReaderPool is already closed")
-        }
-
-        var rld: ReadersAndUpdates? = readerMap[info]
-        if (rld == null) {
-            if (!create) {
-                return null
-            }
-            rld =
-                ReadersAndUpdates(
-                    segmentInfos.indexCreatedVersionMajor, info, newPendingDeletes(info)
-                )
-            // Steal initial reference:
-            readerMap[info] = rld
-        } else {
+        return withReaderMapLock {
             assert(
-                rld.info === info
-            ) {
-                ("rld.info="
-                        + rld.info
-                        + " info="
-                        + info
-                        + " isLive="
-                        + assertInfoIsLive(rld.info)
-                        + " vs "
-                        + assertInfoIsLive(info))
+                info.info.dir === originalDirectory
+            ) { "info.dir=" + info.info.dir + " vs " + originalDirectory }
+            if (closed.load()) {
+                assert(readerMap.isEmpty()) { "Reader map is not empty: $readerMap" }
+                throw AlreadyClosedException("ReaderPool is already closed")
             }
+
+            var rld: ReadersAndUpdates? = readerMap[info]
+            if (rld == null) {
+                if (!create) {
+                    return@withReaderMapLock null
+                }
+                rld =
+                    ReadersAndUpdates(
+                        segmentInfos.indexCreatedVersionMajor, info, newPendingDeletes(info)
+                    )
+                // Steal initial reference:
+                readerMap[info] = rld
+            } else {
+                assert(
+                    rld.info === info
+                ) {
+                    ("rld.info="
+                            + rld.info
+                            + " info="
+                            + info
+                            + " isLive="
+                            + assertInfoIsLiveUnsafe(rld.info)
+                            + " vs "
+                            + assertInfoIsLiveUnsafe(info))
+                }
+            }
+
+            if (create) {
+                // Return ref to caller:
+                rld.incRef()
+            }
+
+            assert(noDupsUnsafe())
+
+            rld
         }
-
-        if (create) {
-            // Return ref to caller:
-            rld.incRef()
-        }
-
-        assert(noDups())
-
-        return rld
     }
 
     private fun newPendingDeletes(info: SegmentCommitInfo): PendingDeletes {
@@ -451,7 +460,7 @@ internal class ReaderPool(
 
     // Make sure that every segment appears only once in the
     // pool:
-    private fun noDups(): Boolean {
+    private fun noDupsUnsafe(): Boolean {
         val seen: MutableSet<String> = HashSet()
         for (info in readerMap.keys) {
             assert(!seen.contains(info.info.name)) { "seen twice: " + info.info.name }
@@ -459,4 +468,19 @@ internal class ReaderPool(
         }
         return true
     }
+
+    private fun assertInfoIsLiveUnsafe(info: SegmentCommitInfo): Boolean {
+        val idx: Int = segmentInfos.indexOf(info)
+        assert(idx != -1) { "info=$info isn't live" }
+        assert(
+            segmentInfos.info(idx) === info
+        ) { "info=$info doesn't match live info in segmentInfos" }
+        return true
+    }
+
+    private fun <T> withReaderMapLock(action: () -> T): T =
+        runBlocking { readerMapMutex.withLock { action() } }
+
+    private suspend fun <T> withReaderMapLockSuspend(action: suspend () -> T): T =
+        readerMapMutex.withLock { action() }
 }

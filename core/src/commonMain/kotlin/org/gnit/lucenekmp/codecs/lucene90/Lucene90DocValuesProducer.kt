@@ -396,7 +396,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
     }
 
     private class SortedSetEntry {
-        lateinit var singleValueEntry: SortedEntry
+        var singleValueEntry: SortedEntry? = null
         lateinit var ordsEntry: SortedNumericEntry
         lateinit var termsDictEntry: TermsDictEntry
     }
@@ -777,6 +777,10 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                     override fun binaryValue(): BytesRef {
                         val startOffset: Long = addresses.get(doc.toLong())
                         bytes.length = (addresses.get(doc + 1L) - startOffset).toInt()
+                        val endOffset = startOffset + bytes.length
+                        check(startOffset >= 0L && endOffset <= entry.dataLength) {
+                            "Dense binary address out of bounds: doc=$doc start=$startOffset end=$endOffset dataLength=${entry.dataLength}"
+                        }
                         bytesSlice.readBytes(startOffset, bytes.bytes, 0, bytes.length)
                         return bytes
                     }
@@ -824,6 +828,10 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
                         val index = disi.index()
                         val startOffset: Long = addresses.get(index.toLong())
                         bytes.length = (addresses.get(index + 1L) - startOffset).toInt()
+                        val endOffset = startOffset + bytes.length
+                        check(startOffset >= 0L && endOffset <= entry.dataLength) {
+                            "Sparse binary address out of bounds: index=$index start=$startOffset end=$endOffset dataLength=${entry.dataLength}"
+                        }
                         bytesSlice.readBytes(startOffset, bytes.bytes, 0, bytes.length)
                         return bytes
                     }
@@ -1444,7 +1452,7 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
     override fun getSortedSet(field: FieldInfo): SortedSetDocValues {
         val entry: SortedSetEntry = sortedSets[field.number]!!
         if (entry.singleValueEntry != null) {
-            return DocValues.singleton(getSorted(entry.singleValueEntry))
+            return DocValues.singleton(getSorted(entry.singleValueEntry!!))
         }
 
         // Specialize the common case for ordinals: single block of packed integers.

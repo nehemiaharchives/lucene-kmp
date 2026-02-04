@@ -67,13 +67,13 @@ class OrdinalMap private constructor(
                     newToOld[i] = i
                 }
                 object : InPlaceMergeSorter() {
-                    protected override fun swap(i: Int, j: Int) {
+                    override fun swap(i: Int, j: Int) {
                         val tmp = newToOld[i]
                         newToOld[i] = newToOld[j]
                         newToOld[j] = tmp
                     }
 
-                    protected override fun compare(i: Int, j: Int): Int {
+                    override fun compare(i: Int, j: Int): Int {
                         // j first since we actually want higher weights first
                         return Long.compare(weights[newToOld[j]], weights[newToOld[i]])
                     }
@@ -187,7 +187,7 @@ class OrdinalMap private constructor(
         val queue = TermsEnumPriorityQueue(subs.size)
 
         for (i in subs.indices) {
-            val sub: TermsEnumIndex = TermsEnumIndex(subs[segmentMap.newToOld(i)], i)
+            val sub = TermsEnumIndex(subs[segmentMap.newToOld(i)], i)
             if (sub.next() != null) {
                 queue.add(sub)
             }
@@ -200,8 +200,8 @@ class OrdinalMap private constructor(
             var top: TermsEnumIndex = queue.top()
             topState.copyFrom(top)
 
-            var firstSegmentIndex = Int.Companion.MAX_VALUE
-            var globalOrdDelta = Long.Companion.MAX_VALUE
+            var firstSegmentIndex = Int.MAX_VALUE
+            var globalOrdDelta = Long.MAX_VALUE
 
             // Advance past this term, recording the per-segment ord deltas:
             while (true) {
@@ -255,7 +255,7 @@ class OrdinalMap private constructor(
 
         // If the first segment contains all of the global ords, then we can apply a small optimization
         // and hardcode the first segment indices and global ord deltas as all zeroes.
-        if (ordDeltaBits.size > 0 && ordDeltaBits[0] == 0L && firstSegmentBits == 0L) {
+        if (ordDeltaBits.isNotEmpty() && ordDeltaBits[0] == 0L && firstSegmentBits == 0L) {
             this.firstSegments = LongValues.ZEROES
             this.globalOrdDeltas = LongValues.ZEROES
         } else {
@@ -280,11 +280,11 @@ class OrdinalMap private constructor(
                     if (ordDeltaBits[i] < 0) 64 else PackedInts.bitsRequired(ordDeltaBits[i])
                 val monotonicBits: Long = deltas.ramBytesUsed() * 8
                 val packedBits: Long = bitsRequired * deltas.size()
-                if (deltas.size() <= Int.Companion.MAX_VALUE
+                if (deltas.size() <= Int.MAX_VALUE
                     && packedBits <= monotonicBits * (1 + acceptableOverheadRatio)
                 ) {
                     // monotonic compression mostly adds overhead, let's keep the mapping in plain packed ints
-                    val size = deltas.size() as Int
+                    val size = deltas.size().toInt()
                     val newDeltas: PackedInts.Mutable =
                         PackedInts.getMutable(size, bitsRequired, acceptableOverheadRatio)
                     val it: PackedLongValues.Iterator = deltas.iterator()
@@ -333,7 +333,7 @@ class OrdinalMap private constructor(
 
     /** Given a global ordinal, returns the index of the first segment that contains this term.  */
     fun getFirstSegmentNumber(globalOrd: Long): Int {
-        return segmentMap.newToOld(firstSegments.get(globalOrd) as Int)
+        return segmentMap.newToOld(firstSegments.get(globalOrd).toInt())
     }
 
     override fun ramBytesUsed(): Long {
@@ -342,7 +342,7 @@ class OrdinalMap private constructor(
 
     override val childResources: MutableCollection<Accountable>
         get() {
-            val resources: MutableList<Accountable> = mutableListOf<Accountable>()
+            val resources: MutableList<Accountable> = mutableListOf()
             resources.add(Accountables.namedAccountable("segment map", segmentMap))
             // TODO: would be nice to return the ordinal and segment maps too, but it's not straightforward
             //  because of optimizations.

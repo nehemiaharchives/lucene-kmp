@@ -150,7 +150,7 @@ internal class SortedSetDocValuesWriter(
 
     private fun finish() {
         if (finalOrds == null) {
-            assert(finalOrdCounts == null && finalSortedValues == null && finalOrdMap == null)
+            assert(finalOrdCounts == null && !::finalSortedValues.isInitialized && !::finalOrdMap.isInitialized)
             finishCurrentDoc()
             val valueCount: Int = hash.size()
             finalOrds = pending.build()
@@ -167,7 +167,7 @@ internal class SortedSetDocValuesWriter(
         get() {
             finish()
             return getValues(
-                finalSortedValues, finalOrdMap, hash, finalOrds!!, finalOrdCounts!!, maxCount, docsWithField
+                finalSortedValues, finalOrdMap, hash, finalOrds!!, finalOrdCounts, maxCount, docsWithField
             )
         }
 
@@ -176,7 +176,7 @@ internal class SortedSetDocValuesWriter(
         ordMap: IntArray,
         hash: BytesRefHash,
         ords: PackedLongValues,
-        ordCounts: PackedLongValues,
+        ordCounts: PackedLongValues?,
         maxCount: Int,
         docsWithField: DocsWithFieldSet
     ): SortedSetDocValues {

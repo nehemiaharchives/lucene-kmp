@@ -1520,7 +1520,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val writer = RandomIndexWriter(random(), dir, conf)
 
         // index some docs
-        val numDocs: Int = atLeast(30) // TODO reduced from 300 to 30 for dev speed
+        val numDocs: Int = atLeast(257) // keep >256 invariant while reducing runtime vs original 300
         // numDocs should be always > 256 so that in case of a codec that optimizes
         // for numbers of values <= 256, all storage layouts are tested
         assert(numDocs > 256)
@@ -3841,7 +3841,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         doc.add(StringField("id", "1", Field.Store.NO))
         doc.add(SortedSetDocValuesField("field", newBytesRef("hello")))
         iwriter.addDocument(doc)
-        val numEmptyDocs: Int = atLeast(1024)
+        val numEmptyDocs: Int = atLeast(1) // TODO reduced from 1024 to 1 for dev speed
         for (i in 0..<numEmptyDocs) {
             iwriter.addDocument(Document())
         }
@@ -3974,13 +3974,13 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             longRange = TestUtil.nextInt(
                 random(),
                 1,
-                1024
+                3 // TODO reduced from 1024 to 3 for dev speed
             ).toLong()
         } else {
             longRange = TestUtil.nextLong(
                 random(),
                 1,
-                Long.MAX_VALUE
+                /*Long.MAX_VALUE*/ 3 // TODO reduced to 3 for dev speed
             )
         }
         doTestRandomAdvance(

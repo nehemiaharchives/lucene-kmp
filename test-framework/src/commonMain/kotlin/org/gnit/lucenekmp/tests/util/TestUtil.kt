@@ -1330,6 +1330,9 @@ class TestUtil {
 
         /** Returns a random postings format that supports term ordinals  */
         fun getPostingsFormatWithOrds(r: Random): PostingsFormat {
+            // KMP runtime has no JVM SPI auto-discovery, so register test-only postings formats explicitly.
+            PostingsFormat.registerPostingsFormat("LuceneFixedGap") { LuceneFixedGap() }
+            PostingsFormat.registerPostingsFormat("BlockTreeOrds") { BlockTreeOrdsPostingsFormat() }
             when (r.nextInt(2)) {
                 0 -> return LuceneFixedGap()
                 1 -> return BlockTreeOrdsPostingsFormat()

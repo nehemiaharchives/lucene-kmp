@@ -492,7 +492,8 @@ abstract class LogMergePolicy
         infos: SegmentInfos,
         mergeContext: MergeContext
     ): MergeSpecification? {
-        val numSegments: Int = infos.size()
+        val infosSnapshot: MutableList<SegmentCommitInfo> = infos.asList()
+        val numSegments: Int = infosSnapshot.size
         if (verbose(mergeContext)) {
             message("findMerges: $numSegments segments", mergeContext)
         }
@@ -506,7 +507,7 @@ abstract class LogMergePolicy
 
         var totalDocCount = 0
         for (i in 0..<numSegments) {
-            val info: SegmentCommitInfo = infos.info(i)
+            val info: SegmentCommitInfo = infosSnapshot[i]
             totalDocCount += sizeDocs(info, mergeContext).toInt()
             var size: Long = size(info, mergeContext)
 

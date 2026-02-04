@@ -36,7 +36,8 @@ class DirectMonotonicWriter internal constructor(
     @Throws(IOException::class)
     private fun flush() {
         require(bufferSize != 0)
-        val avgInc: Double = ((buffer[bufferSize - 1] - buffer[0]).toDouble() / max(1, bufferSize - 1))
+        val avgInc: Float =
+            ((buffer[bufferSize - 1] - buffer[0]).toDouble() / max(1, bufferSize - 1)).toFloat()
         var min = Long.Companion.MAX_VALUE
         for (i in 0..<bufferSize) {
             val expected = (avgInc * i.toLong()).toLong()
@@ -54,7 +55,7 @@ class DirectMonotonicWriter internal constructor(
         }
 
         meta.writeLong(min)
-        meta.writeInt(Float.floatToIntBits(avgInc.toFloat()))
+        meta.writeInt(Float.floatToIntBits(avgInc))
         meta.writeLong(data.filePointer - baseDataPointer)
         if (maxDelta == 0L) {
             meta.writeByte(0.toByte())

@@ -1,5 +1,9 @@
 package org.gnit.lucenekmp.util
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.FileNotFoundException
 import okio.IOException
 import org.gnit.lucenekmp.index.IndexFileNames
@@ -18,7 +22,9 @@ import org.gnit.lucenekmp.store.Directory
  * @lucene.internal
  */
 class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
+    private val logger = KotlinLogging.logger {}
     private val refCounts: MutableMap<String, RefCount> = HashMap<String, RefCount>()
+    private val refCountsMutex = Mutex()
 
     private val directory: Directory
 
@@ -50,16 +56,20 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
     }
 
     fun incRef(fileNames: MutableCollection<String>) {
-        for (file in fileNames) {
-            incRef(file)
+        withRefCountsLock {
+            for (file in fileNames) {
+                incRefUnsafe(file)
+            }
         }
     }
 
     fun incRef(fileName: String) {
+        withRefCountsLock { incRefUnsafe(fileName) }
+    }
+
+    private fun incRefUnsafe(fileName: String) {
         val rc = getRefCountInternal(fileName)!!
-        if (messenger != null) {
-            messenger(MsgType.REF, "IncRef \"" + fileName + "\": pre-incr count is " + rc.count)
-        }
+        messenger(MsgType.REF, "IncRef \"" + fileName + "\": pre-incr count is " + rc.count)
         rc.incRef()
     }
 
@@ -69,34 +79,44 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
      */
     @Throws(IOException::class)
     fun decRef(fileNames: MutableCollection<String>) {
-        val toDelete: MutableSet<String> = HashSet<String>()
-        var firstThrowable: Throwable? = null
-        for (fileName in fileNames) {
-            try {
-                if (decRef(fileName)) {
-                    toDelete.add(fileName!!)
+        logger.debug { "FileDeleter.decRef start: files=${fileNames.size}" }
+        withRefCountsLock {
+            val toDelete: MutableSet<String> = HashSet<String>()
+            var firstThrowable: Throwable? = null
+            // Defensive snapshot: callers are expected to synchronize, but in practice some paths mutate
+            // the incoming collection concurrently.
+            val snapshot = fileNames.toList()
+            for (fileName in snapshot) {
+                try {
+                    if (decRefUnsafe(fileName)) {
+                        toDelete.add(fileName)
+                    }
+                } catch (t: Throwable) {
+                    firstThrowable = IOUtils.useOrSuppress<Throwable>(firstThrowable, t)
                 }
+            }
+
+            try {
+                delete(toDelete)
             } catch (t: Throwable) {
                 firstThrowable = IOUtils.useOrSuppress<Throwable>(firstThrowable, t)
             }
-        }
 
-        try {
-            delete(toDelete)
-        } catch (t: Throwable) {
-            firstThrowable = IOUtils.useOrSuppress<Throwable>(firstThrowable, t)
+            if (firstThrowable != null) {
+                throw IOUtils.rethrowAlways(firstThrowable)
+            }
         }
-
-        if (firstThrowable != null) {
-            throw IOUtils.rethrowAlways(firstThrowable)
-        }
+        logger.debug { "FileDeleter.decRef done" }
     }
 
     /** Returns true if the file should be deleted  */
-    private fun decRef(fileName: String): Boolean {
-        val rc = getRefCountInternal(fileName)!!
-        if (messenger != null) {
-            messenger(MsgType.REF, "DecRef \"" + fileName + "\": pre-decr count is " + rc.count)
+    private fun decRefUnsafe(fileName: String): Boolean {
+        val rc = refCounts[fileName] ?: return false
+        messenger(MsgType.REF, "DecRef \"" + fileName + "\": pre-decr count is " + rc.count)
+        if (rc.count == 0) {
+            // KMP port currently has concurrent close/merge paths that may race decRef calls.
+            // Java code relies on external synchronization; be defensive here.
+            return false
         }
         if (rc.decRef() == 0) {
             refCounts.remove(fileName)
@@ -111,89 +131,98 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
 
     /** if the file is not yet recorded, this method will create a new RefCount object with count 0  */
     fun initRefCount(fileName: String) {
-        refCounts.computeIfAbsent(fileName) { fileName: String -> RefCount(fileName) }
+        withRefCountsLock {
+            refCounts.computeIfAbsent(fileName) { key: String -> RefCount(key) }
+        }
     }
 
     /**
      * get ref count for a provided file, if the file is not yet recorded, this method will return 0
      */
     fun getRefCount(fileName: String): Int {
-        return refCounts.getOrElse(fileName) { ZERO_REF }.count
+        return withRefCountsLock {
+            refCounts.getOrElse(fileName) { ZERO_REF }.count
+        }
     }
 
     val allFiles: MutableSet<String>
         /** get all files, some of them may have ref count 0  */
-        get() = refCounts.keys
+        get() = withRefCountsLock { refCounts.keys.toMutableSet() }
 
     /** return true only if file is touched and also has larger than 0 ref count  */
     fun exists(fileName: String): Boolean {
+        return withRefCountsLock { existsUnsafe(fileName) }
+    }
+
+    private fun existsUnsafe(fileName: String): Boolean {
         return refCounts.containsKey(fileName) && refCounts.get(fileName)!!.count > 0
     }
 
     val unrefedFiles: MutableSet<String>
         /** get files that are touched but not incref'ed  */
         get() {
-            val unrefed: MutableSet<String> = HashSet<String>()
-            for (entry in refCounts.entries) {
-                val rc = entry.value
-                val fileName = entry.key
-                if (rc.count == 0) {
-                    messenger(MsgType.FILE, "removing unreferenced file \"$fileName\"")
-                    unrefed.add(fileName)
+            return withRefCountsLock {
+                val unrefed: MutableSet<String> = HashSet<String>()
+                for (entry in refCounts.entries) {
+                    val rc = entry.value
+                    val fileName = entry.key
+                    if (rc.count == 0) {
+                        messenger(MsgType.FILE, "removing unreferenced file \"$fileName\"")
+                        unrefed.add(fileName)
+                    }
                 }
+                unrefed
             }
-            return unrefed
         }
 
     /** delete only files that are unref'ed  */
     @Throws(IOException::class)
     fun deleteFilesIfNoRef(files: MutableCollection<String>) {
-        val toDelete: MutableSet<String> = HashSet<String>()
-        for (fileName in files) {
-            // NOTE: it's very unusual yet possible for the
-            // refCount to be present and 0: it can happen if you
-            // open IW on a crashed index, and it removes a bunch
-            // of unref'd files, and then you add new docs / do
-            // merging, and it reuses that segment name.
-            // TestCrash.testCrashAfterReopen can hit this:
-            if (exists(fileName) == false) {
-                if (messenger != null) {
+        withRefCountsLock {
+            val toDelete: MutableSet<String> = HashSet<String>()
+            for (fileName in files) {
+                // NOTE: it's very unusual yet possible for the
+                // refCount to be present and 0: it can happen if you
+                // open IW on a crashed index, and it removes a bunch
+                // of unref'd files, and then you add new docs / do
+                // merging, and it reuses that segment name.
+                // TestCrash.testCrashAfterReopen can hit this:
+                if (existsUnsafe(fileName) == false) {
                     messenger(MsgType.FILE, "will delete new file \"$fileName\"")
+                    toDelete.add(fileName)
                 }
-                toDelete.add(fileName!!)
             }
+            delete(toDelete)
         }
-
-        delete(toDelete)
     }
 
     @Throws(IOException::class)
     fun forceDelete(fileName: String) {
-        refCounts.remove(fileName)
-        delete(fileName)
-    }
-
-    @Throws(IOException::class)
-    fun deleteFileIfNoRef(fileName: String) {
-        if (exists(fileName) == false) {
-            if (messenger != null) {
-                messenger(MsgType.FILE, "will delete new file \"$fileName\"")
-            }
+        withRefCountsLock {
+            refCounts.remove(fileName)
             delete(fileName)
         }
     }
 
     @Throws(IOException::class)
-    private fun delete(toDelete: MutableCollection<String>) {
-        if (messenger != null) {
-            messenger(MsgType.FILE, "now delete " + toDelete.size + " files: " + toDelete)
+    fun deleteFileIfNoRef(fileName: String) {
+        withRefCountsLock {
+            if (existsUnsafe(fileName) == false) {
+                messenger(MsgType.FILE, "will delete new file \"$fileName\"")
+                delete(fileName)
+            }
         }
+    }
+
+    @Throws(IOException::class)
+    private fun delete(toDelete: MutableCollection<String>) {
+        messenger(MsgType.FILE, "now delete " + toDelete.size + " files: " + toDelete)
 
         // First pass: delete any segments_N files.  We do these first to be certain stale commit points
         // are removed
         // before we remove any files they reference, in case we crash right now:
         for (fileName in toDelete) {
-            assert(exists(fileName) == false)
+            assert(existsUnsafe(fileName) == false)
             if (fileName.startsWith(IndexFileNames.SEGMENTS)) {
                 delete(fileName)
             }
@@ -202,7 +231,7 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
         // Only delete other files if we were able to remove the segments_N files; this way we never
         // leave a corrupt commit in the index even in the presense of virus checkers:
         for (fileName in toDelete) {
-            assert(exists(fileName) == false)
+            assert(existsUnsafe(fileName) == false)
             if (fileName.startsWith(IndexFileNames.SEGMENTS) == false) {
                 delete(fileName)
             }
@@ -232,6 +261,9 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
             }
         }
     }
+
+    private fun <T> withRefCountsLock(action: () -> T): T =
+        runBlocking { refCountsMutex.withLock { action() } }
 
     /** Tracks the reference count for a single index file:  */
     class RefCount internal constructor(// fileName used only for better assert error messages

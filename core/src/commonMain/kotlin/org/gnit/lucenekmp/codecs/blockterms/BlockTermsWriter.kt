@@ -112,7 +112,7 @@ class BlockTermsWriter(
                     break
                 }
 
-                termsWriter.write(term, termsEnum, norms!!)
+                termsWriter.write(term, termsEnum, norms)
             }
 
             termsWriter.finish()
@@ -188,7 +188,7 @@ class BlockTermsWriter(
         fun write(
             text: BytesRef,
             termsEnum: TermsEnum,
-            norms: NormsProducer
+            norms: NormsProducer?
         ) {
             val state: BlockTermState? =
                 postingsWriter.writeTerm(text, termsEnum, docsSeen, norms)
