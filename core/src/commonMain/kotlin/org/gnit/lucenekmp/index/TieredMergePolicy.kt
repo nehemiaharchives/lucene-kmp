@@ -933,7 +933,7 @@ open class TieredMergePolicy
             MERGE_TYPE.FORCE_MERGE_DELETES,
             mergeContext,
             false
-        )!!
+        )
     }
 
     fun getMaxAllowedDocs(totalMaxDoc: Int, totalDelDocs: Int): Int {
