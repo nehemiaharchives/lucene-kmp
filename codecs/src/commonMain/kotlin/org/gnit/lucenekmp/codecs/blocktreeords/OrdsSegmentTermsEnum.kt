@@ -133,7 +133,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
 
     targetBeforeCurrentLength = currentFrame.ord
 
-    if (false && positioned && currentFrame !== staticFrame) {
+    if (positioned && currentFrame !== staticFrame) {
       arc = arcs[0]
       output = arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
       targetUpto = 0
@@ -235,7 +235,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
     var output: FSTOrdsOutputs.Output
     targetBeforeCurrentLength = currentFrame.ord
 
-    if (false && positioned && currentFrame !== staticFrame) {
+    if (positioned && currentFrame !== staticFrame) {
       arc = arcs[0]
       output = arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
       targetUpto = 0

@@ -237,9 +237,11 @@ internal class OrdsSegmentTermsEnumFrame internal constructor(
       }
     }
 
-    fp = newFP
-    nextEnt = -1
-    termOrd = lastFloorTermOrd
+    if (newFP != fp) {
+      fp = newFP
+      nextEnt = -1
+      termOrd = lastFloorTermOrd
+    }
   }
 
   /** Seek to the floor sub-block that contains the given term ordinal. */
@@ -298,31 +300,26 @@ internal class OrdsSegmentTermsEnumFrame internal constructor(
     return true
   }
 
-  fun scanToSubBlock(lastSubFP: Long) {
-    if (nextEnt != -1 && fp == lastSubFP) return
-    // scan until the sub-block with lastSubFP is found
-    if (nextEnt == -1) loadBlock()
+  fun scanToSubBlock(subFP: Long) {
+    check(!isLeafBlock)
+    if (lastSubFP == subFP) return
+    check(subFP < fp)
+    val targetSubCode = fp - subFP
     while (true) {
-      if (nextEnt == entCount) return
+      check(nextEnt < entCount)
+      nextEnt++
       val code = suffixesReader.readVInt()
-      val suffix = code ushr 1
-      val savePos = suffixesReader.position
-      suffixesReader.skipBytes(suffix.toLong())
-      if ((code and 1) == 0) {
-        // term
-        state.termBlockOrd++
-        nextEnt++
-        continue
+      suffixesReader.skipBytes((if (isLeafBlock) code else (code ushr 1)).toLong())
+      if ((code and 1) != 0) {
+        val subCode = suffixesReader.readVLong()
+        termOrd += suffixesReader.readVLong()
+        if (targetSubCode == subCode) {
+          lastSubFP = subFP
+          return
+        }
       } else {
-        val subFP = fp - suffixesReader.readVLong()
-        val termOrdDelta = suffixesReader.readVLong()
-        nextEnt++
-        if (subFP == lastSubFP) return
-        if (subFP < lastSubFP) continue
-        // otherwise we went past it; rewind to previous entry so next() will return it
-        suffixesReader.position = savePos
-        nextEnt--
-        return
+        state.termBlockOrd++
+        termOrd++
       }
     }
   }
