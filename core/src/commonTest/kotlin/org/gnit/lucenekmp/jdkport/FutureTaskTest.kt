@@ -1,13 +1,14 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
 class FutureTaskTest {
 
     @Test
     fun testCancel() {
-        runBlocking {
+        runTest {
             // Use a CompletableDeferred to simulate a long-running task
             val deferred = CompletableDeferred<String>()
 
@@ -36,7 +37,7 @@ class FutureTaskTest {
 
     @Test
     fun testIsDone() {
-        runBlocking {
+        runTest {
             // Use a CompletableDeferred to control completion
             val deferred = CompletableDeferred<String>()
 
@@ -63,7 +64,7 @@ class FutureTaskTest {
 
     @Test
     fun testIsCancelled() {
-        runBlocking {
+        runTest {
             // Use a CompletableDeferred to simulate a long-running task
             val deferred = CompletableDeferred<String>()
 
@@ -91,7 +92,7 @@ class FutureTaskTest {
 
     @Test
     fun testGet() {
-        runBlocking {
+        runTest {
             val task = FutureTask {
                 "result"
             }
@@ -102,7 +103,7 @@ class FutureTaskTest {
 
     @Test
     fun testRun() {
-        runBlocking {
+        runTest {
             val task = FutureTask {
                 "result"
             }
@@ -113,7 +114,7 @@ class FutureTaskTest {
 
     @Test
     fun testRunAndReset() {
-        runBlocking {
+        runTest {
             // Create a custom FutureTask that exposes the protected runAndReset method
             class TestFutureTask<V>(callable: Callable<V>) : FutureTask<V>(callable) {
                 fun publicRunAndReset(): Boolean = runAndReset()
@@ -126,5 +127,21 @@ class FutureTaskTest {
             assertTrue(task.publicRunAndReset())
             assertFalse(task.isDone())
         }
+    }
+
+    @Test
+    fun testGet_multipleWaitersAllComplete() = runTest {
+        val task = FutureTask {
+            "result"
+        }
+
+        val waiter1 = async(Dispatchers.Default) { withTimeout(2_000) { task.get() } }
+        val waiter2 = async(Dispatchers.Default) { withTimeout(2_000) { task.get() } }
+
+        delay(50)
+        launch(Dispatchers.Default) { task.run() }
+
+        assertEquals("result", waiter1.await())
+        assertEquals("result", waiter2.await())
     }
 }

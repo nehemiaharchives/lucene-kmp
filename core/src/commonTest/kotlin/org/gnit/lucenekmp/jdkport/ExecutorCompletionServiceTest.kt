@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
 class ExecutorCompletionServiceTest {
@@ -10,7 +11,7 @@ class ExecutorCompletionServiceTest {
     }
 
     @Test
-    fun submitCallable_completesAndTakeReturnsInCompletionOrder() = runBlocking {
+    fun submitCallable_completesAndTakeReturnsInCompletionOrder() = runTest {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         try {
             val ecs = ExecutorCompletionService<Int>(concurrentExecutor(scope))
@@ -41,7 +42,7 @@ class ExecutorCompletionServiceTest {
     }
 
     @Test
-    fun submitRunnableWithResult_enqueuesAndReturnsProvidedResult() = runBlocking {
+    fun submitRunnableWithResult_enqueuesAndReturnsProvidedResult() = runTest {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         try {
             val ecs = ExecutorCompletionService<String>(concurrentExecutor(scope))
@@ -66,7 +67,7 @@ class ExecutorCompletionServiceTest {
     }
 
     @Test
-    fun pollWithTimeout_waitsUpToTimeoutAndReturnsWhenAvailable() = runBlocking {
+    fun pollWithTimeout_waitsUpToTimeoutAndReturnsWhenAvailable() = runTest {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         try {
             val ecs = ExecutorCompletionService<Int>(concurrentExecutor(scope))

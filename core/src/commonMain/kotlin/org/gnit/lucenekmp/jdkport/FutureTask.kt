@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -8,9 +7,6 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.AtomicReference
@@ -118,8 +114,6 @@ open class FutureTask<V> : RunnableFuture<V> {
 
     @OptIn(ExperimentalAtomicApi::class)
     private val runner = AtomicReference<Job?>(null)
-    private val mutex = Mutex()
-    private var continuation: CancellableContinuation<V>? = null
 
     private companion object {
         private const val NEW = 0
@@ -214,23 +208,6 @@ open class FutureTask<V> : RunnableFuture<V> {
         logger.debug { "[FutureTask.get] enter state=${state.load()} hash=${this.hashCode()}" }
         var s = state.load()
         if (s <= COMPLETING) {
-            if (s == NEW) {
-                mutex.withLock {
-                    s = state.load()
-                    if (s == NEW) {
-                        return suspendCancellableCoroutine { cont ->
-                            this.continuation = cont
-                            logger.debug { "[FutureTask.get] suspended state=NEW hash=${this.hashCode()}" }
-                            cont.invokeOnCancellation {
-                                if (state.compareAndSet(NEW, CANCELLED)) {
-                                    finishCompletion()
-                                }
-                            }
-                        }
-                    }
-                }
-                s = state.load()
-            }
             if (s <= COMPLETING) {
                 logger.debug { "[FutureTask.get] awaiting completion state=$s hash=${this.hashCode()}" }
                 val result = awaitDone(false, 0.nanoseconds)
@@ -251,22 +228,6 @@ open class FutureTask<V> : RunnableFuture<V> {
             throw NullPointerException()
         var s = state.load()
         if (s <= COMPLETING) {
-            if (s == NEW) {
-                mutex.withLock {
-                    s = state.load()
-                    if (s == NEW) {
-                        return suspendCancellableCoroutine { cont ->
-                            this.continuation = cont
-                            cont.invokeOnCancellation {
-                                if (state.compareAndSet(NEW, CANCELLED)) {
-                                    finishCompletion()
-                                }
-                            }
-                        }
-                    }
-                }
-                s = state.load()
-            }
             if (s <= COMPLETING) {
                 val duration = unit.toNanos(timeout).nanoseconds
                 val result = awaitDone(true, duration)
@@ -466,19 +427,7 @@ open class FutureTask<V> : RunnableFuture<V> {
      */
     @OptIn(ExperimentalAtomicApi::class)
     private fun finishCompletion() {
-        // assert state.load() > COMPLETING;
-        continuation.let { cont ->
-            continuation = null
-            val s = state.load()
-            if (cont != null) {
-                if (s >= CANCELLED) {
-                    cont.cancel()
-                } else {
-                    cont.resume(report(s))
-                }
-            }
-        }
-        logger.debug { "[FutureTask.finishCompletion] state=${state.load()} hasContinuation=${continuation != null} hash=${this.hashCode()}" }
+        logger.debug { "[FutureTask.finishCompletion] state=${state.load()} hash=${this.hashCode()}" }
         done()
         callable = null // to reduce footprint
     }
