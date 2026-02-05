@@ -153,6 +153,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
       }
 
       if (cmp == 0) {
+        val targetUptoMid = targetUpto
         val targetLimit2 = kotlin.math.min(text.length, term.length())
         while (targetUpto < targetLimit2) {
           cmp = (term.byteAt(targetUpto).toInt() and 0xFF) - (text.bytes[text.offset + targetUpto].toInt() and 0xFF)
@@ -160,6 +161,7 @@ internal class OrdsSegmentTermsEnum(internal val fr: OrdsFieldReader) : BaseTerm
           targetUpto++
         }
         if (cmp == 0) cmp = term.length() - text.length
+        targetUpto = targetUptoMid
       }
 
       if (cmp < 0) {
