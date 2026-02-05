@@ -2,8 +2,12 @@ package org.gnit.lucenekmp.index
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
+import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.poll
+import org.gnit.lucenekmp.jdkport.set
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.InfoStream
@@ -11,6 +15,8 @@ import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.decrementAndFetch
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Clock
@@ -27,6 +33,7 @@ import kotlin.time.Instant
  * In addition to the [FlushPolicy] the flush control might set certain [ ] as flush pending iff a [DocumentsWriterPerThread] exceeds the
  * [IndexWriterConfig.rAMPerThreadHardLimitMB] to prevent address space exhaustion.
  */
+@OptIn(ExperimentalAtomicApi::class)
 class DocumentsWriterFlushControl(
     private val documentsWriter: DocumentsWriter,
     private val config: LiveIndexWriterConfig
@@ -74,6 +81,7 @@ class DocumentsWriterFlushControl(
     // future by
     // polling the flushQueue
     private val flushingWriters: MutableList<DocumentsWriterPerThread> = mutableListOf()
+    private val flushingWritersCount: AtomicInteger = AtomicInteger(0)
 
     private var maxConfiguredRamBuffer = 0.0
     var peakActiveBytes: Long = 0 // only with assert
@@ -295,11 +303,21 @@ class DocumentsWriterFlushControl(
     // TODO Syncronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun doAfterFlush(dwpt: DocumentsWriterPerThread) {
-        assert(flushingWriters.contains(dwpt))
+        val removed = flushingWriters.remove(dwpt)
+        if (!removed) {
+            logger.debug { "DWFC.doAfterFlush(): DWPT was not present in flushingWriters seg=${dwpt.getSegmentInfo().name}" }
+        }
         try {
-            flushingWriters.remove(dwpt)
+            val count = flushingWritersCount.decrementAndFetch()
+            if (count < 0) {
+                // Keep count monotonic to avoid indefinite waitForFlush spin if accounting gets imbalanced.
+                flushingWritersCount.set(0)
+                logger.debug { "DWFC.doAfterFlush(): flushingWritersCount went negative, clamped to zero" }
+            }
             this.flushingBytes -= dwpt.lastCommittedBytesUsed
-            //logger.debug { "DWFC.doAfterFlush() seg=${dwpt.getSegmentInfo().name} flushingWriters=${flushingWriters.size} flushingBytes=$flushingBytes" }
+            logger.debug {
+                "DWFC.doAfterFlush() seg=${dwpt.getSegmentInfo().name} flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} flushingBytes=$flushingBytes"
+            }
             assert(assertMemory())
         } finally {
             try {
@@ -353,17 +371,28 @@ class DocumentsWriterFlushControl(
     // TODO Syncronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun waitForFlush() {
-        //logger.debug { "DWFC.waitForFlush() enter: flushingWriters=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush" }
-        while (flushingWriters.isNotEmpty()) {
+        val start = Clock.System.now()
+        var spins = 0
+        logger.debug {
+            "DWFC.waitForFlush() enter: flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush"
+        }
+        while (flushingWritersCount.load() > 0) {
             try {
-                /*(this as java.lang.Object).wait()*/
-                // TODO notifyAll is not supported in KMP, need to think what to do here
-                //logger.debug { "DWFC.waitForFlush() loop: flushingWriters=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size}" }
+                spins++
+                if (spins % 1024 == 0) {
+                    logger.debug {
+                        "DWFC.waitForFlush() loop: spins=$spins flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
+                    }
+                }
+                // No monitor wait/notify in KMP; yield cooperatively so in-flight flush work can complete.
+                runBlocking { yield() }
             } catch (e: CancellationException) {
                 throw ThreadInterruptedException(e)
             }
         }
-        //logger.debug { "DWFC.waitForFlush() exit" }
+        logger.debug {
+            "DWFC.waitForFlush() exit: spins=$spins elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
+        }
     }
 
     /**
@@ -448,7 +477,10 @@ class DocumentsWriterFlushControl(
     private fun addFlushingDWPT(perThread: DocumentsWriterPerThread) {
         assert(!flushingWriters.contains(perThread)) { "DWPT is already flushing" }
         flushingWriters.add(perThread)
-        //logger.debug { "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWriters=${flushingWriters.size}" }
+        val count = flushingWritersCount.incrementAndFetch()
+        logger.debug {
+            "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWritersCount=$count flushingWritersList=${flushingWriters.size}"
+        }
     }
 
     /**
@@ -589,7 +621,7 @@ class DocumentsWriterFlushControl(
     fun finishFullFlush() {
         assert(this.isFullFlush)
         assert(flushQueue.isEmpty())
-        assert(flushingWriters.isEmpty())
+        assert(flushingWritersCount.load() == 0)
         try {
             if (!blockedFlushes.isEmpty()) {
                 assert(assertBlockedFlushes(documentsWriter.deleteQueue))
@@ -678,7 +710,7 @@ class DocumentsWriterFlushControl(
     /**
      * Returns the number of DWPTs currently marked as flushing (in-flight). */
     fun numFlushingDWPT(): Int {
-        return flushingWriters.size
+        return flushingWritersCount.load()
     }
 
     /**

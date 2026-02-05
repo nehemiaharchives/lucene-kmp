@@ -3149,14 +3149,15 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                         val storedFields: StoredFields = r.storedFields()
                         val binaries: BinaryDocValues = r.getBinaryDocValues("dvBin")!!
                         val sorted: SortedDocValues? = r.getSortedDocValues("dvSorted")
+                        val sortedNonNull: SortedDocValues = assertNotNull(sorted)
                         val numerics: NumericDocValues = r.getNumericDocValues("dvNum")!!
                         for (j in 0..<r.maxDoc()) {
                             val binaryValue: BytesRef = storedFields.document(j).getBinaryValue("storedBin")!!
                             assertEquals(j.toLong(), binaries.nextDoc().toLong())
                             var scratch: BytesRef = binaries.binaryValue()!!
                             assertEquals(binaryValue, scratch)
-                            assertEquals(j.toLong(), sorted.nextDoc().toLong())
-                            scratch = sorted.lookupOrd(sorted.ordValue())!!
+                            assertEquals(j.toLong(), sortedNonNull.nextDoc().toLong())
+                            scratch = sortedNonNull.lookupOrd(sortedNonNull.ordValue())!!
                             assertEquals(binaryValue, scratch)
                             val expected: String = storedFields.document(j).get("storedNum")!!
                             assertEquals(j.toLong(), numerics.nextDoc().toLong())
@@ -3270,7 +3271,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                         val storedFields: StoredFields =
                             r.storedFields()
                         val binaries: BinaryDocValues? = r.getBinaryDocValues("dvBin")
-                        val sorted: SortedDocValues = r.getSortedDocValues("dvSorted")!!
+                        val sorted: SortedDocValues? = r.getSortedDocValues("dvSorted")
                         val numerics: NumericDocValues? = r.getNumericDocValues("dvNum")
                         val sortedSet: SortedSetDocValues? = r.getSortedSetDocValues("dvSortedSet")
                         val sortedNumeric: SortedNumericDocValues? = r.getSortedNumericDocValues("dvSortedNumeric")
@@ -3278,12 +3279,12 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                             val binaryValue: BytesRef? = storedFields.document(j).getBinaryValue("storedBin")
                             if (binaryValue != null) {
                                 if (binaries != null) {
-                                    assertNotNull(sorted)
+                                    val sortedNonNull = assertNotNull(sorted)
                                     assertEquals(j.toLong(), binaries.nextDoc().toLong())
                                     var scratch: BytesRef? = binaries.binaryValue()
                                     assertEquals(binaryValue, scratch)
-                                    assertEquals(j.toLong(), sorted.nextDoc().toLong())
-                                    scratch = sorted.lookupOrd(sorted.ordValue())
+                                    assertEquals(j.toLong(), sortedNonNull.nextDoc().toLong())
+                                    scratch = sortedNonNull.lookupOrd(sortedNonNull.ordValue())
                                     assertEquals(binaryValue, scratch)
                                 }
                             }

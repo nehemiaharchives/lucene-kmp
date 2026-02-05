@@ -473,7 +473,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         readerPool.enableReaderPooling()
         var r: StandardDirectoryReader? = null
         doBeforeFlush()
-        var anyChanges: Boolean
+        var anyChanges = false
         val maxFullFlushMergeWaitMillis: Long = config.maxFullFlushMergeWaitMillis
         /*
      * for releasing a NRT reader we must ensure that
@@ -528,9 +528,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
        */
             var success = false
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(fullFlushLock) {
-            try {
+            withFullFlushLock {
+                try {
                 // TODO: should we somehow make the seqNo available in the returned NRT reader
                 anyChanges = runBlocking { docWriter.flushAllThreads() } < 0
                 if (!anyChanges) {
@@ -565,7 +564,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         this, readerFactory, segmentInfos, applyAllDeletes, writeAllDeletes
                     )
                 if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "return reader version=" + r.version + " reader=" + r)
+                    infoStream.message("IW", "return reader version=" + r!!.version + " reader=" + r)
                 }
                 if (maxFullFlushMergeWaitMillis > 0) {
                     // we take the SIS from the reader which has already pruned away fully deleted readers
@@ -581,7 +580,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // while holding that lock. Merging outside of the lock ie. after calling
                     // docWriter.finishFullFlush(boolean) would
                     // yield wrong results because deletes might sneak in during the merge
-                    openingSegmentInfos = r.segmentInfos.clone()
+                    openingSegmentInfos = r!!.segmentInfos.clone()
                     onGetReaderMerges =
                         preparePointInTimeMerge(
                             openingSegmentInfos,
@@ -625,8 +624,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         }
                 }
                 //} // synchronized(this)
-                success = true
-            } finally {
+                    success = true
+                } finally {
                 // Done: finish the full flush!
 
                 // TODO Thread is not supported in KMP, need to think what to do here
@@ -640,8 +639,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         infoStream.message("IW", "hit exception during NRT reader")
                     }
                 }
+                }
             }
-            //} // synchronized(fullFlushLock)
             if (onGetReaderMerges != null) { // only relevant if we do merge on getReader
                 val mergedReader: StandardDirectoryReader? =
                     finishGetReaderMerge(
@@ -656,7 +655,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     )
                 if (mergedReader != null) {
                     try {
-                        r.close()
+                        r!!.close()
                     } finally {
                         r = mergedReader
                     }
@@ -689,7 +688,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 IOUtils.close(onGetReaderMergeResources)
             }
         }
-        return r
+        return r!!
     }
 
     @Throws(IOException::class)
@@ -3626,9 +3625,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         logger.debug { "prepareCommit: doBeforeFlush" }
         doBeforeFlush()
         testPoint("startDoFlush")
-        var toCommit: SegmentInfos?
+        var toCommit: SegmentInfos = segmentInfos.clone()
         var anyChanges = false
-        var seqNo: Long
+        var seqNo: Long = -1L
         var pointInTimeMerges: MergePolicy.MergeSpecification? = null
         val stopAddingMergedSegments = AtomicBoolean(false)
         val maxCommitMergeWaitMillis: Long = config.maxFullFlushMergeWaitMillis
@@ -3638,11 +3637,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // sync block:
         try {
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(fullFlushLock) {
-            var flushSuccess = false
-            var success = false
-            try {
+            withFullFlushLock {
+                var flushSuccess = false
+                var success = false
+                try {
                 if (infoStream.isEnabled("IW")) {
                     infoStream.message("IW", "prepareCommit: flushAllThreads start")
                 }
@@ -3735,27 +3733,24 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             { `_`: SegmentCommitInfo -> })
                 }
                 //} // end of synchronized(this)
-                success = true
-            } finally {
-                if (!success) {
-                    if (infoStream.isEnabled("IW")) {
-                        infoStream.message("IW", "hit exception during prepareCommit")
+                    success = true
+                } finally {
+                    if (!success) {
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "hit exception during prepareCommit")
+                        }
                     }
+                    // Done: finish the full flush!
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "prepareCommit: finishFullFlush")
+                    }
+                    logger.debug { "prepareCommit: finishFullFlush" }
+                    docWriter.finishFullFlush(flushSuccess)
+                    logger.debug { "prepareCommit: doAfterFlush start" }
+                    doAfterFlush()
+                    logger.debug { "prepareCommit: doAfterFlush done" }
                 }
-
-                // TODO Thread is not supported in KMP, need to think what to do here
-                //assert(java.lang.Thread.holdsLock(fullFlushLock))
-                // Done: finish the full flush!
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "prepareCommit: finishFullFlush")
-                }
-                logger.debug { "prepareCommit: finishFullFlush" }
-                docWriter.finishFullFlush(flushSuccess)
-                logger.debug { "prepareCommit: doAfterFlush start" }
-                doAfterFlush()
-                logger.debug { "prepareCommit: doAfterFlush done" }
             }
-            //} // end of synchronized(fullFlushLock)
             logger.debug { "prepareCommit: after fullFlush block" }
         } catch (tragedy: Error) {
             tragicEvent(tragedy, "prepareCommit")
@@ -4304,7 +4299,16 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
     // Ensures only one flush() is actually flushing segments
     // at a time:
-    private val fullFlushLock = Any()
+    private val fullFlushLock = ReentrantLock()
+
+    private inline fun <T> withFullFlushLock(block: () -> T): T {
+        fullFlushLock.lock()
+        try {
+            return block()
+        } finally {
+            fullFlushLock.unlock()
+        }
+    }
 
     /**
      * Moves all in-memory segments to the [Directory], but does not commit (fsync) them (call
@@ -4365,12 +4369,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 infoStream.message("IW", "  start flush: applyAllDeletes=$applyAllDeletes")
                 infoStream.message("IW", "  index before flush " + segString())
             }
-            var anyChanges: Boolean
+            var anyChanges = false
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(fullFlushLock) {
-            var flushSuccess = false
-            try {
+            withFullFlushLock {
+                var flushSuccess = false
+                try {
                 logger.debug { "doFlush: docWriter.flushAllThreads start" }
                 anyChanges = (runBlocking { docWriter.flushAllThreads() } < 0)
                 logger.debug { "doFlush: docWriter.flushAllThreads done anyChanges=$anyChanges" }
@@ -4381,17 +4384,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 logger.debug { "doFlush: publishFlushedSegments start" }
                 publishFlushedSegments(true)
                 logger.debug { "doFlush: publishFlushedSegments done" }
-                flushSuccess = true
-            } finally {
+                    flushSuccess = true
+                } finally {
 
                 // TODO Thread is not supported in KMP, need to think what to do here
                 //assert(java.lang.Thread.holdsLock(fullFlushLock))
-                logger.debug { "doFlush: finishFullFlush start success=$flushSuccess" }
-                docWriter.finishFullFlush(flushSuccess)
-                logger.debug { "doFlush: finishFullFlush done" }
-                processEvents(false)
+                    logger.debug { "doFlush: finishFullFlush start success=$flushSuccess" }
+                    docWriter.finishFullFlush(flushSuccess)
+                    logger.debug { "doFlush: finishFullFlush done" }
+                    processEvents(false)
+                }
             }
-            //}
 
             if (applyAllDeletes) {
                 logger.debug { "doFlush: applyAllDeletesAndUpdates start" }
