@@ -82,11 +82,11 @@ class ExecutorCompletionServiceTest {
             }
 
             // Not ready yet; small timeout should return null
-            assertNull(ecs.poll(20, TimeUnit.MILLISECONDS))
+            assertNull(withContext(Dispatchers.Default) { ecs.poll(20, TimeUnit.MILLISECONDS) })
 
             // Larger timeout should allow completion
             gate.complete(Unit)
-            val f = ecs.poll(200, TimeUnit.MILLISECONDS)
+            val f = withContext(Dispatchers.Default) { ecs.poll(200, TimeUnit.MILLISECONDS) }
             assertNotNull(f)
             assertEquals(7, f.get())
         } finally {

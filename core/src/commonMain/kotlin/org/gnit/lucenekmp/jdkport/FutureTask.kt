@@ -13,7 +13,6 @@ import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.coroutines.resume
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 
@@ -191,7 +190,7 @@ open class FutureTask<V> : RunnableFuture<V> {
 
         try {
             if (mayInterruptIfRunning) {
-                runner.load()!!.cancel()
+                runner.load()?.cancel()
                 state.store(INTERRUPTED)
             }
         } finally {
