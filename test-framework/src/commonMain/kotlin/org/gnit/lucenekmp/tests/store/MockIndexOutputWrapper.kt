@@ -99,14 +99,17 @@ class MockIndexOutputWrapper(private val dir: MockDirectoryWrapper, out: IndexOu
             assert(out != null)
             dir.maybeThrowDeterministicException()
         } finally {
-            out!!.close()
-            dir.removeIndexOutput(this, name!!)
-            if (dir.trackDiskUsage) {
-                // Now compute actual disk usage & track the maxUsedSize
-                // in the MockDirectoryWrapper:
-                val size = dir.sizeInBytes()
-                if (size > dir.maxUsedSizeInBytes) {
-                    dir.maxUsedSizeInBytes = size
+            try {
+                out!!.close()
+            } finally {
+                dir.removeIndexOutput(this, name!!)
+                if (dir.trackDiskUsage) {
+                    // Now compute actual disk usage & track the maxUsedSize
+                    // in the MockDirectoryWrapper:
+                    val size = dir.sizeInBytes()
+                    if (size > dir.maxUsedSizeInBytes) {
+                        dir.maxUsedSizeInBytes = size
+                    }
                 }
             }
         }
