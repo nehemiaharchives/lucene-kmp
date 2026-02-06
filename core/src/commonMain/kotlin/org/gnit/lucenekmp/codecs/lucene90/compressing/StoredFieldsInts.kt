@@ -94,7 +94,7 @@ internal object StoredFieldsInts {
         while (k < count - BLOCK_SIZE_MINUS_ONE) {
             val step = offset + k
             for (i in 0..63) {
-                val l = (values[step + i].toLong() shl 32) or values[step + 64 + i].toLong()
+                val l = (values[step + i].toLong() shl 32) or (values[step + 64 + i].toLong() and 0xFFFFFFFFL)
                 out.writeLong(l)
             }
             k += BLOCK_SIZE
