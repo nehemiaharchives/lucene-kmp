@@ -492,14 +492,9 @@ open class SortField {
      *
      * @lucene.experimental
      */
-    open val indexSorter: IndexSorter? = null
+    open val indexSorter: IndexSorter?
     get() {
-        // Early return if field is null
-        if (field == null) {
-            return null
-        }
-
-        val fieldName = this.field!! // Safe to use non-null assertion as we checked above
+        val fieldName = this.field ?: return null
 
         when (type) {
             Type.STRING -> {

@@ -157,7 +157,7 @@ internal class NumericDocValuesWriter(
         }
     }
 
-    internal class NumericDVs(val values: LongArray, private val docsWithField: BitSet) {
+    internal class NumericDVs(val values: LongArray, private val docsWithField: BitSet?) {
         private val maxDoc: Int = values.size
 
         fun maxDoc(): Int {
@@ -211,7 +211,7 @@ internal class NumericDocValuesWriter(
                 docsWithField?.set(newDocID)
                 values[newDocID] = oldDocValues.longValue()
             }
-            return NumericDVs(values, docsWithField!!)
+            return NumericDVs(values, docsWithField)
         }
 
         @Throws(IOException::class)

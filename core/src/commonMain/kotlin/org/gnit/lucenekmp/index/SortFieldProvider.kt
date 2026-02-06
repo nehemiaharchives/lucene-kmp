@@ -3,6 +3,8 @@ package org.gnit.lucenekmp.index
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.ClassLoader
 import org.gnit.lucenekmp.search.SortField
+import org.gnit.lucenekmp.search.SortedNumericSortField
+import org.gnit.lucenekmp.search.SortedSetSortField
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
 import org.gnit.lucenekmp.util.NamedSPILoader
@@ -50,8 +52,22 @@ abstract class SortFieldProvider protected constructor(override val name: String
     companion object {
         /** Looks up a SortFieldProvider by name  */
         fun forName(name: String): SortFieldProvider {
-            //return Holder.loader.lookup(name)
-            throw UnsupportedOperationException("SortFieldProvider.forName is not implemented yet")
+            return when (name) {
+                SortField.Provider.NAME -> SortField.Provider()
+                SortedSetSortField.Provider.NAME -> SortedSetSortField.Provider()
+                SortedNumericSortField.Provider.NAME -> SortedNumericSortField.Provider()
+                else -> {
+                    try {
+                        Holder.loader.lookup(name)
+                    } catch (e: Throwable) {
+                        throw UnsupportedOperationException(
+                            "SortFieldProvider '$name' is not available. Known built-ins: " +
+                                "[${SortField.Provider.NAME}, ${SortedSetSortField.Provider.NAME}, ${SortedNumericSortField.Provider.NAME}].",
+                            e
+                        )
+                    }
+                }
+            }
         }
 
         /** Lists all available SortFieldProviders  */

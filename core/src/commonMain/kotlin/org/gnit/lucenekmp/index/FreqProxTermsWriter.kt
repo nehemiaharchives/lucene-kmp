@@ -360,9 +360,10 @@ class FreqProxTermsWriter(
         private var pos = 0
         private var startOffset = 0
         private var endOffset = 0
+        private val payloadRef = BytesRef()
         override val payload: BytesRef?
             get(): BytesRef? {
-                return if (payload!!.length == 0) null else payload
+                return if (payloadRef.length == 0) null else payloadRef
             }
 
         private var currFreq = 0
@@ -483,14 +484,14 @@ class FreqProxTermsWriter(
                 endOffset = startOffset + postingInput!!.readVInt()
             }
             if ((token and 1) != 0) {
-                payload!!.offset = 0
-                payload!!.length = postingInput!!.readVInt()
-                if (payload!!.length > payload!!.bytes.size) {
-                    payload!!.bytes = ByteArray(ArrayUtil.oversize(payload!!.length, 1))
+                payloadRef.offset = 0
+                payloadRef.length = postingInput!!.readVInt()
+                if (payloadRef.length > payloadRef.bytes.size) {
+                    payloadRef.bytes = ByteArray(ArrayUtil.oversize(payloadRef.length, 1))
                 }
-                postingInput!!.readBytes(payload!!.bytes, 0, payload!!.length)
+                postingInput!!.readBytes(payloadRef.bytes, 0, payloadRef.length)
             } else {
-                payload!!.length = 0
+                payloadRef.length = 0
             }
             return pos
         }

@@ -351,7 +351,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         // read field numbers that have term vectors
         val fieldNums: IntArray
         run {
-            val token: Int = (vectorsStream.readByte() and 0xFF.toByte()).toInt()
+            val token: Int = vectorsStream.readByte().toInt() and 0xFF
             require(
                 token != 0 // means no term vectors, cannot happen since we checked for numFields == 0
             )
