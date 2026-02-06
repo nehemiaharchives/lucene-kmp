@@ -79,7 +79,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testRandomStoredFields() {
+    open fun testRandomStoredFields() {
         val dir: Directory = newDirectory()
         val rand: Random = random()
         val w = RandomIndexWriter(rand, dir, newIndexWriterConfig(MockAnalyzer(random())).setMaxBufferedDocs(TestUtil.nextInt(rand, 5, 20)))
@@ -182,7 +182,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // LUCENE-1727: make sure doc fields are stored in order
     @Throws(Throwable::class)
-    fun testStoredFieldsOrder() {
+    open fun testStoredFieldsOrder() {
         val d: Directory = newDirectory()
         val w = IndexWriter(d, newIndexWriterConfig(MockAnalyzer(random())))
         val doc = Document()
@@ -218,7 +218,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // LUCENE-1219
     @Throws(IOException::class)
-    fun testBinaryFieldOffsetLength() {
+    open fun testBinaryFieldOffsetLength() {
         val dir: Directory = newDirectory()
         val w = IndexWriter(dir, newIndexWriterConfig(MockAnalyzer(random())))
         var b = ByteArray(50)
@@ -248,7 +248,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testNumericField() {
+    open fun testNumericField() {
         val dir: Directory = newDirectory()
         val w = RandomIndexWriter(random(), dir)
         val numDocs: Int = atLeast(500)
@@ -323,7 +323,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIndexedBit() {
+    open fun testIndexedBit() {
         val dir: Directory = newDirectory()
         val w = RandomIndexWriter(random(), dir)
         val doc = Document()
@@ -345,7 +345,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testReadSkip() {
+    open fun testReadSkip() {
         val dir: Directory = newDirectory()
         val iwConf = newIndexWriterConfig(MockAnalyzer(random()))
         iwConf.setMaxBufferedDocs(RandomNumbers.randomIntBetween(random(), 2, 30))
@@ -403,7 +403,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testEmptyDocs() {
+    open fun testEmptyDocs() {
         val dir: Directory = newDirectory()
         val iwConf = newIndexWriterConfig(MockAnalyzer(random()))
         iwConf.setMaxBufferedDocs(RandomNumbers.randomIntBetween(random(), 2, 30))
@@ -434,7 +434,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(Exception::class)
-    fun testConcurrentReads() {
+    open fun testConcurrentReads() {
         val dir: Directory = newDirectory()
         val iwConf = newIndexWriterConfig(MockAnalyzer(random()))
         iwConf.setMaxBufferedDocs(RandomNumbers.randomIntBetween(random(), 2, 30))
@@ -504,7 +504,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testWriteReadMerge() {
+    open fun testWriteReadMerge() {
         // get another codec, other than the default: so we are merging segments across different codecs
         val otherCodec: Codec
         if ("SimpleText" == Codec.default.name) {
@@ -655,7 +655,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testMergeFilterReader() {
+    open fun testMergeFilterReader() {
         val dir: Directory = newDirectory()
         var w = RandomIndexWriter(random(),dir)
         val numDocs: Int = atLeast(200)
@@ -721,7 +721,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(IOException::class)
-    fun testBigDocuments() {
+    open fun testBigDocuments() {
         // "big" as "much bigger than the chunk size"
         // for this test we force an FS dir
         // we can't just use newFSDirectory, because this test doesn't really index anything.
@@ -793,7 +793,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testBulkMergeWithDeletes() {
+    open fun testBulkMergeWithDeletes() {
         val numDocs: Int = atLeast(200)
         val dir: Directory = newDirectory()
         var w = RandomIndexWriter(random(), dir, newIndexWriterConfig(MockAnalyzer(random())).setMergePolicy(NoMergePolicy.INSTANCE))
@@ -824,7 +824,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     /** mix up field numbers, merge, and check that data is correct  */
     @Throws(Exception::class)
-    fun testMismatchedFields() {
+    open fun testMismatchedFields() {
         val dirs: Array<Directory> = Array(10)
         /*for (i in dirs.indices)*/{
             val dir: Directory = newDirectory()
@@ -881,7 +881,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testRandomStoredFieldsWithIndexSort() {
+    open fun testRandomStoredFieldsWithIndexSort() {
         val sortFields: Array<SortField>
         if (random().nextBoolean()) {
             sortFields =
@@ -1016,7 +1016,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     /** Test realistic data, which typically compresses better than random data.  */
     @Throws(IOException::class)
-    fun testLineFileDocs() {
+    open fun testLineFileDocs() {
         // Use an FS dir and a non-randomized IWC to not slow down indexing
         newFSDirectory(createTempDir())
             .use { dir ->
