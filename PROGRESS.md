@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1029 | 75% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1034 | 75% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -79,7 +79,7 @@
 |     org.apache.lucene.codecs.lucene95 |         org.gnit.lucenekmp.codecs.lucene95 | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.lucene99 |         org.gnit.lucenekmp.codecs.lucene99 | 14 | 13 | 92% | [ ] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 5 | 4 | 80% | [ ] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 41 | 46% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 42 | 47% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 185 | 92% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 16 | 61% | [ ] |
@@ -94,7 +94,7 @@
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 9 | 90% | [ ] |
-|       org.apache.lucene.tests.codecs.blockterms |           org.gnit.lucenekmp.tests.codecs.blockterms | 4 | 0 | 0% | [ ] |
+|       org.apache.lucene.tests.codecs.blockterms |           org.gnit.lucenekmp.tests.codecs.blockterms | 4 | 1 | 25% | [ ] |
 |       org.apache.lucene.tests.codecs.bloom |           org.gnit.lucenekmp.tests.codecs.bloom | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.codecs.cheapbastard |           org.gnit.lucenekmp.tests.codecs.cheapbastard | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.compressing |           org.gnit.lucenekmp.tests.codecs.compressing | 7 | 6 | 85% | [ ] |
@@ -106,7 +106,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 18 | 45% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 21 | 52% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
@@ -139,7 +139,7 @@
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene101 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.lucene102 | 2 | 0 | 0% |
-|     org.apache.lucene.codecs.lucene90 | 14 | 3 | 21% |
+|     org.apache.lucene.codecs.lucene90 | 14 | 4 | 28% |
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 0 | 0% |
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 167 | 24% |
+| Total | 673 | 168 | 24% |
 
 
 ## Tests To Port
@@ -199,7 +199,6 @@
 | [org.apache.lucene.codecs.lucene101.TestLucene101PostingsFormatV0](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene101/TestLucene101PostingsFormatV0.java) | org.gnit.lucenekmp.codecs.lucene101.TestLucene101PostingsFormatV0 |
 | [org.apache.lucene.codecs.lucene102.TestLucene102BinaryQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene102/TestLucene102BinaryQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene102.TestLucene102BinaryQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene102/TestLucene102HnswBinaryQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat |
-| [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatVariableSkipInterval.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval |
 | [org.apache.lucene.codecs.lucene90.TestLucene90LiveDocsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90LiveDocsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90LiveDocsFormat |

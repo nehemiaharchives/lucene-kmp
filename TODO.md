@@ -118,7 +118,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.cranky.CrankyStoredFieldsFormat → org.gnit.lucenekmp.tests.codecs.cranky.CrankyStoredFieldsFormat
 - org.apache.lucene.tests.codecs.cranky.CrankyTermVectorsFormat → org.gnit.lucenekmp.tests.codecs.cranky.CrankyTermVectorsFormat
 - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
-- org.apache.lucene.tests.index.LegacyBaseDocValuesFormatTestCase → org.gnit.lucenekmp.tests.index.LegacyBaseDocValuesFormatTestCase
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
 - org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
 - org.apache.lucene.tests.mockfile.FilterFileSystem → org.gnit.lucenekmp.tests.mockfile.FilterFileSystem
@@ -299,7 +298,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat → org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat
 - org.apache.lucene.tests.geo.BaseGeoPointTestCase → org.gnit.lucenekmp.tests.geo.BaseGeoPointTestCase
 - org.apache.lucene.tests.geo.BaseXYPointTestCase → org.gnit.lucenekmp.tests.geo.BaseXYPointTestCase
-- org.apache.lucene.tests.index.BaseDocValuesFormatTestCase → org.gnit.lucenekmp.tests.index.BaseDocValuesFormatTestCase
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
 - org.apache.lucene.tests.index.BaseLiveDocsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseLiveDocsFormatTestCase
 - org.apache.lucene.tests.index.BaseMergePolicyTestCase → org.gnit.lucenekmp.tests.index.BaseMergePolicyTestCase
@@ -357,7 +355,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.lucene102.BinarizedByteVectorValues → org.gnit.lucenekmp.codecs.lucene102.BinarizedByteVectorValues
 - org.apache.lucene.codecs.lucene102.Lucene102BinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat
-- org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormat
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockDecoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockDecoder
 - org.apache.lucene.codecs.uniformsplit.BlockHeader → org.gnit.lucenekmp.codecs.uniformsplit.BlockHeader
@@ -386,7 +383,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.LatLonShapeDocValuesField → org.gnit.lucenekmp.document.LatLonShapeDocValuesField
 - org.apache.lucene.document.LongRangeDocValuesField → org.gnit.lucenekmp.document.LongRangeDocValuesField
 - org.apache.lucene.document.ShapeDocValuesField → org.gnit.lucenekmp.document.ShapeDocValuesField
-- org.apache.lucene.document.SortedSetDocValuesField → org.gnit.lucenekmp.document.SortedSetDocValuesField
 - org.apache.lucene.document.TestLatLonPointDistanceSort → org.gnit.lucenekmp.document.TestLatLonPointDistanceSort
 - org.apache.lucene.document.XYDocValuesField → org.gnit.lucenekmp.document.XYDocValuesField
 - org.apache.lucene.document.XYPointField → org.gnit.lucenekmp.document.XYPointField
@@ -520,14 +516,12 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.analysis.MockSynonymFilter → org.gnit.lucenekmp.tests.analysis.MockSynonymFilter
 - org.apache.lucene.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1 → org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1
 - org.apache.lucene.tests.analysis.standard.WordBreakTestUnicode_12_1_0 → org.gnit.lucenekmp.tests.analysis.standard.WordBreakTestUnicode_12_1_0
-- org.apache.lucene.tests.codecs.blockterms.LuceneFixedGap → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
 - org.apache.lucene.tests.codecs.cranky.CrankyCodec → org.gnit.lucenekmp.tests.codecs.cranky.CrankyCodec
 - org.apache.lucene.tests.codecs.vector.ConfigurableMCodec → org.gnit.lucenekmp.tests.codecs.vector.ConfigurableMCodec
 - org.apache.lucene.tests.geo.EarthDebugger → org.gnit.lucenekmp.tests.geo.EarthDebugger
 - org.apache.lucene.tests.index.AllDeletedFilterReader → org.gnit.lucenekmp.tests.index.AllDeletedFilterReader
-- org.apache.lucene.tests.index.BaseCompressingDocValuesFormatTestCase → org.gnit.lucenekmp.tests.index.BaseCompressingDocValuesFormatTestCase
 - org.apache.lucene.tests.index.BaseTestCheckIndex → org.gnit.lucenekmp.tests.index.BaseTestCheckIndex
 - org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper
 - org.apache.lucene.tests.index.ForceMergePolicy → org.gnit.lucenekmp.tests.index.ForceMergePolicy
@@ -652,7 +646,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextLiveDocsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextLiveDocsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextPostingsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPostingsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextStoredFieldsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextStoredFieldsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextTermVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextTermVectorsFormat
