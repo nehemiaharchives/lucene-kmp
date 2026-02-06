@@ -5,11 +5,8 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.util.configureTestLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.TimeZone
-import okio.FileSystem
 import okio.IOException
 import okio.Path
-import okio.Path.Companion.toPath
-import okio.SYSTEM
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.FieldType
@@ -68,8 +65,6 @@ import org.gnit.lucenekmp.tests.search.similarities.RandomSimilarity
 import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
-import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.TEST_DIRECTORY
-import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.VERBOSE
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
@@ -213,7 +208,19 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             /*Nightly::class.getAnnotation<A>(TestGroup::class)
                 .enabled()*/ false
         )
-        // ↑ line 459
+
+        /** Whether or not [Weekly] tests should run.  */
+        val TEST_WEEKLY: Boolean =
+            systemPropertyAsBoolean(
+                SYSPROP_WEEKLY,
+                /*Weekly::class.java.getAnnotation<com.carrotsearch.randomizedtesting.annotations.TestGroup?>(
+                    com.carrotsearch.randomizedtesting.annotations.TestGroup::class.java,
+                ).enabled*/ false
+            )
+
+        /** Whether or not monster tests should run. */
+        val TEST_MONSTER: Boolean = systemPropertyAsBoolean(SYSPROP_MONSTER, false)
+        // ↑ line 469
 
 
 

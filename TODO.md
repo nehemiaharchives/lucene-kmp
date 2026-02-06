@@ -299,7 +299,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.geo.BaseGeoPointTestCase → org.gnit.lucenekmp.tests.geo.BaseGeoPointTestCase
 - org.apache.lucene.tests.geo.BaseXYPointTestCase → org.gnit.lucenekmp.tests.geo.BaseXYPointTestCase
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
-- org.apache.lucene.tests.index.BaseLiveDocsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseLiveDocsFormatTestCase
 - org.apache.lucene.tests.index.BaseMergePolicyTestCase → org.gnit.lucenekmp.tests.index.BaseMergePolicyTestCase
 - org.apache.lucene.tests.index.BasePointsFormatTestCase → org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
 - org.apache.lucene.tests.index.BaseSegmentInfoFormatTestCase → org.gnit.lucenekmp.tests.index.BaseSegmentInfoFormatTestCase
@@ -618,7 +617,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance
 - org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval
-- org.apache.lucene.codecs.lucene90.TestLucene90LiveDocsFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90LiveDocsFormat
 - org.apache.lucene.codecs.lucene90.TestLucene90NormsFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormat
 - org.apache.lucene.codecs.lucene90.TestLucene90NormsFormatMergeInstance → org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormatMergeInstance
 - org.apache.lucene.codecs.lucene90.TestLucene90PointsFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90PointsFormat
@@ -644,7 +642,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2 → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextLiveDocsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextLiveDocsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextStoredFieldsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextStoredFieldsFormat
