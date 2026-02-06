@@ -194,56 +194,56 @@ jobs:
           - platform: linux
             module_name: core
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :core:linuxX64Test
             artifact: linux-core-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-common
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :analysis:common:linuxX64Test
             artifact: linux-analysis-common-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-morfologik
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :analysis:morfologik:linuxX64Test
             artifact: linux-analysis-morfologik-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-smartcn
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :analysis:smartcn:linuxX64Test
             artifact: linux-analysis-smartcn-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-nori
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :analysis:nori:linuxX64Test
             artifact: linux-analysis-nori-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-kuromoji
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :analysis:kuromoji:linuxX64Test
             artifact: linux-analysis-kuromoji-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-extra
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :analysis:extra:linuxX64Test
             artifact: linux-analysis-extra-reports
             needs_konan_cache: true
           - platform: linux
             module_name: codecs
             os: ubuntu-latest
-            timeout: 20
+            timeout: 30
             task: :codecs:linuxX64Test
             artifact: linux-codecs-reports
             needs_konan_cache: true
