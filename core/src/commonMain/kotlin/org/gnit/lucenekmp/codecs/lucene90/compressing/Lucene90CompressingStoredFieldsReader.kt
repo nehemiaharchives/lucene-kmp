@@ -737,9 +737,10 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
             } else {
                 // positive double
                 val bits =
-                    ((b.toLong()) shl 56 or ((`in`.readInt() and 0xFFFFFFFFL.toInt()) shl 24).toLong()
-                            or ((`in`.readShort() and 0xFFFFL.toShort()).toInt() shl 8).toLong()
-                            or (`in`.readByte().toLong() and 0xFFL))
+                    ((b.toLong()) shl 56) or
+                            ((`in`.readInt().toLong() and 0xFFFFFFFFL) shl 24) or
+                            ((`in`.readShort().toLong() and 0xFFFFL) shl 8) or
+                            (`in`.readByte().toLong() and 0xFFL)
                 return Double.longBitsToDouble(bits)
             }
         }
