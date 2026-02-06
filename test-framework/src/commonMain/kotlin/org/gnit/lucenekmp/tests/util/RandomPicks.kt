@@ -1,10 +1,13 @@
 package org.gnit.lucenekmp.tests.util
 
+import org.gnit.lucenekmp.jdkport.Ported
 import kotlin.random.Random
 
 /**
  * port of com.carrotsearch.randomizedtesting.generators.RandomPicks
  */
+
+@Ported(from = "com.carrotsearch.randomizedtesting.generators.RandomPicks")
 object RandomPicks {
 
     fun randomFrom(r: Random, array: ByteArray): Byte {

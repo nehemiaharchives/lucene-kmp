@@ -39,6 +39,8 @@ import org.gnit.lucenekmp.index.CheckIndex
 import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.DocValuesType
 import org.gnit.lucenekmp.index.IndexReader
+import org.gnit.lucenekmp.index.IndexWriter
+import org.gnit.lucenekmp.index.DirectoryReader
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.MultiTerms
 import org.gnit.lucenekmp.index.PostingsEnum
@@ -1405,7 +1407,7 @@ class TestUtil {
             }
         }
 
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun addIndexesSlowly(
             writer: IndexWriter,
             vararg readers: DirectoryReader
@@ -1418,7 +1420,7 @@ class TestUtil {
                 }
             }
             writer.addIndexes(*leaves.toTypedArray<CodecReader>())
-        }*/
+        }
 
         /** just tries to configure things to keep the open file count lowish  */
         /*fun reduceOpenFiles(w: IndexWriter) {
