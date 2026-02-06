@@ -119,4 +119,9 @@ subprojects {
         environment("tests.linedocsfile", testLineDocsPath)
         environment("SIMCTL_CHILD_tests.linedocsfile", testLineDocsPath)
     }
+
+    tasks.matching { it.name in setOf("compileKotlinJvm", "compileTestKotlinJvm") }
+        .configureEach {
+            group = LifecycleBasePlugin.BUILD_GROUP // "build"
+        }
 }
