@@ -173,7 +173,7 @@ internal class IntersectTermsEnum(
 
         val initOutputCount: Int = outputAccumulator.outputCount()
         while (idx < f.prefix) {
-            val target: Int = (term.bytes[idx] and 0xff.toByte()).toInt()
+            val target: Int = term.bytes[idx].toInt() and 0xFF
             // TODO: we could be more efficient for the next()
             // case by using current arc as starting point,
             // passed to findTargetArc
@@ -226,7 +226,7 @@ internal class IntersectTermsEnum(
             for (idx in 0..<currentFrame!!.suffix) {
                 state =
                     runAutomaton.step(
-                        state, (currentFrame!!.suffixBytes[currentFrame!!.startBytePos + idx] and 0xff.toByte()).toInt()
+                        state, currentFrame!!.suffixBytes[currentFrame!!.startBytePos + idx].toInt() and 0xFF
                     )
                 require(state != -1)
             }

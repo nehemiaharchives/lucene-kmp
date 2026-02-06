@@ -81,7 +81,7 @@ class BlockPackedReaderIterator(`in`: DataInput, packedIntsVersion: Int, blockSi
         // 2. skip as many blocks as necessary
         require(off == blockSize)
         while (count >= blockSize) {
-            val token: Int = (`in`!!.readByte() and 0xFF.toByte()).toInt()
+            val token: Int = `in`!!.readByte().toInt() and 0xFF
             val bitsPerValue = token ushr BPV_SHIFT
             if (bitsPerValue > 64) {
                 throw IOException("Corrupted")
@@ -161,7 +161,7 @@ class BlockPackedReaderIterator(`in`: DataInput, packedIntsVersion: Int, blockSi
 
     @Throws(IOException::class)
     private fun refill() {
-        val token: Int = (`in`!!.readByte() and 0xFF.toByte()).toInt()
+        val token: Int = `in`!!.readByte().toInt() and 0xFF
         val minEquals0 = (token and MIN_VALUE_EQUALS_0) != 0
         val bitsPerValue = token ushr BPV_SHIFT
         if (bitsPerValue > 64) {
@@ -216,7 +216,7 @@ class BlockPackedReaderIterator(`in`: DataInput, packedIntsVersion: Int, blockSi
                 }
                 shift += 7
             }
-            return l or ((`in`.readByte() and 0xFFL.toByte()).toInt() shl 56).toLong()
+            return l or ((`in`.readByte().toLong() and 0xFFL) shl 56)
         }
     }
 }

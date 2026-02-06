@@ -704,7 +704,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
          */
         @Throws(IOException::class)
         fun readZFloat(`in`: DataInput): Float {
-            val b: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+            val b: Int = `in`.readByte().toInt() and 0xFF
             if (b == 0xFF) {
                 // negative value
                 return Float.intBitsToFloat(`in`.readInt())
@@ -713,7 +713,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 return ((b and 0x7f) - 1).toFloat()
             } else {
                 // positive float
-                val bits = b shl 24 or ((`in`.readShort() and 0xFFFF.toShort()).toInt() shl 8) or (`in`.readByte() and 0xFF.toByte()).toInt()
+                val bits = b shl 24 or ((`in`.readShort().toInt() and 0xFFFF) shl 8) or (`in`.readByte().toInt() and 0xFF)
                 return Float.intBitsToFloat(bits)
             }
         }
@@ -724,7 +724,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
          */
         @Throws(IOException::class)
         fun readZDouble(`in`: DataInput): Double {
-            val b: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+            val b: Int = `in`.readByte().toInt() and 0xFF
             if (b == 0xFF) {
                 // negative value
                 return Double.longBitsToDouble(`in`.readLong())
@@ -739,7 +739,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 val bits =
                     ((b.toLong()) shl 56 or ((`in`.readInt() and 0xFFFFFFFFL.toInt()) shl 24).toLong()
                             or ((`in`.readShort() and 0xFFFFL.toShort()).toInt() shl 8).toLong()
-                            or (`in`.readByte() and 0xFFL.toByte()).toLong())
+                            or (`in`.readByte().toLong() and 0xFFL))
                 return Double.longBitsToDouble(bits)
             }
         }
@@ -750,7 +750,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
          */
         @Throws(IOException::class)
         fun readTLong(`in`: DataInput): Long {
-            val header: Int = (`in`.readByte() and 0xFF.toByte()).toInt()
+            val header: Int = `in`.readByte().toInt() and 0xFF
 
             var bits = (header and 0x1F).toLong()
             if ((header and 0x20) != 0) {

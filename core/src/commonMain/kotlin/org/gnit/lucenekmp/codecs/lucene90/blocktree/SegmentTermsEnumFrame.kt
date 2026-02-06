@@ -85,7 +85,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
         outputAccumulator.setFloorData(floorDataReader)
         rewindPos = floorDataReader.position
         numFollowFloorBlocks = floorDataReader.readVInt()
-        nextFloorLabel = (floorDataReader.readByte() and 0xff.toByte()).toInt()
+        nextFloorLabel = floorDataReader.readByte().toInt() and 0xFF
         // if (DEBUG) {
         // System.out.println("    setFloorData fpOrig=" + fpOrig + " bytes=" + new
         // BytesRef(source.bytes, source.offset + in.position, numBytes) + " numFollowFloorBlocks="
@@ -239,7 +239,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
             floorDataReader.position = (rewindPos)
             numFollowFloorBlocks = floorDataReader.readVInt()
             require(numFollowFloorBlocks > 0)
-            nextFloorLabel = (floorDataReader.readByte() and 0xff.toByte()).toInt()
+            nextFloorLabel = floorDataReader.readByte().toInt() and 0xFF
         }
 
         /*
@@ -399,7 +399,7 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
                 // }
                 break
             } else {
-                nextFloorLabel = (floorDataReader.readByte() and 0xff.toByte()).toInt()
+                nextFloorLabel = floorDataReader.readByte().toInt() and 0xFF
                 if (targetLabel < nextFloorLabel) {
                     // if (DEBUG) {
                     //   System.out.println("        stop!  nextFloorLabel=" + toHex(nextFloorLabel));

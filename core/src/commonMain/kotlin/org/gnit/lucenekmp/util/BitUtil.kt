@@ -339,14 +339,14 @@ object BitUtil {
  */
 fun ByteArray.getLongBE(offset: Int): Long {
     require(offset >= 0 && offset + 8 <= size) { "Invalid offset: $offset" }
-    return (this[offset].toLong() and 0xFF shl 56) or
-            (this[offset + 1].toLong() and 0xFF shl 48) or
-            (this[offset + 2].toLong() and 0xFF shl 40) or
-            (this[offset + 3].toLong() and 0xFF shl 32) or
-            (this[offset + 4].toLong() and 0xFF shl 24) or
-            (this[offset + 5].toLong() and 0xFF shl 16) or
-            (this[offset + 6].toLong() and 0xFF shl 8) or
-            (this[offset + 7].toLong() and 0xFF)
+    return ((this[offset].toLong() and 0xFFL) shl 56) or
+            ((this[offset + 1].toLong() and 0xFFL) shl 48) or
+            ((this[offset + 2].toLong() and 0xFFL) shl 40) or
+            ((this[offset + 3].toLong() and 0xFFL) shl 32) or
+            ((this[offset + 4].toLong() and 0xFFL) shl 24) or
+            ((this[offset + 5].toLong() and 0xFFL) shl 16) or
+            ((this[offset + 6].toLong() and 0xFFL) shl 8) or
+            (this[offset + 7].toLong() and 0xFFL)
 }
 
 /**
@@ -354,9 +354,9 @@ fun ByteArray.getLongBE(offset: Int): Long {
  */
 fun ByteArray.getIntBE(offset: Int): Int {
     require(offset >= 0 && offset + 4 <= size) { "Invalid offset: $offset" }
-    return (this[offset].toInt() and 0xFF shl 24) or
-            (this[offset + 1].toInt() and 0xFF shl 16) or
-            (this[offset + 2].toInt() and 0xFF shl 8) or
+    return ((this[offset].toInt() and 0xFF) shl 24) or
+            ((this[offset + 1].toInt() and 0xFF) shl 16) or
+            ((this[offset + 2].toInt() and 0xFF) shl 8) or
             (this[offset + 3].toInt() and 0xFF)
 }
 

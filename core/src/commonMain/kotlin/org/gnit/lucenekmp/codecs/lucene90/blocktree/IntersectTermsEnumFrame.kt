@@ -109,7 +109,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
             fp = fpOrig + (floorDataReader.readVLong() ushr 1)
             numFollowFloorBlocks--
             nextFloorLabel = if (numFollowFloorBlocks != 0) {
-                (floorDataReader.readByte() and 0xff.toByte()).toInt()
+                floorDataReader.readByte().toInt() and 0xFF
             } else {
                 256
             }
@@ -140,7 +140,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
             if ((blockCode and Lucene90BlockTreeTermsReader.OUTPUT_FLAG_IS_FLOOR.toLong()) != 0L) {
                 // Floor frame
                 numFollowFloorBlocks = floorDataReader.readVInt()
-                nextFloorLabel = (floorDataReader.readByte() and 0xff.toByte()).toInt()
+                nextFloorLabel = floorDataReader.readByte().toInt() and 0xFF
 
                 // If current state is not accept, and has transitions, we must process
                 // first block in case it has empty suffix:
@@ -151,7 +151,7 @@ internal class IntersectTermsEnumFrame(private val ite: IntersectTermsEnum, val 
                         fp = fpOrig + (floorDataReader.readVLong() ushr 1)
                         numFollowFloorBlocks--
                         nextFloorLabel = if (numFollowFloorBlocks != 0) {
-                            (floorDataReader.readByte() and 0xff.toByte()).toInt()
+                            floorDataReader.readByte().toInt() and 0xFF
                         } else {
                             256
                         }
