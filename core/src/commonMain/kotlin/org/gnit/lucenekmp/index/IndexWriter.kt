@@ -215,6 +215,16 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     private val addIndexesMergeSource = AddIndexesMergeSource(this)
 
     private val writeDocValuesLock: ReentrantLock = ReentrantLock()
+    private val indexWriterLock: ReentrantLock = ReentrantLock()
+
+    private inline fun <T> withIndexWriterLock(action: () -> T): T {
+        indexWriterLock.lock()
+        try {
+            return action()
+        } finally {
+            indexWriterLock.unlock()
+        }
+    }
 
     internal class EventQueue(private val writer: IndexWriter) : AutoCloseable {
         @Volatile
@@ -3863,80 +3873,76 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
                         @Throws(IOException::class)
                         override fun mergeFinished(committed: Boolean, segmentDropped: Boolean) {
+                            withIndexWriterLock {
+                                // includedInCommit will be set (above, by our caller) to false if the
+                                // allowed max wall clock
+                                // time (IWC.getMaxCommitMergeWaitMillis()) has elapsed, which means we did
+                                // not make the timeout
+                                // and will not commit our merge to the to-be-committed SegmentInfos
+                                if (!segmentDropped && committed && !stopCollectingMergeResults()) {
+                                    // make sure onMergeComplete really was called:
+                                    checkNotNull(origInfo)
 
-                            // TODO Thread is not supported in KMP, need to think what to do here
-                            //assert(java.lang.Thread.holdsLock(this@IndexWriter))
+                                    if (infoStream.isEnabled("IW")) {
+                                        infoStream.message(
+                                            "IW", "now apply merge during commit: " + toWrap.segString()
+                                        )
+                                    }
 
-                            // includedInCommit will be set (above, by our caller) to false if the
-                            // allowed max wall clock
-                            // time (IWC.getMaxCommitMergeWaitMillis()) has elapsed, which means we did
-                            // not make the timeout
-                            // and will not commit our merge to the to-be-committed SegmentInfos
-                            if (!segmentDropped && committed && !stopCollectingMergeResults()) {
-                                // make sure onMergeComplete really was called:
-
-                                checkNotNull(origInfo)
-
-                                if (infoStream.isEnabled("IW")) {
-                                    infoStream.message(
-                                        "IW", "now apply merge during commit: " + toWrap.segString()
-                                    )
-                                }
-
-                                if (trigger == MergeTrigger.COMMIT) {
-                                    // if we do this in a getReader call here this is obsolete since we
-                                    // already hold a reader that has
-                                    // incRef'd these files
-                                    deleter.incRef(origInfo!!.files())
-                                }
-                                val mergedSegmentNames: MutableSet<String> = HashSet()
-                                for (sci in segments) {
-                                    mergedSegmentNames.add(sci.info.name)
-                                }
-                                val toCommitMergedAwaySegments: MutableList<SegmentCommitInfo> = mutableListOf()
-                                for (sci in mergingSegmentInfos) {
-                                    if (mergedSegmentNames.contains(sci.info.name)) {
-                                        toCommitMergedAwaySegments.add(sci)
-                                        if (trigger == MergeTrigger.COMMIT) {
-                                            // if we do this in a getReader call here this is obsolete since we
-                                            // already hold a reader that has
-                                            // incRef'd these files and will decRef them when it's closed
-                                            deleter.decRef(sci.files())
+                                    if (trigger == MergeTrigger.COMMIT) {
+                                        // if we do this in a getReader call here this is obsolete since we
+                                        // already hold a reader that has
+                                        // incRef'd these files
+                                        deleter.incRef(origInfo!!.files())
+                                    }
+                                    val mergedSegmentNames: MutableSet<String> = HashSet()
+                                    for (sci in segments) {
+                                        mergedSegmentNames.add(sci.info.name)
+                                    }
+                                    val toCommitMergedAwaySegments: MutableList<SegmentCommitInfo> = mutableListOf()
+                                    for (sci in mergingSegmentInfos) {
+                                        if (mergedSegmentNames.contains(sci.info.name)) {
+                                            toCommitMergedAwaySegments.add(sci)
+                                            if (trigger == MergeTrigger.COMMIT) {
+                                                // if we do this in a getReader call here this is obsolete since we
+                                                // already hold a reader that has
+                                                // incRef'd these files and will decRef them when it's closed
+                                                deleter.decRef(sci.files())
+                                            }
                                         }
                                     }
+                                    // Construct a OneMerge that applies to toCommit
+                                    val applicableMerge: MergePolicy.OneMerge =
+                                        MergePolicy.OneMerge(toCommitMergedAwaySegments)
+                                    applicableMerge.info = origInfo
+                                    val segmentCounter =
+                                        origInfo!!.info.name.substring(1).toLong(Character.MAX_RADIX)
+                                    mergingSegmentInfos.counter = max(mergingSegmentInfos.counter, segmentCounter + 1)
+                                    mergingSegmentInfos.applyMergeChanges(applicableMerge, false)
+                                } else {
+                                    if (infoStream.isEnabled("IW")) {
+                                        infoStream.message(
+                                            "IW", "skip apply merge during commit: " + toWrap.segString()
+                                        )
+                                    }
                                 }
-                                // Construct a OneMerge that applies to toCommit
-                                val applicableMerge: MergePolicy.OneMerge =
-                                    MergePolicy.OneMerge(toCommitMergedAwaySegments)
-                                applicableMerge.info = origInfo
-                                val segmentCounter =
-                                    origInfo!!.info.name.substring(1).toLong(Character.MAX_RADIX)
-                                mergingSegmentInfos.counter = max(mergingSegmentInfos.counter, segmentCounter + 1)
-                                mergingSegmentInfos.applyMergeChanges(applicableMerge, false)
-                            } else {
-                                if (infoStream.isEnabled("IW")) {
-                                    infoStream.message(
-                                        "IW", "skip apply merge during commit: " + toWrap.segString()
-                                    )
-                                }
+                                toWrap.mergeFinished(committed, segmentDropped)
+                                super.mergeFinished(committed, segmentDropped)
                             }
-                            toWrap.mergeFinished(committed, segmentDropped)
-                            super.mergeFinished(committed, segmentDropped)
                         }
 
                         @Throws(IOException::class)
                         override fun onMergeComplete() {
-
-                            // TODO Thread is not supported in KMP, need to think what to do here
-                            //assert(java.lang.Thread.holdsLock(this@IndexWriter))
-                            if (!stopCollectingMergeResults() && !isAborted && (info!!.info.maxDoc() > 0) /* never do this if the segment if dropped / empty */) {
-                                mergeFinished.accept(info!!)
-                                // clone the target info to make sure we have the original info without
-                                // the updated del and update gens
-                                origInfo = info!!.clone()
+                            withIndexWriterLock {
+                                if (!stopCollectingMergeResults() && !isAborted && (info!!.info.maxDoc() > 0) /* never do this if the segment if dropped / empty */) {
+                                    mergeFinished.accept(info!!)
+                                    // clone the target info to make sure we have the original info without
+                                    // the updated del and update gens
+                                    origInfo = info!!.clone()
+                                }
+                                toWrap.onMergeComplete()
+                                super.onMergeComplete()
                             }
-                            toWrap.onMergeComplete()
-                            super.onMergeComplete()
                         }
 
                         @Throws(IOException::class)
@@ -4618,6 +4624,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         merge: MergePolicy.OneMerge,
         docMaps: Array<MergeState.DocMap>
     ): Boolean {
+        return withIndexWriterLock {
         merge.onMergeComplete()
         testPoint("startCommitMerge")
 
@@ -4657,7 +4664,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             runBlocking { readerPool.drop(merge.info!!) }
             // Safe: these files must exist:
             deleteNewFiles(merge.info!!.files())
-            return false
+            return@withIndexWriterLock false
         }
 
         val mergedUpdates: ReadersAndUpdates? =
@@ -4752,7 +4759,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             }
         }
 
-        return true
+        true
+        }
     }
 
     @Throws(IOException::class)
@@ -5115,23 +5123,25 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun mergeFinish(merge: MergePolicy.OneMerge) {
-        // forceMerge, addIndexes or waitForMerges may be waiting
-        // on merges to finish.
+        withIndexWriterLock {
+            // forceMerge, addIndexes or waitForMerges may be waiting
+            // on merges to finish.
 
-        // TODO notifyAll is not supported in KMP, need to think what to do here
-        //(this as java.lang.Object).notifyAll()
+            // TODO notifyAll is not supported in KMP, need to think what to do here
+            //(this as java.lang.Object).notifyAll()
 
-        // It's possible we are called twice, eg if there was an
-        // exception inside mergeInit
-        if (merge.registerDone) {
-            val sourceSegments: MutableList<SegmentCommitInfo> = merge.segments
-            for (info in sourceSegments) {
-                mergingSegments.remove(info)
+            // It's possible we are called twice, eg if there was an
+            // exception inside mergeInit
+            if (merge.registerDone) {
+                val sourceSegments: MutableList<SegmentCommitInfo> = merge.segments
+                for (info in sourceSegments) {
+                    mergingSegments.remove(info)
+                }
+                merge.registerDone = false
             }
-            merge.registerDone = false
-        }
 
-        runningMerges.remove(merge)
+            runningMerges.remove(merge)
+        }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -5140,37 +5150,39 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     private fun closeMergeReaders(
         merge: MergePolicy.OneMerge, suppressExceptions: Boolean, droppedSegment: Boolean
     ) {
-        if (!merge.hasFinished()) {
-            val drop = !suppressExceptions
-            // first call mergeFinished before we potentially drop the reader and the last reference.
-            merge.close(
-                !suppressExceptions,
-                droppedSegment
-            ) { mr: MergePolicy.MergeReader ->
-                if (merge.usesPooledReaders) {
-                    val sr: SegmentReader = mr.reader!!
-                    val rld: ReadersAndUpdates =
-                        checkNotNull(getPooledInstance(sr.originalSegmentInfo, false))
-                    if (drop) {
-                        rld.dropChanges()
-                    } else {
-                        rld.dropMergingUpdates()
-                    }
-                    runBlocking {
-                        rld.release(sr)
-                        release(rld)
+        withIndexWriterLock {
+            if (!merge.hasFinished()) {
+                val drop = !suppressExceptions
+                // first call mergeFinished before we potentially drop the reader and the last reference.
+                merge.close(
+                    !suppressExceptions,
+                    droppedSegment
+                ) { mr: MergePolicy.MergeReader ->
+                    if (merge.usesPooledReaders) {
+                        val sr: SegmentReader = mr.reader!!
+                        val rld: ReadersAndUpdates =
+                            checkNotNull(getPooledInstance(sr.originalSegmentInfo, false))
                         if (drop) {
-                            readerPool.drop(rld.info)
+                            rld.dropChanges()
+                        } else {
+                            rld.dropMergingUpdates()
+                        }
+                        runBlocking {
+                            rld.release(sr)
+                            release(rld)
+                            if (drop) {
+                                readerPool.drop(rld.info)
+                            }
                         }
                     }
+                    deleter.decRef(mr.reader!!.segmentInfo.files())
                 }
-                deleter.decRef(mr.reader!!.segmentInfo.files())
+            } else {
+                assert(
+                    merge.mergeReader.isEmpty()
+                ) { "we are done but still have readers: " + merge.mergeReader }
+                assert(suppressExceptions) { "can't be done and not suppressing exceptions" }
             }
-        } else {
-            assert(
-                merge.mergeReader.isEmpty()
-            ) { "we are done but still have readers: " + merge.mergeReader }
-            assert(suppressExceptions) { "can't be done and not suppressing exceptions" }
         }
     }
 
