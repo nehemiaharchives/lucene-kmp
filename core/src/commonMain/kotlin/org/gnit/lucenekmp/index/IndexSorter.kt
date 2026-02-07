@@ -330,7 +330,7 @@ interface IndexSorter {
     /** Sorts documents based on terms from a SortedDocValues instance  */
     open class StringSorter(
         override val providerName: String,
-        private val missingValue: Any,
+        private val missingValue: Any?,
         reverse: Boolean,
         private val valuesProvider: SortedDocValuesProvider
     ) : IndexSorter {

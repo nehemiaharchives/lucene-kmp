@@ -186,7 +186,7 @@ class SortedSetSortField(
     override val indexSorter: IndexSorter
         get() = IndexSorter.StringSorter(
             Provider.NAME,
-            missingValue!!,
+            missingValue,
             reverse
         ) { reader: LeafReader ->
             this.getValues(reader)
