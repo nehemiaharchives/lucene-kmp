@@ -504,7 +504,7 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
         }
 
         /** Apply `numDeletes` uniformly across all segments of `infos`.  */
-        protected fun applyDeletes(infos: SegmentInfos, numDeletes: Int): SegmentInfos {
+        fun applyDeletes(infos: SegmentInfos, numDeletes: Int): SegmentInfos {
             var numDeletes = numDeletes
             val infoList: MutableList<SegmentCommitInfo> = infos.asList()
             val totalNumDocs: Int = infoList.sumOf { s: SegmentCommitInfo -> s.info.maxDoc() - s.delCount }
