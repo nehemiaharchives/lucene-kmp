@@ -11,7 +11,6 @@ import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.StoredFields
 import org.gnit.lucenekmp.jdkport.AtomicInteger
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.jdkport.set
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FilterDirectory
@@ -22,6 +21,7 @@ import org.gnit.lucenekmp.tests.codecs.compressing.dummy.DummyCompressingCodec
 import org.gnit.lucenekmp.tests.index.BaseStoredFieldsFormatTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -48,7 +48,7 @@ class TestLucene90StoredFieldsFormat : BaseStoredFieldsFormatTestCase() {
         @Throws(IOException::class)
         override fun prefetch(offset: Long, length: Long) {
             `in`.prefetch(offset, length)
-            counter.incrementAndGet()
+            counter.incrementAndFetch()
         }
 
         override fun clone(): IndexInput {

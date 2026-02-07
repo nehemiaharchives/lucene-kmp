@@ -2,8 +2,6 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.decrementAndFetch
-import kotlin.concurrent.atomics.incrementAndFetch
 
 @OptIn(ExperimentalAtomicApi::class)
 fun AtomicInt.get(): Int = this.load()
@@ -39,12 +37,6 @@ fun AtomicInt.accumulateAndGet(
         haveNext = (prev == (get().also { prev = it }))
     }
 }
-
-@OptIn(ExperimentalAtomicApi::class)
-fun AtomicInt.incrementAndGet() = this.incrementAndFetch()
-
-@OptIn(ExperimentalAtomicApi::class)
-fun AtomicInt.decrementAndGet() = this.decrementAndFetch()
 
 /**
  * Possibly atomically sets the value to `newValue` if

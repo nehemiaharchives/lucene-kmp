@@ -35,7 +35,6 @@ import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.get
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.Bits

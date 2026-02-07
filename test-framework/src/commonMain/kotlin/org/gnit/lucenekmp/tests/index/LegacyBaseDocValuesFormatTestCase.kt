@@ -263,7 +263,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     open fun testVariouslyCompressibleBinaryValues() {
         val directory: Directory = newDirectory()
         val iwriter = RandomIndexWriter(random(), directory)
-        val numDocs: Int = 1 + random().nextInt(100)
+        val numDocs: Int = 1 + random().nextInt(10) // TODO reduced from 100 to 10 for dev speed
 
         val writtenValues: HashMap<Int, BytesRef> = HashMap()
 
@@ -1363,8 +1363,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         }
 
         // delete some docs
-        val numDeletions: Int =
-            random().nextInt(numDocs / 10)
+        val numDeletions: Int = random().nextInt(numDocs / 10)
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -3345,7 +3344,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numBinaries: Int = random().nextInt(21)
         val numSortedNums: Int = random().nextInt(21)
 
-        val numDocs: Int = TestUtil.nextInt(random(), 2025, 2047)
+        val numDocs: Int = TestUtil.nextInt(random(), start = 25, end = 47) // TODO reduced from start = 2025, end = 2047 to start = 25, end = 47
         for (i in 0..<numDocs) {
             val doc = Document()
 

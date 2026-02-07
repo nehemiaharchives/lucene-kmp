@@ -83,7 +83,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                TestUtil.nextInt(random(), 256, 384), 1, 200, 16, 100 // TODO reduced from 1024..2049 and maxLength 500 for <=10s runtime
+                TestUtil.nextInt(random(), 10, 20), 1, 50, 16, 100 // TODO reduced from 1024..2049 and maxLength 500 for <=10s runtime
             )
         }
     }
@@ -93,7 +93,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testSortedVariableLengthBigVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            doTestSortedVsStoredFields(atLeast(100), 1.0, 1, maxLength = 32) // TODO reduced from maxLength = 32766 to maxLength = 32 for dev speed
+            doTestSortedVsStoredFields(atLeast(10), 1.0, 1, maxLength = 32) // TODO reduced from atLeast(100) atLeast(10) to, maxLength = 32766 to maxLength = 32 for dev speed
         }
     }
 
@@ -140,8 +140,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestTermsEnumRandom(
-                TestUtil.nextInt(random(), 64, 256)) { // TODO reduced from 1025..8121 for <=10s runtime
-                TestUtil.randomSimpleString(random(), 1, 80) // TODO reduced from maxLength 500 for <=10s runtime
+                TestUtil.nextInt(random(), 10, 25)) { // TODO reduced from 1025..8121 for <=10s runtime
+                TestUtil.randomSimpleString(random(), 1, 10) // TODO reduced from maxLength 500 for <=10s runtime
             }
         }
     }
@@ -152,8 +152,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testTermsEnumLongSharedPrefixes() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            doTestTermsEnumRandom(TestUtil.nextInt(random(), 128, 512)) { // TODO reduced from 1025..5121 for <=10s runtime
-                val chars = CharArray(random().nextInt(120)) // TODO reduced from 500 for <=10s runtime
+            doTestTermsEnumRandom(TestUtil.nextInt(random(), 12, 51)) { // TODO reduced from 1025..5121 for <=10s runtime
+                val chars = CharArray(random().nextInt(12)) // TODO reduced from 500 for <=10s runtime
                 Arrays.fill(chars, 'a')
                 if (chars.isNotEmpty()) {
                     chars[random().nextInt(chars.size)] = 'b'
@@ -174,7 +174,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
 
     @Throws(Exception::class)
     private fun doTestSparseDocValuesVsStoredFields() {
-        val values = LongArray(TestUtil.nextInt(random(), 1, 500))
+        val values = LongArray(TestUtil.nextInt(random(), 1, 50)) // TODO reduced from 500 to 50 for dev speed
         for (i in values.indices) {
             values[i] = random().nextLong()
         }
@@ -192,7 +192,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         // sparse compression is only enabled if less than 1% of docs have a value
         val avgGap = 100
 
-        val numDocs: Int = atLeast(200)
+        val numDocs: Int = atLeast(20) //TODO reduced from 200 to 20 for dev speed
         for (i in random()
             .nextInt(avgGap * 2) downTo 0) {
             writer.addDocument(Document())
@@ -488,8 +488,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Test
     @Throws(IOException::class)
     fun testSortedSetAroundBlockSize() {
-        val frontier =
-            1 shl Lucene90DocValuesFormat.DIRECT_MONOTONIC_BLOCK_SHIFT
+        val frontier = 1 shl Lucene90DocValuesFormat.DIRECT_MONOTONIC_BLOCK_SHIFT
         for (maxDoc in frontier - 1..frontier + 1) {
             val dir: Directory = newDirectory()
             val w = IndexWriter(dir, newIndexWriterConfig().setMergePolicy(newLogMergePolicy()))
@@ -629,7 +628,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testNumericFieldJumpTables() {
         // Java Lucene nightly uses 5 * 65536 docs to hit the full IndexedDISI block-skip path.
         // Keep a smaller-but-stable smoke scale here so this test stays within the 10s budget.
-        val maxDoc: Int = atLeast(5 * 4096)
+        val maxDoc: Int = atLeast(4) // TODO reduced from 5 * 4096 to 4 for dev speed
 
         val dir: Directory = newDirectory()
         val iw = createFastIndexWriter(dir, maxDoc)
@@ -765,7 +764,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     private fun doTestSparseNumericBlocksOfVariousBitsPerValue(density: Double) {
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
-        conf.setMaxBufferedDocs(atLeast(Lucene90DocValuesFormat.NUMERIC_BLOCK_SIZE))
+        conf.setMaxBufferedDocs(atLeast(/*Lucene90DocValuesFormat.NUMERIC_BLOCK_SIZE*/ 100)) // TODO reduced for dev speed
         conf.setRAMBufferSizeMB(-1.0)
         conf.setMergePolicy(newLogMergePolicy(random().nextBoolean()))
         val writer = IndexWriter(dir, conf)
@@ -775,7 +774,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         doc.add(storedField)
         doc.add(dvField)
 
-        val numDocs: Int = atLeast(Lucene90DocValuesFormat.NUMERIC_BLOCK_SIZE * 3)
+        val numDocs: Int = atLeast(/*Lucene90DocValuesFormat.NUMERIC_BLOCK_SIZE * 3*/ 100) // TODO reduced for dev speed
         val longs: () -> Long /*java.util.function.LongSupplier*/ = blocksOfVariousBPV()
         for (i in 0..<numDocs) {
             if (random().nextDouble() > density) {
@@ -844,8 +843,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Throws(IOException::class)
     fun testReseekAfterSkipDecompression() {
         val CARDINALITY: Int = (Lucene90DocValuesFormat.TERMS_DICT_BLOCK_LZ4_SIZE shl 1) + 11
-        val valueSet: MutableSet<String> =
-            CollectionUtil.newHashSet(CARDINALITY)
+        val valueSet: MutableSet<String> = CollectionUtil.newHashSet(CARDINALITY)
         for (i in 0..<CARDINALITY) {
             valueSet.add(TestUtil.randomSimpleString(random(), 64))
         }

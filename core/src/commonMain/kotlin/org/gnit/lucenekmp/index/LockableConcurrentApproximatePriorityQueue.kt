@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.index
 
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.Lock
-import org.gnit.lucenekmp.jdkport.incrementAndGet
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
 

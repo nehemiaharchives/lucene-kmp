@@ -194,7 +194,7 @@ jobs:
           - platform: linux
             module_name: core
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :core:linuxX64Test
             artifact: linux-core-reports
             needs_konan_cache: true
