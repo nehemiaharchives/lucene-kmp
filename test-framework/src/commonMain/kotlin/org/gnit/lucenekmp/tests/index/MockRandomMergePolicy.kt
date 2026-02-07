@@ -42,17 +42,17 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
 
     override fun findMerges(
         mergeTrigger: MergeTrigger?,
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         var mergeSpec: MergeSpecification? = null
 
         // System.out.println("MRMP: findMerges sis=" + segmentInfos);
         val segments: MutableList<SegmentCommitInfo> = mutableListOf()
         val merging: MutableSet<SegmentCommitInfo> =
-            mergeContext.mergingSegments
+            mergeContext!!.mergingSegments
 
-        for (sipc in segmentInfos) {
+        for (sipc in segmentInfos!!) {
             if (!merging.contains(sipc)) {
                 segments.add(sipc)
             }
@@ -91,14 +91,14 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
 
     @Throws(IOException::class)
     override fun findForcedMerges(
-        segmentInfos: SegmentInfos,
+        segmentInfos: SegmentInfos?,
         maxSegmentCount: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         val eligibleSegments: MutableList<SegmentCommitInfo> = mutableListOf()
-        for (info in segmentInfos) {
-            if (segmentsToMerge.containsKey(info)) {
+        for (info in segmentInfos!!) {
+            if (segmentsToMerge!!.containsKey(info)) {
                 eligibleSegments.add(info)
             }
         }
@@ -107,7 +107,7 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
         var mergeSpec: MergeSpecification? = null
         if (eligibleSegments.size > 1
             || (eligibleSegments.size == 1
-                    && isMerged(segmentInfos, eligibleSegments[0], mergeContext) == false)
+                    && isMerged(segmentInfos, eligibleSegments[0], mergeContext!!) == false)
         ) {
             mergeSpec = MergeSpecification()
             // Already shuffled having come out of a set but
@@ -144,7 +144,7 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
         if (mergeSpec != null) {
             for (merge in mergeSpec.merges) {
                 for (info in merge.segments) {
-                    assert(segmentsToMerge.containsKey(info))
+                    assert(segmentsToMerge!!.containsKey(info))
                 }
             }
         }
@@ -153,8 +153,8 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
 
     @Throws(IOException::class)
     override fun findForcedDeletesMerges(
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return findMerges(null, segmentInfos, mergeContext)
     }

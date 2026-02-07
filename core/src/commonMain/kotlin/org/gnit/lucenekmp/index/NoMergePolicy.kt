@@ -15,8 +15,8 @@ class NoMergePolicy private constructor() : MergePolicy() {
 
     override fun findMerges(
         mergeTrigger: MergeTrigger?,
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return null
     }
@@ -28,17 +28,17 @@ class NoMergePolicy private constructor() : MergePolicy() {
     }
 
     override fun findForcedMerges(
-        segmentInfos: SegmentInfos,
+        segmentInfos: SegmentInfos?,
         maxSegmentCount: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return null
     }
 
     override fun findForcedDeletesMerges(
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return null
     }

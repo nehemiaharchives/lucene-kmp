@@ -238,14 +238,14 @@ open class TieredMergePolicy
     // call size() once per segment and sort by that:
     @Throws(IOException::class)
     private fun getSortedBySegmentSize(
-        infos: SegmentInfos, mergeContext: MergeContext
+        infos: SegmentInfos?, mergeContext: MergeContext?
     ): MutableList<SegmentSizeAndDocs> {
         val sortedBySize: MutableList<SegmentSizeAndDocs> = mutableListOf()
 
-        for (info in infos) {
+        for (info in infos!!) {
             sortedBySize.add(
                 SegmentSizeAndDocs(
-                    info, size(info, mergeContext), mergeContext.numDeletesToMerge(info)
+                    info, size(info, mergeContext!!), mergeContext.numDeletesToMerge(info)
                 )
             )
         }
@@ -265,10 +265,10 @@ open class TieredMergePolicy
     @Throws(IOException::class)
     override fun findMerges(
         mergeTrigger: MergeTrigger?,
-        infos: SegmentInfos,
-        mergeContext: MergeContext
+        infos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
-        val merging: MutableSet<SegmentCommitInfo> = mergeContext.mergingSegments
+        val merging: MutableSet<SegmentCommitInfo> = mergeContext!!.mergingSegments
         // Compute total index bytes & print details about the index
         var totIndexBytes: Long = 0
         var minSegmentBytes = Long.MAX_VALUE
@@ -381,7 +381,7 @@ open class TieredMergePolicy
                 ("  allowedSegmentCount="
                         + allowedSegCount
                         + " vs count="
-                        + infos.size()
+                        + infos!!.size()
                         + " (eligible count="
                         + sortedInfos.size
                         + ") tooBigCount= "
@@ -698,10 +698,10 @@ open class TieredMergePolicy
 
     @Throws(IOException::class)
     override fun findForcedMerges(
-        infos: SegmentInfos,
+        infos: SegmentInfos?,
         maxSegmentCount: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         if (verbose(mergeContext)) {
             message(
@@ -718,7 +718,7 @@ open class TieredMergePolicy
         val sortedSizeAndDocs = getSortedBySegmentSize(infos, mergeContext)
 
         var totalMergeBytes: Long = 0
-        val merging: MutableSet<SegmentCommitInfo> = mergeContext.mergingSegments
+        val merging: MutableSet<SegmentCommitInfo> = mergeContext!!.mergingSegments
 
         // Trim the list down, remove if we're respecting max segment size and it's not original.
         // Presumably it's been merged before and is close enough to the max segment size we
@@ -727,7 +727,7 @@ open class TieredMergePolicy
         var forceMergeRunning = false
         while (iter.hasNext()) {
             val segSizeDocs = iter.next()
-            val isOriginal = segmentsToMerge[segSizeDocs.segInfo]
+            val isOriginal = segmentsToMerge!![segSizeDocs.segInfo]
             if (isOriginal == null) {
                 iter.remove()
             } else {
@@ -764,7 +764,7 @@ open class TieredMergePolicy
         var foundDeletes = false
         while (iter.hasNext()) {
             val segSizeDocs = iter.next()
-            val isOriginal = segmentsToMerge[segSizeDocs.segInfo]
+            val isOriginal = segmentsToMerge!![segSizeDocs.segInfo]
             if (segSizeDocs.delCount != 0) {
                 // This is forceMerge; all segments with deleted docs should be merged.
                 if (isOriginal != null && isOriginal) {
@@ -791,8 +791,8 @@ open class TieredMergePolicy
         if (!foundDeletes) {
             val infoZero: SegmentCommitInfo = sortedSizeAndDocs[0].segInfo
             if ((maxSegmentCount != Int.MAX_VALUE && maxSegmentCount > 1 && sortedSizeAndDocs.size <= maxSegmentCount)
-                || (maxSegmentCount == 1 && sortedSizeAndDocs.size == 1 && (segmentsToMerge[infoZero] != null
-                        || isMerged(infos, infoZero, mergeContext)))
+                || (maxSegmentCount == 1 && sortedSizeAndDocs.size == 1 && (segmentsToMerge!![infoZero] != null
+                        || isMerged(infos!!, infoZero, mergeContext)))
             ) {
                 if (verbose(mergeContext)) {
                     message("already merged", mergeContext)
@@ -878,8 +878,8 @@ open class TieredMergePolicy
 
     @Throws(IOException::class)
     override fun findForcedDeletesMerges(
-        infos: SegmentInfos,
-        mergeContext: MergeContext
+        infos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         if (verbose(mergeContext)) {
             message(
@@ -893,11 +893,11 @@ open class TieredMergePolicy
 
         // First do a quick check that there's any work to do.
         // NOTE: this makes BaseMergePOlicyTestCase.testFindForcedDeletesMerges work
-        val merging: MutableSet<SegmentCommitInfo> = mergeContext.mergingSegments
+        val merging: MutableSet<SegmentCommitInfo> = mergeContext!!.mergingSegments
 
         var haveWork = false
         var totalDelCount = 0
-        for (info in infos) {
+        for (info in infos!!) {
             val delCount: Int = mergeContext.numDeletesToMerge(info)
             assert(assertDelCount(delCount, info))
             totalDelCount += delCount

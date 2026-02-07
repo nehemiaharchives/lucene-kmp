@@ -16,18 +16,18 @@ class OneMergeWrappingMergePolicy(
     @Throws(IOException::class)
     override fun findMerges(
         mergeTrigger: MergeTrigger?,
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return wrapSpec(`in`.findMerges(mergeTrigger, segmentInfos, mergeContext))
     }
 
     @Throws(IOException::class)
     override fun findForcedMerges(
-        segmentInfos: SegmentInfos,
+        segmentInfos: SegmentInfos?,
         maxSegmentCount: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return wrapSpec(
             `in`.findForcedMerges(segmentInfos, maxSegmentCount, segmentsToMerge, mergeContext)
@@ -36,8 +36,8 @@ class OneMergeWrappingMergePolicy(
 
     @Throws(IOException::class)
     override fun findForcedDeletesMerges(
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         return wrapSpec(`in`.findForcedDeletesMerges(segmentInfos, mergeContext))
     }

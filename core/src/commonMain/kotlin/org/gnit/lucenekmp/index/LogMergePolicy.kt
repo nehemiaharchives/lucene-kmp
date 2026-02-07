@@ -161,19 +161,19 @@ abstract class LogMergePolicy
      */
     @Throws(IOException::class)
     protected fun isMerged(
-        infos: SegmentInfos,
+        infos: SegmentInfos?,
         maxNumSegments: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): Boolean {
-        val numSegments: Int = infos.size()
+        val numSegments: Int = infos!!.size()
         var numToMerge = 0
         var mergeInfo: SegmentCommitInfo? = null
         var segmentIsOriginal = false
         var i = 0
         while (i < numSegments && numToMerge <= maxNumSegments) {
             val info: SegmentCommitInfo = infos.info(i)
-            val isOriginal = segmentsToMerge[info]
+            val isOriginal = segmentsToMerge!![info]
             if (isOriginal != null) {
                 segmentIsOriginal = isOriginal
                 numToMerge++
@@ -182,7 +182,7 @@ abstract class LogMergePolicy
             i++
         }
 
-        return numToMerge <= maxNumSegments && (numToMerge != 1 || !segmentIsOriginal || isMerged(infos, mergeInfo!!, mergeContext))
+        return numToMerge <= maxNumSegments && (numToMerge != 1 || !segmentIsOriginal || isMerged(infos, mergeInfo!!, mergeContext!!))
     }
 
     override fun maxFullFlushMergeSize(): Long {
@@ -343,16 +343,16 @@ abstract class LogMergePolicy
      */
     @Throws(IOException::class)
     override fun findForcedMerges(
-        infos: SegmentInfos,
+        infos: SegmentInfos?,
         maxNumSegments: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
         assert(maxNumSegments > 0)
         if (verbose(mergeContext)) {
             message(
                 "findForcedMerges: maxNumSegs=$maxNumSegments segsToMerge=$segmentsToMerge",
-                mergeContext
+                mergeContext!!
             )
         }
 
@@ -360,7 +360,7 @@ abstract class LogMergePolicy
         // there are <maxNumSegments:.
         if (isMerged(infos, maxNumSegments, segmentsToMerge, mergeContext)) {
             if (verbose(mergeContext)) {
-                message("already merged; skip", mergeContext)
+                message("already merged; skip", mergeContext!!)
             }
             return null
         }
@@ -368,10 +368,10 @@ abstract class LogMergePolicy
         // Find the newest (rightmost) segment that needs to
         // be merged (other segments may have been flushed
         // since merging started):
-        var last: Int = infos.size()
+        var last: Int = infos!!.size()
         while (last > 0) {
             val info: SegmentCommitInfo = infos.info(--last)
-            if (segmentsToMerge[info] != null) {
+            if (segmentsToMerge!![info] != null) {
                 last++
                 break
             }
@@ -379,13 +379,13 @@ abstract class LogMergePolicy
 
         if (last == 0) {
             if (verbose(mergeContext)) {
-                message("last == 0; skip", mergeContext)
+                message("last == 0; skip", mergeContext!!)
             }
             return null
         }
 
         // There is only one segment already, and it is merged
-        if (maxNumSegments == 1 && last == 1 && isMerged(infos, infos.info(0), mergeContext)) {
+        if (maxNumSegments == 1 && last == 1 && isMerged(infos, infos.info(0), mergeContext!!)) {
             if (verbose(mergeContext)) {
                 message("already 1 seg; skip", mergeContext)
             }
@@ -396,7 +396,7 @@ abstract class LogMergePolicy
         var anyTooLarge = false
         for (i in 0..<last) {
             val info: SegmentCommitInfo = infos.info(i)
-            if (size(info, mergeContext) > maxMergeSizeForForcedMerge
+            if (size(info, mergeContext!!) > maxMergeSizeForForcedMerge
                 || sizeDocs(info, mergeContext) > maxMergeDocs
             ) {
                 anyTooLarge = true
@@ -405,9 +405,9 @@ abstract class LogMergePolicy
         }
 
         if (anyTooLarge) {
-            return findForcedMergesSizeLimit(infos, last, mergeContext)
+            return findForcedMergesSizeLimit(infos, last, mergeContext!!)
         } else {
-            return findForcedMergesMaxNumSegments(infos, maxNumSegments, last, mergeContext)
+            return findForcedMergesMaxNumSegments(infos, maxNumSegments, last, mergeContext!!)
         }
     }
 
@@ -417,14 +417,14 @@ abstract class LogMergePolicy
      */
     @Throws(IOException::class)
     override fun findForcedDeletesMerges(
-        segmentInfos: SegmentInfos,
-        mergeContext: MergeContext
+        segmentInfos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification {
-        val segments: MutableList<SegmentCommitInfo> = segmentInfos.asList()
+        val segments: MutableList<SegmentCommitInfo> = segmentInfos!!.asList()
         val numSegments = segments.size
 
         if (verbose(mergeContext)) {
-            message("findForcedDeleteMerges: $numSegments segments", mergeContext)
+            message("findForcedDeleteMerges: $numSegments segments", mergeContext!!)
         }
 
         val spec = MergeSpecification()
@@ -489,13 +489,13 @@ abstract class LogMergePolicy
     @Throws(IOException::class)
     override fun findMerges(
         mergeTrigger: MergeTrigger?,
-        infos: SegmentInfos,
-        mergeContext: MergeContext
+        infos: SegmentInfos?,
+        mergeContext: MergeContext?
     ): MergeSpecification? {
-        val infosSnapshot: MutableList<SegmentCommitInfo> = infos.asList()
+        val infosSnapshot: MutableList<SegmentCommitInfo> = infos!!.asList()
         val numSegments: Int = infosSnapshot.size
         if (verbose(mergeContext)) {
-            message("findMerges: $numSegments segments", mergeContext)
+            message("findMerges: $numSegments segments", mergeContext!!)
         }
 
         // Compute levels, which is just log (base mergeFactor)
@@ -503,7 +503,7 @@ abstract class LogMergePolicy
         val levels: MutableList<SegmentInfoAndLevel> = mutableListOf()
         val norm = ln(mergeFactor.toDouble()).toFloat()
 
-        val mergingSegments: MutableSet<SegmentCommitInfo> = mergeContext.mergingSegments
+        val mergingSegments: MutableSet<SegmentCommitInfo> = mergeContext!!.mergingSegments
 
         var totalDocCount = 0
         for (i in 0..<numSegments) {

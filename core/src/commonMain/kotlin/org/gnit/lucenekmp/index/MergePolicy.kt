@@ -631,7 +631,7 @@ abstract class MergePolicy
      */
     @Throws(IOException::class)
     abstract fun findMerges(
-        mergeTrigger: MergeTrigger?, segmentInfos: SegmentInfos, mergeContext: MergeContext
+        mergeTrigger: MergeTrigger?, segmentInfos: SegmentInfos?, mergeContext: MergeContext?
     ): MergeSpecification?
 
     /**
@@ -669,10 +669,10 @@ abstract class MergePolicy
      */
     @Throws(IOException::class)
     abstract fun findForcedMerges(
-        segmentInfos: SegmentInfos,
+        segmentInfos: SegmentInfos?,
         maxSegmentCount: Int,
-        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-        mergeContext: MergeContext
+        segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+        mergeContext: MergeContext?
     ): MergeSpecification?
 
     /**
@@ -684,7 +684,7 @@ abstract class MergePolicy
      */
     @Throws(IOException::class)
     abstract fun findForcedDeletesMerges(
-        segmentInfos: SegmentInfos, mergeContext: MergeContext
+        segmentInfos: SegmentInfos?, mergeContext: MergeContext?
     ): MergeSpecification?
 
     /**
@@ -867,17 +867,17 @@ abstract class MergePolicy
 
     /** Builds a String representation of the given SegmentCommitInfo instances  */
     protected fun segString(
-        mergeContext: MergeContext,
-        infos: Iterable<SegmentCommitInfo>
-    ): String = infos.joinToString(" ") { info ->
-        val delCount = mergeContext.numDeletedDocs(info) - info.delCount
+        mergeContext: MergeContext?,
+        infos: Iterable<SegmentCommitInfo>?
+    ): String = infos!!.joinToString(" ") { info ->
+        val delCount = mergeContext!!.numDeletedDocs(info) - info.delCount
         info.toString(delCount)
     }
 
     /** Print a debug message to [MergeContext]'s `infoStream`.  */
-    protected fun message(message: String, mergeContext: MergeContext) {
+    protected fun message(message: String, mergeContext: MergeContext?) {
         if (verbose(mergeContext)) {
-            mergeContext.infoStream.message("MP", message)
+            mergeContext!!.infoStream.message("MP", message)
         }
     }
 
@@ -886,8 +886,8 @@ abstract class MergePolicy
      *
      * @see .message
      */
-    protected fun verbose(mergeContext: MergeContext): Boolean {
-        return mergeContext.infoStream.isEnabled("MP")
+    protected fun verbose(mergeContext: MergeContext?): Boolean {
+        return mergeContext!!.infoStream.isEnabled("MP")
     }
 
     /**
@@ -931,7 +931,7 @@ abstract class MergePolicy
 
         constructor(reader: CodecReader, hardLiveDocs: Bits?) {
             if (/*SegmentReader::class.java.isAssignableFrom(reader.javaClass)*/ reader is SegmentReader) {
-                this.reader = reader as SegmentReader
+                this.reader = reader
             } else {
                 this.reader = null
             }

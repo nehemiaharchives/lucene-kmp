@@ -24,26 +24,26 @@ class TestOneMergeWrappingMergePolicy : LuceneTestCase() {
         @Throws(IOException::class)
         override fun findMerges(
             mergeTrigger: MergeTrigger?,
-            segmentInfos: SegmentInfos,
-            mergeContext: MergeContext
+            segmentInfos: SegmentInfos?,
+            mergeContext: MergeContext?
         ): MergeSpecification? {
             return merges
         }
 
         @Throws(IOException::class)
         override fun findForcedMerges(
-            segmentInfos: SegmentInfos,
+            segmentInfos: SegmentInfos?,
             maxSegmentCount: Int,
-            segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>,
-            mergeContext: MergeContext
+            segmentsToMerge: MutableMap<SegmentCommitInfo, Boolean>?,
+            mergeContext: MergeContext?
         ): MergeSpecification? {
             return forcedMerges
         }
 
         @Throws(IOException::class)
         override fun findForcedDeletesMerges(
-            segmentInfos: SegmentInfos,
-            mergeContext: MergeContext
+            segmentInfos: SegmentInfos?,
+            mergeContext: MergeContext?
         ): MergeSpecification? {
             return forcedDeletesMerges
         }
