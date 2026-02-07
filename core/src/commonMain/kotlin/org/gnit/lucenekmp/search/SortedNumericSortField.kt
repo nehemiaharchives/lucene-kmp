@@ -191,7 +191,7 @@ class SortedNumericSortField(
                 object : IntComparator(
                     numHits,
                     field!!,
-                    missingValue as Int,
+                    missingValue as Int?,
                     reverse,
                     if (isMinOrMax) pruning else Pruning.NONE
                 ) {
@@ -220,7 +220,7 @@ class SortedNumericSortField(
                 object : FloatComparator(
                     numHits,
                     field!!,
-                    missingValue as Float,
+                    missingValue as Float?,
                     reverse,
                     if (isMinOrMax) pruning else Pruning.NONE
                 ) {
@@ -249,7 +249,7 @@ class SortedNumericSortField(
                 object : LongComparator(
                     numHits,
                     field!!,
-                    missingValue as Long,
+                    missingValue as Long?,
                     reverse,
                     if (isMinOrMax) pruning else Pruning.NONE
                 ) {
@@ -278,7 +278,7 @@ class SortedNumericSortField(
                 object : DoubleComparator(
                     numHits,
                     field!!,
-                    missingValue as Double,
+                    missingValue as Double?,
                     reverse,
                     if (isMinOrMax) pruning else Pruning.NONE
                 ) {
@@ -324,7 +324,7 @@ class SortedNumericSortField(
             when (type) {
                 Type.INT -> return IndexSorter.IntSorter(
                     Provider.NAME,
-                    missingValue as Int,
+                    missingValue as Int?,
                     reverse
                 ) { reader: LeafReader ->
                     this.getValue(reader)
@@ -332,7 +332,7 @@ class SortedNumericSortField(
 
                 Type.LONG -> return IndexSorter.LongSorter(
                     Provider.NAME,
-                    missingValue as Long,
+                    missingValue as Long?,
                     reverse
                 ) { reader: LeafReader ->
                     this.getValue(reader)
@@ -340,7 +340,7 @@ class SortedNumericSortField(
 
                 Type.DOUBLE -> return IndexSorter.DoubleSorter(
                     Provider.NAME,
-                    missingValue as Double,
+                    missingValue as Double?,
                     reverse
                 ) { reader: LeafReader ->
                     this.getValue(reader)
@@ -348,7 +348,7 @@ class SortedNumericSortField(
 
                 Type.FLOAT -> return IndexSorter.FloatSorter(
                     Provider.NAME,
-                    missingValue as Float,
+                    missingValue as Float?,
                     reverse
                 ) { reader: LeafReader ->
                     this.getValue(reader)

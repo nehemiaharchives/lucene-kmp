@@ -27,6 +27,200 @@ class SegmentInfo(
     attributes: MutableMap<String, String>,
     indexSort: Sort?
 ) {
+    private class UnmodifiableMutableIterator<T>(private val delegate: MutableIterator<T>) : MutableIterator<T> {
+        override fun hasNext(): Boolean = delegate.hasNext()
+
+        override fun next(): T = delegate.next()
+
+        override fun remove() {
+            throw UnsupportedOperationException()
+        }
+    }
+
+    private class UnmodifiableMutableSet<T>(private val delegate: MutableSet<T>) : MutableSet<T> {
+        override val size: Int
+            get() = delegate.size
+
+        override fun contains(element: T): Boolean = delegate.contains(element)
+
+        override fun containsAll(elements: Collection<T>): Boolean = delegate.containsAll(elements)
+
+        override fun isEmpty(): Boolean = delegate.isEmpty()
+
+        override fun iterator(): MutableIterator<T> = UnmodifiableMutableIterator(delegate.iterator())
+
+        override fun add(element: T): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun addAll(elements: Collection<T>): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun clear() {
+            throw UnsupportedOperationException()
+        }
+
+        override fun remove(element: T): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun removeAll(elements: Collection<T>): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun retainAll(elements: Collection<T>): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun equals(other: Any?): Boolean = delegate == other
+
+        override fun hashCode(): Int = delegate.hashCode()
+
+        override fun toString(): String = delegate.toString()
+    }
+
+    private class UnmodifiableMutableMap<K, V>(private val delegate: MutableMap<K, V>) : MutableMap<K, V> {
+        override val size: Int
+            get() = delegate.size
+
+        override fun isEmpty(): Boolean = delegate.isEmpty()
+
+        override fun containsKey(key: K): Boolean = delegate.containsKey(key)
+
+        override fun containsValue(value: V): Boolean = delegate.containsValue(value)
+
+        override fun get(key: K): V? = delegate[key]
+
+        override val keys: MutableSet<K>
+            get() = UnmodifiableMutableSet(delegate.keys)
+
+        override val values: MutableCollection<V>
+            get() = object : MutableCollection<V> {
+                override val size: Int
+                    get() = delegate.values.size
+
+                override fun contains(element: V): Boolean = delegate.values.contains(element)
+
+                override fun containsAll(elements: Collection<V>): Boolean =
+                    delegate.values.containsAll(elements)
+
+                override fun isEmpty(): Boolean = delegate.values.isEmpty()
+
+                override fun iterator(): MutableIterator<V> = UnmodifiableMutableIterator(delegate.values.iterator())
+
+                override fun add(element: V): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun addAll(elements: Collection<V>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun clear() {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun remove(element: V): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun removeAll(elements: Collection<V>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun retainAll(elements: Collection<V>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+            }
+
+        override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+            get() = object : MutableSet<MutableMap.MutableEntry<K, V>> {
+                private val entrySet = delegate.entries
+
+                override val size: Int
+                    get() = entrySet.size
+
+                override fun contains(element: MutableMap.MutableEntry<K, V>): Boolean = entrySet.contains(element)
+
+                override fun containsAll(elements: Collection<MutableMap.MutableEntry<K, V>>): Boolean =
+                    entrySet.containsAll(elements)
+
+                override fun isEmpty(): Boolean = entrySet.isEmpty()
+
+                override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>> {
+                    val iter = entrySet.iterator()
+                    return object : MutableIterator<MutableMap.MutableEntry<K, V>> {
+                        override fun hasNext(): Boolean = iter.hasNext()
+
+                        override fun next(): MutableMap.MutableEntry<K, V> {
+                            val entry = iter.next()
+                            return object : MutableMap.MutableEntry<K, V> {
+                                override val key: K
+                                    get() = entry.key
+                                override val value: V
+                                    get() = entry.value
+
+                                override fun setValue(newValue: V): V {
+                                    throw UnsupportedOperationException()
+                                }
+                            }
+                        }
+
+                        override fun remove() {
+                            throw UnsupportedOperationException()
+                        }
+                    }
+                }
+
+                override fun add(element: MutableMap.MutableEntry<K, V>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun addAll(elements: Collection<MutableMap.MutableEntry<K, V>>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun clear() {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun remove(element: MutableMap.MutableEntry<K, V>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun removeAll(elements: Collection<MutableMap.MutableEntry<K, V>>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+
+                override fun retainAll(elements: Collection<MutableMap.MutableEntry<K, V>>): Boolean {
+                    throw UnsupportedOperationException()
+                }
+            }
+
+        override fun clear() {
+            throw UnsupportedOperationException()
+        }
+
+        override fun put(key: K, value: V): V? {
+            throw UnsupportedOperationException()
+        }
+
+        override fun putAll(from: Map<out K, V>) {
+            throw UnsupportedOperationException()
+        }
+
+        override fun remove(key: K): V? {
+            throw UnsupportedOperationException()
+        }
+
+        override fun equals(other: Any?): Boolean = delegate == other
+
+        override fun hashCode(): Int = delegate.hashCode()
+
+        override fun toString(): String = delegate.toString()
+    }
+
     /** Unique segment name in the directory.  */
     val name: String
 
@@ -63,9 +257,9 @@ class SegmentInfo(
 
     var diagnostics: MutableMap<String, String> = mutableMapOf()
         get() {
-            return field
+            return UnmodifiableMutableMap(field)
         }
-        set(newDiagnostics){
+        set(newDiagnostics) {
             field = HashMap(newDiagnostics)
         }
 
@@ -75,6 +269,9 @@ class SegmentInfo(
      * @return internal codec attributes map.
      */
     var attributes: MutableMap<String, String>
+        get() {
+            return UnmodifiableMutableMap(field)
+        }
         private set
 
     val indexSort: Sort?
@@ -149,7 +346,7 @@ class SegmentInfo(
     /** Return all files referenced by this SegmentInfo.  */
     fun files(): MutableSet<String> {
         checkNotNull(setFiles) { "files were not computed yet; segment=$name maxDoc=$maxDoc" }
-        return setFiles!!
+        return UnmodifiableMutableSet(setFiles!!)
     }
 
     override fun toString(): String {
