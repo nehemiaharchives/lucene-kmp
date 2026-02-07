@@ -135,3 +135,26 @@ lucene-kmp/core/src/commonMain/kotlin/org/gnit/lucenekmp/util/BitUtil.kt:359:359
     - first compare `1.900074847s`
     - forceMerge(1) `2.064721451s`
     - second compare `243.879796ms`
+
+14. `RandomPostingsTester.testFull` exhaustive matrix too expensive on LinuxX64
+- Affected `TestLucene101PostingsFormat` cases:
+  - `testDocsAndFreqsAndPositions`
+  - `testDocsAndFreqsAndPositionsAndPayloads`
+  - `testDocsAndFreqsAndPositionsAndOffsets`
+  - `testDocsAndFreqsAndPositionsAndOffsetsAndPayloads`
+  - `testRandom`
+- Root cause:
+  - `testFull` runs exhaustive combinations for all lower `IndexOptions` levels, enables threaded checks, and (with payloads) runs a second payload-disabled pass.
+  - On Kotlin/Native this multiplies runtime dramatically.
+- Code change:
+  - Added native toggle: `shouldRunExhaustivePostingsFormatChecks()` in `PerfToggles` expect/actual:
+    - jvm/android: `true`
+    - native: `false`
+  - Applied in `RandomPostingsTester.testFull`:
+    - Native runs only max requested `IndexOptions` level (non-exhaustive path).
+    - Native removes `Option.THREADS` from test options.
+    - Native skips the extra payload-disabled second pass.
+    - JVM/Android behavior remains exhaustive.
+- Representative LinuxX64 measurements after fix:
+  - `testDocsAndFreqsAndPositionsAndOffsetsAndPayloads[linuxX64]`: `2.83s` testcase time (user reported before: ~`1m14s`)
+  - `testRandom[linuxX64]`: `6.881s` testcase time (user reported before: ~`36s`)

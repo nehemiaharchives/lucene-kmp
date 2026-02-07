@@ -42,6 +42,7 @@ import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.tests.util.shouldRunExhaustivePostingsFormatChecks
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.FixedBitSet
@@ -1971,17 +1972,26 @@ class RandomPostingsTester(random: Random) {
                 .indexOf(options)*/
         val maxIndexOption: Int = allOptions.indexOf(options)
 
-        for (i in 0..maxIndexOption) {
+        val exhaustiveChecks = shouldRunExhaustivePostingsFormatChecks()
+        val optionIndexes = if (exhaustiveChecks) {
+            0..maxIndexOption
+        } else {
+            maxIndexOption..maxIndexOption
+        }
+        for (i in optionIndexes) {
+            val testOptions = EnumSet.allOf<Option>(Option::class)
+            if (!exhaustiveChecks) {
+                // Threaded verification is disproportionately expensive on Kotlin/Native.
+                testOptions.remove(Option.THREADS)
+            }
             testTerms(
                 fieldsProducer,
-                EnumSet.allOf<Option>(
-                    Option::class
-                ),
+                testOptions,
                 allOptions[i],
                 options,
                 true
             )
-            if (withPayloads) {
+            if (withPayloads && exhaustiveChecks) {
                 // If we indexed w/ payloads, also test enums w/o accessing payloads:
                 testTerms(
                     fieldsProducer,
