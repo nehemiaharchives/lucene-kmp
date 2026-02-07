@@ -1,5 +1,5 @@
 package org.gnit.lucenekmp.util
 
 actual fun configureTestLogging() {
-    // no-op on JVM
+    // no-op on iOS X64
 }
