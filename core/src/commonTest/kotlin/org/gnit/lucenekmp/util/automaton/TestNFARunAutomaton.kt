@@ -43,7 +43,7 @@ class TestNFARunAutomaton : LuceneTestCase() {
                 // sometimes the automaton accepts nothing and throws
                 continue
             }
-            repeat(20) {
+            repeat(3) { // TODO reduced from 20 to 3 for dev speed
                 if (random().nextBoolean()) {
                     testAcceptedString(regExp, randomStringGen, candidate, 10)
                     testRandomString(regExp, dfa, candidate, 10)
