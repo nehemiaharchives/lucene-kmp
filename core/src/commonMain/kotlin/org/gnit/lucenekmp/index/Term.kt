@@ -1,6 +1,9 @@
 package org.gnit.lucenekmp.index
 
 import org.gnit.lucenekmp.jdkport.ByteBuffer
+import org.gnit.lucenekmp.jdkport.CharacterCodingException
+import org.gnit.lucenekmp.jdkport.CodingErrorAction
+import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
@@ -76,7 +79,7 @@ class Term : Comparable<Term>, Accountable {
      * the case of dates and other types, this is an encoding of the object as a string.
      */
     fun text(): String {
-        return bytes.utf8ToString()
+        return toString(bytes)
     }
 
     /** Returns the bytes of this term, these should not be modified.  */
@@ -156,21 +159,16 @@ class Term : Comparable<Term>, Accountable {
 
         /**
          * Returns a human-readable form of the term text.
-         * If the bytes are not valid UTF-8 (i.e. decoding does not round-trip), then the fallback BytesRef.toString() is returned.
+         * If the bytes are not valid UTF-8, the fallback BytesRef.toString() is returned.
          */
         fun toString(termText: BytesRef): String {
-            // Wrap the term's bytes in our ByteBuffer
-            val bb = ByteBuffer.wrap(termText.bytes, termText.offset, termText.length)
-            // Read the remaining bytes into an array
-            val byteArray = ByteArray(bb.remaining())
-            bb.get(byteArray)
-            // Attempt to decode using UTF-8
-            val decoded = byteArray.toString()
-            // Check that re-encoding gives the same byte sequence.
-            // (If the input had malformed sequences, replacement characters would appear.)
-            return if (decoded.encodeToByteArray().contentEquals(byteArray)) {
-                decoded
-            } else {
+            val decoder =
+                StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+            return try {
+                decoder.decode(ByteBuffer.wrap(termText.bytes, termText.offset, termText.length)).toString()
+            } catch (_: CharacterCodingException) {
                 termText.toString()
             }
         }
