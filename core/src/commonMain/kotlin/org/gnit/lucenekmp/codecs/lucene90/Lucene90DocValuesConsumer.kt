@@ -131,7 +131,7 @@ internal class Lucene90DocValuesConsumer(
             object : EmptyDocValuesProducer() {
                 @Throws(IOException::class)
                 override fun getSortedNumeric(field: FieldInfo): SortedNumericDocValues {
-                    return DocValues.singleton(valuesProducer.getNumeric(field)!!)
+                    return DocValues.singleton(valuesProducer.getNumeric(field) ?: DocValues.emptyNumeric())
                 }
             }
         if (field.docValuesSkipIndexType() !== DocValuesSkipIndexType.NONE) {

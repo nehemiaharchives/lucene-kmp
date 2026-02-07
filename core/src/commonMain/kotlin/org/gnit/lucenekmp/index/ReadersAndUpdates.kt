@@ -356,7 +356,7 @@ class ReadersAndUpdates(
                                     updateSupplier(fieldInfo)
                                 val mergedDocValues: MergedDocValues<BinaryDocValues> =
                                     MergedDocValues(
-                                        reader.getBinaryDocValues(field)!!,
+                                        DocValues.getBinary(reader, field),
                                         DocValuesFieldUpdates.Iterator.asBinaryDocValues(
                                             iterator
                                         ),
@@ -403,7 +403,7 @@ class ReadersAndUpdates(
                                     updateSupplier(fieldInfo)
                                 val mergedDocValues: MergedDocValues<NumericDocValues> =
                                     MergedDocValues(
-                                        reader.getNumericDocValues(field)!!,
+                                        DocValues.getNumeric(reader, field),
                                         DocValuesFieldUpdates.Iterator.asNumericDocValues(
                                             iterator
                                         ),
