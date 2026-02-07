@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.index
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.test.Test
@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
 
     @Test
-    fun testPollFromSameThread() = runBlocking {
+    fun testPollFromSameThread() = runTest {
         val pq = ConcurrentApproximatePriorityQueue<Int>(
             TestUtil.nextInt(
                 random(),
@@ -32,7 +32,7 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
     }
 
     @Test
-    fun testPollFromDifferentThread() = runBlocking {
+    fun testPollFromDifferentThread() = runTest {
         val pq = ConcurrentApproximatePriorityQueue<Int>(
             TestUtil.nextInt(
                 random(),
@@ -53,7 +53,7 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
     }
 
     @Test
-    fun testCurrentLockIsBusy() = runBlocking {
+    fun testCurrentLockIsBusy() = runTest {
         val pq = ConcurrentApproximatePriorityQueue<Int>(
             TestUtil.nextInt(
                 random(),
@@ -74,7 +74,10 @@ class TestConcurrentApproximatePriorityQueue : LuceneTestCase() {
             }
             assertTrue(pq.locks[queueIndex].tryLock())
             takeLock.complete(Unit)
-            releaseLock.await()
+            // Do not suspend while holding ReentrantLock: coroutine resume may switch worker
+            // threads and violate thread ownership on unlock.
+            while (!releaseLock.isCompleted) {
+            }
             pq.locks[queueIndex].unlock()
         }
         takeLock.await()
