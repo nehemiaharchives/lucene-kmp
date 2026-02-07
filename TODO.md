@@ -301,7 +301,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
 - org.apache.lucene.tests.index.BaseMergePolicyTestCase → org.gnit.lucenekmp.tests.index.BaseMergePolicyTestCase
 - org.apache.lucene.tests.index.BasePointsFormatTestCase → org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
-- org.apache.lucene.tests.index.BaseSegmentInfoFormatTestCase → org.gnit.lucenekmp.tests.index.BaseSegmentInfoFormatTestCase
 - org.apache.lucene.tests.index.BaseTermVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseTermVectorsFormatTestCase
 - org.apache.lucene.tests.index.OwnCacheKeyMultiReader → org.gnit.lucenekmp.tests.index.OwnCacheKeyMultiReader
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
@@ -629,7 +628,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.lucene99.TestLucene99HnswVectorsFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswVectorsFormat
 - org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter → org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter
-- org.apache.lucene.codecs.lucene99.TestLucene99SegmentInfoFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99SegmentInfoFormat
 - org.apache.lucene.codecs.memory.TestDirectPostingsFormat → org.gnit.lucenekmp.codecs.memory.TestDirectPostingsFormat
 - org.apache.lucene.codecs.memory.TestFSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.TestFSTPostingsFormat
 - org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat → org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat
@@ -639,7 +637,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextTermVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextTermVectorsFormat
 - org.apache.lucene.codecs.uniformsplit.TestBlockWriter → org.gnit.lucenekmp.codecs.uniformsplit.TestBlockWriter
 - org.apache.lucene.codecs.uniformsplit.TestFSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.TestFSTDictionary

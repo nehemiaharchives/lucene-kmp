@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1036 | 75% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1037 | 75% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -106,7 +106,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 23 | 57% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 24 | 60% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
@@ -143,7 +143,7 @@
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 1 | 33% |
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
-|     org.apache.lucene.codecs.lucene99 | 6 | 1 | 16% |
+|     org.apache.lucene.codecs.lucene99 | 6 | 2 | 33% |
 |     org.apache.lucene.codecs.perfield | 4 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 3 | 6% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 172 | 25% |
+| Total | 673 | 173 | 25% |
 
 
 ## Tests To Port
@@ -213,7 +213,6 @@
 | [org.apache.lucene.codecs.lucene99.TestLucene99HnswVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99HnswVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswVectorsFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorsWriter.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter |
-| [org.apache.lucene.codecs.lucene99.TestLucene99SegmentInfoFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99SegmentInfoFormat.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99SegmentInfoFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldDocValuesFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldKnnVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldKnnVectorsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldKnnVectorsFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat |
