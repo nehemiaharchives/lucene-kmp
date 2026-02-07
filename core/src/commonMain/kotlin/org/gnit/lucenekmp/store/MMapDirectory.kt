@@ -1,8 +1,11 @@
 package org.gnit.lucenekmp.store
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import okio.FileHandle
+import okio.FileSystem
 import okio.IOException
 import okio.Path
+import okio.SYSTEM
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.jdkport.Optional
 import org.gnit.lucenekmp.jdkport.System
@@ -59,8 +62,14 @@ import org.gnit.lucenekmp.util.Constants
  *
  * @see [Blog post
  * about MMapDirectory](https://blog.thetaphi.de/2012/07/use-lucenes-mmapdirectory-on-64bit.html)
+ *
+ *
+ * **KMP note:** On Kotlin Multiplatform targets this class provides an mmap-compatible API but
+ * uses a non-mmap implementation backed by regular file reads (`okio` + positional IO). This keeps
+ * Lucene API behavior (random-access IndexInput, clone/slice semantics, thread-safe positional
+ * reads, close semantics) without relying on JDK 21+ foreign memory APIs.
  */
-class MMapDirectory constructor(
+class MMapDirectory(
     path: Path,
     lockFactory: LockFactory = FSLockFactory.default,
     maxChunkSize: Long = DEFAULT_MAX_CHUNK_SIZE
@@ -338,53 +347,8 @@ class MMapDirectory constructor(
             }
 
         private fun <A> lookupProvider(): MMapIndexInputProvider<A> {
-            val maxPermits = sharedArenaMaxPermitsSysprop
-
-            // MemorySegmentIndexInputProvider is in lucene/lucene/core/src/java21/org/apache/lucene/store/MemorySegmentIndexInputProvider.java
-            // so java lucene needs to call it in following way:
-
-            /*
-            val lookup: MethodHandles.Lookup = MethodHandles.lookup()
-            try {
-                val cls: KClass<*> =
-                    lookup.findClass("org.gnit.lucenekmp.store.MemorySegmentIndexInputProvider")
-                // we use method handles, so we do not need to deal with setAccessible as we have private
-                // access through the lookup:
-                val constr: MethodHandle = lookup.findConstructor(
-                    cls,
-                    MethodType.methodType(Void.TYPE, Int::class)
-                )
-                try {
-                    return constr.invoke(maxPermits) as MMapIndexInputProvider<A>
-                } catch (e: RuntimeException) {
-                    throw e
-                } catch (e: Error) {
-                    throw e
-                } catch (th: Throwable) {
-                    throw AssertionError(th)
-                }
-            } catch (e: NoSuchMethodException) {
-                throw LinkageError(
-                    "MemorySegmentIndexInputProvider is missing correctly typed constructor", e
-                )
-            } catch (e: IllegalAccessException) {
-                throw LinkageError(
-                    "MemorySegmentIndexInputProvider is missing correctly typed constructor", e
-                )
-            } catch (cnfe: KClassNotFoundException) {
-                throw LinkageError("MemorySegmentIndexInputProvider is missing in Lucene JAR file", cnfe)
-            }*/
-
-            // but lucene-kmp will only support JDK 24 for now, so we will directly instantiate the provider:
-            //return MemorySegmentIndexInputProvider(maxPermits) as MMapIndexInputProvider<A>
-
-            // but, but,,, when I look into MemorySegmentIndexInputProvider.java I came to realize that it uses
-            // jdk21 api for low-level memory operations and that will be too hard to port for KMP.
-            // so we will give up implementing MMapDirectory for now.
-
-            throw UnsupportedOperationException(
-                "MMapDirectory is not supported in lucene-kmp, because it uses JDK 21+ APIs that are not available in KMP."
-            )
+            logger.warn { "MMapDirectory uses KMP fallback provider backed by okio positional file reads (non-mmap implementation)." }
+            return KmpMMapIndexInputProvider() as MMapIndexInputProvider<A>
         }
 
         /**
@@ -398,6 +362,48 @@ class MMapDirectory constructor(
         init {
             PROVIDER = lookupProvider<Any>()
             DEFAULT_MAX_CHUNK_SIZE = PROVIDER.defaultMaxChunkSize
+        }
+
+        /**
+         * KMP-safe provider that keeps MMapDirectory API behavior but uses regular file reads.
+         *
+         * It delegates to an IndexInput implementation backed by okio positional reads:
+         * [NIOFSDirectory.NIOFSIndexInput].
+         */
+        private class KmpMMapIndexInputProvider : MMapIndexInputProvider<Any> {
+            private val fileSystem: FileSystem = FileSystem.SYSTEM
+
+            override fun openInput(
+                path: Path,
+                context: IOContext,
+                chunkSizePower: Int,
+                preload: Boolean,
+                group: Optional<String>,
+                attachment: Any?
+            ): IndexInput {
+                // chunkSizePower/preload/group/attachment are mmap-specific hints in Java Lucene.
+                // The KMP fallback keeps functional behavior with positional file reads.
+                val handle: FileHandle = fileSystem.openReadOnly(path)
+                var success = false
+                try {
+                    val indexInput = NIOFSDirectory.NIOFSIndexInput(
+                        "MMapIndexInput(path=\"$path\") [kmp-fallback]",
+                        handle,
+                        context
+                    )
+                    success = true
+                    return indexInput
+                } finally {
+                    if (!success) {
+                        org.gnit.lucenekmp.util.IOUtils.closeWhileHandlingException(handle)
+                    }
+                }
+            }
+
+            override val defaultMaxChunkSize: Long =
+                if (Constants.JRE_IS_64BIT) 1L shl 34 else 1L shl 28
+
+            override fun supportsMadvise(): Boolean = false
         }
     }
 }
