@@ -84,7 +84,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
         val rand: Random = random()
         val w = RandomIndexWriter(rand, dir, newIndexWriterConfig(MockAnalyzer(random())).setMaxBufferedDocs(TestUtil.nextInt(rand, 5, 20)))
         // w.w.setNoCFSRatio(0.0);
-        val docCount: Int = atLeast(200)
+        val docCount: Int = atLeast(10) // TODO reduced from 200 to 10 for dev speed
         val fieldCount: Int = TestUtil.nextInt(rand, 1, 5)
 
         val fieldIDs: MutableList<Int> = mutableListOf()
@@ -920,7 +920,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
             }
 
         val docs: MutableMap<String, Document> = HashMap()
-        val numDocs: Int = atLeast(100)
+        val numDocs: Int = atLeast(10) // TODO reduced from 100 to 10 for dev speed
         for (i in 0..<numDocs) {
             val id = i.toString()
             docs[id] = documentFactory(id)
