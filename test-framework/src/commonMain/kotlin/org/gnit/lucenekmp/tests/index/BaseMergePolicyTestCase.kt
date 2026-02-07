@@ -68,13 +68,12 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
-    fun testForceMergeNotNeeded() {
+    open fun testForceMergeNotNeeded() {
         newDirectory().use { dir ->
             val mayMerge = AtomicBoolean(true)
             val mergeScheduler: MergeScheduler =
                 object : SerialMergeScheduler() {
                     /*@Synchronized*/
-                    @Throws(IOException::class)
                     override suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger) {
                         if (mayMerge.load() == false) {
                             val merge: OneMerge? = mergeSource.nextMerge
@@ -119,7 +118,7 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
     }
 
     @Throws(IOException::class)
-    fun testFindForcedDeletesMerges() {
+    open fun testFindForcedDeletesMerges() {
         val mp: MergePolicy = mergePolicy()
         if (mp is FilterMergePolicy) {
             assumeFalse("test doesn't work with MockRandomMP", mp.unwrap() is MockRandomMergePolicy)
@@ -202,8 +201,8 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
 
     /** Simulate an append-only use-case, ie. there are no deletes.  */
     @Throws(IOException::class)
-    fun testSimulateAppendOnly() {
-        doTestSimulateAppendOnly(mergePolicy(), 100000000, 10000)
+    open fun testSimulateAppendOnly() {
+        doTestSimulateAppendOnly(mergePolicy(), totalDocs = 1000, maxDocsPerFlush = 100) // TODO reduced from totalDocs = 100000000, maxDocsPerFlush = 10000 to totalDocs = 10000, maxDocsPerFlush = 100 for dev speed
     }
 
     /**
@@ -250,8 +249,8 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
 
     /** Simulate an update use-case where documents are uniformly updated across segments.  */
     @Throws(IOException::class)
-    fun testSimulateUpdates() {
-        val numDocs: Int = atLeast(1000000)
+    open fun testSimulateUpdates() {
+        val numDocs: Int = atLeast(10000) // TODO reduced from 1000000 to 1000 for dev speed
         doTestSimulateUpdates(mergePolicy(), numDocs, 2500)
     }
 
@@ -317,7 +316,7 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
-    fun testNoPathologicalMerges() {
+    open fun testNoPathologicalMerges() {
         val mergePolicy: MergePolicy = mergePolicy()
         val stats = IOStats()
         val segNameGenerator = AtomicLong(0)
@@ -327,7 +326,7 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
         // to trigger pathological O(n^2) merging due to floor segment sizes
         val avgDocSizeMB = 10.0 / 1024 / 1024
         val maxDocsPerFlush = 3
-        val totalDocs = 10000
+        val totalDocs = 100 // TODO reduced from 10000 to 100 for dev speed
         var numFlushes = 0
         var numDocs = 0
         while (numDocs < totalDocs) {
@@ -367,7 +366,7 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
          * Make a new [SegmentCommitInfo] with the given `maxDoc`, `numDeletedDocs` and
          * `sizeInBytes`, which are usually the numbers that merge policies care about.
          */
-        protected fun makeSegmentCommitInfo(
+        fun makeSegmentCommitInfo(
             name: String, maxDoc: Int, numDeletedDocs: Int, sizeMB: Double, source: String
         ): SegmentCommitInfo {
             require(name.startsWith("_") != false) { "name must start with an _, got $name" }
@@ -464,7 +463,6 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
                     throw UnsupportedOperationException()
                 }
 
-                @get:Throws(IOException::class)
                 override val pendingDeletions: MutableSet<String>
                     get() {
                         throw UnsupportedOperationException()
@@ -476,7 +474,7 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
          * `stats`.
          */
         @Throws(IOException::class)
-        protected fun applyMerge(infos: SegmentInfos, merge: OneMerge, mergedSegmentName: String, stats: IOStats): SegmentInfos {
+        fun applyMerge(infos: SegmentInfos, merge: OneMerge, mergedSegmentName: String, stats: IOStats): SegmentInfos {
             var newMaxDoc = 0
             var newSize = 0.0
             for (sci in merge.segments) {

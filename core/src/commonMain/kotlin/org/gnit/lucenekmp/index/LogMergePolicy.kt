@@ -44,10 +44,10 @@ abstract class LogMergePolicy
      * Any segments whose size is smaller than this value will be candidates for full-flush merges and
      * merged more aggressively.
      */
-    protected var minMergeSize: Long = 0
+    var minMergeSize: Long = 0
 
     /** If the size of a segment exceeds this value then it will never be merged.  */
-    protected var maxMergeSize: Long = 0
+    var maxMergeSize: Long = 0
 
     // Although the core MPs set it explicitly, we must default in case someone
     // out there wrote his own LMP ...
