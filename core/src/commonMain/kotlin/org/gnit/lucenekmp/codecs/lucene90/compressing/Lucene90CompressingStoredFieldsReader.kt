@@ -314,28 +314,10 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
 
         @Throws(IOException::class)
         fun doReset(docID: Int) {
-            val startFP = fieldsStream.filePointer
-            if (docID == 23145) {
-                val probeStart = kotlin.math.max(0L, startFP - 8)
-                val probeLen = 32
-                val probeBuf = ByteArray(probeLen)
-                val probe = fieldsStream.clone()
-                probe.seek(probeStart)
-                probe.readBytes(probeBuf, 0, probeLen)
-                val hex = probeBuf.joinToString(" ") { b -> ((b.toInt() and 0xFF)).toString(16).padStart(2, '0') }
-                logger.debug {
-                    "stored fields bytes: docID=$docID startFP=$startFP probeStart=$probeStart probeLen=$probeLen hex=$hex"
-                }
-            }
             docBase = fieldsStream.readVInt()
             val token: Int = fieldsStream.readVInt()
             chunkDocs = token ushr 2
             if (!contains(docID) || docBase + chunkDocs > numDocs) {
-                if (docID == 23145) {
-                    logger.debug {
-                        "stored fields corrupt header: docID=$docID startFP=$startFP docBase=$docBase token=$token chunkDocs=$chunkDocs numDocs=$numDocs fieldsLength=${fieldsStream.length()}"
-                    }
-                }
                 throw CorruptIndexException(
                     ("Corrupted: docID="
                             + docID
@@ -521,45 +503,8 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
     @Throws(IOException::class)
     fun serializedDocument(docID: Int): SerializedDocument {
         if (!state.contains(docID)) {
-            val originalStartPointer = indexReader.getStartPointer(docID)
-
-            fun tryResetAt(startPointer: Long) {
-                fieldsStream.seek(startPointer)
-                state.reset(docID)
-            }
-
-            try {
-                tryResetAt(originalStartPointer)
-            } catch (e: CorruptIndexException) {
-                // The stored-fields index gives byte-level start pointers. If the ported packed/
-                // monotonic readers return a pointer that is slightly misaligned, we can end up
-                // starting in the middle of a vInt and falsely report corruption.
-                val candidates = longArrayOf(
-                    originalStartPointer + 1,
-                    originalStartPointer - 1,
-                    originalStartPointer + 2,
-                    originalStartPointer - 2
-                )
-                var recovered = false
-                for (candidate in candidates) {
-                    if (candidate < 0L || candidate > fieldsStream.length()) {
-                        continue
-                    }
-                    try {
-                        tryResetAt(candidate)
-                        logger.debug {
-                            "stored fields recovered startPointer: docID=$docID original=$originalStartPointer corrected=$candidate"
-                        }
-                        recovered = true
-                        break
-                    } catch (_: CorruptIndexException) {
-                        // try next
-                    }
-                }
-                if (!recovered) {
-                    throw e
-                }
-            }
+            fieldsStream.seek(indexReader.getStartPointer(docID))
+            state.reset(docID)
         }
         require(state.contains(docID))
         return state.document(docID)

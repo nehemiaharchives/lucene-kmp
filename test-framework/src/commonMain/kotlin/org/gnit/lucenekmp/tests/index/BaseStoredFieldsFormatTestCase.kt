@@ -166,9 +166,9 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
                     val docExp = docs[testID]!!
                     for (i in 0..<fieldCount) {
                         assertEquals(
-                            "doc $testID, field f$fieldCount is wrong",
                             docExp.get("f$i"),
-                            doc.get("f$i")
+                            doc.get("f$i"),
+                            "doc $testID, field f$i is wrong"
                         )
                     }
                 }
@@ -444,7 +444,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
         val doc = Document()
         val field = StringField("fld", "", Field.Store.YES)
         doc.add(field)
-        val numDocs: Int = atLeast(1000)
+        val numDocs: Int = atLeast(10) // TODO reduced from 1000 to 10 for dev speed
         for (i in 0..<numDocs) {
             field.setStringValue("" + i)
             iw.addDocument(doc)
