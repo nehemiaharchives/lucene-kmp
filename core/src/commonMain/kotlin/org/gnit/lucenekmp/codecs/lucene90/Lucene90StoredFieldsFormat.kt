@@ -91,7 +91,7 @@ class Lucene90StoredFieldsFormat(
 
     /** Stored fields format with specified mode  */
     /** Stored fields format with default options  */
-    var mode: Mode = Mode.BEST_SPEED) : StoredFieldsFormat() {
+    mode: Mode? = Mode.BEST_SPEED) : StoredFieldsFormat() {
     /** Configuration option for stored fields.  */
     enum class Mode {
         /** Trade compression ratio for retrieval speed.  */
@@ -143,9 +143,7 @@ class Lucene90StoredFieldsFormat(
         }
     }
 
-    init {
-        this.mode = mode
-    }
+    val mode: Mode = mode ?: throw NullPointerException()
 
     companion object {
         /** Attribute key for compression mode.  */

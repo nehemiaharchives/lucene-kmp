@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.codecs
 
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101Codec
 import org.gnit.lucenekmp.jdkport.ClassLoader
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.util.NamedSPILoader
 import org.gnit.lucenekmp.util.NamedSPILoader.NamedSPI
 
@@ -99,15 +100,28 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
     }
     companion object {
         private val registry: MutableMap<String, Codec> = mutableMapOf()
+        private val registryLock = ReentrantLock()
 
         /** Register a codec instance for lookup by name. */
         fun register(codec: Codec) {
-            registry[codec.name] = codec
+            registryLock.lock()
+            try {
+                if (registry.containsKey(codec.name).not()) {
+                    registry[codec.name] = codec
+                }
+            } finally {
+                registryLock.unlock()
+            }
         }
 
         /** looks up a codec by name  */
         fun forName(name: String): Codec {
-            return registry[name] ?: Holder.defaultCodec
+            registryLock.lock()
+            try {
+                return registry[name] ?: Holder.defaultCodec
+            } finally {
+                registryLock.unlock()
+            }
         }
 
         /** returns a list of all available codec names  */

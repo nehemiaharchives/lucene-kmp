@@ -38,7 +38,7 @@ import kotlin.jvm.JvmOverloads
  *
  * @lucene.experimental
  */
-class Lucene101Codec @JvmOverloads constructor(mode: Mode = Mode.BEST_SPEED) : Codec("Lucene101") {
+class Lucene101Codec @JvmOverloads constructor(mode: Mode? = Mode.BEST_SPEED) : Codec("Lucene101") {
     /** Configuration option for the codec.  */
     enum class Mode(val storedMode: Lucene90StoredFieldsFormat.Mode) {
         /** Trade compression ratio for retrieval speed.  */
@@ -77,8 +77,11 @@ class Lucene101Codec @JvmOverloads constructor(mode: Mode = Mode.BEST_SPEED) : C
         }
     }
 
-    private val storedFieldsFormat: StoredFieldsFormat = Lucene90StoredFieldsFormat(mode.storedMode)
-
+    private val storedFieldsFormat: StoredFieldsFormat
+    init {
+        val checkedMode = mode ?: throw NullPointerException()
+        storedFieldsFormat = Lucene90StoredFieldsFormat(checkedMode.storedMode)
+    }
     /**
      * Instantiates a new codec, specifying the stored fields compression mode to use.
      *
