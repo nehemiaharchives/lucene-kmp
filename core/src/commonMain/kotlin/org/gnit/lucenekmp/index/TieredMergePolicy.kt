@@ -418,7 +418,7 @@ open class TieredMergePolicy
         mergeContext: MergeContext,
         maxMergeIsRunning: Boolean
     ): MergeSpecification? {
-        val sortedEligible: MutableList<SegmentSizeAndDocs> = mutableListOf()
+        val sortedEligible: MutableList<SegmentSizeAndDocs> = sortedEligibleInfos.toMutableList()
 
         val segInfosSizes: MutableMap<SegmentCommitInfo, SegmentSizeAndDocs> = mutableMapOf()
         for (segSizeDocs in sortedEligible) {
