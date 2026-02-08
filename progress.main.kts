@@ -93,14 +93,14 @@ class Progress : CliktCommand() {
             cwd.name == "lucene-kmp" && File(cwd.parentFile, "lucene").isDirectory ->
                 File(cwd.parentFile, "lucene").canonicalPath
             File(cwd, "lucene").isDirectory -> File(cwd, "lucene").canonicalPath
-            else -> "$homeDir/code/lp/lucene"
+            else -> "$homeDir/code/bbl-lucene/lucene"
         }
     }
     private val inferredKmpDir = run {
         when {
             cwd.name == "lucene-kmp" -> cwd.canonicalPath
             File(cwd, "lucene-kmp").isDirectory -> File(cwd, "lucene-kmp").canonicalPath
-            else -> "$homeDir/code/lp/lucene-kmp"
+            else -> "$homeDir/code/bbl-lucene/lucene-kmp"
         }
     }
     private val javaDir by option("--java", "-j").default(inferredJavaDir)

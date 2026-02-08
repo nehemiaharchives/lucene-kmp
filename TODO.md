@@ -299,7 +299,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.geo.BaseGeoPointTestCase → org.gnit.lucenekmp.tests.geo.BaseGeoPointTestCase
 - org.apache.lucene.tests.geo.BaseXYPointTestCase → org.gnit.lucenekmp.tests.geo.BaseXYPointTestCase
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
-- org.apache.lucene.tests.index.BaseMergePolicyTestCase → org.gnit.lucenekmp.tests.index.BaseMergePolicyTestCase
 - org.apache.lucene.tests.index.BasePointsFormatTestCase → org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
 - org.apache.lucene.tests.index.BaseTermVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseTermVectorsFormatTestCase
 - org.apache.lucene.tests.index.OwnCacheKeyMultiReader → org.gnit.lucenekmp.tests.index.OwnCacheKeyMultiReader
@@ -410,9 +409,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestPersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.TestPersistentSnapshotDeletionPolicy
 - org.apache.lucene.index.TestStressIndexing → org.gnit.lucenekmp.index.TestStressIndexing
 - org.apache.lucene.index.TestTermsHashPerField → org.gnit.lucenekmp.index.TestTermsHashPerField
-- org.apache.lucene.index.TestTieredMergePolicy → org.gnit.lucenekmp.index.TestTieredMergePolicy
 - org.apache.lucene.index.TestTransactions → org.gnit.lucenekmp.index.TestTransactions
-- org.apache.lucene.index.UpgradeIndexMergePolicy → org.gnit.lucenekmp.index.UpgradeIndexMergePolicy
 - org.apache.lucene.internal.hppc.CharCursor → org.gnit.lucenekmp.internal.hppc.CharCursor
 - org.apache.lucene.internal.hppc.DoubleCursor → org.gnit.lucenekmp.internal.hppc.DoubleCursor
 - org.apache.lucene.internal.hppc.FloatCursor → org.gnit.lucenekmp.internal.hppc.FloatCursor
@@ -636,7 +633,10 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2 → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
+- org.apache.lucene.codecs.simpletext.TestSimpleTextLiveDocsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextLiveDocsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat
+- org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat
+- org.apache.lucene.codecs.simpletext.TestSimpleTextStoredFieldsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextStoredFieldsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextTermVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextTermVectorsFormat
 - org.apache.lucene.codecs.uniformsplit.TestBlockWriter → org.gnit.lucenekmp.codecs.uniformsplit.TestBlockWriter
 - org.apache.lucene.codecs.uniformsplit.TestFSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.TestFSTDictionary
@@ -787,7 +787,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestIntBlockPool → org.gnit.lucenekmp.index.TestIntBlockPool
 - org.apache.lucene.index.TestIsCurrent → org.gnit.lucenekmp.index.TestIsCurrent
 - org.apache.lucene.index.TestKnnGraph → org.gnit.lucenekmp.index.TestKnnGraph
-- org.apache.lucene.index.TestLogMergePolicy → org.gnit.lucenekmp.index.TestLogMergePolicy
 - org.apache.lucene.index.TestLongPostings → org.gnit.lucenekmp.index.TestLongPostings
 - org.apache.lucene.index.TestManyFields → org.gnit.lucenekmp.index.TestManyFields
 - org.apache.lucene.index.TestMaxPosition → org.gnit.lucenekmp.index.TestMaxPosition
@@ -806,7 +805,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestNeverDelete → org.gnit.lucenekmp.index.TestNeverDelete
 - org.apache.lucene.index.TestNewestSegment → org.gnit.lucenekmp.index.TestNewestSegment
 - org.apache.lucene.index.TestNoDeletionPolicy → org.gnit.lucenekmp.index.TestNoDeletionPolicy
-- org.apache.lucene.index.TestNoMergePolicy → org.gnit.lucenekmp.index.TestNoMergePolicy
 - org.apache.lucene.index.TestNoMergeScheduler → org.gnit.lucenekmp.index.TestNoMergeScheduler
 - org.apache.lucene.index.TestOmitNorms → org.gnit.lucenekmp.index.TestOmitNorms
 - org.apache.lucene.index.TestOmitPositions → org.gnit.lucenekmp.index.TestOmitPositions
@@ -862,7 +860,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestTryDelete → org.gnit.lucenekmp.index.TestTryDelete
 - org.apache.lucene.index.TestTwoPhaseCommitTool → org.gnit.lucenekmp.index.TestTwoPhaseCommitTool
 - org.apache.lucene.index.TestUniqueTermCount → org.gnit.lucenekmp.index.TestUniqueTermCount
-- org.apache.lucene.index.TestUpgradeIndexMergePolicy → org.gnit.lucenekmp.index.TestUpgradeIndexMergePolicy
 - org.apache.lucene.internal.hppc.TestCharHashSet → org.gnit.lucenekmp.internal.hppc.TestCharHashSet
 - org.apache.lucene.internal.hppc.TestCharObjectHashMap → org.gnit.lucenekmp.internal.hppc.TestCharObjectHashMap
 - org.apache.lucene.internal.hppc.TestFloatArrayList → org.gnit.lucenekmp.internal.hppc.TestFloatArrayList
@@ -1068,7 +1065,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.TestSleepingLockWrapper → org.gnit.lucenekmp.store.TestSleepingLockWrapper
 - org.apache.lucene.store.TestStressLockFactories → org.gnit.lucenekmp.store.TestStressLockFactories
 - org.apache.lucene.store.TestTrackingDirectoryWrapper → org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper
+- org.apache.lucene.tests.analysis.TestLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.TestMockAnalyzer → org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer
+- org.apache.lucene.tests.analysis.TestMockCharFilter → org.gnit.lucenekmp.tests.analysis.TestMockCharFilter
 - org.apache.lucene.tests.analysis.TestMockSynonymFilter → org.gnit.lucenekmp.tests.analysis.TestMockSynonymFilter
 - org.apache.lucene.tests.analysis.TestToken → org.gnit.lucenekmp.tests.analysis.TestToken
 - org.apache.lucene.tests.codecs.asserting.TestAssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.TestAssertingDocValuesFormat
