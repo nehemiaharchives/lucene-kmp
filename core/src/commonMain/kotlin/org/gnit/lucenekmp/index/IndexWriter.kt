@@ -3690,59 +3690,59 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 logger.debug { "prepareCommit: applyAllDeletesAndUpdates" }
                 applyAllDeletesAndUpdates()
 
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "prepareCommit: writeReaderPool")
-                }
-                logger.debug { "prepareCommit: writeReaderPool" }
-                writeReaderPool(true)
-                if (changeCount.load() != lastCommitChangeCount) {
-                    // There are changes to commit, so we will write a new segments_N in startCommit.
-                    // The act of committing is itself an NRT-visible change (an NRT reader that was
-                    // just opened before this should see it on reopen) so we increment changeCount
-                    // and segments version so a future NRT reopen will see the change:
-                    changeCount.incrementAndFetch()
-                    segmentInfos.changed()
-                }
-
-                if (commitUserData != null) {
-                    val userData: MutableMap<String, String> = HashMap()
-                    for (ent in commitUserData) {
-                        userData[ent.key] = ent.value
+                // Guard commit-time segment metadata against concurrent merges/updates.
+                withIndexWriterLock {
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "prepareCommit: writeReaderPool")
                     }
-                    segmentInfos.setUserData(userData, false)
-                }
+                    logger.debug { "prepareCommit: writeReaderPool" }
+                    writeReaderPool(true)
+                    if (changeCount.load() != lastCommitChangeCount) {
+                        // There are changes to commit, so we will write a new segments_N in startCommit.
+                        // The act of committing is itself an NRT-visible change (an NRT reader that was
+                        // just opened before this should see it on reopen) so we increment changeCount
+                        // and segments version so a future NRT reopen will see the change:
+                        changeCount.incrementAndFetch()
+                        segmentInfos.changed()
+                    }
 
-                // Must clone the segmentInfos while we still
-                // hold fullFlushLock and while sync'd so that
-                // no partial changes (eg a delete w/o
-                // corresponding add from an updateDocument) can
-                // sneak into the commit point:
-                toCommit = segmentInfos.clone()
-                pendingCommitChangeCount = changeCount.load()
-                // This protects the segmentInfos we are now going
-                // to commit.  This is important in case, eg, while
-                // we are trying to sync all referenced files, a
-                // merge completes which would otherwise have
-                // removed the files we are now syncing.
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "prepareCommit: incRef commit files")
+                    if (commitUserData != null) {
+                        val userData: MutableMap<String, String> = HashMap()
+                        for (ent in commitUserData) {
+                            userData[ent.key] = ent.value
+                        }
+                        segmentInfos.setUserData(userData, false)
+                    }
+
+                    // Must clone the segmentInfos while we still
+                    // hold fullFlushLock and while sync'd so that
+                    // no partial changes (eg a delete w/o
+                    // corresponding add from an updateDocument) can
+                    // sneak into the commit point:
+                    toCommit = segmentInfos.clone()
+                    pendingCommitChangeCount = changeCount.load()
+                    // This protects the segmentInfos we are now going
+                    // to commit.  This is important in case, eg, while
+                    // we are trying to sync all referenced files, a
+                    // merge completes which would otherwise have
+                    // removed the files we are now syncing.
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "prepareCommit: incRef commit files")
+                    }
+                    logger.debug { "prepareCommit: incRef commit files" }
+                    deleter.incRef(toCommit.files(false))
+                    if (maxCommitMergeWaitMillis > 0) {
+                        // we can safely call preparePointInTimeMerge since writeReaderPool(true) above
+                        // wrote all
+                        // necessary files to disk and checkpointed them.
+                        pointInTimeMerges =
+                            preparePointInTimeMerge(
+                                toCommit,
+                                { stopAddingMergedSegments.load() },
+                                MergeTrigger.COMMIT,
+                                { `_`: SegmentCommitInfo -> })
+                    }
                 }
-                logger.debug { "prepareCommit: incRef commit files" }
-                deleter.incRef(toCommit.files(false))
-                if (maxCommitMergeWaitMillis > 0) {
-                    // we can safely call preparePointInTimeMerge since writeReaderPool(true) above
-                    // wrote all
-                    // necessary files to disk and checkpointed them.
-                    pointInTimeMerges =
-                        preparePointInTimeMerge(
-                            toCommit,
-                            { stopAddingMergedSegments.load() },
-                            MergeTrigger.COMMIT,
-                            { `_`: SegmentCommitInfo -> })
-                }
-                //} // end of synchronized(this)
                     success = true
                 } finally {
                     if (!success) {
