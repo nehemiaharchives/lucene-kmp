@@ -1463,23 +1463,25 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun dropDeletedSegment(info: SegmentCommitInfo) {
-        // If a merge has already registered for this
-        // segment, we leave it in the readerPool; the
-        // merge will skip merging it and will then drop
-        // it once it's done:
-        if (!mergingSegments.contains(info)) {
-            // it's possible that we invoke this method more than once for the same SCI
-            // we must only remove the docs once!
-            var dropPendingDocs: Boolean = segmentInfos.remove(info)
-            try {
-                // this is sneaky - we might hit an exception while dropping a reader but then we have
-                // already
-                // removed the segment for the segmentInfo and we lost the pendingDocs update due to that.
-                // therefore we execute the adjustPendingNumDocs in a finally block to account for that.
-                dropPendingDocs = dropPendingDocs or runBlocking { readerPool.drop(info) }
-            } finally {
-                if (dropPendingDocs) {
-                    adjustPendingNumDocs(-info.info.maxDoc().toLong())
+        withIndexWriterLock {
+            // If a merge has already registered for this
+            // segment, we leave it in the readerPool; the
+            // merge will skip merging it and will then drop
+            // it once it's done:
+            if (!mergingSegments.contains(info)) {
+                // it's possible that we invoke this method more than once for the same SCI
+                // we must only remove the docs once!
+                var dropPendingDocs: Boolean = segmentInfos.remove(info)
+                try {
+                    // this is sneaky - we might hit an exception while dropping a reader but then we have
+                    // already
+                    // removed the segment for the segmentInfo and we lost the pendingDocs update due to that.
+                    // therefore we execute the adjustPendingNumDocs in a finally block to account for that.
+                    dropPendingDocs = dropPendingDocs or runBlocking { readerPool.drop(info) }
+                } finally {
+                    if (dropPendingDocs) {
+                        adjustPendingNumDocs(-info.info.maxDoc().toLong())
+                    }
                 }
             }
         }
@@ -2664,8 +2666,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun checkpoint() {
-        changed()
-        deleter.checkpoint(segmentInfos, false)
+        withIndexWriterLock {
+            changed()
+            deleter.checkpoint(segmentInfos, false)
+        }
     }
 
     /**
@@ -2676,16 +2680,20 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun checkpointNoSIS() {
-        changeCount.incrementAndFetch()
-        deleter.checkpoint(segmentInfos, false)
+        withIndexWriterLock {
+            changeCount.incrementAndFetch()
+            deleter.checkpoint(segmentInfos, false)
+        }
     }
 
     /** Called internally if any index state has changed.  */
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun changed() {
-        changeCount.incrementAndFetch()
-        segmentInfos.changed()
+        withIndexWriterLock {
+            changeCount.incrementAndFetch()
+            segmentInfos.changed()
+        }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -2728,81 +2736,83 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         globalPacket: FrozenBufferedUpdates?,
         sortMap: DocMap?
     ) {
-        var published = false
-        try {
-            // Lock order IW -> BDS
-            ensureOpen(false)
+        withIndexWriterLock {
+            var published = false
+            try {
+                // Lock order IW -> BDS
+                ensureOpen(false)
 
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message("IW", "publishFlushedSegment $newSegment")
-            }
-
-            if (globalPacket != null && globalPacket.any()) {
-                publishFrozenUpdates(globalPacket)
-            }
-
-            // Publishing the segment must be sync'd on IW -> BDS to make the sure
-            // that no merge prunes away the seg. private delete packet
-            val nextGen: Long
-            if (packet != null && packet.any()) {
-                nextGen = publishFrozenUpdates(packet)
-            } else {
-                // Since we don't have a delete packet to apply we can get a new
-                // generation right away
-                nextGen = bufferedUpdatesStream.getNextGen()
-                // No deletes/updates here, so marked finished immediately:
-                bufferedUpdatesStream.finishedSegment(nextGen)
-            }
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message(
-                    "IW", "publish sets newSegment delGen=" + nextGen + " seg=" + segString(newSegment)
-                )
-            }
-            newSegment.bufferedDeletesGen = nextGen
-            segmentInfos.add(newSegment)
-            published = true
-            checkpoint()
-            if (packet != null && packet.any() && sortMap != null) {
-                // TODO: not great we do this heavyish op while holding IW's monitor lock,
-                // but it only applies if you are using sorted indices and updating doc values:
-                val rld: ReadersAndUpdates = getPooledInstance(newSegment, true)!!
-                rld.sortMap = sortMap
-                // DON't release this ReadersAndUpdates we need to stick with that sortMap
-            }
-            val fieldInfo: FieldInfo? =
-                fieldInfos.fieldInfo(config.softDeletesField) // will return null if no soft deletes are present
-            // this is a corner case where documents delete them-self with soft deletes. This is used to
-            // build delete tombstones etc. in this case we haven't seen any updates to the DV in this
-            // fresh flushed segment.
-            // if we have seen updates the update code checks if the segment is fully deleted.
-            val hasInitialSoftDeleted =
-                (fieldInfo != null && fieldInfo.docValuesGen == -1L && fieldInfo.docValuesType != DocValuesType.NONE)
-            val isFullyHardDeleted = newSegment.delCount == newSegment.info.maxDoc()
-            // we either have a fully hard-deleted segment or one or more docs are soft-deleted. In both
-            // cases we need
-            // to go and check if they are fully deleted. This has the nice side-effect that we now have
-            // accurate numbers
-            // for the soft delete right after we flushed to disk.
-            if (hasInitialSoftDeleted || isFullyHardDeleted) {
-                // this operation is only really executed if needed an if soft-deletes are not configured it
-                // only be executed
-                // if we deleted all docs in this newly flushed segment.
-                val rld: ReadersAndUpdates = getPooledInstance(newSegment, true)!!
-                try {
-                    if (isFullyDeleted(rld)) {
-                        dropDeletedSegment(newSegment)
-                        checkpoint()
-                    }
-                } finally {
-                    release(rld)
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "publishFlushedSegment $newSegment")
                 }
+
+                if (globalPacket != null && globalPacket.any()) {
+                    publishFrozenUpdates(globalPacket)
+                }
+
+                // Publishing the segment must be sync'd on IW -> BDS to make the sure
+                // that no merge prunes away the seg. private delete packet
+                val nextGen: Long
+                if (packet != null && packet.any()) {
+                    nextGen = publishFrozenUpdates(packet)
+                } else {
+                    // Since we don't have a delete packet to apply we can get a new
+                    // generation right away
+                    nextGen = bufferedUpdatesStream.getNextGen()
+                    // No deletes/updates here, so marked finished immediately:
+                    bufferedUpdatesStream.finishedSegment(nextGen)
+                }
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message(
+                        "IW", "publish sets newSegment delGen=" + nextGen + " seg=" + segString(newSegment)
+                    )
+                }
+                newSegment.bufferedDeletesGen = nextGen
+                segmentInfos.add(newSegment)
+                published = true
+                checkpoint()
+                if (packet != null && packet.any() && sortMap != null) {
+                    // TODO: not great we do this heavyish op while holding IW's monitor lock,
+                    // but it only applies if you are using sorted indices and updating doc values:
+                    val rld: ReadersAndUpdates = getPooledInstance(newSegment, true)!!
+                    rld.sortMap = sortMap
+                    // DON't release this ReadersAndUpdates we need to stick with that sortMap
+                }
+                val fieldInfo: FieldInfo? =
+                    fieldInfos.fieldInfo(config.softDeletesField) // will return null if no soft deletes are present
+                // this is a corner case where documents delete them-self with soft deletes. This is used to
+                // build delete tombstones etc. in this case we haven't seen any updates to the DV in this
+                // fresh flushed segment.
+                // if we have seen updates the update code checks if the segment is fully deleted.
+                val hasInitialSoftDeleted =
+                    (fieldInfo != null && fieldInfo.docValuesGen == -1L && fieldInfo.docValuesType != DocValuesType.NONE)
+                val isFullyHardDeleted = newSegment.delCount == newSegment.info.maxDoc()
+                // we either have a fully hard-deleted segment or one or more docs are soft-deleted. In both
+                // cases we need
+                // to go and check if they are fully deleted. This has the nice side-effect that we now have
+                // accurate numbers
+                // for the soft delete right after we flushed to disk.
+                if (hasInitialSoftDeleted || isFullyHardDeleted) {
+                    // this operation is only really executed if needed an if soft-deletes are not configured it
+                    // only be executed
+                    // if we deleted all docs in this newly flushed segment.
+                    val rld: ReadersAndUpdates = getPooledInstance(newSegment, true)!!
+                    try {
+                        if (isFullyDeleted(rld)) {
+                            dropDeletedSegment(newSegment)
+                            checkpoint()
+                        }
+                    } finally {
+                        release(rld)
+                    }
+                }
+            } finally {
+                if (!published) {
+                    adjustPendingNumDocs(-newSegment.info.maxDoc().toLong())
+                }
+                flushCount.incrementAndFetch()
+                doAfterFlush()
             }
-        } finally {
-            if (!published) {
-                adjustPendingNumDocs(-newSegment.info.maxDoc().toLong())
-            }
-            flushCount.incrementAndFetch()
-            doAfterFlush()
         }
     }
 
@@ -6146,16 +6156,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     fun incRefDeleter(segmentInfos: SegmentInfos) {
-        ensureOpen()
-        deleter.incRef(segmentInfos, false)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                ("incRefDeleter for NRT reader version="
-                        + segmentInfos.version
-                        + " segments="
-                        + segString(segmentInfos))
-            )
+        withIndexWriterLock {
+            ensureOpen()
+            deleter.incRef(segmentInfos, false)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    ("incRefDeleter for NRT reader version="
+                            + segmentInfos.version
+                            + " segments="
+                            + segString(segmentInfos))
+                )
+            }
         }
     }
 
@@ -6169,16 +6181,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     fun decRefDeleter(segmentInfos: SegmentInfos) {
-        ensureOpen()
-        deleter.decRef(segmentInfos)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                ("decRefDeleter for NRT reader version="
-                        + segmentInfos.version
-                        + " segments="
-                        + segString(segmentInfos))
-            )
+        withIndexWriterLock {
+            ensureOpen()
+            deleter.decRef(segmentInfos)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    ("decRefDeleter for NRT reader version="
+                            + segmentInfos.version
+                            + " segments="
+                            + segString(segmentInfos))
+                )
+            }
         }
     }
 

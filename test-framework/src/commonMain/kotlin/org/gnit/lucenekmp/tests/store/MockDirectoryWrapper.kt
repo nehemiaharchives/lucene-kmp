@@ -85,6 +85,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     private var openFilesForWrite: MutableSet<String> = mutableSetOf()
     private val openLocksMutex = Mutex()
     private val openLocks: MutableMap<String, RuntimeException> = mutableMapOf()
+    private val openFilesMutex = Mutex()
 
     @Volatile
     var crashed: Boolean = false
@@ -113,15 +114,20 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     // is made to delete an open file, we enroll it here.
     private var openFilesDeleted: MutableSet<String>? = null
 
+    private fun <T> withOpenFilesLock(action: () -> T): T =
+        runBlocking { openFilesMutex.withLock { action() } }
+
     /*@Synchronized*/
     private fun init() {
-        if (openFiles == null) {
-            openFiles = mutableMapOf()
-            openFilesDeleted = mutableSetOf()
-        }
+        withOpenFilesLock {
+            if (openFiles == null) {
+                openFiles = mutableMapOf()
+                openFilesDeleted = mutableSetOf()
+            }
 
-        if (createdFiles == null) createdFiles = mutableSetOf()
-        if (unSyncedFiles == null) unSyncedFiles = mutableSetOf()
+            if (createdFiles == null) createdFiles = mutableSetOf()
+            if (unSyncedFiles == null) unSyncedFiles = mutableSetOf()
+        }
     }
 
     @OptIn(ExperimentalAtomicApi::class)
@@ -200,7 +206,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         for (name in names) {
             // randomly fail with IOE on any file
             maybeThrowIOException(name)
-            `in`.sync(mutableSetOf<String>(name))
+            `in`.sync(mutableSetOf(name))
             unSyncedFiles!!.remove(name)
         }
     }
@@ -215,24 +221,26 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             throw IOException("cannot rename after crash")
         }
 
-        if (openFiles!!.containsKey(source) && assertNoDeleteOpenFile) {
-            throw fillOpenTrace<AssertionError>(
-                AssertionError(
-                    "MockDirectoryWrapper: source file \"$source\" is still open: cannot rename"
-                ),
-                source,
-                true
-            )
-        }
+        withOpenFilesLock {
+            if (openFiles!!.containsKey(source) && assertNoDeleteOpenFile) {
+                throw fillOpenTrace(
+                    AssertionError(
+                        "MockDirectoryWrapper: source file \"$source\" is still open: cannot rename"
+                    ),
+                    source,
+                    true
+                )
+            }
 
-        if (openFiles!!.containsKey(dest) && assertNoDeleteOpenFile) {
-            throw fillOpenTrace<AssertionError>(
-                AssertionError(
-                    "MockDirectoryWrapper: dest file \"$dest\" is still open: cannot rename"
-                ),
-                dest,
-                true
-            )
+            if (openFiles!!.containsKey(dest) && assertNoDeleteOpenFile) {
+                throw fillOpenTrace(
+                    AssertionError(
+                        "MockDirectoryWrapper: dest file \"$dest\" is still open: cannot rename"
+                    ),
+                    dest,
+                    true
+                )
+            }
         }
 
         var success = false
@@ -246,7 +254,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                     unSyncedFiles!!.remove(source)
                     unSyncedFiles!!.add(dest)
                 }
-                openFilesDeleted!!.remove(source)
+                withOpenFilesLock { openFilesDeleted!!.remove(source) }
                 createdFiles!!.remove(source)
                 createdFiles!!.add(dest)
             }
@@ -288,7 +296,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         for (fileName in listAll()) {
             if (fileName.startsWith(IndexFileNames.SEGMENTS)) {
                 if (LuceneTestCase.VERBOSE) {
-                    println("MDW: read " + fileName + " to gather files it references")
+                    println("MDW: read $fileName to gather files it references")
                 }
                 val infos: SegmentInfos
                 try {
@@ -361,7 +369,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         val filesToCorrupt: MutableList<String> = files.toMutableList() /*java.util.ArrayList<String>(files)*/
         // sort the files otherwise we have reproducibility issues
         // across JVMs if the incoming collection is a hashSet etc.
-        CollectionUtil.timSort<String>(filesToCorrupt)
+        CollectionUtil.timSort(filesToCorrupt)
         for (name in filesToCorrupt) {
             var damage: Int = randomState.nextInt(6)
             if (alwaysCorrupt && damage == 3) {
@@ -383,7 +391,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                         length = fileLength(name)
                     } catch (ioe: IOException) {
                         throw RuntimeException(
-                            "hit unexpected IOException while trying to corrupt file " + name, ioe
+                            "hit unexpected IOException while trying to corrupt file $name", ioe
                         )
                     }
 
@@ -513,7 +521,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                         }
                     } catch (ioe: IOException) {
                         throw RuntimeException(
-                            "hit unexpected IOException while trying to corrupt file " + name, ioe
+                            "hit unexpected IOException while trying to corrupt file $name", ioe
                         )
                     }
 
@@ -609,14 +617,14 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     @Throws(IOException::class)
     fun maybeThrowIOException(message: String) {
         if (randomState.nextDouble() < randomIOExceptionRate) {
-            val ioe: IOException =
+            val ioe =
                 IOException("a random IOException" + (if (message == null) "" else " ($message)"))
             if (LuceneTestCase.VERBOSE) {
                 val jobName = runBlocking { currentCoroutineContext()[Job]?.toString() ?: "unknown" }
                 println(
                     (jobName
                             + ": MockDirectoryWrapper: now throw random exception"
-                            + (if (message == null) "" else " (" + message + ")"))
+                            + (if (message == null) "" else " ($message)"))
                 )
                 ioe.printStackTrace(/*java.lang.System.out*/)
             }
@@ -663,19 +671,21 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             throw IOException("cannot delete after crash")
         }
 
-        if (openFiles!!.containsKey(name)) {
-            openFilesDeleted!!.add(name)
-            if (assertNoDeleteOpenFile) {
-                throw fillOpenTrace<IOException>(
-                    IOException(
-                        "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
-                    ),
-                    name,
-                    true
-                )
+        withOpenFilesLock {
+            if (openFiles!!.containsKey(name)) {
+                openFilesDeleted!!.add(name)
+                if (assertNoDeleteOpenFile) {
+                    throw fillOpenTrace(
+                        IOException(
+                            "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
+                        ),
+                        name,
+                        true
+                    )
+                }
+            } else {
+                openFilesDeleted!!.remove(name)
             }
-        } else {
-            openFilesDeleted!!.remove(name)
         }
 
         unSyncedFiles!!.remove(name)
@@ -744,7 +754,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             throw FileAlreadyExistsException("File \"$name\" was already written to.")
         }
 
-        if (assertNoDeleteOpenFile && openFiles!!.containsKey(name)) {
+        if (assertNoDeleteOpenFile && withOpenFilesLock { openFiles!!.containsKey(name) }) {
             throw AssertionError(
                 "MockDirectoryWrapper: file \"$name\" is still open: cannot overwrite"
             )
@@ -762,7 +772,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         val io: IndexOutput =
             MockIndexOutputWrapper(this, delegateOutput, name)
         addFileHandle(io, name, Handle.Output)
-        openFilesForWrite.add(name)
+        withOpenFilesLock { openFilesForWrite.add(name) }
         return maybeThrottle(name, io)
     }
 
@@ -817,7 +827,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         val io: IndexOutput =
             MockIndexOutputWrapper(this, delegateOutput, name)
         addFileHandle(io, name, Handle.Output)
-        openFilesForWrite.add(name)
+        withOpenFilesLock { openFilesForWrite.add(name) }
 
         return maybeThrottle(name, io)
     }
@@ -830,15 +840,17 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     /*@Synchronized*/
     fun addFileHandle(c: AutoCloseable, name: String, handle: Handle) {
-        var v = openFiles!!.get(name)
-        if (v != null) {
-            v = v + 1
-            openFiles!!.put(name, v)
-        } else {
-            openFiles!!.put(name, 1)
-        }
+        withOpenFilesLock {
+            var v = openFiles!![name]
+            if (v != null) {
+                v += 1
+                openFiles!![name] = v
+            } else {
+                openFiles!![name] = 1
+            }
 
-        openFileHandles[c] = RuntimeException("unclosed Index" + handle.name + ": " + name)
+            openFileHandles[c] = RuntimeException("unclosed Index" + handle.name + ": " + name)
+        }
     }
 
     private var failOnOpenInput = true
@@ -868,14 +880,16 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         }
 
         // cannot open a file for input if it's still open for output.
-        if (!allowReadingFilesStillOpenForWrite && openFilesForWrite.contains(name)) {
-            throw fillOpenTrace<AccessDeniedException>(
-                AccessDeniedException(
-                    "MockDirectoryWrapper: file \"$name\" is still open for writing"
-                ),
-                name,
-                false
-            )
+        withOpenFilesLock {
+            if (!allowReadingFilesStillOpenForWrite && openFilesForWrite.contains(name)) {
+                throw fillOpenTrace(
+                    AccessDeniedException(
+                        "MockDirectoryWrapper: file \"$name\" is still open for writing"
+                    ),
+                    name,
+                    false
+                )
+            }
         }
 
         // record the read advice before randomizing the context
@@ -937,15 +951,21 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             // all that matters is that we tried! (they will eventually go away)
             //   still open when we tried to delete
             maybeYield()
-            if (openFiles == null) {
-                openFiles = mutableMapOf()
-                openFilesDeleted = mutableSetOf()
+            var openFilesSnapshot: Map<String, Int> = emptyMap()
+            var openFileHandlesSnapshot: Map<AutoCloseable, Exception> = emptyMap()
+            withOpenFilesLock {
+                if (openFiles == null) {
+                    openFiles = mutableMapOf()
+                    openFilesDeleted = mutableSetOf()
+                }
+                openFilesSnapshot = openFiles!!.toMap()
+                openFileHandlesSnapshot = openFileHandles.toMap()
             }
-            if (openFiles!!.size > 0) {
+            if (openFilesSnapshot.isNotEmpty()) {
                 // print the first one as it's very verbose otherwise
                 var cause: Exception? = null
-                val stacktraces: MutableIterator<Exception> =
-                    openFileHandles.values.iterator()
+                val stacktraces: Iterator<Exception> =
+                    openFileHandlesSnapshot.values.iterator()
                 if (stacktraces.hasNext()) {
                     cause = stacktraces.next()
                 }
@@ -953,9 +973,9 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                 // super() does not throw IOException currently:
                 throw RuntimeException(
                     ("MockDirectoryWrapper: cannot close: there are still "
-                            + openFiles!!.size
+                            + openFilesSnapshot.size
                             + " open files: "
-                            + openFiles),
+                            + openFilesSnapshot),
                     cause
                 )
             }
@@ -964,7 +984,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                     openLocks.toMap()
                 }
             }
-            if (openLocksSnapshot.size > 0) {
+            if (openLocksSnapshot.isNotEmpty()) {
                 var cause: Exception? = null
                 val stacktraces: Iterator<RuntimeException> =
                     openLocksSnapshot.values.iterator()
@@ -1029,9 +1049,9 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                     var endFiles: Array<String> = `in`.listAll()
 
                     val startSet: MutableSet<String> =
-                        TreeSet<String>(/*Arrays.asList<String>(*)*/ startFiles.toMutableList() )
+                        TreeSet(/*Arrays.asList<String>(*)*/ startFiles.toMutableList() )
                     val endSet: MutableSet<String> =
-                        TreeSet<String>(/*Arrays.asList<String>(*endFiles)*/ endFiles.toMutableList() )
+                        TreeSet(/*Arrays.asList<String>(*endFiles)*/ endFiles.toMutableList() )
 
                     startFiles = startSet.toTypedArray<String>()
                     endFiles = endSet.toTypedArray<String>()
@@ -1105,14 +1125,20 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     /*@Synchronized*/
     fun removeOpenFile(c: AutoCloseable, name: String) {
-        var v = openFiles!!.get(name)
+        withOpenFilesLock {
+            removeOpenFileUnsafe(c, name)
+        }
+    }
+
+    private fun removeOpenFileUnsafe(c: AutoCloseable, name: String) {
+        var v = openFiles!![name]
         // Could be null when crash() was called
         if (v != null) {
             if (v == 1) {
                 openFiles!!.remove(name)
             } else {
-                v = v - 1
-                openFiles!!.put(name, v)
+                v -= 1
+                openFiles!![name] = v
             }
         }
 
@@ -1121,13 +1147,17 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     /*@Synchronized*/
     fun removeIndexOutput(out: IndexOutput, name: String) {
-        openFilesForWrite.remove(name)
-        removeOpenFile(out, name)
+        withOpenFilesLock {
+            openFilesForWrite.remove(name)
+            removeOpenFileUnsafe(out, name)
+        }
     }
 
     /*@Synchronized*/
     fun removeIndexInput(`in`: IndexInput, name: String) {
-        removeOpenFile(`in`, name)
+        withOpenFilesLock {
+            removeOpenFileUnsafe(`in`, name)
+        }
     }
 
     /**
