@@ -2146,9 +2146,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     ): MergePolicy.MergeSpecification? {
         // In case infoStream was disabled on init, but then enabled at some
         // point, try again to log the config here:
-
-        messageState()
-
         assert(maxNumSegments == UNBOUNDED_MAX_MERGE_SEGMENTS || maxNumSegments > 0)
         //checkNotNull(trigger)
         if (!merges.areEnabled()) {
@@ -2160,61 +2157,64 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             return null
         }
 
-        val spec: MergePolicy.MergeSpecification?
-        val cachingMergeContext = CachingMergeContext(this)
-        logger.debug { "updatePendingMerges: trigger=$trigger maxNumSegments=$maxNumSegments segCount=${segmentInfos.size()}" }
-        if (maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS) {
-            assert(
-                trigger == MergeTrigger.EXPLICIT || trigger == MergeTrigger.MERGE_FINISHED
-            ) {
-                ("Expected EXPLICT or MERGE_FINISHED as trigger even with maxNumSegments set but was: "
-                        + trigger.name)
-            }
+        return withIndexWriterLock {
+            messageState()
+            val spec: MergePolicy.MergeSpecification?
+            val cachingMergeContext = CachingMergeContext(this)
+            logger.debug { "updatePendingMerges: trigger=$trigger maxNumSegments=$maxNumSegments segCount=${segmentInfos.size()}" }
+            if (maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS) {
+                assert(
+                    trigger == MergeTrigger.EXPLICIT || trigger == MergeTrigger.MERGE_FINISHED
+                ) {
+                    ("Expected EXPLICT or MERGE_FINISHED as trigger even with maxNumSegments set but was: "
+                            + trigger.name)
+                }
 
-            spec = mergePolicy.findForcedMerges(
-                segmentInfos,
-                maxNumSegments,
-                segmentsToMerge.toMutableMap(),
-                cachingMergeContext
-            )
-            if (spec != null) {
-                logger.debug { "updatePendingMerges: forced merges=${spec.merges.size}" }
-                val numMerges: Int = spec.merges.size
-                for (i in 0..<numMerges) {
-                    val merge: MergePolicy.OneMerge = spec.merges[i]
-                    merge.maxNumSegments = maxNumSegments
+                spec = mergePolicy.findForcedMerges(
+                    segmentInfos,
+                    maxNumSegments,
+                    segmentsToMerge.toMutableMap(),
+                    cachingMergeContext
+                )
+                if (spec != null) {
+                    logger.debug { "updatePendingMerges: forced merges=${spec.merges.size}" }
+                    val numMerges: Int = spec.merges.size
+                    for (i in 0..<numMerges) {
+                        val merge: MergePolicy.OneMerge = spec.merges[i]
+                        merge.maxNumSegments = maxNumSegments
+                    }
+                }
+            } else {
+                spec = when (trigger) {
+                    MergeTrigger.GET_READER, MergeTrigger.COMMIT -> mergePolicy.findFullFlushMerges(
+                        trigger,
+                        segmentInfos,
+                        cachingMergeContext
+                    )
+
+                    MergeTrigger.ADD_INDEXES -> throw IllegalStateException(
+                        "Merges with ADD_INDEXES trigger should be "
+                                + "called from within the addIndexes() API flow"
+                    )
+
+                    MergeTrigger.EXPLICIT, MergeTrigger.FULL_FLUSH, MergeTrigger.MERGE_FINISHED, MergeTrigger.SEGMENT_FLUSH, MergeTrigger.CLOSING -> mergePolicy.findMerges(
+                        trigger,
+                        segmentInfos,
+                        cachingMergeContext
+                    )
+
+                    else -> mergePolicy.findMerges(trigger, segmentInfos, cachingMergeContext)
                 }
             }
-        } else {
-            spec = when (trigger) {
-                MergeTrigger.GET_READER, MergeTrigger.COMMIT -> mergePolicy.findFullFlushMerges(
-                    trigger,
-                    segmentInfos,
-                    cachingMergeContext
-                )
-
-                MergeTrigger.ADD_INDEXES -> throw IllegalStateException(
-                    "Merges with ADD_INDEXES trigger should be "
-                            + "called from within the addIndexes() API flow"
-                )
-
-                MergeTrigger.EXPLICIT, MergeTrigger.FULL_FLUSH, MergeTrigger.MERGE_FINISHED, MergeTrigger.SEGMENT_FLUSH, MergeTrigger.CLOSING -> mergePolicy.findMerges(
-                    trigger,
-                    segmentInfos,
-                    cachingMergeContext
-                )
-
-                else -> mergePolicy.findMerges(trigger, segmentInfos, cachingMergeContext)
+            if (spec != null) {
+                logger.debug { "updatePendingMerges: register merges count=${spec.merges.size}" }
+                val numMerges: Int = spec.merges.size
+                for (i in 0..<numMerges) {
+                    registerMerge(spec.merges[i])
+                }
             }
+            spec
         }
-        if (spec != null) {
-            logger.debug { "updatePendingMerges: register merges count=${spec.merges.size}" }
-            val numMerges: Int = spec.merges.size
-            for (i in 0..<numMerges) {
-                registerMerge(spec.merges[i])
-            }
-        }
-        return spec
     }
 
     /**
