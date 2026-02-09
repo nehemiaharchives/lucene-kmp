@@ -14,6 +14,8 @@ import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttributeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -468,6 +470,9 @@ open class AttributeSource {
                 OffsetAttributeImpl::class -> arrayOf(
                     OffsetAttribute::class
                 )
+                PayloadAttributeImpl::class -> arrayOf(
+                    PayloadAttribute::class
+                )
                 PackedTokenAttributeImpl::class -> arrayOf(
                     CharTermAttribute::class,
                     TypeAttribute::class,
@@ -491,6 +496,7 @@ open class AttributeSource {
             return when (clazz) {
                 CharTermAttributeImpl::class -> AttributeImpl::class
                 OffsetAttributeImpl::class -> AttributeImpl::class
+                PayloadAttributeImpl::class -> AttributeImpl::class
                 PackedTokenAttributeImpl::class -> CharTermAttributeImpl::class
                 KeywordAttributeImpl::class -> AttributeImpl::class
                 AttributeImpl::class -> Any::class

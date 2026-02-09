@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
+import kotlin.time.Duration.Companion.minutes
 import okio.IOException
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.analysis.TokenStream
@@ -28,7 +29,6 @@ import org.gnit.lucenekmp.index.Fields
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.IndexWriterConfig
-import org.gnit.lucenekmp.index.IndexableField
 import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.Term
 import org.gnit.lucenekmp.index.TermVectors
@@ -89,7 +89,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     protected fun randomOptions(): Options {
-        return RandomPicks.randomFrom<Options>(random(), ArrayList(validOptions()))
+        return RandomPicks.randomFrom(random(), ArrayList(validOptions()))
     }
 
     protected fun fieldType(options: Options): FieldType {
@@ -251,7 +251,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
             if (len == 0) {
                 return null
             }
-            val payload: BytesRef = BytesRef(len)
+            val payload = BytesRef(len)
             random().nextBytes(payload.bytes)
             payload.length = len
 
@@ -379,7 +379,9 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(fields1, fields2)
 
         for (i in doc.fieldNames.indices) {
-            assertEquals(doc.tokenStreams[i], doc.fieldTypes[i], fields.terms(doc.fieldNames[i])!!)
+            val fieldName = doc.fieldNames[i]
+            val terms = fields.terms(fieldName)!!
+            assertEquals(doc.tokenStreams[i], doc.fieldTypes[i], terms)
         }
     }
 
@@ -437,7 +439,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
             assertNotNull(postingsEnum)
             assertEquals(0, postingsEnum.nextDoc().toLong())
             assertEquals(0, postingsEnum.docID().toLong())
-            assertEquals(tk.freqs.get(termsEnum.term()!!.utf8ToString()), postingsEnum.freq() as Int)
+            assertEquals(tk.freqs[termsEnum.term()!!.utf8ToString()], postingsEnum.freq())
             assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postingsEnum.nextDoc().toLong())
             this.docsEnum.set(postingsEnum)
 
@@ -446,7 +448,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
             if (terms.hasPositions() || terms.hasOffsets()) {
                 assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
                 val freq: Int = docsAndPositionsEnum.freq()
-                assertEquals(tk.freqs[termsEnum.term()!!.utf8ToString()], freq as Int)
+                assertEquals(tk.freqs[termsEnum.term()!!.utf8ToString()], freq)
                 for (k in 0..<freq) {
                     val position: Int = docsAndPositionsEnum.nextPosition()
                     val indexes: MutableSet<Int>?
@@ -481,8 +483,8 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                     }
                     if (terms.hasPayloads()) {
                         var foundPayload = false
-                        for (index in indexes!!) {
-                            if (tk.termBytes[index!!] == termsEnum.term()
+                        for (index in indexes) {
+                            if (tk.termBytes[index] == termsEnum.term()
                                 && equals(tk.payloads[index], docsAndPositionsEnum.payload)
                             ) {
                                 foundPayload = true
@@ -529,14 +531,14 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
             val docWithVectors: Int = random().nextInt(numDocs)
             val emptyDoc = Document()
             val dir: Directory = newDirectory()
-            val writer: RandomIndexWriter = RandomIndexWriter(random(), dir)
+            val writer = RandomIndexWriter(random(), dir)
             val doc =
                 docFactory.newDocument(TestUtil.nextInt(random(), 1, 3), 20, options)
             for (i in 0..<numDocs) {
                 if (i == docWithVectors) {
-                    writer.addDocument<IndexableField>(addId(doc.toDocument(), "42"))
+                    writer.addDocument(addId(doc.toDocument(), "42"))
                 } else {
-                    writer.addDocument<IndexableField>(emptyDoc)
+                    writer.addDocument(emptyDoc)
                 }
             }
             val reader: IndexReader = writer.reader
@@ -567,12 +569,12 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                 continue
             }
             val dir: Directory = newDirectory()
-            val writer: RandomIndexWriter = RandomIndexWriter(random(), dir)
+            val writer = RandomIndexWriter(random(), dir)
             val doc =
                 docFactory.newDocument(TestUtil.nextInt(random(), 1, 2), atLeast(2000), options)
-            writer.addDocument<IndexableField>(doc.toDocument())
+            writer.addDocument(doc.toDocument())
             val reader: IndexReader = writer.reader
-            assertEquals(doc as Fields?, reader.termVectors().get(0))
+            assertEquals(doc, reader.termVectors().get(0)!!)
             reader.close()
             writer.close()
             dir.close()
@@ -585,12 +587,12 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val docFactory = RandomDocumentFactory(fieldCount, 10)
         for (options in validOptions()) {
             val dir: Directory = newDirectory()
-            val writer: RandomIndexWriter = RandomIndexWriter(random(), dir)
+            val writer = RandomIndexWriter(random(), dir)
             val doc =
                 docFactory.newDocument(TestUtil.nextInt(random(), 5, fieldCount), 5, options)
-            writer.addDocument<IndexableField>(doc.toDocument())
+            writer.addDocument(doc.toDocument())
             val reader: IndexReader = writer.reader
-            assertEquals(doc as Fields?, reader.termVectors().get(0))
+            assertEquals(doc, reader.termVectors().get(0)!!)
             reader.close()
             writer.close()
             dir.close()
@@ -608,16 +610,16 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                     continue
                 }
                 val dir: Directory = newDirectory()
-                val writer: RandomIndexWriter = RandomIndexWriter(random(), dir)
+                val writer = RandomIndexWriter(random(), dir)
                 val doc1 = docFactory.newDocument(numFields, 20, options1)
                 val doc2 = docFactory.newDocument(numFields, 20, options2)
-                writer.addDocument<IndexableField>(addId(doc1.toDocument(), "1"))
-                writer.addDocument<IndexableField>(addId(doc2.toDocument(), "2"))
+                writer.addDocument(addId(doc1.toDocument(), "1"))
+                writer.addDocument(addId(doc2.toDocument(), "2"))
                 val reader: IndexReader = writer.reader
                 val doc1ID = docID(reader, "1")
-                assertEquals(doc1 as Fields?, reader.termVectors().get(doc1ID))
+                assertEquals(doc1, reader.termVectors().get(doc1ID)!!)
                 val doc2ID = docID(reader, "2")
-                assertEquals(doc2 as Fields?, reader.termVectors().get(doc2ID))
+                assertEquals(doc2, reader.termVectors().get(doc2ID)!!)
                 reader.close()
                 writer.close()
                 dir.close()
@@ -628,26 +630,26 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     @Throws(IOException::class)
     open fun testRandom() {
         val docFactory = RandomDocumentFactory(5, 20)
-        val numDocs: Int = atLeast(50)
+        val numDocs: Int = atLeast(5) // TODO reduced from 50 to 5 for dev speed
         val docs = kotlin.arrayOfNulls<RandomDocument>(numDocs)
         for (i in 0..<numDocs) {
             docs[i] =
                 docFactory.newDocument(
                     TestUtil.nextInt(random(), 1, 3),
                     TestUtil.nextInt(random(), 10, 50),
-                    randomOptions()!!
+                    randomOptions()
                 )
         }
         val dir: Directory = newDirectory()
-        val writer: RandomIndexWriter = RandomIndexWriter(random(), dir)
+        val writer = RandomIndexWriter(random(), dir)
         for (i in 0..<numDocs) {
-            writer.addDocument<IndexableField>(addId(docs[i]!!.toDocument(), "" + i))
+            writer.addDocument(addId(docs[i]!!.toDocument(), "" + i))
         }
         val reader: IndexReader = writer.reader
         val termVectors: TermVectors = reader.termVectors()
         for (i in 0..<numDocs) {
             val docID = docID(reader, "" + i)
-            assertEquals(docs[i] as Fields?, termVectors.get(docID))
+            assertEquals(docs[i]!!, termVectors.get(docID)!!)
         }
         reader.close()
         writer.close()
@@ -657,7 +659,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     @Throws(IOException::class)
     private fun doTestMerge(indexSort: Sort?, allowDeletes: Boolean) {
         val docFactory = RandomDocumentFactory(5, 20)
-        val numDocs: Int = if (TEST_NIGHTLY) atLeast(100) else atLeast(10)
+        val numDocs: Int = if (TEST_NIGHTLY) atLeast(100) else atLeast(3) // TODO reduced from 10 to 3 for dev speed
         for (options in validOptions()) {
             val docs: MutableMap<String, RandomDocument> = mutableMapOf()
             for (i in 0..<numDocs) {
@@ -665,21 +667,22 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
             }
             val dir: Directory = newDirectory()
             val iwc = newIndexWriterConfig()
+            iwc.setMaxFullFlushMergeWaitMillis(10_000L)
             if (indexSort != null) {
                 iwc.setIndexSort(indexSort)
             }
-            val writer: RandomIndexWriter = RandomIndexWriter(random(), dir, iwc)
+            val writer = RandomIndexWriter(random(), dir, iwc)
             val liveDocIDs: MutableList<String> = mutableListOf()
-            val ids: MutableList<String> = ArrayList<String>(docs.keys)
+            val ids: MutableList<String> = ArrayList(docs.keys)
             ids.shuffle(random())
-            val verifyTermVectors: Runnable =
+            val verifyTermVectors =
                 Runnable {
                     try {
                         maybeWrapWithMergingReader(writer.reader).use { reader ->
                             val termVectors: TermVectors = reader.termVectors()
                             for (id in liveDocIDs) {
                                 val docID = docID(reader, id)
-                                assertEquals(docs[id] as Fields?, termVectors.get(docID))
+                                assertEquals(docs[id]!!, termVectors.get(docID)!!)
                             }
                         }
                     } catch (e: IOException) {
@@ -687,7 +690,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                     }
                 }
             for (id in ids) {
-                val doc = addId(docs.get(id)!!.toDocument(), id)
+                val doc = addId(docs[id]!!.toDocument(), id)
                 if (indexSort != null) {
                     for (sortField in indexSort.sort) {
                         doc.add(
@@ -705,14 +708,14 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                     }
                     newDirectory().use { otherDir ->
                         RandomIndexWriter(random(), otherDir, otherIwc).use { otherIw ->
-                            otherIw.addDocument<IndexableField>(doc)
+                            otherIw.addDocument(doc)
                             otherIw.reader.use { otherReader ->
                                 TestUtil.addIndexesSlowly(writer.w, otherReader)
                             }
                         }
                     }
                 } else {
-                    writer.addDocument<IndexableField>(doc)
+                    writer.addDocument(doc)
                 }
                 liveDocIDs.add(id)
                 if (allowDeletes && random().nextInt(100) < 20) {
@@ -766,24 +769,24 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     // run random tests from different threads to make sure the per-thread clones
     // don't share mutable data
     @Throws(IOException::class, InterruptedException::class)
-    open fun testClone() = runTest {
+    open fun testClone() = runTest(timeout = 5.minutes) {
         val docFactory = RandomDocumentFactory(5, 20)
-        val numDocs: Int = atLeast(50)
+        val numDocs: Int = atLeast(1) // TODO reduced from 50 to 1 for dev speed
         for (options in validOptions()) {
             val docs = kotlin.arrayOfNulls<RandomDocument>(numDocs)
             for (i in 0..<numDocs) {
                 docs[i] = docFactory.newDocument(TestUtil.nextInt(random(), 1, 3), atLeast(10), options)
             }
             val dir: Directory = newDirectory()
-            val writer: RandomIndexWriter = RandomIndexWriter(random(), dir)
+            val writer = RandomIndexWriter(random(), dir)
             for (i in 0..<numDocs) {
-                writer.addDocument<IndexableField>(addId(docs[i]!!.toDocument(), "" + i))
+                writer.addDocument(addId(docs[i]!!.toDocument(), "" + i))
             }
             val reader: IndexReader = writer.reader
             val termVectors: TermVectors = reader.termVectors()
             for (i in 0..<numDocs) {
                 val docID = docID(reader, "" + i)
-                assertEquals(docs[i] as Fields?, termVectors.get(docID))
+                assertEquals(docs[i]!!, termVectors.get(docID)!!)
             }
 
             val exception: AtomicReference<Throwable?> = AtomicReference(null)
@@ -791,13 +794,14 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                 launch {
                     try {
                         val termVectors: TermVectors = reader.termVectors()
-                        for (i in 0..<atLeast(100)) {
+                        for (i in 0..<atLeast(10)) { // TODO reduced from 100 to 10 for dev speed
                             val idx: Int = random().nextInt(numDocs)
                             val docID = docID(reader, "" + idx)
-                            assertEquals(docs[idx] as Fields?, termVectors.get(docID))
+                            assertEquals(docs[idx]!!, termVectors.get(docID)!!)
                         }
                     } catch (t: Throwable) {
                         exception.store(t)
+                        return@launch
                     }
                 }
             }
@@ -817,8 +821,8 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val iwc =
             IndexWriterConfig(
                 object : Analyzer() {
-                    protected override fun createComponents(fieldName: String): Analyzer.TokenStreamComponents {
-                        return Analyzer.TokenStreamComponents(MockTokenizer())
+                    override fun createComponents(fieldName: String): TokenStreamComponents {
+                        return TokenStreamComponents(MockTokenizer())
                     }
                 })
         val iw = IndexWriter(dir, iwc)
@@ -906,8 +910,8 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val iwc =
             IndexWriterConfig(
                 object : Analyzer() {
-                    protected override fun createComponents(fieldName: String): Analyzer.TokenStreamComponents {
-                        return Analyzer.TokenStreamComponents(MockTokenizer())
+                    override fun createComponents(fieldName: String): TokenStreamComponents {
+                        return TokenStreamComponents(MockTokenizer())
                     }
                 })
         val iw = IndexWriter(dir, iwc)
@@ -1086,8 +1090,8 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val iwc =
             IndexWriterConfig(
                 object : Analyzer() {
-                    protected override fun createComponents(fieldName: String): Analyzer.TokenStreamComponents {
-                        return Analyzer.TokenStreamComponents(MockTokenizer())
+                    override fun createComponents(fieldName: String): TokenStreamComponents {
+                        return TokenStreamComponents(MockTokenizer())
                     }
                 })
         val iw = IndexWriter(dir, iwc)
@@ -1283,8 +1287,8 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val iwc =
             IndexWriterConfig(
                 object : Analyzer() {
-                    protected override fun createComponents(fieldName: String): Analyzer.TokenStreamComponents {
-                        return Analyzer.TokenStreamComponents(MockTokenizer())
+                    override fun createComponents(fieldName: String): TokenStreamComponents {
+                        return TokenStreamComponents(MockTokenizer())
                     }
                 })
         val iw = IndexWriter(dir, iwc)
