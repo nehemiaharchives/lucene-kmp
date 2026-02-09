@@ -279,7 +279,14 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Run tests
-        run: ./gradlew -PenableHangDetection=true ${{ matrix.task }}
+        run: >
+          ./gradlew
+          -PenableHangDetection=true
+          --stacktrace
+          --info
+          -Dorg.gradle.test.logging.events=failed
+          -Dorg.gradle.test.logging.exceptionFormat=full
+          ${{ matrix.task }}
 
       - name: Upload build reports
         if: ${{ env.ACT != 'true' }}
