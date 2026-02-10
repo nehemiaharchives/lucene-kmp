@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import okio.FileNotFoundException
 import org.gnit.lucenekmp.codecs.CodecUtil
@@ -21,6 +22,7 @@ import org.gnit.lucenekmp.util.IOUtils
  * @lucene.experimental
  */
 internal class Lucene90CompoundReader(private val directory: Directory, si: SegmentInfo) : CompoundDirectory() {
+    private val logger = KotlinLogging.logger {}
     /** Offset/Length for a slice inside of a compound file  */
     class FileEntry {
         var offset: Long = 0
@@ -49,6 +51,7 @@ internal class Lucene90CompoundReader(private val directory: Directory, si: Segm
                 + CodecUtil.footerLength())
 
         handle = directory.openInput(dataFileName, IOContext.DEFAULT.withReadAdvice(ReadAdvice.NORMAL))
+        logger.debug { "CFS open: segment=$segmentName dataFile=$dataFileName handle=$handle" }
         try {
             CodecUtil.checkIndexHeader(
                 handle, Lucene90CompoundFormat.DATA_CODEC, version, version, si.getId(), ""
@@ -125,6 +128,7 @@ internal class Lucene90CompoundReader(private val directory: Directory, si: Segm
 
     @Throws(IOException::class)
     override fun close() {
+        logger.debug { "CFS close: segment=$segmentName handle=$handle" }
         IOUtils.close(handle)
     }
 

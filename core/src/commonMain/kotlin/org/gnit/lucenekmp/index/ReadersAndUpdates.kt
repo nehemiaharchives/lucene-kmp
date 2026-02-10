@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.FieldInfosFormat
@@ -40,6 +41,7 @@ class ReadersAndUpdates(
     // liveDocs vs when we loaded it or last wrote it:
     private val pendingDeletes: PendingDeletes
 ) {
+    private val logger = KotlinLogging.logger {}
 
     // Tracks how many consumers are using this instance:
     @OptIn(ExperimentalAtomicApi::class)
@@ -198,6 +200,7 @@ class ReadersAndUpdates(
         // TODO: can we somehow use IOUtils here...  problem is
         // we are calling .decRef not .close)...
         if (reader != null) {
+            logger.debug { "RLD.dropReaders: closing reader seg=${info.info.name}" }
             try {
                 reader!!.decRef()
             } finally {
@@ -802,6 +805,7 @@ class ReadersAndUpdates(
         assert(pendingDeletes.verifyDocCounts(reader))
         val mergeReader: MergePolicy.MergeReader =
             MergePolicy.MergeReader(reader, pendingDeletes.hardLiveDocs)
+        logger.debug { "RLD.getReaderForMerge: created mergeReader seg=${info.info.name} reader=${reader.segmentName}" }
         var success = false
         try {
             readerConsumer.accept(mergeReader)
@@ -809,6 +813,7 @@ class ReadersAndUpdates(
             return mergeReader
         } finally {
             if (!success) {
+                logger.debug { "RLD.getReaderForMerge: readerConsumer failed, decRef seg=${info.info.name}" }
                 reader.decRef()
             }
         }

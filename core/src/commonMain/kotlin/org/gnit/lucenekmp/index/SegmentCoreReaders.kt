@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -33,6 +34,7 @@ class SegmentCoreReaders(
     si: SegmentCommitInfo,
     context: IOContext
 ) {
+    private val logger = KotlinLogging.logger {}
     // Counts how many other readers share the core objects
     // (freqStream, proxStream, tis, etc.) of this reader;
     // when coreRef drops to 0, these core objects may be
@@ -79,7 +81,10 @@ class SegmentCoreReaders(
 
     @OptIn(ExperimentalAtomicApi::class)
     suspend fun decRef() {
-        if (ref.decrementAndFetch() == 0) {
+        val newRef = ref.decrementAndFetch()
+        val segName = runCatching { segment }.getOrElse { "<init>" }
+        if (newRef == 0) {
+            logger.debug { "SegmentCoreReaders.decRef close: segment=$segName cfsReader=${cfsReader != null}" }
             try{
                 IOUtils.close(
                     fields,
@@ -93,6 +98,8 @@ class SegmentCoreReaders(
             }finally{
                 this.notifyCoreClosedListeners()
             }
+        } else {
+            logger.debug { "SegmentCoreReaders.decRef retain: segment=$segName ref=$newRef" }
         }
     }
 
