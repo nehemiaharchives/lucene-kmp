@@ -1876,40 +1876,33 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         flush(triggerMerge = true, applyAllDeletes = true)
         logger.debug { "forceMerge: flush done maxNumSegments=$maxNumSegments" }
 
-        // TODO Synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-        resetMergeExceptions()
-        segmentsToMerge.clear()
-        val segmentInfosSnapshot = segmentInfos.toList()
-        for (info in segmentInfosSnapshot) {
-            //checkNotNull(info)
-            segmentsToMerge[info] = true
-        }
-        mergeMaxNumSegments = maxNumSegments
+        withIndexWriterLock {
+            resetMergeExceptions()
+            segmentsToMerge.clear()
+            val segmentInfosSnapshot = segmentInfos.toList()
+            for (info in segmentInfosSnapshot) {
+                segmentsToMerge[info] = true
+            }
+            mergeMaxNumSegments = maxNumSegments
 
-        // Now mark all pending & running merges for forced
-        // merge:
-        val pendingMergesSnapshot = pendingMerges.toList()
-        for (merge in pendingMergesSnapshot) {
-            merge.maxNumSegments = maxNumSegments
-            if (merge.info != null) {
-                // this can be null since we register the merge under lock before we then do the actual
-                // merge and
-                // set the merge.info in _mergeInit
-                segmentsToMerge[merge.info!!] = true
+            // Now mark all pending & running merges for forced merge:
+            val pendingMergesSnapshot = pendingMerges.toList()
+            for (merge in pendingMergesSnapshot) {
+                merge.maxNumSegments = maxNumSegments
+                if (merge.info != null) {
+                    // merge.info can be null until _mergeInit runs.
+                    segmentsToMerge[merge.info!!] = true
+                }
+            }
+            val runningMergesSnapshot = runningMerges.toList()
+            for (merge in runningMergesSnapshot) {
+                merge.maxNumSegments = maxNumSegments
+                if (merge.info != null) {
+                    // merge.info can be null until _mergeInit runs.
+                    segmentsToMerge[merge.info!!] = true
+                }
             }
         }
-        val runningMergesSnapshot = runningMerges.toList()
-        for (merge in runningMergesSnapshot) {
-            merge.maxNumSegments = maxNumSegments
-            if (merge.info != null) {
-                // this can be null since we put the merge on runningMerges before we do the actual merge
-                // and
-                // set the merge.info in _mergeInit
-                segmentsToMerge[merge.info!!] = true
-            }
-        }
-        //} // end synchronized(this)
 
         logger.debug { "forceMerge: maybeMerge enter maxNumSegments=$maxNumSegments" }
         maybeMerge(config.mergePolicy, MergeTrigger.EXPLICIT, maxNumSegments)
@@ -1917,32 +1910,36 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         if (doWait) {
             var waitIters = 0
+            var stableNoPendingChecks = 0
 
             // TODO synchronized is not supported in KMP, need to think what to do here
             //synchronized(this) {
             while (true) {
-                if (tragedy.load() != null) {
-                    throw IllegalStateException(
-                        "this writer hit an unrecoverable error; cannot complete forceMerge",
-                        tragedy.load()
-                    )
-                }
+                val hasPendingMaxNumSegmentMerges = withIndexWriterLock {
+                    if (tragedy.load() != null) {
+                        throw IllegalStateException(
+                            "this writer hit an unrecoverable error; cannot complete forceMerge",
+                            tragedy.load()
+                        )
+                    }
 
-                if (mergeExceptions.isNotEmpty()) {
-                    // Forward any exceptions in background merge
-                    // threads to the current thread:
-                    val size = mergeExceptions.size
-                    for (i in 0..<size) {
-                        val merge: MergePolicy.OneMerge = mergeExceptions[i]
-                        if (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS) {
-                            throw IOException(
-                                "background merge hit exception: " + merge.segString(), merge.exception
-                            )
+                    if (mergeExceptions.isNotEmpty()) {
+                        // Forward any exceptions in background merge threads to the current thread.
+                        val size = mergeExceptions.size
+                        for (i in 0..<size) {
+                            val merge: MergePolicy.OneMerge = mergeExceptions[i]
+                            if (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS) {
+                                throw IOException(
+                                    "background merge hit exception: " + merge.segString(), merge.exception
+                                )
+                            }
                         }
                     }
+                    maxNumSegmentsMergesPendingUnlocked()
                 }
 
-                if (maxNumSegmentsMergesPending()) {
+                if (hasPendingMaxNumSegmentMerges) {
+                    stableNoPendingChecks = 0
                     waitIters++
                     logger.debug {
                         "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size}"
@@ -1953,6 +1950,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     testPoint("forceMergeBeforeWait")
                     doWait()
                 } else {
+                    // Java relies on monitor wait/notify to avoid racing with merge-finished callbacks.
+                    // In KMP we don't have equivalent monitor semantics here, so require a second
+                    // no-pending observation before exiting forceMerge wait.
+                    if (stableNoPendingChecks == 0) {
+                        stableNoPendingChecks = 1
+                        doWait()
+                        continue
+                    }
                     logger.debug { "forceMerge: done waiting maxNumSegments=$maxNumSegments" }
                     break
                 }
@@ -1974,6 +1979,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun maxNumSegmentsMergesPending(): Boolean {
+        return withIndexWriterLock {
+            maxNumSegmentsMergesPendingUnlocked()
+        }
+    }
+
+    private fun maxNumSegmentsMergesPendingUnlocked(): Boolean {
         if (logger.isDebugEnabled()) {
             logMerges("maxNumSegmentsMergesPending", pendingMerges, runningMerges)
         }
@@ -2242,24 +2253,26 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun getNextMerge(): MergePolicy.OneMerge? {
-        if (logger.isDebugEnabled()) {
-            logger.debug { "getNextMerge: pending=${pendingMerges.size} running=${runningMerges.size}" }
-        }
-        if (tragedy.load() != null) {
-            throw IllegalStateException(
-                "this writer hit an unrecoverable error; cannot merge", tragedy.load()
-            )
-        }
-        if (pendingMerges.isEmpty()) {
-            return null
-        } else {
-            // Advance the merge from pending to running
-            val merge: MergePolicy.OneMerge = pendingMerges.removeFirst()
-            runningMerges.add(merge)
+        return withIndexWriterLock {
             if (logger.isDebugEnabled()) {
-                logger.debug { "getNextMerge: checked out ${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
+                logger.debug { "getNextMerge: pending=${pendingMerges.size} running=${runningMerges.size}" }
             }
-            return merge
+            if (tragedy.load() != null) {
+                throw IllegalStateException(
+                    "this writer hit an unrecoverable error; cannot merge", tragedy.load()
+                )
+            }
+            if (pendingMerges.isEmpty()) {
+                null
+            } else {
+                // Advance the merge from pending to running
+                val merge: MergePolicy.OneMerge = pendingMerges.removeFirst()
+                runningMerges.add(merge)
+                if (logger.isDebugEnabled()) {
+                    logger.debug { "getNextMerge: checked out ${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
+                }
+                merge
+            }
         }
     }
 
@@ -2271,12 +2284,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun hasPendingMerges(): Boolean {
-        if (tragedy.load() != null) {
-            throw IllegalStateException(
-                "this writer hit an unrecoverable error; cannot merge", tragedy.load()
-            )
+        return withIndexWriterLock {
+            if (tragedy.load() != null) {
+                throw IllegalStateException(
+                    "this writer hit an unrecoverable error; cannot merge", tragedy.load()
+                )
+            }
+            pendingMerges.isNotEmpty()
         }
-        return pendingMerges.isNotEmpty()
     }
 
     /**
@@ -4834,33 +4849,33 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     handleMergeException(t, merge)
                 }
             } finally {
-
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                // Readers are already closed in commitMerge if we didn't hit
-                // an exc:
-                if (!success) {
-                    closeMergeReaders(merge, suppressExceptions = true, droppedSegment = false)
-                }
-                mergeFinish(merge)
-                logger.debug { "merge: finish ${merge.segString()} success=$success" }
-                if (!success) {
-                    if (infoStream.isEnabled("IW")) {
-                        infoStream.message("IW", "hit exception during merge")
+                // Keep merge finish bookkeeping and MERGE_FINISHED scheduling in one critical section.
+                // This matches Java's synchronized behavior and avoids a race where forceMerge
+                // observes no pending/running maxNumSegments merges just before MERGE_FINISHED
+                // re-enqueues one.
+                withIndexWriterLock {
+                    // Readers are already closed in commitMerge if we didn't hit an exception.
+                    if (!success) {
+                        closeMergeReaders(merge, suppressExceptions = true, droppedSegment = false)
                     }
-                } else if (!merge.isAborted
-                    && (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS || (!closed && !closing))
-                ) {
-                    // This merge (and, generally, any change to the
-                    // segments) may now enable new merges, so we call
-                    // merge policy & update pending merges.
-                    updatePendingMerges(
-                        mergePolicy,
-                        MergeTrigger.MERGE_FINISHED,
-                        merge.maxNumSegments
-                    )
+                    mergeFinish(merge)
+                    logger.debug { "merge: finish ${merge.segString()} success=$success" }
+                    if (!success) {
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "hit exception during merge")
+                        }
+                    } else if (!merge.isAborted
+                        && (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS || (!closed && !closing))
+                    ) {
+                        // This merge (and, generally, any change to the segments) may now enable
+                        // new merges, so call merge policy and update pending merges.
+                        updatePendingMerges(
+                            mergePolicy,
+                            MergeTrigger.MERGE_FINISHED,
+                            merge.maxNumSegments
+                        )
+                    }
                 }
-                //}
             }
         } catch (t: Throwable) {
             // Important that tragicEvent is called after mergeFinish, else we hang
