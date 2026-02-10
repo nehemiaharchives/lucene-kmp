@@ -455,13 +455,13 @@ abstract class MergePolicy
                     mergeCompleted.await()
                     true
                 }
+            } catch (e: TimeoutCancellationException) {
+                false
             } catch (ce: kotlinx.coroutines.CancellationException) {
                 throw ThreadInterruptedException(ce)
             } catch (e: ExecutionException) {
                 false
             } catch (e: TimeoutException) {
-                false
-            } catch (e: TimeoutCancellationException) {
                 false
             }
         }
@@ -580,13 +580,13 @@ abstract class MergePolicy
                     }
                 }
                 true
+            } catch (e: TimeoutCancellationException) {
+                false
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw ThreadInterruptedException(e)
             } catch (e: ExecutionException) {
                 false
             } catch (e: TimeoutException) {
-                false
-            } catch (e: TimeoutCancellationException) {
                 false
             } catch (e: CancellationException) {
                 false
