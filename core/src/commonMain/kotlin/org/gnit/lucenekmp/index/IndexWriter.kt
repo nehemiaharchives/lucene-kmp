@@ -5691,8 +5691,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // are called, deleter should know about every
             // file referenced by the current head
             // segmentInfos:
-            if (!deleter.exists(fileName)) {
-                deleter.incRef(mutableListOf(fileName))
+            check(deleter.exists(fileName)) {
+                "IndexFileDeleter doesn't know about file $fileName"
             }
         }
         return true
