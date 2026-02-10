@@ -802,8 +802,16 @@ class ReadersAndUpdates(
         assert(pendingDeletes.verifyDocCounts(reader))
         val mergeReader: MergePolicy.MergeReader =
             MergePolicy.MergeReader(reader, pendingDeletes.hardLiveDocs)
-        readerConsumer.accept(mergeReader)
-        return mergeReader
+        var success = false
+        try {
+            readerConsumer.accept(mergeReader)
+            success = true
+            return mergeReader
+        } finally {
+            if (!success) {
+                reader.decRef()
+            }
+        }
     }
 
     /**
