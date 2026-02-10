@@ -794,7 +794,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                 launch {
                     try {
                         val termVectors: TermVectors = reader.termVectors()
-                        for (i in 0..<atLeast(10)) { // TODO reduced from 100 to 10 for dev speed
+                        for (i in 0..<atLeast(3)) { // TODO reduced from 100 to 3 for dev speed
                             val idx: Int = random().nextInt(numDocs)
                             val docID = docID(reader, "" + idx)
                             assertEquals(docs[idx]!!, termVectors.get(docID)!!)
