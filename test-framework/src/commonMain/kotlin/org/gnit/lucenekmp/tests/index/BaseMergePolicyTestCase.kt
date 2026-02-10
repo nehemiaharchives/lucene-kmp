@@ -75,15 +75,18 @@ abstract class BaseMergePolicyTestCase : LuceneTestCase() {
                 object : SerialMergeScheduler() {
                     /*@Synchronized*/
                     override suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger) {
-                        if (mayMerge.load() == false) {
-                            val merge: OneMerge? = mergeSource.nextMerge
-                            if (merge != null) {
-                                println("TEST: we should not need any merging, yet merge policy returned merge $merge")
+                        while (true) {
+                            val merge: OneMerge = mergeSource.nextMerge ?: break
+                            // forceMerge() first performs a flush that can enqueue regular merges
+                            // (maxNumSegments == -1). Also, a single-segment forced merge can still
+                            // be returned to normalize segment state (e.g. CFS/deletes metadata).
+                            // This test only asserts that no *consolidating* forced merge is needed.
+                            if (mayMerge.load() == false && merge.maxNumSegments != -1 && merge.segments.size > 1) {
+                                println("TEST: we should not need any merging, yet merge policy returned merge ${merge.segString()}")
                                 throw AssertionError()
                             }
+                            mergeSource.merge(merge)
                         }
-
-                        super.merge(mergeSource, trigger)
                     }
                 }
 
