@@ -13,7 +13,7 @@ actual class DeflateCompressor actual constructor(actual val level: Int) : Compr
 
     @Throws(IOException::class)
     actual override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) {
-        val len = buffersInput.length() as Int
+        val len = buffersInput.length().toInt()
 
         val bytes = ByteArray(len)
         buffersInput.readBytes(bytes, 0, len)
