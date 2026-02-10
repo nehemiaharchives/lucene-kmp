@@ -59,6 +59,16 @@ class ReadersAndUpdates(
         }
     }
 
+    // Caller must already hold rldMutex
+    private fun getReaderNoLock(context: IOContext): SegmentReader {
+        if (reader == null) {
+            reader = SegmentReader(info, indexCreatedVersionMajor, context)
+            pendingDeletes.onNewReader(reader!!, info)
+        }
+        reader!!.incRef()
+        return reader!!
+    }
+
     // Tracks how many consumers are using this instance:
     @OptIn(ExperimentalAtomicApi::class)
     private val refCount: AtomicInteger = AtomicInteger(1)
@@ -186,15 +196,7 @@ class ReadersAndUpdates(
     @Throws(IOException::class)
     fun getReader(context: IOContext): SegmentReader {
         return withRldLock {
-            if (reader == null) {
-                // We steal returned ref:
-                reader = SegmentReader(info, indexCreatedVersionMajor, context)
-                pendingDeletes.onNewReader(reader!!, info)
-            }
-
-            // Ref for caller
-            reader!!.incRef()
-            reader!!
+            getReaderNoLock(context)
         }
     }
 
@@ -241,7 +243,7 @@ class ReadersAndUpdates(
     suspend fun getReadOnlyClone(context: IOContext): SegmentReader {
         return withRldLockSuspend {
             if (reader == null) {
-                getReader(context).decRef()
+                getReaderNoLock(context).decRef()
                 checkNotNull(reader)
             }
             // force new liveDocs
@@ -818,7 +820,7 @@ class ReadersAndUpdates(
                 mergingUpdates.addAll(ent.value)
             }
 
-            var reader: SegmentReader = getReader(context)
+            var reader: SegmentReader = getReaderNoLock(context)
             if (pendingDeletes.needsRefresh(reader)
                 || reader.segmentInfo.delGen != pendingDeletes.info.delGen
             ) {
