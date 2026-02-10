@@ -5706,7 +5706,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // are called, deleter should know about every
             // file referenced by the current head
             // segmentInfos:
-            check(deleter.exists(fileName)) {
+            assert(deleter.exists(fileName)) {
                 "IndexFileDeleter doesn't know about file $fileName"
             }
         }
