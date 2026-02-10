@@ -24,9 +24,7 @@ import org.gnit.lucenekmp.index.IndexSorter
 import org.gnit.lucenekmp.index.SegmentInfo
 import org.gnit.lucenekmp.index.SortFieldProvider
 import org.gnit.lucenekmp.jdkport.ParseException
-import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.assert
-import org.gnit.lucenekmp.jdkport.fromByteArray
 import org.gnit.lucenekmp.search.Sort
 import org.gnit.lucenekmp.store.ByteArrayDataInput
 import org.gnit.lucenekmp.store.DataOutput
@@ -156,8 +154,7 @@ class SimpleTextSegmentInfoFormat : SegmentInfoFormat() {
             SimpleTextUtil.readLine(input, scratch)
             assert(StringHelper.startsWith(scratch.get(), SI_SORT))
             val numSortFields = readString(SI_SORT.length, scratch).toInt()
-            val sortField = Array(numSortFields)/*
-            for (i in 0 until numSortFields)*/ {
+            val sortField = Array(numSortFields) {
                 SimpleTextUtil.readLine(input, scratch)
                 assert(StringHelper.startsWith(scratch.get(), SI_SORT_NAME))
                 val provider = readString(SI_SORT_NAME.length, scratch)
@@ -175,8 +172,9 @@ class SimpleTextSegmentInfoFormat : SegmentInfoFormat() {
                         serializedSort.offset,
                         serializedSort.length
                     )
-                /*sortField[i] =*/ SortFieldProvider.forName(provider).readSortField(bytes)
-                /*assert(bytes.eof())*/
+                val field = SortFieldProvider.forName(provider).readSortField(bytes)
+                assert(bytes.eof())
+                field
             }
 
             val indexSort: Sort? = if (sortField.isEmpty()) {
@@ -208,12 +206,9 @@ class SimpleTextSegmentInfoFormat : SegmentInfoFormat() {
     }
 
     private fun readString(offset: Int, scratch: BytesRefBuilder): String {
-        return String.fromByteArray(
-            scratch.bytes(),
-            offset,
-            scratch.length() - offset,
-            StandardCharsets.UTF_8
-        )
+        // Keep parity with Java's new String(bytes, offset, len, UTF_8) by decoding the
+        // exact line bytes and slicing off the ASCII prefix.
+        return scratch.get().utf8ToString().substring(offset)
     }
 
     @Throws(IOException::class)
