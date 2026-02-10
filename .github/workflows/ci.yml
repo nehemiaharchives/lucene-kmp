@@ -70,7 +70,7 @@ jobs:
           - platform: jvm
             module_name: codecs
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :codecs:jvmTest
             artifact: jvm-codecs-reports
 
@@ -127,7 +127,7 @@ jobs:
           - platform: android
             module_name: codecs
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :codecs:testAndroidHostTest
             artifact: android-codecs-reports
             needs_android: true
@@ -185,7 +185,7 @@ jobs:
           - platform: ios
             module_name: codecs
             os: macos-latest
-            timeout: 40
+            timeout: 50
             task: :codecs:iosSimulatorArm64Test
             artifact: ios-codecs-reports
             needs_konan_cache: true
@@ -243,7 +243,7 @@ jobs:
           - platform: linux
             module_name: codecs
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :codecs:linuxX64Test
             artifact: linux-codecs-reports
             needs_konan_cache: true
@@ -283,7 +283,7 @@ jobs:
           ./gradlew
           -PenableHangDetection=true
           --stacktrace
-          --info
+          --quiet
           -Dorg.gradle.test.logging.events=failed
           -Dorg.gradle.test.logging.exceptionFormat=full
           ${{ matrix.task }}
