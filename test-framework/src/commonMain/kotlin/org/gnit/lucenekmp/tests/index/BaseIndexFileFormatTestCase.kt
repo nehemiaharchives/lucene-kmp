@@ -65,8 +65,10 @@ import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.Version
 import kotlinx.coroutines.Job
 import kotlin.reflect.KClass
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.BeforeTest
 
 
 /** Common tests to all index formats.  */
@@ -162,17 +164,17 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
     private var savedCodec: Codec? = null
 
     @Throws(Exception::class)
-    /*override*/ fun setUp() {
-        /*super.setUp()*/ //TODO implement if needed
+    @BeforeTest
+    fun setUp() {
         // set the default codec, so adding test cases to this isn't fragile
         savedCodec = Codec.default
         Codec.default = this.codec
     }
 
     @Throws(Exception::class)
-    /*override*/ fun tearDown() {
+    @AfterTest
+    fun tearDown() {
         Codec.default = savedCodec!! // restore
-        /*super.tearDown()*/ //TODO implement if needed
     }
 
     /** Add random fields to the provided document.  */

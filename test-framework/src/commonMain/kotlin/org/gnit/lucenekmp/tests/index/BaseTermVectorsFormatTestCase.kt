@@ -509,7 +509,7 @@ abstract class BaseTermVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         }
     }
 
-    protected val readPastLastPositionExceptionClass: KClass<out Throwable>
+    protected open val readPastLastPositionExceptionClass: KClass<out Throwable>
         get() = IllegalStateException::class
 
     protected fun addId(doc: Document, id: String): Document {
