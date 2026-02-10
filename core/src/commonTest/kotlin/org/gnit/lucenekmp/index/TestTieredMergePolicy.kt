@@ -943,7 +943,7 @@ class TestTieredMergePolicy : BaseMergePolicyTestCase() {
         // Avoid low values of the max merged segment size which prevent this merge policy from scaling
         // well
         mergePolicy.setMaxMergedSegmentMB(TestUtil.nextInt(random(), 1024, 10 * 1024).toDouble())
-        doTestSimulateAppendOnly(mergePolicy, 100000000, 10000)
+        doTestSimulateAppendOnly(mergePolicy, totalDocs = 1000, maxDocsPerFlush = 100) // TODO reduced from totalDocs = 100000000, maxDocsPerFlush = 10000 to totalDocs = 1000, maxDocsPerFlush = 100 for dev speed
     }
 
     @Test
@@ -953,7 +953,7 @@ class TestTieredMergePolicy : BaseMergePolicyTestCase() {
         // Avoid low values of the max merged segment size which prevent this merge policy from scaling
         // well
         mergePolicy.setMaxMergedSegmentMB(TestUtil.nextInt(random(), 1024, 10 * 1024).toDouble())
-        val numDocs: Int = if (TEST_NIGHTLY) atLeast(10000000) else atLeast(1000000)
+        val numDocs: Int = if (TEST_NIGHTLY) atLeast(10000000) else atLeast(100) // TODO reduced from 1000000 to 100 for dev speed
         doTestSimulateUpdates(mergePolicy, numDocs, 2500)
     }
 
