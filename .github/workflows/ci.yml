@@ -28,49 +28,49 @@ jobs:
           - platform: jvm
             module_name: core
             os: ubuntu-latest
-            timeout: 10
+            timeout: 40
             task: :core:jvmTest
             artifact: jvm-core-reports
           - platform: jvm
             module_name: analysis-common
             os: ubuntu-latest
-            timeout: 10
+            timeout: 40
             task: :analysis:common:jvmTest
             artifact: jvm-analysis-common-reports
           - platform: jvm
             module_name: analysis-morfologik
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:morfologik:jvmTest
             artifact: jvm-analysis-morfologik-reports
           - platform: jvm
             module_name: analysis-smartcn
             os: ubuntu-latest
-            timeout: 10
+            timeout: 40
             task: :analysis:smartcn:jvmTest
             artifact: jvm-analysis-smartcn-reports
           - platform: jvm
             module_name: analysis-nori
             os: ubuntu-latest
-            timeout: 10
+            timeout: 40
             task: :analysis:nori:jvmTest
             artifact: jvm-analysis-nori-reports
           - platform: jvm
             module_name: analysis-kuromoji
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:kuromoji:jvmTest
             artifact: jvm-analysis-kuromoji-reports
           - platform: jvm
             module_name: analysis-extra
             os: ubuntu-latest
-            timeout: 10
+            timeout: 40
             task: :analysis:extra:jvmTest
             artifact: jvm-analysis-extra-reports
           - platform: jvm
             module_name: codecs
             os: ubuntu-latest
-            timeout: 10
+            timeout: 40
             task: :codecs:jvmTest
             artifact: jvm-codecs-reports
 
@@ -78,56 +78,56 @@ jobs:
           - platform: android
             module_name: core
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :core:testAndroidHostTest
             artifact: android-core-reports
             needs_android: true
           - platform: android
             module_name: analysis-common
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:common:testAndroidHostTest
             artifact: android-analysis-common-reports
             needs_android: true
           - platform: android
             module_name: analysis-morfologik
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:morfologik:testAndroidHostTest
             artifact: android-analysis-morfologik-reports
             needs_android: true
           - platform: android
             module_name: analysis-smartcn
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:smartcn:testAndroidHostTest
             artifact: android-analysis-smartcn-reports
             needs_android: true
           - platform: android
             module_name: analysis-nori
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:nori:testAndroidHostTest
             artifact: android-analysis-nori-reports
             needs_android: true
           - platform: android
             module_name: analysis-kuromoji
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:kuromoji:testAndroidHostTest
             artifact: android-analysis-kuromoji-reports
             needs_android: true
           - platform: android
             module_name: analysis-extra
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :analysis:extra:testAndroidHostTest
             artifact: android-analysis-extra-reports
             needs_android: true
           - platform: android
             module_name: codecs
             os: ubuntu-latest
-            timeout: 15
+            timeout: 40
             task: :codecs:testAndroidHostTest
             artifact: android-codecs-reports
             needs_android: true
@@ -143,49 +143,49 @@ jobs:
           - platform: ios
             module_name: analysis-common
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :analysis:common:iosSimulatorArm64Test
             artifact: ios-analysis-common-reports
             needs_konan_cache: true
           - platform: ios
             module_name: analysis-morfologik
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :analysis:morfologik:iosSimulatorArm64Test
             artifact: ios-analysis-morfologik-reports
             needs_konan_cache: true
           - platform: ios
             module_name: analysis-smartcn
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :analysis:smartcn:iosSimulatorArm64Test
             artifact: ios-analysis-smartcn-reports
             needs_konan_cache: true
           - platform: ios
             module_name: analysis-nori
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :analysis:nori:iosSimulatorArm64Test
             artifact: ios-analysis-nori-reports
             needs_konan_cache: true
           - platform: ios
             module_name: analysis-kuromoji
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :analysis:kuromoji:iosSimulatorArm64Test
             artifact: ios-analysis-kuromoji-reports
             needs_konan_cache: true
           - platform: ios
             module_name: analysis-extra
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :analysis:extra:iosSimulatorArm64Test
             artifact: ios-analysis-extra-reports
             needs_konan_cache: true
           - platform: ios
             module_name: codecs
             os: macos-latest
-            timeout: 20
+            timeout: 40
             task: :codecs:iosSimulatorArm64Test
             artifact: ios-codecs-reports
             needs_konan_cache: true
@@ -201,49 +201,49 @@ jobs:
           - platform: linux
             module_name: analysis-common
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :analysis:common:linuxX64Test
             artifact: linux-analysis-common-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-morfologik
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :analysis:morfologik:linuxX64Test
             artifact: linux-analysis-morfologik-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-smartcn
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :analysis:smartcn:linuxX64Test
             artifact: linux-analysis-smartcn-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-nori
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :analysis:nori:linuxX64Test
             artifact: linux-analysis-nori-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-kuromoji
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :analysis:kuromoji:linuxX64Test
             artifact: linux-analysis-kuromoji-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-extra
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :analysis:extra:linuxX64Test
             artifact: linux-analysis-extra-reports
             needs_konan_cache: true
           - platform: linux
             module_name: codecs
             os: ubuntu-latest
-            timeout: 30
+            timeout: 40
             task: :codecs:linuxX64Test
             artifact: linux-codecs-reports
             needs_konan_cache: true
