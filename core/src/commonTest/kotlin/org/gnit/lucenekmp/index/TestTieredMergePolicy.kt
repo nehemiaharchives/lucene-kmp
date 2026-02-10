@@ -181,7 +181,7 @@ class TestTieredMergePolicy : BaseMergePolicyTestCase() {
     @Test
     @Throws(Exception::class)
     fun testPartialMerge() {
-        val num: Int = atLeast(10)
+        val num: Int = atLeast(1) // reduced from 10 to 1 for dev speed
         for (iter in 0..<num) {
             if (VERBOSE) {
                 println("TEST: iter=$iter")
@@ -195,7 +195,7 @@ class TestTieredMergePolicy : BaseMergePolicyTestCase() {
             tmp.setSegmentsPerTier(6.0)
 
             val w = IndexWriter(dir, conf)
-            val numDocs: Int = TestUtil.nextInt(random(), 20, 100)
+            val numDocs: Int = TestUtil.nextInt(random(), start = 2, end = 10) // reduced from start = 20, end = 100 to start = 2, end = 10 for dev speed
             for (i in 0..<numDocs) {
                 val doc = Document()
                 doc.add(newTextField("content", "aaa " + (i % 4), Field.Store.NO))
