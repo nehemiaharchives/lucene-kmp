@@ -1350,7 +1350,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         // numDocs should be always > 256 so that in case of a codec that optimizes
         // for numbers of values <= 256, all storage layouts are tested
 
-        logger.debug { "LegacyBaseDocValuesFormatTestCase.doTestNumericsVsStoredFields numDocs: $numDocs" }
+        // logger.debug { "LegacyBaseDocValuesFormatTestCase.doTestNumericsVsStoredFields numDocs: $numDocs" }
 
         assert(numDocs > 256)
         val indexMark = TimeSource.Monotonic.markNow()
@@ -1368,7 +1368,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 writer.commit()
             }
         }
-        logger.debug { "doTestNumericsVsStoredFields indexing took ${indexMark.elapsedNow()}" }
+        // logger.debug { "doTestNumericsVsStoredFields indexing took ${indexMark.elapsedNow()}" }
 
         // delete some docs
         val deleteMark = TimeSource.Monotonic.markNow()
@@ -1377,21 +1377,21 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
         }
-        logger.debug { "doTestNumericsVsStoredFields deletions took ${deleteMark.elapsedNow()} (numDeletions=$numDeletions)" }
+        // logger.debug { "doTestNumericsVsStoredFields deletions took ${deleteMark.elapsedNow()} (numDeletions=$numDeletions)" }
 
         // merge some segments and ensure that at least one of them has more than
         // max(256, minDocs) values
         val mergeMark = TimeSource.Monotonic.markNow()
         writer.forceMerge(numDocs / max(256, minDocs))
-        logger.debug { "doTestNumericsVsStoredFields forceMerge took ${mergeMark.elapsedNow()}" }
+        // logger.debug { "doTestNumericsVsStoredFields forceMerge took ${mergeMark.elapsedNow()}" }
 
         writer.close()
         // compare
         val compareMark = TimeSource.Monotonic.markNow()
         assertDVIterate(dir)
-        logger.debug { "doTestNumericsVsStoredFields assertDVIterate took ${compareMark.elapsedNow()}" }
+        // logger.debug { "doTestNumericsVsStoredFields assertDVIterate took ${compareMark.elapsedNow()}" }
         dir.close()
-        logger.debug { "doTestNumericsVsStoredFields total took ${totalMark.elapsedNow()}" }
+        // logger.debug { "doTestNumericsVsStoredFields total took ${totalMark.elapsedNow()}" }
     }
 
     // Asserts equality of stored value vs. DocValue by iterating DocValues one at a time
@@ -1402,9 +1402,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val checkReaderMark = TimeSource.Monotonic.markNow()
         if (shouldRunCheckReaderInNumericsVsStoredFields()) {
             TestUtil.checkReader(ir)
-            logger.debug { "assertDVIterate TestUtil.checkReader took ${checkReaderMark.elapsedNow()}" }
+            // logger.debug { "assertDVIterate TestUtil.checkReader took ${checkReaderMark.elapsedNow()}" }
         } else {
-            logger.debug { "assertDVIterate skipped TestUtil.checkReader on this platform" }
+            // logger.debug { "assertDVIterate skipped TestUtil.checkReader on this platform" }
         }
         val leavesMark = TimeSource.Monotonic.markNow()
         for (context in ir.leaves()) {
@@ -1437,9 +1437,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             }
             assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docValues.docID().toLong())
         }
-        logger.debug { "assertDVIterate leaves/doc compare took ${leavesMark.elapsedNow()}" }
+        // logger.debug { "assertDVIterate leaves/doc compare took ${leavesMark.elapsedNow()}" }
         ir.close()
-        logger.debug { "assertDVIterate total took ${totalMark.elapsedNow()}" }
+        // logger.debug { "assertDVIterate total took ${totalMark.elapsedNow()}" }
     }
 
     @Throws(IOException::class)

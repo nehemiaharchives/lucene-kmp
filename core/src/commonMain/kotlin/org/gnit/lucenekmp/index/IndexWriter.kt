@@ -1865,9 +1865,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             infoStream.message("IW", "forceMerge: index now " + segString())
             infoStream.message("IW", "now flush at forceMerge")
         }
-        logger.debug { "forceMerge: start maxNumSegments=$maxNumSegments doWait=$doWait" }
+        // logger.debug { "forceMerge: start maxNumSegments=$maxNumSegments doWait=$doWait" }
         flush(triggerMerge = true, applyAllDeletes = true)
-        logger.debug { "forceMerge: flush done maxNumSegments=$maxNumSegments" }
+        // logger.debug { "forceMerge: flush done maxNumSegments=$maxNumSegments" }
 
         withIndexWriterLock {
             resetMergeExceptions()
@@ -1897,9 +1897,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             }
         }
 
-        logger.debug { "forceMerge: maybeMerge enter maxNumSegments=$maxNumSegments" }
+        // logger.debug { "forceMerge: maybeMerge enter maxNumSegments=$maxNumSegments" }
         maybeMerge(config.mergePolicy, MergeTrigger.EXPLICIT, maxNumSegments)
-        logger.debug { "forceMerge: maybeMerge exit maxNumSegments=$maxNumSegments" }
+        // logger.debug { "forceMerge: maybeMerge exit maxNumSegments=$maxNumSegments" }
 
         if (doWait) {
             var waitIters = 0
@@ -1934,11 +1934,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 if (hasPendingMaxNumSegmentMerges) {
                     stableNoPendingChecks = 0
                     waitIters++
-                    logger.debug {
-                        "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size}"
-                    }
+                    // logger.debug {
+                    //     "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size}"
+                    // }
                     if (logger.isDebugEnabled()) {
-                        logMerges("forceMerge", pendingMerges, runningMerges)
+                        // logMerges("forceMerge", pendingMerges, runningMerges)
                     }
                     testPoint("forceMergeBeforeWait")
                     doWait()
@@ -1978,9 +1978,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     }
 
     private fun maxNumSegmentsMergesPendingUnlocked(): Boolean {
-        if (logger.isDebugEnabled()) {
-            logMerges("maxNumSegmentsMergesPending", pendingMerges, runningMerges)
-        }
+        // if (logger.isDebugEnabled()) {
+        //     logMerges("maxNumSegmentsMergesPending", pendingMerges, runningMerges)
+        // }
         for (merge in pendingMerges) {
             if (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS) return true
         }
@@ -2127,19 +2127,19 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         maxNumSegments: Int
     ) {
         ensureOpen(false)
-        logger.debug { "maybeMerge: trigger=$trigger maxNumSegments=$maxNumSegments" }
+        // logger.debug { "maybeMerge: trigger=$trigger maxNumSegments=$maxNumSegments" }
         if (updatePendingMerges(mergePolicy, trigger, maxNumSegments) != null) {
-            logger.debug { "maybeMerge: executeMerge trigger=$trigger maxNumSegments=$maxNumSegments" }
+            // logger.debug { "maybeMerge: executeMerge trigger=$trigger maxNumSegments=$maxNumSegments" }
             executeMerge(trigger)
-            logger.debug { "maybeMerge: executeMerge done trigger=$trigger maxNumSegments=$maxNumSegments" }
+            // logger.debug { "maybeMerge: executeMerge done trigger=$trigger maxNumSegments=$maxNumSegments" }
         }
     }
 
     @Throws(IOException::class)
     fun executeMerge(trigger: MergeTrigger) {
-        logger.debug { "executeMerge: start trigger=$trigger" }
+        // logger.debug { "executeMerge: start trigger=$trigger" }
         runBlocking { mergeScheduler.merge(mergeSource, trigger) }
-        logger.debug { "executeMerge: end trigger=$trigger" }
+        // logger.debug { "executeMerge: end trigger=$trigger" }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -4252,12 +4252,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         if (infoStream.isEnabled("IW")) {
                             infoStream.message("IW", "commit: finishCommit start")
                         }
-                        logger.debug { "finishCommit: start" }
+                        // logger.debug { "finishCommit: start" }
                         committedSegmentsFileName = pendingCommit!!.finishCommit(directory)
                         if (infoStream.isEnabled("IW")) {
                             infoStream.message("IW", "commit: finishCommit done")
                         }
-                        logger.debug { "finishCommit: done" }
+                        // logger.debug { "finishCommit: done" }
 
                         // we committed, if anything goes wrong after this, we are screwed and it's a tragedy:
                         commitCompleted = true
@@ -4273,12 +4273,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         if (infoStream.isEnabled("IW")) {
                             infoStream.message("IW", "commit: deleter.checkpoint start")
                         }
-                        logger.debug { "finishCommit: deleter.checkpoint start" }
+                        // logger.debug { "finishCommit: deleter.checkpoint start" }
                         deleter.checkpoint(pendingCommit!!, true)
                         if (infoStream.isEnabled("IW")) {
                             infoStream.message("IW", "commit: deleter.checkpoint done")
                         }
-                        logger.debug { "finishCommit: deleter.checkpoint done" }
+                        // logger.debug { "finishCommit: deleter.checkpoint done" }
 
                         // Carry over generation to our master SegmentInfos:
                         segmentInfos.updateGeneration(pendingCommit!!)
@@ -5207,7 +5207,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     deleter.decRef(mr.reader!!.segmentInfo.files())
                     logger.debug { "closeMergeReaders: decRef done seg=${mr.reader?.segmentName}" }
                 }
-                logger.debug { "closeMergeReaders: done merge=${merge.segString()}" }
+                // logger.debug { "closeMergeReaders: done merge=${merge.segString()}" }
             } else {
                 assert(
                     merge.mergeReader.isEmpty()
@@ -6414,18 +6414,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      */
     @Throws(IOException::class)
     fun tryApply(updates: FrozenBufferedUpdates): Boolean {
-        logger.debug { "tryApply: start delGen=${updates.delGen()}" }
+        // logger.debug { "tryApply: start delGen=${updates.delGen()}" }
         if (updates.tryLock()) {
             try {
-                logger.debug { "tryApply: locked delGen=${updates.delGen()}" }
+                // logger.debug { "tryApply: locked delGen=${updates.delGen()}" }
                 forceApply(updates)
                 return true
             } finally {
                 updates.unlock()
-                logger.debug { "tryApply: unlock delGen=${updates.delGen()}" }
+                // logger.debug { "tryApply: unlock delGen=${updates.delGen()}" }
             }
         }
-        logger.debug { "tryApply: busy delGen=${updates.delGen()}" }
+        // logger.debug { "tryApply: busy delGen=${updates.delGen()}" }
         return false
     }
 
@@ -6437,10 +6437,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
     fun forceApply(updates: FrozenBufferedUpdates) {
-        logger.debug { "forceApply: lock start delGen=${updates.delGen()}" }
+        // logger.debug { "forceApply: lock start delGen=${updates.delGen()}" }
         updates.lock()
         try {
-            logger.debug { "forceApply: lock acquired delGen=${updates.delGen()} applied=${updates.isApplied()}" }
+            // logger.debug { "forceApply: lock acquired delGen=${updates.delGen()} applied=${updates.isApplied()}" }
             if (updates.isApplied()) {
                 // already done
                 return
@@ -6481,7 +6481,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 //synchronized(this) {
                 val opened = withIndexWriterLock {
                     val infos: MutableList<SegmentCommitInfo> = getInfosToApply(updates) ?: return@withIndexWriterLock null
-                    logger.debug { "forceApply: infos size=${infos.size} delGen=${updates.delGen()}" }
+                    // logger.debug { "forceApply: infos size=${infos.size} delGen=${updates.delGen()}" }
 
                     for (info in infos) {
                         delFiles.addAll(info.files())
@@ -6518,9 +6518,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     //checkNotNull(finalizer) // access the finalizer to prevent a warning
                     // don't hold IW monitor lock here so threads are free concurrently resolve
                     // deletes/updates:
-                    logger.debug { "forceApply: updates.apply start delGen=${updates.delGen()} segStates=${segStates.size}" }
+                    // logger.debug { "forceApply: updates.apply start delGen=${updates.delGen()} segStates=${segStates.size}" }
                     delCount = runBlocking { updates.apply(segStates) }
-                    logger.debug { "forceApply: updates.apply done delGen=${updates.delGen()} delCount=$delCount" }
+                    // logger.debug { "forceApply: updates.apply done delGen=${updates.delGen()} delCount=$delCount" }
                     success.store(true)
                 }
                 // Since we just resolved some more deletes/updates, now is a good time to write them:
@@ -6600,7 +6600,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             }
         } finally {
             updates.unlock()
-            logger.debug { "forceApply: unlock delGen=${updates.delGen()}" }
+            // logger.debug { "forceApply: unlock delGen=${updates.delGen()}" }
         }
     }
 
@@ -6797,9 +6797,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             get() {
                 val nextMerge: MergePolicy.OneMerge? = writer.getNextMerge()
                 if (nextMerge != null) {
-                    writer.logger.debug {
-                        "IndexWriterMergeSource: nextMerge ${nextMerge.segString()} maxNumSegments=${nextMerge.maxNumSegments}"
-                    }
+                    // writer.logger.debug {
+                    //     "IndexWriterMergeSource: nextMerge ${nextMerge.segString()} maxNumSegments=${nextMerge.maxNumSegments}"
+                    // }
                     if (writer.mergeScheduler.verbose()) {
                         writer.mergeScheduler.message(
                             "  checked out merge " + writer.segString(nextMerge.segments)

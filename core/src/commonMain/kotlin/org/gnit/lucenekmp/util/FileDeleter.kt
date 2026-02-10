@@ -79,7 +79,7 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
      */
     @Throws(IOException::class)
     fun decRef(fileNames: MutableCollection<String>) {
-        logger.debug { "FileDeleter.decRef start: files=${fileNames.size}" }
+        // logger.debug { "FileDeleter.decRef start: files=${fileNames.size}" }
         withRefCountsLock {
             val toDelete: MutableSet<String> = HashSet<String>()
             var firstThrowable: Throwable? = null
@@ -106,7 +106,7 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
                 throw IOUtils.rethrowAlways(firstThrowable)
             }
         }
-        logger.debug { "FileDeleter.decRef done" }
+        // logger.debug { "FileDeleter.decRef done" }
     }
 
     /** Returns true if the file should be deleted  */

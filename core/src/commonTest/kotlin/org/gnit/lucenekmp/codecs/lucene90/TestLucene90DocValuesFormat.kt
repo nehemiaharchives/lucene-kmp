@@ -1291,11 +1291,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     override fun testSparseShortNumericsVsStoredFields() = super.testSparseShortNumericsVsStoredFields()
 
     @Test
-    override fun testIntNumericsVsStoredFields() {
-        repeat(100){
-            super.testIntNumericsVsStoredFields()
-        }
-    }
+    override fun testIntNumericsVsStoredFields() = super.testIntNumericsVsStoredFields()
 
     @Test
     override fun testSparseIntNumericsVsStoredFields() = super.testSparseIntNumericsVsStoredFields()

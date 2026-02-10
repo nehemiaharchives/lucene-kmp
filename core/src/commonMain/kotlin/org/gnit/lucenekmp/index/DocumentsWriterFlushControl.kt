@@ -305,19 +305,19 @@ class DocumentsWriterFlushControl(
     fun doAfterFlush(dwpt: DocumentsWriterPerThread) {
         val removed = flushingWriters.remove(dwpt)
         if (!removed) {
-            logger.debug { "DWFC.doAfterFlush(): DWPT was not present in flushingWriters seg=${dwpt.getSegmentInfo().name}" }
+            // logger.debug { "DWFC.doAfterFlush(): DWPT was not present in flushingWriters seg=${dwpt.getSegmentInfo().name}" }
         }
         try {
             val count = flushingWritersCount.decrementAndFetch()
             if (count < 0) {
                 // Keep count monotonic to avoid indefinite waitForFlush spin if accounting gets imbalanced.
                 flushingWritersCount.set(0)
-                logger.debug { "DWFC.doAfterFlush(): flushingWritersCount went negative, clamped to zero" }
+                // logger.debug { "DWFC.doAfterFlush(): flushingWritersCount went negative, clamped to zero" }
             }
             this.flushingBytes -= dwpt.lastCommittedBytesUsed
-            logger.debug {
-                "DWFC.doAfterFlush() seg=${dwpt.getSegmentInfo().name} flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} flushingBytes=$flushingBytes"
-            }
+            // logger.debug {
+            //     "DWFC.doAfterFlush() seg=${dwpt.getSegmentInfo().name} flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} flushingBytes=$flushingBytes"
+            // }
             assert(assertMemory())
         } finally {
             try {
@@ -373,26 +373,26 @@ class DocumentsWriterFlushControl(
     fun waitForFlush() {
         val start = Clock.System.now()
         var spins = 0
-        logger.debug {
-            "DWFC.waitForFlush() enter: flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush"
-        }
+        // logger.debug {
+        //     "DWFC.waitForFlush() enter: flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush"
+        // }
         while (flushingWritersCount.load() > 0) {
             try {
                 spins++
-                if (spins % 1024 == 0) {
-                    logger.debug {
-                        "DWFC.waitForFlush() loop: spins=$spins flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
-                    }
-                }
+                // if (spins % 1024 == 0) {
+                //     logger.debug {
+                //         "DWFC.waitForFlush() loop: spins=$spins flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
+                //     }
+                // }
                 // No monitor wait/notify in KMP; yield cooperatively so in-flight flush work can complete.
                 runBlocking { yield() }
             } catch (e: CancellationException) {
                 throw ThreadInterruptedException(e)
             }
         }
-        logger.debug {
-            "DWFC.waitForFlush() exit: spins=$spins elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
-        }
+        // logger.debug {
+        //     "DWFC.waitForFlush() exit: spins=$spins elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
+        // }
     }
 
     /**
@@ -478,9 +478,9 @@ class DocumentsWriterFlushControl(
         assert(!flushingWriters.contains(perThread)) { "DWPT is already flushing" }
         flushingWriters.add(perThread)
         val count = flushingWritersCount.incrementAndFetch()
-        logger.debug {
-            "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWritersCount=$count flushingWritersList=${flushingWriters.size}"
-        }
+        // logger.debug {
+        //     "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWritersCount=$count flushingWritersList=${flushingWriters.size}"
+        // }
     }
 
     /**

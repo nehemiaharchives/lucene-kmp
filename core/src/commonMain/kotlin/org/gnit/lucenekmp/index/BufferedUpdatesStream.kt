@@ -117,7 +117,7 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
         //synchronized(this) {
         /*assert(java.lang.Thread.holdsLock(writer) == false)*/ // jvm specific operation, need to do something for kotlin common
         val waitFor = HashSet(updates)
-        logger.debug { "waitApplyAll: packets=${waitFor.size}" }
+        // logger.debug { "waitApplyAll: packets=${waitFor.size}" }
         //}
 
         waitApply(waitFor, writer)
@@ -212,14 +212,14 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
             if (infoStream.isEnabled("BD")) {
                 infoStream.message("BD", "waitApply: no deletes to apply")
             }
-            logger.debug { "waitApply: no deletes to apply" }
+            // logger.debug { "waitApply: no deletes to apply" }
             return
         }
 
         if (infoStream.isEnabled("BD")) {
             infoStream.message("BD", "waitApply: " + waitFor.size + " packets: " + waitFor)
         }
-        logger.debug { "waitApply: packets=${waitFor.size}" }
+        // logger.debug { "waitApply: packets=${waitFor.size}" }
 
         val pendingPackets: ArrayList<FrozenBufferedUpdates> = ArrayList()
         var totalDelCount: Long = 0
@@ -227,11 +227,11 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
             // Frozen packets are now resolved, concurrently, by the indexing threads that
             // create them, by adding a DocumentsWriter.ResolveUpdatesEvent to the events queue,
             // but if we get here and the packet is not yet resolved, we resolve it now ourselves:
-            logger.debug { "waitApply: tryApply start delGen=${packet.delGen()}" }
+            // logger.debug { "waitApply: tryApply start delGen=${packet.delGen()}" }
             if (!writer.tryApply(packet)) {
                 // if somebody else is currently applying it - move on to the next one and force apply below
                 pendingPackets.add(packet)
-                logger.debug { "waitApply: tryApply busy delGen=${packet.delGen()}" }
+                // logger.debug { "waitApply: tryApply busy delGen=${packet.delGen()}" }
             }
             totalDelCount += packet.totalDelCount
         }

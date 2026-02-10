@@ -478,7 +478,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     private suspend fun doFlush(flushingDWPT: DocumentsWriterPerThread) {
         var flushingDWPT: DocumentsWriterPerThread = flushingDWPT
         checkNotNull(flushingDWPT) { "Flushing DWPT must not be null" }
-        logger.debug { "DW.doFlush() start seg=${flushingDWPT.getSegmentInfo().name} docsInRAM=${flushingDWPT.numDocsInRAM}" }
+        // logger.debug { "DW.doFlush() start seg=${flushingDWPT.getSegmentInfo().name} docsInRAM=${flushingDWPT.numDocsInRAM}" }
         do {
             assert(!flushingDWPT.hasFlushed())
             var success = false
@@ -556,9 +556,9 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     flushNotifications.onTicketBacklog()
                 }
             } finally {
-                logger.debug { "DW.doFlush() before doAfterFlush seg=${flushingDWPT.getSegmentInfo().name}" }
+                // logger.debug { "DW.doFlush() before doAfterFlush seg=${flushingDWPT.getSegmentInfo().name}" }
                 flushControl.doAfterFlush(flushingDWPT)
-                logger.debug { "DW.doFlush() after doAfterFlush seg=${flushingDWPT.getSegmentInfo().name} queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}" }
+                // logger.debug { "DW.doFlush() after doAfterFlush seg=${flushingDWPT.getSegmentInfo().name} queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}" }
             }
             // poll next pending flush safely
             val next: DocumentsWriterPerThread? = flushControl.nextPendingFlush()
@@ -569,9 +569,9 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 break
             }
         } while (true)
-        logger.debug { "DW.doFlush() before afterSegmentsFlushed" }
+        // logger.debug { "DW.doFlush() before afterSegmentsFlushed" }
         flushNotifications.afterSegmentsFlushed()
-        logger.debug { "DW.doFlush() end" }
+        // logger.debug { "DW.doFlush() end" }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -696,9 +696,9 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         if (infoStream.isEnabled("DW")) {
             infoStream.message("DW", "startFullFlush")
         }
-        logger.debug {
-            "DW.flushAllThreads() enter fullFlush=${flushControl.isFullFlush} queued=${flushControl.numQueuedFlushes()} blocked=${flushControl.numBlockedFlushes()} flushing=${flushControl.numFlushingDWPT()}"
-        }
+        // logger.debug {
+        //     "DW.flushAllThreads() enter fullFlush=${flushControl.isFullFlush} queued=${flushControl.numQueuedFlushes()} blocked=${flushControl.numBlockedFlushes()} flushing=${flushControl.numFlushingDWPT()}"
+        // }
 
         // TODO synchronized is not supported in KMP, need to think what to do here
         //synchronized(this) {
@@ -721,20 +721,20 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 val queued = flushControl.numQueuedFlushes()
                 val blocked = flushControl.numBlockedFlushes()
                 val flushing = flushControl.numFlushingDWPT()
-                logger.debug {
-                    "DW.flushAllThreads() loop: queued=$queued blocked=$blocked flushing=$flushing fullFlush=${flushControl.isFullFlush}"
-                }
+                // logger.debug {
+                //     "DW.flushAllThreads() loop: queued=$queued blocked=$blocked flushing=$flushing fullFlush=${flushControl.isFullFlush}"
+                // }
                 val flushedNow = maybeFlush()
-                logger.debug { "DW.flushAllThreads() maybeFlush -> $flushedNow" }
+                // logger.debug { "DW.flushAllThreads() maybeFlush -> $flushedNow" }
                 anythingFlushed = anythingFlushed or flushedNow
             } while (flushControl.numQueuedFlushes() > 0)
 
-            logger.debug { "DW.flushAllThreads() waiting for inflight flushes... flushing=${flushControl.numFlushingDWPT()}" }
+            // logger.debug { "DW.flushAllThreads() waiting for inflight flushes... flushing=${flushControl.numFlushingDWPT()}" }
             // If a concurrent flush is still in flight wait for it
             flushControl.waitForFlush()
-            logger.debug {
-                "DW.flushAllThreads() inflight flushes done. queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}"
-            }
+            // logger.debug {
+            //     "DW.flushAllThreads() inflight flushes done. queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}"
+            // }
             if (!anythingFlushed && flushingDeleteQueue.anyChanges()
             ) { // apply deletes if we did not flush any document
                 if (infoStream.isEnabled("DW")) {
@@ -743,7 +743,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                         "DW", /*java.lang.Thread.currentThread().getName() + */": flush naked frozen global deletes"
                     )
                 }
-                logger.debug { "DW.flushAllThreads() adding ticket to freeze global deletes" }
+                // logger.debug { "DW.flushAllThreads() adding ticket to freeze global deletes" }
                 assert(assertTicketQueueModification(flushingDeleteQueue))
                 ticketQueue.addTicket { maybeFreezeGlobalBuffer(flushingDeleteQueue)!! }
             }
@@ -752,14 +752,14 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             // concurrently if we have very small ram buffers this happens quite frequently
             assert(!flushingDeleteQueue.anyChanges())
         } finally {
-            logger.debug { "DW.flushAllThreads() finally: closing currentFullFlushDelQueue" }
+            // logger.debug { "DW.flushAllThreads() finally: closing currentFullFlushDelQueue" }
             assert(flushingDeleteQueue == currentFullFlushDelQueue)
             flushingDeleteQueue
                 .close() // all DWPT have been processed and this queue has been fully flushed to the
             // ticket-queue
         }
         val result = if (anythingFlushed) -seqNo else seqNo
-        logger.debug { "DW.flushAllThreads() exit: resultSeq=$result" }
+        // logger.debug { "DW.flushAllThreads() exit: resultSeq=$result" }
         return result
     }
 
@@ -784,7 +784,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     "DW", /*java.lang.Thread.currentThread().getName() + */" finishFullFlush success=$success"
                 )
             }
-            logger.debug { "DW.finishFullFlush(): start success=$success" }
+            // logger.debug { "DW.finishFullFlush(): start success=$success" }
             assert(setFlushingDeleteQueue(null))
             if (success) {
                 // Release the flush lock
@@ -794,10 +794,10 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             }
         } finally {
             pendingChangesInCurrentFullFlush = false
-            logger.debug { "DW.finishFullFlush(): applyAllDeletes start" }
+            // logger.debug { "DW.finishFullFlush(): applyAllDeletes start" }
             applyAllDeletes() // make sure we do execute this since we block applying deletes during full
             // flush
-            logger.debug { "DW.finishFullFlush(): applyAllDeletes done" }
+            // logger.debug { "DW.finishFullFlush(): applyAllDeletes done" }
         }
     }
 

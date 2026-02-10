@@ -105,22 +105,22 @@ class FrozenBufferedUpdates(
     fun tryLock(): Boolean {
         val locked = applyLock.tryLock()
         if (locked) {
-            logger.debug { "FrozenBufferedUpdates.tryLock: acquired delGen=$delGen" }
+            // logger.debug { "FrozenBufferedUpdates.tryLock: acquired delGen=$delGen" }
         }
         return locked
     }
 
     /** locks this buffered update instance  */
     fun lock() {
-        logger.debug { "FrozenBufferedUpdates.lock: start delGen=$delGen" }
+        // logger.debug { "FrozenBufferedUpdates.lock: start delGen=$delGen" }
         applyLock.lock()
-        logger.debug { "FrozenBufferedUpdates.lock: acquired delGen=$delGen" }
+        // logger.debug { "FrozenBufferedUpdates.lock: acquired delGen=$delGen" }
     }
 
     /** Releases the lock of this buffered update instance  */
     fun unlock() {
         applyLock.unlock()
-        logger.debug { "FrozenBufferedUpdates.unlock: delGen=$delGen" }
+        // logger.debug { "FrozenBufferedUpdates.unlock: delGen=$delGen" }
     }
 
     /** Returns true iff this buffered updates instance was already applied  */
