@@ -25,7 +25,11 @@ actual class DeflateCompressor actual constructor(actual val level: Int) : Compr
 
     @OptIn(ExperimentalForeignApi::class)
     actual override fun compress(buffersInput: ByteBuffersDataInput, out: DataOutput) {
-        val len = buffersInput.length() as Int
+        val lenLong = buffersInput.length()
+        require(lenLong in 0L..Int.MAX_VALUE.toLong()) {
+            "input length out of Int range: $lenLong"
+        }
+        val len = lenLong.toInt()
 
         val bytes = ByteArray(len)
         buffersInput.readBytes(bytes, 0, len)
