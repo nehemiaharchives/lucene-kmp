@@ -20,6 +20,8 @@ import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.computeIfAbsent
 import org.gnit.lucenekmp.jdkport.get
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -42,6 +44,20 @@ class ReadersAndUpdates(
     private val pendingDeletes: PendingDeletes
 ) {
     private val logger = KotlinLogging.logger {}
+    private val rldMutex = Mutex()
+
+    private fun <T> withRldLock(action: () -> T): T = runBlocking {
+        rldMutex.withLock { action() }
+    }
+
+    private suspend fun <T> withRldLockSuspend(action: suspend () -> T): T {
+        rldMutex.lock()
+        try {
+            return action()
+        } finally {
+            rldMutex.unlock()
+        }
+    }
 
     // Tracks how many consumers are using this instance:
     @OptIn(ExperimentalAtomicApi::class)
@@ -169,21 +185,25 @@ class ReadersAndUpdates(
     /*@Synchronized*/
     @Throws(IOException::class)
     fun getReader(context: IOContext): SegmentReader {
-        if (reader == null) {
-            // We steal returned ref:
-            reader = SegmentReader(info, indexCreatedVersionMajor, context)
-            pendingDeletes.onNewReader(reader!!, info)
-        }
+        return withRldLock {
+            if (reader == null) {
+                // We steal returned ref:
+                reader = SegmentReader(info, indexCreatedVersionMajor, context)
+                pendingDeletes.onNewReader(reader!!, info)
+            }
 
-        // Ref for caller
-        reader!!.incRef()
-        return reader!!
+            // Ref for caller
+            reader!!.incRef()
+            reader!!
+        }
     }
 
     /*@Synchronized*/
     suspend fun release(sr: SegmentReader) {
-        assert(info === sr.originalSegmentInfo)
-        sr.decRef()
+        withRldLockSuspend {
+            assert(info === sr.originalSegmentInfo)
+            sr.decRef()
+        }
     }
 
     /*@Synchronized*/
@@ -197,18 +217,20 @@ class ReadersAndUpdates(
     // NOTE: removes callers ref
     /*@Synchronized*/
     suspend fun dropReaders() {
-        // TODO: can we somehow use IOUtils here...  problem is
-        // we are calling .decRef not .close)...
-        if (reader != null) {
-            logger.debug { "RLD.dropReaders: closing reader seg=${info.info.name}" }
-            try {
-                reader!!.decRef()
-            } finally {
-                reader = null
+        withRldLockSuspend {
+            // TODO: can we somehow use IOUtils here...  problem is
+            // we are calling .decRef not .close)...
+            if (reader != null) {
+                logger.debug { "RLD.dropReaders: closing reader seg=${info.info.name}" }
+                try {
+                    reader!!.decRef()
+                } finally {
+                    reader = null
+                }
             }
-        }
 
-        decRef()
+            decRef()
+        }
     }
 
     /**
@@ -217,21 +239,23 @@ class ReadersAndUpdates(
      */
     /*@Synchronized*/
     suspend fun getReadOnlyClone(context: IOContext): SegmentReader {
-        if (reader == null) {
-            getReader(context).decRef()
-            checkNotNull(reader)
-        }
-        // force new liveDocs
-        val liveDocs: Bits? = pendingDeletes.liveDocs
-        if (liveDocs != null) {
-            return SegmentReader(
-                info, reader!!, liveDocs, pendingDeletes.hardLiveDocs, pendingDeletes.numDocs(), true
-            )
-        } else {
-            // liveDocs == null and reader != null. That can only be if there are no deletes
-            assert(reader!!.liveDocs == null)
-            reader!!.incRef()
-            return reader!!
+        return withRldLockSuspend {
+            if (reader == null) {
+                getReader(context).decRef()
+                checkNotNull(reader)
+            }
+            // force new liveDocs
+            val liveDocs: Bits? = pendingDeletes.liveDocs
+            if (liveDocs != null) {
+                SegmentReader(
+                    info, reader!!, liveDocs, pendingDeletes.hardLiveDocs, pendingDeletes.numDocs(), true
+                )
+            } else {
+                // liveDocs == null and reader != null. That can only be if there are no deletes
+                assert(reader!!.liveDocs == null)
+                reader!!.incRef()
+                reader!!
+            }
         }
     }
 
@@ -780,41 +804,42 @@ class ReadersAndUpdates(
         context: IOContext,
         readerConsumer: IOConsumer<MergePolicy.MergeReader>
     ): MergePolicy.MergeReader {
-        // We must carry over any still-pending DV updates because they were not
-        // successfully written, e.g. because there was a hole in the delGens,
-        // or they arrived after we wrote all DVs for merge but before we set
-        // isMerging here:
-
-        for (ent in pendingDVUpdates.entries) {
-            var mergingUpdates: MutableList<DocValuesFieldUpdates>? = mergingDVUpdates[ent.key]
-            if (mergingUpdates == null) {
-                mergingUpdates = ArrayList()
-                mergingDVUpdates.put(ent.key, mergingUpdates)
+        return withRldLockSuspend {
+            // We must carry over any still-pending DV updates because they were not
+            // successfully written, e.g. because there was a hole in the delGens,
+            // or they arrived after we wrote all DVs for merge but before we set
+            // isMerging here:
+            for (ent in pendingDVUpdates.entries) {
+                var mergingUpdates: MutableList<DocValuesFieldUpdates>? = mergingDVUpdates[ent.key]
+                if (mergingUpdates == null) {
+                    mergingUpdates = ArrayList()
+                    mergingDVUpdates.put(ent.key, mergingUpdates)
+                }
+                mergingUpdates.addAll(ent.value)
             }
-            mergingUpdates.addAll(ent.value)
-        }
 
-        var reader: SegmentReader = getReader(context)
-        if (pendingDeletes.needsRefresh(reader)
-            || reader.segmentInfo.delGen != pendingDeletes.info.delGen
-        ) {
-            // beware of zombies:
-            checkNotNull(pendingDeletes.liveDocs)
-            reader = createNewReaderWithLatestLiveDocs(reader)
-        }
-        assert(pendingDeletes.verifyDocCounts(reader))
-        val mergeReader: MergePolicy.MergeReader =
-            MergePolicy.MergeReader(reader, pendingDeletes.hardLiveDocs)
-        logger.debug { "RLD.getReaderForMerge: created mergeReader seg=${info.info.name} reader=${reader.segmentName}" }
-        var success = false
-        try {
-            readerConsumer.accept(mergeReader)
-            success = true
-            return mergeReader
-        } finally {
-            if (!success) {
-                logger.debug { "RLD.getReaderForMerge: readerConsumer failed, decRef seg=${info.info.name}" }
-                reader.decRef()
+            var reader: SegmentReader = getReader(context)
+            if (pendingDeletes.needsRefresh(reader)
+                || reader.segmentInfo.delGen != pendingDeletes.info.delGen
+            ) {
+                // beware of zombies:
+                checkNotNull(pendingDeletes.liveDocs)
+                reader = createNewReaderWithLatestLiveDocs(reader)
+            }
+            assert(pendingDeletes.verifyDocCounts(reader))
+            val mergeReader: MergePolicy.MergeReader =
+                MergePolicy.MergeReader(reader, pendingDeletes.hardLiveDocs)
+            logger.debug { "RLD.getReaderForMerge: created mergeReader seg=${info.info.name} reader=${reader.segmentName}" }
+            var success = false
+            try {
+                readerConsumer.accept(mergeReader)
+                success = true
+                mergeReader
+            } finally {
+                if (!success) {
+                    logger.debug { "RLD.getReaderForMerge: readerConsumer failed, decRef seg=${info.info.name}" }
+                    reader.decRef()
+                }
             }
         }
     }
