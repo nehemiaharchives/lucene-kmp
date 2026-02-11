@@ -300,7 +300,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.geo.BaseXYPointTestCase → org.gnit.lucenekmp.tests.geo.BaseXYPointTestCase
 - org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
 - org.apache.lucene.tests.index.BasePointsFormatTestCase → org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
-- org.apache.lucene.tests.index.BaseTermVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseTermVectorsFormatTestCase
 - org.apache.lucene.tests.index.OwnCacheKeyMultiReader → org.gnit.lucenekmp.tests.index.OwnCacheKeyMultiReader
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.index.ThreadedIndexingAndSearchingTestCase → org.gnit.lucenekmp.tests.index.ThreadedIndexingAndSearchingTestCase
@@ -616,9 +615,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.lucene90.TestLucene90NormsFormatMergeInstance → org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormatMergeInstance
 - org.apache.lucene.codecs.lucene90.TestLucene90PointsFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90PointsFormat
 - org.apache.lucene.codecs.lucene90.TestLucene90StoredFieldsFormatMergeInstance → org.gnit.lucenekmp.codecs.lucene90.TestLucene90StoredFieldsFormatMergeInstance
-- org.apache.lucene.codecs.lucene90.TestLucene90TermVectorsFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90TermVectorsFormat
 - org.apache.lucene.codecs.lucene90.blocktree.TestMSBVLong → org.gnit.lucenekmp.codecs.lucene90.blocktree.TestMSBVLong
-- org.apache.lucene.codecs.lucene90.compressing.TestCompressingTermVectorsFormat → org.gnit.lucenekmp.codecs.lucene90.compressing.TestCompressingTermVectorsFormat
 - org.apache.lucene.codecs.lucene90.compressing.TestStoredFieldsInt → org.gnit.lucenekmp.codecs.lucene90.compressing.TestStoredFieldsInt
 - org.apache.lucene.codecs.lucene90.tests.MockTermStateFactory → org.gnit.lucenekmp.codecs.lucene90.tests.MockTermStateFactory
 - org.apache.lucene.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat
@@ -633,11 +630,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2 → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextLiveDocsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextLiveDocsFormat
 - org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextStoredFieldsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextStoredFieldsFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextTermVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextTermVectorsFormat
 - org.apache.lucene.codecs.uniformsplit.TestBlockWriter → org.gnit.lucenekmp.codecs.uniformsplit.TestBlockWriter
 - org.apache.lucene.codecs.uniformsplit.TestFSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.TestFSTDictionary
 - org.apache.lucene.codecs.uniformsplit.TestTermBytes → org.gnit.lucenekmp.codecs.uniformsplit.TestTermBytes
@@ -1065,9 +1058,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.TestSleepingLockWrapper → org.gnit.lucenekmp.store.TestSleepingLockWrapper
 - org.apache.lucene.store.TestStressLockFactories → org.gnit.lucenekmp.store.TestStressLockFactories
 - org.apache.lucene.store.TestTrackingDirectoryWrapper → org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper
-- org.apache.lucene.tests.analysis.TestLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.TestMockAnalyzer → org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer
-- org.apache.lucene.tests.analysis.TestMockCharFilter → org.gnit.lucenekmp.tests.analysis.TestMockCharFilter
 - org.apache.lucene.tests.analysis.TestMockSynonymFilter → org.gnit.lucenekmp.tests.analysis.TestMockSynonymFilter
 - org.apache.lucene.tests.analysis.TestToken → org.gnit.lucenekmp.tests.analysis.TestToken
 - org.apache.lucene.tests.codecs.asserting.TestAssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.TestAssertingDocValuesFormat
