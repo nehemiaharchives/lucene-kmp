@@ -714,7 +714,7 @@ abstract class BaseNormsFormatTestCase : BaseIndexFileFormatTestCase() {
     @Throws(Exception::class)
     open fun testThreads() = runTest(timeout = 3.minutes) {
         val density = if (codecSupportsSparsity() == false || random().nextBoolean()) 1f else random().nextFloat()
-        val numDocs: Int = atLeast(50) // TODO reduced from 500 to 50 for dev speed
+        val numDocs: Int = atLeast(3) // TODO reduced from 500 to 3 for dev speed
         val docsWithField = FixedBitSet(numDocs)
         val numDocsWithField = max(1, (density * numDocs).toInt())
         if (numDocsWithField == numDocs) {

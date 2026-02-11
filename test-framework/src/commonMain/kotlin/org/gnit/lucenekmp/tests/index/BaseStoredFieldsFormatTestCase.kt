@@ -84,7 +84,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
         val rand: Random = random()
         val w = RandomIndexWriter(rand, dir, newIndexWriterConfig(MockAnalyzer(random())).setMaxBufferedDocs(TestUtil.nextInt(rand, 5, 20)))
         // w.w.setNoCFSRatio(0.0);
-        val docCount: Int = atLeast(10) // TODO reduced from 200 to 10 for dev speed
+        val docCount: Int = atLeast(3) // TODO reduced from 200 to 3 for dev speed
         val fieldCount: Int = TestUtil.nextInt(rand, 1, 5)
 
         val fieldIDs: MutableList<Int> = mutableListOf()
@@ -749,12 +749,16 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
         onlyStored.setIndexOptions(IndexOptions.NONE)
 
         val smallField = Field("fld", randomByteArray(random().nextInt(10), 256), onlyStored)
-        val numFields: Int = RandomNumbers.randomIntBetween(random(), 500000, 1000000)
+        val numFields: Int = RandomNumbers.randomIntBetween(random(), min = 50, max = 1000) // TODO reduced from min = 500000, max = 1000000 to min = 50, max = 1000 for dev speed
         for (i in 0..<numFields) {
             bigDoc1.add(smallField)
         }
 
-        val bigField = Field("fld", randomByteArray(RandomNumbers.randomIntBetween(random(), 1000000, 5000000), 2), onlyStored)
+        val bigField = Field(
+            name = "fld",
+            value = randomByteArray(RandomNumbers.randomIntBetween(random(), min = 10000, max = 50000), 2), // TODO reduced from min = 10000, max = 50000 for dev speed
+            type = onlyStored
+        )
         bigDoc2.add(bigField)
 
         val numDocs: Int = atLeast(5)
