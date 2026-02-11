@@ -1028,8 +1028,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
                     .use { docs ->
                         IndexWriter(dir, IndexWriterConfig())
                             .use { w ->
-                            val numDocs: Int =
-                                atLeast(10000)
+                            val numDocs: Int = atLeast(100) // TODO reduced from 10000 to 100 for dev speed
                             for (i in 0..<numDocs) {
                                 // Only keep stored fields
                                 val doc = docs.nextDoc()

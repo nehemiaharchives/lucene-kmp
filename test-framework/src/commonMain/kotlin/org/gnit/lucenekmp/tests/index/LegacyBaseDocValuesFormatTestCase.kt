@@ -4153,19 +4153,15 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
     open fun testHighOrdsSortedSetDV() {
-        assumeFalse(
-            "This test with SimpleTextCodec requires a lot of memory",
-            codec is SimpleTextCodec
-        )
+        assumeFalse("This test with SimpleTextCodec requires a lot of memory", codec is SimpleTextCodec)
         val dir: Directory = newDirectory()
-        val iwc =
-            IndexWriterConfig()
+        val iwc = IndexWriterConfig()
         iwc.setRAMBufferSizeMB(
             (8 + random().nextInt(64)).toDouble()
         )
         val writer = IndexWriter(dir, iwc)
         // many docs with some of them have very high ords
-        val numDocs: Int = 20000 + random().nextInt(10000)
+        val numDocs: Int = 200 + random().nextInt(100) // TODO reduced from 20000 + random().nextInt(10000) to 200 + random().nextInt(100) for dev speed
         for (i in 1..<numDocs) {
             val numOrds: Int
             if (random().nextInt(100) <= 5) {

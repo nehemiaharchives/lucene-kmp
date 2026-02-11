@@ -27,7 +27,7 @@ class TestLucene90StoredFieldsFormatHighCompression : BaseStoredFieldsFormatTest
         val dir: Directory = newDirectory()
         for (i in 0..9) {
             val iwc: IndexWriterConfig = newIndexWriterConfig()
-            iwc.setCodec(Lucene101Codec(RandomPicks.randomFrom<Lucene101Codec.Mode>(random(), Lucene101Codec.Mode.entries.toTypedArray())))
+            iwc.setCodec(Lucene101Codec(RandomPicks.randomFrom(random(), Lucene101Codec.Mode.entries.toTypedArray())))
             val iw = IndexWriter(dir, newIndexWriterConfig())
             val doc = Document()
             doc.add(StoredField("field1", "value1"))
@@ -55,17 +55,13 @@ class TestLucene90StoredFieldsFormatHighCompression : BaseStoredFieldsFormatTest
 
     @Test
     fun testInvalidOptions() {
-        expectThrows(
-            NullPointerException::class,
-            {
-                Lucene101Codec(/*null*/ null)
-            })
+        expectThrows(NullPointerException::class) {
+            Lucene101Codec(/*null*/ null)
+        }
 
-        expectThrows(
-            NullPointerException::class,
-            {
-                Lucene90StoredFieldsFormat(/*null*/ null)
-            })
+        expectThrows(NullPointerException::class) {
+            Lucene90StoredFieldsFormat(/*null*/ null)
+        }
     }
 
     // tests inherited from BaseStoredFieldsFormatTestCase
