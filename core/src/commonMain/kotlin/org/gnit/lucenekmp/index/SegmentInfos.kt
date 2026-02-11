@@ -530,9 +530,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 files.add(segmentFileName)
             }
         }
-        // Snapshot to avoid concurrent modification issues during commit/merge handling.
-        val snapshot = segments.toList()
-        for (info in snapshot) {
+        for (info in this) {
             files.addAll(info.files())
         }
 
