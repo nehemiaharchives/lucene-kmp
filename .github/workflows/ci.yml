@@ -283,13 +283,11 @@ jobs:
           ./gradlew
           -PenableHangDetection=true
           --stacktrace
-          --quiet
-          -Dorg.gradle.test.logging.events=failed
-          -Dorg.gradle.test.logging.exceptionFormat=full
+          --console=plain
           ${{ matrix.task }}
 
       - name: Upload build reports
-        if: ${{ env.ACT != 'true' }}
+        if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
@@ -405,7 +403,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build reports
-        if: ${{ env.ACT != 'true' }}
+        if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: build-reports

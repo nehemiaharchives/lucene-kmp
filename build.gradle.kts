@@ -1,4 +1,7 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
+import org.gradle.api.tasks.testing.AbstractTestTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -118,6 +121,17 @@ subprojects {
         // iOS simulator tests are launched via `simctl spawn`; forward env to child process.
         environment("tests.linedocsfile", testLineDocsPath)
         environment("SIMCTL_CHILD_tests.linedocsfile", testLineDocsPath)
+    }
+
+    tasks.withType<AbstractTestTask>().configureEach {
+        testLogging {
+            events = setOf(TestLogEvent.FAILED)
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+            showStandardStreams = false
+        }
     }
 
     tasks.matching { it.name in setOf("compileKotlinJvm", "compileTestKotlinJvm") }
