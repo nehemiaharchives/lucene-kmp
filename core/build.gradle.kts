@@ -100,7 +100,7 @@ kotlin {
             // test dependencies which are used both by jvm and android will be here
         }
         jvmTest.get().dependsOn(jvmAndroidTest)
-        androidUnitTest.get().dependsOn(jvmAndroidTest)
+        getByName("androidHostTest").dependsOn(jvmAndroidTest)
 
         val androidDeviceTest by getting {
             dependencies {
