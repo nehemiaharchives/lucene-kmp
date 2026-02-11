@@ -23,9 +23,7 @@ import org.gnit.lucenekmp.index.FieldInfos
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.index.SegmentInfo
 import org.gnit.lucenekmp.index.StoredFieldVisitor
-import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.assert
-import org.gnit.lucenekmp.jdkport.fromByteArray
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.BufferedChecksumIndexInput
 import org.gnit.lucenekmp.store.ChecksumIndexInput
@@ -176,14 +174,12 @@ class SimpleTextStoredFieldsReader : StoredFieldsReader {
         readLine()
         assert(StringHelper.startsWith(scratch.get(), SimpleTextStoredFieldsWriter.VALUE))
         if (type == SimpleTextStoredFieldsWriter.TYPE_STRING) {
-            val bytes = ByteArray(scratch.length() - SimpleTextStoredFieldsWriter.VALUE.length)
-            scratch.bytes().copyInto(
-                bytes,
-                0,
+            scratchUTF16.copyUTF8Bytes(
+                scratch.bytes(),
                 SimpleTextStoredFieldsWriter.VALUE.length,
-                SimpleTextStoredFieldsWriter.VALUE.length + bytes.size
+                scratch.length() - SimpleTextStoredFieldsWriter.VALUE.length
             )
-            visitor.stringField(fieldInfo, String.fromByteArray(bytes, StandardCharsets.UTF_8))
+            visitor.stringField(fieldInfo, scratchUTF16.toString())
         } else if (type == SimpleTextStoredFieldsWriter.TYPE_BINARY) {
             val copy = ByteArray(scratch.length() - SimpleTextStoredFieldsWriter.VALUE.length)
             scratch.bytes().copyInto(
