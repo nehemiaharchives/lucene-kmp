@@ -197,7 +197,7 @@ internal class SimpleTextPointsReader(readState: SegmentReadState) : PointsReade
     }
 
     @Throws(IOException::class)
-    override fun getValues(fieldName: String): PointValues {
+    override fun getValues(fieldName: String): PointValues? {
         val fieldInfo: FieldInfo? = readState.fieldInfos.fieldInfo(fieldName)
         if (fieldInfo == null) {
             throw IllegalArgumentException("field=\"$fieldName\" is unrecognized")
@@ -205,7 +205,7 @@ internal class SimpleTextPointsReader(readState: SegmentReadState) : PointsReade
         if (fieldInfo.pointDimensionCount == 0) {
             throw IllegalArgumentException("field=\"$fieldName\" did not index points")
         }
-        return readers[fieldName]!!
+        return readers[fieldName]
     }
 
     @Throws(IOException::class)
