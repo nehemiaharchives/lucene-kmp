@@ -27,8 +27,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 
 ## Depth 4
 - org.apache.lucene.codecs.bitvectors.FlatBitVectorsScorer → org.gnit.lucenekmp.codecs.bitvectors.FlatBitVectorsScorer
-- org.apache.lucene.codecs.lucene102.Lucene102BinaryFlatVectorsScorer → org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryFlatVectorsScorer
-- org.apache.lucene.codecs.lucene102.OffHeapBinarizedVectorValues → org.gnit.lucenekmp.codecs.lucene102.OffHeapBinarizedVectorValues
 - org.apache.lucene.codecs.memory.FSTTermsReader → org.gnit.lucenekmp.codecs.memory.FSTTermsReader
 - org.apache.lucene.codecs.memory.FSTTermsWriter → org.gnit.lucenekmp.codecs.memory.FSTTermsWriter
 - org.apache.lucene.codecs.uniformsplit.UniformSplitTerms → org.gnit.lucenekmp.codecs.uniformsplit.UniformSplitTerms
@@ -129,8 +127,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.analysis.AutomatonToTokenStream → org.gnit.lucenekmp.analysis.AutomatonToTokenStream
 - org.apache.lucene.analysis.DelegatingAnalyzerWrapper → org.gnit.lucenekmp.analysis.DelegatingAnalyzerWrapper
 - org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat
-- org.apache.lucene.codecs.lucene102.Lucene102BinaryQuantizedVectorsReader → org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryQuantizedVectorsReader
-- org.apache.lucene.codecs.lucene102.Lucene102BinaryQuantizedVectorsWriter → org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryQuantizedVectorsWriter
 - org.apache.lucene.codecs.memory.DirectPostingsFormat → org.gnit.lucenekmp.codecs.memory.DirectPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockEncoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockEncoder
 - org.apache.lucene.codecs.uniformsplit.FSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.FSTDictionary
@@ -163,7 +159,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.SoftDeletesRetentionMergePolicy → org.gnit.lucenekmp.index.SoftDeletesRetentionMergePolicy
 - org.apache.lucene.index.TwoPhaseCommitTool → org.gnit.lucenekmp.index.TwoPhaseCommitTool
 - org.apache.lucene.internal.hppc.CharHashSet → org.gnit.lucenekmp.internal.hppc.CharHashSet
-- org.apache.lucene.internal.hppc.FloatArrayList → org.gnit.lucenekmp.internal.hppc.FloatArrayList
 - org.apache.lucene.internal.hppc.IntDoubleHashMap → org.gnit.lucenekmp.internal.hppc.IntDoubleHashMap
 - org.apache.lucene.internal.hppc.IntFloatHashMap → org.gnit.lucenekmp.internal.hppc.IntFloatHashMap
 - org.apache.lucene.internal.hppc.IntLongHashMap → org.gnit.lucenekmp.internal.hppc.IntLongHashMap
@@ -298,7 +293,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat → org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat
 - org.apache.lucene.tests.geo.BaseGeoPointTestCase → org.gnit.lucenekmp.tests.geo.BaseGeoPointTestCase
 - org.apache.lucene.tests.geo.BaseXYPointTestCase → org.gnit.lucenekmp.tests.geo.BaseXYPointTestCase
-- org.apache.lucene.tests.index.BaseKnnVectorsFormatTestCase → org.gnit.lucenekmp.tests.index.BaseKnnVectorsFormatTestCase
 - org.apache.lucene.tests.index.OwnCacheKeyMultiReader → org.gnit.lucenekmp.tests.index.OwnCacheKeyMultiReader
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.index.ThreadedIndexingAndSearchingTestCase → org.gnit.lucenekmp.tests.index.ThreadedIndexingAndSearchingTestCase
@@ -346,8 +340,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.analysis.tokenattributes.PositionLengthAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.TypeAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TypeAttributeImpl
-- org.apache.lucene.codecs.lucene102.BinarizedByteVectorValues → org.gnit.lucenekmp.codecs.lucene102.BinarizedByteVectorValues
-- org.apache.lucene.codecs.lucene102.Lucene102BinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockDecoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockDecoder
@@ -410,7 +402,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestTransactions → org.gnit.lucenekmp.index.TestTransactions
 - org.apache.lucene.internal.hppc.CharCursor → org.gnit.lucenekmp.internal.hppc.CharCursor
 - org.apache.lucene.internal.hppc.DoubleCursor → org.gnit.lucenekmp.internal.hppc.DoubleCursor
-- org.apache.lucene.internal.hppc.FloatCursor → org.gnit.lucenekmp.internal.hppc.FloatCursor
 - org.apache.lucene.queryparser.classic.MultiFieldQueryParser → org.gnit.lucenekmp.queryparser.classic.MultiFieldQueryParser
 - org.apache.lucene.queryparser.classic.TestMultiPhraseQueryParsing → org.gnit.lucenekmp.queryparser.classic.TestMultiPhraseQueryParsing
 - org.apache.lucene.queryparser.complexPhrase.TestComplexPhraseQuery → org.gnit.lucenekmp.queryparser.complexPhrase.TestComplexPhraseQuery
@@ -516,7 +507,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.index.AllDeletedFilterReader → org.gnit.lucenekmp.tests.index.AllDeletedFilterReader
 - org.apache.lucene.tests.index.BaseTestCheckIndex → org.gnit.lucenekmp.tests.index.BaseTestCheckIndex
 - org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper
-- org.apache.lucene.tests.index.ForceMergePolicy → org.gnit.lucenekmp.tests.index.ForceMergePolicy
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener
 - org.apache.lucene.tests.index.PerThreadPKLookup → org.gnit.lucenekmp.tests.index.PerThreadPKLookup
 - org.apache.lucene.tests.index.SuppressingConcurrentMergeScheduler → org.gnit.lucenekmp.tests.index.SuppressingConcurrentMergeScheduler
@@ -573,7 +563,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.mutable.MutableValueStr → org.gnit.lucenekmp.util.mutable.MutableValueStr
 - org.apache.lucene.util.packed.PackedDataInput → org.gnit.lucenekmp.util.packed.PackedDataInput
 - org.apache.lucene.util.packed.PackedDataOutput → org.gnit.lucenekmp.util.packed.PackedDataOutput
-- org.apache.lucene.util.quantization.OptimizedScalarQuantizer → org.gnit.lucenekmp.util.quantization.OptimizedScalarQuantizer
 
 ## Depth 1
 - org.apache.lucene.TestAssertions → org.gnit.lucenekmp.TestAssertions
@@ -606,7 +595,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.compressing.TestHighCompressionMode → org.gnit.lucenekmp.codecs.compressing.TestHighCompressionMode
 - org.apache.lucene.codecs.compressing.TestLZ4WithPresetDictCompressionMode → org.gnit.lucenekmp.codecs.compressing.TestLZ4WithPresetDictCompressionMode
 - org.apache.lucene.codecs.lucene101.TestLucene101PostingsFormatV0 → org.gnit.lucenekmp.codecs.lucene101.TestLucene101PostingsFormatV0
-- org.apache.lucene.codecs.lucene102.TestLucene102BinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.TestLucene102BinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance
 - org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval

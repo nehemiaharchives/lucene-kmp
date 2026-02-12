@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1041 | 76% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1052 | 76% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -71,7 +71,7 @@
 |     org.apache.lucene.codecs.compressing |         org.gnit.lucenekmp.codecs.compressing | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.hnsw |         org.gnit.lucenekmp.codecs.hnsw | 10 | 9 | 90% | [ ] |
 |     org.apache.lucene.codecs.lucene101 |         org.gnit.lucenekmp.codecs.lucene101 | 10 | 8 | 80% | [ ] |
-|     org.apache.lucene.codecs.lucene102 |         org.gnit.lucenekmp.codecs.lucene102 | 8 | 0 | 0% | [ ] |
+|     org.apache.lucene.codecs.lucene102 |         org.gnit.lucenekmp.codecs.lucene102 | 8 | 6 | 75% | [ ] |
 |     org.apache.lucene.codecs.lucene90 |         org.gnit.lucenekmp.codecs.lucene90 | 18 | 17 | 94% | [ ] |
 |       org.apache.lucene.codecs.lucene90.blocktree |           org.gnit.lucenekmp.codecs.lucene90.blocktree | 10 | 9 | 90% | [ ] |
 |       org.apache.lucene.codecs.lucene90.compressing |           org.gnit.lucenekmp.codecs.lucene90.compressing | 11 | 10 | 90% | [ ] |
@@ -82,7 +82,7 @@
 |   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 42 | 47% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 186 | 93% | [ ] |
-|     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 16 | 61% | [ ] |
+|     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 18 | 69% | [ ] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 3 | 2 | 66% | [ ] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 6 | 5 | 83% | [ ] |
 |   org.apache.lucene.search |       org.gnit.lucenekmp.search | 197 | 165 | 83% | [ ] |
@@ -106,7 +106,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 27 | 67% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 29 | 72% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
@@ -124,7 +124,7 @@
 |     org.apache.lucene.util.hnsw |         org.gnit.lucenekmp.util.hnsw | 26 | 25 | 96% | [ ] |
 |     org.apache.lucene.util.mutable |         org.gnit.lucenekmp.util.mutable | 9 | 0 | 0% | [ ] |
 |     org.apache.lucene.util.packed |         org.gnit.lucenekmp.util.packed | 53 | 48 | 90% | [ ] |
-|     org.apache.lucene.util.quantization |         org.gnit.lucenekmp.util.quantization | 6 | 4 | 66% | [ ] |
+|     org.apache.lucene.util.quantization |         org.gnit.lucenekmp.util.quantization | 6 | 5 | 83% | [ ] |
 
 
 ## Test Classes Port Progress
@@ -138,7 +138,7 @@
 |     org.apache.lucene.codecs.compressing | 5 | 1 | 20% |
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene101 | 6 | 5 | 83% |
-|     org.apache.lucene.codecs.lucene102 | 2 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene102 | 2 | 1 | 50% |
 |     org.apache.lucene.codecs.lucene90 | 14 | 9 | 64% |
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 2 | 66% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 180 | 26% |
+| Total | 673 | 181 | 26% |
 
 
 ## Tests To Port
@@ -197,7 +197,6 @@
 | [org.apache.lucene.codecs.compressing.TestHighCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestHighCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestHighCompressionMode |
 | [org.apache.lucene.codecs.compressing.TestLZ4WithPresetDictCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestLZ4WithPresetDictCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestLZ4WithPresetDictCompressionMode |
 | [org.apache.lucene.codecs.lucene101.TestLucene101PostingsFormatV0](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene101/TestLucene101PostingsFormatV0.java) | org.gnit.lucenekmp.codecs.lucene101.TestLucene101PostingsFormatV0 |
-| [org.apache.lucene.codecs.lucene102.TestLucene102BinaryQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene102/TestLucene102BinaryQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene102.TestLucene102BinaryQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene102/TestLucene102HnswBinaryQuantizedVectorsFormat.java) | org.gnit.lucenekmp.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatVariableSkipInterval.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval |
