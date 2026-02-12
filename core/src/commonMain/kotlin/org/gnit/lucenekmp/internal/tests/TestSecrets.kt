@@ -64,12 +64,12 @@ object TestSecrets {
         return requireNotNull(indexPackageAccess)
     }
 
-    /*val concurrentMergeSchedulerAccess: ConcurrentMergeSchedulerAccess
-        *//** Return the accessor to internal secrets for an [ConcurrentMergeScheduler].  *//*
+    val concurrentMergeSchedulerAccess: ConcurrentMergeSchedulerAccess
+        /** Return the accessor to internal secrets for an [ConcurrentMergeScheduler].  */
         get() {
             ensureCaller()
             return requireNotNull<ConcurrentMergeSchedulerAccess>(cmsAccess)
-        }*/
+        }
 
     /** Return the accessor to internal secrets for an [SegmentReader].  */
     /*fun getSegmentReaderAccess(): SegmentReaderAccess {

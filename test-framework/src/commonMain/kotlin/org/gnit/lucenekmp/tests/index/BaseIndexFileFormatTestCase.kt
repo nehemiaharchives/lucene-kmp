@@ -270,7 +270,7 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
         dir2.close()
     }
 
-    protected fun mergeIsStable(): Boolean {
+    protected open fun mergeIsStable(): Boolean {
         return true
     }
 
