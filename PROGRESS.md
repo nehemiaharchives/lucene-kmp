@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1040 | 75% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1041 | 76% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -106,7 +106,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 2 | 33% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 26 | 65% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 27 | 67% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 12 | 48% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
@@ -139,7 +139,7 @@
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene101 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.lucene102 | 2 | 0 | 0% |
-|     org.apache.lucene.codecs.lucene90 | 14 | 8 | 57% |
+|     org.apache.lucene.codecs.lucene90 | 14 | 9 | 64% |
 |       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
 |       org.apache.lucene.codecs.lucene90.compressing | 3 | 2 | 66% |
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 179 | 26% |
+| Total | 673 | 180 | 26% |
 
 
 ## Tests To Port
@@ -203,7 +203,6 @@
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatVariableSkipInterval.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval |
 | [org.apache.lucene.codecs.lucene90.TestLucene90NormsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90NormsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90NormsFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90NormsFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormatMergeInstance |
-| [org.apache.lucene.codecs.lucene90.TestLucene90PointsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90PointsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90PointsFormat |
 | [org.apache.lucene.codecs.lucene90.TestLucene90StoredFieldsFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90StoredFieldsFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90StoredFieldsFormatMergeInstance |
 | [org.apache.lucene.codecs.lucene90.blocktree.TestMSBVLong](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/blocktree/TestMSBVLong.java) | org.gnit.lucenekmp.codecs.lucene90.blocktree.TestMSBVLong |
 | [org.apache.lucene.codecs.lucene90.compressing.TestStoredFieldsInt](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/compressing/TestStoredFieldsInt.java) | org.gnit.lucenekmp.codecs.lucene90.compressing.TestStoredFieldsInt |
