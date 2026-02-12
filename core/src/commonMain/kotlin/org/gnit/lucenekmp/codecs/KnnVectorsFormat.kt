@@ -7,6 +7,7 @@ import org.gnit.lucenekmp.codecs.lucene99.Lucene99FlatVectorsFormat
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswScalarQuantizedVectorsFormat
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsFormat
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99ScalarQuantizedVectorsFormat
+import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryQuantizedVectorsFormat
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.index.SegmentReadState
@@ -68,6 +69,30 @@ abstract class KnnVectorsFormat protected constructor(name: String) : NamedSPI {
     }
 
     companion object {
+        private val registry: MutableMap<String, () -> KnnVectorsFormat> = mutableMapOf(
+            "Lucene99HnswVectorsFormat" to { Lucene99HnswVectorsFormat() },
+            Lucene99ScalarQuantizedVectorsFormat.NAME to { Lucene99ScalarQuantizedVectorsFormat() },
+            Lucene99HnswScalarQuantizedVectorsFormat.NAME to { Lucene99HnswScalarQuantizedVectorsFormat() },
+            Lucene99FlatVectorsFormat.NAME to {
+                Lucene99FlatVectorsFormat(
+                    FlatVectorScorerUtil.getLucene99FlatVectorsScorer()
+                )
+            },
+            Lucene102BinaryQuantizedVectorsFormat.NAME to { Lucene102BinaryQuantizedVectorsFormat() },
+        )
+
+        /**
+         * Registers a vectors format factory by name. This is the KMP-safe alternative to SPI.
+         *
+         * Only adds new names; existing registrations are left untouched.
+         */
+        fun registerKnnVectorsFormat(name: String, factory: () -> KnnVectorsFormat) {
+            NamedSPILoader.checkServiceName(name)
+            if (!registry.containsKey(name)) {
+                registry[name] = factory
+            }
+        }
+
         /** The maximum number of vector dimensions  */
         const val DEFAULT_MAX_DIMENSIONS: Int = 1024
 
@@ -88,21 +113,25 @@ abstract class KnnVectorsFormat protected constructor(name: String) : NamedSPI {
 
         /** looks up a format by name  */
         fun forName(name: String): KnnVectorsFormat {
-            return when (name) {
-                "Lucene99HnswVectorsFormat" -> Lucene99HnswVectorsFormat()
-                Lucene99ScalarQuantizedVectorsFormat.NAME -> Lucene99ScalarQuantizedVectorsFormat()
-                Lucene99HnswScalarQuantizedVectorsFormat.NAME -> Lucene99HnswScalarQuantizedVectorsFormat()
-                Lucene99FlatVectorsFormat.NAME ->
-                    Lucene99FlatVectorsFormat(
-                        FlatVectorScorerUtil.getLucene99FlatVectorsScorer()
-                    )
-                else -> throw IllegalArgumentException("Unknown KnnVectorsFormat: $name")
+            registry[name]?.let { factory ->
+                return factory()
+            }
+            return try {
+                Holder.loader.lookup(name)
+            } catch (e: Throwable) {
+                val known = registry.keys.sorted()
+                throw UnsupportedOperationException(
+                    "KnnVectorsFormat '$name' is not available. Known built-ins: $known.",
+                    e
+                )
             }
         }
 
         /** returns a list of all available format names  */
         fun availableKnnVectorsFormats(): MutableSet<String> {
-            return Holder.loader.availableServices()
+            val services = Holder.loader.availableServices()
+            services.addAll(registry.keys)
+            return services
         }
 
         /**

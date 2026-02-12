@@ -112,10 +112,7 @@ abstract class PostingsFormat protected constructor(override val name: String) :
                 return Holder.loader.lookup(name)
             } catch (e: Throwable) {
                 val known = registry.keys.sorted()
-                throw UnsupportedOperationException(
-                    "PostingsFormat '$name' is not available. Known built-ins: $known.",
-                    e
-                )
+                throw UnsupportedOperationException("PostingsFormat '$name' is not available. Known built-ins: $known.", e)
             }
         }
 

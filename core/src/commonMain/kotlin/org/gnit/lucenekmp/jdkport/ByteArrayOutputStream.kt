@@ -184,7 +184,7 @@ class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
      * @since  1.1
      */
     override fun toString(): String {
-        return /*String(buf, 0, count)*/ String.fromByteArray(buf, StandardCharsets.UTF_8)
+        return /*String(buf, 0, count)*/ String.fromByteArray(buf.copyOf(count), StandardCharsets.UTF_8)
     }
 
     /**
@@ -221,7 +221,7 @@ class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
     /*@Throws(UnsupportedEncodingException::class)*/
     fun toString(charsetName: String): String {
         return /*String(buf, 0, count, charset(charsetName))*/ String.fromByteArray(
-            buf, StandardCharsets.UTF_8
+            buf.copyOf(count), StandardCharsets.UTF_8
         )
     }
 
@@ -243,7 +243,7 @@ class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
      */
     fun toString(charset: Charset): String {
         return /*String(buf, 0, count, charset)*/ String.fromByteArray(
-            buf, charset
+            buf.copyOf(count), charset
         )
     }
 

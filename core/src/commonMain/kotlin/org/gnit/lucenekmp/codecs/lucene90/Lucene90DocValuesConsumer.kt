@@ -114,9 +114,9 @@ internal class Lucene90DocValuesConsumer(
             success = true
         } finally {
             if (success) {
-                IOUtils.close(data!!, meta!!)
+                IOUtils.close(data, meta)
             } else {
-                IOUtils.closeWhileHandlingException(data!!, meta!!)
+                IOUtils.closeWhileHandlingException(data, meta)
             }
             data = null
             meta = data
@@ -152,8 +152,8 @@ internal class Lucene90DocValuesConsumer(
         }
 
         fun reset() {
-            min = Long.Companion.MAX_VALUE
-            max = Long.Companion.MIN_VALUE
+            min = Long.MAX_VALUE
+            max = Long.MIN_VALUE
             numValues = 0
         }
 
@@ -192,8 +192,8 @@ internal class Lucene90DocValuesConsumer(
         var maxValue: Long
 
         init {
-            minValue = Long.Companion.MAX_VALUE
-            maxValue = Long.Companion.MIN_VALUE
+            minValue = Long.MAX_VALUE
+            maxValue = Long.MIN_VALUE
         }
 
         fun isDone(skipIndexIntervalSize: Int, valueCount: Int, nextValue: Long, nextDoc: Int): Boolean {
@@ -241,8 +241,8 @@ internal class Lucene90DocValuesConsumer(
         require(field.docValuesSkipIndexType() !== DocValuesSkipIndexType.NONE)
         val start: Long = data!!.filePointer
         val values: SortedNumericDocValues = valuesProducer.getSortedNumeric(field)!!
-        var globalMaxValue = Long.Companion.MIN_VALUE
-        var globalMinValue = Long.Companion.MAX_VALUE
+        var globalMaxValue = Long.MIN_VALUE
+        var globalMinValue = Long.MAX_VALUE
         var globalDocCount = 0
         var maxDocId = -1
         val accumulators: MutableList<SkipAccumulator> = ArrayList()
@@ -346,7 +346,7 @@ internal class Lucene90DocValuesConsumer(
                 val v: Long = values.nextValue()
 
                 if (gcd != 1L) {
-                    gcd = if (v < Long.Companion.MIN_VALUE / 2 || v > Long.Companion.MAX_VALUE / 2) {
+                    gcd = if (v < Long.MIN_VALUE / 2 || v > Long.MAX_VALUE / 2) {
                         // in that case v - minValue might overflow and make the GCD computation return
                         // wrong results. Since these extreme values are unlikely, we just discard
                         // GCD computation for them
@@ -530,7 +530,7 @@ internal class Lucene90DocValuesConsumer(
 
         // All blocks has been written. Flush the offset jump-table
         val offsetsOrigo: Long = data!!.filePointer
-        for (i in 0..<offsetsIndex) {
+        for (i in 0..offsetsIndex) {
             data?.writeLong(offsets[i])
         }
         data?.writeLong(offsetsOrigo)
@@ -965,7 +965,7 @@ internal class Lucene90DocValuesConsumer(
                             if (doc != NO_MORE_DOCS) {
                                 docValueCount = values.docValueCount()
                                 ords = ArrayUtil.grow(ords, docValueCount)
-                                for (j in 0..<docValueCount) {
+                                for (j in 0..docValueCount) {
                                     ords[j] = values.nextOrd()
                                 }
                                 i = 0
@@ -996,7 +996,7 @@ internal class Lucene90DocValuesConsumer(
             val collector: MutableList<SkipAccumulator> = ArrayList()
             var i = 0
             while (i < accumulators.size - levelSize + 1) {
-                collector.add(SkipAccumulator.Companion.merge(accumulators, i, levelSize))
+                collector.add(SkipAccumulator.merge(accumulators, i, levelSize))
                 i += levelSize
             }
             return collector

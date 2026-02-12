@@ -342,7 +342,8 @@ class StandardDirectoryReader internal constructor(
             // IndexWriter synchronizes externally before calling
             // us, which ensures infos will not change; so there's
             // no need to process segments in reverse order
-            val numSegments: Int = infos.size()
+            val infosSnapshot: MutableList<SegmentCommitInfo> = infos.asList()
+            val numSegments: Int = infosSnapshot.size
 
             val readers: MutableList<SegmentReader> =
                 ArrayList(numSegments)
@@ -356,7 +357,7 @@ class StandardDirectoryReader internal constructor(
                     // segmentInfos here, so that we are passing the
                     // actual instance of SegmentInfoPerCommit in
                     // IndexWriter's segmentInfos:
-                    val info: SegmentCommitInfo = infos.info(i)
+                    val info: SegmentCommitInfo = infosSnapshot[i]
                     assert(info.info.dir === dir)
                     val reader: SegmentReader = readerFunction.apply(info)
                     if (reader.numDocs() > 0

@@ -849,7 +849,8 @@ class Lucene102BinaryQuantizedVectorsWriter(
                     mergedCentroid[j] = mergedCentroid[j] / totalVectorCount
                 }
                 if (fieldInfo.vectorSimilarityFunction === VectorSimilarityFunction.COSINE) {
-                    VectorUtil.l2normalize(mergedCentroid)
+                    // Merged centroids can be all-zero (e.g., vectors cancel out); keep zero vector.
+                    VectorUtil.l2normalize(mergedCentroid, false)
                 }
                 return totalVectorCount
             }
@@ -888,7 +889,8 @@ class Lucene102BinaryQuantizedVectorsWriter(
                 centroid[i] /= count.toFloat()
             }
             if (fieldInfo.vectorSimilarityFunction === VectorSimilarityFunction.COSINE) {
-                VectorUtil.l2normalize(centroid)
+                // Centroid can be all-zero for cosine data during merges; do not throw.
+                VectorUtil.l2normalize(centroid, false)
             }
             return count
         }

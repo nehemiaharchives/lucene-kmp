@@ -204,17 +204,17 @@ open class FutureTask<V> : RunnableFuture<V> {
      */
     @OptIn(ExperimentalAtomicApi::class)
     override suspend fun get(): V {
-        logger.debug { "[FutureTask.get] enter state=${state.load()} hash=${this.hashCode()}" }
+        //logger.debug { "[FutureTask.get] enter state=${state.load()} hash=${this.hashCode()}" }
         var s = state.load()
         if (s <= COMPLETING) {
             if (s <= COMPLETING) {
-                logger.debug { "[FutureTask.get] awaiting completion state=$s hash=${this.hashCode()}" }
+                //logger.debug { "[FutureTask.get] awaiting completion state=$s hash=${this.hashCode()}" }
                 val result = awaitDone(false, 0.nanoseconds)
-                logger.debug { "[FutureTask.get] completed via awaitDone state=${state.load()} hash=${this.hashCode()}" }
+                //logger.debug { "[FutureTask.get] completed via awaitDone state=${state.load()} hash=${this.hashCode()}" }
                 return result
             }
         }
-        logger.debug { "[FutureTask.get] return report state=$s hash=${this.hashCode()}" }
+        //logger.debug { "[FutureTask.get] return report state=$s hash=${this.hashCode()}" }
         return report(s)
     }
 
@@ -332,9 +332,9 @@ open class FutureTask<V> : RunnableFuture<V> {
 
     @OptIn(ExperimentalAtomicApi::class)
     override fun run() {
-        logger.debug { "[FutureTask.run] enter state=${state.load()} hasRunner=${runner.load() != null} hash=${this.hashCode()}" }
+        //logger.debug { "[FutureTask.run] enter state=${state.load()} hasRunner=${runner.load() != null} hash=${this.hashCode()}" }
         if (state.load() != NEW || !runner.compareAndSet(null, Job())) {
-            logger.debug { "[FutureTask.run] abort: state=${state.load()} runnerWasSet=${runner.load() != null} hash=${this.hashCode()}" }
+            //logger.debug { "[FutureTask.run] abort: state=${state.load()} runnerWasSet=${runner.load() != null} hash=${this.hashCode()}" }
             return
         }
         val currentRunner = runner.load()!!
@@ -344,15 +344,15 @@ open class FutureTask<V> : RunnableFuture<V> {
                 var result: V? = null
                 var ran = false
                 try {
-                    logger.debug { "[FutureTask.run] invoking callable hash=${this.hashCode()}" }
+                    //logger.debug { "[FutureTask.run] invoking callable hash=${this.hashCode()}" }
                     result = c.call()
                     ran = true
                 } catch (ex: Throwable) {
-                    logger.debug { "[FutureTask.run] callable threw ${ex::class.simpleName}: ${ex.message} hash=${this.hashCode()}" }
+                    //logger.debug { "[FutureTask.run] callable threw ${ex::class.simpleName}: ${ex.message} hash=${this.hashCode()}" }
                     setException(ex)
                 }
                 if (ran) {
-                    logger.debug { "[FutureTask.run] callable completed, setting result hash=${this.hashCode()}" }
+                    //logger.debug { "[FutureTask.run] callable completed, setting result hash=${this.hashCode()}" }
                     set(result as V)
                 }
             }
@@ -366,7 +366,7 @@ open class FutureTask<V> : RunnableFuture<V> {
             if (s >= INTERRUPTING) {
                 handlePossibleCancellationInterrupt(s)
             }
-            logger.debug { "[FutureTask.run] exit finalState=$s hash=${this.hashCode()}" }
+            //logger.debug { "[FutureTask.run] exit finalState=$s hash=${this.hashCode()}" }
         }
     }
 
@@ -426,7 +426,7 @@ open class FutureTask<V> : RunnableFuture<V> {
      */
     @OptIn(ExperimentalAtomicApi::class)
     private fun finishCompletion() {
-        logger.debug { "[FutureTask.finishCompletion] state=${state.load()} hash=${this.hashCode()}" }
+        //logger.debug { "[FutureTask.finishCompletion] state=${state.load()} hash=${this.hashCode()}" }
         done()
         callable = null // to reduce footprint
     }
@@ -459,7 +459,7 @@ open class FutureTask<V> : RunnableFuture<V> {
             }
             spins++
             if (spins % 100000 == 0) {
-                logger.debug { "[FutureTask.awaitDone] still waiting state=$s hash=${this.hashCode()}" }
+                //logger.debug { "[FutureTask.awaitDone] still waiting state=$s hash=${this.hashCode()}" }
             }
             yield()
         }

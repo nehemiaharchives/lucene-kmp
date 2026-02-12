@@ -7,7 +7,6 @@ import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
 import okio.IOException
-import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryFlatVectorsScorer
 
 /**
  * Reads vectors from an index. When searching this reader, it iterates every vector in the index
@@ -27,7 +26,7 @@ import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryFlatVectorsScorer
 abstract class FlatVectorsReader
 /** Sole constructor  */ protected constructor(
     /** Scorer for flat vectors  */
-    open val vectorScorer: Lucene102BinaryFlatVectorsScorer
+    open val vectorScorer: FlatVectorsScorer
 ) : KnnVectorsReader(), Accountable {
     /**
      * @return the [FlatVectorsScorer] for this reader.

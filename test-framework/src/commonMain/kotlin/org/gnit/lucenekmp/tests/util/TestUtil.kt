@@ -294,7 +294,7 @@ class TestUtil {
                 checker.setLevel(level)
                 checker.failFast = failFast
                 checker.setInfoStream(
-                    PrintStream(output, false, StandardCharsets.UTF_8),
+                    PrintStream(output, true, StandardCharsets.UTF_8),
                     false
                 )
                 if (concurrent) {

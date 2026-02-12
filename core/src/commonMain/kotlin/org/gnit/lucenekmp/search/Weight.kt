@@ -196,12 +196,7 @@ abstract class Weight
      *
      * @lucene.internal
      */
-    protected class DefaultScorerSupplier(scorer: Scorer) : ScorerSupplier() {
-        private val scorer: Scorer
-
-        init {
-            this.scorer = requireNotNull<Scorer>(scorer){"Scorer must not be null"}
-        }
+    protected class DefaultScorerSupplier(private val scorer: Scorer) : ScorerSupplier() {
 
         @Throws(IOException::class)
         override fun get(leadCost: Long): Scorer {
@@ -225,7 +220,7 @@ abstract class Weight
 
         /** Sole constructor.  */
         init {
-            this.scorer = requireNotNull<Scorer>(scorer)
+            this.scorer = scorer
             this.twoPhase = scorer.twoPhaseIterator()
             if (twoPhase == null) {
                 this.iterator = scorer.iterator()
@@ -235,7 +230,7 @@ abstract class Weight
         }
 
         override fun cost(): Long {
-            return iterator!!.cost()
+            return iterator.cost()
         }
 
         @Throws(IOException::class)
@@ -243,11 +238,7 @@ abstract class Weight
             var min = min
             collector.scorer = scorer
             val competitiveIterator: DocIdSetIterator? = collector.competitiveIterator()
-            logger.debug {
-                "[DefaultBulkScorer.score] start min=$min max=$max " +
-                    "iterator=${iterator::class.simpleName} twoPhase=${twoPhase!!::class.simpleName} " +
-                    "competitive=${competitiveIterator!!::class.simpleName} acceptDocs=${acceptDocs != null}"
-            }
+            // logger.debug { "[DefaultBulkScorer.score] start min=$min max=$max " + "iterator=${iterator::class.simpleName} twoPhase=${twoPhase!!::class.simpleName} " + "competitive=${competitiveIterator!!::class.simpleName} acceptDocs=${acceptDocs != null}" }
 
             if (competitiveIterator != null) {
                 if (competitiveIterator.docID() > min) {
@@ -300,7 +291,7 @@ abstract class Weight
                 var stallCount = 0
                 while (doc < max) {
                     if (iterations % LOG_INTERVAL == 0) {
-                        logger.debug { "[DefaultBulkScorer.scoreIterator] doc=$doc max=$max iter=$iterations" }
+                        //logger.debug { "[DefaultBulkScorer.scoreIterator] doc=$doc max=$max iter=$iterations" }
                     }
                     if (iterations > ITERATION_HARD_LIMIT) {
                         throw IllegalStateException(
@@ -308,17 +299,17 @@ abstract class Weight
                         )
                     }
                     if (iterations < 5) {
-                        logger.debug { "[DefaultBulkScorer.scoreIterator] pre-collect doc=$doc" }
+                        //logger.debug { "[DefaultBulkScorer.scoreIterator] pre-collect doc=$doc" }
                     }
                     if (acceptDocs == null || acceptDocs.get(doc)) {
                         collector.collect(doc)
                     }
                     if (iterations < 5) {
-                        logger.debug { "[DefaultBulkScorer.scoreIterator] pre-nextDoc doc=$doc" }
+                        //logger.debug { "[DefaultBulkScorer.scoreIterator] pre-nextDoc doc=$doc" }
                     }
                     val nextDoc = iterator.nextDoc()
                     if (iterations < 5) {
-                        logger.debug { "[DefaultBulkScorer.scoreIterator] post-nextDoc doc=$doc nextDoc=$nextDoc" }
+                        //logger.debug { "[DefaultBulkScorer.scoreIterator] post-nextDoc doc=$doc nextDoc=$nextDoc" }
                     }
                     if (nextDoc == doc) {
                         stallCount++
@@ -348,7 +339,7 @@ abstract class Weight
                 var stallCount = 0
                 while (doc < max) {
                     if (iterations % LOG_INTERVAL == 0) {
-                        logger.debug { "[DefaultBulkScorer.scoreTwoPhaseIterator] doc=$doc max=$max iter=$iterations" }
+                        //logger.debug { "[DefaultBulkScorer.scoreTwoPhaseIterator] doc=$doc max=$max iter=$iterations" }
                     }
                     if ((acceptDocs == null || acceptDocs.get(doc)) && twoPhase.matches()) {
                         collector.collect(doc)
@@ -382,10 +373,7 @@ abstract class Weight
                 var stallCount = 0
                 while (doc < max) {
                     if (iterations % LOG_INTERVAL == 0) {
-                        logger.debug {
-                            "[DefaultBulkScorer.scoreCompetitiveIterator] doc=$doc max=$max iter=$iterations " +
-                                "competitive=${competitiveIterator.docID()}"
-                        }
+                        //logger.debug { "[DefaultBulkScorer.scoreCompetitiveIterator] doc=$doc max=$max iter=$iterations " + "competitive=${competitiveIterator.docID()}" }
                     }
                     val prevDoc = doc
                     require(
@@ -445,10 +433,7 @@ abstract class Weight
                 var stallCount = 0
                 while (doc < max) {
                     if (iterations % LOG_INTERVAL == 0) {
-                        logger.debug {
-                            "[DefaultBulkScorer.scoreTwoPhaseOrCompetitiveIterator] doc=$doc max=$max iter=$iterations " +
-                                "competitive=${competitiveIterator.docID()}"
-                        }
+                        //logger.debug { "[DefaultBulkScorer.scoreTwoPhaseOrCompetitiveIterator] doc=$doc max=$max iter=$iterations " + "competitive=${competitiveIterator.docID()}" }
                     }
                     val prevDoc = doc
                     require(

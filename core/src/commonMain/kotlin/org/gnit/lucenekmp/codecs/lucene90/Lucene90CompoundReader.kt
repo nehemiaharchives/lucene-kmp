@@ -51,7 +51,7 @@ internal class Lucene90CompoundReader(private val directory: Directory, si: Segm
                 + CodecUtil.footerLength())
 
         handle = directory.openInput(dataFileName, IOContext.DEFAULT.withReadAdvice(ReadAdvice.NORMAL))
-        logger.debug { "CFS open: segment=$segmentName dataFile=$dataFileName handle=$handle" }
+        //logger.debug { "CFS open: segment=$segmentName dataFile=$dataFileName handle=$handle" }
         try {
             CodecUtil.checkIndexHeader(
                 handle, Lucene90CompoundFormat.DATA_CODEC, version, version, si.getId(), ""
@@ -128,7 +128,7 @@ internal class Lucene90CompoundReader(private val directory: Directory, si: Segm
 
     @Throws(IOException::class)
     override fun close() {
-        logger.debug { "CFS close: segment=$segmentName handle=$handle" }
+        //logger.debug { "CFS close: segment=$segmentName handle=$handle" }
         IOUtils.close(handle)
     }
 

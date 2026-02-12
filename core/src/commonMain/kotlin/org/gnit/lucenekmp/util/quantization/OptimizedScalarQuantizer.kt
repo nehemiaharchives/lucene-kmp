@@ -78,7 +78,10 @@ class OptimizedScalarQuantizer(
         vector: FloatArray, destinations: Array<ByteArray>, bits: ByteArray, centroid: FloatArray
     ): Array<QuantizationResult> {
         assert(similarityFunction !== VectorSimilarityFunction.COSINE || VectorUtil.isUnitVector(vector))
-        assert(similarityFunction !== VectorSimilarityFunction.COSINE || VectorUtil.isUnitVector(centroid))
+        assert(
+            similarityFunction !== VectorSimilarityFunction.COSINE ||
+                VectorUtil.isUnitVector(centroid) || isZeroVector(centroid)
+        )
         assert(bits.size == destinations.size)
         val intervalScratch = FloatArray(2)
         var vecMean = 0.0
@@ -146,7 +149,10 @@ class OptimizedScalarQuantizer(
         vector: FloatArray, destination: ByteArray, bits: Byte, centroid: FloatArray
     ): QuantizationResult {
         assert(similarityFunction !== VectorSimilarityFunction.COSINE || VectorUtil.isUnitVector(vector))
-        assert(similarityFunction !== VectorSimilarityFunction.COSINE || VectorUtil.isUnitVector(centroid))
+        assert(
+            similarityFunction !== VectorSimilarityFunction.COSINE ||
+                VectorUtil.isUnitVector(centroid) || isZeroVector(centroid)
+        )
         assert(vector.size <= destination.size)
         assert(bits in 1..8)
         val intervalScratch = FloatArray(2)
@@ -379,6 +385,15 @@ class OptimizedScalarQuantizer(
 
         private fun clamp(x: Double, a: Double, b: Double): Double {
             return min(max(x, a), b)
+        }
+
+        private fun isZeroVector(vector: FloatArray): Boolean {
+            for (value in vector) {
+                if (value != 0f) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }

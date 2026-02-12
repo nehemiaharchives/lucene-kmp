@@ -70,7 +70,7 @@ class KnnFloatVectorQuery(
     @Throws(IOException::class)
     override fun approximateSearch(
         context: LeafReaderContext,
-        acceptDocs: Bits,
+        acceptDocs: Bits?,
         visitedLimit: Int,
         knnCollectorManager: KnnCollectorManager
     ): TopDocs {

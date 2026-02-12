@@ -90,7 +90,7 @@ abstract class AbstractKnnVectorQuery(
 
         // Merge sort the results
         val topK = mergeLeafResults(perLeafResults)
-        if (topK.scoreDocs!!.isEmpty()) {
+        if (topK.scoreDocs.isEmpty()) {
             return MatchNoDocsQuery()
         }
         return createRewrittenQuery(reader, topK)
@@ -104,7 +104,7 @@ abstract class AbstractKnnVectorQuery(
     ): TopDocs {
         val results = getLeafResults(ctx, filterWeight, timeLimitingKnnCollectorManager)
         if (ctx.docBase > 0) {
-            for (scoreDoc in results.scoreDocs!!) {
+            for (scoreDoc in results.scoreDocs) {
                 scoreDoc.doc += ctx.docBase
             }
         }
@@ -118,10 +118,10 @@ abstract class AbstractKnnVectorQuery(
         timeLimitingKnnCollectorManager: TimeLimitingKnnCollectorManager
     ): TopDocs {
         val reader: LeafReader = ctx.reader()
-        val liveDocs: Bits = reader.liveDocs!!
+        val liveDocs: Bits? = reader.liveDocs
 
         if (filterWeight == null) {
-            return approximateSearch(ctx, liveDocs, Int.Companion.MAX_VALUE, timeLimitingKnnCollectorManager)
+            return approximateSearch(ctx, liveDocs, Int.MAX_VALUE, timeLimitingKnnCollectorManager)
         }
 
         val scorer = filterWeight.scorer(ctx)
@@ -136,7 +136,7 @@ abstract class AbstractKnnVectorQuery(
         if (cost <= k) {
             // If there are <= k possible matches, short-circuit and perform exact search, since HNSW
             // must always visit at least k documents
-            return exactSearch(ctx, BitSetIterator(acceptDocs, cost.toLong()), queryTimeout!!)
+            return exactSearch(ctx, BitSetIterator(acceptDocs, cost.toLong()), queryTimeout)
         }
 
         // Perform the approximate kNN search
@@ -145,13 +145,13 @@ abstract class AbstractKnnVectorQuery(
         return if ((results.totalHits.relation === TotalHits.Relation.EQUAL_TO // We know that there are more than `k` available docs, if we didn't even get `k`
                     // something weird
                     // happened, and we need to drop to exact search
-                    && results.scoreDocs!!.size >= k) // Return partial results only when timeout is met
+                    && results.scoreDocs.size >= k) // Return partial results only when timeout is met
             || (queryTimeout != null && queryTimeout.shouldExit())
         ) {
             results
         } else {
             // We stopped the kNN search because it visited too many nodes, so fall back to exact search
-            exactSearch(ctx, BitSetIterator(acceptDocs, cost.toLong()), queryTimeout!!)
+            exactSearch(ctx, BitSetIterator(acceptDocs, cost.toLong()), queryTimeout)
         }
     }
 
@@ -179,7 +179,7 @@ abstract class AbstractKnnVectorQuery(
     @Throws(IOException::class)
     protected abstract fun approximateSearch(
         context: LeafReaderContext,
-        acceptDocs: Bits,
+        acceptDocs: Bits?,
         visitedLimit: Int,
         knnCollectorManager: KnnCollectorManager
     ): TopDocs
@@ -261,17 +261,17 @@ abstract class AbstractKnnVectorQuery(
     }
 
     private fun createRewrittenQuery(reader: IndexReader, topK: TopDocs): Query {
-        val len: Int = topK.scoreDocs!!.size
+        val len: Int = topK.scoreDocs.size
 
         require(len > 0)
-        val maxScore = topK.scoreDocs!![0].score
+        val maxScore = topK.scoreDocs[0].score
 
-        topK.scoreDocs?.sortBy { it.doc }
+        topK.scoreDocs.sortBy { it.doc }
         val docs = IntArray(len)
         val scores = FloatArray(len)
         for (i in 0..<len) {
-            docs[i] = topK.scoreDocs!![i].doc
-            scores[i] = topK.scoreDocs!![i].score
+            docs[i] = topK.scoreDocs[i].doc
+            scores[i] = topK.scoreDocs[i].score
         }
         val segmentStarts = findSegmentStarts(reader.leaves(), docs)
         return DocAndScoreQuery(docs, scores, maxScore, segmentStarts, reader.context.id())

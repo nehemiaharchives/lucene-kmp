@@ -83,22 +83,36 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
     }
 
     companion object {
+        private val registry: MutableMap<String, () -> DocValuesFormat> = mutableMapOf(
+            "Lucene90" to { Lucene90DocValuesFormat() },
+        )
+
+        /**
+         * Registers a doc values format factory by name. This is the KMP-safe alternative to SPI.
+         *
+         * Only adds new names; existing registrations are left untouched.
+         */
+        fun registerDocValuesFormat(name: String, factory: () -> DocValuesFormat) {
+            NamedSPILoader.checkServiceName(name)
+            if (!registry.containsKey(name)) {
+                registry[name] = factory
+            }
+        }
+
         /** looks up a format by name  */
         fun forName(name: String): DocValuesFormat {
-            // Provide built-in mappings for known formats in KMP (no real SPI discovery):
-            return when (name) {
-                "Lucene90" -> Lucene90DocValuesFormat()
-                else -> {
-                    // Fallback to the SPI loader if available; otherwise, throw a clear error
-                    try {
-                        Holder.loader.lookup(name)
-                    } catch (e: Throwable) {
-                        throw UnsupportedOperationException(
-                            "DocValuesFormat '$name' is not available. Known built-ins: [Lucene90].",
-                            e
-                        )
-                    }
-                }
+            registry[name]?.let { factory ->
+                return factory()
+            }
+            // Fallback to the SPI loader if available; otherwise, throw a clear error
+            return try {
+                Holder.loader.lookup(name)
+            } catch (e: Throwable) {
+                val known = registry.keys.sorted()
+                throw UnsupportedOperationException(
+                    "DocValuesFormat '$name' is not available. Known built-ins: $known.",
+                    e
+                )
             }
         }
 
@@ -108,7 +122,7 @@ abstract class DocValuesFormat protected constructor(name: String) : NamedSPILoa
             val discovered = Holder.loader.availableServices()
             val result = mutableSetOf<String>()
             result.addAll(discovered)
-            result.add("Lucene90")
+            result.addAll(registry.keys)
             return result
         }
 

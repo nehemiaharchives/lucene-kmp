@@ -248,7 +248,7 @@ protected constructor() : IndexReader() {
      */
     @Throws(IOException::class)
     fun searchNearestVectors(
-        field: String, target: FloatArray, k: Int, acceptDocs: Bits, visitedLimit: Int
+        field: String, target: FloatArray, k: Int, acceptDocs: Bits?, visitedLimit: Int
     ): TopDocs {
         var k = k
         val fi: FieldInfo? = this.fieldInfos.fieldInfo(field)
@@ -268,7 +268,7 @@ protected constructor() : IndexReader() {
         }
         val collector: KnnCollector = TopKnnCollector(k, visitedLimit)
         searchNearestVectors(field, target, collector, acceptDocs)
-        return collector.topDocs()!!
+        return collector.topDocs()
     }
 
     /**

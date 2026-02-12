@@ -22,7 +22,6 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import okio.EOFException
 import okio.FileNotFoundException
-import okio.IOException
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
@@ -84,7 +83,7 @@ class SegmentCoreReaders(
         val newRef = ref.decrementAndFetch()
         val segName = runCatching { segment }.getOrElse { "<init>" }
         if (newRef == 0) {
-            logger.debug { "SegmentCoreReaders.decRef close: segment=$segName cfsReader=${cfsReader != null}" }
+            //logger.debug { "SegmentCoreReaders.decRef close: segment=$segName cfsReader=${cfsReader != null}" }
             try{
                 IOUtils.close(
                     fields,
@@ -99,7 +98,7 @@ class SegmentCoreReaders(
                 this.notifyCoreClosedListeners()
             }
         } else {
-            logger.debug { "SegmentCoreReaders.decRef retain: segment=$segName ref=$newRef" }
+            //logger.debug { "SegmentCoreReaders.decRef retain: segment=$segName ref=$newRef" }
         }
     }
 

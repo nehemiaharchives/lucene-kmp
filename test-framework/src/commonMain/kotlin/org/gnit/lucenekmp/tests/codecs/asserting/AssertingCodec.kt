@@ -36,6 +36,12 @@ import kotlinx.coroutines.Job
 open class AssertingCodec : FilterCodec("Asserting", TestUtil.getDefaultCodec()) {
 
     companion object {
+        init {
+            PostingsFormat.registerPostingsFormat("Asserting") { AssertingPostingsFormat() }
+            DocValuesFormat.registerDocValuesFormat("Asserting") { AssertingDocValuesFormat() }
+            KnnVectorsFormat.registerKnnVectorsFormat("Asserting") { AssertingKnnVectorsFormat() }
+        }
+
         // Mirrors java.lang.Thread.currentThread() checks by tracking the current coroutine Job
         // via a CloseableThreadLocal. If no Job is bound, checks are skipped (best-effort).
         private val currentJobLocal = CloseableThreadLocal<Job?>()

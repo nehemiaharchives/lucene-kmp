@@ -1934,9 +1934,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 if (hasPendingMaxNumSegmentMerges) {
                     stableNoPendingChecks = 0
                     waitIters++
-                    // logger.debug {
-                    //     "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size}"
-                    // }
+                    if (waitIters % 50 == 0) {
+                        val mergeState = withIndexWriterLock {
+                            "pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size}"
+                        }
+                        logger.debug {
+                            "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments $mergeState"
+                        }
+                    }
                     if (logger.isDebugEnabled()) {
                         // logMerges("forceMerge", pendingMerges, runningMerges)
                     }
@@ -4783,6 +4788,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
     @Throws(IOException::class)
     private fun handleMergeException(t: Throwable, merge: MergePolicy.OneMerge) {
+        logger.debug(t) { "handleMergeException: merge=${merge.segString()} exceptionClass=${t::class.simpleName}" }
         if (infoStream.isEnabled("IW")) {
             infoStream.message(
                 "IW", "handleMergeException: merge=" + segString(merge.segments) + " exc=" + t
@@ -4839,6 +4845,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     mergeSuccess(merge)
                     success = true
                 } catch (t: Throwable) {
+                    logger.debug(t) { "merge: caught throwable before handleMergeException merge=${merge.segString()}" }
                     handleMergeException(t, merge)
                 }
             } finally {
@@ -4846,12 +4853,15 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // This matches Java's synchronized behavior and avoids a race where forceMerge
                 // observes no pending/running maxNumSegments merges just before MERGE_FINISHED
                 // re-enqueues one.
+                logger.debug { "merge: finally before lock merge=${merge.segString()} success=$success" }
                 withIndexWriterLock {
+                    logger.debug { "merge: finally lock acquired merge=${merge.segString()} success=$success" }
                     // Readers are already closed in commitMerge if we didn't hit an exception.
                     if (!success) {
                         closeMergeReaders(merge, suppressExceptions = true, droppedSegment = false)
                     }
                     mergeFinish(merge)
+                    logger.debug { "merge: after mergeFinish merge=${merge.segString()} success=$success" }
 //                     logger.debug { "merge: finish ${merge.segString()} success=$success" }
                     if (!success) {
                         if (infoStream.isEnabled("IW")) {
@@ -4867,8 +4877,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             MergeTrigger.MERGE_FINISHED,
                             merge.maxNumSegments
                         )
+                        logger.debug { "merge: after updatePendingMerges merge=${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
                     }
                 }
+                logger.debug { "merge: finally after lock merge=${merge.segString()} success=$success" }
             }
         } catch (t: Throwable) {
             // Important that tragicEvent is called after mergeFinish, else we hang
@@ -5141,6 +5153,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun mergeFinish(merge: MergePolicy.OneMerge) {
+        logger.debug { "mergeFinish: enter merge=${merge.segString()} registerDone=${merge.registerDone}" }
         withIndexWriterLock {
             // forceMerge, addIndexes or waitForMerges may be waiting
             // on merges to finish.
@@ -5160,6 +5173,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
             runningMerges.remove(merge)
         }
+        logger.debug { "mergeFinish: exit merge=${merge.segString()} runningMerges=${runningMerges.size}" }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -5207,7 +5221,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     deleter.decRef(mr.reader!!.segmentInfo.files())
                     logger.debug { "closeMergeReaders: decRef done seg=${mr.reader?.segmentName}" }
                 }
-                // logger.debug { "closeMergeReaders: done merge=${merge.segString()}" }
+                logger.debug { "closeMergeReaders: merge.close returned merge=${merge.segString()}" }
             } else {
                 assert(
                     merge.mergeReader.isEmpty()

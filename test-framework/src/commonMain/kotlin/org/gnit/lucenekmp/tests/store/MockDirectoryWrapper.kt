@@ -853,11 +853,9 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
             openFileHandles[c] = RuntimeException("unclosed Index" + handle.name + ": " + name)
             if (name.endsWith(".cfs")) {
-                logger.debug { "MDW addFileHandle: name=$name handle=$handle count=${openFiles!![name]}" }
+                //logger.debug { "MDW addFileHandle: name=$name handle=$handle count=${openFiles!![name]}" }
                 if ((openFiles!![name] ?: 0) > 1) {
-                    logger.debug {
-                        "MDW addFileHandle duplicate-open: name=$name handle=$handle count=${openFiles!![name]}\n${RuntimeException("cfs duplicate open stack").stackTraceToString()}"
-                    }
+                    //logger.debug { "MDW addFileHandle duplicate-open: name=$name handle=$handle count=${openFiles!![name]}\n${RuntimeException("cfs duplicate open stack").stackTraceToString()}" }
                 }
             }
         }
@@ -1155,15 +1153,13 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         openFileHandles.remove(c)
         if (name.endsWith(".cfs")) {
             val remaining = openFiles!![name] ?: 0
-            logger.debug { "MDW removeOpenFile: name=$name remaining=$remaining" }
+            //logger.debug { "MDW removeOpenFile: name=$name remaining=$remaining" }
             if (remaining > 0) {
                 val traces =
                     openFileHandles.values
                         .filter { it.message?.contains(name) == true }
                         .joinToString(separator = "\n\n") { it.stackTraceToString() }
-                logger.debug {
-                    "MDW removeOpenFile outstanding-handles: name=$name remaining=$remaining\n$traces"
-                }
+                //logger.debug { "MDW removeOpenFile outstanding-handles: name=$name remaining=$remaining\n$traces" }
             }
         }
     }

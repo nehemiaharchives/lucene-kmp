@@ -59,7 +59,7 @@ class Lucene99FlatVectorsFormat(private val vectorsScorer: FlatVectorsScorer) : 
 
     @Throws(IOException::class)
     override fun fieldsReader(state: SegmentReadState): FlatVectorsReader {
-        logger.debug { "Lucene99FlatVectorsFormat: fieldsReader start seg=${state.segmentInfo.name} suffix=${state.segmentSuffix}" }
+        //logger.debug { "Lucene99FlatVectorsFormat: fieldsReader start seg=${state.segmentInfo.name} suffix=${state.segmentSuffix}" }
         return Lucene99FlatVectorsReader(state, vectorsScorer)
     }
 

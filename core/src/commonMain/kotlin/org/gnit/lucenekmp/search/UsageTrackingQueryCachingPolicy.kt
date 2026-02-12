@@ -59,9 +59,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
 
         // call hashCode outside of sync block
         // in case it's somewhat expensive:
-        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] hashCode start query=${query::class.simpleName}" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] hashCode start query=${query::class.simpleName}" }
         val hashCode = query.hashCode()
-        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] hashCode done value=$hashCode" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] hashCode done value=$hashCode" }
 
         // we only track hash codes to avoid holding references to possible
         // large queries; this may cause rare false positives, but at worse
@@ -69,9 +69,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
 
         // TODO synchronized is not supported in KMP, need to think what to do here
         //synchronized(this) {
-        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add start" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add start" }
         recentlyUsedFilters.add(hashCode)
-        logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add done" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add done" }
         //}
     }
 
@@ -91,16 +91,16 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
 
     @Throws(IOException::class)
     override fun shouldCache(query: Query): Boolean {
-        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] enter query=${query::class.simpleName}" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] enter query=${query::class.simpleName}" }
         if (shouldNeverCache(query)) {
-            logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] neverCache=true" }
+            //logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] neverCache=true" }
             return false
         }
-        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] frequency start" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] frequency start" }
         val frequency = frequency(query)
-        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] frequency done value=$frequency" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] frequency done value=$frequency" }
         val minFrequency = minFrequencyToCache(query)
-        logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] minFrequency=$minFrequency" }
+        //logger.debug { "[UsageTrackingQueryCachingPolicy.shouldCache] minFrequency=$minFrequency" }
         return frequency >= minFrequency
     }
 

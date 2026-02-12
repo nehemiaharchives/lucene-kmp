@@ -484,8 +484,7 @@ class CheckIndex(
         // ExecutorService-based parallel checking is currently disabled for common code.
         // Keep single-threaded behavior: forward to the overloaded checkIndex with no executor.
         msg(infoStream!!, "Checking index with threadCount: $threadCount")
-        val segments = onlySegments ?: mutableListOf()
-        return checkIndex(segments, null)
+        return checkIndex(onlySegments, null)
     }
 
     /**
@@ -500,7 +499,7 @@ class CheckIndex(
     @OptIn(ExperimentalCoroutinesApi::class)
     @Throws(IOException::class)
     fun checkIndex(
-        onlySegments: MutableList<String>,
+        onlySegments: MutableList<String>?,
         executorService: ExecutorService?
     ): Status {
         ensureOpen()
@@ -1058,7 +1057,7 @@ class CheckIndex(
                 // below while the segment part check may still print out messages
                 if (segInfoStat.liveDocStatus!!.error != null) {
                     throw CheckIndexException("Live docs test failed", segInfoStat.liveDocStatus!!.error!!)
-                } else if (segInfoStat.fieldInfoStatus!!.error!! != null) {
+                } else if (segInfoStat.fieldInfoStatus!!.error != null) {
                     throw CheckIndexException(
                         "Field Info test failed", segInfoStat.fieldInfoStatus!!.error!!
                     )
@@ -1074,20 +1073,20 @@ class CheckIndex(
                     throw CheckIndexException(
                         "Stored Field test failed", segInfoStat.storedFieldStatus!!.error!!
                     )
-                } else if (segInfoStat.termVectorStatus!!.error!! != null) {
+                } else if (segInfoStat.termVectorStatus!!.error != null) {
                     throw CheckIndexException(
                         "Term Vector test failed", segInfoStat.termVectorStatus!!.error!!
                     )
-                } else if (segInfoStat.docValuesStatus!!.error!! != null) {
+                } else if (segInfoStat.docValuesStatus!!.error != null) {
                     throw CheckIndexException("DocValues test failed", segInfoStat.docValuesStatus!!.error!!)
-                } else if (segInfoStat.pointsStatus!!.error!! != null) {
+                } else if (segInfoStat.pointsStatus!!.error != null) {
                     throw CheckIndexException("Points test failed", segInfoStat.pointsStatus!!.error!!)
-                } else if (segInfoStat.vectorValuesStatus!!.error!! != null) {
+                } else if (segInfoStat.vectorValuesStatus!!.error != null) {
                     throw CheckIndexException(
                         "Vectors test failed", segInfoStat.vectorValuesStatus!!.error!!
                     )
                 } else if (segInfoStat.indexSortStatus != null
-                    && segInfoStat.indexSortStatus!!.error!! != null
+                    && segInfoStat.indexSortStatus!!.error != null
                 ) {
                     throw CheckIndexException(
                         "Index Sort test failed", segInfoStat.indexSortStatus!!.error!!

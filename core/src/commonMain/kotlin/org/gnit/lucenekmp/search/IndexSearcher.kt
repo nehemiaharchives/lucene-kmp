@@ -150,11 +150,11 @@ open class IndexSearcher(
         if (executor == null) {
             leafSlices =
                 if (leafContexts.isEmpty())
-                    kotlin.arrayOfNulls<LeafSlice>(0) as Array<LeafSlice>
+                    arrayOfNulls<LeafSlice>(0) as Array<LeafSlice>
                 else
-                    arrayOf<LeafSlice>(
+                    arrayOf(
                         LeafSlice(
-                            ArrayList<LeafReaderContextPartition>(
+                            ArrayList(
                                 leafContexts
                                     .map { ctx: LeafReaderContext ->
                                         LeafReaderContextPartition.createForEntireSegment(
@@ -517,7 +517,7 @@ open class IndexSearcher(
         doDocScores: Boolean
     ): TopFieldDocs {
         require(!(after != null && after !is FieldDoc)) { "after must be a FieldDoc; got $after" }
-        return searchAfter(after as? FieldDoc, query, numHits, sort, doDocScores)
+        return searchAfter(after, query, numHits, sort, doDocScores)
     }
 
     @Throws(IOException::class)
@@ -596,11 +596,9 @@ open class IndexSearcher(
                 val collector = collectors[i]
                 listTasks.add(
                     Callable {
-                        logger.debug {
-                            "[IndexSearcher.search] task start slice=$i partitions=${leaves.size} collector=${collector::class.simpleName}"
-                        }
+                        //logger.debug { "[IndexSearcher.search] task start slice=$i partitions=${leaves.size} collector=${collector::class.simpleName}" }
                         search(leaves, weight, collector)
-                        logger.debug { "[IndexSearcher.search] task end slice=$i" }
+                        //logger.debug { "[IndexSearcher.search] task end slice=$i" }
                         collector
                     })
             }
@@ -661,9 +659,7 @@ open class IndexSearcher(
         weight: Weight,
         collector: Collector
     ) {
-        logger.debug {
-            "[IndexSearcher.searchLeaf] enter ord=${ctx.ord} minDocId=$minDocId maxDocId=$maxDocId"
-        }
+        //logger.debug { "[IndexSearcher.searchLeaf] enter ord=${ctx.ord} minDocId=$minDocId maxDocId=$maxDocId" }
         val leafCollector: LeafCollector
         try {
             leafCollector = collector.getLeafCollector(ctx)
@@ -672,29 +668,24 @@ open class IndexSearcher(
             // continue with the following leaf
             return
         }
-        logger.debug {
-            "[IndexSearcher.searchLeaf] scorerSupplier start weight=${weight::class.simpleName} query=${weight.query::class.simpleName}"
-        }
+        //logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier start weight=${weight::class.simpleName} query=${weight.query::class.simpleName}" }
         val scorerSupplier: ScorerSupplier? = weight.scorerSupplier(ctx)
-        logger.debug {
-            "[IndexSearcher.searchLeaf] scorerSupplier done weight=${weight::class.simpleName} query=${weight.query::class.simpleName} hasScorer=${scorerSupplier != null}"
-        }
+        //logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier done weight=${weight::class.simpleName} query=${weight.query::class.simpleName} hasScorer=${scorerSupplier != null}" }
         if (scorerSupplier != null) {
-            logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier ready ord=${ctx.ord}" }
+            //logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier ready ord=${ctx.ord}" }
             scorerSupplier.setTopLevelScoringClause()
             val scorer: BulkScorer = scorerSupplier.bulkScorer()!!
-            logger.debug { "[IndexSearcher.searchLeaf] bulkScorer ready ord=${ctx.ord}" }
+            //logger.debug { "[IndexSearcher.searchLeaf] bulkScorer ready ord=${ctx.ord}" }
             var maybeTimedScorer: BulkScorer = scorer
             if (queryTimeout != null) {
                 maybeTimedScorer = TimeLimitingBulkScorer(scorer, queryTimeout!!)
             }
             try {
                 // Optimize for the case when live docs are stored in a FixedBitSet.
-                val acceptDocs: Bits? =
-                    ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)
-                logger.debug { "[IndexSearcher.searchLeaf] scoring start ord=${ctx.ord}" }
+                val acceptDocs: Bits? = ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)
+                //logger.debug { "[IndexSearcher.searchLeaf] scoring start ord=${ctx.ord}" }
                 maybeTimedScorer.score(leafCollector, acceptDocs, minDocId, maxDocId)
-                logger.debug { "[IndexSearcher.searchLeaf] scoring end ord=${ctx.ord}" }
+                //logger.debug { "[IndexSearcher.searchLeaf] scoring end ord=${ctx.ord}" }
             } catch (e: CollectionTerminatedException) {
                 // collection was terminated prematurely
                 // continue with the following leaf
@@ -705,7 +696,7 @@ open class IndexSearcher(
         // Note: this is called if collection ran successfully, including the above special cases of
         // CollectionTerminatedException and TimeExceededException, but no other exception.
         leafCollector.finish()
-        logger.debug { "[IndexSearcher.searchLeaf] finish ord=${ctx.ord}" }
+        //logger.debug { "[IndexSearcher.searchLeaf] finish ord=${ctx.ord}" }
     }
 
     /**
@@ -949,7 +940,7 @@ open class IndexSearcher(
      */
     @Throws(IOException::class)
     fun collectionStatistics(field: String): CollectionStatistics? {
-        checkNotNull(field)
+        //checkNotNull(field)
         var docCount: Long = 0
         var sumTotalTermFreq: Long = 0
         var sumDocFreq: Long = 0
@@ -985,7 +976,7 @@ open class IndexSearcher(
      * typically happens if a PrefixQuery, FuzzyQuery, WildcardQuery, or TermRangeQuery is expanded to
      * many terms during search.
      */
-    open class TooManyClauses(msg: String = "maxClauseCount is set to " + IndexSearcher.maxClauseCount) :
+    open class TooManyClauses(msg: String = "maxClauseCount is set to $maxClauseCount") :
         RuntimeException(msg) {
         /** The value of [IndexSearcher.getMaxClauseCount] when this Exception was created  */
         val maxClauseCount: Int = IndexSearcher.maxClauseCount
@@ -1172,11 +1163,9 @@ open class IndexSearcher(
                     }
                 }
 
-                val slices: Array<LeafSlice> = kotlin.arrayOfNulls<LeafSlice>(groupedLeafPartitions.size) as Array<LeafSlice>
-                var upto = 0
-                for (currentGroup in groupedLeafPartitions) {
+                val slices: Array<LeafSlice> = arrayOfNulls<LeafSlice>(groupedLeafPartitions.size) as Array<LeafSlice>
+                for ((upto, currentGroup) in groupedLeafPartitions.withIndex()) {
                     slices[upto] = LeafSlice(currentGroup)
-                    ++upto
                 }
                 return slices
             }
@@ -1206,20 +1195,16 @@ open class IndexSearcher(
                 }
             }
 
-            val slices: Array<LeafSlice> = kotlin.arrayOfNulls<LeafSlice>(groupedLeaves.size) as Array<LeafSlice>
-            var upto = 0
-            for (currentLeaf in groupedLeaves) {
+            val slices: Array<LeafSlice> = arrayOfNulls<LeafSlice>(groupedLeaves.size) as Array<LeafSlice>
+            for ((upto, currentLeaf) in groupedLeaves.withIndex()) {
                 slices[upto] =
                     LeafSlice(
                         ArrayList(
                             currentLeaf
                                 .map { ctx: LeafReaderContext ->
-                                    LeafReaderContextPartition.createForEntireSegment(
-                                        ctx
-                                    )
+                                    LeafReaderContextPartition.createForEntireSegment(ctx)
                                 }
                                 .toList()))
-                ++upto
             }
 
             return slices

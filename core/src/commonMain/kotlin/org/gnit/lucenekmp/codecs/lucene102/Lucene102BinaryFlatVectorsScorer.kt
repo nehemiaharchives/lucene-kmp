@@ -44,10 +44,24 @@ class Lucene102BinaryFlatVectorsScorer(private val nonQuantizedDelegate: FlatVec
                 VectorUtil.l2normalize(copy)
             }
             target = copy
+            val quantizationCentroid =
+                if (similarityFunction === VectorSimilarityFunction.COSINE) {
+                    val centroidCopy = ArrayUtil.copyOfSubArray(centroid!!, 0, centroid.size)
+                    var centroidNorm2 = 0f
+                    for (value in centroidCopy) {
+                        centroidNorm2 += value * value
+                    }
+                    if (centroidNorm2 > 0f) {
+                        VectorUtil.l2normalize(centroidCopy)
+                    }
+                    centroidCopy
+                } else {
+                    centroid!!
+                }
             val initial = ByteArray(target.size)
             val quantized = ByteArray(Lucene102BinaryQuantizedVectorsFormat.QUERY_BITS * vectorValues.discretizedDimensions() / 8)
             val queryCorrections: QuantizationResult =
-                quantizer!!.scalarQuantize(target, initial, 4.toByte(), centroid!!)
+                quantizer!!.scalarQuantize(target, initial, 4.toByte(), quantizationCentroid)
             OptimizedScalarQuantizer.transposeHalfByte(initial, quantized)
             return object : RandomVectorScorer.AbstractRandomVectorScorer(vectorValues) {
                 @Throws(IOException::class)

@@ -30,7 +30,6 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
 import okio.IOException
-import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryFlatVectorsScorer
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.UncheckedIOException
 
@@ -39,20 +38,20 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
  *
  * @lucene.experimental
  */
-class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer as Lucene102BinaryFlatVectorsScorer) {
+class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer) {
     private val logger = KotlinLogging.logger {}
     private val fields: IntObjectHashMap<FieldEntry> = IntObjectHashMap()
     private val vectorData: IndexInput
     private val fieldInfos: FieldInfos
 
     init {
-        logger.debug { "Lucene99FlatVectorsReader: init start seg=${state.segmentInfo.name} suffix=${state.segmentSuffix}" }
+        //logger.debug { "Lucene99FlatVectorsReader: init start seg=${state.segmentInfo.name} suffix=${state.segmentSuffix}" }
         val versionMeta = readMetadata(state)
-        logger.debug { "Lucene99FlatVectorsReader: readMetadata version=$versionMeta" }
+        //logger.debug { "Lucene99FlatVectorsReader: readMetadata version=$versionMeta" }
         this.fieldInfos = state.fieldInfos
         var success = false
         try {
-            logger.debug { "Lucene99FlatVectorsReader: open vector data" }
+            //logger.debug { "Lucene99FlatVectorsReader: open vector data" }
             vectorData =
                 openDataInput(
                     state,
@@ -62,14 +61,14 @@ class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScor
                     // in the HNSW graph.
                     state.context.withReadAdvice(ReadAdvice.RANDOM)
                 )
-            logger.debug { "Lucene99FlatVectorsReader: open vector data done" }
+            //logger.debug { "Lucene99FlatVectorsReader: open vector data done" }
             success = true
         } finally {
             if (!success) {
                 IOUtils.closeWhileHandlingException(this)
             }
         }
-        logger.debug { "Lucene99FlatVectorsReader: init done" }
+        //logger.debug { "Lucene99FlatVectorsReader: init done" }
     }
 
     @Throws(IOException::class)
@@ -109,7 +108,7 @@ class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScor
             if (info == null) {
                 throw CorruptIndexException("Invalid field number: $fieldNumber", meta)
             }
-            val fieldEntry = FieldEntry.Companion.create(meta, info)
+            val fieldEntry = FieldEntry.create(meta, info)
             fields.put(info.number, fieldEntry)
             fieldNumber = meta.readInt()
         }
