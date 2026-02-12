@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.internal.tests
 
-//import org.gnit.lucenekmp.index.ConcurrentMergeScheduler
+import org.gnit.lucenekmp.index.ConcurrentMergeScheduler
 import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.SegmentReader
 //import org.gnit.lucenekmp.internal.tests.ConcurrentMergeSchedulerAccess
@@ -68,6 +68,7 @@ object TestSecrets {
         /** Return the accessor to internal secrets for an [ConcurrentMergeScheduler].  */
         get() {
             ensureCaller()
+            ensureConcurrentMergeSchedulerAccessInitialized()
             return requireNotNull<ConcurrentMergeSchedulerAccess>(cmsAccess)
         }
 
@@ -139,6 +140,15 @@ object TestSecrets {
         // Touch IndexWriter's companion object to trigger its init block.
         @Suppress("UNUSED_VARIABLE")
         val unused = IndexWriter.actualMaxDocs
+    }
+
+    private fun ensureConcurrentMergeSchedulerAccessInitialized() {
+        if (cmsAccess != null) {
+            return
+        }
+        // Touch ConcurrentMergeScheduler's companion object to trigger its init block.
+        @Suppress("UNUSED_VARIABLE")
+        val unused = ConcurrentMergeScheduler.ensureInitializedForTests
     }
 
     private fun ensureCaller() {

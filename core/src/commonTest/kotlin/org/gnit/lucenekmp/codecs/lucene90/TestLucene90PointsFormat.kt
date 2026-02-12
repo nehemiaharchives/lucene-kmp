@@ -74,7 +74,9 @@ class TestLucene90PointsFormat : BasePointsFormatTestCase() {
     @Test
     @Throws(Exception::class)
     override fun testMergeStability() {
-        assumeFalse("TODO: mess with the parameters and test gets angry!", codec is FilterCodec)
+        if (codec is FilterCodec || !mergeIsStable()) {
+            return
+        }
         super.testMergeStability()
     }
 

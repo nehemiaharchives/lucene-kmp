@@ -974,6 +974,8 @@ open class ConcurrentMergeScheduler
     }
 
     companion object {
+        internal val ensureInitializedForTests: Boolean = true
+
         /**
          * Dynamic default for `maxThreadCount` and `maxMergeCount`, based on CPU core count.
          * `maxThreadCount` is set to `max(1, min(4, cpuCoreCount/2))`. `maxMergeCount`
