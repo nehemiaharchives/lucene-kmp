@@ -1288,19 +1288,19 @@ class TestUtil {
          * Return a Codec that can read any of the default codecs and formats, but always writes in the
          * specified format.
          */
-        /*fun alwaysKnnVectorsFormat(format: KnnVectorsFormat): Codec {
+        fun alwaysKnnVectorsFormat(format: KnnVectorsFormat): Codec {
             // TODO: we really need for knn vectors impls etc to announce themselves
             // (and maybe their params, too) to infostream on flush and merge.
             // otherwise in a real debugging situation we won't know whats going on!
             if (LuceneTestCase.VERBOSE) {
-                println("TestUtil: forcing knn vectors format to:" + format)
+                println("TestUtil: forcing knn vectors format to:$format")
             }
             return object : AssertingCodec() {
                 override fun getKnnVectorsFormatForField(field: String): KnnVectorsFormat {
                     return format
                 }
             }
-        }*/
+        }
 
         /**
          * Returns the actual default codec (e.g. LuceneMNCodec) for this version of Lucene. This may be

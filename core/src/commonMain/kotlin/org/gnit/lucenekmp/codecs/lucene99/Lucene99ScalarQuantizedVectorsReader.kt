@@ -4,6 +4,7 @@ import okio.IOException
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
+import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryFlatVectorsScorer
 import org.gnit.lucenekmp.codecs.lucene95.OrdToDocDISIReaderConfiguration
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsReader.Companion.readSimilarityFunction
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsReader.Companion.readVectorEncoding
@@ -40,7 +41,7 @@ class Lucene99ScalarQuantizedVectorsReader(
     state: SegmentReadState,
     private val rawVectorsReader: FlatVectorsReader,
     scorer: FlatVectorsScorer
-) : FlatVectorsReader(scorer), QuantizedVectorsReader {
+) : FlatVectorsReader(scorer as Lucene102BinaryFlatVectorsScorer), QuantizedVectorsReader {
 
     private val fields: IntObjectHashMap<FieldEntry> = IntObjectHashMap()
     private val quantizedVectorData: IndexInput

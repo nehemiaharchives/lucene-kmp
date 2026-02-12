@@ -30,6 +30,7 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.hnsw.RandomVectorScorer
 import okio.IOException
+import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryFlatVectorsScorer
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.UncheckedIOException
 
@@ -38,7 +39,7 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
  *
  * @lucene.experimental
  */
-class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer) {
+class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer as Lucene102BinaryFlatVectorsScorer) {
     private val logger = KotlinLogging.logger {}
     private val fields: IntObjectHashMap<FieldEntry> = IntObjectHashMap()
     private val vectorData: IndexInput

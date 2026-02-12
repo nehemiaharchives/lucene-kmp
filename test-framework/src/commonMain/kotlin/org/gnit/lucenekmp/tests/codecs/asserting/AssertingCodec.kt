@@ -161,7 +161,7 @@ open class AssertingCodec : FilterCodec("Asserting", TestUtil.getDefaultCodec())
      *
      * <p>The default implementation always returns "Asserting"
      */
-    fun getKnnVectorsFormatForField(field: String): KnnVectorsFormat {
+    open fun getKnnVectorsFormatForField(field: String): KnnVectorsFormat {
         return defaultKnnVectorsFormat
     }
 }

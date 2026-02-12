@@ -117,7 +117,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         return Codec.default.knnVectorsFormat().getMaxDimensions(fieldName)
     }
 
-    fun testFieldConstructor() {
+    open fun testFieldConstructor() {
         val v = FloatArray(1)
         val field = KnnFloatVectorField("f", v)
         assertEquals(1, field.fieldType().vectorDimension().toLong())
@@ -125,7 +125,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertSame(v, field.vectorValue())
     }
 
-    fun testFieldConstructorExceptions() {
+    open fun testFieldConstructorExceptions() {
         // null is not allowed at compiler level with kotlin language feature, so no need to test these
         //expectThrows(IllegalArgumentException::class, { KnnFloatVectorField(null, FloatArray(1)) })
         //expectThrows(IllegalArgumentException::class, { KnnFloatVectorField("f", null) })
@@ -134,7 +134,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         expectThrows(IllegalArgumentException::class) { KnnFloatVectorField("f", FloatArray(0)) }
     }
 
-    fun testFieldSetValue() {
+    open fun testFieldSetValue() {
         val field = KnnFloatVectorField("f", FloatArray(1))
         val v1 = FloatArray(1)
         field.setVectorValue(v1)
@@ -147,7 +147,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // Illegal schema change tests:
     @Throws(Exception::class)
-    fun testIllegalDimChangeTwoDocs() {
+    open fun testIllegalDimChangeTwoDocs() {
         // illegal change in the same segment
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -185,7 +185,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalSimilarityFunctionChange() {
+    open fun testIllegalSimilarityFunctionChange() {
         // illegal change in the same segment
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -223,7 +223,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalDimChangeTwoWriters() {
+    open fun testIllegalDimChangeTwoWriters() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -246,7 +246,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(Exception::class)
-    fun testMergingWithDifferentKnnFields() {
+    open fun testMergingWithDifferentKnnFields() {
         newDirectory().use { dir ->
             val iwc = IndexWriterConfig()
             val codec: Codec = codec
@@ -285,7 +285,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(Exception::class)
-    fun testMergingWithDifferentByteKnnFields() {
+    open fun testMergingWithDifferentByteKnnFields() {
         newDirectory().use { dir ->
             val iwc = IndexWriterConfig()
             val codec: Codec = codec
@@ -355,7 +355,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testWriterRamEstimate() {
+    open fun testWriterRamEstimate() {
         val fieldInfos = FieldInfos(arrayOf())
         val dir: Directory = newDirectory()
         val codec: Codec = Codec.default
@@ -420,7 +420,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalSimilarityFunctionChangeTwoWriters() {
+    open fun testIllegalSimilarityFunctionChangeTwoWriters() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -437,7 +437,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAddIndexesDirectory0() {
+    open fun testAddIndexesDirectory0() {
         val fieldName = "field"
         val doc = Document()
         doc.add(KnnFloatVectorField(fieldName, FloatArray(4), VectorSimilarityFunction.DOT_PRODUCT))
@@ -463,7 +463,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAddIndexesDirectory1() {
+    open fun testAddIndexesDirectory1() {
         val fieldName = "field"
         val doc = Document()
         newDirectory().use { dir ->
@@ -492,7 +492,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAddIndexesDirectory01() {
+    open fun testAddIndexesDirectory01() {
         val fieldName = "field"
         val vector = FloatArray(2)
         val doc = Document()
@@ -526,7 +526,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalDimChangeViaAddIndexesDirectory() {
+    open fun testIllegalDimChangeViaAddIndexesDirectory() {
         newDirectory().use { dir ->
             newDirectory().use { dir2 ->
                 IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -553,7 +553,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalSimilarityFunctionChangeViaAddIndexesDirectory() {
+    open fun testIllegalSimilarityFunctionChangeViaAddIndexesDirectory() {
         newDirectory().use { dir ->
             newDirectory().use { dir2 ->
                 IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -578,7 +578,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalDimChangeViaAddIndexesCodecReader() {
+    open fun testIllegalDimChangeViaAddIndexesCodecReader() {
         newDirectory().use { dir ->
             newDirectory().use { dir2 ->
                 IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -607,7 +607,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalSimilarityFunctionChangeViaAddIndexesCodecReader() {
+    open fun testIllegalSimilarityFunctionChangeViaAddIndexesCodecReader() {
         newDirectory().use { dir ->
             newDirectory().use { dir2 ->
                 IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -636,7 +636,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalDimChangeViaAddIndexesSlowCodecReader() {
+    open fun testIllegalDimChangeViaAddIndexesSlowCodecReader() {
         newDirectory().use { dir ->
             newDirectory().use { dir2 ->
                 IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -663,7 +663,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalSimilarityFunctionChangeViaAddIndexesSlowCodecReader() {
+    open fun testIllegalSimilarityFunctionChangeViaAddIndexesSlowCodecReader() {
         newDirectory().use { dir ->
             newDirectory().use { dir2 ->
                 IndexWriter(dir, newIndexWriterConfig()).use { w ->
@@ -690,7 +690,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalMultipleValues() {
+    open fun testIllegalMultipleValues() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -707,7 +707,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalDimensionTooLarge() {
+    open fun testIllegalDimensionTooLarge() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -763,7 +763,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIllegalEmptyVector() {
+    open fun testIllegalEmptyVector() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -788,7 +788,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // Write vectors, one segment with default codec, another with SimpleText, then forceMerge
     @Throws(Exception::class)
-    fun testDifferentCodecs1() {
+    open fun testDifferentCodecs1() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -808,7 +808,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     // Write vectors, one segment with SimpleText, another with default codec, then forceMerge
     @Throws(Exception::class)
-    fun testDifferentCodecs2() {
+    open fun testDifferentCodecs2() {
         val iwc = newIndexWriterConfig()
         iwc.setCodec(Codec.forName("SimpleText"))
         newDirectory().use { dir ->
@@ -826,7 +826,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         }
     }
 
-    fun testInvalidKnnVectorFieldUsage() {
+    open fun testInvalidKnnVectorFieldUsage() {
         val field =
             KnnFloatVectorField("field", FloatArray(2), VectorSimilarityFunction.EUCLIDEAN)
 
@@ -838,7 +838,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testDeleteAllVectorDocs() {
+    open fun testDeleteAllVectorDocs() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -877,7 +877,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testKnnVectorFieldMissingFromOneSegment() {
+    open fun testKnnVectorFieldMissingFromOneSegment() {
         FSDirectory.open(createTempDir()).use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 var doc = Document()
@@ -903,7 +903,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSparseVectors() {
+    open fun testSparseVectors() {
         val numDocs: Int = atLeast(1000)
         val numFields: Int = TestUtil.nextInt(random(), 1, 10)
         val fieldDocCounts = IntArray(numFields)
@@ -989,7 +989,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testFloatVectorScorerIteration() {
+    open fun testFloatVectorScorerIteration() {
         val iwc = newIndexWriterConfig()
         if (random().nextBoolean()) {
             iwc.setIndexSort(Sort(SortField("sortkey", SortField.Type.INT)))
@@ -1052,7 +1052,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testByteVectorScorerIteration() {
+    open fun testByteVectorScorerIteration() {
         val iwc = newIndexWriterConfig()
         if (random().nextBoolean()) {
             iwc.setIndexSort(Sort(SortField("sortkey", SortField.Type.INT)))
@@ -1115,7 +1115,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testEmptyFloatVectorData() {
+    open fun testEmptyFloatVectorData() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc1 = Document()
@@ -1142,7 +1142,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testEmptyByteVectorData() {
+    open fun testEmptyByteVectorData() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc1 = Document()
@@ -1180,7 +1180,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIndexedValueNotAliased() {
+    open fun testIndexedValueNotAliased() {
         // We copy indexed values (as for BinaryDocValues) so the input float[] can be reused across
         // calls to IndexWriter.addDocument.
         val fieldName = "field"
@@ -1225,7 +1225,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSortedIndex() {
+    open fun testSortedIndex() {
         val iwc = newIndexWriterConfig()
         iwc.setIndexSort(Sort(SortField("sortkey", SortField.Type.INT)))
         val fieldName = "field"
@@ -1256,7 +1256,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testSortedIndexBytes() {
+    open fun testSortedIndexBytes() {
         val iwc = newIndexWriterConfig()
         iwc.setIndexSort(Sort(SortField("sortkey", SortField.Type.INT)))
         val fieldName = "field"
@@ -1286,7 +1286,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testIndexMultipleKnnVectorFields() {
+    open fun testIndexMultipleKnnVectorFields() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig().setMergePolicy(newLogMergePolicy())).use { iw ->
                 var doc = Document()
@@ -1348,7 +1348,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
      * consistently.
      */
     @Throws(Exception::class)
-    fun testRandom() {
+    open fun testRandom() {
         val iwc = newIndexWriterConfig()
         if (random().nextBoolean()) {
             iwc.setIndexSort(Sort(SortField("sortkey", SortField.Type.INT)))
@@ -1432,7 +1432,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
      * back consistently.
      */
     @Throws(Exception::class)
-    fun testRandomBytes() {
+    open fun testRandomBytes() {
         val iwc = newIndexWriterConfig()
         if (random().nextBoolean()) {
             iwc.setIndexSort(Sort(SortField("sortkey", SortField.Type.INT)))
@@ -1517,7 +1517,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
      * meant to define a strict requirement on behavior.
      */
     @Throws(Exception::class)
-    fun testSearchWithVisitedLimit() {
+    open fun testSearchWithVisitedLimit() {
         val iwc = newIndexWriterConfig()
         val fieldName = "field"
         newDirectory().use { dir ->
@@ -1582,7 +1582,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
      * graph, and verify that the expected values can be read back consistently.
      */
     @Throws(Exception::class)
-    fun testRandomWithUpdatesAndGraph() {
+    open fun testRandomWithUpdatesAndGraph() {
         val iwc = newIndexWriterConfig()
         val fieldName = "field"
         newDirectory().use { dir ->
@@ -1732,7 +1732,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testCheckIndexIncludesVectors() {
+    open fun testCheckIndexIncludesVectors() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -1767,7 +1767,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         }
     }
 
-    fun testSimilarityFunctionIdentifiers() {
+    open fun testSimilarityFunctionIdentifiers() {
         // make sure we don't accidentally mess up similarity function identifiers by re-ordering their
         // enumerators
         assertEquals(0, VectorSimilarityFunction.EUCLIDEAN.ordinal.toLong())
@@ -1777,7 +1777,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(4, VectorSimilarityFunction.entries.size.toLong())
     }
 
-    fun testVectorEncodingOrdinals() {
+    open fun testVectorEncodingOrdinals() {
         // make sure we don't accidentally mess up vector encoding identifiers by re-ordering their
         // enumerators
         assertEquals(0, VectorEncoding.BYTE.ordinal.toLong())
@@ -1786,7 +1786,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testAdvance() {
+    open fun testAdvance() {
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val numdocs: Int = atLeast(1500)
@@ -1841,7 +1841,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testVectorValuesReportCorrectDocs() {
+    open fun testVectorValuesReportCorrectDocs() {
         val numDocs: Int = atLeast(1000)
         var dim: Int = random().nextInt(20) + 1
         if (dim % 2 != 0) {
@@ -1951,7 +1951,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     @Throws(Exception::class)
-    fun testMismatchedFields() {
+    open fun testMismatchedFields() {
         val dir1: Directory = newDirectory()
         val w1 = IndexWriter(dir1, newIndexWriterConfig())
         val doc = Document()
@@ -2007,7 +2007,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
      * gross failures only, not to represent the true expected recall.
      */
     @Throws(IOException::class)
-    fun testRecall() {
+    open fun testRecall() {
         val functions: Array<VectorSimilarityFunction> = arrayOf(
             VectorSimilarityFunction.EUCLIDEAN,
             VectorSimilarityFunction.COSINE,

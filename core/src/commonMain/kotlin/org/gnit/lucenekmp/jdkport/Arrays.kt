@@ -1095,6 +1095,39 @@ object Arrays {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order. The range
+     * to be sorted extends from the index `fromIndex`, inclusive, to
+     * the index `toIndex`, exclusive. If `fromIndex == toIndex`,
+     * the range to be sorted is empty.
+     *
+     *
+     * The `<` relation does not provide a total order on all float
+     * values: `-0.0f == 0.0f` is `true` and a `Float.NaN`
+     * value compares neither less than, greater than, nor equal to any value,
+     * even itself. This method uses the total order imposed by the method
+     * [Float.compareTo]: `-0.0f` is treated as less than value
+     * `0.0f` and `Float.NaN` is considered greater than any
+     * other value and all `Float.NaN` values are considered equal.
+     *
+     * @implNote The sorting algorithm is a Dual-Pivot Quicksort
+     * by Vladimir Yaroslavskiy, Jon Bentley, and Joshua Bloch. This algorithm
+     * offers O(n log(n)) performance on all data sets, and is typically
+     * faster than traditional (one-pivot) Quicksort implementations.
+     *
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element, inclusive, to be sorted
+     * @param toIndex the index of the last element, exclusive, to be sorted
+     *
+     * @throws IllegalArgumentException if `fromIndex > toIndex`
+     * @throws ArrayIndexOutOfBoundsException
+     * if `fromIndex < 0` or `toIndex > a.length`
+     */
+    fun sort(a: FloatArray, fromIndex: Int, toIndex: Int) {
+        rangeCheck(a.size, fromIndex, toIndex)
+        a.sort( fromIndex, toIndex)
+    }
+
+    /**
      * Sorts the specified array of objects according to the order induced by
      * the specified comparator.  All elements in the array must be
      * *mutually comparable* by the specified comparator (that is,
@@ -1297,6 +1330,28 @@ object Arrays {
         a.fill(
             element = value
         )
+    }
+
+    /**
+     * Assigns the specified float value to each element of the specified
+     * range of the specified array of floats.  The range to be filled
+     * extends from index `fromIndex`, inclusive, to index
+     * `toIndex`, exclusive.  (If `fromIndex==toIndex`, the
+     * range to be filled is empty.)
+     *
+     * @param a the array to be filled
+     * @param fromIndex the index of the first element (inclusive) to be
+     * filled with the specified value
+     * @param toIndex the index of the last element (exclusive) to be
+     * filled with the specified value
+     * @param value the value to be stored in all elements of the array
+     * @throws IllegalArgumentException if `fromIndex > toIndex`
+     * @throws ArrayIndexOutOfBoundsException if `fromIndex < 0` or
+     * `toIndex > a.length`
+     */
+    fun fill(a: FloatArray, fromIndex: Int, toIndex: Int, value: Float) {
+        rangeCheck(a.size, fromIndex, toIndex)
+        for (i in fromIndex..<toIndex) a[i] = value
     }
 
     fun fill(a: CharArray, value: Char) {
