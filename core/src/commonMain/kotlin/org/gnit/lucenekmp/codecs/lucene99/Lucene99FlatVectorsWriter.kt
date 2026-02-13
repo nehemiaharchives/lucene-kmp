@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsWriter
 import org.gnit.lucenekmp.codecs.lucene95.OrdToDocDISIReaderConfiguration
 import org.gnit.lucenekmp.codecs.lucene95.OffHeapByteVectorValues.DenseOffHeapVectorValues
+import org.gnit.lucenekmp.codecs.lucene95.OffHeapFloatVectorValues
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99FlatVectorsFormat.Companion.DIRECT_MONOTONIC_BLOCK_SHIFT
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.DocsWithFieldSet
@@ -86,7 +87,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
 
     @Throws(IOException::class)
     override fun addField(fieldInfo: FieldInfo): FlatFieldVectorsWriter<*> {
-        val newField = FieldWriter.Companion.create(fieldInfo)
+        val newField = FieldWriter.create(fieldInfo)
         fields.add(newField)
         return newField
     }
@@ -295,7 +296,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
 
                     FLOAT32 -> this.vectorScorer.getRandomVectorScorerSupplier(
                         fieldInfo.vectorSimilarityFunction,
-                        DenseOffHeapVectorValues(
+                        OffHeapFloatVectorValues.DenseOffHeapVectorValues(
                             fieldInfo.vectorDimension,
                             docsWithField.cardinality(),
                             finalVectorDataInput,
