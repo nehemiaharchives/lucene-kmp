@@ -165,7 +165,7 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
 
     @Throws(Exception::class)
     @BeforeTest
-    fun setUp() {
+    open fun setUp() {
         // set the default codec, so adding test cases to this isn't fragile
         savedCodec = Codec.default
         Codec.default = this.codec

@@ -1653,7 +1653,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                         val results: TopDocs =
                             ctx.reader()
                                 .searchNearestVectors(
-                                    fieldName, randomNormalizedVector(dimension), k, liveDocs!!, Int.Companion.MAX_VALUE
+                                    fieldName, randomNormalizedVector(dimension), k, liveDocs, Int.MAX_VALUE
                                 )
                         assertEquals(min(k, size).toLong(), results.scoreDocs.size.toLong())
                         for (i in 0..<k - 1) {
