@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.internal.hppc.LongArrayList
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.numberOfLeadingZeros
 import org.gnit.lucenekmp.jdkport.toUnsignedInt
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput
@@ -31,7 +32,6 @@ import org.gnit.lucenekmp.util.PriorityQueue
 import org.gnit.lucenekmp.util.bkd.BKDUtil.ByteArrayPredicate
 import kotlin.math.max
 import kotlin.math.min
-
 
 // TODO
 //   - allow variable length byte[] (across docs and dims), but this is quite a bit more hairy
@@ -609,7 +609,7 @@ open class BKDWriter(
         val dataOut: IndexOutput
         val dataStartFP: Long
         val leafBlockFPs: LongArrayList = LongArrayList()
-        val leafBlockStartValues: MutableList<ByteArray> = ArrayList<ByteArray>()
+        val leafBlockStartValues: MutableList<ByteArray> = ArrayList()
         val leafValues: ByteArray = ByteArray(config.maxPointsInLeafNode * config.packedBytesLength())
         val leafDocs: IntArray = IntArray(config.maxPointsInLeafNode)
         private var valueCount: Long = 0
@@ -991,7 +991,7 @@ open class BKDWriter(
         val writeBuffer: ByteBuffersDataOutput = ByteBuffersDataOutput.newResettableInstance()
 
         // This is the "file" we append the byte[] to:
-        val blocks: MutableList<ByteArray> = ArrayList<ByteArray>()
+        val blocks: MutableList<ByteArray> = ArrayList()
         val lastSplitValues = ByteArray(config.bytesPerDim * config.numIndexDims)
         // System.out.println("\npack index");
         val totalSize =
@@ -1574,7 +1574,7 @@ open class BKDWriter(
             }
 
             // Find the dimension that has the least number of unique bytes at commonPrefixLengths[dim]
-            val usedBytes: Array<FixedBitSet?> = kotlin.arrayOfNulls<FixedBitSet>(config.numDims)
+            val usedBytes: Array<FixedBitSet?> = arrayOfNulls(config.numDims)
             for (dim in 0..<config.numDims) {
                 if (commonPrefixLengths[dim] < config.bytesPerDim) {
                     usedBytes[dim] = FixedBitSet(256)
@@ -1589,7 +1589,7 @@ open class BKDWriter(
                 }
             }
             var sortedDim = 0
-            var sortedDimCardinality = Int.Companion.MAX_VALUE
+            var sortedDimCardinality = Int.MAX_VALUE
             for (dim in 0..<config.numDims) {
                 if (usedBytes[dim] != null) {
                     val cardinality: Int = usedBytes[dim]!!.cardinality()
@@ -1870,8 +1870,8 @@ open class BKDWriter(
             computeCommonPrefixLength(heapSource, scratch, from, to)
 
             var sortedDim = 0
-            var sortedDimCardinality = Int.Companion.MAX_VALUE
-            val usedBytes: Array<FixedBitSet?> = kotlin.arrayOfNulls<FixedBitSet>(config.numDims)
+            var sortedDimCardinality = Int.MAX_VALUE
+            val usedBytes: Array<FixedBitSet?> = arrayOfNulls(config.numDims)
             for (dim in 0..<config.numDims) {
                 if (commonPrefixLengths[dim] < config.bytesPerDim) {
                     usedBytes[dim] = FixedBitSet(256)
@@ -1964,7 +1964,7 @@ open class BKDWriter(
             // How many points will be in the left tree:
             val leftCount = numLeftLeafNodes * config.maxPointsInLeafNode.toLong()
 
-            val slices: Array<BKDRadixSelector.PathSlice?> = kotlin.arrayOfNulls<BKDRadixSelector.PathSlice>(2)
+            val slices: Array<BKDRadixSelector.PathSlice?> = arrayOfNulls(2)
 
             val commonPrefixLen: Int =
                 commonPrefixComparator.compare(
@@ -2146,7 +2146,7 @@ open class BKDWriter(
                     max.copyBytes(candidate.bytes, candidate.offset + offset, length)
                 }
             }
-            return arrayOf<BytesRef>(min.get(), max.get())
+            return arrayOf(min.get(), max.get())
         }
 
         private fun runLen(
