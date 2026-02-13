@@ -60,10 +60,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
         this.flatVectorsReader = flatVectorsReader
         var success = false
         this.fieldInfos = state.fieldInfos
-        val metaFileName: String =
-            IndexFileNames.segmentFileName(
-                state.segmentInfo.name, state.segmentSuffix, Lucene99HnswVectorsFormat.META_EXTENSION
-            )
+        val metaFileName: String = IndexFileNames.segmentFileName(state.segmentInfo.name, state.segmentSuffix, Lucene99HnswVectorsFormat.META_EXTENSION)
         var versionMeta = -1
         try {
             logger.debug { "Lucene99HnswVectorsReader: open meta file=$metaFileName" }
@@ -177,8 +174,8 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
     }
 
     @Throws(IOException::class)
-    override fun getFloatVectorValues(field: String): FloatVectorValues {
-        return flatVectorsReader.getFloatVectorValues(field)!!
+    override fun getFloatVectorValues(field: String): FloatVectorValues? {
+        return flatVectorsReader.getFloatVectorValues(field)
     }
 
     @Throws(IOException::class)
@@ -320,7 +317,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
         val size: Int,
         val nodesByLevel: Array<IntArray>,
         // for each level the start offsets in vectorIndex file from where to read neighbours
-        val offsetsMeta: DirectMonotonicReader.Meta,
+        val offsetsMeta: DirectMonotonicReader.Meta?,
         val offsetsOffset: Long,
         val offsetsBlockShift: Int,
         val offsetsLength: Long
@@ -386,7 +383,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                     dimension,
                     size,
                     nodesByLevel,
-                    offsetsMeta!!,
+                    offsetsMeta,
                     offsetsOffset,
                     offsetsBlockShift,
                     offsetsLength
@@ -413,10 +410,8 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
         private val currentNeighborsBuffer: IntArray
 
         init {
-            val addressesData: RandomAccessInput =
-                vectorIndex.randomAccessSlice(entry.offsetsOffset, entry.offsetsLength)
-            this.graphLevelNodeOffsets =
-                DirectMonotonicReader.getInstance(entry.offsetsMeta, addressesData)
+            val addressesData: RandomAccessInput = vectorIndex.randomAccessSlice(entry.offsetsOffset, entry.offsetsLength)
+            this.graphLevelNodeOffsets = DirectMonotonicReader.getInstance(entry.offsetsMeta!!, addressesData)
             this.currentNeighborsBuffer = IntArray(entry.M * 2)
             this.maxConn = entry.M
             graphLevelNodeIndexOffsets = LongArray(numLevels)
@@ -435,9 +430,7 @@ class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, Hnsw
                     targetOrd
                 else
                     Arrays.binarySearch(nodesByLevel[level], 0, nodesByLevel[level].size, targetOrd)
-            require(
-                targetIndex >= 0
-            ) { "seek level=$level target=$targetOrd not found: $targetIndex" }
+            require(targetIndex >= 0) { "seek level=$level target=$targetOrd not found: $targetIndex" }
             // unsafe; no bounds checking
             dataIn.seek(graphLevelNodeOffsets.get(targetIndex + graphLevelNodeIndexOffsets[level]))
             arcCount = dataIn.readVInt()

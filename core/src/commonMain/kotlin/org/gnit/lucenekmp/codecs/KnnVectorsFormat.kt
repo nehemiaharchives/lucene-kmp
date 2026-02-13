@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswScalarQuantizedVectorsForm
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99HnswVectorsFormat
 import org.gnit.lucenekmp.codecs.lucene99.Lucene99ScalarQuantizedVectorsFormat
 import org.gnit.lucenekmp.codecs.lucene102.Lucene102BinaryQuantizedVectorsFormat
+import org.gnit.lucenekmp.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat
 import org.gnit.lucenekmp.index.ByteVectorValues
 import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.index.SegmentReadState
@@ -79,6 +80,7 @@ abstract class KnnVectorsFormat protected constructor(name: String) : NamedSPI {
                 )
             },
             Lucene102BinaryQuantizedVectorsFormat.NAME to { Lucene102BinaryQuantizedVectorsFormat() },
+            Lucene102HnswBinaryQuantizedVectorsFormat.NAME to { Lucene102HnswBinaryQuantizedVectorsFormat() },
         )
 
         /**
