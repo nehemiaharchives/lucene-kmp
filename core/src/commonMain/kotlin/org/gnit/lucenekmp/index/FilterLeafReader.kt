@@ -361,7 +361,7 @@ abstract class FilterLeafReader protected constructor(inReader: LeafReader) : Le
     @Throws(IOException::class)
     override fun terms(field: String?): Terms? {
         ensureOpen()
-        return delegate.terms(field)!!
+        return delegate.terms(field)
     }
 
     override fun toString(): String {
