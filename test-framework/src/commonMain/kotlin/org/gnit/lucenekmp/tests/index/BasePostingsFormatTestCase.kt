@@ -1,8 +1,5 @@
 package org.gnit.lucenekmp.tests.index
 
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.runBlocking
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.analysis.Analyzer
@@ -173,10 +170,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         val iters = 5
 
         for (iter in 0..<iters) {
-            val path: Path =
-                createTempDir("testPostingsFormat")
-            val dir: Directory =
-                newFSDirectory(path)
+            val path: Path = createTempDir("testPostingsFormat")
+            val dir: Directory = newFSDirectory(path)
 
             val indexPayloads: Boolean =
                 random().nextBoolean()
@@ -216,10 +211,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testPostingsEnumReuse() {
-        val path: Path =
-            createTempDir("testPostingsEnumReuse")
-        val dir: Directory =
-            newFSDirectory(path)
+        val path: Path = createTempDir("testPostingsEnumReuse")
+        val dir: Directory = newFSDirectory(path)
 
         val fieldsProducer: FieldsProducer =
             postingsTester!!.buildIndex(
@@ -230,26 +223,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                 true
             )
         postingsTester!!.allTerms.shuffle(random())
-        val fieldAndTerm: RandomPostingsTester.FieldAndTerm =
-            postingsTester!!.allTerms[0]
+        val fieldAndTerm: RandomPostingsTester.FieldAndTerm = postingsTester!!.allTerms[0]
 
         val terms: Terms = fieldsProducer.terms(fieldAndTerm.field)!!
         val te: TermsEnum = terms.iterator()
 
         te.seekExact(fieldAndTerm.term)
-        checkReuse(
-            te,
-            FREQS.toInt(),
-            ALL.toInt(),
-            false
-        )
+        checkReuse(te,FREQS.toInt(), ALL.toInt(), false)
         if (this.isPostingsEnumReuseImplemented) {
-            checkReuse(
-                te,
-                ALL.toInt(),
-                ALL.toInt(),
-                true
-            )
+            checkReuse(te, ALL.toInt(), ALL.toInt(), true)
         }
 
         fieldsProducer.close()
@@ -258,38 +240,21 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testJustEmptyField() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            newIndexWriterConfig(/*null*/)
+        val dir: Directory = newDirectory()
+        val iwc = newIndexWriterConfig(/*null*/)
         iwc.setCodec(codec)
-        val iw =
-            RandomIndexWriter(
-                random(),
-                dir,
-                iwc
-            )
+        val iw = RandomIndexWriter(random(), dir, iwc)
         val doc = Document()
-        doc.add(
-            newStringField(
-                "",
-                "something",
-                Store.NO
-            )
-        )
+        doc.add(newStringField("","something", Store.NO))
         iw.addDocument(doc)
         val ir: DirectoryReader = iw.reader
-        val ar: LeafReader =
-            getOnlyLeafReader(ir)
+        val ar: LeafReader = getOnlyLeafReader(ir)
         assertEquals(1, ar.fieldInfos.size().toLong())
         val terms: Terms = ar.terms("")!!
         assertNotNull(terms)
         val termsEnum: TermsEnum = terms.iterator()
         assertNotNull(termsEnum.next())
-        assertEquals(
-            termsEnum.term(),
-            BytesRef("something")
-        )
+        assertEquals(termsEnum.term(), BytesRef("something"))
         assertNull(termsEnum.next())
         ir.close()
         iw.close()
@@ -298,29 +263,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testEmptyFieldAndEmptyTerm() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            newIndexWriterConfig(/*null*/)
+        val dir: Directory = newDirectory()
+        val iwc = newIndexWriterConfig(/*null*/)
         iwc.setCodec(codec)
-        val iw =
-            RandomIndexWriter(
-                random(),
-                dir,
-                iwc
-            )
+        val iw = RandomIndexWriter(random(), dir, iwc)
         val doc = Document()
-        doc.add(
-            newStringField(
-                "",
-                "",
-                Store.NO
-            )
-        )
+        doc.add(newStringField("", "", Store.NO))
         iw.addDocument(doc)
         val ir: DirectoryReader = iw.reader
-        val ar: LeafReader =
-            getOnlyLeafReader(ir)
+        val ar: LeafReader = getOnlyLeafReader(ir)
         assertEquals(1, ar.fieldInfos.size().toLong())
         val terms: Terms? = ar.terms("")
         assertNotNull(terms)
@@ -335,36 +286,19 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testDidntWantFreqsButAskedAnyway() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            newIndexWriterConfig(
-                MockAnalyzer(random())
-            )
+        val dir: Directory = newDirectory()
+        val iwc = newIndexWriterConfig(MockAnalyzer(random()))
         iwc.setCodec(codec)
-        val iw =
-            RandomIndexWriter(
-                random(),
-                dir,
-                iwc
-            )
+        val iw = RandomIndexWriter(random(), dir, iwc)
         val doc = Document()
-        doc.add(
-            newTextField(
-                "field",
-                "value",
-                Store.NO
-            )
-        )
+        doc.add(newTextField("field", "value", Store.NO))
         iw.addDocument(doc)
         iw.addDocument(doc)
         val ir: DirectoryReader = iw.reader
-        val ar: LeafReader =
-            getOnlyLeafReader(ir)
+        val ar: LeafReader = getOnlyLeafReader(ir)
         val termsEnum: TermsEnum = ar.terms("field")!!.iterator()
         assertTrue(termsEnum.seekExact(BytesRef("value")))
-        val docsEnum: PostingsEnum? =
-            termsEnum.postings(null, NONE.toInt())
+        val docsEnum: PostingsEnum? = termsEnum.postings(null, NONE.toInt())
         assertEquals(0, docsEnum!!.nextDoc().toLong())
         assertEquals(1, docsEnum.freq().toLong())
         assertEquals(1, docsEnum.nextDoc().toLong())
@@ -376,36 +310,19 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testAskForPositionsWhenNotThere() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            newIndexWriterConfig(
-                MockAnalyzer(random())
-            )
+        val dir: Directory = newDirectory()
+        val iwc = newIndexWriterConfig(MockAnalyzer(random()))
         iwc.setCodec(codec)
-        val iw =
-            RandomIndexWriter(
-                random(),
-                dir,
-                iwc
-            )
+        val iw = RandomIndexWriter(random(), dir, iwc)
         val doc = Document()
-        doc.add(
-            newStringField(
-                "field",
-                "value",
-                Store.NO
-            )
-        )
+        doc.add(newStringField("field", "value", Store.NO))
         iw.addDocument(doc)
         iw.addDocument(doc)
         val ir: DirectoryReader = iw.reader
-        val ar: LeafReader =
-            getOnlyLeafReader(ir)
+        val ar: LeafReader = getOnlyLeafReader(ir)
         val termsEnum: TermsEnum = ar.terms("field")!!.iterator()
         assertTrue(termsEnum.seekExact(BytesRef("value")))
-        val docsEnum: PostingsEnum? =
-            termsEnum.postings(null, POSITIONS.toInt())
+        val docsEnum: PostingsEnum? = termsEnum.postings(null, POSITIONS.toInt())
         assertEquals(0, docsEnum!!.nextDoc().toLong())
         assertEquals(1, docsEnum.freq().toLong())
         assertEquals(1, docsEnum.nextDoc().toLong())
@@ -419,34 +336,20 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     // TODO: can this be improved
     @Throws(Exception::class)
     open fun testGhosts() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            newIndexWriterConfig(/*null*/)
+        val dir: Directory = newDirectory()
+        val iwc = newIndexWriterConfig(/*null*/)
         iwc.setCodec(codec)
         iwc.setMergePolicy(newLogMergePolicy())
-        val iw =
-            RandomIndexWriter(
-                random(),
-                dir,
-                iwc
-            )
+        val iw = RandomIndexWriter(random(), dir, iwc)
         val doc = Document()
         iw.addDocument(doc)
         doc.add(
-            newStringField(
-                "ghostField",
-                "something",
-                Store.NO
-            )
+            newStringField("ghostField", "something", Store.NO)
         )
         iw.addDocument(doc)
         iw.forceMerge(1)
         iw.deleteDocuments(
-            Term(
-                "ghostField",
-                "something"
-            )
+            Term("ghostField", "something")
         ) // delete the only term for the field
         iw.forceMerge(1)
         val ir: DirectoryReader = iw.reader
@@ -472,46 +375,32 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     // Test seek in disorder.
     @Throws(Exception::class)
     open fun testDisorder() {
-        val dir: Directory =
-            newDirectory()
+        val dir: Directory = newDirectory()
 
-        val iwc =
-            newIndexWriterConfig(/*null*/)
+        val iwc = newIndexWriterConfig(/*null*/)
         iwc.setCodec(codec)
         iwc.setMergePolicy(newTieredMergePolicy())
         val iw = IndexWriter(dir, iwc)
 
         for (i in 0..9999) {
-            val document =
-                Document()
-            document.add(
-                StringField(
-                    "id",
-                    i.toString() + "",
-                    Store.NO
-                )
-            )
+            val document = Document()
+            document.add(StringField("id", i.toString() + "", Store.NO))
             iw.addDocument(document)
         }
         iw.commit()
         iw.forceMerge(1)
 
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
         val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("id")!!.iterator()
 
         for (i in 0..19999) {
             val n: Int = random().nextInt(0, 10000)
-            val target =
-                BytesRef(n.toString() + "")
+            val target = BytesRef(n.toString() + "")
             // seekExact.
             assertTrue(termsEnum.seekExact(target))
             assertEquals(termsEnum.term(), target)
             // seekCeil.
-            assertEquals(
-                SeekStatus.FOUND,
-                termsEnum.seekCeil(target)
-            )
+            assertEquals(SeekStatus.FOUND, termsEnum.seekCeil(target))
             assertEquals(termsEnum.term(), target)
         }
 
@@ -526,11 +415,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testBinarySearchTermLeaf() {
-        val dir: Directory =
-            newDirectory()
+        val dir: Directory = newDirectory()
 
-        val iwc =
-            newIndexWriterConfig(/*null*/)
+        val iwc = newIndexWriterConfig(/*null*/)
         iwc.setCodec(codec)
         iwc.setMergePolicy(newTieredMergePolicy())
         val iw = IndexWriter(dir, iwc)
@@ -538,15 +425,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         for (i in 100000..100400) {
             // only add odd number
             if (i % 2 == 1) {
-                val document =
-                    Document()
-                document.add(
-                    StringField(
-                        "id",
-                        i.toString() + "",
-                        Store.NO
-                    )
-                )
+                val document = Document()
+                document.add(StringField("id", i.toString() + "", Store.NO))
                 iw.addDocument(document)
             }
         }
@@ -574,32 +454,17 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             val target =
                 BytesRef(i.toString() + "")
             if (i % 2 == 1) {
-                assertEquals(
-                    SeekStatus.FOUND,
-                    termsEnum.seekCeil(target)
-                )
+                assertEquals(SeekStatus.FOUND, termsEnum.seekCeil(target))
                 assertEquals(termsEnum.term(), target)
                 if (i <= 100397) {
-                    assertEquals(
-                        BytesRef((i + 2).toString() + ""),
-                        termsEnum.next()
-                    )
+                    assertEquals(BytesRef((i + 2).toString() + ""), termsEnum.next())
                 }
             } else {
-                assertEquals(
-                    SeekStatus.NOT_FOUND,
-                    termsEnum.seekCeil(target)
-                )
-                assertEquals(
-                    BytesRef((i + 1).toString() + ""),
-                    termsEnum.term()
-                )
+                assertEquals(SeekStatus.NOT_FOUND, termsEnum.seekCeil(target))
+                assertEquals(BytesRef((i + 1).toString() + ""), termsEnum.term())
             }
         }
-        assertEquals(
-            SeekStatus.END,
-            termsEnum.seekCeil(BytesRef(100400.toString() + ""))
-        )
+        assertEquals(SeekStatus.END, termsEnum.seekCeil(BytesRef(100400.toString() + "")))
         reader.close()
         iw.close()
         dir.close()
@@ -608,50 +473,24 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     // tests that level 2 ghost fields still work
     @Throws(Exception::class)
     open fun testLevel2Ghosts() {
-        val dir: Directory =
-            newDirectory()
+        val dir: Directory = newDirectory()
 
-        val iwc =
-            newIndexWriterConfig(/*null*/)
+        val iwc = newIndexWriterConfig(/*null*/)
         iwc.setCodec(codec)
         iwc.setMergePolicy(newLogMergePolicy())
         val iw = IndexWriter(dir, iwc)
 
         var document = Document()
-        document.add(
-            StringField(
-                "id",
-                "0",
-                Store.NO
-            )
-        )
-        document.add(
-            StringField(
-                "suggest_field",
-                "apples",
-                Store.NO
-            )
-        )
+        document.add(StringField("id", "0", Store.NO))
+        document.add(StringField("suggest_field", "apples", Store.NO))
         iw.addDocument(document)
         // need another document so whole segment isn't deleted
         iw.addDocument(Document())
         iw.commit()
 
         document = Document()
-        document.add(
-            StringField(
-                "id",
-                "1",
-                Store.NO
-            )
-        )
-        document.add(
-            StringField(
-                "suggest_field2",
-                "apples",
-                Store.NO
-            )
-        )
+        document.add(StringField("id", "1", Store.NO))
+        document.add(StringField("suggest_field2", "apples", Store.NO))
         iw.addDocument(document)
         iw.commit()
 
@@ -665,22 +504,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         iw.addDocument(Document())
         iw.forceMerge(1)
 
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
-        val indexSearcher =
-            IndexSearcher(reader)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
+        val indexSearcher = IndexSearcher(reader)
 
-        assertEquals(
-            1,
-            indexSearcher.count(
-                TermQuery(
-                    Term(
-                        "id",
-                        "1"
-                    )
-                )
-            ).toLong()
-        )
+        assertEquals(1, indexSearcher.count(TermQuery(Term("id", "1"))).toLong())
 
         reader.close()
         iw.close()
@@ -696,19 +523,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
     // during flush/merge
     @Throws(Exception::class)
     open fun testInvertedWrite() {
-        val dir: Directory =
-            newDirectory()
-        val analyzer =
-            MockAnalyzer(random())
-        analyzer.setMaxTokenLength(
-            TestUtil.nextInt(
-                random(),
-                1,
-                IndexWriter.MAX_TERM_LENGTH
-            )
-        )
-        val iwc =
-            newIndexWriterConfig(analyzer)
+        val dir: Directory = newDirectory()
+        val analyzer = MockAnalyzer(random())
+        analyzer.setMaxTokenLength(TestUtil.nextInt(random(), 1, IndexWriter.MAX_TERM_LENGTH))
+        val iwc = newIndexWriterConfig(analyzer)
 
         // Must be concurrent because thread(s) can be merging
         // while up to one thread flushes, and each of those
@@ -725,8 +543,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         iwc.setCodec(
             object : FilterCodec(codec.name, codec) {
                 override fun postingsFormat(): PostingsFormat {
-                    val defaultPostingsFormat: PostingsFormat =
-                        delegate.postingsFormat()
+                    val defaultPostingsFormat: PostingsFormat = delegate.postingsFormat()
 
                     // Capture a Job reference from the current coroutine context (if any)
                     // val mainJob: Job? = runBlocking { currentCoroutineContext()[Job] }
@@ -740,8 +557,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                         PostingsFormat(defaultPostingsFormat.name) {
                         @Throws(IOException::class)
                         override fun fieldsConsumer(state: SegmentWriteState): FieldsConsumer {
-                            val fieldsConsumer: FieldsConsumer =
-                                defaultPostingsFormat.fieldsConsumer(state)
+                            val fieldsConsumer: FieldsConsumer = defaultPostingsFormat.fieldsConsumer(state)
 
                             return object : FieldsConsumer() {
                                 @Throws(IOException::class)
@@ -751,8 +567,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                                 ) {
                                     fieldsConsumer.write(fields, norms)
 
-                                    val isMerge =
-                                        state.context.context == IOContext.Context.MERGE
+                                    val isMerge = state.context.context == IOContext.Context.MERGE
 
                                     // We only use one thread for flushing in this test.
                                     // Original Java assertion (kept as comment):
@@ -765,47 +580,30 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                                     // with the inverted API; if
                                     // addOnSecondPass is true, we add up
                                     // term stats on the 2nd iteration:
-                                    val addOnSecondPass: Boolean =
-                                        random()
-                                            .nextBoolean()
+                                    val addOnSecondPass: Boolean = random().nextBoolean()
 
                                     // System.out.println("write isMerge=" + isMerge + " 2ndPass=" +
                                     // addOnSecondPass);
 
                                     // Gather our own stats:
-                                    val terms: Terms =
-                                        checkNotNull(fields.terms("body"))
-                                    val termsEnum: TermsEnum =
-                                        terms.iterator()
+                                    val terms: Terms = checkNotNull(fields.terms("body"))
+                                    val termsEnum: TermsEnum = terms.iterator()
                                     var docs: PostingsEnum? = null
                                     while (termsEnum.next() != null) {
                                         val term: BytesRef? = termsEnum.term()
                                         // TODO: also sometimes ask for payloads/offsets
-                                        val noPositions: Boolean =
-                                            random()
-                                                .nextBoolean()
+                                        val noPositions: Boolean = random().nextBoolean()
                                         if (noPositions) {
-                                            docs = termsEnum.postings(
-                                                docs,
-                                                FREQS.toInt()
-                                            )
+                                            docs = termsEnum.postings(docs, FREQS.toInt())
                                         } else {
-                                            docs = termsEnum.postings(
-                                                null,
-                                                POSITIONS.toInt()
-                                            )
+                                            docs = termsEnum.postings(null, POSITIONS.toInt())
                                         }
                                         var docFreq = 0
                                         var totalTermFreq: Long = 0
                                         while (docs!!.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
                                             docFreq++
                                             totalTermFreq += docs.freq().toLong()
-                                            val limit: Int =
-                                                TestUtil.nextInt(
-                                                    random(),
-                                                    1,
-                                                    docs.freq()
-                                                )
+                                            val limit: Int = TestUtil.nextInt(random(), 1, docs.freq())
                                             if (!noPositions) {
                                                 for (i in 0..<limit) {
                                                     docs.nextPosition()
@@ -818,11 +616,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                                         // During merge we should only see terms
                                         // we had already seen during a
                                         // previous flush:
-                                        assertTrue(
-                                            isMerge == false || termFreqs.containsKey(
-                                                termString
-                                            )
-                                        )
+                                        assertTrue(isMerge == false || termFreqs.containsKey(termString))
 
                                         if (isMerge == false) {
                                             if (addOnSecondPass == false) {
@@ -847,19 +641,11 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                                     for (term in termFreqs.keys) {
                                         if (termsEnum.seekExact(BytesRef(term))) {
                                             // TODO: also sometimes ask for payloads/offsets
-                                            val noPositions: Boolean =
-                                                random()
-                                                    .nextBoolean()
+                                            val noPositions: Boolean = random().nextBoolean()
                                             if (noPositions) {
-                                                docs = termsEnum.postings(
-                                                    docs,
-                                                    FREQS.toInt()
-                                                )
+                                                docs = termsEnum.postings(docs, FREQS.toInt())
                                             } else {
-                                                docs = termsEnum.postings(
-                                                    null,
-                                                    POSITIONS.toInt()
-                                                )
+                                                docs = termsEnum.postings(null, POSITIONS.toInt())
                                             }
 
                                             var docFreq = 0
@@ -867,12 +653,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                                             while (docs!!.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
                                                 docFreq++
                                                 totalTermFreq += docs.freq().toLong()
-                                                val limit: Int =
-                                                    TestUtil.nextInt(
-                                                        random(),
-                                                        1,
-                                                        docs.freq()
-                                                    )
+                                                val limit: Int = TestUtil.nextInt(random(), 1, docs.freq())
                                                 if (!noPositions) {
                                                     for (i in 0..<limit) {
                                                         docs.nextPosition()
@@ -890,25 +671,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
                                             // System.out.println("  term=" + term + " docFreq=" + docFreq + " ttDF=" +
                                             // termToDocFreq.get(term));
-                                            assertTrue(
-                                                docFreq <= termFreqs[term]!!.docFreq
-                                            )
-                                            assertTrue(
-                                                totalTermFreq <= termFreqs[term]!!.totalTermFreq
-                                            )
+                                            assertTrue(docFreq <= termFreqs[term]!!.docFreq)
+                                            assertTrue(totalTermFreq <= termFreqs[term]!!.totalTermFreq)
                                         }
                                     }
 
                                     // Also test seekCeil
                                     for (iter in 0..9) {
-                                        val term =
-                                            BytesRef(
-                                                TestUtil.randomRealisticUnicodeString(
-                                                    random()
-                                                )
-                                            )
-                                        val status: SeekStatus =
-                                            termsEnum.seekCeil(term)
+                                        val term = BytesRef(TestUtil.randomRealisticUnicodeString(random()))
+                                        val status: SeekStatus = termsEnum.seekCeil(term)
                                         if (status == SeekStatus.NOT_FOUND) {
                                             assertTrue(term < termsEnum.term()!!)
                                         }
@@ -930,21 +701,14 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                 }
             })
 
-        val w =
-            RandomIndexWriter(
-                random(),
-                dir,
-                iwc
-            )
+        val w = RandomIndexWriter(random(), dir, iwc)
 
-        val docs =
-            LineFileDocs(random())
+        val docs = LineFileDocs(random())
         val bytesToIndex: Int = atLeast(100) * 10 // TODO reduced from * 1024 to  *10 for dev speed
         var bytesIndexed = 0
         while (bytesIndexed < bytesToIndex) {
             val doc = docs.nextDoc()
-            val justBodyDoc =
-                Document()
+            val justBodyDoc = Document()
             justBodyDoc.add(doc.getField("body")!!)
             w.addDocument(justBodyDoc)
             bytesIndexed += RamUsageTester.ramUsed(justBodyDoc).toInt()
@@ -962,14 +726,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         var supportsOrds = true
         while (termsEnum.next() != null) {
             val term: BytesRef? = termsEnum.term()
-            assertEquals(
-                termFreqs[term!!.utf8ToString()]!!.docFreq.toLong(),
-                termsEnum.docFreq().toLong()
-            )
-            assertEquals(
-                termFreqs[term.utf8ToString()]!!.totalTermFreq,
-                termsEnum.totalTermFreq()
-            )
+            assertEquals(termFreqs[term!!.utf8ToString()]!!.docFreq.toLong(), termsEnum.docFreq().toLong())
+            assertEquals(termFreqs[term.utf8ToString()]!!.totalTermFreq, termsEnum.totalTermFreq())
             if (supportsOrds) {
                 var ord: Long
                 try {
@@ -1003,34 +761,20 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testPostingsEnumDocsOnly() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            IndexWriterConfig(/*null*/)
+        val dir: Directory = newDirectory()
+        val iwc = IndexWriterConfig(/*null*/)
         val iw = IndexWriter(dir, iwc)
         val doc = Document()
-        doc.add(
-            StringField(
-                "foo",
-                "bar",
-                Store.NO
-            )
-        )
+        doc.add(StringField("foo", "bar", Store.NO))
         iw.addDocument(doc)
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
 
         // sugar method (FREQS)
-        var postings: PostingsEnum =
-            getOnlyLeafReader(reader)
-                .postings(Term("foo", "bar"))!!
+        var postings: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"))!!
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(1, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
 
         // termsenum reuse (FREQS)
         val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("foo")!!.iterator()
@@ -1042,10 +786,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(1, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
 
         // asking for any flags: ok
         for (flag in intArrayOf(
@@ -1060,10 +801,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             assertEquals(-1, postings.docID().toLong())
             assertEquals(0, postings.nextDoc().toLong())
             assertEquals(1, postings.freq().toLong())
-            assertEquals(
-                DocIdSetIterator.NO_MORE_DOCS.toLong(),
-                postings.nextDoc().toLong()
-            )
+            assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
             // reuse that too
             postings2 = termsEnum.postings(postings, flag)!!
             assertNotNull(postings2)
@@ -1072,10 +810,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             assertEquals(-1, postings2.docID().toLong())
             assertEquals(0, postings2.nextDoc().toLong())
             assertEquals(1, postings2.freq().toLong())
-            assertEquals(
-                DocIdSetIterator.NO_MORE_DOCS.toLong(),
-                postings2.nextDoc().toLong()
-            )
+            assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings2.nextDoc().toLong())
         }
 
         iw.close()
@@ -1085,8 +820,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testPostingsEnumFreqs() {
-        val dir: Directory =
-            newDirectory()
+        val dir: Directory = newDirectory()
         val iwc =
             IndexWriterConfig(
                 object : Analyzer() {
@@ -1096,25 +830,18 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                 })
         val iw = IndexWriter(dir, iwc)
         val doc = Document()
-        val ft =
-            FieldType(TextField.TYPE_NOT_STORED)
+        val ft = FieldType(TextField.TYPE_NOT_STORED)
         ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS)
         doc.add(Field("foo", "bar bar", ft))
         iw.addDocument(doc)
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
 
         // sugar method (FREQS)
-        var postings: PostingsEnum =
-            getOnlyLeafReader(reader)
-                .postings(Term("foo", "bar"))!!
+        var postings: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"))!!
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(2, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),postings.nextDoc().toLong())
 
         // termsenum reuse (FREQS)
         val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("foo")!!.iterator()
@@ -1126,25 +853,17 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, postings2.docID().toLong())
         assertEquals(0, postings2.nextDoc().toLong())
         assertEquals(2, postings2.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings2.nextDoc().toLong())
 
         // asking for docs only: ok
-        val docsOnly: PostingsEnum =
-            termsEnum.postings(null, NONE.toInt())!!
+        val docsOnly: PostingsEnum = termsEnum.postings(null, NONE.toInt())!!
         assertEquals(-1, docsOnly.docID().toLong())
         assertEquals(0, docsOnly.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly.freq() == 1 || docsOnly.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly.nextDoc().toLong())
         // reuse that too
-        val docsOnly2: PostingsEnum =
-            termsEnum.postings(docsOnly, NONE.toInt())!!
+        val docsOnly2: PostingsEnum = termsEnum.postings(docsOnly, NONE.toInt())!!
         assertNotNull(docsOnly2)
         assertReused("foo", docsOnly, docsOnly2)
         // and it had better work
@@ -1152,10 +871,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsOnly2.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly.freq() == 1 || docsOnly.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly2.nextDoc().toLong())
 
         // asking for any flags: ok
         for (flag in intArrayOf(
@@ -1172,10 +888,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             if (flag != NONE.toInt()) {
                 assertEquals(2, postings.freq().toLong())
             }
-            assertEquals(
-                DocIdSetIterator.NO_MORE_DOCS.toLong(),
-                postings.nextDoc().toLong()
-            )
+            assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
             // reuse that too
             postings2 = termsEnum.postings(postings, flag)!!
             assertNotNull(postings2)
@@ -1186,10 +899,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             if (flag != NONE.toInt()) {
                 assertEquals(2, postings2.freq().toLong())
             }
-            assertEquals(
-                DocIdSetIterator.NO_MORE_DOCS.toLong(),
-                postings2.nextDoc().toLong()
-            )
+            assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings2.nextDoc().toLong())
         }
 
         iw.close()
@@ -1199,8 +909,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testPostingsEnumPositions() {
-        val dir: Directory =
-            newDirectory()
+        val dir: Directory = newDirectory()
         val iwc =
             IndexWriterConfig(
                 object : Analyzer() {
@@ -1210,28 +919,16 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
                 })
         val iw = IndexWriter(dir, iwc)
         val doc = Document()
-        doc.add(
-            TextField(
-                "foo",
-                "bar bar",
-                Store.NO
-            )
-        )
+        doc.add(TextField("foo", "bar bar", Store.NO))
         iw.addDocument(doc)
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
 
         // sugar method (FREQS)
-        val postings: PostingsEnum =
-            getOnlyLeafReader(reader)
-                .postings(Term("foo", "bar"))!!
+        val postings: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"))!!
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(2, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
 
         // termsenum reuse (FREQS)
         val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("foo")!!.iterator()
@@ -1243,25 +940,17 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, postings2.docID().toLong())
         assertEquals(0, postings2.nextDoc().toLong())
         assertEquals(2, postings2.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings2.nextDoc().toLong())
 
         // asking for docs only: ok
-        val docsOnly: PostingsEnum =
-            termsEnum.postings(null, NONE.toInt())!!
+        val docsOnly: PostingsEnum = termsEnum.postings(null, NONE.toInt())!!
         assertEquals(-1, docsOnly.docID().toLong())
         assertEquals(0, docsOnly.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly.freq() == 1 || docsOnly.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly.nextDoc().toLong())
         // reuse that too
-        val docsOnly2: PostingsEnum =
-            termsEnum.postings(docsOnly, NONE.toInt())!!
+        val docsOnly2: PostingsEnum = termsEnum.postings(docsOnly, NONE.toInt())!!
         assertNotNull(docsOnly2)
         assertReused("foo", docsOnly, docsOnly2)
         // and it had better work
@@ -1269,17 +958,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsOnly2.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly2.freq() == 1 || docsOnly2.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly2.nextDoc().toLong())
 
         // asking for positions, ok
-        var docsAndPositionsEnum: PostingsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), POSITIONS.toInt())!!
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum.freq().toLong())
@@ -1291,17 +973,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum.nextDoc().toLong())
 
         // now reuse the positions
-        var docsAndPositionsEnum2: PostingsEnum =
-            termsEnum.postings(
-                docsAndPositionsEnum,
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum2: PostingsEnum = termsEnum.postings(docsAndPositionsEnum, POSITIONS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1314,17 +989,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum2.nextDoc().toLong())
 
         // payloads, offsets, etc don't cause an error if they aren't there
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                PAYLOADS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), PAYLOADS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         // but make sure they work
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
@@ -1338,15 +1006,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            PAYLOADS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, PAYLOADS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1359,16 +1021,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                OFFSETS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), OFFSETS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1381,15 +1036,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            OFFSETS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, OFFSETS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1402,16 +1051,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                ALL.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), ALL.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1424,14 +1066,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            ALL.toInt()
-        )!!
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, ALL.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1444,10 +1080,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum2.nextDoc().toLong())
 
         iw.close()
         reader.close()
@@ -1456,36 +1089,27 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testPostingsEnumOffsets() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            IndexWriterConfig(
-                object : Analyzer() {
-                    override fun createComponents(fieldName: String): TokenStreamComponents {
-                        return TokenStreamComponents(MockTokenizer())
-                    }
-                })
+        val dir: Directory = newDirectory()
+        val iwc = IndexWriterConfig(
+            object : Analyzer() {
+                            override fun createComponents(fieldName: String): TokenStreamComponents {
+                                return TokenStreamComponents(MockTokenizer())
+                            }
+                        })
         val iw = IndexWriter(dir, iwc)
         val doc = Document()
-        val ft =
-            FieldType(TextField.TYPE_NOT_STORED)
+        val ft = FieldType(TextField.TYPE_NOT_STORED)
         ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
         doc.add(Field("foo", "bar bar", ft))
         iw.addDocument(doc)
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
 
         // sugar method (FREQS)
-        val postings: PostingsEnum =
-            getOnlyLeafReader(reader)
-                .postings(Term("foo", "bar"))!!
+        val postings: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"))!!
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(2, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
 
         // termsenum reuse (FREQS)
         val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("foo")!!.iterator()
@@ -1497,25 +1121,17 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, postings2.docID().toLong())
         assertEquals(0, postings2.nextDoc().toLong())
         assertEquals(2, postings2.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),postings2.nextDoc().toLong())
 
         // asking for docs only: ok
-        val docsOnly: PostingsEnum =
-            termsEnum.postings(null, NONE.toInt())!!
+        val docsOnly: PostingsEnum = termsEnum.postings(null, NONE.toInt())!!
         assertEquals(-1, docsOnly.docID().toLong())
         assertEquals(0, docsOnly.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly.freq() == 1 || docsOnly.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly.nextDoc().toLong())
         // reuse that too
-        val docsOnly2: PostingsEnum =
-            termsEnum.postings(docsOnly, NONE.toInt())!!
+        val docsOnly2: PostingsEnum = termsEnum.postings(docsOnly, NONE.toInt())!!
         assertNotNull(docsOnly2)
         assertReused("foo", docsOnly, docsOnly2)
         // and it had better work
@@ -1523,17 +1139,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsOnly2.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly2.freq() == 1 || docsOnly2.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly2.nextDoc().toLong())
 
         // asking for positions, ok
-        var docsAndPositionsEnum: PostingsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), POSITIONS.toInt())!!
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum.freq().toLong())
@@ -1547,46 +1156,28 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertTrue(docsAndPositionsEnum.startOffset() == -1 || docsAndPositionsEnum.startOffset() == 4)
         assertTrue(docsAndPositionsEnum.endOffset() == -1 || docsAndPositionsEnum.endOffset() == 7)
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
 
         // now reuse the positions
-        var docsAndPositionsEnum2: PostingsEnum =
-            termsEnum.postings(
-                docsAndPositionsEnum,
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum2: PostingsEnum = termsEnum.postings(docsAndPositionsEnum, POSITIONS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum2.freq().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 3)
         assertNull(docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 7)
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
         // payloads don't cause an error if they aren't there
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                PAYLOADS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), PAYLOADS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         // but make sure they work
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
@@ -1602,43 +1193,26 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertTrue(docsAndPositionsEnum.startOffset() == -1 || docsAndPositionsEnum.startOffset() == 4)
         assertTrue(docsAndPositionsEnum.endOffset() == -1 || docsAndPositionsEnum.endOffset() == 7)
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            PAYLOADS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, PAYLOADS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum2.freq().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 3)
         assertNull(docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 7)
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                OFFSETS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), OFFSETS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1651,15 +1225,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(4, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum.endOffset().toLong())
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            OFFSETS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, OFFSETS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1672,16 +1240,9 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(4, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum2.endOffset().toLong())
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                ALL.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), ALL.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1694,14 +1255,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(4, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum.endOffset().toLong())
         assertNull(docsAndPositionsEnum.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            ALL.toInt()
-        )!!
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, ALL.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1714,10 +1269,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(4, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum2.endOffset().toLong())
         assertNull(docsAndPositionsEnum2.payload)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
         iw.close()
         reader.close()
@@ -1732,28 +1284,18 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         val doc = Document()
         val token1 = Token("bar", 0, 3)
         token1.payload = BytesRef("pay1")
-        val token2 =
-            Token("bar", 4, 7)
+        val token2 = Token("bar", 4, 7)
         token2.payload = BytesRef("pay2")
-        doc.add(
-            TextField(
-                "foo",
-                CannedTokenStream(token1, token2)
-            )
-        )
+        doc.add(TextField("foo", CannedTokenStream(token1, token2)))
         iw.addDocument(doc)
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
 
         // sugar method (FREQS)
         val postings: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"))!!
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(2, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
 
         // termsenum reuse (FREQS)
         val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("foo")!!.iterator()
@@ -1765,25 +1307,17 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, postings2.docID().toLong())
         assertEquals(0, postings2.nextDoc().toLong())
         assertEquals(2, postings2.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings2.nextDoc().toLong())
 
         // asking for docs only: ok
-        val docsOnly: PostingsEnum =
-            termsEnum.postings(null, NONE.toInt())!!
+        val docsOnly: PostingsEnum = termsEnum.postings(null, NONE.toInt())!!
         assertEquals(-1, docsOnly.docID().toLong())
         assertEquals(0, docsOnly.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly.freq() == 1 || docsOnly.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly.nextDoc().toLong())
         // reuse that too
-        val docsOnly2: PostingsEnum =
-            termsEnum.postings(docsOnly, NONE.toInt())!!
+        val docsOnly2: PostingsEnum = termsEnum.postings(docsOnly, NONE.toInt())!!
         assertNotNull(docsOnly2)
         assertReused("foo", docsOnly, docsOnly2)
         // and it had better work
@@ -1791,17 +1325,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsOnly2.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly2.freq() == 1 || docsOnly2.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly2.nextDoc().toLong())
 
         // asking for positions, ok
-        var docsAndPositionsEnum: PostingsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), POSITIONS.toInt())!!
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum.freq().toLong())
@@ -1809,29 +1336,16 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum.payload
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay1") == docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay2") == docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
 
         // now reuse the positions
-        var docsAndPositionsEnum2: PostingsEnum =
-            termsEnum.postings(
-                docsAndPositionsEnum,
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum2: PostingsEnum = termsEnum.postings(docsAndPositionsEnum, POSITIONS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1840,29 +1354,16 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum2.payload
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay1") == docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay2") == docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
         // payloads
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                PAYLOADS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), PAYLOADS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1870,26 +1371,14 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            PAYLOADS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, PAYLOADS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1897,27 +1386,14 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum2.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                OFFSETS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), OFFSETS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1926,27 +1402,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum.payload
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay1") == docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay2") == docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            OFFSETS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum,OFFSETS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -1955,28 +1419,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum2.payload
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null|| BytesRef("pay1") == docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay2") == docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                ALL.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), ALL.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -1984,25 +1435,13 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            ALL.toInt()
-        )!!
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, ALL.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -2010,21 +1449,12 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum2.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(-1, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(-1, docsAndPositionsEnum2.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
         iw.close()
         reader.close()
@@ -2033,48 +1463,29 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testPostingsEnumAll() {
-        val dir: Directory =
-            newDirectory()
-        val iwc =
-            IndexWriterConfig(/*null*/)
+        val dir: Directory = newDirectory()
+        val iwc = IndexWriterConfig(/*null*/)
         val iw = IndexWriter(dir, iwc)
         val doc = Document()
-        val token1 =
-            Token("bar", 0, 3)
+        val token1 = Token("bar", 0, 3)
         token1.payload = BytesRef("pay1")
-        val token2 =
-            Token("bar", 4, 7)
+        val token2 = Token("bar", 4, 7)
         token2.payload = BytesRef("pay2")
-        val ft =
-            FieldType(TextField.TYPE_NOT_STORED)
+        val ft = FieldType(TextField.TYPE_NOT_STORED)
         ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
-        doc.add(
-            Field(
-                "foo",
-                CannedTokenStream(token1, token2),
-                ft
-            )
-        )
+        doc.add(Field("foo", CannedTokenStream(token1, token2), ft))
         iw.addDocument(doc)
-        val reader: DirectoryReader =
-            DirectoryReader.open(iw)
+        val reader: DirectoryReader = DirectoryReader.open(iw)
 
         // sugar method (FREQS)
-        val postings: PostingsEnum =
-            getOnlyLeafReader(reader)
-                .postings(Term("foo", "bar"))!!
+        val postings: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"))!!
         assertEquals(-1, postings.docID().toLong())
         assertEquals(0, postings.nextDoc().toLong())
         assertEquals(2, postings.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings.nextDoc().toLong())
 
         // termsenum reuse (FREQS)
-        val termsEnum: TermsEnum =
-            getOnlyLeafReader(reader).terms("foo")!!
-                .iterator()
+        val termsEnum: TermsEnum = getOnlyLeafReader(reader).terms("foo")!!.iterator()
         termsEnum.seekExact(BytesRef("bar"))
         val postings2: PostingsEnum? = termsEnum.postings(postings)
         assertNotNull(postings2)
@@ -2083,25 +1494,17 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(-1, postings2.docID().toLong())
         assertEquals(0, postings2.nextDoc().toLong())
         assertEquals(2, postings2.freq().toLong())
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            postings2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), postings2.nextDoc().toLong())
 
         // asking for docs only: ok
-        val docsOnly: PostingsEnum =
-            termsEnum.postings(null, NONE.toInt())!!
+        val docsOnly: PostingsEnum = termsEnum.postings(null, NONE.toInt())!!
         assertEquals(-1, docsOnly.docID().toLong())
         assertEquals(0, docsOnly.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly.freq() == 1 || docsOnly.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly.nextDoc().toLong())
         // reuse that too
-        val docsOnly2: PostingsEnum =
-            termsEnum.postings(docsOnly, NONE.toInt())!!
+        val docsOnly2: PostingsEnum = termsEnum.postings(docsOnly, NONE.toInt())!!
         assertNotNull(docsOnly2)
         assertReused("foo", docsOnly, docsOnly2)
         // and it had better work
@@ -2109,17 +1512,10 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsOnly2.nextDoc().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsOnly2.freq() == 1 || docsOnly2.freq() == 2)
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsOnly2.nextDoc().toLong()
-        )
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsOnly2.nextDoc().toLong())
 
         // asking for positions, ok
-        var docsAndPositionsEnum: PostingsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum: PostingsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), POSITIONS.toInt())!!
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum.freq().toLong())
@@ -2128,67 +1524,37 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertTrue(docsAndPositionsEnum.startOffset() == -1 || docsAndPositionsEnum.startOffset() == 0)
         assertTrue(docsAndPositionsEnum.endOffset() == -1 || docsAndPositionsEnum.endOffset() == 3)
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum.payload
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay1") == docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsAndPositionsEnum.startOffset() == -1 || docsAndPositionsEnum.startOffset() == 4)
         assertTrue(docsAndPositionsEnum.endOffset() == -1 || docsAndPositionsEnum.endOffset() == 7)
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay2") == docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
 
         // now reuse the positions
-        var docsAndPositionsEnum2: PostingsEnum =
-            termsEnum.postings(
-                docsAndPositionsEnum,
-                POSITIONS.toInt()
-            )!!
+        var docsAndPositionsEnum2: PostingsEnum = termsEnum.postings(docsAndPositionsEnum, POSITIONS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum2.freq().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 3)
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum2.payload
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay1") == docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 7)
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay2") == docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
         // payloads
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                PAYLOADS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), PAYLOADS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -2197,61 +1563,32 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsAndPositionsEnum.startOffset() == -1 || docsAndPositionsEnum.startOffset() == 0)
         assertTrue(docsAndPositionsEnum.endOffset() == -1 || docsAndPositionsEnum.endOffset() == 3)
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
         assertTrue(docsAndPositionsEnum.startOffset() == -1 || docsAndPositionsEnum.startOffset() == 4)
         assertTrue(docsAndPositionsEnum.endOffset() == -1 || docsAndPositionsEnum.endOffset() == 7)
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            PAYLOADS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, PAYLOADS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
         assertEquals(2, docsAndPositionsEnum2.freq().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 0)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 3)
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum2.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4
-        )
+        assertTrue(docsAndPositionsEnum2.startOffset() == -1 || docsAndPositionsEnum2.startOffset() == 4)
         assertTrue(docsAndPositionsEnum2.endOffset() == -1 || docsAndPositionsEnum2.endOffset() == 7)
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                OFFSETS.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), OFFSETS.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -2260,27 +1597,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(3, docsAndPositionsEnum.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum.payload
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay1") == docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(4, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum.payload == null || BytesRef("pay2") == docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
         // reuse
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            OFFSETS.toInt()
-        )!!
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, OFFSETS.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -2289,28 +1614,15 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(3, docsAndPositionsEnum2.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay1") == docsAndPositionsEnum2.payload
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay1") == docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(4, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum2.endOffset().toLong())
         // we don't define what it is, but if its something else, we should look into it
-        assertTrue(
-            docsAndPositionsEnum2.payload == null
-                    || BytesRef("pay2") == docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertTrue(docsAndPositionsEnum2.payload == null || BytesRef("pay2") == docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum2.nextDoc().toLong())
 
-        docsAndPositionsEnum =
-            getOnlyLeafReader(reader).postings(
-                Term("foo", "bar"),
-                ALL.toInt()
-            )!!
+        docsAndPositionsEnum = getOnlyLeafReader(reader).postings(Term("foo", "bar"), ALL.toInt())!!
         assertNotNull(docsAndPositionsEnum)
         assertEquals(-1, docsAndPositionsEnum.docID().toLong())
         assertEquals(0, docsAndPositionsEnum.nextDoc().toLong())
@@ -2318,25 +1630,13 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(0, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(3, docsAndPositionsEnum.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum.payload)
         assertEquals(1, docsAndPositionsEnum.nextPosition().toLong())
         assertEquals(4, docsAndPositionsEnum.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum.nextDoc().toLong()
-        )
-        docsAndPositionsEnum2 = termsEnum.postings(
-            docsAndPositionsEnum,
-            ALL.toInt()
-        )!!
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docsAndPositionsEnum.nextDoc().toLong())
+        docsAndPositionsEnum2 = termsEnum.postings(docsAndPositionsEnum, ALL.toInt())!!
         assertReused("foo", docsAndPositionsEnum, docsAndPositionsEnum2)
         assertEquals(-1, docsAndPositionsEnum2.docID().toLong())
         assertEquals(0, docsAndPositionsEnum2.nextDoc().toLong())
@@ -2344,21 +1644,12 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
         assertEquals(0, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(0, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(3, docsAndPositionsEnum2.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay1"),
-            docsAndPositionsEnum2.payload
-        )
+        assertEquals(BytesRef("pay1"), docsAndPositionsEnum2.payload)
         assertEquals(1, docsAndPositionsEnum2.nextPosition().toLong())
         assertEquals(4, docsAndPositionsEnum2.startOffset().toLong())
         assertEquals(7, docsAndPositionsEnum2.endOffset().toLong())
-        assertEquals(
-            BytesRef("pay2"),
-            docsAndPositionsEnum2.payload
-        )
-        assertEquals(
-            DocIdSetIterator.NO_MORE_DOCS.toLong(),
-            docsAndPositionsEnum2.nextDoc().toLong()
-        )
+        assertEquals(BytesRef("pay2"), docsAndPositionsEnum2.payload)
+        assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(),docsAndPositionsEnum2.nextDoc().toLong())
 
         iw.close()
         reader.close()
@@ -2376,14 +1667,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             val numFields: Int = random().nextInt(5)
             for (j in 0..<numFields) {
                 doc.add(
-                    Field(
-                        "f_$opts",
-                        TestUtil.randomSimpleString(
-                            random(),
-                            2
-                        ),
-                        ft
-                    )
+                    Field("f_$opts", TestUtil.randomSimpleString(random(), 2), ft)
                 )
             }
         }
@@ -2397,34 +1681,19 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             .use { dir ->
                 LineFileDocs(random())
                     .use { docs ->
-                        IndexWriter(
-                            dir,
-                            IndexWriterConfig()
-                        ).use { w ->
+                        IndexWriter(dir, IndexWriterConfig()).use { w ->
                             val numDocs: Int =
-                                atLeast(100) // TODO reducing form 10000 to 100 for dev speed
+                                atLeast(3) // TODO reducing form 10000 to 3 for dev speed
                             for (i in 0..<numDocs) {
                                 // Only keep the body field, and don't index term vectors on it, we only care about
                                 // postings
                                 val doc = docs.nextDoc()
-                                var body: IndexableField =
-                                    doc.getField("body")!!
+                                var body: IndexableField? = doc.getField("body")
                                 assertNotNull(body)
                                 assertNotNull(body.stringValue())
-                                assertNotEquals(
-                                    IndexOptions.NONE,
-                                    body.fieldType().indexOptions()
-                                )
-                                body = TextField(
-                                    "body",
-                                    body.stringValue()!!,
-                                    Store.NO
-                                )
-                                w.addDocument(
-                                    mutableListOf<IndexableField>(
-                                        body
-                                    )
-                                )
+                                assertNotEquals(IndexOptions.NONE, body.fieldType().indexOptions())
+                                body = TextField("body", body.stringValue()!!, Store.NO)
+                                w.addDocument(mutableListOf<IndexableField>(body))
                             }
                             w.forceMerge(1)
                         }
@@ -2435,58 +1704,27 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testMismatchedFields() {
-        val dir1: Directory =
-            newDirectory()
-        val w1 = IndexWriter(
-            dir1,
-            newIndexWriterConfig()
-        )
+        val dir1: Directory = newDirectory()
+        val w1 = IndexWriter(dir1, newIndexWriterConfig())
         val doc = Document()
-        doc.add(
-            StringField(
-                "f",
-                "a",
-                Store.NO
-            )
-        )
-        doc.add(
-            StringField(
-                "g",
-                "b",
-                Store.NO
-            )
-        )
+        doc.add(StringField("f", "a", Store.NO))
+        doc.add(StringField("g", "b", Store.NO))
         w1.addDocument(doc)
 
-        val dir2: Directory =
-            newDirectory()
-        val w2 =
-            IndexWriter(
-                dir2,
-                newIndexWriterConfig()
-                    .setMergeScheduler(SerialMergeScheduler())
-            )
+        val dir2: Directory = newDirectory()
+        val w2 = IndexWriter(dir2, newIndexWriterConfig().setMergeScheduler(SerialMergeScheduler()))
         w2.addDocument(doc)
         w2.commit()
 
-        var reader: DirectoryReader =
-            DirectoryReader.open(w1)
+        var reader: DirectoryReader = DirectoryReader.open(w1)
         w1.close()
-        w2.addIndexes(
-            MismatchedCodecReader(
-                getOnlyLeafReader(
-                    reader
-                ) as CodecReader,
-                random()
-            )
-        )
+        w2.addIndexes(MismatchedCodecReader(getOnlyLeafReader(reader) as CodecReader, random()))
         reader.close()
         w2.forceMerge(1)
         reader = DirectoryReader.open(w2)
         w2.close()
 
-        val leafReader: LeafReader =
-            getOnlyLeafReader(reader)
+        val leafReader: LeafReader = getOnlyLeafReader(reader)
 
         var te: TermsEnum = leafReader.terms("f")!!.iterator()
         assertEquals("a", te.next()!!.utf8ToString())
@@ -2509,10 +1747,8 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
             secondFlags: Int,
             shouldReuse: Boolean
         ) {
-            val postings1: PostingsEnum =
-                termsEnum.postings(null, firstFlags)!!
-            val postings2: PostingsEnum =
-                termsEnum.postings(postings1, secondFlags)!!
+            val postings1: PostingsEnum = termsEnum.postings(null, firstFlags)!!
+            val postings2: PostingsEnum = termsEnum.postings(postings1, secondFlags)!!
             if (shouldReuse) {
                 assertSame(
                     postings1,
