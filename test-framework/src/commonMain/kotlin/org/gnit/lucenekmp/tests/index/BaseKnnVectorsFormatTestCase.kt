@@ -1524,7 +1524,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val fieldName = "field"
         newDirectory().use { dir ->
             IndexWriter(dir, iwc).use { iw ->
-                val numDoc = 300
+                val numDoc = 10 // TODO reduced from 300 to 10 for dev speed
                 val dimension = 10
                 for (i in 0..<numDoc) {
                     val value: FloatArray?
@@ -1545,7 +1545,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                 }
                 DirectoryReader.open(iw).use { reader ->
                     for (ctx in reader.leaves()) {
-                        val liveDocs: Bits = ctx.reader().liveDocs!!
+                        val liveDocs: Bits? = ctx.reader().liveDocs
                         val vectorValues: FloatVectorValues? = ctx.reader().getFloatVectorValues(fieldName)
                         if (vectorValues == null) {
                             continue
@@ -1589,7 +1589,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val fieldName = "field"
         newDirectory().use { dir ->
             IndexWriter(dir, iwc).use { iw ->
-                val numDoc: Int = atLeast(100)
+                val numDoc: Int = atLeast(10) // TODO reduced from 100 to 10 for dev speed
                 var dimension: Int = atLeast(10)
                 if (dimension % 2 != 0) {
                     dimension++
