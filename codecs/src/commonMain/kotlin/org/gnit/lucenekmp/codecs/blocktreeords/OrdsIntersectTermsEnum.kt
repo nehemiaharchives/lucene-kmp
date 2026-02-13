@@ -111,7 +111,7 @@ internal class OrdsIntersectTermsEnum(
     return arcs[ord]
   }
 
-    private fun pushFrame(state: Int): OrdsIntersectTermsEnumFrame {
+  private fun pushFrame(state: Int): OrdsIntersectTermsEnumFrame {
     val f = getFrame(if (currentFrame == null) 0 else 1 + currentFrame!!.ord)
 
     f.fp = currentFrame!!.lastSubFP
@@ -120,20 +120,22 @@ internal class OrdsIntersectTermsEnum(
     f.state = state
 
     var arc: FST.Arc<FSTOrdsOutputs.Output> = currentFrame!!.arc!!
-    val idx = currentFrame!!.prefix
-    val output = currentFrame!!.outputPrefix ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
-    val out = output
+    var idx = currentFrame!!.prefix
+    assert(currentFrame!!.suffix > 0)
+    var output = currentFrame!!.outputPrefix ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
 
     while (idx < f.prefix) {
       val target = term.bytes[idx].toInt() and 0xff
       arc = fr.index!!.findTargetArc(target, arc, getArc(1 + idx), fstReader!!)!!
+      output = OrdsBlockTreeTermsWriter.FST_OUTPUTS.add(output, arc.output() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT)
+      idx++
     }
 
     f.arc = arc
-    f.outputPrefix = out
+    f.outputPrefix = output
     assert(arc.isFinal)
     val nextFinal = arc.nextFinalOutput() ?: OrdsBlockTreeTermsWriter.NO_OUTPUT
-    f.load(OrdsBlockTreeTermsWriter.FST_OUTPUTS.add(out, nextFinal))
+    f.load(OrdsBlockTreeTermsWriter.FST_OUTPUTS.add(output, nextFinal))
     return f
   }
 
