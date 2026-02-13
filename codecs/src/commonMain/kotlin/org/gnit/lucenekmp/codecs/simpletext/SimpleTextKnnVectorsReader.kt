@@ -325,14 +325,13 @@ internal class SimpleTextKnnVectorsReader(readState: SegmentReadState) : KnnVect
             if (size() == 0) {
                 return null
             }
-            val simpleTextFloatVectorValues = SimpleTextFloatVectorValues(this)
-            val iterator = simpleTextFloatVectorValues.iterator()
+            val iterator = iterator()
             return object : VectorScorer {
                 @Throws(IOException::class)
                 override fun score(): Float {
                     val ord = iterator.index()
                     return entry.similarityFunction.compare(
-                        simpleTextFloatVectorValues.vectorValue(ord),
+                        vectorValue(ord),
                         target
                     )
                 }
@@ -417,15 +416,14 @@ internal class SimpleTextKnnVectorsReader(readState: SegmentReadState) : KnnVect
             if (size() == 0) {
                 return null
             }
-            val simpleTextByteVectorValues = SimpleTextByteVectorValues(this)
             return object : VectorScorer {
-                private val it = simpleTextByteVectorValues.iterator()
+                private val it = this@SimpleTextByteVectorValues.iterator()
 
                 @Throws(IOException::class)
                 override fun score(): Float {
                     val ord = it.index()
                     return entry.similarityFunction.compare(
-                        simpleTextByteVectorValues.vectorValue(ord),
+                        vectorValue(ord),
                         target
                     )
                 }
