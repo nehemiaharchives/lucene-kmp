@@ -223,15 +223,13 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
         val numIndexDims: Int =
             TestUtil.nextInt(random(), 1, min(numDims, PointValues.MAX_INDEX_DIMENSIONS))
 
-        val docValues: Array<Array<ByteArray>> = Array(numDocs)
-        /*for (docID in 0..<numDocs)*/ {
-            val values = Array(numDims)
-            /*for (dim in 0..<numDims)*/ {
-                val valuesDim /*values[dim]*/ = ByteArray(numBytesPerDim)
-                random().nextBytes(valuesDim)
-                valuesDim
+        val docValues: Array<Array<ByteArray>> = Array(numDocs) { emptyArray() }
+        for (docID in 0..<numDocs) {
+            val values = Array(numDims) { ByteArray(numBytesPerDim) }
+            for (dim in 0..<numDims) {
+                random().nextBytes(values[dim])
             }
-            /*docValues[docID] =*/ values
+            docValues[docID] = values
         }
 
         // Keep retrying until we 1) we allow a big enough heap, and 2) we hit a random IOExc from MDW:

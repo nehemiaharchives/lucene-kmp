@@ -1049,7 +1049,7 @@ open class BKDWriter(
                 return 0
             } else {
                 val delta = leafNodes.getLeafLP(leavesOffset) - minBlockFP
-                require(
+                assert(
                     leafNodes.numLeaves() == numLeaves || delta > 0
                 ) { "expected delta > 0; got numLeaves =$numLeaves and delta=$delta" }
                 writeBuffer.writeVLong(delta)
@@ -1064,7 +1064,7 @@ open class BKDWriter(
             } else {
                 leftBlockFP = leafNodes.getLeafLP(leavesOffset)
                 val delta = leftBlockFP - minBlockFP
-                require(
+                assert(
                     leafNodes.numLeaves() == numLeaves || delta > 0
                 ) { "expected delta > 0; got numLeaves =$numLeaves and delta=$delta" }
                 writeBuffer.writeVLong(delta)
@@ -1671,19 +1671,19 @@ open class BKDWriter(
         } else {
             // inner node
 
-            var splitDim = 0 //TODO initialized with zero to avoid nullable Int?, however not sure if this is correct
+            val splitDim: Int
             // compute the split dimension and partition around it
             if (config.numIndexDims == 1) {
                 splitDim = 0
             } else {
                 // for dimensions > 2 we recompute the bounds for the current inner node to help the
-                // algorithm choose best
-                // split dimensions. Because it is an expensive operation, the frequency we recompute the
-                // bounds is given
-                // by SPLITS_BEFORE_EXACT_BOUNDS.
+                // algorithm choose best split dimensions. Because it is an expensive operation, the
+                // frequency we recompute the bounds is given by SPLITS_BEFORE_EXACT_BOUNDS.
                 if (numLeaves != leafBlockFPs.size && config.numIndexDims > 2 && parentSplits.sum() % SPLITS_BEFORE_EXACT_BOUNDS == 0) {
-                    splitDim = split(minPackedValue, maxPackedValue, parentSplits)
+                    computePackedValueBounds(reader, from, to, minPackedValue, maxPackedValue, scratchBytesRef1)
                 }
+                splitDim = split(minPackedValue, maxPackedValue, parentSplits)
+            }
 
                 // How many leaves will be in the left tree:
                 val numLeftLeafNodes = getNumLeftLeafNodes(numLeaves)
@@ -1779,8 +1779,6 @@ open class BKDWriter(
                 parentSplits[splitDim]--
             }
         }
-    }
-
 
     @Throws(IOException::class)
     private fun computePackedValueBounds(
