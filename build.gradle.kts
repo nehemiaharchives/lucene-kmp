@@ -2,6 +2,7 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.api.tasks.Sync
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -117,10 +118,20 @@ subprojects {
         .asFile
         .absolutePath
 
+    val syncIndexTestResources = tasks.register<Sync>("syncIndexTestResources") {
+        from(rootProject.layout.projectDirectory.dir("test-framework/src/commonMain/resources/org/gnit/lucenekmp/tests/index"))
+        into(layout.buildDirectory.dir("generated/test-resources/index"))
+    }
+
     tasks.withType<KotlinNativeTest>().configureEach {
+        dependsOn(syncIndexTestResources)
+        val indexResourcesDir = syncIndexTestResources.get().destinationDir.absolutePath
+
         // iOS simulator tests are launched via `simctl spawn`; forward env to child process.
         environment("tests.linedocsfile", testLineDocsPath)
         environment("SIMCTL_CHILD_tests.linedocsfile", testLineDocsPath)
+        environment("tests.indexresourcesdir", indexResourcesDir)
+        environment("SIMCTL_CHILD_tests.indexresourcesdir", indexResourcesDir)
     }
 
     tasks.withType<AbstractTestTask>().configureEach {

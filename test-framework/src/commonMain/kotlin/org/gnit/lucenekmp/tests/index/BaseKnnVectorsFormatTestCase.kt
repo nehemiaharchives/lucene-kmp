@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.tests.index
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import dev.scottpierce.envvar.EnvVar
 import okio.FileSystem
 import okio.IOException
 import okio.Path.Companion.toPath
@@ -2154,14 +2155,17 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
         val seen: MutableSet<String> = HashSet<String>(578)
 
         val fs = FileSystem.SYSTEM
+        val injectedResourceRoot = EnvVar["tests.indexresourcesdir"]
         val resourceRoots = listOf(
+            // explicitly staged location for Kotlin/Native tests (forwarded via SIMCTL_CHILD_* on iOS):
+            injectedResourceRoot,
             // when cwd is lucene-kmp/core (common in run configurations):
             "../test-framework/src/commonMain/resources/org/gnit/lucenekmp/tests/index",
             // when cwd is lucene-kmp:
             "test-framework/src/commonMain/resources/org/gnit/lucenekmp/tests/index",
             // when cwd is workspace root:
             "lucene-kmp/test-framework/src/commonMain/resources/org/gnit/lucenekmp/tests/index"
-        )
+        ).filterNotNull()
         fun resolveResourcePath(fileName: String): okio.Path {
             for (root in resourceRoots) {
                 val candidate = ("$root/$fileName").toPath()
