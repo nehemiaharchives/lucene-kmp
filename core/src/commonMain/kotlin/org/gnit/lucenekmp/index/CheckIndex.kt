@@ -3281,10 +3281,14 @@ class CheckIndex(
             val fieldInfos: FieldInfos = reader.fieldInfos
             val status: Status.VectorValuesStatus = Status.VectorValuesStatus()
             try {
-                val vectorsReader: KnnVectorsReader = reader.vectorReader!!
                 if (fieldInfos.hasVectorValues()) {
                     for (fieldInfo in fieldInfos) {
                         if (fieldInfo.hasVectorValues()) {
+                            // If the reader doesn't provide any vector values for this field, skip it (same as Java).
+                            if (reader.getFloatVectorValues(fieldInfo.name) == null &&
+                                reader.getByteVectorValues(fieldInfo.name) == null) {
+                                continue
+                            }
                             status.totalKnnVectorFields++
                             when (fieldInfo.vectorEncoding) {
                                 VectorEncoding.BYTE -> checkByteVectorValues(
@@ -3338,14 +3342,14 @@ class CheckIndex(
             }
             val startNS: Long = System.nanoTime()
             val status: Status.HnswGraphsStatus = Status.HnswGraphsStatus()
-            val vectorsReader: KnnVectorsReader = reader.vectorReader!!
+            val vectorsReader: KnnVectorsReader? = reader.vectorReader
             val fieldInfos: FieldInfos = reader.fieldInfos
 
             try {
                 if (fieldInfos.hasVectorValues()) {
                     for (fieldInfo in fieldInfos) {
                         if (fieldInfo.hasVectorValues()) {
-                            val fieldReader: KnnVectorsReader = getFieldReaderForName(vectorsReader, fieldInfo.name)
+                            val fieldReader: KnnVectorsReader = getFieldReaderForName(vectorsReader!!, fieldInfo.name)
                             if (fieldReader is HnswGraphProvider) {
                                 val hnswGraph: HnswGraph = fieldReader.getGraph(fieldInfo.name)!!
                                 testHnswGraph(hnswGraph, fieldInfo.name, status)

@@ -63,7 +63,7 @@ abstract class FlushPolicy {
     ): DocumentsWriterPerThread {
         assert(perThread.numDocsInRAM > 0)
         // the dwpt which needs to be flushed eventually
-        val maxRamUsingWriter: DocumentsWriterPerThread = control.findLargestNonPendingWriter()
+        val maxRamUsingWriter: DocumentsWriterPerThread = control.findLargestNonPendingWriter() ?: perThread
         assert(assertMessage("set largest ram consuming thread pending on lower watermark"))
         return maxRamUsingWriter
     }

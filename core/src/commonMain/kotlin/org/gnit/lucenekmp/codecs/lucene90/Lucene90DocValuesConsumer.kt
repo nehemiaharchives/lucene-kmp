@@ -965,7 +965,7 @@ internal class Lucene90DocValuesConsumer(
                             if (doc != NO_MORE_DOCS) {
                                 docValueCount = values.docValueCount()
                                 ords = ArrayUtil.grow(ords, docValueCount)
-                                for (j in 0..docValueCount) {
+                                for (j in 0 until docValueCount) {
                                     ords[j] = values.nextOrd()
                                 }
                                 i = 0

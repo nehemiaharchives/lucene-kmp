@@ -793,7 +793,7 @@ class DocumentsWriterFlushControl(
 
     // TODO Syncronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
-    fun findLargestNonPendingWriter(): DocumentsWriterPerThread {
+    fun findLargestNonPendingWriter(): DocumentsWriterPerThread? {
         syncLock.lock()
         try {
             var maxRamUsingWriter: DocumentsWriterPerThread? = null
@@ -817,7 +817,7 @@ class DocumentsWriterFlushControl(
             if (infoStream.isEnabled("FP")) {
                 infoStream.message("FP", "$count in-use non-flushing threads states")
             }
-            return maxRamUsingWriter!!
+            return maxRamUsingWriter
         } finally {
             syncLock.unlock()
         }
@@ -825,7 +825,7 @@ class DocumentsWriterFlushControl(
 
     /** Returns the largest non-pending flushable DWPT or `null` if there is none.  */
     fun checkoutLargestNonPendingWriter(): DocumentsWriterPerThread? {
-        val largestNonPendingWriter: DocumentsWriterPerThread = findLargestNonPendingWriter()
+        val largestNonPendingWriter: DocumentsWriterPerThread? = findLargestNonPendingWriter()
         if (largestNonPendingWriter != null) {
             // we only lock this very briefly to swap it's DWPT out - we don't go through the DWPTPool and
             // it's free queue

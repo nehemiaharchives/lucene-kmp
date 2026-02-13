@@ -35,7 +35,7 @@ class TestLucene101PostingsFormat : BasePostingsFormatTestCase() {
             ByteArrayDataOutput(bytes)
         val `in` =
             ByteArrayDataInput()
-        for (i in intArrayOf(0, 1, 127, 128, 32767, 32768, Int.Companion.MAX_VALUE)) {
+        for (i in intArrayOf(0, 1, 127, 128, 32767, 32768, Int.MAX_VALUE)) {
             out.reset(bytes)
             Lucene101PostingsWriter.writeVInt15(out, i)
             `in`.reset(bytes, 0, out.position)
