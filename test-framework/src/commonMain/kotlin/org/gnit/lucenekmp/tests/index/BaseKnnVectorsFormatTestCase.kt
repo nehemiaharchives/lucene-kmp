@@ -1550,10 +1550,27 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
                         if (vectorValues == null) {
                             continue
                         }
+                        // KMP deviation from Java Lucene test:
+                        // With the reduced test corpus size used in this port (numDoc=10), random deletions can
+                        // leave too few live vectors for Java's original random k/visitedLimit ranges. That makes
+                        // the "limit must be hit" assertion flaky in CI. We derive limits from live vector count so
+                        // the same semantic assertions stay valid deterministically.
+                        var liveVectorCount = 0
+                        val vectorIt = vectorValues.iterator()
+                        var doc = vectorIt.nextDoc()
+                        while (doc != DocIdSetIterator.NO_MORE_DOCS) {
+                            if (liveDocs == null || liveDocs.get(doc)) {
+                                liveVectorCount++
+                            }
+                            doc = vectorIt.nextDoc()
+                        }
+                        if (liveVectorCount <= 1) {
+                            continue
+                        }
 
                         // check the limit is hit when it's very small
-                        var k: Int = 5 + random().nextInt(45)
-                        var visitedLimit: Int = k + random().nextInt(5)
+                        var k: Int = min(5 + random().nextInt(45), liveVectorCount)
+                        var visitedLimit: Int = min(k + random().nextInt(5), liveVectorCount - 1)
                         var results: TopDocs =
                             ctx.reader()
                                 .searchNearestVectors(
