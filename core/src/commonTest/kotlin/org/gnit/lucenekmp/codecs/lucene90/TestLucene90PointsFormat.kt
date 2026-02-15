@@ -360,7 +360,6 @@ class TestLucene90PointsFormat : BasePointsFormatTestCase() {
 
     @Test
     override fun testWithExceptions() = super.testWithExceptions()
-
     @Test
     override fun testMultiValued() = super.testMultiValued()
 

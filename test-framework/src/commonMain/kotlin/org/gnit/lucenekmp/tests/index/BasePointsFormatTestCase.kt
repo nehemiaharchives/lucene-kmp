@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.tests.index
 
 import com.ionspin.kotlin.bignum.integer.BigInteger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.document.BinaryPoint
@@ -56,6 +57,8 @@ import kotlin.test.fail
  * given PointsFormat that this test fails to catch then this test needs to be improved!
  */
 abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
+    private val logger = KotlinLogging.logger {}
+
     override fun addRandomFields(doc: Document) {
         val numValues: Int = random().nextInt(3)
         for (i in 0..<numValues) {
@@ -234,32 +237,57 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
 
         // Keep retrying until we 1) we allow a big enough heap, and 2) we hit a random IOExc from MDW:
         var done = false
+        var attempt = 0
         while (done == false) {
+            attempt++
+            logger.debug {
+                "testWithExceptions attempt=$attempt numDocs=$numDocs numDims=$numDims numIndexDims=$numIndexDims numBytesPerDim=$numBytesPerDim"
+            }
             newMockFSDirectory(createTempDir()).use { dir ->
                 try {
                     dir.randomIOExceptionRate = 0.05
                     dir.randomIOExceptionRateOnOpen = 0.05
+                    logger.debug {
+                        "testWithExceptions attempt=$attempt verify start ioRate=${dir.randomIOExceptionRate} ioRateOnOpen=${dir.randomIOExceptionRateOnOpen}"
+                    }
                     verify(dir, docValues, null, numDims, numIndexDims, numBytesPerDim, true)
+                    logger.debug { "testWithExceptions attempt=$attempt verify completed without exception" }
                 } catch (ise: IllegalStateException) {
                     done = handlePossiblyFakeException(ise)
+                    logger.debug {
+                        "testWithExceptions attempt=$attempt caught IllegalStateException done=$done message=${ise.message}"
+                    }
                 } catch (ae: AssertionError) {
                     if (ae.message != null && ae.message!!.contains("does not exist; files=")) {
                         // OK: likely we threw the random IOExc when IW was asserting the commit files exist
                         done = true
+                        logger.debug {
+                            "testWithExceptions attempt=$attempt caught AssertionError(known-random-io) done=$done message=${ae.message}"
+                        }
                     } else {
+                        logger.debug {
+                            "testWithExceptions attempt=$attempt rethrow AssertionError message=${ae.message}"
+                        }
                         throw ae
                     }
                 } catch (iae: IllegalArgumentException) {
                     // This just means we got a too-small maxMB for the maxPointsInLeafNode; just retry w/
                     // more heap
+                    logger.debug {
+                        "testWithExceptions attempt=$attempt caught IllegalArgumentException(retry) message=${iae.message}"
+                    }
                     assertTrue(
                         iae.message!!.contains("either increase maxMBSortInHeap or decrease maxPointsInLeafNode")
                     )
                 } catch (ioe: IOException) {
                     done = handlePossiblyFakeException(ioe)
+                    logger.debug {
+                        "testWithExceptions attempt=$attempt caught IOException done=$done message=${ioe.message}"
+                    }
                 }
             }
         }
+        logger.debug { "testWithExceptions finished after attempt=$attempt done=$done" }
     }
 
     // TODO: merge w/ BaseIndexFileFormatTestCase.handleFakeIOException
@@ -271,9 +299,15 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
                 && (message.contains("a random IOException")
                         || message.contains("background merge hit exception"))
             ) {
+                logger.debug {
+                    "handlePossiblyFakeException accepted as fake exception throwable=$ex message=$message"
+                }
                 return true
             }
             ex = ex.cause
+        }
+        logger.debug {
+            "handlePossiblyFakeException rethrowing throwable=$e message=${e?.message}"
         }
         Rethrow.rethrow(e!!)
 

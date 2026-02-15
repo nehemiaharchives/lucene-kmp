@@ -1934,9 +1934,13 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 if (hasPendingMaxNumSegmentMerges) {
                     stableNoPendingChecks = 0
                     waitIters++
-                    if (waitIters % 50 == 0) {
+                    if (waitIters % 10 == 0) {
                         val mergeState = withIndexWriterLock {
-                            "pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size}"
+                            val pendingForced = pendingMerges.filter { it.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS }
+                            val runningForced = runningMerges.filter { it.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS }
+                            val mergeExceptionState =
+                                mergeExceptions.joinToString { "${it.segString()} exception=${it.exception}" }
+                            "pending=${pendingMerges.size} running=${runningMerges.size} forcedPending=${pendingForced.size} forcedRunning=${runningForced.size} mergeExceptions=${mergeExceptions.size} segmentsToMerge=${segmentsToMerge.size} pendingForcedDetail=${pendingForced.joinToString { it.segString() }} runningForcedDetail=${runningForced.joinToString { it.segString() }} mergeExceptionDetail=$mergeExceptionState"
                         }
                         logger.debug {
                             "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments $mergeState"
@@ -1952,11 +1956,16 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // In KMP we don't have equivalent monitor semantics here, so require a second
                     // no-pending observation before exiting forceMerge wait.
                     if (stableNoPendingChecks == 0) {
+                        logger.debug {
+                            "forceMerge: first no-pending observation maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size}; waiting one more cycle"
+                        }
                         stableNoPendingChecks = 1
                         doWait()
                         continue
                     }
-//                     logger.debug { "forceMerge: done waiting maxNumSegments=$maxNumSegments" }
+                    logger.debug {
+                        "forceMerge: done waiting maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size}"
+                    }
                     break
                 }
             }
@@ -2616,7 +2625,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // We wait here to make all merges stop.  It should not
         // take very long because they periodically check if
         // they are aborted.
+        var abortWaitIters = 0
         while (runningMerges.size + runningAddIndexesMerges.size != 0) {
+            abortWaitIters++
             if (infoStream.isEnabled("IW")) {
                 infoStream.message(
                     "IW",
@@ -2625,6 +2636,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             + " running merge/s to abort; currently running addIndexes: "
                             + runningAddIndexesMerges.size)
                 )
+            }
+            if (abortWaitIters % 10 == 0) {
+                logger.debug {
+                    "abortMerges: waiting iter=$abortWaitIters runningMerges=${runningMerges.size} runningAddIndexesMerges=${runningAddIndexesMerges.size} pendingMerges=${pendingMerges.size}"
+                }
             }
 
             doWait()
@@ -2659,7 +2675,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             infoStream.message("IW", "waitForMerges")
         }
 
+        var waitForMergesIters = 0
         while (pendingMerges.isNotEmpty() || runningMerges.isNotEmpty()) {
+            waitForMergesIters++
+            if (waitForMergesIters % 10 == 0) {
+                logger.debug {
+                    "waitForMerges: waiting iter=$waitForMergesIters pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size}"
+                }
+            }
             doWait()
         }
 
@@ -4858,6 +4881,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     logger.debug { "merge: finally lock acquired merge=${merge.segString()} success=$success" }
                     // Readers are already closed in commitMerge if we didn't hit an exception.
                     if (!success) {
+                        logger.debug {
+                            "merge: unsuccessful merge details merge=${merge.segString()} aborted=${merge.isAborted} exception=${merge.exception}"
+                        }
                         closeMergeReaders(merge, suppressExceptions = true, droppedSegment = false)
                     }
                     mergeFinish(merge)
