@@ -97,25 +97,8 @@ class TestLucene99ScalarQuantizedVectorsFormat : BaseKnnVectorsFormatTestCase() 
         for (i in 0 until numVectors) {
             vectors.add(randomVector(dim))
         }
-        val scalarQuantizer: ScalarQuantizer = Lucene99ScalarQuantizedVectorsWriter.buildScalarQuantizer(
-            FloatVectorWrapper(vectors),
-            numVectors,
-            similarityFunction,
-            confidenceInterval,
-            bits.toByte()
-        )
         val expectedCorrections = FloatArray(numVectors)
         val expectedVectors = Array(numVectors) { ByteArray(dim) }
-        for (i in 0 until numVectors) {
-            var vector = vectors[i]
-            if (normalize) {
-                val copy = FloatArray(vector.size)
-                vector.copyInto(copy)
-                VectorUtil.l2normalize(copy)
-                vector = copy
-            }
-            expectedCorrections[i] = scalarQuantizer.quantize(vector, expectedVectors[i], similarityFunction)
-        }
         val randomlyReusedVector = FloatArray(dim)
 
         newDirectory().use { dir ->
@@ -146,7 +129,18 @@ class TestLucene99ScalarQuantizedVectorsFormat : BaseKnnVectorsFormatTestCase() 
                             knnVectorsReader = knnVectorsReader.getFieldReader("f") ?: fail("missing field reader for f")
                         }
                         if (knnVectorsReader is Lucene99ScalarQuantizedVectorsReader) {
-                            assertNotNull(knnVectorsReader.getQuantizationState("f"))
+                            val persistedQuantizer = assertNotNull(knnVectorsReader.getQuantizationState("f"))
+                            for (i in 0 until numVectors) {
+                                var vector = vectors[i]
+                                if (normalize) {
+                                    val copy = FloatArray(vector.size)
+                                    vector.copyInto(copy)
+                                    VectorUtil.l2normalize(copy)
+                                    vector = copy
+                                }
+                                expectedCorrections[i] =
+                                    persistedQuantizer.quantize(vector, expectedVectors[i], similarityFunction)
+                            }
                             val quantizedByteVectorValues: QuantizedByteVectorValues =
                                 knnVectorsReader.getQuantizedVectorValues("f")
                             val iter: KnnVectorValues.DocIndexIterator = quantizedByteVectorValues.iterator()
