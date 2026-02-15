@@ -340,7 +340,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.analysis.tokenattributes.PositionLengthAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.TypeAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TypeAttributeImpl
-- org.apache.lucene.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.Lucene102HnswBinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockDecoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockDecoder
 - org.apache.lucene.codecs.uniformsplit.BlockHeader → org.gnit.lucenekmp.codecs.uniformsplit.BlockHeader
@@ -595,7 +594,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.compressing.TestHighCompressionMode → org.gnit.lucenekmp.codecs.compressing.TestHighCompressionMode
 - org.apache.lucene.codecs.compressing.TestLZ4WithPresetDictCompressionMode → org.gnit.lucenekmp.codecs.compressing.TestLZ4WithPresetDictCompressionMode
 - org.apache.lucene.codecs.lucene101.TestLucene101PostingsFormatV0 → org.gnit.lucenekmp.codecs.lucene101.TestLucene101PostingsFormatV0
-- org.apache.lucene.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene102.TestLucene102HnswBinaryQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance
 - org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval → org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval
 - org.apache.lucene.codecs.lucene90.TestLucene90NormsFormat → org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormat
@@ -604,18 +602,13 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.lucene90.blocktree.TestMSBVLong → org.gnit.lucenekmp.codecs.lucene90.blocktree.TestMSBVLong
 - org.apache.lucene.codecs.lucene90.compressing.TestStoredFieldsInt → org.gnit.lucenekmp.codecs.lucene90.compressing.TestStoredFieldsInt
 - org.apache.lucene.codecs.lucene90.tests.MockTermStateFactory → org.gnit.lucenekmp.codecs.lucene90.tests.MockTermStateFactory
-- org.apache.lucene.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswQuantizedVectorsFormat
-- org.apache.lucene.codecs.lucene99.TestLucene99HnswVectorsFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99HnswVectorsFormat
-- org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat → org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsFormat
 - org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter → org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter
 - org.apache.lucene.codecs.memory.TestDirectPostingsFormat → org.gnit.lucenekmp.codecs.memory.TestDirectPostingsFormat
 - org.apache.lucene.codecs.memory.TestFSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.TestFSTPostingsFormat
 - org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat → org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat
-- org.apache.lucene.codecs.perfield.TestPerFieldKnnVectorsFormat → org.gnit.lucenekmp.codecs.perfield.TestPerFieldKnnVectorsFormat
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2 → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
 - org.apache.lucene.codecs.uniformsplit.TestBlockWriter → org.gnit.lucenekmp.codecs.uniformsplit.TestBlockWriter
 - org.apache.lucene.codecs.uniformsplit.TestFSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.TestFSTDictionary
 - org.apache.lucene.codecs.uniformsplit.TestTermBytes → org.gnit.lucenekmp.codecs.uniformsplit.TestTermBytes
@@ -1043,7 +1036,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.TestSleepingLockWrapper → org.gnit.lucenekmp.store.TestSleepingLockWrapper
 - org.apache.lucene.store.TestStressLockFactories → org.gnit.lucenekmp.store.TestStressLockFactories
 - org.apache.lucene.store.TestTrackingDirectoryWrapper → org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper
+- org.apache.lucene.tests.analysis.TestLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.TestMockAnalyzer → org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer
+- org.apache.lucene.tests.analysis.TestMockCharFilter → org.gnit.lucenekmp.tests.analysis.TestMockCharFilter
 - org.apache.lucene.tests.analysis.TestMockSynonymFilter → org.gnit.lucenekmp.tests.analysis.TestMockSynonymFilter
 - org.apache.lucene.tests.analysis.TestToken → org.gnit.lucenekmp.tests.analysis.TestToken
 - org.apache.lucene.tests.codecs.asserting.TestAssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.TestAssertingDocValuesFormat
