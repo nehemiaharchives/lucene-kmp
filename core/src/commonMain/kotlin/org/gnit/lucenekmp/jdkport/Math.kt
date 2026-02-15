@@ -318,6 +318,182 @@ object Math {
         }
     }
 
+
+    /**
+     * Returns the floating-point number adjacent to the first
+     * argument in the direction of the second argument.  If both
+     * arguments compare as equal the second argument is returned.
+     *
+     *
+     *
+     * Special cases:
+     *
+     *  *  If either argument is a NaN, then NaN is returned.
+     *
+     *  *  If both arguments are signed zeros, `direction`
+     * is returned unchanged (as implied by the requirement of
+     * returning the second argument if the arguments compare as
+     * equal).
+     *
+     *  *  If `start` is
+     * [Double.MIN_VALUE] and `direction`
+     * has a value such that the result should have a smaller
+     * magnitude, then a zero with the same sign as `start`
+     * is returned.
+     *
+     *  *  If `start` is infinite and
+     * `direction` has a value such that the result should
+     * have a smaller magnitude, [Double.MAX_VALUE] with the
+     * same sign as `start` is returned.
+     *
+     *  *  If `start` is equal to
+     * [Double.MAX_VALUE] and `direction` has a
+     * value such that the result should have a larger magnitude, an
+     * infinity with same sign as `start` is returned.
+     *
+     *
+     * @param start  starting floating-point value
+     * @param direction value indicating which of
+     * `start`'s neighbors or `start` should
+     * be returned
+     * @return The floating-point number adjacent to `start` in the
+     * direction of `direction`.
+     * @since 1.6
+     */
+    fun nextAfter(start: Double, direction: Double): Double {
+        /*
+         * The cases:
+         *
+         * nextAfter(+infinity, 0)  == MAX_VALUE
+         * nextAfter(+infinity, +infinity)  == +infinity
+         * nextAfter(-infinity, 0)  == -MAX_VALUE
+         * nextAfter(-infinity, -infinity)  == -infinity
+         *
+         * are naturally handled without any additional testing
+         */
+
+        /*
+         * IEEE 754 floating-point numbers are lexicographically
+         * ordered if treated as signed-magnitude integers.
+         * Since Java's integers are two's complement,
+         * incrementing the two's complement representation of a
+         * logically negative floating-point value *decrements*
+         * the signed-magnitude representation. Therefore, when
+         * the integer representation of a floating-point value
+         * is negative, the adjustment to the representation is in
+         * the opposite direction from what would initially be expected.
+         */
+
+        // Branch to descending case first as it is more costly than ascending
+        // case due to start != 0.0d conditional.
+
+        if (start > direction) { // descending
+            if (start != 0.0) {
+                val transducer = Double.doubleToRawLongBits(start)
+                return Double.longBitsToDouble(transducer + (if (transducer > 0L) -1L else 1L))
+            } else { // start == 0.0d && direction < 0.0d
+                return -Double.Companion.MIN_VALUE
+            }
+        } else if (start < direction) { // ascending
+            // Add +0.0 to get rid of a -0.0 (+0.0 + -0.0 => +0.0)
+            // then bitwise convert start to integer.
+            val transducer = Double.doubleToRawLongBits(start + 0.0)
+            return Double.longBitsToDouble(transducer + (if (transducer >= 0L) 1L else -1L))
+        } else if (start == direction) {
+            return direction
+        } else { // isNaN(start) || isNaN(direction)
+            return start + direction
+        }
+    }
+
+
+    /**
+     * Returns the floating-point number adjacent to the first
+     * argument in the direction of the second argument.  If both
+     * arguments compare as equal a value equivalent to the second argument
+     * is returned.
+     *
+     *
+     *
+     * Special cases:
+     *
+     *  *  If either argument is a NaN, then NaN is returned.
+     *
+     *  *  If both arguments are signed zeros, a value equivalent
+     * to `direction` is returned.
+     *
+     *  *  If `start` is
+     * [Float.MIN_VALUE] and `direction`
+     * has a value such that the result should have a smaller
+     * magnitude, then a zero with the same sign as `start`
+     * is returned.
+     *
+     *  *  If `start` is infinite and
+     * `direction` has a value such that the result should
+     * have a smaller magnitude, [Float.MAX_VALUE] with the
+     * same sign as `start` is returned.
+     *
+     *  *  If `start` is equal to
+     * [Float.MAX_VALUE] and `direction` has a
+     * value such that the result should have a larger magnitude, an
+     * infinity with same sign as `start` is returned.
+     *
+     *
+     * @param start  starting floating-point value
+     * @param direction value indicating which of
+     * `start`'s neighbors or `start` should
+     * be returned
+     * @return The floating-point number adjacent to `start` in the
+     * direction of `direction`.
+     * @since 1.6
+     */
+    fun nextAfter(start: Float, direction: Double): Float {
+        /*
+         * The cases:
+         *
+         * nextAfter(+infinity, 0)  == MAX_VALUE
+         * nextAfter(+infinity, +infinity)  == +infinity
+         * nextAfter(-infinity, 0)  == -MAX_VALUE
+         * nextAfter(-infinity, -infinity)  == -infinity
+         *
+         * are naturally handled without any additional testing
+         */
+
+        /*
+         * IEEE 754 floating-point numbers are lexicographically
+         * ordered if treated as signed-magnitude integers.
+         * Since Java's integers are two's complement,
+         * incrementing the two's complement representation of a
+         * logically negative floating-point value *decrements*
+         * the signed-magnitude representation. Therefore, when
+         * the integer representation of a floating-point value
+         * is negative, the adjustment to the representation is in
+         * the opposite direction from what would initially be expected.
+         */
+
+        // Branch to descending case first as it is more costly than ascending
+        // case due to start != 0.0f conditional.
+
+        if (start > direction) { // descending
+            if (start != 0.0f) {
+                val transducer = Float.floatToRawIntBits(start)
+                return Float.intBitsToFloat(transducer + (if (transducer > 0) -1 else 1))
+            } else { // start == 0.0f && direction < 0.0f
+                return -Float.Companion.MIN_VALUE
+            }
+        } else if (start < direction) { // ascending
+            // Add +0.0 to get rid of a -0.0 (+0.0 + -0.0 => +0.0)
+            // then bitwise convert start to integer.
+            val transducer = Float.floatToRawIntBits(start + 0.0f)
+            return Float.intBitsToFloat(transducer + (if (transducer >= 0) 1 else -1))
+        } else if (start.toDouble() == direction) {
+            return direction.toFloat()
+        } else { // isNaN(start) || isNaN(direction)
+            return start + direction.toFloat()
+        }
+    }
+
+
     /* ===== IEEE-754 / Double helpers that the Kotlin std-lib does NOT expose ===== */
 
     /**
