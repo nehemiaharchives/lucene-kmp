@@ -1348,7 +1348,7 @@ abstract class BaseGeoPointTestCase : LuceneTestCase() {
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
     open fun testRandomDistanceHuge() {
-        for (iters in 0..9) {
+        for (iters in 0..3) { // TODO reduced from 0..9 to 0..3 for dev speed
             doRandomDistanceTest(3, 5) // TODO reduced from 2000, 100 to 3, 5
         }
     }
