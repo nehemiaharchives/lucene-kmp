@@ -31,6 +31,7 @@ import org.gnit.lucenekmp.index.SlowImpactsEnum
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TermsEnum
 import org.gnit.lucenekmp.jdkport.StandardCharsets
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.fromByteArray
 import org.gnit.lucenekmp.store.BufferedChecksumIndexInput
@@ -854,21 +855,27 @@ internal class SimpleTextFieldsReader(state: SegmentReadState) : FieldsProducer(
     }
 
     private val termsCache: MutableMap<String, SimpleTextTerms> = HashMap()
+    private val termsCacheLock = ReentrantLock()
 
-    /*@Synchronized*/
     @Throws(IOException::class)
     override fun terms(field: String?): Terms? {
-        var terms = termsCache[field]
-        if (terms == null) {
-            val fp = fields[field]
-            if (fp == null) {
-                return null
-            } else {
-                terms = SimpleTextTerms(field!!, fp, maxDoc)
-                termsCache[field] = terms
+        termsCacheLock.lock()
+        try {
+            val fieldName = field ?: return null
+            var terms = termsCache[fieldName]
+            if (terms == null) {
+                val fp = fields[fieldName]
+                if (fp == null) {
+                    return null
+                } else {
+                    terms = SimpleTextTerms(fieldName, fp, maxDoc)
+                    termsCache[fieldName] = terms
+                }
             }
+            return terms
+        } finally {
+            termsCacheLock.unlock()
         }
-        return terms
     }
 
     override fun size(): Int {
