@@ -203,7 +203,7 @@ open class Field : IndexableField {
      * The value of the field as a String, or null. If null, the Reader value or binary value is used.
      * Exactly one of stringValue(), readerValue(), and binaryValue() must be set.
      */
-    public override fun stringValue(): String? {
+    override fun stringValue(): String? {
         if (fieldsData is CharSequence || fieldsData is Number) {
             return fieldsData.toString()
         } else {
@@ -218,7 +218,7 @@ open class Field : IndexableField {
      * The value of the field as a Reader, or null. If null, the String value or binary value is used.
      * Exactly one of stringValue(), readerValue(), and binaryValue() must be set.
      */
-    public override fun readerValue(): Reader? {
+    override fun readerValue(): Reader? {
         return if (fieldsData is Reader) fieldsData as Reader else null
     }
 
@@ -242,14 +242,14 @@ open class Field : IndexableField {
      * details.
      */
     open fun setStringValue(value: String) {
-        require(fieldsData is String) { "cannot change value type from " + fieldsData!!::class.simpleName + " to String" }
+        require(fieldsData is String) { "cannot change value type from " + fieldsData::class.simpleName + " to String" }
         requireNotNull(value) { "value must not be null" }
         fieldsData = value
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     fun setReaderValue(value: Reader) {
-        require(fieldsData is Reader) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Reader" }
+        require(fieldsData is Reader) { "cannot change value type from " + fieldsData::class.simpleName + " to Reader" }
         fieldsData = value
     }
 
@@ -268,7 +268,7 @@ open class Field : IndexableField {
     open fun setBytesValue(value: BytesRef) {
         require(fieldsData is BytesRef) {
             ("cannot change value type from "
-                    + fieldsData!!::class.simpleName
+                    + fieldsData::class.simpleName
                     + " to BytesRef")
         }
         requireNotNull(value) { "value must not be null" }
@@ -277,37 +277,37 @@ open class Field : IndexableField {
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     fun setByteValue(value: Byte) {
-        require(fieldsData is Byte) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Byte" }
+        require(fieldsData is Byte) { "cannot change value type from " + fieldsData::class.simpleName + " to Byte" }
         fieldsData = value
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     fun setShortValue(value: Short) {
-        require(fieldsData is Short) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Short" }
+        require(fieldsData is Short) { "cannot change value type from " + fieldsData::class.simpleName + " to Short" }
         fieldsData = value
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     open fun setIntValue(value: Int) {
-        require(fieldsData is Int) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Integer" }
+        require(fieldsData is Int) { "cannot change value type from " + fieldsData::class.simpleName + " to Integer" }
         fieldsData = value
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     open fun setLongValue(value: Long) {
-        require(fieldsData is Long) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Long" }
+        require(fieldsData is Long) { "cannot change value type from " + fieldsData::class.simpleName + " to Long" }
         fieldsData = value
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     open fun setFloatValue(value: Float) {
-        require(fieldsData is Float) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Float" }
+        require(fieldsData is Float) { "cannot change value type from " + fieldsData::class.simpleName + " to Float" }
         fieldsData = value
     }
 
     /** Expert: change the value of this field. See [.setStringValue].  */
     open fun setDoubleValue(value: Double) {
-        require(fieldsData is Double) { "cannot change value type from " + fieldsData!!::class.simpleName + " to Double" }
+        require(fieldsData is Double) { "cannot change value type from " + fieldsData::class.simpleName + " to Double" }
         fieldsData = value
     }
 
@@ -321,11 +321,11 @@ open class Field : IndexableField {
         this.fieldsData = tokenStream
     }
 
-    public override fun name(): String {
+    override fun name(): String {
         return name
     }
 
-    public override fun numericValue(): Number? {
+    override fun numericValue(): Number? {
         if (fieldsData is Number) {
             return fieldsData as Number
         } else {
@@ -333,7 +333,7 @@ open class Field : IndexableField {
         }
     }
 
-    public override fun binaryValue(): BytesRef? {
+    override fun binaryValue(): BytesRef? {
         if (fieldsData is BytesRef) {
             return fieldsData as BytesRef
         } else {
@@ -358,11 +358,11 @@ open class Field : IndexableField {
     }
 
     /** Returns the [FieldType] for this field.  */
-    public override fun fieldType(): IndexableFieldType {
+    override fun fieldType(): IndexableFieldType {
         return type
     }
 
-    public override fun invertableType(): InvertableType {
+    override fun invertableType(): InvertableType {
         return InvertableType.TOKEN_STREAM
     }
 
@@ -419,13 +419,7 @@ open class Field : IndexableField {
         : TokenStream() {
         private val bytesAtt: BytesTermAttribute = addAttribute(BytesTermAttribute::class)
         private var used = true
-        var value: BytesRef?
-            get() {
-                return value
-            }
-            set(value) {
-                this.value = value
-            }
+        var value: BytesRef? = null
 
         override fun incrementToken(): Boolean {
             if (used) {
