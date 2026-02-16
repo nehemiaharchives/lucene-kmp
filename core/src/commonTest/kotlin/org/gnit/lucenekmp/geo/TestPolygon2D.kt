@@ -250,7 +250,7 @@ class TestPolygon2D : LuceneTestCase() {
                 val latitude = point[0]
                 val longitude = point[1]
                 val expected = GeoTestUtil.containsSlowly(polygon, longitude, latitude)
-                assertEquals(expected, impl.contains(longitude, latitude))
+                assertEquals(expected, impl.contains(latitude, longitude))
             }
         }
     }
