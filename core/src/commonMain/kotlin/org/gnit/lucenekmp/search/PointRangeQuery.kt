@@ -38,12 +38,12 @@ import kotlin.reflect.cast
  * @lucene.experimental
  */
 abstract class PointRangeQuery protected constructor(
-    field: String,
+    field: String?,
     lowerPoint: ByteArray,
     upperPoint: ByteArray,
     numDims: Int
 ) : Query() {
-    val field: String
+    val field: String?
     val numDims: Int
     val bytesPerDim: Int
     var lowerPoint: ByteArray = lowerPoint
@@ -256,7 +256,7 @@ abstract class PointRangeQuery protected constructor(
             override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
                 val reader: LeafReader = context.reader()
 
-                val valuesToCheck: PointValues? = reader.getPointValues(field)
+                val valuesToCheck: PointValues? = if(field != null) reader.getPointValues(field) else null
                 if (!checkValidPointValues(valuesToCheck)) {
                     return null
                 }
@@ -342,7 +342,7 @@ abstract class PointRangeQuery protected constructor(
             override fun count(context: LeafReaderContext): Int {
                 val reader: LeafReader = context.reader()
 
-                val values: PointValues? = reader.getPointValues(field)
+                val values: PointValues? = if(field != null) reader.getPointValues(field) else null
                 if (!checkValidPointValues(values)) {
                     return 0
                 }
@@ -532,7 +532,7 @@ abstract class PointRangeQuery protected constructor(
          * @throws IllegalArgumentException if `field`, `lowerPoint` or `upperPoint` are
          * null.
          */
-        fun checkArgs(field: String, lowerPoint: Any, upperPoint: Any) {
+        fun checkArgs(field: String?, lowerPoint: Any, upperPoint: Any) {
             requireNotNull(field) { "field must not be null" }
             requireNotNull(lowerPoint) { "lowerPoint must not be null" }
             requireNotNull(upperPoint) { "upperPoint must not be null" }

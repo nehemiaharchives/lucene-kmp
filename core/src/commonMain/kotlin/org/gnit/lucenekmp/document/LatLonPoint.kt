@@ -208,7 +208,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
          * @throws IllegalArgumentException if `field` is null, or the box has invalid coordinates.
          */
         fun newBoxQuery(
-            field: String,
+            field: String?,
             minLatitude: Double,
             maxLatitude: Double,
             minLongitude: Double,
@@ -271,7 +271,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
             }
         }
 
-        private fun newBoxInternal(field: String, min: ByteArray, max: ByteArray): Query {
+        private fun newBoxInternal(field: String?, min: ByteArray, max: ByteArray): Query {
             return object : PointRangeQuery(field, min, max, 2) {
                 override fun toString(dimension: Int, value: ByteArray): String {
                     return if (dimension == 0) {
@@ -298,7 +298,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
          * radius is invalid.
          */
         fun newDistanceQuery(
-            field: String, latitude: Double, longitude: Double, radiusMeters: Double
+            field: String?, latitude: Double, longitude: Double, radiusMeters: Double
         ): Query {
             return LatLonPointDistanceQuery(field, latitude, longitude, radiusMeters)
         }
@@ -313,7 +313,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
          * @see Polygon
          */
         fun newPolygonQuery(
-            field: String,
+            field: String?,
             vararg polygons: Polygon
         ): Query {
             return newGeometryQuery(field, QueryRelation.INTERSECTS, *polygons)
@@ -332,7 +332,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
          * @see LatLonGeometry
          */
         fun newGeometryQuery(
-            field: String, queryRelation: QueryRelation, vararg latLonGeometries: LatLonGeometry
+            field: String?, queryRelation: QueryRelation, vararg latLonGeometries: LatLonGeometry
         ): Query {
             if (queryRelation == QueryRelation.INTERSECTS && latLonGeometries.size == 1) {
                 if (latLonGeometries[0] is Rectangle) {
@@ -351,7 +351,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
         }
 
         private fun makeContainsGeometryQuery(
-            field: String,
+            field: String?,
             vararg latLonGeometries: LatLonGeometry
         ): Query {
             val builder: BooleanQuery.Builder = BooleanQuery.Builder()

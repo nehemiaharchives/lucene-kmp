@@ -36,7 +36,7 @@ import kotlin.math.min
  * @lucene.internal
  */
 internal abstract class SpatialQuery protected constructor(
-    field: String,
+    field: String?,
     queryRelation: QueryRelation,
     vararg geometries: Geometry
 ) : Query() {

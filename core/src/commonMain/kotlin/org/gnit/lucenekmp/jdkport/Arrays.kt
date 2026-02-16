@@ -1332,6 +1332,12 @@ object Arrays {
         )
     }
 
+    fun fill(a: DoubleArray, value: Double){
+        a.fill(
+            element = value
+        )
+    }
+
     /**
      * Assigns the specified float value to each element of the specified
      * range of the specified array of floats.  The range to be filled

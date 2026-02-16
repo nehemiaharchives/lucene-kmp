@@ -21,7 +21,7 @@ internal class LatLonPointQuery
 /**
  * Creates a query that matches all indexed shapes to the provided array of [LatLonGeometry]
  */
-    (field: String, queryRelation: QueryRelation, vararg geometries: LatLonGeometry) :
+    (field: String?, queryRelation: QueryRelation, vararg geometries: LatLonGeometry) :
     SpatialQuery(field, queryRelation, *validateGeometry(queryRelation, *geometries)) {
     override fun createComponent2D(vararg geometries: Geometry): Component2D {
         return LatLonGeometry.create(*geometries as Array<LatLonGeometry>)

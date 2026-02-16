@@ -31,9 +31,9 @@ import kotlin.math.max
 import kotlin.reflect.cast
 
 /** Distance query for [LatLonPoint].  */
-internal class LatLonPointDistanceQuery(field: String, latitude: Double, longitude: Double, radiusMeters: Double) :
+internal class LatLonPointDistanceQuery(field: String?, latitude: Double, longitude: Double, radiusMeters: Double) :
     Query() {
-    val field: String
+    val field: String?
     val latitude: Double
     val longitude: Double
     val radiusMeters: Double
@@ -101,7 +101,7 @@ internal class LatLonPointDistanceQuery(field: String, latitude: Double, longitu
             @Throws(IOException::class)
             override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
                 val reader: LeafReader = context.reader()
-                val values: PointValues? = reader.getPointValues(field)
+                val values: PointValues? = if(field != null) reader.getPointValues(field) else null
                 if (values == null) {
                     // No docs in this segment had any points fields
                     return null
