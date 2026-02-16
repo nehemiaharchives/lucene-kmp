@@ -530,7 +530,7 @@ internal class Lucene90DocValuesConsumer(
 
         // All blocks has been written. Flush the offset jump-table
         val offsetsOrigo: Long = data!!.filePointer
-        for (i in 0..offsetsIndex) {
+        for (i in 0 until offsetsIndex) {
             data?.writeLong(offsets[i])
         }
         data?.writeLong(offsetsOrigo)

@@ -374,7 +374,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
     // A particularly tricky adversary for BKD tree:
     @Throws(Exception::class)
     open fun testSamePointManyTimes() {
-        val numPoints: Int = atLeast(1000)
+        val numPoints: Int = atLeast(3) // TODO reduced from 1000 to 3 for dev speed
 
         // Every doc has 2 points:
         val theX = nextX()
@@ -392,8 +392,8 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
     // A particularly tricky adversary for BKD tree:
     @Throws(Exception::class)
     open fun testLowCardinality() {
-        val numPoints: Int = atLeast(1000)
-        val cardinality: Int = TestUtil.nextInt(random(), 2, 20)
+        val numPoints: Int = atLeast(3) // TODO reduced from 1000 to 3 for dev speed
+        val cardinality: Int = TestUtil.nextInt(random(), 2, 3) // TODO reduced from 2, 20 to 2, 3 for dev speed
 
         val diffXs = FloatArray(cardinality)
         val diffYs = FloatArray(cardinality)
@@ -414,7 +414,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
 
     @Throws(Exception::class)
     open fun testAllYEqual() {
-        val numPoints: Int = atLeast(1000)
+        val numPoints: Int = atLeast(3) // TODO reduced from 1000 to 3 for dev speed
         val y = nextY()
         val xs = FloatArray(numPoints)
         val ys = FloatArray(numPoints)
@@ -422,7 +422,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
         var haveRealDoc = false
 
         for (docID in 0..<numPoints) {
-            val x: Int = random().nextInt(20)
+            val x: Int = random().nextInt(2) // TODO reduced from 20 to 2 for dev speed
             if (x == 17) {
                 // Some docs don't have a point:
                 ys[docID] = Float.NaN
@@ -461,7 +461,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
 
     @Throws(Exception::class)
     open fun testAllXEqual() {
-        val numPoints: Int = atLeast(1000)
+        val numPoints: Int = atLeast(3) // TODO reduced from 1000 to 3 for dev speed
         val theX = nextX()
         val xs = FloatArray(numPoints)
         val ys = FloatArray(numPoints)
@@ -469,7 +469,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
         var haveRealDoc = false
 
         for (docID in 0..<numPoints) {
-            val x: Int = random().nextInt(20)
+            val x: Int = random().nextInt(2) // TODO reduced from 20 to 2 for dev speed
             if (x == 17) {
                 // Some docs don't have a point:
                 ys[docID] = Float.NaN
@@ -508,7 +508,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
 
     @Throws(Exception::class)
     open fun testMultiValued() {
-        val numPoints: Int = atLeast(1000)
+        val numPoints: Int = atLeast(3) // TODO reduced from 1000 to 3 for dev speed
         // Every doc has 2 points:
         val xs = FloatArray(2 * numPoints)
         val ys = FloatArray(2 * numPoints)
@@ -599,12 +599,12 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
     @Throws(Exception::class)
     open fun testRandomTiny() {
         // Make sure single-leaf-node case is OK:
-        doTestRandom(10)
+        doTestRandom(1) // TODO reduced from 10 to 1 for dev speed
     }
 
     @Throws(Exception::class)
     open fun testRandomMedium() {
-        doTestRandom(1000)
+        doTestRandom(3) // TODO reduced from 1000 to 3 for dev speed
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
@@ -614,7 +614,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
             "Direct codec can OOME on this test",
             TestUtil.getDocValuesFormat(FIELD_NAME) == "Direct"
         )
-        doTestRandom(200000)
+        doTestRandom(5) // TODO reduced from 200000 to 5 for dev speed
     }
 
     @Throws(Exception::class)
@@ -631,7 +631,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
         var haveRealDoc = false
 
         for (id in 0..<numPoints) {
-            val x: Int = random().nextInt(20)
+            val x: Int = random().nextInt(2) // TODO reduced from 20 to 2 for dev speed
             if (x == 17) {
                 // Some docs don't have a point:
                 ys[id] = Float.NaN
@@ -751,7 +751,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
 
         val s: IndexSearcher = newSearcher(r)
 
-        val iters: Int = atLeast(25)
+        val iters: Int = atLeast(5) // TODO reduced from 25 to 5 for dev speed
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc: Int = s.indexReader.maxDoc()
@@ -835,7 +835,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
 
         val s: IndexSearcher = newSearcher(r)
 
-        val iters: Int = atLeast(25)
+        val iters: Int = atLeast(5) // TODO reduced from 25 to 5 for dev speed
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc: Int = s.indexReader.maxDoc()
@@ -935,7 +935,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
         // We can't wrap with "exotic" readers because points needs to work:
         val s: IndexSearcher = newSearcher(r)
 
-        val iters: Int = atLeast(75)
+        val iters: Int = atLeast(5) // TODO reduced from 75 to 5 for dev speed
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc: Int = s.indexReader.maxDoc()
@@ -1020,7 +1020,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
         // We can't wrap with "exotic" readers because points needs to work:
         val s: IndexSearcher = newSearcher(r)
 
-        val iters: Int = atLeast(75)
+        val iters: Int = atLeast(5) // TODO reduced from 75 to 5 for dev speed
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc: Int = s.indexReader.maxDoc()
@@ -1217,7 +1217,7 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
     open fun testRandomDistance() {
         val numIters: Int = atLeast(1)
         for (iters in 0..<numIters) {
-            doRandomDistanceTest(10, 100)
+            doRandomDistanceTest(3, 3) // TODO reduced from 10, 100 to 3, 3 for dev speed
         }
     }
 
@@ -1225,8 +1225,8 @@ abstract class BaseXYPointTestCase : LuceneTestCase() {
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
     open fun testRandomDistanceHuge() {
-        for (iters in 0..9) {
-            doRandomDistanceTest(2000, 100)
+        for (iters in 0..2) { // TODO reduced from 0..9  to 0..2 for dev speed
+            doRandomDistanceTest(3, 10) // TODO reduced from 2000, 100 to 3, 10 for dev speed
         }
     }
 

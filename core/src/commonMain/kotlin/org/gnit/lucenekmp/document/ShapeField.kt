@@ -402,7 +402,7 @@ object ShapeField {
         ) {
             val bytes: ByteArray
 
-            if (fieldsData == null) {
+            if (!isFieldsDataInitialized()) {
                 bytes = ByteArray(7 * BYTES)
                 fieldsData = BytesRef(bytes)
             } else {
