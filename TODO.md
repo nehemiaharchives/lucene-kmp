@@ -22,7 +22,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.IndriDisjunctionScorer → org.gnit.lucenekmp.search.IndriDisjunctionScorer
 - org.apache.lucene.search.IndriScorer → org.gnit.lucenekmp.search.IndriScorer
 - org.apache.lucene.search.MultiNormsLeafSimScorer → org.gnit.lucenekmp.search.MultiNormsLeafSimScorer
-- org.apache.lucene.search.SimpleFieldComparator → org.gnit.lucenekmp.search.SimpleFieldComparator
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
 
 ## Depth 4
@@ -36,10 +35,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.sharedterms.STUniformSplitTermsWriter → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.STUniformSplitTermsWriter
 - org.apache.lucene.codecs.uniformsplit.sharedterms.UnionFieldMetadataBuilder → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.UnionFieldMetadataBuilder
 - org.apache.lucene.document.BinaryRangeDocValues → org.gnit.lucenekmp.document.BinaryRangeDocValues
-- org.apache.lucene.document.FeatureQuery → org.gnit.lucenekmp.document.FeatureQuery
-- org.apache.lucene.document.FeatureSortField → org.gnit.lucenekmp.document.FeatureSortField
 - org.apache.lucene.document.LatLonShapeBoundingBoxQuery → org.gnit.lucenekmp.document.LatLonShapeBoundingBoxQuery
-- org.apache.lucene.document.RangeFieldQuery → org.gnit.lucenekmp.document.RangeFieldQuery
 - org.apache.lucene.document.XYShapeDocValues → org.gnit.lucenekmp.document.XYShapeDocValues
 - org.apache.lucene.document.XYShapeQuery → org.gnit.lucenekmp.document.XYShapeQuery
 - org.apache.lucene.queryparser.flexible.core.QueryNodeError → org.gnit.lucenekmp.queryparser.flexible.core.QueryNodeError
@@ -129,10 +125,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.UniformSplitTermsReader → org.gnit.lucenekmp.codecs.uniformsplit.UniformSplitTermsReader
 - org.apache.lucene.codecs.uniformsplit.sharedterms.STUniformSplitTermsReader → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.STUniformSplitTermsReader
 - org.apache.lucene.document.BinaryRangeDocValuesField → org.gnit.lucenekmp.document.BinaryRangeDocValuesField
-- org.apache.lucene.document.DoubleRange → org.gnit.lucenekmp.document.DoubleRange
 - org.apache.lucene.document.DoubleRangeSlowRangeQuery → org.gnit.lucenekmp.document.DoubleRangeSlowRangeQuery
-- org.apache.lucene.document.FeatureDoubleValuesSource → org.gnit.lucenekmp.document.FeatureDoubleValuesSource
-- org.apache.lucene.document.FeatureField → org.gnit.lucenekmp.document.FeatureField
 - org.apache.lucene.document.FloatRange → org.gnit.lucenekmp.document.FloatRange
 - org.apache.lucene.document.FloatRangeSlowRangeQuery → org.gnit.lucenekmp.document.FloatRangeSlowRangeQuery
 - org.apache.lucene.document.InetAddressRange → org.gnit.lucenekmp.document.InetAddressRange
@@ -595,7 +588,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2 → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
-- org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
 - org.apache.lucene.codecs.uniformsplit.TestBlockWriter → org.gnit.lucenekmp.codecs.uniformsplit.TestBlockWriter
 - org.apache.lucene.codecs.uniformsplit.TestFSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.TestFSTDictionary
 - org.apache.lucene.codecs.uniformsplit.TestTermBytes → org.gnit.lucenekmp.codecs.uniformsplit.TestTermBytes
@@ -607,11 +599,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.BaseLatLonShapeDocValueTestCase → org.gnit.lucenekmp.document.BaseLatLonShapeDocValueTestCase
 - org.apache.lucene.document.BaseLatLonShapeTestCase → org.gnit.lucenekmp.document.BaseLatLonShapeTestCase
 - org.apache.lucene.document.BaseXYShapeDocValueTestCase → org.gnit.lucenekmp.document.BaseXYShapeDocValueTestCase
-- org.apache.lucene.document.TestBinaryDocument → org.gnit.lucenekmp.document.TestBinaryDocument
-- org.apache.lucene.document.TestDocValuesLongHashSet → org.gnit.lucenekmp.document.TestDocValuesLongHashSet
 - org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
-- org.apache.lucene.document.TestDoubleRange → org.gnit.lucenekmp.document.TestDoubleRange
-- org.apache.lucene.document.TestFeatureDoubleValues → org.gnit.lucenekmp.document.TestFeatureDoubleValues
 - org.apache.lucene.document.TestFeatureField → org.gnit.lucenekmp.document.TestFeatureField
 - org.apache.lucene.document.TestFeatureSort → org.gnit.lucenekmp.document.TestFeatureSort
 - org.apache.lucene.document.TestFieldType → org.gnit.lucenekmp.document.TestFieldType
