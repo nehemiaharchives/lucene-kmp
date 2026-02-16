@@ -38,9 +38,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.BinaryRangeDocValues → org.gnit.lucenekmp.document.BinaryRangeDocValues
 - org.apache.lucene.document.FeatureQuery → org.gnit.lucenekmp.document.FeatureQuery
 - org.apache.lucene.document.FeatureSortField → org.gnit.lucenekmp.document.FeatureSortField
-- org.apache.lucene.document.LatLonDocValuesBoxQuery → org.gnit.lucenekmp.document.LatLonDocValuesBoxQuery
-- org.apache.lucene.document.LatLonDocValuesQuery → org.gnit.lucenekmp.document.LatLonDocValuesQuery
-- org.apache.lucene.document.LatLonPointDistanceComparator → org.gnit.lucenekmp.document.LatLonPointDistanceComparator
 - org.apache.lucene.document.LatLonShapeBoundingBoxQuery → org.gnit.lucenekmp.document.LatLonShapeBoundingBoxQuery
 - org.apache.lucene.document.RangeFieldQuery → org.gnit.lucenekmp.document.RangeFieldQuery
 - org.apache.lucene.document.XYShapeDocValues → org.gnit.lucenekmp.document.XYShapeDocValues
@@ -141,7 +138,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.InetAddressRange → org.gnit.lucenekmp.document.InetAddressRange
 - org.apache.lucene.document.IntRange → org.gnit.lucenekmp.document.IntRange
 - org.apache.lucene.document.IntRangeSlowRangeQuery → org.gnit.lucenekmp.document.IntRangeSlowRangeQuery
-- org.apache.lucene.document.LatLonPointSortField → org.gnit.lucenekmp.document.LatLonPointSortField
 - org.apache.lucene.document.LatLonShapeDocValues → org.gnit.lucenekmp.document.LatLonShapeDocValues
 - org.apache.lucene.document.LatLonShapeDocValuesQuery → org.gnit.lucenekmp.document.LatLonShapeDocValuesQuery
 - org.apache.lucene.document.LatLonShapeQuery → org.gnit.lucenekmp.document.LatLonShapeQuery
@@ -287,7 +283,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.uniformsplit.Rot13CypherTestUtil → org.gnit.lucenekmp.tests.codecs.uniformsplit.Rot13CypherTestUtil
 - org.apache.lucene.tests.codecs.uniformsplit.UniformSplitRot13PostingsFormat → org.gnit.lucenekmp.tests.codecs.uniformsplit.UniformSplitRot13PostingsFormat
 - org.apache.lucene.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat → org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat
-- org.apache.lucene.tests.geo.BaseGeoPointTestCase → org.gnit.lucenekmp.tests.geo.BaseGeoPointTestCase
 - org.apache.lucene.tests.index.OwnCacheKeyMultiReader → org.gnit.lucenekmp.tests.index.OwnCacheKeyMultiReader
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.index.ThreadedIndexingAndSearchingTestCase → org.gnit.lucenekmp.tests.index.ThreadedIndexingAndSearchingTestCase
@@ -357,7 +352,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.DoubleRangeDocValuesField → org.gnit.lucenekmp.document.DoubleRangeDocValuesField
 - org.apache.lucene.document.FloatRangeDocValuesField → org.gnit.lucenekmp.document.FloatRangeDocValuesField
 - org.apache.lucene.document.IntRangeDocValuesField → org.gnit.lucenekmp.document.IntRangeDocValuesField
-- org.apache.lucene.document.LatLonDocValuesField → org.gnit.lucenekmp.document.LatLonDocValuesField
 - org.apache.lucene.document.LatLonShape → org.gnit.lucenekmp.document.LatLonShape
 - org.apache.lucene.document.LatLonShapeDocValuesField → org.gnit.lucenekmp.document.LatLonShapeDocValuesField
 - org.apache.lucene.document.LongRangeDocValuesField → org.gnit.lucenekmp.document.LongRangeDocValuesField
@@ -923,8 +917,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.TestKnnByteVectorQuery → org.gnit.lucenekmp.search.TestKnnByteVectorQuery
 - org.apache.lucene.search.TestKnnByteVectorQueryMMap → org.gnit.lucenekmp.search.TestKnnByteVectorQueryMMap
 - org.apache.lucene.search.TestKnnFloatVectorQuery → org.gnit.lucenekmp.search.TestKnnFloatVectorQuery
-- org.apache.lucene.search.TestLatLonDocValuesQueries → org.gnit.lucenekmp.search.TestLatLonDocValuesQueries
-- org.apache.lucene.search.TestLatLonPointQueries → org.gnit.lucenekmp.search.TestLatLonPointQueries
 - org.apache.lucene.search.TestLiveFieldValues → org.gnit.lucenekmp.search.TestLiveFieldValues
 - org.apache.lucene.search.TestLongValuesSource → org.gnit.lucenekmp.search.TestLongValuesSource
 - org.apache.lucene.search.TestMatchAllDocsQuery → org.gnit.lucenekmp.search.TestMatchAllDocsQuery

@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1061 | 77% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1067 | 77% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -79,7 +79,7 @@
 |     org.apache.lucene.codecs.lucene95 |         org.gnit.lucenekmp.codecs.lucene95 | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.lucene99 |         org.gnit.lucenekmp.codecs.lucene99 | 14 | 13 | 92% | [ ] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 5 | 4 | 80% | [ ] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 48 | 53% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 53 | 59% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 186 | 93% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 18 | 69% | [ ] |
@@ -105,7 +105,7 @@
 |       org.apache.lucene.tests.codecs.uniformsplit |           org.gnit.lucenekmp.tests.codecs.uniformsplit | 3 | 0 | 0% | [ ] |
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
-|     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 3 | 50% | [ ] |
+|     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 4 | 66% | [ ] |
 |     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 29 | 72% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 13 | 52% | [ ] |
@@ -151,7 +151,7 @@
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
 |     org.apache.lucene.internal.tests | 1 | 0 | 0% |
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 8 | 5% |
+|   org.apache.lucene.search | 149 | 10 | 6% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 15 | 60% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 188 | 27% |
+| Total | 673 | 190 | 28% |
 
 
 ## Tests To Port
@@ -503,8 +503,6 @@
 | [org.apache.lucene.search.TestKnnByteVectorQueryMMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnByteVectorQueryMMap.java) | org.gnit.lucenekmp.search.TestKnnByteVectorQueryMMap |
 | [org.apache.lucene.search.TestKnnFloatVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnFloatVectorQuery.java) | org.gnit.lucenekmp.search.TestKnnFloatVectorQuery |
 | [org.apache.lucene.search.TestLRUQueryCache](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLRUQueryCache.java) | org.gnit.lucenekmp.search.TestLRUQueryCache |
-| [org.apache.lucene.search.TestLatLonDocValuesQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLatLonDocValuesQueries.java) | org.gnit.lucenekmp.search.TestLatLonDocValuesQueries |
-| [org.apache.lucene.search.TestLatLonPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLatLonPointQueries.java) | org.gnit.lucenekmp.search.TestLatLonPointQueries |
 | [org.apache.lucene.search.TestLiveFieldValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLiveFieldValues.java) | org.gnit.lucenekmp.search.TestLiveFieldValues |
 | [org.apache.lucene.search.TestLongRangeFieldQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLongRangeFieldQueries.java) | org.gnit.lucenekmp.search.TestLongRangeFieldQueries |
 | [org.apache.lucene.search.TestLongValuesSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLongValuesSource.java) | org.gnit.lucenekmp.search.TestLongValuesSource |
