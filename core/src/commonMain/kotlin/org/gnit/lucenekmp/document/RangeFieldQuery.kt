@@ -24,7 +24,6 @@ import org.gnit.lucenekmp.util.DocIdSetBuilder
 import org.gnit.lucenekmp.util.IntsRef
 import kotlin.reflect.cast
 
-
 /**
  * Query class for searching `RangeField` types by a defined [Relation].
  *
@@ -367,7 +366,6 @@ abstract class RangeFieldQuery protected constructor(field: String, ranges: Byte
         }
     }
 
-    @Throws(IOException::class)
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
         return object : ConstantScoreWeight(this, boost) {
             fun getIntersectVisitor(result: DocIdSetBuilder): IntersectVisitor {

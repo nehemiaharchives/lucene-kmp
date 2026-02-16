@@ -109,6 +109,17 @@ val Float.Companion.MIN_EXPONENT: Int
 val Float.Companion.MAX_EXPONENT: Int
     get() = (1 shl (Float.SIZE - Float.PRECISION - 1)) - 1 // 127
 
+/**
+ * A constant holding the smallest positive normal value of type
+ * `float`, 2<sup>-126</sup>.  It is equal to the
+ * hexadecimal floating-point literal `0x1.0p-126f` and also
+ * equal to `Float.intBitsToFloat(0x00800000)`.
+ *
+ * @since 1.6
+ */
+val Float.Companion.MIN_NORMAL: Float
+    get() = 1.1754944E-38f // 1.17549435E-38f
+
 
 /**
  * The number of bits used to represent a `float` value.
