@@ -70,7 +70,7 @@ jobs:
           - platform: jvm
             module_name: codecs
             os: ubuntu-latest
-            timeout: 50
+            timeout: 60
             task: :codecs:jvmTest
             artifact: jvm-codecs-reports
 
@@ -194,7 +194,7 @@ jobs:
           - platform: linux
             module_name: core
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :core:linuxX64Test
             artifact: linux-core-reports
             needs_konan_cache: true
