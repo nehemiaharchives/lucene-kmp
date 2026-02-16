@@ -267,7 +267,7 @@ class FeatureField(fieldName: String, featureName: String, featureValue: Float, 
         }
     }
 
-    internal class SaturationFunction(private val field: String, private val feature: String, private val pivot: Float) : FeatureFunction() {
+    internal class SaturationFunction(private val field: String, private val feature: String, private val pivot: Float?) : FeatureFunction() {
         @Throws(IOException::class)
         override fun rewrite(indexSearcher: IndexSearcher): FeatureFunction {
             if (pivot != null) {
@@ -292,7 +292,7 @@ class FeatureField(fieldName: String, featureName: String, featureValue: Float, 
         }
 
         override fun toString(): String {
-            return "SaturationFunction(pivot=" + pivot + ")"
+            return "SaturationFunction(pivot=$pivot)"
         }
 
         override fun scorer(weight: Float): SimScorer {
@@ -321,7 +321,7 @@ class FeatureField(fieldName: String, featureName: String, featureValue: Float, 
                         + " feature, computed as w * S / (S + k) from:"),
                 Explanation.match(weight, "w, weight of this function"),
                 Explanation.match(
-                    pivot, "k, pivot feature value that would give a score contribution equal to w/2"
+                    pivot!!, "k, pivot feature value that would give a score contribution equal to w/2"
                 ),
                 Explanation.match(featureValue, "S, feature value")
             )
@@ -535,7 +535,7 @@ class FeatureField(fieldName: String, featureName: String, featureValue: Float, 
             require(!(pivot != null && (pivot <= 0 || Float.isFinite(pivot) == false))) { "pivot must be > 0, got: $pivot" }
             var q: Query =
                 FeatureQuery(
-                    fieldName, featureName, SaturationFunction(fieldName, featureName, pivot!!)
+                    fieldName, featureName, SaturationFunction(fieldName, featureName, pivot)
                 )
             if (weight != 1f) {
                 q = BoostQuery(q, weight)

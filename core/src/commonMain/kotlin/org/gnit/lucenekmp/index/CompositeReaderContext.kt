@@ -10,7 +10,7 @@ class CompositeReaderContext private constructor(
     private val children: MutableList<IndexReaderContext>,
     leaves: MutableList<LeafReaderContext>?
 ) : IndexReaderContext(parent, ordInParent, docbaseInParent) {
-    private val leaves: MutableList<LeafReaderContext> = leaves!!
+    private val leaves: MutableList<LeafReaderContext>? = leaves
 
     /**
      * Creates a [CompositeReaderContext] for intermediate readers that aren't top-level readers
@@ -37,8 +37,7 @@ class CompositeReaderContext private constructor(
     @Throws(UnsupportedOperationException::class)
     override fun leaves(): MutableList<LeafReaderContext> {
         if (!isTopLevel) throw UnsupportedOperationException("This is not a top-level context.")
-        checkNotNull(leaves)
-        return leaves
+        return checkNotNull(leaves)
     }
 
     override fun children(): MutableList<IndexReaderContext> {

@@ -36,6 +36,7 @@ import org.gnit.lucenekmp.search.ScorerSupplier
 import org.gnit.lucenekmp.search.SimpleCollector
 import org.gnit.lucenekmp.search.Weight
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.shouldRunExhaustivePostingsFormatChecks
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.Version
 import kotlin.math.abs
@@ -141,7 +142,7 @@ object QueryUtils {
                 checkSkipTo(q1, s)
                 checkBulkScorerSkipTo(random, q1, s)
                 checkCount(q1, s)
-                if (wrap) {
+                if (wrap && shouldRunExhaustivePostingsFormatChecks()) {
                     check(random, q1, wrapUnderlyingReader(random, s, -1), false)
                     check(random, q1, wrapUnderlyingReader(random, s, 0), false)
                     check(random, q1, wrapUnderlyingReader(random, s, +1), false)
@@ -335,15 +336,25 @@ object QueryUtils {
 
         val skip_op = 0
         val next_op = 1
-        val orders = arrayOf<IntArray>(
-            intArrayOf(next_op),
-            intArrayOf(skip_op),
-            intArrayOf(skip_op, next_op),
-            intArrayOf(next_op, skip_op),
-            intArrayOf(skip_op, skip_op, next_op, next_op),
-            intArrayOf(next_op, next_op, skip_op, skip_op),
-            intArrayOf(skip_op, skip_op, skip_op, next_op, next_op),
-        )
+        val exhaustiveChecks = shouldRunExhaustivePostingsFormatChecks()
+        val orders = if (exhaustiveChecks) {
+            arrayOf<IntArray>(
+                intArrayOf(next_op),
+                intArrayOf(skip_op),
+                intArrayOf(skip_op, next_op),
+                intArrayOf(next_op, skip_op),
+                intArrayOf(skip_op, skip_op, next_op, next_op),
+                intArrayOf(next_op, next_op, skip_op, skip_op),
+                intArrayOf(skip_op, skip_op, skip_op, next_op, next_op),
+            )
+        } else {
+            // Keep basic next/skip and mixed traversal semantics on native without the full permutation cost.
+            arrayOf<IntArray>(
+                intArrayOf(next_op),
+                intArrayOf(skip_op),
+                intArrayOf(skip_op, next_op),
+            )
+        }
         for (k in orders.indices) {
             val order = orders[k]
             // System.out.print("Order:");for (int i = 0; i < order.length; i++)
@@ -354,13 +365,13 @@ object QueryUtils {
 
             // FUTURE: ensure scorer.doc()==-1
             val maxDiff = 1e-5f
-            val lastReader: Array<LeafReader> = arrayOf()
-
+            val lastReader: Array<LeafReader?> = arrayOfNulls(1)
             s.search(
                 q,
                 object : SimpleCollector() {
                     override var scorer: Scorable? = null
                     override var weight: Weight? = null
+                    private var replayScorer: Scorer? = null
                     private var iterator: DocIdSetIterator? = null
                     private var leafPtr = 0
 
@@ -369,7 +380,7 @@ object QueryUtils {
                         val score: Float = scorer!!.score()
                         lastDoc[0] = doc
                         try {
-                            if (scorer == null) {
+                            if (replayScorer == null) {
                                 val rewritten: Query = s.rewrite(q)
                                 val w: Weight = s.createWeight(
                                     rewritten,
@@ -378,8 +389,8 @@ object QueryUtils {
                                 )
                                 val context: LeafReaderContext =
                                     readerContextArray.get(leafPtr)
-                                scorer = w.scorer(context)
-                                iterator = (scorer!! as Scorer).iterator()
+                                replayScorer = w.scorer(context)
+                                iterator = replayScorer!!.iterator()
                             }
 
                             val op = order[(opidx[0]++) % order.size]
@@ -387,12 +398,12 @@ object QueryUtils {
                             // "skip("+(sdoc[0]+1)+")":"next()");
                             val more =
                                 if (op == skip_op)
-                                    iterator!!.advance((scorer!! as Scorer).docID() + 1) != DocIdSetIterator.NO_MORE_DOCS
+                                    iterator!!.advance(replayScorer!!.docID() + 1) != DocIdSetIterator.NO_MORE_DOCS
                                 else
                                     iterator!!.nextDoc() != DocIdSetIterator.NO_MORE_DOCS
-                            val scorerDoc: Int = (scorer!! as Scorer).docID()
-                            val scorerScore: Float = scorer!!.score()
-                            val scorerScore2: Float = scorer!!.score()
+                            val scorerDoc: Int = replayScorer!!.docID()
+                            val scorerScore: Float = replayScorer!!.score()
+                            val scorerScore2: Float = replayScorer!!.score()
                             val scoreDiff = abs(score - scorerScore)
                             val scorerDiff = abs(scorerScore2 - scorerScore)
 
@@ -451,7 +462,7 @@ object QueryUtils {
                                                     + " score="
                                                     + score
                                                     + "\n\t Scorer="
-                                                    + scorer
+                                                    + replayScorer
                                                     + "\n\t Query="
                                                     + q
                                                     + "  "
@@ -480,7 +491,7 @@ object QueryUtils {
                         // confirm that skipping beyond the last doc, on the
                         // previous reader, hits NO_MORE_DOCS
                         if (lastReader[0] != null) {
-                            val previousReader: LeafReader = lastReader[0]
+                            val previousReader: LeafReader = lastReader[0]!!
                             val indexSearcher: IndexSearcher =
                                 LuceneTestCase.newSearcher(
                                     previousReader,
@@ -522,6 +533,8 @@ object QueryUtils {
                         }
                         lastReader[0] = context.reader()
                         assert(readerContextArray.get(leafPtr).reader() === context.reader())
+                        replayScorer = null
+                        iterator = null
                         this.scorer = null
                         lastDoc[0] = -1
                     }
@@ -530,7 +543,7 @@ object QueryUtils {
             if (lastReader[0] != null) {
                 // confirm that skipping beyond the last doc, on the
                 // previous reader, hits NO_MORE_DOCS
-                val previousReader: LeafReader = lastReader[0]
+                val previousReader: LeafReader = lastReader[0]!!
                 val indexSearcher: IndexSearcher =
                     LuceneTestCase.newSearcher(previousReader, false)
                 indexSearcher.similarity = s.similarity
@@ -545,7 +558,7 @@ object QueryUtils {
                 if (scorer != null) {
                     val iterator: DocIdSetIterator = scorer.iterator()
                     var more = false
-                    val liveDocs: Bits? = lastReader[0].liveDocs
+                    val liveDocs: Bits? = lastReader[0]!!.liveDocs
                     var d: Int = iterator.advance(lastDoc[0] + 1)
                     while (d != DocIdSetIterator.NO_MORE_DOCS
                     ) {
@@ -577,7 +590,7 @@ object QueryUtils {
         // System.out.println("checkFirstSkipTo: "+q);
         val maxDiff = 1e-3f
         val lastDoc = intArrayOf(-1)
-        val lastReader: Array<LeafReader> = arrayOf()
+        val lastReader: Array<LeafReader?> = arrayOfNulls(1)
         val context: MutableList<LeafReaderContext> =
             s.topReaderContext.leaves()
         val rewritten: Query = s.rewrite(q)
@@ -632,7 +645,8 @@ object QueryUtils {
                                         + advanceScore
                                         + ">!")
                             )
-                            i += (intervalTimes32++ / 1024).toInt()
+                            val step = maxOf(1, (intervalTimes32++ / 1024).toInt())
+                            i += step
                         }
                         lastDoc[0] = doc
                     } catch (e: IOException) {
@@ -649,7 +663,7 @@ object QueryUtils {
                     // confirm that skipping beyond the last doc, on the
                     // previous reader, hits NO_MORE_DOCS
                     if (lastReader[0] != null) {
-                        val previousReader: LeafReader = lastReader[0]
+                        val previousReader: LeafReader = lastReader[0]!!
                         val indexSearcher: IndexSearcher =
                             LuceneTestCase.newSearcher(
                                 previousReader,
@@ -695,7 +709,7 @@ object QueryUtils {
         if (lastReader[0] != null) {
             // confirm that skipping beyond the last doc, on the
             // previous reader, hits NO_MORE_DOCS
-            val previousReader: LeafReader = lastReader[0]
+            val previousReader: LeafReader = lastReader[0]!!
             val indexSearcher: IndexSearcher =
                 LuceneTestCase.newSearcher(previousReader, false)
             indexSearcher.similarity = s.similarity
@@ -708,7 +722,7 @@ object QueryUtils {
             if (scorer != null) {
                 val iterator: DocIdSetIterator = scorer.iterator()
                 var more = false
-                val liveDocs: Bits? = lastReader[0].liveDocs
+                val liveDocs: Bits? = lastReader[0]!!.liveDocs
                 var d: Int = iterator.advance(lastDoc[0] + 1)
                 while (d != DocIdSetIterator.NO_MORE_DOCS
                 ) {

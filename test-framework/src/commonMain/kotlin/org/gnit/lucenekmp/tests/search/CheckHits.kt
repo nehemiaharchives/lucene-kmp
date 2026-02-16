@@ -322,13 +322,12 @@ object CheckHits {
         searcher.search(
             query,
             object :
-                CollectorManager<ExplanationAsserter, Any> {
+                CollectorManager<ExplanationAsserter, Unit> {
                 override fun newCollector(): ExplanationAsserter {
                     return ExplanationAsserter(query, defaultFieldName, searcher, deep)
                 }
 
-                override fun reduce(collectors: MutableCollection<ExplanationAsserter>): Any? {
-                    return null
+                override fun reduce(collectors: MutableCollection<ExplanationAsserter>) {
                 }
             })
     }
@@ -348,14 +347,13 @@ object CheckHits {
         searcher.search(
             query,
             object :
-                CollectorManager<MatchesAsserter, Any?> {
+                CollectorManager<MatchesAsserter, Unit> {
                 @Throws(IOException::class)
                 override fun newCollector(): MatchesAsserter {
                     return MatchesAsserter(query, searcher)
                 }
 
-                override fun reduce(collectors: MutableCollection<MatchesAsserter>): Any? {
-                    return null
+                override fun reduce(collectors: MutableCollection<MatchesAsserter>) {
                 }
             })
     }

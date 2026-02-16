@@ -139,3 +139,70 @@ fun assertArrayEquals(expecteds: Array<String?>, actuals: Array<String?>, messag
     }
 }
 
+/**
+ * Asserts that `actual` satisfies the condition specified by
+ * `matcher`. If not, an [AssertionError] is thrown with
+ * information about the matcher and failing value. Example:
+ *
+ * <pre>
+ * assertThat(0, is(1)); // fails:
+ * // failure message:
+ * // expected: is &lt;1&gt;
+ * // got value: &lt;0&gt;
+ * assertThat(0, is(not(1))) // passes
+</pre> *
+ *
+ * `Matcher` does not currently document the meaning
+ * of its type parameter `T`.  This method assumes that a matcher
+ * typed as `Matcher<T>` can be meaningfully applied only
+ * to values that could be assigned to a variable of type `T`.
+ *
+ * @param <T> the static type accepted by the matcher (this can flag obvious
+ * compile-time problems such as `assertThat(1, is("a"))`
+ * @param actual the computed value being compared
+ * @param matcher an expression, built of [Matcher]s, specifying allowed
+ * values
+ * @see org.hamcrest.CoreMatchers
+ *
+</T> */
+@Deprecated("use {@code MatcherAssert.assertThat()}")
+fun <T> assertThat(actual: T, matcher: Matcher<in T>) {
+    assertThat<T>("", actual, matcher)
+}
+
+/**
+ * Asserts that `actual` satisfies the condition specified by
+ * `matcher`. If not, an [AssertionError] is thrown with
+ * the reason and information about the matcher and failing value. Example:
+ *
+ * <pre>
+ * assertThat(&quot;Help! Integers don't work&quot;, 0, is(1)); // fails:
+ * // failure message:
+ * // Help! Integers don't work
+ * // expected: is &lt;1&gt;
+ * // got value: &lt;0&gt;
+ * assertThat(&quot;Zero is one&quot;, 0, is(not(1))) // passes
+</pre> *
+ *
+ * `Matcher` does not currently document the meaning
+ * of its type parameter `T`.  This method assumes that a matcher
+ * typed as `Matcher<T>` can be meaningfully applied only
+ * to values that could be assigned to a variable of type `T`.
+ *
+ * @param reason additional information about the error
+ * @param <T> the static type accepted by the matcher (this can flag obvious
+ * compile-time problems such as `assertThat(1, is("a"))`
+ * @param actual the computed value being compared
+ * @param matcher an expression, built of [Matcher]s, specifying allowed
+ * values
+ * @see org.hamcrest.CoreMatchers
+ *
+</T> */
+@Deprecated("use {@code MatcherAssert.assertThat()}")
+fun <T> assertThat(
+    reason: String, actual: T,
+    matcher: Matcher<in T>
+) {
+    MatcherAssert.assertThat<T>(reason, actual, matcher)
+}
+
