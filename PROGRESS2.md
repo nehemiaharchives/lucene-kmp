@@ -26,7 +26,7 @@
 ### Total KMP classes: 999
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1405
+### Total KMP Unit Test classes: 1416
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -381,7 +381,7 @@
 | [org.apache.lucene.search.TaskExecutor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TaskExecutor.java) | org.gnit.lucenekmp.search.TaskExecutor | Depth 2 | [x] | 2 | 1 | 0% | 2 |
 | [org.apache.lucene.search.TermCollectingRewrite](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermCollectingRewrite.java) | org.gnit.lucenekmp.search.TermCollectingRewrite | Depth 4 | [x] | 2 | 2 | 46% | 0 |
 | [org.apache.lucene.search.TermInSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermInSetQuery.java) | org.gnit.lucenekmp.search.TermInSetQuery | Depth 3 | [x] | 24 | 0 | 0% | 24 |
-| [org.apache.lucene.search.TermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermQuery.java) | org.gnit.lucenekmp.search.TermQuery | Depth 2 | [x] | 9 | 8 | 0% | 9 |
+| [org.apache.lucene.search.TermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermQuery.java) | org.gnit.lucenekmp.search.TermQuery | Depth 2 | [x] | 9 | 3 | 0% | 9 |
 | [org.apache.lucene.search.TermRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermRangeQuery.java) | org.gnit.lucenekmp.search.TermRangeQuery | Depth 2 | [x] | 14 | 2 | 90% | 12 |
 | [org.apache.lucene.search.TermScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermScorer.java) | org.gnit.lucenekmp.search.TermScorer | Depth 2 | [x] | 5 | 5 | 86% | 0 |
 | [org.apache.lucene.search.TermStatistics](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermStatistics.java) | org.gnit.lucenekmp.search.TermStatistics | Depth 1 | [x] | 2 | 0 | 33% | 2 |
@@ -7077,7 +7077,7 @@
 - **Java Property Accessors**: 1
 - **Java Auto-Generated**: 1
 - **Java Synthetic**: 1
-- **KMP Core Business Logic**: 8
+- **KMP Core Business Logic**: 3
 - **KMP Property Accessors**: 2
 - **KMP Auto-Generated**: 0
 - **KMP Synthetic**: 0
@@ -11955,7 +11955,7 @@
 | [org.apache.lucene.document.TestDocument](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestDocument.java) | org.gnit.lucenekmp.document.TestDocument | Depth 1 | [] | 153 | 0 | 0% |
 | [org.apache.lucene.document.TestDoubleRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestDoubleRange.java) | org.gnit.lucenekmp.document.TestDoubleRange | Depth 1 | [x] | 140 | 3 | 13% |
 | [org.apache.lucene.document.TestFeatureDoubleValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureDoubleValues.java) | org.gnit.lucenekmp.document.TestFeatureDoubleValues | Depth 1 | [x] | 145 | 8 | 0% |
-| [org.apache.lucene.document.TestFeatureField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureField.java) | org.gnit.lucenekmp.document.TestFeatureField | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.document.TestFeatureField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureField.java) | org.gnit.lucenekmp.document.TestFeatureField | Depth 1 | [x] | 151 | 1 | 83% |
 | [org.apache.lucene.document.TestFeatureSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureSort.java) | org.gnit.lucenekmp.document.TestFeatureSort | Depth 1 | [] | 145 | 0 | 0% |
 | [org.apache.lucene.document.TestField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestField.java) | org.gnit.lucenekmp.document.TestField | Depth 1 | [x] | 183 | 68 | 60% |
 | [org.apache.lucene.document.TestFieldType](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFieldType.java) | org.gnit.lucenekmp.document.TestFieldType | Depth 1 | [] | 146 | 0 | 0% |
@@ -12810,7 +12810,7 @@
 | [org.apache.lucene.search.TaskExecutor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TaskExecutor.java) | org.gnit.lucenekmp.search.TaskExecutor | Depth 3 | [x] | 2 | 1 | 0% |
 | [org.apache.lucene.search.TermCollectingRewrite](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermCollectingRewrite.java) | org.gnit.lucenekmp.search.TermCollectingRewrite | Depth 4 | [x] | 6 | 2 | 0% |
 | [org.apache.lucene.search.TermInSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermInSetQuery.java) | org.gnit.lucenekmp.search.TermInSetQuery | Depth 3 | [x] | 24 | 0 | 0% |
-| [org.apache.lucene.search.TermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermQuery.java) | org.gnit.lucenekmp.search.TermQuery | Depth 3 | [x] | 9 | 8 | 0% |
+| [org.apache.lucene.search.TermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermQuery.java) | org.gnit.lucenekmp.search.TermQuery | Depth 3 | [x] | 9 | 3 | 0% |
 | [org.apache.lucene.search.TermRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermRangeQuery.java) | org.gnit.lucenekmp.search.TermRangeQuery | Depth 2 | [x] | 14 | 2 | 90% |
 | [org.apache.lucene.search.TermScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermScorer.java) | org.gnit.lucenekmp.search.TermScorer | Depth 2 | [x] | 5 | 5 | 86% |
 | [org.apache.lucene.search.TermStatistics](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TermStatistics.java) | org.gnit.lucenekmp.search.TermStatistics | Depth 2 | [x] | 2 | 0 | 33% |
@@ -13258,7 +13258,7 @@
 | [org.apache.lucene.tests.search.BaseRangeFieldQueryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/BaseRangeFieldQueryTestCase.java) | org.gnit.lucenekmp.tests.search.BaseRangeFieldQueryTestCase | Depth 2 | [] | 156 | 0 | 0% |
 | [org.apache.lucene.tests.search.BlockScoreQueryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/BlockScoreQueryWrapper.java) | org.gnit.lucenekmp.tests.search.BlockScoreQueryWrapper | Depth 3 | [] | 7 | 0 | 0% |
 | [org.apache.lucene.tests.search.BulkScorerWrapperScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/BulkScorerWrapperScorer.java) | org.gnit.lucenekmp.tests.search.BulkScorerWrapperScorer | Depth 3 | [] | 4 | 0 | 0% |
-| [org.apache.lucene.tests.search.CheckHits](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/CheckHits.java) | org.gnit.lucenekmp.tests.search.CheckHits | Depth 3 | [x] | 2 | 2 | 9% |
+| [org.apache.lucene.tests.search.CheckHits](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/CheckHits.java) | org.gnit.lucenekmp.tests.search.CheckHits | Depth 3 | [x] | 2 | 2 | 16% |
 | [org.apache.lucene.tests.search.DummyTotalHitCountCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/DummyTotalHitCountCollector.java) | org.gnit.lucenekmp.tests.search.DummyTotalHitCountCollector | Depth 3 | [] | 4 | 0 | 0% |
 | [org.apache.lucene.tests.search.MatchesTestBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/MatchesTestBase.java) | org.gnit.lucenekmp.tests.search.MatchesTestBase | Depth 2 | [] | 147 | 0 | 0% |
 | [org.apache.lucene.tests.search.QueryUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/QueryUtils.java) | org.gnit.lucenekmp.tests.search.QueryUtils | Depth 3 | [x] | 5 | 4 | 0% |
@@ -13657,8 +13657,8 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1356
+- Ported Unit Test Classes: 1357
 - Unit Test Porting Progress: 56%
-- **Unit Test Semantic Completion: 4%**
+- **Unit Test Semantic Completion: 5%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 6230
+- Test Core Methods Implemented: 6231

@@ -600,7 +600,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.BaseLatLonShapeTestCase → org.gnit.lucenekmp.document.BaseLatLonShapeTestCase
 - org.apache.lucene.document.BaseXYShapeDocValueTestCase → org.gnit.lucenekmp.document.BaseXYShapeDocValueTestCase
 - org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
-- org.apache.lucene.document.TestFeatureField → org.gnit.lucenekmp.document.TestFeatureField
 - org.apache.lucene.document.TestFeatureSort → org.gnit.lucenekmp.document.TestFeatureSort
 - org.apache.lucene.document.TestFieldType → org.gnit.lucenekmp.document.TestFieldType
 - org.apache.lucene.document.TestFloatRange → org.gnit.lucenekmp.document.TestFloatRange

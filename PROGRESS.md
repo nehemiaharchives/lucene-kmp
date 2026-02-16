@@ -145,7 +145,7 @@
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene99 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.perfield | 4 | 1 | 25% |
-|   org.apache.lucene.document | 50 | 7 | 14% |
+|   org.apache.lucene.document | 50 | 8 | 16% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
 |   org.apache.lucene.index | 197 | 13 | 6% |
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 194 | 28% |
+| Total | 673 | 195 | 28% |
 
 
 ## Tests To Port
@@ -208,7 +208,6 @@
 | [org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldDocValuesFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat2.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2 |
-| [org.apache.lucene.document.TestFeatureField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureField.java) | org.gnit.lucenekmp.document.TestFeatureField |
 | [org.apache.lucene.document.TestFeatureSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureSort.java) | org.gnit.lucenekmp.document.TestFeatureSort |
 | [org.apache.lucene.document.TestFieldType](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFieldType.java) | org.gnit.lucenekmp.document.TestFieldType |
 | [org.apache.lucene.document.TestFloatRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFloatRange.java) | org.gnit.lucenekmp.document.TestFloatRange |
