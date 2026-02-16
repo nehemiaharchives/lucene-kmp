@@ -216,6 +216,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
     private val writeDocValuesLock: ReentrantLock = ReentrantLock()
     private val indexWriterLock: ReentrantLock = ReentrantLock()
+    private val segmentInfosCounterLock: ReentrantLock = ReentrantLock()
 
     private inline fun <T> withIndexWriterLock(action: () -> T): T {
         indexWriterLock.lock()
@@ -1787,17 +1788,19 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // Cannot synchronize on IndexWriter because that causes
         // deadlock
 
-        // TODO Synchronized is not supported in KMP, need to think what to do here
-        //synchronized(segmentInfos) {
-        // Important to increment changeCount so that the
-        // segmentInfos is written on close.  Otherwise we
-        // could close, re-open and re-return the same segment
-        // name that was previously returned which can cause
-        // problems at least with ConcurrentMergeScheduler.
-        changeCount.incrementAndFetch()
-        segmentInfos.changed()
-        return "_" + (segmentInfos.counter++).toString(Character.MAX_RADIX.coerceIn(2, 36))
-        //}
+        segmentInfosCounterLock.lock()
+        try {
+            // Important to increment changeCount so that the
+            // segmentInfos is written on close.  Otherwise we
+            // could close, re-open and re-return the same segment
+            // name that was previously returned which can cause
+            // problems at least with ConcurrentMergeScheduler.
+            changeCount.incrementAndFetch()
+            segmentInfos.changed()
+            return "_" + (segmentInfos.counter++).toString(Character.MAX_RADIX.coerceIn(2, 36))
+        } finally {
+            segmentInfosCounterLock.unlock()
+        }
     }
 
     /** If enabled, information about merges will be printed to this.  */
