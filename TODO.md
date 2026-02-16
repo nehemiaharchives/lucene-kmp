@@ -43,9 +43,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.LatLonPointDistanceComparator → org.gnit.lucenekmp.document.LatLonPointDistanceComparator
 - org.apache.lucene.document.LatLonShapeBoundingBoxQuery → org.gnit.lucenekmp.document.LatLonShapeBoundingBoxQuery
 - org.apache.lucene.document.RangeFieldQuery → org.gnit.lucenekmp.document.RangeFieldQuery
-- org.apache.lucene.document.XYDocValuesPointInGeometryQuery → org.gnit.lucenekmp.document.XYDocValuesPointInGeometryQuery
-- org.apache.lucene.document.XYPointDistanceComparator → org.gnit.lucenekmp.document.XYPointDistanceComparator
-- org.apache.lucene.document.XYPointInGeometryQuery → org.gnit.lucenekmp.document.XYPointInGeometryQuery
 - org.apache.lucene.document.XYShapeDocValues → org.gnit.lucenekmp.document.XYShapeDocValues
 - org.apache.lucene.document.XYShapeQuery → org.gnit.lucenekmp.document.XYShapeQuery
 - org.apache.lucene.queryparser.flexible.core.QueryNodeError → org.gnit.lucenekmp.queryparser.flexible.core.QueryNodeError
@@ -151,7 +148,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.LongRange → org.gnit.lucenekmp.document.LongRange
 - org.apache.lucene.document.LongRangeSlowRangeQuery → org.gnit.lucenekmp.document.LongRangeSlowRangeQuery
 - org.apache.lucene.document.ShapeDocValues → org.gnit.lucenekmp.document.ShapeDocValues
-- org.apache.lucene.document.XYPointSortField → org.gnit.lucenekmp.document.XYPointSortField
 - org.apache.lucene.document.XYShapeDocValuesQuery → org.gnit.lucenekmp.document.XYShapeDocValuesQuery
 - org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
 - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
@@ -292,7 +288,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.uniformsplit.UniformSplitRot13PostingsFormat → org.gnit.lucenekmp.tests.codecs.uniformsplit.UniformSplitRot13PostingsFormat
 - org.apache.lucene.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat → org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms.STUniformSplitRot13PostingsFormat
 - org.apache.lucene.tests.geo.BaseGeoPointTestCase → org.gnit.lucenekmp.tests.geo.BaseGeoPointTestCase
-- org.apache.lucene.tests.geo.BaseXYPointTestCase → org.gnit.lucenekmp.tests.geo.BaseXYPointTestCase
 - org.apache.lucene.tests.index.OwnCacheKeyMultiReader → org.gnit.lucenekmp.tests.index.OwnCacheKeyMultiReader
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.index.ThreadedIndexingAndSearchingTestCase → org.gnit.lucenekmp.tests.index.ThreadedIndexingAndSearchingTestCase
@@ -305,7 +300,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.search.BlockScoreQueryWrapper → org.gnit.lucenekmp.tests.search.BlockScoreQueryWrapper
 - org.apache.lucene.tests.search.BulkScorerWrapperScorer → org.gnit.lucenekmp.tests.search.BulkScorerWrapperScorer
 - org.apache.lucene.tests.search.DummyTotalHitCountCollector → org.gnit.lucenekmp.tests.search.DummyTotalHitCountCollector
-- org.apache.lucene.tests.search.FixedBitSetCollector → org.gnit.lucenekmp.tests.search.FixedBitSetCollector
 - org.apache.lucene.tests.search.ScorerIndexSearcher → org.gnit.lucenekmp.tests.search.ScorerIndexSearcher
 - org.apache.lucene.tests.search.ShardSearchingTestBase → org.gnit.lucenekmp.tests.search.ShardSearchingTestBase
 - org.apache.lucene.tests.store.BaseLockFactoryTestCase → org.gnit.lucenekmp.tests.store.BaseLockFactoryTestCase
@@ -369,8 +363,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.LongRangeDocValuesField → org.gnit.lucenekmp.document.LongRangeDocValuesField
 - org.apache.lucene.document.ShapeDocValuesField → org.gnit.lucenekmp.document.ShapeDocValuesField
 - org.apache.lucene.document.TestLatLonPointDistanceSort → org.gnit.lucenekmp.document.TestLatLonPointDistanceSort
-- org.apache.lucene.document.XYDocValuesField → org.gnit.lucenekmp.document.XYDocValuesField
-- org.apache.lucene.document.XYPointField → org.gnit.lucenekmp.document.XYPointField
 - org.apache.lucene.document.XYShape → org.gnit.lucenekmp.document.XYShape
 - org.apache.lucene.document.XYShapeDocValuesField → org.gnit.lucenekmp.document.XYShapeDocValuesField
 - org.apache.lucene.index.NoMergeScheduler → org.gnit.lucenekmp.index.NoMergeScheduler
@@ -609,6 +601,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat
 - org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2 → org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2
 - org.apache.lucene.codecs.simpletext.TestSimpleTextDocValuesFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextDocValuesFormat
+- org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat → org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat
 - org.apache.lucene.codecs.uniformsplit.TestBlockWriter → org.gnit.lucenekmp.codecs.uniformsplit.TestBlockWriter
 - org.apache.lucene.codecs.uniformsplit.TestFSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.TestFSTDictionary
 - org.apache.lucene.codecs.uniformsplit.TestTermBytes → org.gnit.lucenekmp.codecs.uniformsplit.TestTermBytes
@@ -1010,8 +1003,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.TestWANDScorer → org.gnit.lucenekmp.search.TestWANDScorer
 - org.apache.lucene.search.TestWildcardQuery → org.gnit.lucenekmp.search.TestWildcardQuery
 - org.apache.lucene.search.TestWildcardRandom → org.gnit.lucenekmp.search.TestWildcardRandom
-- org.apache.lucene.search.TestXYDocValuesQueries → org.gnit.lucenekmp.search.TestXYDocValuesQueries
-- org.apache.lucene.search.TestXYPointQueries → org.gnit.lucenekmp.search.TestXYPointQueries
 - org.apache.lucene.search.knn.TestMultiLeafKnnCollector → org.gnit.lucenekmp.search.knn.TestMultiLeafKnnCollector
 - org.apache.lucene.search.similarities.DistributionTestCase → org.gnit.lucenekmp.search.similarities.DistributionTestCase
 - org.apache.lucene.search.similarities.TestAxiomaticSimilarity → org.gnit.lucenekmp.search.similarities.TestAxiomaticSimilarity
@@ -1036,9 +1027,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.TestSleepingLockWrapper → org.gnit.lucenekmp.store.TestSleepingLockWrapper
 - org.apache.lucene.store.TestStressLockFactories → org.gnit.lucenekmp.store.TestStressLockFactories
 - org.apache.lucene.store.TestTrackingDirectoryWrapper → org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper
-- org.apache.lucene.tests.analysis.TestLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.TestMockAnalyzer → org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer
-- org.apache.lucene.tests.analysis.TestMockCharFilter → org.gnit.lucenekmp.tests.analysis.TestMockCharFilter
 - org.apache.lucene.tests.analysis.TestMockSynonymFilter → org.gnit.lucenekmp.tests.analysis.TestMockSynonymFilter
 - org.apache.lucene.tests.analysis.TestToken → org.gnit.lucenekmp.tests.analysis.TestToken
 - org.apache.lucene.tests.codecs.asserting.TestAssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.TestAssertingDocValuesFormat
