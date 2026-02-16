@@ -19,6 +19,7 @@ import org.gnit.lucenekmp.jdkport.AccessDeniedException
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.FileAlreadyExistsException
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.TreeSet
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.AlreadyClosedException
@@ -84,6 +85,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     var allowReadingFilesStillOpenForWrite: Boolean = false
     private var unSyncedFiles: MutableSet<String>? = null
     private var createdFiles: MutableSet<String>? = null
+    private val stateLock = ReentrantLock()
     private var openFilesForWrite: MutableSet<String> = mutableSetOf()
     private val openLocksMutex = Mutex()
     private val openLocks: MutableMap<String, RuntimeException> = mutableMapOf()
@@ -118,6 +120,15 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     private fun <T> withOpenFilesLock(action: () -> T): T =
         runBlocking { openFilesMutex.withLock { action() } }
+
+    private inline fun <T> withStateLock(action: () -> T): T {
+        stateLock.lock()
+        try {
+            return action()
+        } finally {
+            stateLock.unlock()
+        }
+    }
 
     /*@Synchronized*/
     private fun init() {
@@ -198,67 +209,71 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun sync(names: MutableCollection<String>) {
-        maybeYield()
-        maybeThrowDeterministicException()
-        if (crashed) {
-            throw IOException("cannot sync after crash")
-        }
-        // always pass thru fsync, directories rely on this.
-        // 90% of time, we use DisableFsyncFS which omits the real calls.
-        for (name in names) {
-            // randomly fail with IOE on any file
-            maybeThrowIOException(name)
-            `in`.sync(mutableSetOf(name))
-            unSyncedFiles!!.remove(name)
+        withStateLock {
+            maybeYield()
+            maybeThrowDeterministicException()
+            if (crashed) {
+                throw IOException("cannot sync after crash")
+            }
+            // always pass thru fsync, directories rely on this.
+            // 90% of time, we use DisableFsyncFS which omits the real calls.
+            for (name in names) {
+                // randomly fail with IOE on any file
+                maybeThrowIOException(name)
+                `in`.sync(mutableSetOf(name))
+                unSyncedFiles!!.remove(name)
+            }
         }
     }
 
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun rename(source: String, dest: String) {
-        maybeYield()
-        maybeThrowDeterministicException()
+        withStateLock {
+            maybeYield()
+            maybeThrowDeterministicException()
 
-        if (crashed) {
-            throw IOException("cannot rename after crash")
-        }
-
-        withOpenFilesLock {
-            if (openFiles!!.containsKey(source) && assertNoDeleteOpenFile) {
-                throw fillOpenTrace(
-                    AssertionError(
-                        "MockDirectoryWrapper: source file \"$source\" is still open: cannot rename"
-                    ),
-                    source,
-                    true
-                )
+            if (crashed) {
+                throw IOException("cannot rename after crash")
             }
 
-            if (openFiles!!.containsKey(dest) && assertNoDeleteOpenFile) {
-                throw fillOpenTrace(
-                    AssertionError(
-                        "MockDirectoryWrapper: dest file \"$dest\" is still open: cannot rename"
-                    ),
-                    dest,
-                    true
-                )
-            }
-        }
-
-        var success = false
-        try {
-            `in`.rename(source, dest)
-            success = true
-        } finally {
-            if (success) {
-                // we don't do this stuff with lucene's commit, but it's just for completeness
-                if (unSyncedFiles!!.contains(source)) {
-                    unSyncedFiles!!.remove(source)
-                    unSyncedFiles!!.add(dest)
+            withOpenFilesLock {
+                if (openFiles!!.containsKey(source) && assertNoDeleteOpenFile) {
+                    throw fillOpenTrace(
+                        AssertionError(
+                            "MockDirectoryWrapper: source file \"$source\" is still open: cannot rename"
+                        ),
+                        source,
+                        true
+                    )
                 }
-                withOpenFilesLock { openFilesDeleted!!.remove(source) }
-                createdFiles!!.remove(source)
-                createdFiles!!.add(dest)
+
+                if (openFiles!!.containsKey(dest) && assertNoDeleteOpenFile) {
+                    throw fillOpenTrace(
+                        AssertionError(
+                            "MockDirectoryWrapper: dest file \"$dest\" is still open: cannot rename"
+                        ),
+                        dest,
+                        true
+                    )
+                }
+            }
+
+            var success = false
+            try {
+                `in`.rename(source, dest)
+                success = true
+            } finally {
+                if (success) {
+                    // we don't do this stuff with lucene's commit, but it's just for completeness
+                    if (unSyncedFiles!!.contains(source)) {
+                        unSyncedFiles!!.remove(source)
+                        unSyncedFiles!!.add(dest)
+                    }
+                    withOpenFilesLock { openFilesDeleted!!.remove(source) }
+                    createdFiles!!.remove(source)
+                    createdFiles!!.add(dest)
+                }
             }
         }
     }
@@ -583,22 +598,24 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     fun crash() {
-        openFiles = mutableMapOf()
-        openFilesForWrite = mutableSetOf()
-        openFilesDeleted = mutableSetOf()
-        // first force-close all files, so we can corrupt on windows etc.
-        // clone the file map, as these guys want to remove themselves on close.
-        val m: MutableMap<AutoCloseable, Exception> = openFileHandles.toMutableMap()
-            /*java.util.IdentityHashMap<AutoCloseable, Exception>(openFileHandles)*/
-        for (f in m.keys) {
-            try {
-                f.close()
-            } catch (ignored: Exception) {
+        withStateLock {
+            openFiles = mutableMapOf()
+            openFilesForWrite = mutableSetOf()
+            openFilesDeleted = mutableSetOf()
+            // first force-close all files, so we can corrupt on windows etc.
+            // clone the file map, as these guys want to remove themselves on close.
+            val m: MutableMap<AutoCloseable, Exception> = openFileHandles.toMutableMap()
+                /*java.util.IdentityHashMap<AutoCloseable, Exception>(openFileHandles)*/
+            for (f in m.keys) {
+                try {
+                    f.close()
+                } catch (ignored: Exception) {
+                }
             }
+            corruptFiles(unSyncedFiles!!)
+            crashed = true
+            unSyncedFiles = mutableSetOf()
         }
-        corruptFiles(unSyncedFiles!!)
-        crashed = true
-        unSyncedFiles = mutableSetOf()
     }
 
     /*@Synchronized*/
@@ -665,34 +682,36 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun deleteFile(name: String) {
-        maybeYield()
+        withStateLock {
+            maybeYield()
 
-        maybeThrowDeterministicException()
+            maybeThrowDeterministicException()
 
-        if (crashed) {
-            throw IOException("cannot delete after crash")
-        }
-
-        withOpenFilesLock {
-            if (openFiles!!.containsKey(name)) {
-                openFilesDeleted!!.add(name)
-                if (assertNoDeleteOpenFile) {
-                    throw fillOpenTrace(
-                        IOException(
-                            "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
-                        ),
-                        name,
-                        true
-                    )
-                }
-            } else {
-                openFilesDeleted!!.remove(name)
+            if (crashed) {
+                throw IOException("cannot delete after crash")
             }
-        }
 
-        unSyncedFiles!!.remove(name)
-        `in`.deleteFile(name)
-        createdFiles!!.remove(name)
+            withOpenFilesLock {
+                if (openFiles!!.containsKey(name)) {
+                    openFilesDeleted!!.add(name)
+                    if (assertNoDeleteOpenFile) {
+                        throw fillOpenTrace(
+                            IOException(
+                                "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
+                            ),
+                            name,
+                            true
+                        )
+                    }
+                } else {
+                    openFilesDeleted!!.remove(name)
+                }
+            }
+
+            unSyncedFiles!!.remove(name)
+            `in`.deleteFile(name)
+            createdFiles!!.remove(name)
+        }
     }
 
     // sets the cause of the incoming ioe to be the stack
@@ -741,41 +760,43 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         name: String,
         context: IOContext
     ): IndexOutput {
-        maybeThrowDeterministicException()
-        maybeThrowIOExceptionOnOpen(name)
-        maybeYield()
-        if (failOnCreateOutput) {
+        return withStateLock {
             maybeThrowDeterministicException()
-        }
-        if (crashed) {
-            throw IOException("cannot createOutput after crash")
-        }
-        init()
+            maybeThrowIOExceptionOnOpen(name)
+            maybeYield()
+            if (failOnCreateOutput) {
+                maybeThrowDeterministicException()
+            }
+            if (crashed) {
+                throw IOException("cannot createOutput after crash")
+            }
+            init()
 
-        if (createdFiles!!.contains(name)) {
-            throw FileAlreadyExistsException("File \"$name\" was already written to.")
+            if (createdFiles!!.contains(name)) {
+                throw FileAlreadyExistsException("File \"$name\" was already written to.")
+            }
+
+            if (assertNoDeleteOpenFile && withOpenFilesLock { openFiles!!.containsKey(name) }) {
+                throw AssertionError(
+                    "MockDirectoryWrapper: file \"$name\" is still open: cannot overwrite"
+                )
+            }
+
+            unSyncedFiles!!.add(name)
+            createdFiles!!.add(name)
+
+            // System.out.println(Thread.currentThread().name + ": MDW: create " + name);
+            val delegateOutput: IndexOutput =
+                `in`.createOutput(
+                    name,
+                    LuceneTestCase.newIOContext(randomState, context)
+                )
+            val io: IndexOutput =
+                MockIndexOutputWrapper(this, delegateOutput, name)
+            addFileHandle(io, name, Handle.Output)
+            withOpenFilesLock { openFilesForWrite.add(name) }
+            maybeThrottle(name, io)
         }
-
-        if (assertNoDeleteOpenFile && withOpenFilesLock { openFiles!!.containsKey(name) }) {
-            throw AssertionError(
-                "MockDirectoryWrapper: file \"$name\" is still open: cannot overwrite"
-            )
-        }
-
-        unSyncedFiles!!.add(name)
-        createdFiles!!.add(name)
-
-        // System.out.println(Thread.currentThread().name + ": MDW: create " + name);
-        val delegateOutput: IndexOutput =
-            `in`.createOutput(
-                name,
-                LuceneTestCase.newIOContext(randomState, context)
-            )
-        val io: IndexOutput =
-            MockIndexOutputWrapper(this, delegateOutput, name)
-        addFileHandle(io, name, Handle.Output)
-        withOpenFilesLock { openFilesForWrite.add(name) }
-        return maybeThrottle(name, io)
     }
 
     private fun maybeThrottle(
@@ -802,36 +823,38 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         suffix: String,
         context: IOContext
     ): IndexOutput {
-        maybeThrowDeterministicException()
-        maybeThrowIOExceptionOnOpen("temp: prefix=$prefix suffix=$suffix")
-        maybeYield()
-        if (failOnCreateOutput) {
+        return withStateLock {
             maybeThrowDeterministicException()
+            maybeThrowIOExceptionOnOpen("temp: prefix=$prefix suffix=$suffix")
+            maybeYield()
+            if (failOnCreateOutput) {
+                maybeThrowDeterministicException()
+            }
+            if (crashed) {
+                throw IOException("cannot createTempOutput after crash")
+            }
+            init()
+
+            val delegateOutput: IndexOutput =
+                `in`.createTempOutput(
+                    prefix,
+                    suffix,
+                    LuceneTestCase.newIOContext(randomState, context)
+                )
+            val name: String = delegateOutput.name!!
+            check(
+                name.lowercase().endsWith(".tmp") != false
+            ) { "wrapped directory failed to use .tmp extension: got: $name" }
+
+            unSyncedFiles!!.add(name)
+            createdFiles!!.add(name)
+            val io: IndexOutput =
+                MockIndexOutputWrapper(this, delegateOutput, name)
+            addFileHandle(io, name, Handle.Output)
+            withOpenFilesLock { openFilesForWrite.add(name) }
+
+            maybeThrottle(name, io)
         }
-        if (crashed) {
-            throw IOException("cannot createTempOutput after crash")
-        }
-        init()
-
-        val delegateOutput: IndexOutput =
-            `in`.createTempOutput(
-                prefix,
-                suffix,
-                LuceneTestCase.newIOContext(randomState, context)
-            )
-        val name: String = delegateOutput.name!!
-        check(
-            name.lowercase().endsWith(".tmp") != false
-        ) { "wrapped directory failed to use .tmp extension: got: $name" }
-
-        unSyncedFiles!!.add(name)
-        createdFiles!!.add(name)
-        val io: IndexOutput =
-            MockIndexOutputWrapper(this, delegateOutput, name)
-        addFileHandle(io, name, Handle.Output)
-        withOpenFilesLock { openFilesForWrite.add(name) }
-
-        return maybeThrottle(name, io)
     }
 
     enum class Handle {
