@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.index
 
 import dev.scottpierce.envvar.EnvVar
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,7 @@ import org.gnit.lucenekmp.store.RateLimitedIndexOutput
 import org.gnit.lucenekmp.store.RateLimiter
 import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.InfoStream
+import org.gnit.lucenekmp.util.NativeCrashProbe
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.AtomicInteger
@@ -37,11 +39,17 @@ import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.UncheckedIOException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.get
+import org.gnit.lucenekmp.jdkport.currentThreadId
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.jdkport.accumulateAndGet
+import kotlin.concurrent.Volatile
 // import java.util.concurrent.SynchronousQueue
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 /**
  * A [MergeScheduler] that runs each merge using a separate thread.
@@ -65,6 +73,7 @@ import kotlin.math.max
 open class ConcurrentMergeScheduler
 /** Sole constructor, with all settings set to default values.  */
     : MergeScheduler() {
+    private val logger = KotlinLogging.logger {}
     /** List of currently active [MergeThread]s.  */
     protected val mergeThreads: MutableList<MergeThread> = mutableListOf()
 
@@ -452,38 +461,63 @@ open class ConcurrentMergeScheduler
      * Wait for any running merge threads to finish. This call is not interruptible as used by [ ][.close].
      */
     suspend fun sync() {
-        var interrupted = false
-        try {
-            while (true) {
-                var toSync: MergeThread? = null
+        var waitingThreadName: String? = null
+        var waitingStartedAt = TimeSource.Monotonic.markNow()
+        var waitingIters = 0
+        var loggedSlowWait = false
+        val currentJob = currentCoroutineContext()[Job]
+        val currentWorkerId = currentThreadId()
 
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                    for (t in mergeThreads) {
-                        // In case a merge thread is calling us, don't try to sync on
-                        // itself, since that will never finish!
-                        if (t.isAlive() && t !== currentCoroutineContext()[Job]) {
-                            toSync = t
-                            break
-                        }
-                    }
-                //}
-                if (toSync != null) {
-                    try {
-                        toSync.join()
-                    } catch (ie: InterruptedException) {
-                        // ignore this Exception, we will retry until all threads are dead
-                        interrupted = true
-                    }
-                } else {
+        while (true) {
+            var toSync: MergeThread? = null
+
+            // TODO synchronized is not supported in KMP, need to think what to do here
+            //synchronized(this) {
+            for (t in mergeThreads) {
+                // In case a merge thread is calling us, don't try to sync on
+                // itself, since that will never finish!
+                if (!t.isAlive()) {
+                    continue
+                }
+                val isCurrentMergeThreadOnThisWorker =
+                    t.debugPhase() == "doMerge" && t.debugThreadId() == currentWorkerId
+                if (!isCurrentMergeThreadOnThisWorker && t.job !== currentJob) {
+                    toSync = t
                     break
                 }
             }
-        } finally {
-            // finally, restore interrupt status:
-            if (interrupted)
-                currentCoroutineContext()[Job]!!.cancel()
-                //java.lang.Thread.currentThread().interrupt()
+            //}
+            if (toSync == null) {
+                break
+            }
+
+            val threadName = toSync.getName()
+            if (waitingThreadName != threadName) {
+                waitingThreadName = threadName
+                waitingStartedAt = TimeSource.Monotonic.markNow()
+                waitingIters = 0
+                loggedSlowWait = false
+            }
+
+            val joined = withTimeoutOrNull(1.seconds) {
+                toSync.awaitCompletion()
+                true
+            } ?: false
+
+            if (joined) {
+                waitingThreadName = null
+                continue
+            }
+
+            waitingIters++
+            if (!loggedSlowWait && waitingStartedAt.elapsedNow() > 5.seconds) {
+                loggedSlowWait = true
+                val elapsed = waitingStartedAt.elapsedNow()
+                logger.error {
+                    "CMS.sync slow wait elapsed=$elapsed waitIters=$waitingIters mergeThread=${toSync.getName()} mergeSegment=${getSegmentName(toSync.merge)} mergeThreadPhase=${toSync.debugPhase()} phaseElapsedMs=${toSync.debugPhaseElapsedMs()} mergePhase=${toSync.merge.debugPhase} mergePhaseElapsedMs=${toSync.merge.debugPhaseElapsedMs()} mergeAborted=${toSync.merge.isAborted} mergeException=${toSync.merge.exception?.let { it::class.simpleName }} active=${debugActiveMergeThreads()} started=${debugStartedMergeThreads()} finished=${debugFinishedMergeThreads()} suppressExceptions=$suppressExceptions"
+                }
+                NativeCrashProbe.requestNativeProbeDump(times = 1)
+            }
         }
     }
 
@@ -708,9 +742,20 @@ open class ConcurrentMergeScheduler
     ) : Comparable<MergeThread> {
 
         val rateLimiter: MergeRateLimiter = MergeRateLimiter(merge.mergeProgress)
+        @Volatile
+        private var debugPhaseLabel: String = "created"
+        @Volatile
+        private var debugPhaseStartedAtNanos: Long = System.nanoTime()
+        @Volatile
+        private var debugThreadId: Long = -1L
+        private val uncaughtHandler = CoroutineExceptionHandler { _, throwable ->
+            logger.error(throwable) {
+                "CMS.mergeThread uncaught coroutine exception merge=${merge.segString()} suppressExceptions=$suppressExceptions"
+            }
+        }
 
         // create a Job that will execute your merge logic when started
-        val job: Job = scope.launch(start = CoroutineStart.LAZY) {
+        val job: Job = scope.launch(context = uncaughtHandler, start = CoroutineStart.LAZY) {
             runMerge()  // suspending function containing your merge code
         }
 
@@ -722,35 +767,71 @@ open class ConcurrentMergeScheduler
 
         /** Mirrors Thread.start() */
         fun start() {
+            setDebugPhase("scheduled")
             job.start()
         }
 
-        /** Mirrors Thread.join() by blocking until completion */
-        fun join() {
-            runBlocking {
-                job.join()
-            }
+        suspend fun awaitCompletion() {
+            job.join()
+        }
+
+        fun debugPhase(): String = debugPhaseLabel
+
+        fun debugPhaseElapsedMs(nowNanos: Long = System.nanoTime()): Long {
+            return (nowNanos - debugPhaseStartedAtNanos) / 1_000_000L
+        }
+
+        fun debugThreadId(): Long = debugThreadId
+
+        private fun setDebugPhase(phase: String) {
+            debugPhaseLabel = phase
+            debugPhaseStartedAtNanos = System.nanoTime()
+            debugThreadId = currentThreadId()
         }
 
         override fun compareTo(other: MergeThread): Int =
             other.merge.estimatedMergeBytes
                 .compareTo(this.merge.estimatedMergeBytes)
 
+        @OptIn(ExperimentalAtomicApi::class)
         private suspend fun runMerge() {
+            setDebugPhase("runMerge.enter")
+            debugStartedMergeThreadsCounter.incrementAndFetch()
+            debugActiveMergeThreadsCounter.incrementAndFetch()
             try {
                 if (verbose()) message("merge thread ${getName()} start")
+                setDebugPhase("doMerge")
                 doMerge(mergeSource, merge)
                 if (verbose()) {
                     message(
                         "merge thread ${this.getName()} merge segment [${getSegmentName(merge)}] done estSize=${bytesToMB(merge.estimatedMergeBytes)} MB (written=${bytesToMB(rateLimiter.getTotalBytesWritten())} MB) runTime=${nsToSec(System.nanoTime() - merge.mergeStartNS)}s (stopped=${nsToSec(rateLimiter.totalStoppedNS)}s, paused=${nsToSec(rateLimiter.totalPausedNS)}s) rate=${rateToString(rateLimiter.mBPerSec)}"
                     )
                 }
+                setDebugPhase("runOnMergeFinished")
                 runOnMergeFinished(mergeSource)
+                setDebugPhase("runMerge.done")
                 if (verbose()) message("merge thread ${getName()} end")
             } catch (exc: Throwable) {
+                setDebugPhase("exception:${exc::class.simpleName}")
                 when {
                     exc is MergePolicy.MergeAbortedException -> { /* ignore */ }
-                    !suppressExceptions               -> handleMergeException(exc)
+                    !suppressExceptions               -> {
+                        logger.error(exc) { "CMS.runMerge unsuppressed exception merge=${merge.segString()} suppressExceptions=$suppressExceptions" }
+                        handleMergeException(exc)
+                    }
+                    else -> {
+                        if (!isLikelyFakeIOException(exc)) {
+                            logger.error(exc) {
+                                "CMS.runMerge suppressed non-fake exception merge=${merge.segString()} suppressExceptions=$suppressExceptions"
+                            }
+                        }
+                    }
+                }
+            } finally {
+                setDebugPhase("finally")
+                debugFinishedMergeThreadsCounter.incrementAndFetch()
+                debugActiveMergeThreadsCounter.accumulateAndGet(-1) { prev, delta ->
+                    max(0, prev + delta)
                 }
             }
         }
@@ -961,6 +1042,10 @@ open class ConcurrentMergeScheduler
                             // suppressExceptions is normally only set during
                             // testing.
                             handleMergeException(exc)
+                        } else if (!isLikelyFakeIOException(exc)) {
+                            logger.error(exc) {
+                                "CMS.cachedExecutor suppressed non-fake exception suppressExceptions=$suppressExceptions"
+                            }
                         }
                     } finally {
                         activeCount.decrementAndFetch()
@@ -973,8 +1058,33 @@ open class ConcurrentMergeScheduler
         }
     }
 
+    private fun isLikelyFakeIOException(t: Throwable): Boolean {
+        var cur: Throwable? = t
+        while (cur != null) {
+            val message = cur.message
+            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
+                return true
+            }
+            cur = cur.cause
+        }
+        return false
+    }
+
     companion object {
         internal val ensureInitializedForTests: Boolean = true
+        @OptIn(ExperimentalAtomicApi::class)
+        private val debugActiveMergeThreadsCounter: AtomicInteger = AtomicInteger(0)
+        @OptIn(ExperimentalAtomicApi::class)
+        private val debugStartedMergeThreadsCounter: AtomicInteger = AtomicInteger(0)
+        @OptIn(ExperimentalAtomicApi::class)
+        private val debugFinishedMergeThreadsCounter: AtomicInteger = AtomicInteger(0)
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun debugActiveMergeThreads(): Int = debugActiveMergeThreadsCounter.get()
+        @OptIn(ExperimentalAtomicApi::class)
+        fun debugStartedMergeThreads(): Int = debugStartedMergeThreadsCounter.get()
+        @OptIn(ExperimentalAtomicApi::class)
+        fun debugFinishedMergeThreads(): Int = debugFinishedMergeThreadsCounter.get()
 
         /**
          * Dynamic default for `maxThreadCount` and `maxMergeCount`, based on CPU core count.

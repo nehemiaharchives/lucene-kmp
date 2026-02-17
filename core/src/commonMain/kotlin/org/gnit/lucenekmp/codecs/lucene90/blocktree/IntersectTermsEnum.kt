@@ -65,7 +65,7 @@ internal class IntersectTermsEnum(
         this.automaton = automaton
         this.commonSuffix = commonSuffix
 
-        `in` = fr.parent.termsIn.clone()
+        `in` = fr.parent.cloneTermsInput()
         stack = kotlin.arrayOfNulls<IntersectTermsEnumFrame>(5)
         for (idx in stack.indices) {
             stack[idx] = IntersectTermsEnumFrame(this, idx)

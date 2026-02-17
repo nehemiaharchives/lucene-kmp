@@ -238,6 +238,10 @@ abstract class MergePolicy
 
         @Volatile
         var mergeStartNS: Long = -1
+        @Volatile
+        var debugPhase: String = "created"
+        @Volatile
+        var debugPhaseStartedAtNanos: Long = System.nanoTime()
 
         /** Total number of documents in segments to be merged, not accounting for deletions.  */
         val totalMaxDoc: Int
@@ -400,6 +404,15 @@ abstract class MergePolicy
                 b.append(" [ABORTED]")
             }
             return b.toString()
+        }
+
+        fun markDebugPhase(phase: String) {
+            debugPhase = phase
+            debugPhaseStartedAtNanos = System.nanoTime()
+        }
+
+        fun debugPhaseElapsedMs(nowNanos: Long = System.nanoTime()): Long {
+            return (nowNanos - debugPhaseStartedAtNanos) / 1_000_000L
         }
 
         /**

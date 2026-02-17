@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.tests.util.NullInfoStream
 import org.gnit.lucenekmp.analysis.Analyzer
@@ -46,6 +47,7 @@ class RandomIndexWriter private constructor(
     closeAnalyzer: Boolean,
     useSoftDeletes: Boolean
 ) : AutoCloseable {
+    private val logger = KotlinLogging.logger {}
     val w: IndexWriter
     private val r: Random
     var docCount: Int = 0
@@ -453,37 +455,63 @@ class RandomIndexWriter private constructor(
 
     @Throws(IOException::class)
     fun getReader(applyDeletions: Boolean, writeAllDeletes: Boolean): DirectoryReader {
-        LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
-        getReaderCalled = true
-        if (r.nextInt(20) == 2) {
-            doRandomForceMerge()
-        }
-        if (!applyDeletions || r.nextBoolean()) {
-            // if we have soft deletes we can't open from a directory
-            if (LuceneTestCase.VERBOSE) {
-                println("RIW.getReader: use NRT reader")
+        var phase = "start"
+        try {
+            LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
+            getReaderCalled = true
+            if (r.nextInt(20) == 2) {
+                phase = "doRandomForceMerge"
+                doRandomForceMerge()
             }
-            if (r.nextInt(5) == 1) {
-                w.commit()
-            }
-            return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
-        } else {
-            if (LuceneTestCase.VERBOSE) {
-                println("RIW.getReader: open new reader")
-            }
-            w.commit()
-            if (r.nextBoolean()) {
-                val reader: DirectoryReader =
-                    DirectoryReader.open(w.getDirectory())
-                if (config.softDeletesField != null) {
-                    return SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
-                } else {
-                    return reader
+            if (!applyDeletions || r.nextBoolean()) {
+                // if we have soft deletes we can't open from a directory
+                if (LuceneTestCase.VERBOSE) {
+                    println("RIW.getReader: use NRT reader")
                 }
-            } else {
+                if (r.nextInt(5) == 1) {
+                    phase = "nrt.commit"
+                    w.commit()
+                }
+                phase = "nrt.getReader"
                 return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
+            } else {
+                if (LuceneTestCase.VERBOSE) {
+                    println("RIW.getReader: open new reader")
+                }
+                phase = "dir.commit"
+                w.commit()
+                if (r.nextBoolean()) {
+                    phase = "dir.open"
+                    val reader: DirectoryReader =
+                        DirectoryReader.open(w.getDirectory())
+                    if (config.softDeletesField != null) {
+                        phase = "dir.wrapSoftDeletes"
+                        return SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
+                    } else {
+                        return reader
+                    }
+                } else {
+                    phase = "dir.nrt.getReader"
+                    return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
+                }
             }
+        } catch (t: Throwable) {
+            val fake = isLikelyFakeException(t)
+            logger.error(t) { "RandomIndexWriter.getReader throwable phase=$phase applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes fake=$fake" }
+            throw t
         }
+    }
+
+    private fun isLikelyFakeException(t: Throwable): Boolean {
+        var cur: Throwable? = t
+        while (cur != null) {
+            val message = cur.message
+            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
+                return true
+            }
+            cur = cur.cause
+        }
+        return false
     }
 
     /**

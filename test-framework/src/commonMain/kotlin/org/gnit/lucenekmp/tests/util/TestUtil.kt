@@ -22,6 +22,7 @@ package org.gnit.lucenekmp.tests.util
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
@@ -82,6 +83,7 @@ import kotlin.test.assertEquals
 
 class TestUtil {
     companion object {
+        private val logger = KotlinLogging.logger {}
 
         /**
          * A comparator that compares UTF-16 strings / char sequences according to Unicode code point
@@ -304,6 +306,7 @@ class TestUtil {
                 }
                 val indexStatus: CheckIndex.Status = checker.checkIndex(null)
                 if (indexStatus == null || indexStatus.clean == false) {
+                    logger.error { "TestUtil.checkIndex failed clean=${indexStatus?.clean} level=$level failFast=$failFast concurrent=$concurrent" }
                     println("CheckIndex failed")
                     println(output.toString(StandardCharsets.UTF_8))
                     throw RuntimeException("CheckIndex failed")

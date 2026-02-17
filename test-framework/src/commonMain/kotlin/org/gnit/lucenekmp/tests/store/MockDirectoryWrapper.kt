@@ -1051,13 +1051,20 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                     // call back to synchronized methods such as MockDirectoryWrapper#fileLength.
                     // Hence passing concurrent = false to this method to turn off concurrent checks.
                     val checkLevel = if (levelForCheckOnClose < 1) 1 else levelForCheckOnClose
-                    TestUtil.checkIndex(
-                        this,
-                        checkLevel,
-                        true,
-                        false,
-                        null
-                    )
+                    try {
+                        TestUtil.checkIndex(
+                            this,
+                            checkLevel,
+                            true,
+                            false,
+                            null
+                        )
+                    } catch (t: Throwable) {
+                        logger.error(t) {
+                            "MockDirectoryWrapper.close checkIndexOnClose failed checkLevel=$checkLevel"
+                        }
+                        throw t
+                    }
                 }
 
                 // TODO: factor this out / share w/ TestIW.assertNoUnreferencedFiles

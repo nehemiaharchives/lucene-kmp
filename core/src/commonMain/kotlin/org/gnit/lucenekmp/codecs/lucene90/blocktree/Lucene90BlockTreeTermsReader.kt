@@ -47,19 +47,19 @@ import okio.IOException
  */
 class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: SegmentReadState) : FieldsProducer() {
     // Open input to the main terms dict file (_X.tib)
-    val termsIn: IndexInput
+    private var termsIn: IndexInput? = null
 
     // Open input to the terms index file (_X.tip)
-    val indexIn: IndexInput
+    private var indexIn: IndexInput? = null
 
     // private static final boolean DEBUG = BlockTreeTermsWriter.DEBUG;
     // Reads the terms dict entries, to gather state to
     // produce DocsEnum on demand
     val postingsReader: PostingsReaderBase
 
-    private val fieldInfos: FieldInfos
-    private val fieldMap: IntObjectHashMap<FieldReader>
-    private val fieldList: MutableList<String>
+    private var fieldInfos: FieldInfos? = null
+    private var fieldMap: IntObjectHashMap<FieldReader>? = null
+    private var fieldList: MutableList<String> = mutableListOf()
 
     val segment: String
 
@@ -75,10 +75,11 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
         try {
             val termsName: String =
                 IndexFileNames.segmentFileName(segment, state.segmentSuffix, TERMS_EXTENSION)
-            termsIn = state.directory.openInput(termsName, state.context)
+            val termsInput = state.directory.openInput(termsName, state.context)
+            termsIn = termsInput
             version =
                 CodecUtil.checkIndexHeader(
-                    termsIn,
+                    termsInput,
                     TERMS_CODEC_NAME,
                     VERSION_START,
                     VERSION_CURRENT,
@@ -88,12 +89,11 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
 
             val indexName: String =
                 IndexFileNames.segmentFileName(segment, state.segmentSuffix, TERMS_INDEX_EXTENSION)
-            indexIn =
-                state.directory.openInput(
-                    indexName, state.context.withReadAdvice(ReadAdvice.RANDOM_PRELOAD)
-                )
+            val indexInput =
+                state.directory.openInput(indexName, state.context.withReadAdvice(ReadAdvice.RANDOM_PRELOAD))
+            indexIn = indexInput
             CodecUtil.checkIndexHeader(
-                indexIn,
+                indexInput,
                 TERMS_INDEX_CODEC_NAME,
                 version,
                 version,
@@ -104,7 +104,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
             // Read per-field details
             val metaName: String =
                 IndexFileNames.segmentFileName(segment, state.segmentSuffix, TERMS_META_EXTENSION)
-            var fieldMap: IntObjectHashMap<FieldReader>? = null
+            var loadedFieldMap: IntObjectHashMap<FieldReader>? = null
             var priorE: Throwable? = null
             var indexLength: Long = -1
             var termsLength: Long = -1
@@ -124,7 +124,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
                     if (numFields < 0) {
                         throw CorruptIndexException("invalid numFields: $numFields", metaIn)
                     }
-                    fieldMap = IntObjectHashMap(numFields)
+                    loadedFieldMap = IntObjectHashMap(numFields)
                     for (i in 0..<numFields) {
                         val field: Int = metaIn.readVInt()
                         val numTerms: Long = metaIn.readVLong()
@@ -175,7 +175,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
                         }
                         val indexStartFP: Long = metaIn.readVLong()
                         val previous: FieldReader? =
-                            fieldMap.put(
+                            loadedFieldMap!!.put(
                                 fieldInfo.number,
                                 FieldReader(
                                     this,
@@ -187,7 +187,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
                                     docCount,
                                     indexStartFP,
                                     metaIn,
-                                    indexIn,
+                                    indexInput,
                                     minTerm,
                                     maxTerm
                                 )
@@ -210,11 +210,11 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
             }
             // At this point the checksum of the meta file has been verified so the lengths are likely
             // correct
-            CodecUtil.retrieveChecksum(indexIn, indexLength)
-            CodecUtil.retrieveChecksum(termsIn, termsLength)
+            CodecUtil.retrieveChecksum(indexInput, indexLength)
+            CodecUtil.retrieveChecksum(termsInput, termsLength)
             fieldInfos = state.fieldInfos
-            this.fieldMap = fieldMap!!
-            this.fieldList = sortFieldNames(fieldMap, state.fieldInfos)
+            this.fieldMap = loadedFieldMap
+            this.fieldList = sortFieldNames(loadedFieldMap!!, state.fieldInfos)
             success = true
         } finally {
             if (!success) {
@@ -229,13 +229,32 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
     //   return "0x" + Integer.toHexString(v);
     // }
     override fun close() {
+        val localIndexIn = indexIn
+        val localTermsIn = termsIn
+        indexIn = null
+        termsIn = null
         try {
-            IOUtils.close(indexIn, termsIn, postingsReader)
+            val closeables = mutableListOf<AutoCloseable>(postingsReader)
+            if (localTermsIn != null) {
+                closeables.add(0, localTermsIn)
+            }
+            if (localIndexIn != null) {
+                closeables.add(0, localIndexIn)
+            }
+            IOUtils.close(closeables)
         } finally {
             // Clear so refs to terms index is GCable even if
             // app hangs onto us:
-            fieldMap.clear()
+            fieldMap?.clear()
+            fieldMap = null
+            fieldList = mutableListOf()
+            fieldInfos = null
         }
+    }
+
+    internal fun cloneTermsInput(): IndexInput {
+        val localTermsIn = checkNotNull(termsIn) { "terms dict input is closed for segment=$segment" }
+        return localTermsIn.clone()
     }
 
     override fun iterator(): MutableIterator<String> {
@@ -245,21 +264,25 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
     @Throws(IOException::class)
     override fun terms(field: String?): Terms? {
         checkNotNull(field)
-        val fieldInfo: FieldInfo? = fieldInfos.fieldInfo(field)
-        return if (fieldInfo == null) null else fieldMap[fieldInfo.number]
+        val localFieldInfos = fieldInfos ?: return null
+        val localFieldMap = fieldMap ?: return null
+        val fieldInfo: FieldInfo? = localFieldInfos.fieldInfo(field)
+        return if (fieldInfo == null) null else localFieldMap[fieldInfo.number]
     }
 
     override fun size(): Int {
-        return fieldMap.size()
+        return fieldMap?.size() ?: 0
     }
 
     @Throws(IOException::class)
     override fun checkIntegrity() {
+        val localIndexIn = checkNotNull(indexIn) { "terms index input is closed for segment=$segment" }
+        val localTermsIn = checkNotNull(termsIn) { "terms dict input is closed for segment=$segment" }
         // terms index
-        CodecUtil.checksumEntireFile(indexIn)
+        CodecUtil.checksumEntireFile(localIndexIn)
 
         // term dictionary
-        CodecUtil.checksumEntireFile(termsIn)
+        CodecUtil.checksumEntireFile(localTermsIn)
 
         // postings
         postingsReader.checkIntegrity()
@@ -268,7 +291,7 @@ class Lucene90BlockTreeTermsReader(postingsReader: PostingsReaderBase, state: Se
     override fun toString(): String {
         return (this::class.simpleName
                 + "(fields="
-                + fieldMap.size()
+                + (fieldMap?.size() ?: 0)
                 + ",delegate="
                 + postingsReader
                 + ")")

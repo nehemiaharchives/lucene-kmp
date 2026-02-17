@@ -13,6 +13,7 @@ import org.gnit.lucenekmp.document.LongPoint
 import org.gnit.lucenekmp.document.NumericDocValuesField
 import org.gnit.lucenekmp.document.StringField
 import org.gnit.lucenekmp.index.CodecReader
+import org.gnit.lucenekmp.index.CheckIndex
 import org.gnit.lucenekmp.index.ConcurrentMergeScheduler
 import org.gnit.lucenekmp.index.DirectoryReader
 import org.gnit.lucenekmp.index.IndexWriter
@@ -43,9 +44,13 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
+import org.gnit.lucenekmp.util.NativeCrashProbe
 import org.gnit.lucenekmp.util.NumericUtils
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -58,6 +63,9 @@ import kotlin.test.fail
  */
 abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
     private val logger = KotlinLogging.logger {}
+    private val closeSlowThreshold = 10.seconds
+    private var testWithExceptionsRunCounter = 0
+    private var activeTestWithExceptionsRun = 0
 
     override fun addRandomFields(doc: Document) {
         val numValues: Int = random().nextInt(3)
@@ -220,6 +228,10 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
     /** Make sure we close open files, delete temp files, etc., on exception  */
     @Throws(Exception::class)
     open fun testWithExceptions() {
+        configureTestLogging()
+        val thisRun = ++testWithExceptionsRunCounter
+        activeTestWithExceptionsRun = thisRun
+        NativeCrashProbe.mark(thisRun, 0, NativeCrashProbe.PHASE_ATTEMPT_START)
         val numDocs: Int = atLeast(1000)
         val numBytesPerDim: Int = TestUtil.nextInt(random(), 2, PointValues.MAX_NUM_BYTES)
         val numDims: Int = TestUtil.nextInt(random(), 1, PointValues.MAX_DIMENSIONS)
@@ -240,54 +252,58 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
         var attempt = 0
         while (done == false) {
             attempt++
-            logger.debug {
-                "testWithExceptions attempt=$attempt numDocs=$numDocs numDims=$numDims numIndexDims=$numIndexDims numBytesPerDim=$numBytesPerDim"
-            }
-            newMockFSDirectory(createTempDir()).use { dir ->
-                try {
-                    dir.randomIOExceptionRate = 0.05
-                    dir.randomIOExceptionRateOnOpen = 0.05
-                    logger.debug {
-                        "testWithExceptions attempt=$attempt verify start ioRate=${dir.randomIOExceptionRate} ioRateOnOpen=${dir.randomIOExceptionRateOnOpen}"
-                    }
-                    verify(dir, docValues, null, numDims, numIndexDims, numBytesPerDim, true)
-                    logger.debug { "testWithExceptions attempt=$attempt verify completed without exception" }
-                } catch (ise: IllegalStateException) {
-                    done = handlePossiblyFakeException(ise)
-                    logger.debug {
-                        "testWithExceptions attempt=$attempt caught IllegalStateException done=$done message=${ise.message}"
-                    }
-                } catch (ae: AssertionError) {
-                    if (ae.message != null && ae.message!!.contains("does not exist; files=")) {
-                        // OK: likely we threw the random IOExc when IW was asserting the commit files exist
-                        done = true
-                        logger.debug {
-                            "testWithExceptions attempt=$attempt caught AssertionError(known-random-io) done=$done message=${ae.message}"
+            NativeCrashProbe.mark(thisRun, attempt, NativeCrashProbe.PHASE_ATTEMPT_START)
+            var attemptStage = "beforeUse"
+            try {
+                newMockFSDirectory(createTempDir()).use { dir ->
+                    attemptStage = "inUse.beforeVerify"
+                    NativeCrashProbe.mark(thisRun, attempt, NativeCrashProbe.PHASE_ATTEMPT_IN_USE)
+                    try {
+                        dir.randomIOExceptionRate = 0.05
+                        dir.randomIOExceptionRateOnOpen = 0.05
+                        verify(dir, docValues, null, numDims, numIndexDims, numBytesPerDim, true)
+                        attemptStage = "inUse.afterVerify"
+                    } catch (ise: IllegalStateException) {
+                        done = handlePossiblyFakeException(ise)
+                    } catch (ae: AssertionError) {
+                        if (ae.message != null && ae.message!!.contains("does not exist; files=")) {
+                            // OK: likely we threw the random IOExc when IW was asserting the commit files exist
+                            done = true
+                        } else {
+                            logger.debug {
+                                "testWithExceptions attempt=$attempt rethrow AssertionError chain=${throwableChainSummary(ae)} files=${safeListAll(dir)}"
+                            }
+                            throw ae
                         }
-                    } else {
-                        logger.debug {
-                            "testWithExceptions attempt=$attempt rethrow AssertionError message=${ae.message}"
+                    } catch (iae: IllegalArgumentException) {
+                        // This just means we got a too-small maxMB for the maxPointsInLeafNode; just retry w/
+                        // more heap
+                        assertTrue(
+                            iae.message!!.contains("either increase maxMBSortInHeap or decrease maxPointsInLeafNode")
+                        )
+                    } catch (ioe: IOException) {
+                        done = handlePossiblyFakeException(ioe)
+                    } catch (t: Throwable) {
+                        logger.error(t) {
+                            "testWithExceptions run=$thisRun attempt=$attempt caught unexpected throwable chain=${throwableChainSummary(t)} files=${safeListAll(dir)}"
                         }
-                        throw ae
+                        throw t
+                    } finally {
+                        attemptStage = "inUse.afterVerifyCall"
                     }
-                } catch (iae: IllegalArgumentException) {
-                    // This just means we got a too-small maxMB for the maxPointsInLeafNode; just retry w/
-                    // more heap
-                    logger.debug {
-                        "testWithExceptions attempt=$attempt caught IllegalArgumentException(retry) message=${iae.message}"
-                    }
-                    assertTrue(
-                        iae.message!!.contains("either increase maxMBSortInHeap or decrease maxPointsInLeafNode")
-                    )
-                } catch (ioe: IOException) {
-                    done = handlePossiblyFakeException(ioe)
-                    logger.debug {
-                        "testWithExceptions attempt=$attempt caught IOException done=$done message=${ioe.message}"
-                    }
+                    attemptStage = "inUse.blockEnd"
                 }
+                attemptStage = "afterUse"
+                NativeCrashProbe.mark(thisRun, attempt, NativeCrashProbe.PHASE_ATTEMPT_END)
+            } catch (t: Throwable) {
+                NativeCrashProbe.mark(thisRun, attempt, NativeCrashProbe.PHASE_ATTEMPT_ESCAPE_THROWABLE)
+                val fake = isLikelyFakeException(t)
+                logger.error(t) {
+                    "testWithExceptions run=$thisRun escaped throwable attempt=$attempt stage=$attemptStage fake=$fake chain=${throwableChainSummary(t)}"
+                }
+                throw t
             }
         }
-        logger.debug { "testWithExceptions finished after attempt=$attempt done=$done" }
     }
 
     // TODO: merge w/ BaseIndexFileFormatTestCase.handleFakeIOException
@@ -299,20 +315,50 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
                 && (message.contains("a random IOException")
                         || message.contains("background merge hit exception"))
             ) {
-                logger.debug {
-                    "handlePossiblyFakeException accepted as fake exception throwable=$ex message=$message"
-                }
                 return true
             }
             ex = ex.cause
         }
-        logger.debug {
-            "handlePossiblyFakeException rethrowing throwable=$e message=${e?.message}"
+        logger.error(e) {
+            "handlePossiblyFakeException rethrowing non-fake exception chain=${throwableChainSummary(e)}"
         }
         Rethrow.rethrow(e!!)
 
         // dead code yet javac disagrees:
         return false
+    }
+
+    private fun throwableChainSummary(t: Throwable?): String {
+        if (t == null) return "null"
+        val parts = ArrayList<String>()
+        var cur: Throwable? = t
+        while (cur != null) {
+            parts.add(cur::class.simpleName + "(" + (cur.message ?: "null") + ")")
+            cur = cur.cause
+        }
+        return parts.joinToString(" -> ")
+    }
+
+    private fun isLikelyFakeException(t: Throwable): Boolean {
+        var cur: Throwable? = t
+        while (cur != null) {
+            val message = cur.message
+            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
+                return true
+            }
+            cur = cur.cause
+        }
+        return false
+    }
+
+    private fun safeListAll(dir: Directory): String {
+        return try {
+            val files = dir.listAll()
+            files.sort()
+            files.contentToString()
+        } catch (t: Throwable) {
+            "listAll-failed:" + throwableChainSummary(t)
+        }
     }
 
     @Throws(Exception::class)
@@ -689,6 +735,7 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
         }
         var w = RandomIndexWriter(random(), dir!!, iwc)
         var r: DirectoryReader? = null
+        var verifyStage = "start"
 
         // Compute actual min/max values:
         val expectedMinValues = arrayOfNulls<ByteArray>(numDims)
@@ -749,6 +796,8 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
         }
 
         try {
+            verifyStage = "indexing"
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_INDEXING)
             val fieldType = FieldType()
             fieldType.setDimensions(numDims, numIndexDims, numBytesPerDim)
             fieldType.freeze()
@@ -840,8 +889,16 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
                 w.forceMerge(1)
             }
 
+            verifyStage = "postIndexing.beforeAcquireReader"
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_POST_BEFORE_READER)
             r = w.reader
+            verifyStage = "postIndexing.afterAcquireReader"
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_POST_AFTER_READER)
+            verifyStage = "postIndexing.beforeCloseWriter"
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_POST_BEFORE_CLOSE_WRITER)
             w.close()
+            verifyStage = "postIndexing.afterCloseWriter"
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_POST_AFTER_CLOSE_WRITER)
 
             if (VERBOSE) {
                 println("TEST: reader=$r")
@@ -925,6 +982,8 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
             }
 
             val iters: Int = atLeast(100)
+            verifyStage = "beforeQueryIters"
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_QUERY_ITERS)
             for (iter in 0..<iters) {
                 if (VERBOSE) {
                     println("\nTEST: iter=$iter")
@@ -1121,8 +1180,63 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
                     fail("$failCount docs failed; $successCount docs succeeded")
                 }
             }
+        } catch (t: Throwable) {
+            val fake = isLikelyFakeException(t)
+            if (!fake || verifyStage.startsWith("postIndexing")) {
+                logger.error(t) {
+                    "verify run=$activeTestWithExceptionsRun throwable stage=$verifyStage expectExceptions=$expectExceptions fake=$fake chain=${throwableChainSummary(t)}"
+                }
+            }
+            throw t
         } finally {
-            IOUtils.closeWhileHandlingException(r, w, saveW, if (saveDir == null) null else dir)
+            NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_VERIFY_FINALLY_CLOSE)
+            var firstError: Error? = null
+            var firstThrowable: Throwable? = null
+            var timeoutFailure: AssertionError? = null
+
+            fun closeOne(name: String, phase: Int, closeable: AutoCloseable?) {
+                if (closeable == null) {
+                    return
+                }
+                NativeCrashProbe.markPhase(phase)
+                val startedAt = TimeSource.Monotonic.markNow()
+                try {
+                    closeable.close()
+                } catch (e: Error) {
+                    firstError = IOUtils.useOrSuppress(firstError, e)
+                } catch (t: Throwable) {
+                    firstThrowable = IOUtils.useOrSuppress(firstThrowable, t)
+                }
+                val elapsed = startedAt.elapsedNow()
+                if (elapsed > closeSlowThreshold && timeoutFailure == null) {
+                    val message =
+                        "verify run=$activeTestWithExceptionsRun close timeout closeable=$name elapsed=$elapsed limit=$closeSlowThreshold probeRun=${NativeCrashProbe.run()} probeAttempt=${NativeCrashProbe.attempt()} probePhase=${NativeCrashProbe.phase()} probeUpdates=${NativeCrashProbe.updates()} cmsActive=${ConcurrentMergeScheduler.debugActiveMergeThreads()} cmsStarted=${ConcurrentMergeScheduler.debugStartedMergeThreads()} cmsFinished=${ConcurrentMergeScheduler.debugFinishedMergeThreads()} chkActive=${CheckIndex.debugActiveIntegrityChecks()} chkStarted=${CheckIndex.debugStartedIntegrityChecks()} chkFinished=${CheckIndex.debugFinishedIntegrityChecks()}"
+                    logger.error { message }
+                    NativeCrashProbe.requestNativeProbeDump(times = 1)
+                    timeoutFailure = AssertionError(message)
+                }
+            }
+
+            closeOne("reader", NativeCrashProbe.PHASE_VERIFY_CLOSE_READER, r)
+            closeOne("writer", NativeCrashProbe.PHASE_VERIFY_CLOSE_WRITER, w)
+            closeOne("saveWriter", NativeCrashProbe.PHASE_VERIFY_CLOSE_SAVE_WRITER, saveW)
+            closeOne("directory", NativeCrashProbe.PHASE_VERIFY_CLOSE_DIR, if (saveDir == null) null else dir)
+
+            if (timeoutFailure != null) {
+                if (firstError != null) {
+                    timeoutFailure!!.addSuppressed(firstError!!)
+                }
+                if (firstThrowable != null) {
+                    timeoutFailure!!.addSuppressed(firstThrowable!!)
+                }
+                throw timeoutFailure as AssertionError
+            }
+            if (firstError != null) {
+                if (firstThrowable != null) {
+                    firstError!!.addSuppressed(firstThrowable!!)
+                }
+                throw firstError as Error
+            }
         }
     }
 

@@ -98,7 +98,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
     // Not private to avoid synthetic access$NNN methods
     fun initIndexInput() {
         if (this.`in` == null) {
-            this.`in` = fr.parent.termsIn.clone()
+            this.`in` = fr.parent.cloneTermsInput()
         }
     }
 

@@ -270,109 +270,136 @@ class IndexingChain(
         // NOTE: caller (DocumentsWriterPerThread) handles
         // aborting on any exception from this method
 
-        val sortMap: Sorter.DocMap? = maybeSortSegment(state)
-        val maxDoc: Int = state.segmentInfo.maxDoc()
-        var t0: Instant = Clock.System.now()
-        writeNorms(state, sortMap)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write norms"
-            )
-        }
-        val readState =
-            SegmentReadState(
-                state.directory,
-                state.segmentInfo,
-                state.fieldInfos!!,
-                IOContext.DEFAULT,
-                state.segmentSuffix
-            )
+        var phase = "start"
+        try {
+            phase = "maybeSortSegment"
+            val sortMap: Sorter.DocMap? = maybeSortSegment(state)
+            val maxDoc: Int = state.segmentInfo.maxDoc()
+            var t0: Instant = Clock.System.now()
+            phase = "writeNorms"
+            writeNorms(state, sortMap)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write norms"
+                )
+            }
+            val readState =
+                SegmentReadState(
+                    state.directory,
+                    state.segmentInfo,
+                    state.fieldInfos!!,
+                    IOContext.DEFAULT,
+                    state.segmentSuffix
+                )
 
-        t0 = Clock.System.now()
-        writeDocValues(state, sortMap)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write docValues"
-            )
-        }
+            t0 = Clock.System.now()
+            phase = "writeDocValues"
+            writeDocValues(state, sortMap)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write docValues"
+                )
+            }
 
-        t0 = Clock.System.now()
-        writePoints(state, sortMap)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write points"
-            )
-        }
+            t0 = Clock.System.now()
+            phase = "writePoints"
+            writePoints(state, sortMap)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write points"
+                )
+            }
 
-        t0 = Clock.System.now()
-        vectorValuesConsumer.flush(state, sortMap)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write vectors"
-            )
-        }
+            t0 = Clock.System.now()
+            phase = "writeVectors"
+            vectorValuesConsumer.flush(state, sortMap)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write vectors"
+                )
+            }
 
-        // it's possible all docs hit non-aborting exceptions...
-        t0 = Clock.System.now()
-        storedFieldsConsumer.finish(maxDoc)
-        storedFieldsConsumer.flush(state, sortMap)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to finish stored fields"
-            )
-        }
+            // it's possible all docs hit non-aborting exceptions...
+            t0 = Clock.System.now()
+            phase = "writeStoredFields"
+            storedFieldsConsumer.finish(maxDoc)
+            storedFieldsConsumer.flush(state, sortMap)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to finish stored fields"
+                )
+            }
 
-        t0 = Clock.System.now()
-        val fieldsToFlush: MutableMap<String, TermsHashPerField> = mutableMapOf()
-        for (i in fieldHash.indices) {
-            var perField = fieldHash[i]
-            while (perField != null) {
-                if (perField.invertState != null) {
-                    fieldsToFlush[perField.fieldInfo!!.name] = perField.termsHashPerField!!
+            t0 = Clock.System.now()
+            phase = "termsHashFlush"
+            val fieldsToFlush: MutableMap<String, TermsHashPerField> = mutableMapOf()
+            for (i in fieldHash.indices) {
+                var perField = fieldHash[i]
+                while (perField != null) {
+                    if (perField.invertState != null) {
+                        fieldsToFlush[perField.fieldInfo!!.name] = perField.termsHashPerField!!
+                    }
+                    perField = perField.next
                 }
-                perField = perField.next
             }
-        }
 
-        if (readState.fieldInfos.hasNorms()) {
-            state.segmentInfo.codec.normsFormat().normsProducer(readState).use { norms ->
-                val normsMergeInstance = norms.mergeInstance
-                termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance)
+            if (readState.fieldInfos.hasNorms()) {
+                state.segmentInfo.codec.normsFormat().normsProducer(readState).use { norms ->
+                    val normsMergeInstance = norms.mergeInstance
+                    termsHash.flush(fieldsToFlush, state, sortMap, normsMergeInstance)
+                }
+            } else {
+                termsHash.flush(fieldsToFlush, state, sortMap, null)
             }
-        } else {
-            termsHash.flush(fieldsToFlush, state, sortMap, null)
+
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write postings and finish vectors"
+                )
+            }
+
+            // Important to save after asking consumer to flush so
+            // consumer can alter the FieldInfo* if necessary.  EG,
+            // FreqProxTermsWriter does this with
+            // FieldInfo.storePayload.
+            t0 = Clock.System.now()
+            phase = "writeFieldInfos"
+            indexWriterConfig
+                .codec
+                .fieldInfosFormat()
+                .write(state.directory, state.segmentInfo, "", state.fieldInfos, IOContext.DEFAULT)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW",
+                    (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write fieldInfos"
+                )
+            }
+
+            return sortMap
+        } catch (t: Throwable) {
+            if (!isLikelyFakeIOException(t)) {
+                logger.error(t) { "IndexingChain.flush exception segment=${state.segmentInfo.name} phase=$phase" }
+            }
+            throw t
         }
+    }
 
-
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write postings and finish vectors"
-            )
+    private fun isLikelyFakeIOException(t: Throwable): Boolean {
+        var cur: Throwable? = t
+        while (cur != null) {
+            val message = cur.message
+            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
+                return true
+            }
+            cur = cur.cause
         }
-
-        // Important to save after asking consumer to flush so
-        // consumer can alter the FieldInfo* if necessary.  EG,
-        // FreqProxTermsWriter does this with
-        // FieldInfo.storePayload.
-        t0 = Clock.System.now()
-        indexWriterConfig
-            .codec
-            .fieldInfosFormat()
-            .write(state.directory, state.segmentInfo, "", state.fieldInfos, IOContext.DEFAULT)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW",
-                (Clock.System.now() - t0).toString(unit = DurationUnit.MILLISECONDS) + " ms to write fieldInfos"
-            )
-        }
-
-        return sortMap
+        return false
     }
 
     /** Writes all buffered points.  */
@@ -1012,9 +1039,6 @@ class IndexingChain(
         while (fp != null && fp.fieldName != name) {
             fp = fp.next
         }
-        if (fp == null) {
-            logger.debug { "getPerField: field not found name=$name hashPos=$hashPos totalFieldCount=$totalFieldCount" }
-        }
         return fp
     }
 
@@ -1330,11 +1354,9 @@ class IndexingChain(
     fun getHasDocValues(field: String): DocIdSetIterator? {
         val perField = getPerField(field)
         if (perField == null) {
-            logger.debug { "getHasDocValues: no PerField for field=$field" }
             return null
         }
         if (perField.docValuesWriter == null) {
-            logger.debug { "getHasDocValues: no docValuesWriter for field=$field" }
             return null
         }
         if (perField.fieldInfo!!.docValuesType == DocValuesType.NONE) {

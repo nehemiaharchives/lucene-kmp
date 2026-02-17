@@ -229,7 +229,7 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
             }
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(this, metaIn!!)
+                IOUtils.closeWhileHandlingException(this, metaIn)
             }
         }
     }

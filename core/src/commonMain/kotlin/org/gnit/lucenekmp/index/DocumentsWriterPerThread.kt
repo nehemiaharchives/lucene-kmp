@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Runnable
 import okio.IOException
 import org.gnit.lucenekmp.index.DocumentsWriter.FlushNotifications
@@ -46,6 +47,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     @property:OptIn(ExperimentalAtomicApi::class) private val pendingNumDocs: AtomicLong,
     enableTestPoints: Boolean
 ) : Accountable, Lock {  // TODO Lock is not ported from JDK, need to think what to do here
+    private val logger = KotlinLogging.logger {}
     private var abortingException: Throwable? = null
 
     private fun onAbortingException(throwable: Throwable) {
@@ -372,16 +374,20 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
             )
         }
         val sortMap: Sorter.DocMap?
+        var phase = "start"
         try {
+            phase = "getHasDocValues"
             val softDeletedDocs = if (indexWriterConfig.softDeletesField != null) {
                 indexingChain.getHasDocValues(indexWriterConfig.softDeletesField!!)
             } else {
                 null
             }
+            phase = "indexingChain.flush"
             sortMap = indexingChain.flush(flushState)
             if (softDeletedDocs == null) {
                 flushState.softDelCountOnFlush = 0
             } else {
+                phase = "countSoftDeletes"
                 flushState.softDelCountOnFlush =
                     PendingSoftDeletes.countSoftDeletes(softDeletedDocs, flushState.liveDocs!!)
                 assert(
@@ -392,7 +398,9 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
             // We clear this here because we already resolved them (private to this segment) when writing
             // postings:
             pendingUpdates.clearDeleteTerms()
-            segmentInfo.setFiles(HashSet(directory.createdFiles))
+            phase = "setFiles"
+            val createdFilesSnapshot = directory.createdFiles
+            segmentInfo.setFiles(HashSet(createdFilesSnapshot))
 
             val segmentInfoPerCommit =
                 SegmentCommitInfo(
@@ -479,12 +487,29 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
             }
             return fs
         } catch (t: Throwable) {
+            if (!isLikelyFakeIOException(t)) {
+                logger.error(t) {
+                    "DWPT.flush exception segment=${flushState.segmentInfo.name} phase=$phase numDocsInRAM=$numDocsInRAM softDeletesField=${indexWriterConfig.softDeletesField} liveDocsNull=${flushState.liveDocs == null}"
+                }
+            }
             onAbortingException(t)
             throw t
         } finally {
             maybeAbort("flush", flushNotifications)
             hasFlushed.set(true)
         }
+    }
+
+    private fun isLikelyFakeIOException(t: Throwable): Boolean {
+        var cur: Throwable? = t
+        while (cur != null) {
+            val message = cur.message
+            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
+                return true
+            }
+            cur = cur.cause
+        }
+        return false
     }
 
     @Throws(IOException::class)

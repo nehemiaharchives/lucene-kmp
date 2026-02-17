@@ -223,7 +223,6 @@ class ReadersAndUpdates(
             // TODO: can we somehow use IOUtils here...  problem is
             // we are calling .decRef not .close)...
             if (reader != null) {
-                logger.debug { "RLD.dropReaders: closing reader seg=${info.info.name}" }
                 try {
                     reader!!.decRef()
                 } finally {
@@ -831,7 +830,6 @@ class ReadersAndUpdates(
             assert(pendingDeletes.verifyDocCounts(reader))
             val mergeReader: MergePolicy.MergeReader =
                 MergePolicy.MergeReader(reader, pendingDeletes.hardLiveDocs)
-            logger.debug { "RLD.getReaderForMerge: created mergeReader seg=${info.info.name} reader=${reader.segmentName}" }
             var success = false
             try {
                 readerConsumer.accept(mergeReader)
@@ -839,7 +837,6 @@ class ReadersAndUpdates(
                 mergeReader
             } finally {
                 if (!success) {
-                    logger.debug { "RLD.getReaderForMerge: readerConsumer failed, decRef seg=${info.info.name}" }
                     reader.decRef()
                 }
             }

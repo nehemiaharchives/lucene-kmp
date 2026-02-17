@@ -1,5 +1,13 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.FilterCodec
@@ -21,14 +29,19 @@ import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
 import org.gnit.lucenekmp.tests.index.MockRandomMergePolicy
 import org.gnit.lucenekmp.tests.util.TestUtil
+import org.gnit.lucenekmp.util.NativeCrashProbe
 import org.gnit.lucenekmp.util.bkd.BKDConfig
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestLucene90PointsFormat : BasePointsFormatTestCase() {
+    private val logger = KotlinLogging.logger {}
     override val codec: Codec
     private val maxPointsInLeafNode: Int
 
@@ -359,7 +372,57 @@ class TestLucene90PointsFormat : BasePointsFormatTestCase() {
     override fun testAllPointDocsDeletedInSegment() = super.testAllPointDocsDeletedInSegment()
 
     @Test
-    override fun testWithExceptions() = super.testWithExceptions()
+    override fun testWithExceptions() {
+        configureTestLogging()
+        val totalRuns = 1000
+        val runTimeout = 10.seconds
+        repeat(totalRuns) { runIndex ->
+            val run = runIndex + 1
+            val startedAt = TimeSource.Monotonic.markNow()
+            NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_RUN_START)
+            logger.error { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns start codec=${codec.name}" }
+            try {
+                val scope = CoroutineScope(Dispatchers.Default)
+                val deferred = scope.async {
+                    NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_SUPER_CALL_ENTER)
+                    super.testWithExceptions()
+                    NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_SUPER_CALL_EXIT)
+                }
+                try {
+                    runBlocking {
+                        withTimeout(runTimeout) {
+                            deferred.await()
+                        }
+                    }
+                } catch (timeout: TimeoutCancellationException) {
+                    val probeRunBeforeTimeout = NativeCrashProbe.run()
+                    val probeAttemptBeforeTimeout = NativeCrashProbe.attempt()
+                    val probePhaseBeforeTimeout = NativeCrashProbe.phase()
+                    val probeUpdatesBeforeTimeout = NativeCrashProbe.updates()
+                    val elapsed = startedAt.elapsedNow()
+                    val message =
+                        "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns timeout elapsed=$elapsed limit=$runTimeout probeBeforeRun=$probeRunBeforeTimeout probeBeforeAttempt=$probeAttemptBeforeTimeout probeBeforePhase=$probePhaseBeforeTimeout probeBeforeUpdates=$probeUpdatesBeforeTimeout"
+                    logger.error(timeout) { message }
+                    NativeCrashProbe.requestNativeProbeDump(times = 1)
+                    deferred.cancel("timed out after $runTimeout")
+                    scope.cancel("timed out after $runTimeout")
+                    throw AssertionError(message, timeout)
+                }
+                NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_RUN_END)
+                logger.error { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns end" }
+            } catch (t: Throwable) {
+                if (t is AssertionError && t.message?.contains("timeout elapsed=") != true) {
+                    NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_RUN_THROWABLE)
+                }
+                logger.error(t) {
+                    "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns throwable=${t::class.simpleName} message=${t.message}"
+                }
+                throw t
+            }
+        }
+        NativeCrashProbe.clear()
+    }
+
     @Test
     override fun testMultiValued() = super.testMultiValued()
 

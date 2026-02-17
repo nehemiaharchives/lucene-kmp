@@ -25,8 +25,8 @@ import org.gnit.lucenekmp.util.bkd.BKDWriter
 open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNode: Int, maxMBSortInHeap: Double) :
     PointsWriter() {
     /** Outputs used to write the BKD tree data files.  */
-    protected var metaOut: IndexOutput
-    protected var indexOut: IndexOutput
+    protected var metaOut: IndexOutput? = null
+    protected var indexOut: IndexOutput? = null
     protected val dataOut: IndexOutput
 
     val writeState: SegmentWriteState
@@ -63,9 +63,10 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
                     writeState.segmentSuffix,
                     Lucene90PointsFormat.META_EXTENSION
                 )
-            metaOut = writeState.directory.createOutput(metaFileName, writeState.context)
+            val createdMetaOut = writeState.directory.createOutput(metaFileName, writeState.context)
+            metaOut = createdMetaOut
             CodecUtil.writeIndexHeader(
-                metaOut,
+                createdMetaOut,
                 Lucene90PointsFormat.META_CODEC_NAME,
                 Lucene90PointsFormat.VERSION_CURRENT,
                 writeState.segmentInfo.getId(),
@@ -78,9 +79,10 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
                     writeState.segmentSuffix,
                     Lucene90PointsFormat.INDEX_EXTENSION
                 )
-            indexOut = writeState.directory.createOutput(indexFileName, writeState.context)
+            val createdIndexOut = writeState.directory.createOutput(indexFileName, writeState.context)
+            indexOut = createdIndexOut
             CodecUtil.writeIndexHeader(
-                indexOut,
+                createdIndexOut,
                 Lucene90PointsFormat.INDEX_CODEC_NAME,
                 Lucene90PointsFormat.VERSION_CURRENT,
                 writeState.segmentInfo.getId(),
@@ -107,6 +109,8 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
 
     @Throws(IOException::class)
     override fun writeField(fieldInfo: FieldInfo, reader: PointsReader) {
+        val metaOut = checkNotNull(metaOut) { "metaOut is not initialized" }
+        val indexOut = checkNotNull(indexOut) { "indexOut is not initialized" }
         val values: PointTree = reader.getValues(fieldInfo.name)!!.pointTree
 
         val config =
@@ -163,6 +167,8 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
 
     @Throws(IOException::class)
     override fun merge(mergeState: MergeState) {
+        val metaOut = checkNotNull(metaOut) { "metaOut is not initialized" }
+        val indexOut = checkNotNull(indexOut) { "indexOut is not initialized" }
         /*
      * If indexSort is activated and some of the leaves are not sorted the next test will catch that
      * and the non-optimized merge will run. If the readers are all sorted then it's safe to perform
@@ -259,6 +265,8 @@ open class Lucene90PointsWriter(writeState: SegmentWriteState, maxPointsInLeafNo
 
     @Throws(IOException::class)
     override fun finish() {
+        val metaOut = checkNotNull(metaOut) { "metaOut is not initialized" }
+        val indexOut = checkNotNull(indexOut) { "indexOut is not initialized" }
         check(!finished) { "already finished" }
         finished = true
         metaOut.writeInt(-1)

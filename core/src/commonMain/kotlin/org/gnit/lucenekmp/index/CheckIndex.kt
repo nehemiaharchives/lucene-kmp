@@ -63,6 +63,7 @@ import okio.Path.Companion.toPath
 import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.ExecutionException
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.InterruptedException
@@ -70,15 +71,19 @@ import org.gnit.lucenekmp.jdkport.PrintStream
 import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TimeUnit
+import org.gnit.lucenekmp.jdkport.accumulateAndGet
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.jdkport.compareUnsigned
 import org.gnit.lucenekmp.jdkport.exitProcess
+import org.gnit.lucenekmp.jdkport.get
 import org.gnit.lucenekmp.jdkport.pop
 import org.gnit.lucenekmp.jdkport.printStackTrace
 import org.gnit.lucenekmp.jdkport.push
 import org.gnit.lucenekmp.jdkport.sort
 import org.gnit.lucenekmp.jdkport.toUnsignedString
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
 import kotlin.math.min
 
@@ -97,6 +102,7 @@ class CheckIndex(
     dir: Directory,
     writeLock: Lock = dir.obtainLock(IndexWriter.WRITE_LOCK_NAME)
 ) : AutoCloseable {
+    private val logger = KotlinLogging.logger {}
     private val dir: Directory
     private val writeLock: Lock
     private var infoStream: PrintStream?
@@ -598,7 +604,13 @@ class CheckIndex(
                 maxDoc += info.info.maxDoc()
                 delCount += info.delCount
             }
-            infoStream!!.print("${100.0 * delCount / maxDoc}% total deletions; $maxDoc documents; $delCount deletions%n")
+            if (maxDoc == 0) {
+                infoStream!!.print(
+                    "n/a total deletions (maxDoc=0); $maxDoc documents; $delCount deletions; segments=${lastCommit.size()}%n"
+                )
+            } else {
+                infoStream!!.print("${100.0 * delCount / maxDoc}% total deletions; $maxDoc documents; $delCount deletions%n")
+            }
         }
 
         // find the oldest and newest segment versions
@@ -880,6 +892,7 @@ class CheckIndex(
         }
     }
 
+    @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
     private fun testSegment(
         sis: SegmentInfos,
@@ -898,8 +911,10 @@ class CheckIndex(
         var toLoseDocCount: Int = info.info.maxDoc()
 
         var reader: SegmentReader? = null
+        var phase = "init"
 
         try {
+            phase = "segmentMetadata"
             msg(infoStream, "    version=" + (version ?: "3.0"))
             msg(infoStream, "    id=" + StringHelper.idToString(info.info.getId()))
             val codec: Codec = info.info.codec
@@ -936,6 +951,7 @@ class CheckIndex(
                 segInfoStat.deletionsGen = info.delGen
             }
 
+            phase = "openReader"
             val startOpenReaderNS: Long = System.nanoTime()
             if (infoStream != null) infoStream.print("    test: open reader.........")
             reader = SegmentReader(
@@ -950,9 +966,19 @@ class CheckIndex(
 
             segInfoStat.openReaderPassed = true
 
+            phase = "checkIntegrity"
             val startIntegrityNS: Long = System.nanoTime()
+            debugStartedIntegrityChecksCounter.incrementAndFetch()
+            debugActiveIntegrityChecksCounter.incrementAndFetch()
             if (infoStream != null) infoStream.print("    test: check integrity.....")
-            reader.checkIntegrity()
+            try {
+                reader.checkIntegrity()
+            } finally {
+                debugFinishedIntegrityChecksCounter.incrementAndFetch()
+                debugActiveIntegrityChecksCounter.accumulateAndGet(-1) { prev, delta ->
+                    max(0, prev + delta)
+                }
+            }
             msg(
                 infoStream,
                 "OK [took ${nsToSec(System.nanoTime() - startIntegrityNS)} sec]"
@@ -1006,6 +1032,7 @@ class CheckIndex(
                 }
             }
             if (level >= Level.MIN_LEVEL_FOR_INTEGRITY_CHECKS) {
+                phase = "deepChecks"
                 // Test Livedocs
                 segInfoStat.liveDocStatus = testLiveDocs(reader, infoStream, failFast)
 
@@ -1100,8 +1127,12 @@ class CheckIndex(
                 }
             }
 
+            phase = "done"
             msg(infoStream, "")
         } catch (t: Throwable) {
+            logger.error(t) {
+                "CheckIndex.testSegment failed segment=${info.info.name} phase=$phase failFast=$failFast toLoseDocCount=$toLoseDocCount"
+            }
             if (failFast) {
                 throw IOUtils.rethrowAlways(t)
             }
@@ -1588,6 +1619,20 @@ class CheckIndex(
 
     companion object {
         private val logger = KotlinLogging.logger {}
+        @OptIn(ExperimentalAtomicApi::class)
+        private val debugActiveIntegrityChecksCounter: AtomicInteger = AtomicInteger(0)
+        @OptIn(ExperimentalAtomicApi::class)
+        private val debugStartedIntegrityChecksCounter: AtomicInteger = AtomicInteger(0)
+        @OptIn(ExperimentalAtomicApi::class)
+        private val debugFinishedIntegrityChecksCounter: AtomicInteger = AtomicInteger(0)
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun debugActiveIntegrityChecks(): Int = debugActiveIntegrityChecksCounter.get()
+        @OptIn(ExperimentalAtomicApi::class)
+        fun debugStartedIntegrityChecks(): Int = debugStartedIntegrityChecksCounter.get()
+        @OptIn(ExperimentalAtomicApi::class)
+        fun debugFinishedIntegrityChecks(): Int = debugFinishedIntegrityChecksCounter.get()
+
         private fun formatList(values: List<String>, limit: Int): String {
             if (values.isEmpty()) return "[]"
             val size = values.size
@@ -1911,13 +1956,6 @@ class CheckIndex(
                     }
                     val isIterSorted = iterList == iterList.sorted()
 
-                    logger.debug {
-                        "CheckIndex.checkFields out of order: lastField=$lastField field=$field fieldsClass=${fields::class.simpleName} seenFields=$snapshot fieldInfos=$infoOrder fullFields=$fullFieldsList infoNames=$infoNames lastIndex=$lastIndex curIndex=$curIndex lastFieldInfoPresent=$lastFieldInfoPresent curFieldInfoPresent=$curFieldInfoPresent iterOrder=$iterList iterSorted=$isIterSorted"
-                    }
-                    // Diagnostic information we can gather in common code:
-                    logger.debug {
-                        "CheckIndex.deepFields: fieldsClass=${fields::class.simpleName} fullFields=$fullFieldsList iterOrder=$iterList iterSorted=$isIterSorted"
-                    }
                     try {
                         msg(infoStream, "  fieldsClass=${fields::class.simpleName} fullFields=$fullFieldsList iterOrder=$iterList iterSorted=$isIterSorted")
                     } catch (_: Exception) {

@@ -21,6 +21,7 @@ import org.gnit.lucenekmp.util.LongsRef
 import org.gnit.lucenekmp.util.TimSorter
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 import org.gnit.lucenekmp.util.packed.PackedInts
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.max
 
 
@@ -30,6 +31,7 @@ class FreqProxTermsWriter(
     bytesUsed: Counter,
     termVectors: TermsHash
 ) : TermsHash(intBlockAllocator, byteBlockAllocator, bytesUsed, termVectors) {
+    private val logger = KotlinLogging.logger {}
     @Throws(IOException::class)
     private fun applyDeletes(state: SegmentWriteState, fields: Fields) {
         // Process any pending Term deletes for this newly
@@ -66,51 +68,75 @@ class FreqProxTermsWriter(
         sortMap: Sorter.DocMap?,
         norms: NormsProducer?
     ) {
-        super.flush(fieldsToFlush, state, sortMap, norms)
+        var phase = "super.flush"
+        try {
+            super.flush(fieldsToFlush, state, sortMap, norms)
 
-        // Gather all fields that saw any postings:
-        val allFields: MutableList<FreqProxTermsWriterPerField> = mutableListOf()
+            // Gather all fields that saw any postings:
+            phase = "gatherFields"
+            val allFields: MutableList<FreqProxTermsWriterPerField> = mutableListOf()
 
-        for (f in fieldsToFlush.values) {
-            val perField: FreqProxTermsWriterPerField =
-                f as FreqProxTermsWriterPerField
-            if (perField.numTerms > 0) {
-                perField.sortTerms()
-                assert(perField.indexOptions != IndexOptions.NONE)
-                allFields.add(perField)
+            for (f in fieldsToFlush.values) {
+                val perField: FreqProxTermsWriterPerField =
+                    f as FreqProxTermsWriterPerField
+                if (perField.numTerms > 0) {
+                    perField.sortTerms()
+                    assert(perField.indexOptions != IndexOptions.NONE)
+                    allFields.add(perField)
+                }
             }
-        }
 
-        if (!state.fieldInfos!!.hasPostings()) {
-            assert(allFields.isEmpty())
-            return
-        }
+            if (!state.fieldInfos!!.hasPostings()) {
+                assert(allFields.isEmpty())
+                return
+            }
 
-        // Sort by field name
-        CollectionUtil.introSort(allFields)
+            // Sort by field name
+            phase = "sortFields"
+            CollectionUtil.introSort(allFields)
 
-        var fields: Fields = FreqProxFields(allFields)
-        applyDeletes(state, fields)
-        if (sortMap != null) {
-            val docMap: Sorter.DocMap = sortMap
-            val infos: FieldInfos = state.fieldInfos
-            fields =
-                object : FilterLeafReader.FilterFields(fields) {
-                    @Throws(IOException::class)
-                    override fun terms(field: String?): Terms? {
-                        val terms: Terms? = `in`.terms(field)
-                        return if (terms == null) {
-                            null
-                        } else {
-                            SortingTerms(terms, infos.fieldInfo(field!!)!!.indexOptions, docMap)
+            var fields: Fields = FreqProxFields(allFields)
+            phase = "applyDeletes"
+            applyDeletes(state, fields)
+            if (sortMap != null) {
+                val docMap: Sorter.DocMap = sortMap
+                val infos: FieldInfos = state.fieldInfos
+                fields =
+                    object : FilterLeafReader.FilterFields(fields) {
+                        @Throws(IOException::class)
+                        override fun terms(field: String?): Terms? {
+                            val terms: Terms? = `in`.terms(field)
+                            return if (terms == null) {
+                                null
+                            } else {
+                                SortingTerms(terms, infos.fieldInfo(field!!)!!.indexOptions, docMap)
+                            }
                         }
                     }
-                }
-        }
+            }
 
-        state.segmentInfo.codec.postingsFormat().fieldsConsumer(state).use { consumer ->
-            consumer.write(fields, norms)
+            phase = "consumer.write"
+            state.segmentInfo.codec.postingsFormat().fieldsConsumer(state).use { consumer ->
+                consumer.write(fields, norms)
+            }
+        } catch (t: Throwable) {
+            if (!isLikelyFakeIOException(t)) {
+                logger.error(t) { "FreqProxTermsWriter.flush exception segment=${state.segmentInfo.name} phase=$phase" }
+            }
+            throw t
         }
+    }
+
+    private fun isLikelyFakeIOException(t: Throwable): Boolean {
+        var cur: Throwable? = t
+        while (cur != null) {
+            val message = cur.message
+            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
+                return true
+            }
+            cur = cur.cause
+        }
+        return false
     }
 
     override fun addField(
