@@ -754,7 +754,7 @@ class Lucene90CompressingTermVectorsWriter internal constructor(
             success = true
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(metaStream!!, vectorsStream!!, indexWriter!!, indexWriter!!)
+                IOUtils.closeWhileHandlingException(metaStream, vectorsStream, indexWriter)
             }
         }
     }

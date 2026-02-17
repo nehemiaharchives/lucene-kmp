@@ -190,12 +190,12 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     @Throws(IOException::class)
     private fun write(directory: Directory) {
         val nextGeneration = this.nextPendingGeneration
-        val segmentFileName: String? =
+        val segmentFileName =
             IndexFileNames.fileNameFromGeneration(
                 IndexFileNames.PENDING_SEGMENTS,
                 "",
                 nextGeneration
-            )
+            ) ?: throw IllegalStateException("pending segment file name is null for generation=$nextGeneration")
 
         // Always advance the generation on write:
         generation = nextGeneration
@@ -204,7 +204,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
         var success = false
 
         try {
-            segnOutput = directory.createOutput(segmentFileName!!, IOContext.DEFAULT)
+            segnOutput = directory.createOutput(segmentFileName, IOContext.DEFAULT)
             write(segnOutput)
             segnOutput.close()
             directory.sync(mutableSetOf(segmentFileName))
@@ -218,7 +218,7 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 IOUtils.closeWhileHandlingException(segnOutput)
                 // Try not to leave a truncated segments_N file in
                 // the index:
-                IOUtils.deleteFilesIgnoringExceptions(directory, segmentFileName!!)
+                IOUtils.deleteFilesIgnoringExceptions(directory, segmentFileName)
             }
         }
     }
@@ -490,15 +490,15 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
 
             // Must carefully compute fileName from "generation"
             // since lastGeneration isn't incremented:
-            val pending: String? =
+            val pending =
                 IndexFileNames.fileNameFromGeneration(
                     IndexFileNames.PENDING_SEGMENTS,
                     "",
                     generation
-                )
+                ) ?: return
             // Suppress so we keep throwing the original exception
             // in our caller
-            IOUtils.deleteFilesIgnoringExceptions(dir, pending!!)
+            IOUtils.deleteFilesIgnoringExceptions(dir, pending)
         }
     }
 
@@ -990,7 +990,9 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 if (format >= VERSION_74) { // oldest supported version
                     CodecUtil.checkFooter(input, priorE)
                 } else {
-                    throw IOUtils.rethrowAlways(priorE!!)
+                    throw IOUtils.rethrowAlways(
+                        priorE ?: IllegalStateException("missing prior exception while reading legacy segments_N footer")
+                    )
                 }
             }
             throw Error("Unreachable code")

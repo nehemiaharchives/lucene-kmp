@@ -316,10 +316,12 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
             )
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(vectorDataInput!!, tempVectorData)
-                IOUtils.deleteFilesIgnoringExceptions(
-                    segmentWriteState.directory, tempVectorData.name!!
-                )
+                IOUtils.closeWhileHandlingException(vectorDataInput, tempVectorData)
+                tempVectorData.name?.let { tempName ->
+                    IOUtils.deleteFilesIgnoringExceptions(
+                        segmentWriteState.directory, tempName
+                    )
+                }
             }
         }
     }
@@ -349,7 +351,7 @@ class Lucene99FlatVectorsWriter(state: SegmentWriteState, scorer: FlatVectorsSco
 
     @Throws(IOException::class)
     override fun close() {
-        IOUtils.close(meta!!, vectorData!!)
+        IOUtils.close(meta, vectorData)
     }
 
     private abstract class FieldWriter<T>(val fieldInfo: FieldInfo) : FlatFieldVectorsWriter<T>() {

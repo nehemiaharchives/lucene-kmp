@@ -67,9 +67,12 @@ class FieldsIndexWriter internal constructor(
     @Throws(IOException::class)
     fun finish(numDocs: Int, maxPointer: Long, metaOut: IndexOutput) {
         check(numDocs == totalDocs) { "Expected $numDocs docs, but got $totalDocs" }
-        CodecUtil.writeFooter(docsOut!!)
-        CodecUtil.writeFooter(filePointersOut!!)
-        IOUtils.close(docsOut!!, filePointersOut!!)
+        val localDocsOut = this.docsOut ?: throw IllegalStateException("docsOut is not initialized")
+        val localFilePointersOut =
+            this.filePointersOut ?: throw IllegalStateException("filePointersOut is not initialized")
+        CodecUtil.writeFooter(localDocsOut)
+        CodecUtil.writeFooter(localFilePointersOut)
+        IOUtils.close(localDocsOut, localFilePointersOut)
 
         dir.createOutput(IndexFileNames.segmentFileName(name, suffix, extension), ioContext).use { dataOut ->
             CodecUtil.writeIndexHeader(dataOut, codecName + "Idx", VERSION_CURRENT, id, suffix)
@@ -78,7 +81,8 @@ class FieldsIndexWriter internal constructor(
             metaOut.writeInt(totalChunks + 1)
             metaOut.writeLong(dataOut.filePointer)
 
-            dir.openChecksumInput(docsOut!!.name!!).use { docsIn ->
+            val docsFileName = localDocsOut.name ?: throw IllegalStateException("docs temp file has no name")
+            dir.openChecksumInput(docsFileName).use { docsIn ->
                 CodecUtil.checkHeader(docsIn, codecName + "Docs", VERSION_CURRENT, VERSION_CURRENT)
                 var priorE: Throwable? = null
                 try {
@@ -100,11 +104,13 @@ class FieldsIndexWriter internal constructor(
                     CodecUtil.checkFooter(docsIn, priorE)
                 }
             }
-            dir.deleteFile(docsOut!!.name!!)
+            dir.deleteFile(docsFileName)
             docsOut = null
 
             metaOut.writeLong(dataOut.filePointer)
-            dir.openChecksumInput(filePointersOut!!.name!!).use { filePointersIn ->
+            val filePointersName =
+                localFilePointersOut.name ?: throw IllegalStateException("filePointers temp file has no name")
+            dir.openChecksumInput(filePointersName).use { filePointersIn ->
                 CodecUtil.checkHeader(
                     filePointersIn, codecName + "FilePointers", VERSION_CURRENT, VERSION_CURRENT
                 )
@@ -128,7 +134,7 @@ class FieldsIndexWriter internal constructor(
                     CodecUtil.checkFooter(filePointersIn, priorE)
                 }
             }
-            dir.deleteFile(filePointersOut!!.name!!)
+            dir.deleteFile(filePointersName)
             filePointersOut = null
 
             metaOut.writeLong(dataOut.filePointer)

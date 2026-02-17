@@ -224,7 +224,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             }
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(this, metaIn!!)
+                IOUtils.closeWhileHandlingException(this, metaIn)
             }
         }
     }

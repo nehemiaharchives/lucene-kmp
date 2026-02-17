@@ -56,7 +56,9 @@ internal class SortingTermVectorsConsumer(
                 writer.finish(state.segmentInfo.maxDoc())
             } finally {
                 IOUtils.close(reader, writer)
-                IOUtils.deleteFiles(tmpDirectory!!, tmpDirectory!!.getTemporaryFiles().values)
+                tmpDirectory?.let { dir ->
+                    IOUtils.deleteFiles(dir, dir.getTemporaryFiles().values)
+                }
             }
         }
     }

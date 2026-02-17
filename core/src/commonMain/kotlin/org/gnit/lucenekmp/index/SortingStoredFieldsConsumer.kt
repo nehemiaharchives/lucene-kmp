@@ -59,7 +59,9 @@ internal class SortingStoredFieldsConsumer(
             sortWriter.finish(state.segmentInfo.maxDoc())
         } finally {
             IOUtils.close(reader, sortWriter)
-            IOUtils.deleteFiles(tmpDirectory!!, tmpDirectory!!.getTemporaryFiles().values)
+            tmpDirectory?.let { dir ->
+                IOUtils.deleteFiles(dir, dir.getTemporaryFiles().values)
+            }
         }
     }
 

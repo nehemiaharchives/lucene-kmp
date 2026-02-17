@@ -184,7 +184,7 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
                 }
             }
             if (filtered == true) {
-                if (nonMergingSegments.size > 0) {
+                if (nonMergingSegments.isNotEmpty()) {
                     filteredMergeSpecification.add(
                         OneMerge(
                             nonMergingSegments
@@ -266,7 +266,7 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
         ): Sorter.DocMap? {
             if (r.nextBoolean()) {
                 if (LuceneTestCase.VERBOSE) {
-                    println("NOTE: MockRandomMergePolicy now reverses reader=" + reader)
+                    println("NOTE: MockRandomMergePolicy now reverses reader=$reader")
                 }
                 // Reverse the doc ID order
                 return reverse(reader)
@@ -281,7 +281,7 @@ class MockRandomMergePolicy(random: Random) : MergePolicy() {
                 } catch (e: /*InterruptedException*/ CancellationException) {
                     throw ThreadInterruptedException(e)
                 } catch (e: ExecutionException) {
-                    throw IOUtils.rethrowAlways(e.cause!!)
+                    throw IOUtils.rethrowAlways(e.cause ?: e)
                 }
             }
             return null

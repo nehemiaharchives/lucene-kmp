@@ -544,7 +544,7 @@ class Lucene99HnswVectorsWriter(
 
     @Throws(IOException::class)
     override fun close() {
-        IOUtils.close(meta!!, vectorIndex!!, flatVectorWriter)
+        IOUtils.close(meta, vectorIndex, flatVectorWriter)
     }
 
     private class FieldWriter<T>(
