@@ -16,9 +16,6 @@
  */
 package org.gnit.lucenekmp.tests.store
 
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.internal.tests.TestSecrets
 import org.gnit.lucenekmp.jdkport.Optional
@@ -45,9 +42,6 @@ open class MockIndexInputWrapper(
 
     @Volatile
     private var closed: Boolean = false
-
-    // KMP common code does not have a stable thread identity; skip strict confinement checks.
-    private val thread: Job? = null
 
     init {
         // If we are a clone then our parent better not be a clone!
@@ -86,8 +80,10 @@ open class MockIndexInputWrapper(
     }
 
     private fun ensureAccessible() {
-        if (confined && thread != null && thread !== runBlocking { currentCoroutineContext()[Job] }) {
-            throw RuntimeException("Abusing from another thread!")
+        if (confined) {
+            // KMP common code has no stable cross-platform thread identity to enforce this check.
+            // TODO think how we can imitate java lucene behavior only using KMP to implement walk around if needed
+            return
         }
     }
 

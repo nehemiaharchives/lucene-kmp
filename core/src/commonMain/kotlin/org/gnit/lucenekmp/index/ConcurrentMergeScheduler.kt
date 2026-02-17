@@ -274,7 +274,12 @@ open class ConcurrentMergeScheduler
         `in`: Directory
     ): Directory {
         val currentJob = runBlocking { currentCoroutineContext()[Job] }
-        val mergeThread = mergeThreads.firstOrNull { it.job === currentJob }
+        val currentWorkerId = currentThreadId()
+        val mergeThread =
+            mergeThreads.firstOrNull {
+                it.job === currentJob ||
+                        (it.debugPhase() == "doMerge" && it.debugThreadId() == currentWorkerId)
+            }
 
         // TODO not sure what to do here, synchronized is not supported in KMP
         /*if (!MergeThread::class.java.isInstance(mergeThread)) {
