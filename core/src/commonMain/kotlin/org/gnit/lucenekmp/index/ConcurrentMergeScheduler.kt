@@ -12,9 +12,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeoutOrNull
 import org.gnit.lucenekmp.index.MergePolicy.OneMerge
 import org.gnit.lucenekmp.internal.tests.TestSecrets
 import org.gnit.lucenekmp.store.AlreadyClosedException
@@ -118,9 +118,7 @@ open class ConcurrentMergeScheduler
 
     /** The executor provided for intra-merge parallelization  */
     protected var intraMergeExecutor: CachedExecutor? = null
-
-    /** Mutex used to stall threads when too many merges are running. */
-    protected val stallMutex = Mutex()
+    private val mergeFinishMutex = Mutex()
 
     /**
      * Expert: directly set the maximum number of merge threads and simultaneous merges allowed.
@@ -141,6 +139,7 @@ open class ConcurrentMergeScheduler
             // OK
             this.maxMergeCount = AUTO_DETECT_MERGES_AND_THREADS
             this.maxThreadCount = AUTO_DETECT_MERGES_AND_THREADS
+            return
         } else require(maxMergeCount != AUTO_DETECT_MERGES_AND_THREADS) { "both maxMergeCount and maxThreadCount must be AUTO_DETECT_MERGES_AND_THREADS" }
         require(maxThreadCount != AUTO_DETECT_MERGES_AND_THREADS) { "both maxMergeCount and maxThreadCount must be AUTO_DETECT_MERGES_AND_THREADS" }
         require(maxThreadCount >= 1) { "maxThreadCount should be at least 1" }
@@ -535,10 +534,14 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun mergeThreadCount(): Int {
-        val currentThread = Job()
+        val currentJob = runBlocking { currentCoroutineContext()[Job] }
+        val currentWorkerId = currentThreadId()
         var count = 0
         for (mergeThread in mergeThreads) {
-            if (currentThread !== mergeThread && mergeThread.isAlive()
+            val isCurrentMergeThread =
+                mergeThread.job === currentJob ||
+                        (mergeThread.debugPhase() == "doMerge" && mergeThread.debugThreadId() == currentWorkerId)
+            if (!isCurrentMergeThread && mergeThread.isAlive()
                 && mergeThread.merge.isAborted == false
             ) {
                 count++
@@ -635,7 +638,7 @@ open class ConcurrentMergeScheduler
      */
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
-    protected suspend fun maybeStall(mergeSource: MergeSource): Boolean {
+    protected open suspend fun maybeStall(mergeSource: MergeSource): Boolean {
         var startStallTime: Long = 0
         while (mergeSource.hasPendingMerges() && mergeThreadCount() >= maxMergeCount) {
             // This means merging has fallen too far behind: we
@@ -674,14 +677,11 @@ open class ConcurrentMergeScheduler
     /** Called from [.maybeStall] to pause the calling thread for a bit.  */
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
-    protected suspend fun doStall() {
+    protected open suspend fun doStall() {
         try {
-            // Wait for only .25 seconds or until notified
-            withTimeoutOrNull(250) {
-                stallMutex.withLock {
-                    // Just acquire/release to simulate wait/notify
-                }
-            }
+            // Cooperative stall: Java uses wait/notify. In KMP we yield for a bounded delay
+            // and re-check conditions in maybeStall loop.
+            kotlinx.coroutines.delay(250)
         } catch (ie: CancellationException) {
             throw ThreadInterruptedException(ie)
         }
@@ -691,7 +691,7 @@ open class ConcurrentMergeScheduler
      * Does the actual merge, by calling [ ][MergeScheduler.MergeSource.merge]
      */
     @Throws(IOException::class)
-    protected fun doMerge(
+    protected open fun doMerge(
         mergeSource: MergeSource,
         merge: OneMerge
     ) {
@@ -701,7 +701,7 @@ open class ConcurrentMergeScheduler
     /** Create and return a new MergeThread  */
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
-    protected fun getMergeThread(
+    protected open fun getMergeThread(
         mergeSource: MergeSource,
         merge: OneMerge
     ): MergeThread {
@@ -714,32 +714,30 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     suspend fun runOnMergeFinished(mergeSource: MergeSource) {
-        // the merge call as well as the merge thread handling in the finally
-        // block must be sync'd on CMS otherwise stalling decisions might cause
-        // us to miss pending merges
-        val currentJob = currentCoroutineContext()[Job]
-        assert(mergeThreads.any { it.job === currentJob }) { "caller is not a merge thread" }
-        // Let CMS run new merges if necessary:
-        try {
-            merge(mergeSource, MergeTrigger.MERGE_FINISHED)
-        } catch (ace: AlreadyClosedException) {
-            // OK
-        } catch (ioe: IOException) {
-            throw UncheckedIOException(ioe)
-        } finally {
-            removeMergeThread(currentJob)
-            updateMergeThreads()
-            // In case we had stalled indexing, we can now wake up and possibly unstall:
-            // (this as java.lang.Object).notifyAll()
-            // TODO perform same effect using KMP coroutines
-            if (stallMutex.isLocked) {
-                stallMutex.unlock()
+        // Java version synchronizes this section so only one merge-finished thread
+        // performs merge scheduling/removal at a time.
+        mergeFinishMutex.withLock {
+            // the merge call as well as the merge thread handling in the finally
+            // block must be sync'd on CMS otherwise stalling decisions might cause
+            // us to miss pending merges
+            val currentJob = currentCoroutineContext()[Job]
+            assert(mergeThreads.any { it.job === currentJob }) { "caller is not a merge thread" }
+            // Let CMS run new merges if necessary:
+            try {
+                merge(mergeSource, MergeTrigger.MERGE_FINISHED)
+            } catch (ace: AlreadyClosedException) {
+                // OK
+            } catch (ioe: IOException) {
+                throw UncheckedIOException(ioe)
+            } finally {
+                removeMergeThread(currentJob)
+                updateMergeThreads()
             }
         }
     }
 
     /** Runs a merge thread to execute a single merge, then exits.  */
-    protected open inner class MergeThread(
+    open inner class MergeThread(
         private val mergeSource: MergeSource,
         val merge: OneMerge,
         // you can inject a scope or create one here:
@@ -777,6 +775,10 @@ open class ConcurrentMergeScheduler
         }
 
         suspend fun awaitCompletion() {
+            val currentJob = currentCoroutineContext()[Job]
+            if (job === currentJob) {
+                return
+            }
             job.join()
         }
 
@@ -844,7 +846,7 @@ open class ConcurrentMergeScheduler
 
 
     /** Called when an exception is hit in a background merge thread  */
-    protected fun handleMergeException(exc: Throwable) {
+    protected open fun handleMergeException(exc: Throwable) {
         throw MergePolicy.MergeException(exc)
     }
 

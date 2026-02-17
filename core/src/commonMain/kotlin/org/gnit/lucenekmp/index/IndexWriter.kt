@@ -1992,6 +1992,15 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 if (hasPendingMaxNumSegmentMerges) {
                     stableNoPendingChecks = 0
                     waitIters++
+                    if (mergeScheduler is ConcurrentMergeScheduler &&
+                        mergeScheduler.mergeThreadCount() == 0
+                    ) {
+                        logger.error {
+                            "forceMerge: detected pending forced merges with no CMS threads; " +
+                                    "re-triggering executeMerge with MERGE_FINISHED"
+                        }
+                        executeMerge(MergeTrigger.MERGE_FINISHED)
+                    }
                     if (waitIters % 10 == 0) {
                         val mergeState = withIndexWriterLock {
                             val pendingForced = pendingMerges.filter { it.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS }

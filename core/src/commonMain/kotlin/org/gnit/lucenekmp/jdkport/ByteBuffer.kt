@@ -828,9 +828,14 @@ open class ByteBuffer private constructor(
             }
             floatArray[i] = Float.fromBits(bits)
         }
-        floatBuffer.put(floatArray)
-        floatBuffer.flip()
-        return floatBuffer
+        // Use wrap to avoid per-byte absolute writes into an okio.Buffer-backed FloatBuffer,
+        // which can be extremely expensive under heavy merge/vector workloads.
+        val wrapped = FloatBuffer.wrap(floatArray)
+        wrapped.order = this.order()
+        wrapped.clear()
+        wrapped.limit(floatCapacity)
+        wrapped.position(0)
+        return wrapped
     }
 
     /**
