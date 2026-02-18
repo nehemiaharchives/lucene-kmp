@@ -357,7 +357,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.QueryTimeoutImpl → org.gnit.lucenekmp.index.QueryTimeoutImpl
 - org.apache.lucene.index.ReaderManager → org.gnit.lucenekmp.index.ReaderManager
 - org.apache.lucene.index.TestAtomicUpdate → org.gnit.lucenekmp.index.TestAtomicUpdate
-- org.apache.lucene.index.TestConcurrentMergeScheduler → org.gnit.lucenekmp.index.TestConcurrentMergeScheduler
 - org.apache.lucene.index.TestCrashCausesCorruptIndex → org.gnit.lucenekmp.index.TestCrashCausesCorruptIndex
 - org.apache.lucene.index.TestDemoParallelLeafReader → org.gnit.lucenekmp.index.TestDemoParallelLeafReader
 - org.apache.lucene.index.TestDirectoryReaderReopen → org.gnit.lucenekmp.index.TestDirectoryReaderReopen
@@ -487,7 +486,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener
 - org.apache.lucene.tests.index.PerThreadPKLookup → org.gnit.lucenekmp.tests.index.PerThreadPKLookup
-- org.apache.lucene.tests.index.SuppressingConcurrentMergeScheduler → org.gnit.lucenekmp.tests.index.SuppressingConcurrentMergeScheduler
 - org.apache.lucene.tests.mockfile.ExtrasFS → org.gnit.lucenekmp.tests.mockfile.ExtrasFS
 - org.apache.lucene.tests.mockfile.HandleLimitFS → org.gnit.lucenekmp.tests.mockfile.HandleLimitFS
 - org.apache.lucene.tests.mockfile.LeakFS → org.gnit.lucenekmp.tests.mockfile.LeakFS

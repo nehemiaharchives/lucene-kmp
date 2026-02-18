@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1074 | 78% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1075 | 78% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -106,7 +106,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 2 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 6 | 4 | 66% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 29 | 72% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 40 | 30 | 75% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 13 | 52% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
@@ -147,7 +147,7 @@
 |     org.apache.lucene.codecs.perfield | 4 | 1 | 25% |
 |   org.apache.lucene.document | 50 | 8 | 16% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
-|   org.apache.lucene.index | 197 | 13 | 6% |
+|   org.apache.lucene.index | 197 | 14 | 7% |
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
 |     org.apache.lucene.internal.tests | 1 | 0 | 0% |
 |     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 195 | 28% |
+| Total | 673 | 196 | 29% |
 
 
 ## Tests To Port
@@ -280,7 +280,6 @@
 | [org.apache.lucene.index.TestCheckIndex](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCheckIndex.java) | org.gnit.lucenekmp.index.TestCheckIndex |
 | [org.apache.lucene.index.TestCodecHoldsOpenFiles](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCodecHoldsOpenFiles.java) | org.gnit.lucenekmp.index.TestCodecHoldsOpenFiles |
 | [org.apache.lucene.index.TestCodecs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCodecs.java) | org.gnit.lucenekmp.index.TestCodecs |
-| [org.apache.lucene.index.TestConcurrentMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestConcurrentMergeScheduler.java) | org.gnit.lucenekmp.index.TestConcurrentMergeScheduler |
 | [org.apache.lucene.index.TestConsistentFieldNumbers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestConsistentFieldNumbers.java) | org.gnit.lucenekmp.index.TestConsistentFieldNumbers |
 | [org.apache.lucene.index.TestCrash](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCrash.java) | org.gnit.lucenekmp.index.TestCrash |
 | [org.apache.lucene.index.TestCrashCausesCorruptIndex](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCrashCausesCorruptIndex.java) | org.gnit.lucenekmp.index.TestCrashCausesCorruptIndex |

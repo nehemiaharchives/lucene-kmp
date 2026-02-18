@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 2413
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 999
+### Total KMP classes: 1000
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1416
+### Total KMP Unit Test classes: 1419
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11835,7 +11835,7 @@
 | [org.apache.lucene.codecs.simpletext.TestSimpleTextKnnVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextKnnVectorsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextKnnVectorsFormat | Depth 1 | [x] | 215 | 103 | 69% |
 | [org.apache.lucene.codecs.simpletext.TestSimpleTextLiveDocsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextLiveDocsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextLiveDocsFormat | Depth 1 | [x] | 144 | 9 | 53% |
 | [org.apache.lucene.codecs.simpletext.TestSimpleTextNormsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextNormsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextNormsFormat | Depth 1 | [x] | 181 | 69 | 58% |
-| [org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextPointsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat | Depth 1 | [x] | 180 | 56 | 71% |
+| [org.apache.lucene.codecs.simpletext.TestSimpleTextPointsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextPointsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPointsFormat | Depth 1 | [x] | 180 | 55 | 72% |
 | [org.apache.lucene.codecs.simpletext.TestSimpleTextPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextPostingsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextPostingsFormat | Depth 1 | [x] | 181 | 45 | 84% |
 | [org.apache.lucene.codecs.simpletext.TestSimpleTextSegmentInfoFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextSegmentInfoFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextSegmentInfoFormat | Depth 1 | [x] | 170 | 42 | 71% |
 | [org.apache.lucene.codecs.simpletext.TestSimpleTextStoredFieldsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/simpletext/TestSimpleTextStoredFieldsFormat.java) | org.gnit.lucenekmp.codecs.simpletext.TestSimpleTextStoredFieldsFormat | Depth 1 | [x] | 167 | 34 | 78% |
@@ -12211,7 +12211,7 @@
 | [org.apache.lucene.index.TestCodecHoldsOpenFiles](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCodecHoldsOpenFiles.java) | org.gnit.lucenekmp.index.TestCodecHoldsOpenFiles | Depth 1 | [] | 140 | 0 | 0% |
 | [org.apache.lucene.index.TestCodecs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCodecs.java) | org.gnit.lucenekmp.index.TestCodecs | Depth 1 | [] | 145 | 0 | 0% |
 | [org.apache.lucene.index.TestConcurrentApproximatePriorityQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestConcurrentApproximatePriorityQueue.java) | org.gnit.lucenekmp.index.TestConcurrentApproximatePriorityQueue | Depth 1 | [x] | 142 | 7 | 0% |
-| [org.apache.lucene.index.TestConcurrentMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestConcurrentMergeScheduler.java) | org.gnit.lucenekmp.index.TestConcurrentMergeScheduler | Depth 2 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.index.TestConcurrentMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestConcurrentMergeScheduler.java) | org.gnit.lucenekmp.index.TestConcurrentMergeScheduler | Depth 2 | [x] | 3 | 3 | 0% |
 | [org.apache.lucene.index.TestConsistentFieldNumbers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestConsistentFieldNumbers.java) | org.gnit.lucenekmp.index.TestConsistentFieldNumbers | Depth 1 | [] | 144 | 0 | 0% |
 | [org.apache.lucene.index.TestCrash](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCrash.java) | org.gnit.lucenekmp.index.TestCrash | Depth 1 | [] | 147 | 0 | 0% |
 | [org.apache.lucene.index.TestCrashCausesCorruptIndex](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestCrashCausesCorruptIndex.java) | org.gnit.lucenekmp.index.TestCrashCausesCorruptIndex | Depth 2 | [] | 0 | 0 | 0% |
@@ -13214,7 +13214,7 @@
 | [org.apache.lucene.tests.index.RandomCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/RandomCodec.java) | org.gnit.lucenekmp.tests.index.RandomCodec | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.index.RandomIndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/RandomIndexWriter.java) | org.gnit.lucenekmp.tests.index.RandomIndexWriter | Depth 3 | [x] | 1 | 3 | 0% |
 | [org.apache.lucene.tests.index.RandomPostingsTester](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/RandomPostingsTester.java) | org.gnit.lucenekmp.tests.index.RandomPostingsTester | Depth 3 | [x] | 0 | 1 | 0% |
-| [org.apache.lucene.tests.index.SuppressingConcurrentMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/SuppressingConcurrentMergeScheduler.java) | org.gnit.lucenekmp.tests.index.SuppressingConcurrentMergeScheduler | Depth 2 | [] | 30 | 0 | 0% |
+| [org.apache.lucene.tests.index.SuppressingConcurrentMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/SuppressingConcurrentMergeScheduler.java) | org.gnit.lucenekmp.tests.index.SuppressingConcurrentMergeScheduler | Depth 2 | [x] | 30 | 30 | 58% |
 | [org.apache.lucene.tests.index.TestAssertingLeafReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/index/TestAssertingLeafReader.java) | org.gnit.lucenekmp.tests.index.TestAssertingLeafReader | Depth 1 | [] | 140 | 0 | 0% |
 | [org.apache.lucene.tests.index.TestForceMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/index/TestForceMergePolicy.java) | org.gnit.lucenekmp.tests.index.TestForceMergePolicy | Depth 1 | [] | 140 | 0 | 0% |
 | [org.apache.lucene.tests.index.TestMockRandomMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/index/TestMockRandomMergePolicy.java) | org.gnit.lucenekmp.tests.index.TestMockRandomMergePolicy | Depth 1 | [] | 140 | 0 | 0% |
@@ -13276,7 +13276,6 @@
 | [org.apache.lucene.tests.store.BaseLockFactoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseLockFactoryTestCase.java) | org.gnit.lucenekmp.tests.store.BaseLockFactoryTestCase | Depth 3 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.tests.store.CorruptingIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/CorruptingIndexOutput.java) | org.gnit.lucenekmp.tests.store.CorruptingIndexOutput | Depth 2 | [] | 22 | 0 | 0% |
 | [org.apache.lucene.tests.store.MockDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/MockDirectoryWrapper.java) | org.gnit.lucenekmp.tests.store.MockDirectoryWrapper | Depth 2 | [x] | 35 | 3 | 0% |
-| [org.apache.lucene.tests.store.MockIndexInputWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/MockIndexInputWrapper.java) | org.gnit.lucenekmp.tests.store.MockIndexInputWrapper | Depth 3 | [x] | 30 | 3 | 0% |
 | [org.apache.lucene.tests.store.MockIndexOutputWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/MockIndexOutputWrapper.java) | org.gnit.lucenekmp.tests.store.MockIndexOutputWrapper | Depth 3 | [x] | 24 | 3 | 0% |
 | [org.apache.lucene.tests.store.RawDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/RawDirectoryWrapper.java) | org.gnit.lucenekmp.tests.store.RawDirectoryWrapper | Depth 3 | [x] | 16 | 14 | 93% |
 | [org.apache.lucene.tests.store.SerialIOCountingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/SerialIOCountingDirectory.java) | org.gnit.lucenekmp.tests.store.SerialIOCountingDirectory | Depth 3 | [] | 5 | 0 | 0% |
@@ -13657,8 +13656,8 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1357
+- Ported Unit Test Classes: 1359
 - Unit Test Porting Progress: 56%
 - **Unit Test Semantic Completion: 5%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 6231
+- Test Core Methods Implemented: 6251
