@@ -210,10 +210,12 @@ class ReadersAndUpdates(
 
     /*@Synchronized*/
     suspend fun delete(docID: Int): Boolean {
-        if (reader == null && pendingDeletes.mustInitOnDelete()) {
-            getReader(IOContext.DEFAULT).decRef() // pass a reader to initialize the pending deletes
+        return withRldLockSuspend {
+            if (reader == null && pendingDeletes.mustInitOnDelete()) {
+                getReaderNoLock(IOContext.DEFAULT).decRef() // pass a reader to initialize pending deletes
+            }
+            pendingDeletes.delete(docID)
         }
-        return pendingDeletes.delete(docID)
     }
 
     // NOTE: removes callers ref

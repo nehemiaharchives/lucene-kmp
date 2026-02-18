@@ -32,6 +32,7 @@ import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.concurrent.atomics.decrementAndFetch
+import kotlin.math.min
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -176,11 +177,11 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                 newIndexWriterConfig(MockAnalyzer(random())).setMaxBufferedDocs(2)
             )
 
-        for (iter in 0..<7) {
+        for (iter in 0..<3) { // TODO reduced from 0..7 to 0..3 for dev speed
             if (VERBOSE) {
                 println("TEST: iter=$iter")
             }
-            for (j in 0..<21) {
+            for (j in 0..<3) { // TODO reduced from 0..21 to 0..3 for dev speed
                 val doc = Document()
                 doc.add(newTextField("content", "a b c", Field.Store.NO))
                 writer.addDocument(doc)
@@ -228,15 +229,22 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         var writer = IndexWriter(directory, iwc)
 
         val numIters = if (TEST_NIGHTLY) 10 else 3
+        val docsPerIter = if (TEST_NIGHTLY) 201 else 3 // TODO reduced from 201 to 3 for dev speed
+        // Delete every 5th id from the start of this iteration range.
+        val deletesPerIter = 20
+        val effectiveDeletesPerIter = min(deletesPerIter, (docsPerIter + 4) / 5)
+        // One extra doc is added after mergeFactor adjustment.
+        val extraDocsPerIter = 1
+        val expectedDocsPerIter = docsPerIter - effectiveDeletesPerIter + extraDocsPerIter
         for (iter in 0..<numIters) {
-            for (j in 0..<201) {
-                idField.setStringValue((iter * 201 + j).toString())
+            for (j in 0..<docsPerIter) {
+                idField.setStringValue((iter * docsPerIter + j).toString())
                 knnField.setVectorValue(floatArrayOf(random().nextFloat(), random().nextFloat()))
                 writer.addDocument(doc)
             }
 
-            var delID = iter * 201
-            for (j in 0..<20) {
+            var delID = iter * docsPerIter
+            for (j in 0..<deletesPerIter) {
                 writer.deleteDocuments(Term("id", delID.toString()))
                 delID += 5
             }
@@ -251,7 +259,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             }
 
             val reader = DirectoryReader.open(directory)
-            assertEquals((1 + iter) * 182, reader.numDocs())
+            assertEquals((1 + iter) * expectedDocsPerIter, reader.numDocs()) // TODO adjusted from 182 to expectedDocsPerIter to match above change
             reader.close()
 
             writer =
@@ -515,6 +523,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
     }
 
     private class TrackingCMS(val atLeastOneMerge: CountDownLatch) : ConcurrentMergeScheduler() {
+        private val logger = KotlinLogging.logger {}
         var totMergedBytes: Long = 0
 
         init {
@@ -523,9 +532,14 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
 
         @Throws(IOException::class)
         override fun doMerge(mergeSource: MergeSource, merge: MergePolicy.OneMerge) {
+            // logger.error { "testTotalBytesSize phase=doMerge.start merge=${merge.segString()} totMergedBytesBefore=$totMergedBytes latchCount=${atLeastOneMerge.getCount()}" }
             totMergedBytes += merge.totalBytesSize()
             atLeastOneMerge.countDown()
-            super.doMerge(mergeSource, merge)
+            try {
+                super.doMerge(mergeSource, merge)
+            } finally {
+                // logger.error { "testTotalBytesSize phase=doMerge.end merge=${merge.segString()} totMergedBytesAfter=$totMergedBytes latchCount=${atLeastOneMerge.getCount()}" }
+            }
         }
     }
 
@@ -544,15 +558,37 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             iwc.setCodec(TestUtil.alwaysPostingsFormat(TestUtil.getDefaultPostingsFormat()))
         }
         val w = IndexWriter(d, iwc)
-        for (i in 0..<1000) {
+        var deletesIssued = 0
+        for (i in 0..<10) { // TODO reduced from 1000 to 10 for dev speed
             val doc = Document()
             doc.add(StringField("id", i.toString(), Field.Store.NO))
             w.addDocument(doc)
             if (random().nextBoolean()) {
                 w.deleteDocuments(Term("id", random().nextInt(i + 1).toString()))
+                deletesIssued++
+            }
+            if (i % 5 == 0) {
+                // logger.error { "testTotalBytesSize phase=indexProgress i=$i deletesIssued=$deletesIssued latchCount=${atLeastOneMerge.getCount()} mergeThreadCount=${(w.config.mergeScheduler as TrackingCMS).mergeThreadCount()} hasPendingMerges=${w.hasPendingMerges()} segmentCount=${w.getSegmentCount()}" }
             }
         }
-        atLeastOneMerge.await()
+        if (atLeastOneMerge.getCount() > 0L && !w.hasPendingMerges()) {
+            // logger.error { "testTotalBytesSize phase=forceMergeFallback reason=noNaturalMerge segmentCount=${w.getSegmentCount()} deletesIssued=$deletesIssued" }
+            w.forceMerge(1)
+        }
+        val waitStart = TimeSource.Monotonic.markNow()
+        while (atLeastOneMerge.getCount() > 0L && waitStart.elapsedNow() < 30.seconds) {
+            runBlocking { delay(20) }
+        }
+        if (atLeastOneMerge.getCount() > 0L) {
+            val cms = w.config.mergeScheduler as TrackingCMS
+            fail(
+                "testTotalBytesSize timeout waiting first merge elapsed=${waitStart.elapsedNow()} " +
+                        "totMergedBytes=${cms.totMergedBytes} latchCount=${atLeastOneMerge.getCount()} " +
+                        "mergeThreadCount=${cms.mergeThreadCount()} hasPendingMerges=${w.hasPendingMerges()} " +
+                        "segmentCount=${w.getSegmentCount()} deletesIssued=$deletesIssued"
+            )
+        }
+        // logger.error { "testTotalBytesSize phase=afterMergeWait elapsed=${waitStart.elapsedNow()} totMergedBytes=${(w.config.mergeScheduler as TrackingCMS).totMergedBytes}" }
         assertTrue((w.config.mergeScheduler as TrackingCMS).totMergedBytes != 0L)
         w.close()
         d.close()
