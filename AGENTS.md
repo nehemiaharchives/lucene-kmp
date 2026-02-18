@@ -50,6 +50,23 @@ Under this directory you find two sub directories:
 * private val logger = KotlinLogging.logger {}
 * logger.debug { "message" }
 * 
+## Debugging Methods (Kotlin/Native + Hang Timeouts)
+* Kotlin/Native-specific debugging method:
+* Reproduce first on native target (`linuxX64Test` on Linux or `macosX64Test` on macOS), then verify behavior against `jvmTest`.
+* Add narrowly-scoped, structured debug logs around suspicious boundaries (merge lifecycle, close/rollback, latch handoff, refcount/deleter transitions).
+* Keep logs stable and grep-friendly: include `phase`, `run`, `attempt`, elapsed time, and key counters (merge-thread count, pending merges, segment count, latch counts).
+* For native-only crash/hang, log state immediately before and after each blocking/state-transition point; avoid wide noisy logging.
+* Keep reusable Kotlin/Native debugging infra in place so future native failures can reuse the same probes quickly.
+* Use `core/src/commonMain/kotlin/org/gnit/lucenekmp/util/NativeCrashProbe.kt` as the standard native probe:
+* update probe state at every major boundary (`run/attempt/phase/updates` plus relevant counters), and trigger probe dump/signal helpers on timeout/fatal paths so native backtraces carry current probe context.
+* keep probe updates inside long-running loops/merge execution so snapshots are not stale.
+* For Linux native runs, configure logging via `core/src/linuxX64Main/kotlin/org/gnit/lucenekmp/util/LoggingConfig.kt` early in startup so probe/debug lines are deterministic and easy to correlate with phase logs.
+* Hang-debugging method with `TimeSource.Monotonic`:
+* Replace unbounded waits/spins with bounded loops using `TimeSource.Monotonic.markNow()` and explicit timeout limits.
+* Emit periodic state snapshots while waiting (not every loop) so stall phase/owner is visible.
+* On timeout, throw `AssertionError` with actionable state snapshot including elapsed duration, current phase, latch/counter values, merge-thread counts, and pending-merge plus segment/file state.
+* Prefer this fail-fast pattern in tests and debug-only code paths to turn silent hangs into deterministic failures.
+
 ## Agent‑Human Coworking Flow
 
 ### Step 1: Suggest & Discuss
