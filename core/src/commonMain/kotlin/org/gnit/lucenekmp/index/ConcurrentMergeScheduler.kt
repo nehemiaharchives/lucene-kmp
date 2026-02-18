@@ -272,7 +272,9 @@ open class ConcurrentMergeScheduler
         merge: OneMerge,
         `in`: Directory
     ): Directory {
-        val currentJob = runBlocking { currentCoroutineContext()[Job] }
+        // Non-suspend context: do not use runBlocking/currentCoroutineContext here because it
+        // creates a synthetic coroutine context that doesn't identify the caller thread.
+        val currentJob: Job? = null
         val currentWorkerId = currentThreadId()
         val mergeThread =
             mergeThreads.firstOrNull {
@@ -534,7 +536,8 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun mergeThreadCount(): Int {
-        val currentJob = runBlocking { currentCoroutineContext()[Job] }
+        // Non-suspend context: rely on worker-id identity instead of synthetic runBlocking job.
+        val currentJob: Job? = null
         val currentWorkerId = currentThreadId()
         var count = 0
         for (mergeThread in mergeThreads) {

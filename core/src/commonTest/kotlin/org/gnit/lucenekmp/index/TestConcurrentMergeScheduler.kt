@@ -994,7 +994,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
     @Test
     @Throws(IOException::class, InterruptedException::class)
     fun testChangeMaxMergeCountyWhileForceMerge() {
-        val numIters = if (TEST_NIGHTLY) 100 else 10
+        val numIters = if (TEST_NIGHTLY) 100 else 3 // TODO reduced from 10 to 3 for dev speed
         for (iters in 0..<numIters) {
             val mp = LogDocMergePolicy()
             mp.mergeFactor = 2

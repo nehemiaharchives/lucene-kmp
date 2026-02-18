@@ -7,6 +7,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.gnit.lucenekmp.jdkport.CoroutineRunnable
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.ThreadFactory
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -33,7 +34,10 @@ class NamedThreadFactory(threadNamePrefix: String?) : ThreadFactory {
         // build a name without String.format or java.util.Locale
         val threadName = "$threadNamePrefix-${threadNumber.fetchAndIncrement()}"
         return GlobalScope.launch(Dispatchers.Default + CoroutineName(threadName)) {
-            r.run()
+            when (r) {
+                is CoroutineRunnable -> r.runSuspending()
+                else -> r.run()
+            }
         }
     }
 
