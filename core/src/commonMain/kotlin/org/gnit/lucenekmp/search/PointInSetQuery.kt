@@ -65,8 +65,8 @@ abstract class PointInSetQuery protected constructor(
         // worst not hurt:
         val builder: PrefixCodedTerms.Builder = PrefixCodedTerms.Builder()
         var previous: BytesRefBuilder? = null
-        var current: BytesRef
-        while ((packedPoints.next().also { current = it!! }) != null) {
+        var current: BytesRef? = packedPoints.next()
+        while (current != null) {
             require(current.length == numDims * bytesPerDim) {
                 ("packed point length should be "
                         + (numDims * bytesPerDim)
@@ -89,6 +89,7 @@ abstract class PointInSetQuery protected constructor(
             }
             builder.add(field, current)
             previous.copyBytes(current)
+            current = packedPoints.next()
         }
         sortedPackedPoints = builder.finish()
         sortedPackedPointsHashCode = sortedPackedPoints.hashCode()

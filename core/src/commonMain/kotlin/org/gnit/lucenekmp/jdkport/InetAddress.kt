@@ -40,7 +40,7 @@ abstract class InetAddress {
      * @return  a hash code value for this IP address.
      */
     override fun hashCode(): Int {
-        return -1
+        return getAddress().contentHashCode()
     }
 
     /**
@@ -61,7 +61,10 @@ abstract class InetAddress {
      * @see java.net.InetAddress.getAddress
      */
     override fun equals(obj: Any?): Boolean {
-        return false
+        if (obj !is InetAddress) {
+            return false
+        }
+        return getAddress().contentEquals(obj.getAddress())
     }
 
     /**
@@ -217,6 +220,146 @@ abstract class InetAddress {
                 }
             }
             throw UnknownHostException("addr is of illegal length")
+        }
+
+        /**
+         * Determines the IP address of a host, given the host's name.
+         *
+         *
+         * This lightweight port currently supports numeric IPv4/IPv6 literals.
+         *
+         * @param host the specified host, or `null`.
+         * @return an `InetAddress` for the supplied literal address.
+         * @throws UnknownHostException if no IP literal address for the host could be found.
+         */
+        @Throws(UnknownHostException::class)
+        fun getByName(host: String?): InetAddress {
+            if (host == null || host.isEmpty()) {
+                throw UnknownHostException("host is null or empty")
+            }
+
+            var literal = host
+            if (literal.startsWith("[") && literal.endsWith("]") && literal.length >= 2) {
+                literal = literal.substring(1, literal.length - 1)
+            }
+
+            if (literal.contains(':')) {
+                val ipv6 = parseIpv6Literal(literal)
+                if (ipv6 != null) {
+                    return getByAddress(host, ipv6)
+                }
+            }
+
+            val ipv4 = parseIpv4Literal(literal)
+            if (ipv4 != null) {
+                return getByAddress(host, ipv4)
+            }
+
+            throw UnknownHostException(host)
+        }
+
+        private fun parseIpv4Literal(literal: String): ByteArray? {
+            val parts = literal.split('.')
+            if (parts.size != 4) {
+                return null
+            }
+            val out = ByteArray(4)
+            for (i in 0..3) {
+                val part = parts[i]
+                if (part.isEmpty()) {
+                    return null
+                }
+                val value = part.toIntOrNull() ?: return null
+                if (value !in 0..255) {
+                    return null
+                }
+                out[i] = value.toByte()
+            }
+            return out
+        }
+
+        private fun parseIpv6Literal(literal: String): ByteArray? {
+            if (literal.isEmpty()) {
+                return null
+            }
+
+            val doubleColon = literal.indexOf("::")
+            if (doubleColon != literal.lastIndexOf("::")) {
+                return null
+            }
+
+            val leftPart: String
+            val rightPart: String
+            if (doubleColon >= 0) {
+                leftPart = literal.substring(0, doubleColon)
+                rightPart = literal.substring(doubleColon + 2)
+            } else {
+                leftPart = literal
+                rightPart = ""
+            }
+
+            val leftGroups = if (leftPart.isEmpty()) emptyList() else leftPart.split(':')
+            val rightGroups = if (rightPart.isEmpty()) emptyList() else rightPart.split(':')
+
+            val words = ArrayList<Int>(8)
+            if (!appendIpv6Groups(leftGroups, words, allowEmbeddedIpv4 = doubleColon < 0 || rightGroups.isEmpty())) {
+                return null
+            }
+
+            val rightWords = ArrayList<Int>(8)
+            if (!appendIpv6Groups(rightGroups, rightWords, allowEmbeddedIpv4 = true)) {
+                return null
+            }
+
+            val totalWords = words.size + rightWords.size
+            if (doubleColon >= 0) {
+                if (totalWords > 8) {
+                    return null
+                }
+                repeat(8 - totalWords) {
+                    words.add(0)
+                }
+            } else if (totalWords != 8) {
+                return null
+            }
+
+            words.addAll(rightWords)
+            if (words.size != 8) {
+                return null
+            }
+
+            val out = ByteArray(16)
+            for (i in 0..7) {
+                out[i * 2] = ((words[i] ushr 8) and 0xFF).toByte()
+                out[i * 2 + 1] = (words[i] and 0xFF).toByte()
+            }
+            return out
+        }
+
+        private fun appendIpv6Groups(groups: List<String>, out: MutableList<Int>, allowEmbeddedIpv4: Boolean): Boolean {
+            for ((index, group) in groups.withIndex()) {
+                if (group.isEmpty()) {
+                    return false
+                }
+                if (group.contains('.')) {
+                    if (!allowEmbeddedIpv4 || index != groups.lastIndex) {
+                        return false
+                    }
+                    val ipv4 = parseIpv4Literal(group) ?: return false
+                    out.add(((ipv4[0].toInt() and 0xFF) shl 8) or (ipv4[1].toInt() and 0xFF))
+                    out.add(((ipv4[2].toInt() and 0xFF) shl 8) or (ipv4[3].toInt() and 0xFF))
+                    continue
+                }
+                if (group.length > 4) {
+                    return false
+                }
+                val value = group.toIntOrNull(16) ?: return false
+                if (value !in 0..0xFFFF) {
+                    return false
+                }
+                out.add(value)
+            }
+            return true
         }
 
         // end of companion object
