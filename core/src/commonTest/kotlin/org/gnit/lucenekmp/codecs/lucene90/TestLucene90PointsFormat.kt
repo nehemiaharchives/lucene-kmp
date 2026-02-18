@@ -373,14 +373,14 @@ class TestLucene90PointsFormat : BasePointsFormatTestCase() {
 
     @Test
     override fun testWithExceptions() {
-        configureTestLogging()
+        /*configureTestLogging()
         val totalRuns = 1000
         val runTimeout = 10.seconds
         repeat(totalRuns) { runIndex ->
             val run = runIndex + 1
             val startedAt = TimeSource.Monotonic.markNow()
             NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_RUN_START)
-            logger.error { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns start codec=${codec.name}" }
+            // logger.error { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns start codec=${codec.name}" }
             try {
                 val scope = CoroutineScope(Dispatchers.Default)
                 val deferred = scope.async {
@@ -402,25 +402,25 @@ class TestLucene90PointsFormat : BasePointsFormatTestCase() {
                     val elapsed = startedAt.elapsedNow()
                     val message =
                         "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns timeout elapsed=$elapsed limit=$runTimeout probeBeforeRun=$probeRunBeforeTimeout probeBeforeAttempt=$probeAttemptBeforeTimeout probeBeforePhase=$probePhaseBeforeTimeout probeBeforeUpdates=$probeUpdatesBeforeTimeout"
-                    logger.error(timeout) { message }
+                    // logger.error(timeout) { message }
                     NativeCrashProbe.requestNativeProbeDump(times = 1)
                     deferred.cancel("timed out after $runTimeout")
                     scope.cancel("timed out after $runTimeout")
                     throw AssertionError(message, timeout)
                 }
                 NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_RUN_END)
-                logger.error { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns end" }
+                // logger.error { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns end" }
             } catch (t: Throwable) {
                 if (t is AssertionError && t.message?.contains("timeout elapsed=") != true) {
                     NativeCrashProbe.mark(run, 0, NativeCrashProbe.PHASE_TEST_RUN_THROWABLE)
                 }
-                logger.error(t) {
-                    "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns throwable=${t::class.simpleName} message=${t.message}"
-                }
+                // logger.error(t) { "TestLucene90PointsFormat.testWithExceptions run=$run/$totalRuns throwable=${t::class.simpleName} message=${t.message}" }
                 throw t
             }
         }
-        NativeCrashProbe.clear()
+        NativeCrashProbe.clear()*/
+
+        super.testWithExceptions()
     }
 
     @Test

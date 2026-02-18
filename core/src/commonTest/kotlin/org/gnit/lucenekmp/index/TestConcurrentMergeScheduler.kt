@@ -425,16 +425,12 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         val totalThreads = 4
         val callingJob = runBlocking { currentCoroutineContext()[Job] }
         val submitsReturned = AtomicInt(0)
-        logger.error {
-            "$testName phase=beforeSchedule totalThreads=$totalThreads maxMergeCount=${mergeScheduler.maxMergeCount} maxThreadCount=${mergeScheduler.maxThreadCount}"
-        }
+        // logger.error { "$testName phase=beforeSchedule totalThreads=$totalThreads maxMergeCount=${mergeScheduler.maxMergeCount} maxThreadCount=${mergeScheduler.maxThreadCount}" }
 
         val submitter =
             CoroutineScope(Dispatchers.Default).launch {
                 for (i in 0..<totalThreads) {
-                    logger.error {
-                        "$testName phase=beforeSubmit index=$i submitsReturned=${submitsReturned.load()} started=${totalThreads - taskStartedLatch.getCount()}"
-                    }
+                    // logger.error { "$testName phase=beforeSubmit index=$i submitsReturned=${submitsReturned.load()} started=${totalThreads - taskStartedLatch.getCount()}" }
                     executor.execute {
                         try {
                             val taskJob = runBlocking { currentCoroutineContext()[Job] }
@@ -446,21 +442,17 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                                     threadsExecutedOnPool.incrementAndFetch()
                                     "pool"
                                 }
-                            logger.error {
-                                "$testName phase=taskStarted index=$i mode=$mode startedRemaining=${taskStartedLatch.getCount()} self=${threadsExecutedOnSelf.load()} pool=${threadsExecutedOnPool.load()}"
-                            }
+                            // logger.error { "$testName phase=taskStarted index=$i mode=$mode startedRemaining=${taskStartedLatch.getCount()} self=${threadsExecutedOnSelf.load()} pool=${threadsExecutedOnPool.load()}" }
                             taskStartedLatch.countDown()
                             releaseLatch.await()
-                            logger.error { "$testName phase=taskReleased index=$i mode=$mode" }
+                            // logger.error { "$testName phase=taskReleased index=$i mode=$mode" }
                         } catch (t: Throwable) {
-                            logger.error(t) { "$testName phase=taskThrowable index=$i" }
+                            // logger.error(t) { "$testName phase=taskThrowable index=$i" }
                             throw t
                         }
                     }
                     val returned = submitsReturned.incrementAndFetch()
-                    logger.error {
-                        "$testName phase=afterSubmit index=$i submitsReturned=$returned started=${totalThreads - taskStartedLatch.getCount()}"
-                    }
+                    // logger.error { "$testName phase=afterSubmit index=$i submitsReturned=$returned started=${totalThreads - taskStartedLatch.getCount()}" }
                 }
             }
 
@@ -469,12 +461,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             runBlocking { delay(10) }
         }
         if (submitsReturned.load() < totalThreads) {
-            logger.error {
-                "$testName phase=submitSlowPath elapsed=${submitWait.elapsedNow()} " +
-                        "submitsReturned=${submitsReturned.load()} startedRemaining=${taskStartedLatch.getCount()} " +
-                        "self=${threadsExecutedOnSelf.load()} pool=${threadsExecutedOnPool.load()} " +
-                        "mergeThreads=${mergeScheduler.mergeThreadCount()} submitterActive=${submitter.isActive}"
-            }
+            // logger.error { "$testName phase=submitSlowPath elapsed=${submitWait.elapsedNow()} submitsReturned=${submitsReturned.load()} startedRemaining=${taskStartedLatch.getCount()} self=${threadsExecutedOnSelf.load()} pool=${threadsExecutedOnPool.load()} mergeThreads=${mergeScheduler.mergeThreadCount()} submitterActive=${submitter.isActive}" }
             // Some executors may synchronously hand off task execution to the caller path.
             // Release blocked tasks and allow submit loop to progress before deciding it's hung.
             releaseLatch.countDown()
@@ -503,13 +490,11 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                         "pool=${threadsExecutedOnPool.load()} mergeThreads=${mergeScheduler.mergeThreadCount()}"
             )
         }
-        logger.error {
-            "$testName phase=allTasksStarted self=${threadsExecutedOnSelf.load()} pool=${threadsExecutedOnPool.load()} mergeThreads=${mergeScheduler.mergeThreadCount()}"
-        }
+        // logger.error { "$testName phase=allTasksStarted self=${threadsExecutedOnSelf.load()} pool=${threadsExecutedOnPool.load()} mergeThreads=${mergeScheduler.mergeThreadCount()}" }
         releaseLatch.countDown()
-        logger.error { "$testName phase=beforeSync" }
+        // logger.error { "$testName phase=beforeSync" }
         runBlocking { mergeScheduler.sync() }
-        logger.error { "$testName phase=afterSync" }
+        // logger.error { "$testName phase=afterSync" }
 
         // Keep parity with Java test setup: merge source object exists even if this KMP port
         // currently validates the max-thread limiting contract without spawning raw merge threads.
@@ -738,13 +723,13 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         val cms =
             object : ConcurrentMergeScheduler() {
                 override fun doMerge(mergeSource: MergeSource, merge: MergePolicy.OneMerge) {
-                    logger.error { "testHangDuringRollback phase=doMerge.enter seg=${merge.segString()}" }
+                    // logger.error { "testHangDuringRollback phase=doMerge.enter seg=${merge.segString()}" }
                     mergeStart.countDown()
                     mergeEnteredDoMerge.countDown()
                     mergeFinish.await()
-                    logger.error { "testHangDuringRollback phase=doMerge.resume seg=${merge.segString()}" }
+                    // logger.error { "testHangDuringRollback phase=doMerge.resume seg=${merge.segString()}" }
                     super.doMerge(mergeSource, merge)
-                    logger.error { "testHangDuringRollback phase=doMerge.end seg=${merge.segString()}" }
+                    // logger.error { "testHangDuringRollback phase=doMerge.end seg=${merge.segString()}" }
                 }
             }
         cms.setMaxMergesAndThreads(1, 1)
@@ -770,10 +755,10 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                     )
                 }
             }
-            logger.error { "testHangDuringRollback phase=mergeStart.reached mergeThreadCount=${cms.mergeThreadCount()}" }
+            // logger.error { "testHangDuringRollback phase=mergeStart.reached mergeThreadCount=${cms.mergeThreadCount()}" }
         }
         val producer = CoroutineScope(Dispatchers.Default).launch {
-            logger.error { "testHangDuringRollback phase=producer.start" }
+            // logger.error { "testHangDuringRollback phase=producer.start" }
             w.addDocument(Document())
             w.addDocument(Document())
             // flush
@@ -781,7 +766,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             // W/o the fix for LUCENE-6094 we would hang forever here:
             w.addDocument(Document())
             // flush + merge
-            logger.error { "testHangDuringRollback phase=producer.releaseMergeFinish" }
+            // logger.error { "testHangDuringRollback phase=producer.releaseMergeFinish" }
             mergeFinish.countDown()
         }
         val waitDocsStarted = TimeSource.Monotonic.markNow()
@@ -791,12 +776,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             runBlocking { delay(10) }
             if (lastDocsLogAt.elapsedNow() >= 5.seconds) {
                 lastDocsLogAt = TimeSource.Monotonic.markNow()
-                logger.error {
-                    "testHangDuringRollback phase=waiting-docStats " +
-                            "numDocs=${w.getDocStats().numDocs} mergeStart=${mergeStart.getCount()} " +
-                            "mergeEnteredDoMerge=${mergeEnteredDoMerge.getCount()} mergeFinish=${mergeFinish.getCount()} " +
-                            "mergeThreadCount=${cms.mergeThreadCount()} hasPendingMerges=${w.hasPendingMerges()}"
-                }
+                // logger.error { "testHangDuringRollback phase=waiting-docStats numDocs=${w.getDocStats().numDocs} mergeStart=${mergeStart.getCount()} mergeEnteredDoMerge=${mergeEnteredDoMerge.getCount()} mergeFinish=${mergeFinish.getCount()} mergeThreadCount=${cms.mergeThreadCount()} hasPendingMerges=${w.hasPendingMerges()}" }
             }
             if (waitDocsStarted.elapsedNow() >= 30.seconds) {
                 fail(
@@ -807,14 +787,11 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                 )
             }
         }
-        logger.error { "testHangDuringRollback phase=docStatsReached8" }
-        logger.error {
-            "testHangDuringRollback phase=skip-producer-join " +
-                    "producerCompleted=${producer.isCompleted} mergeFinish=${mergeFinish.getCount()}"
-        }
-        logger.error { "testHangDuringRollback phase=beforeRollback" }
+        // logger.error { "testHangDuringRollback phase=docStatsReached8" }
+        // logger.error { "testHangDuringRollback phase=skip-producer-join producerCompleted=${producer.isCompleted} mergeFinish=${mergeFinish.getCount()}" }
+        // logger.error { "testHangDuringRollback phase=beforeRollback" }
         w.rollback()
-        logger.error { "testHangDuringRollback phase=afterRollback" }
+        // logger.error { "testHangDuringRollback phase=afterRollback" }
         dir.close()
     }
 
@@ -1030,28 +1007,17 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
 
                     override fun message(component: String, message: String) {
                         if (component == "TP" && message == "mergeMiddleStart") {
-                            logger.error {
-                                "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP mergeMiddleStart before countDown " +
-                                        "arrivedCount=${mergeThreadsArrived.getCount()} forceWaitCount=${forceMergeWaits.getCount()}"
-                            }
+                            // logger.error { "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP mergeMiddleStart before countDown arrivedCount=${mergeThreadsArrived.getCount()} forceWaitCount=${forceMergeWaits.getCount()}" }
                             mergeThreadsArrived.countDown()
                             try {
-                                logger.error {
-                                    "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP mergeMiddleStart waiting " +
-                                            "startAfterWaitCount=${mergeThreadsStartAfterWait.getCount()}"
-                                }
+                                // logger.error { "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP mergeMiddleStart waiting startAfterWaitCount=${mergeThreadsStartAfterWait.getCount()}" }
                                 mergeThreadsStartAfterWait.await()
-                                logger.error {
-                                    "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP mergeMiddleStart resumed"
-                                }
+                                // logger.error { "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP mergeMiddleStart resumed" }
                             } catch (e: InterruptedException) {
                                 throw AssertionError(e)
                             }
                         } else if (component == "TP" && message == "forceMergeBeforeWait") {
-                            logger.error {
-                                "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP forceMergeBeforeWait countDown " +
-                                        "forceWaitCount=${forceMergeWaits.getCount()}"
-                            }
+                            // logger.error { "testChangeMaxMergeCountyWhileForceMerge iter=$iters TP forceMergeBeforeWait countDown forceWaitCount=${forceMergeWaits.getCount()}" }
                             forceMergeWaits.countDown()
                         }
                     }
@@ -1090,7 +1056,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                         runBlocking { delay(10) }
                         if (lastLogAt.elapsedNow() >= 5.seconds) {
                             lastLogAt = TimeSource.Monotonic.markNow()
-                            logger.error { debugState("waiting-$name") }
+                            // logger.error { debugState("waiting-$name") }
                         }
                         if (started.elapsedNow() >= timeoutSeconds.seconds) {
                             fail("${debugState("timeout-$name")} timeout=${timeoutSeconds}s latchCount=${latch.getCount()}")
@@ -1101,16 +1067,16 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                 val forceMergeJob =
                     CoroutineScope(Dispatchers.Default).launch(start = kotlinx.coroutines.CoroutineStart.LAZY) {
                         try {
-                            logger.error { debugState("forceMergeJob.start") }
+                            // logger.error { debugState("forceMergeJob.start") }
                             writer.forceMerge(1)
-                            logger.error { debugState("forceMergeJob.end") }
+                            // logger.error { debugState("forceMergeJob.end") }
                         } catch (e: IOException) {
-                            logger.error(e) { debugState("forceMergeJob.ioException") }
+                            // logger.error(e) { debugState("forceMergeJob.ioException") }
                             throw AssertionError(e)
                         }
                     }
                 try {
-                    logger.error { debugState("beforeSetMaxMergesAndThreads2x2") }
+                    // logger.error { debugState("beforeSetMaxMergesAndThreads2x2") }
                     cms.setMaxMergesAndThreads(2, 2)
                     for (i in 0..<4) {
                         val document = Document()
@@ -1119,16 +1085,16 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                         writer.addDocument(document)
                         writer.flush()
                     }
-                    logger.error { debugState("afterFlush4Docs") }
+                    // logger.error { debugState("afterFlush4Docs") }
                     assertEquals(4, writer.getSegmentCount(), writer.cloneSegmentInfos().toString())
                     awaitLatchOrFail("mergeThreadsArrived", mergeThreadsArrived, 30)
-                    logger.error { debugState("beforeForceMergeJobStart") }
+                    // logger.error { debugState("beforeForceMergeJobStart") }
                     forceMergeJob.start()
                     awaitLatchOrFail("forceMergeWaits", forceMergeWaits, 30)
-                    logger.error { debugState("beforeSetMaxMergesAndThreads1x1") }
+                    // logger.error { debugState("beforeSetMaxMergesAndThreads1x1") }
                     cms.setMaxMergesAndThreads(1, 1)
                 } finally {
-                    logger.error { debugState("finallyReleaseStartAfterWait") }
+                    // logger.error { debugState("finallyReleaseStartAfterWait") }
                     mergeThreadsStartAfterWait.countDown()
                 }
                 var lastLoopLogAt = TimeSource.Monotonic.markNow()
@@ -1138,7 +1104,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                     runBlocking { delay(10) }
                     if (lastLoopLogAt.elapsedNow() >= 5.seconds) {
                         lastLoopLogAt = TimeSource.Monotonic.markNow()
-                        logger.error { debugState("waiting-forceMergeJobComplete") }
+                        // logger.error { debugState("waiting-forceMergeJobComplete") }
                     }
                     if (forceMergeWaitStartedAt.elapsedNow() >= 60.seconds) {
                         fail("${debugState("timeout-forceMergeJobComplete")} timeout=60s waiting for forceMergeJob completion")
@@ -1153,7 +1119,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                         noThreadsPendingSince = null
                     }
                 }
-                logger.error { debugState("afterForceMergeJobComplete") }
+                // logger.error { debugState("afterForceMergeJobComplete") }
                 assertEquals(1, writer.getSegmentCount())
                 writer.close()
             }
