@@ -33,6 +33,7 @@ import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.Executor
 import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
 import org.gnit.lucenekmp.jdkport.TimeUnit
@@ -119,6 +120,16 @@ open class ConcurrentMergeScheduler
     /** The executor provided for intra-merge parallelization  */
     protected var intraMergeExecutor: CachedExecutor? = null
     private val mergeFinishMutex = Mutex()
+    private val schedulerStateLock = ReentrantLock()
+
+    private inline fun <T> withSchedulerStateLock(action: () -> T): T {
+        schedulerStateLock.lock()
+        try {
+            return action()
+        } finally {
+            schedulerStateLock.unlock()
+        }
+    }
 
     /**
      * Expert: directly set the maximum number of merge threads and simultaneous merges allowed.
@@ -133,20 +144,22 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun setMaxMergesAndThreads(maxMergeCount: Int, maxThreadCount: Int) {
-        if (maxMergeCount == AUTO_DETECT_MERGES_AND_THREADS
-            && maxThreadCount == AUTO_DETECT_MERGES_AND_THREADS
-        ) {
-            // OK
-            this.maxMergeCount = AUTO_DETECT_MERGES_AND_THREADS
-            this.maxThreadCount = AUTO_DETECT_MERGES_AND_THREADS
-            return
-        } else require(maxMergeCount != AUTO_DETECT_MERGES_AND_THREADS) { "both maxMergeCount and maxThreadCount must be AUTO_DETECT_MERGES_AND_THREADS" }
-        require(maxThreadCount != AUTO_DETECT_MERGES_AND_THREADS) { "both maxMergeCount and maxThreadCount must be AUTO_DETECT_MERGES_AND_THREADS" }
-        require(maxThreadCount >= 1) { "maxThreadCount should be at least 1" }
-        require(maxMergeCount >= 1) { "maxMergeCount should be at least 1" }
-        require(maxThreadCount <= maxMergeCount) { "maxThreadCount should be <= maxMergeCount (= $maxMergeCount)" }
-        this.maxThreadCount = maxThreadCount
-        this.maxMergeCount = maxMergeCount
+        withSchedulerStateLock {
+            if (maxMergeCount == AUTO_DETECT_MERGES_AND_THREADS
+                && maxThreadCount == AUTO_DETECT_MERGES_AND_THREADS
+            ) {
+                // OK
+                this.maxMergeCount = AUTO_DETECT_MERGES_AND_THREADS
+                this.maxThreadCount = AUTO_DETECT_MERGES_AND_THREADS
+                return
+            } else require(maxMergeCount != AUTO_DETECT_MERGES_AND_THREADS) { "both maxMergeCount and maxThreadCount must be AUTO_DETECT_MERGES_AND_THREADS" }
+            require(maxThreadCount != AUTO_DETECT_MERGES_AND_THREADS) { "both maxMergeCount and maxThreadCount must be AUTO_DETECT_MERGES_AND_THREADS" }
+            require(maxThreadCount >= 1) { "maxThreadCount should be at least 1" }
+            require(maxMergeCount >= 1) { "maxMergeCount should be at least 1" }
+            require(maxThreadCount <= maxMergeCount) { "maxThreadCount should be <= maxMergeCount (= $maxMergeCount)" }
+            this.maxThreadCount = maxThreadCount
+            this.maxMergeCount = maxMergeCount
+        }
     }
 
     /**
@@ -158,30 +171,32 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun setDefaultMaxMergesAndThreads(spins: Boolean) {
-        if (spins) {
-            maxThreadCount = 1
-            maxMergeCount = 6
-        } else {
-            var coreCount = /*java.lang.Runtime.getRuntime().availableProcessors()*/ 1
+        withSchedulerStateLock {
+            if (spins) {
+                maxThreadCount = 1
+                maxMergeCount = 6
+            } else {
+                var coreCount = /*java.lang.Runtime.getRuntime().availableProcessors()*/ 1
 
-            // Let tests override this to help reproducing a failure on a machine that has a different
-            // core count than the one where the test originally failed:
-            try {
-                val value: String? = EnvVar[DEFAULT_CPU_CORE_COUNT_PROPERTY] /*java.lang.System.getProperty(DEFAULT_CPU_CORE_COUNT_PROPERTY)*/
-                if (value != null) {
-                    coreCount = value.toInt()
+                // Let tests override this to help reproducing a failure on a machine that has a different
+                // core count than the one where the test originally failed:
+                try {
+                    val value: String? = EnvVar[DEFAULT_CPU_CORE_COUNT_PROPERTY] /*java.lang.System.getProperty(DEFAULT_CPU_CORE_COUNT_PROPERTY)*/
+                    if (value != null) {
+                        coreCount = value.toInt()
+                    }
+                } catch (ignored: Throwable) {
                 }
-            } catch (ignored: Throwable) {
-            }
 
-            // If you are indexing at full throttle, how many merge threads do you need to keep up It
-            // depends: for most data structures, merging is cheaper than indexing/flushing, but for knn
-            // vectors, merges can require about as much work as the initial indexing/flushing. Plus
-            // documents are indexed/flushed only once, but may be merged multiple times.
-            // Here, we assume an intermediate scenario where merging requires about as much work as
-            // indexing/flushing overall, so we give half the core count to merges.
-            maxThreadCount = max(1, coreCount / 2)
-            maxMergeCount = maxThreadCount + 5
+                // If you are indexing at full throttle, how many merge threads do you need to keep up It
+                // depends: for most data structures, merging is cheaper than indexing/flushing, but for knn
+                // vectors, merges can require about as much work as the initial indexing/flushing. Plus
+                // documents are indexed/flushed only once, but may be merged multiple times.
+                // Here, we assume an intermediate scenario where merging requires about as much work as
+                // indexing/flushing overall, so we give half the core count to merges.
+                maxThreadCount = max(1, coreCount / 2)
+                maxMergeCount = maxThreadCount + 5
+            }
         }
     }
 
@@ -191,7 +206,9 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun setForceMergeMBPerSec(v: Double) {
-        forceMergeMBPerSec = v
+        withSchedulerStateLock {
+            forceMergeMBPerSec = v
+        }
         updateMergeThreads()
     }
 
@@ -199,7 +216,7 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun getForceMergeMBPerSec(): Double {
-        return forceMergeMBPerSec
+        return withSchedulerStateLock { forceMergeMBPerSec }
     }
 
     /**
@@ -210,8 +227,10 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun enableAutoIOThrottle() {
-        this.autoIOThrottle = true
-        targetMBPerSec = START_MB_PER_SEC
+        withSchedulerStateLock {
+            this.autoIOThrottle = true
+            targetMBPerSec = START_MB_PER_SEC
+        }
         updateMergeThreads()
     }
 
@@ -223,7 +242,9 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun disableAutoIOThrottle() {
-        this.autoIOThrottle = false
+        withSchedulerStateLock {
+            this.autoIOThrottle = false
+        }
         updateMergeThreads()
     }
 
@@ -235,10 +256,12 @@ open class ConcurrentMergeScheduler
          * called, else `Double.POSITIVE_INFINITY`.
          */
         get() {
-            return if (this.autoIOThrottle) {
-                targetMBPerSec
-            } else {
-                Double.POSITIVE_INFINITY
+            return withSchedulerStateLock {
+                if (this.autoIOThrottle) {
+                    targetMBPerSec
+                } else {
+                    Double.POSITIVE_INFINITY
+                }
             }
         }
 
@@ -246,15 +269,18 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun removeMergeThread(currentJob: Job?) {
-        // Paranoia: don't trust Thread.equals:
-        for (i in mergeThreads.indices) {
-            if (mergeThreads[i].job === currentJob) {
-                mergeThreads.removeAt(i)
-                return
+        val removed = withSchedulerStateLock {
+            // Paranoia: don't trust Thread.equals:
+            for (i in mergeThreads.indices) {
+                if (mergeThreads[i].job === currentJob) {
+                    mergeThreads.removeAt(i)
+                    return@withSchedulerStateLock true
+                }
             }
+            false
         }
 
-        if (verbose()) {
+        if (!removed && verbose()) {
             message("merge thread $currentJob was not found")
         }
     }
@@ -276,11 +302,12 @@ open class ConcurrentMergeScheduler
         // creates a synthetic coroutine context that doesn't identify the caller thread.
         val currentJob: Job? = null
         val currentWorkerId = currentThreadId()
-        val mergeThread =
+        val mergeThread = withSchedulerStateLock {
             mergeThreads.firstOrNull {
                 it.job === currentJob ||
-                        (it.debugPhase() == "doMerge" && it.debugThreadId() == currentWorkerId)
+                    (it.debugPhase() == "doMerge" && it.debugThreadId() == currentWorkerId)
             }
+        }
 
         // TODO not sure what to do here, synchronized is not supported in KMP
         /*if (!MergeThread::class.java.isInstance(mergeThread)) {
@@ -323,115 +350,117 @@ open class ConcurrentMergeScheduler
     // Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     protected fun updateMergeThreads() {
-        // Only look at threads that are alive & not in the
-        // process of stopping (ie have an active merge):
+        withSchedulerStateLock {
+            // Only look at threads that are alive & not in the
+            // process of stopping (ie have an active merge):
 
-        val activeMerges: MutableList<MergeThread> = mutableListOf()
+            val activeMerges: MutableList<MergeThread> = mutableListOf()
 
-        var threadIdx = 0
-        while (threadIdx < mergeThreads.size) {
-            val mergeThread = mergeThreads[threadIdx]
-            if (!mergeThread.isAlive()) {
-                // Prune any dead threads
-                mergeThreads.removeAt(threadIdx)
-                continue
-            }
-            activeMerges.add(mergeThread)
-            threadIdx++
-        }
-
-        // Sort the merge threads, largest first:
-        CollectionUtil.timSort(activeMerges)
-
-        val activeMergeCount = activeMerges.size
-
-        var bigMergeCount = 0
-
-        threadIdx = activeMergeCount - 1
-        while (threadIdx >= 0) {
-            val mergeThread = activeMerges[threadIdx]
-            if (mergeThread.merge.estimatedMergeBytes > MIN_BIG_MERGE_MB * 1024 * 1024) {
-                bigMergeCount = 1 + threadIdx
-                break
-            }
-            threadIdx--
-        }
-
-        val now: Long = System.nanoTime()
-
-        val message: StringBuilder?
-        if (verbose()) {
-            message = StringBuilder()
-            message.append(
-                "updateMergeThreads ioThrottle=${this.autoIOThrottle} targetMBPerSec=$targetMBPerSec"
-            )
-        } else {
-            message = null
-        }
-
-        threadIdx = 0
-        while (threadIdx < activeMergeCount) {
-            val mergeThread = activeMerges[threadIdx]
-
-            val merge: OneMerge = mergeThread.merge
-
-            // pause the thread if maxThreadCount is smaller than the number of merge threads.
-            val doPause = threadIdx < bigMergeCount - maxThreadCount
-            val newMBPerSec: Double = if (doPause) {
-                0.0
-            } else if (merge.maxNumSegments != -1) {
-                forceMergeMBPerSec
-            } else if (!this.autoIOThrottle) {
-                Double.POSITIVE_INFINITY
-            } else if (merge.estimatedMergeBytes < MIN_BIG_MERGE_MB * 1024 * 1024) {
-                // Don't rate limit small merges:
-                Double.POSITIVE_INFINITY
-            } else {
-                targetMBPerSec
-            }
-
-            val rateLimiter: MergeRateLimiter = mergeThread.rateLimiter
-            val curMBPerSec: Double = rateLimiter.mBPerSec
-
-            if (verbose()) {
-                var mergeStartNS: Long = merge.mergeStartNS
-                if (mergeStartNS == -1L) {
-                    // IndexWriter didn't start the merge yet:
-                    mergeStartNS = now
+            var threadIdx = 0
+            while (threadIdx < mergeThreads.size) {
+                val mergeThread = mergeThreads[threadIdx]
+                if (!mergeThread.isAlive()) {
+                    // Prune any dead threads
+                    mergeThreads.removeAt(threadIdx)
+                    continue
                 }
-                message!!.append('\n')
-                message.append(
-                    "merge thread ${mergeThread.getName()} estSize=${bytesToMB(merge.estimatedMergeBytes)} MB (written=${bytesToMB(rateLimiter.getTotalBytesWritten())} MB) runTime=${nsToSec(now - mergeStartNS)}fs (stopped=${nsToSec(rateLimiter.totalStoppedNS)}s, paused=${nsToSec(rateLimiter.totalPausedNS)}s) rate=${rateToString(rateLimiter.mBPerSec)}\n"
-                )
+                activeMerges.add(mergeThread)
+                threadIdx++
+            }
 
-                if (newMBPerSec != curMBPerSec) {
-                    if (newMBPerSec == 0.0) {
-                        message.append("  now stop")
-                    } else if (curMBPerSec == 0.0) {
-                        if (newMBPerSec == Double.POSITIVE_INFINITY) {
-                            message.append("  now resume")
+            // Sort the merge threads, largest first:
+            CollectionUtil.timSort(activeMerges)
+
+            val activeMergeCount = activeMerges.size
+
+            var bigMergeCount = 0
+
+            threadIdx = activeMergeCount - 1
+            while (threadIdx >= 0) {
+                val mergeThread = activeMerges[threadIdx]
+                if (mergeThread.merge.estimatedMergeBytes > MIN_BIG_MERGE_MB * 1024 * 1024) {
+                    bigMergeCount = 1 + threadIdx
+                    break
+                }
+                threadIdx--
+            }
+
+            val now: Long = System.nanoTime()
+
+            val message: StringBuilder?
+            if (verbose()) {
+                message = StringBuilder()
+                message.append(
+                    "updateMergeThreads ioThrottle=${this.autoIOThrottle} targetMBPerSec=$targetMBPerSec"
+                )
+            } else {
+                message = null
+            }
+
+            threadIdx = 0
+            while (threadIdx < activeMergeCount) {
+                val mergeThread = activeMerges[threadIdx]
+
+                val merge: OneMerge = mergeThread.merge
+
+                // pause the thread if maxThreadCount is smaller than the number of merge threads.
+                val doPause = threadIdx < bigMergeCount - maxThreadCount
+                val newMBPerSec: Double = if (doPause) {
+                    0.0
+                } else if (merge.maxNumSegments != -1) {
+                    forceMergeMBPerSec
+                } else if (!this.autoIOThrottle) {
+                    Double.POSITIVE_INFINITY
+                } else if (merge.estimatedMergeBytes < MIN_BIG_MERGE_MB * 1024 * 1024) {
+                    // Don't rate limit small merges:
+                    Double.POSITIVE_INFINITY
+                } else {
+                    targetMBPerSec
+                }
+
+                val rateLimiter: MergeRateLimiter = mergeThread.rateLimiter
+                val curMBPerSec: Double = rateLimiter.mBPerSec
+
+                if (verbose()) {
+                    var mergeStartNS: Long = merge.mergeStartNS
+                    if (mergeStartNS == -1L) {
+                        // IndexWriter didn't start the merge yet:
+                        mergeStartNS = now
+                    }
+                    message!!.append('\n')
+                    message.append(
+                        "merge thread ${mergeThread.getName()} estSize=${bytesToMB(merge.estimatedMergeBytes)} MB (written=${bytesToMB(rateLimiter.getTotalBytesWritten())} MB) runTime=${nsToSec(now - mergeStartNS)}fs (stopped=${nsToSec(rateLimiter.totalStoppedNS)}s, paused=${nsToSec(rateLimiter.totalPausedNS)}s) rate=${rateToString(rateLimiter.mBPerSec)}\n"
+                    )
+
+                    if (newMBPerSec != curMBPerSec) {
+                        if (newMBPerSec == 0.0) {
+                            message.append("  now stop")
+                        } else if (curMBPerSec == 0.0) {
+                            if (newMBPerSec == Double.POSITIVE_INFINITY) {
+                                message.append("  now resume")
+                            } else {
+                                message.append(
+                                    "  now resume to $newMBPerSec MB/sec"
+                                )
+                            }
                         } else {
                             message.append(
-                                "  now resume to $newMBPerSec MB/sec"
+                                "  now change from $curMBPerSec MB/sec to $newMBPerSec MB/sec"
                             )
                         }
+                    } else if (curMBPerSec == 0.0) {
+                        message.append("  leave stopped")
                     } else {
-                        message.append(
-                            "  now change from $curMBPerSec MB/sec to $newMBPerSec MB/sec"
-                        )
+                        message.append("  leave running at $curMBPerSec MB/sec")
                     }
-                } else if (curMBPerSec == 0.0) {
-                    message.append("  leave stopped")
-                } else {
-                    message.append("  leave running at $curMBPerSec MB/sec")
                 }
-            }
 
-            rateLimiter.mBPerSec = newMBPerSec
-            threadIdx++
-        }
-        if (verbose()) {
-            message(message.toString())
+                rateLimiter.mBPerSec = newMBPerSec
+                threadIdx++
+            }
+            if (verbose()) {
+                message(message.toString())
+            }
         }
     }
 
@@ -439,15 +468,17 @@ open class ConcurrentMergeScheduler
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun initDynamicDefaults(directory: Directory) {
-        if (maxThreadCount == AUTO_DETECT_MERGES_AND_THREADS) {
-            setDefaultMaxMergesAndThreads(false)
-            if (verbose()) {
-                message(
-                    ("initDynamicDefaults maxThreadCount="
-                            + maxThreadCount
-                            + " maxMergeCount="
-                            + maxMergeCount)
-                )
+        withSchedulerStateLock {
+            if (maxThreadCount == AUTO_DETECT_MERGES_AND_THREADS) {
+                setDefaultMaxMergesAndThreads(false)
+                if (verbose()) {
+                    message(
+                        ("initDynamicDefaults maxThreadCount="
+                                + maxThreadCount
+                                + " maxMergeCount="
+                                + maxMergeCount)
+                    )
+                }
             }
         }
     }
@@ -479,17 +510,19 @@ open class ConcurrentMergeScheduler
 
             // TODO synchronized is not supported in KMP, need to think what to do here
             //synchronized(this) {
-            for (t in mergeThreads) {
-                // In case a merge thread is calling us, don't try to sync on
-                // itself, since that will never finish!
-                if (!t.isAlive()) {
-                    continue
-                }
-                val isCurrentMergeThreadOnThisWorker =
-                    t.debugPhase() == "doMerge" && t.debugThreadId() == currentWorkerId
-                if (!isCurrentMergeThreadOnThisWorker && t.job !== currentJob) {
-                    toSync = t
-                    break
+            withSchedulerStateLock {
+                for (t in mergeThreads) {
+                    // In case a merge thread is calling us, don't try to sync on
+                    // itself, since that will never finish!
+                    if (!t.isAlive()) {
+                        continue
+                    }
+                    val isCurrentMergeThreadOnThisWorker =
+                        t.debugPhase() == "doMerge" && t.debugThreadId() == currentWorkerId
+                    if (!isCurrentMergeThreadOnThisWorker && t.job !== currentJob) {
+                        toSync = t
+                        break
+                    }
                 }
             }
             //}
@@ -539,18 +572,20 @@ open class ConcurrentMergeScheduler
         // Non-suspend context: rely on worker-id identity instead of synthetic runBlocking job.
         val currentJob: Job? = null
         val currentWorkerId = currentThreadId()
-        var count = 0
-        for (mergeThread in mergeThreads) {
-            val isCurrentMergeThread =
-                mergeThread.job === currentJob ||
+        return withSchedulerStateLock {
+            var count = 0
+            for (mergeThread in mergeThreads) {
+                val isCurrentMergeThread =
+                    mergeThread.job === currentJob ||
                         (mergeThread.debugPhase() == "doMerge" && mergeThread.debugThreadId() == currentWorkerId)
-            if (!isCurrentMergeThread && mergeThread.isAlive()
-                && mergeThread.merge.isAborted == false
-            ) {
-                count++
+                if (!isCurrentMergeThread && mergeThread.isAlive()
+                    && mergeThread.merge.isAborted == false
+                ) {
+                    count++
+                }
             }
+            count
         }
-        return count
     }
 
     @Throws(IOException::class)
@@ -573,7 +608,9 @@ open class ConcurrentMergeScheduler
     ) {
         if (trigger == MergeTrigger.CLOSING) {
             // Disable throttling on close:
-            targetMBPerSec = MAX_MERGE_MB_PER_SEC
+            withSchedulerStateLock {
+                targetMBPerSec = MAX_MERGE_MB_PER_SEC
+            }
             updateMergeThreads()
         }
 
@@ -608,7 +645,9 @@ open class ConcurrentMergeScheduler
                 // OK to spawn a new merge thread to handle this
                 // merge:
                 val newMergeThread = getMergeThread(mergeSource, merge)
-                mergeThreads.add(newMergeThread)
+                withSchedulerStateLock {
+                    mergeThreads.add(newMergeThread)
+                }
 
                 updateIOThrottle(newMergeThread.merge, newMergeThread.rateLimiter)
 
@@ -643,7 +682,11 @@ open class ConcurrentMergeScheduler
     /*@Synchronized*/
     protected open suspend fun maybeStall(mergeSource: MergeSource): Boolean {
         var startStallTime: Long = 0
-        while (mergeSource.hasPendingMerges() && mergeThreadCount() >= maxMergeCount) {
+        val currentJob = currentCoroutineContext()[Job]
+        while (
+            mergeSource.hasPendingMerges() &&
+                mergeThreadCount() >= withSchedulerStateLock { maxMergeCount }
+        ) {
             // This means merging has fallen too far behind: we
             // have already created maxMergeCount threads, and
             // now there's at least one more merge pending.
@@ -654,7 +697,10 @@ open class ConcurrentMergeScheduler
             // thread to prevent creation of new segments,
             // until merging has caught up:
 
-            if (mergeThreads.any { it.job === currentCoroutineContext()[Job] /*java.lang.Thread.currentThread()*/ }) {
+            val isCurrentMergeThread = withSchedulerStateLock {
+                mergeThreads.any { it.job === currentJob /*java.lang.Thread.currentThread()*/ }
+            }
+            if (isCurrentMergeThread) {
                 // Never stall a merge thread since this blocks the thread from
                 // finishing and calling updateMergeThreads, and blocking it
                 // accomplishes nothing anyway (it's not really a segment producer):
@@ -724,7 +770,10 @@ open class ConcurrentMergeScheduler
             // block must be sync'd on CMS otherwise stalling decisions might cause
             // us to miss pending merges
             val currentJob = currentCoroutineContext()[Job]
-            assert(mergeThreads.any { it.job === currentJob }) { "caller is not a merge thread" }
+            val isMergeThread = withSchedulerStateLock {
+                mergeThreads.any { it.job === currentJob }
+            }
+            assert(isMergeThread) { "caller is not a merge thread" }
             // Let CMS run new merges if necessary:
             try {
                 merge(mergeSource, MergeTrigger.MERGE_FINISHED)
@@ -872,36 +921,39 @@ open class ConcurrentMergeScheduler
     }
 
     override fun toString(): String {
-        return (this::class.simpleName
-                + ": "
-                + "maxThreadCount="
-                + maxThreadCount
-                + ", "
-                + "maxMergeCount="
-                + maxMergeCount
-                + ", "
-                + "ioThrottle="
-                + this.autoIOThrottle)
+        return withSchedulerStateLock {
+            (this::class.simpleName
+                    + ": "
+                    + "maxThreadCount="
+                    + maxThreadCount
+                    + ", "
+                    + "maxMergeCount="
+                    + maxMergeCount
+                    + ", "
+                    + "ioThrottle="
+                    + this.autoIOThrottle)
+        }
     }
 
     private fun isBacklog(now: Long, merge: OneMerge): Boolean {
-        val mergeMB = bytesToMB(merge.estimatedMergeBytes)
-        for (mergeThread in mergeThreads) {
-            val mergeStartNS: Long = mergeThread.merge.mergeStartNS
-            if (mergeThread.isAlive()
-                && mergeThread.merge !== merge && mergeStartNS != -1L && mergeThread.merge.estimatedMergeBytes >= MIN_BIG_MERGE_MB * 1024 * 1024 && nsToSec(
-                    now - mergeStartNS
-                ) > 3.0
-            ) {
-                val otherMergeMB = bytesToMB(mergeThread.merge.estimatedMergeBytes)
-                val ratio = otherMergeMB / mergeMB
-                if (ratio > 0.3 && ratio < 3.0) {
-                    return true
+        return withSchedulerStateLock {
+            val mergeMB = bytesToMB(merge.estimatedMergeBytes)
+            for (mergeThread in mergeThreads) {
+                val mergeStartNS: Long = mergeThread.merge.mergeStartNS
+                if (mergeThread.isAlive()
+                    && mergeThread.merge !== merge && mergeStartNS != -1L && mergeThread.merge.estimatedMergeBytes >= MIN_BIG_MERGE_MB * 1024 * 1024 && nsToSec(
+                        now - mergeStartNS
+                    ) > 3.0
+                ) {
+                    val otherMergeMB = bytesToMB(mergeThread.merge.estimatedMergeBytes)
+                    val ratio = otherMergeMB / mergeMB
+                    if (ratio > 0.3 && ratio < 3.0) {
+                        return@withSchedulerStateLock true
+                    }
                 }
             }
+            false
         }
-
-        return false
     }
 
     /** Tunes IO throttle when a new merge starts.  */
@@ -912,93 +964,95 @@ open class ConcurrentMergeScheduler
         newMerge: OneMerge,
         rateLimiter: MergeRateLimiter
     ) {
-        if (this.autoIOThrottle == false) {
-            return
-        }
+        withSchedulerStateLock {
+            if (this.autoIOThrottle == false) {
+                return
+            }
 
-        val mergeMB = bytesToMB(newMerge.estimatedMergeBytes)
-        if (mergeMB < MIN_BIG_MERGE_MB) {
-            // Only watch non-trivial merges for throttling; this is safe because the MP must eventually
-            // have to do larger merges:
-            return
-        }
+            val mergeMB = bytesToMB(newMerge.estimatedMergeBytes)
+            if (mergeMB < MIN_BIG_MERGE_MB) {
+                // Only watch non-trivial merges for throttling; this is safe because the MP must eventually
+                // have to do larger merges:
+                return
+            }
 
-        val now: Long = System.nanoTime()
+            val now: Long = System.nanoTime()
 
-        // Simplistic closed-loop feedback control: if we find any other similarly
-        // sized merges running, then we are falling behind, so we bump up the
-        // IO throttle, else we lower it:
-        val newBacklog = isBacklog(now, newMerge)
+            // Simplistic closed-loop feedback control: if we find any other similarly
+            // sized merges running, then we are falling behind, so we bump up the
+            // IO throttle, else we lower it:
+            val newBacklog = isBacklog(now, newMerge)
 
-        var curBacklog = false
+            var curBacklog = false
 
-        if (newBacklog == false) {
-            if (mergeThreads.size > maxThreadCount) {
-                // If there are already more than the maximum merge threads allowed, count that as backlog:
-                curBacklog = true
-            } else {
-                // Now see if any still-running merges are backlog'd:
-                for (mergeThread in mergeThreads) {
-                    if (isBacklog(now, mergeThread.merge)) {
-                        curBacklog = true
-                        break
+            if (newBacklog == false) {
+                if (mergeThreads.size > maxThreadCount) {
+                    // If there are already more than the maximum merge threads allowed, count that as backlog:
+                    curBacklog = true
+                } else {
+                    // Now see if any still-running merges are backlog'd:
+                    for (mergeThread in mergeThreads) {
+                        if (isBacklog(now, mergeThread.merge)) {
+                            curBacklog = true
+                            break
+                        }
                     }
                 }
             }
-        }
 
-        val curMBPerSec = targetMBPerSec
+            val curMBPerSec = targetMBPerSec
 
-        if (newBacklog) {
-            // This new merge adds to the backlog: increase IO throttle by 20%
-            targetMBPerSec *= 1.20
-            if (targetMBPerSec > MAX_MERGE_MB_PER_SEC) {
-                targetMBPerSec = MAX_MERGE_MB_PER_SEC
-            }
-            if (verbose()) {
-                if (curMBPerSec == targetMBPerSec) {
+            if (newBacklog) {
+                // This new merge adds to the backlog: increase IO throttle by 20%
+                targetMBPerSec *= 1.20
+                if (targetMBPerSec > MAX_MERGE_MB_PER_SEC) {
+                    targetMBPerSec = MAX_MERGE_MB_PER_SEC
+                }
+                if (verbose()) {
+                    if (curMBPerSec == targetMBPerSec) {
+                        message(
+                            "io throttle: new merge backlog; leave IO rate at ceiling $targetMBPerSec MB/sec"
+                        )
+                    } else {
+                        message(
+                            "io throttle: new merge backlog; increase IO rate to $targetMBPerSec MB/sec"
+                        )
+                    }
+                }
+            } else if (curBacklog) {
+                // We still have an existing backlog; leave the rate as is:
+                if (verbose()) {
                     message(
-                        "io throttle: new merge backlog; leave IO rate at ceiling $targetMBPerSec MB/sec"
-                    )
-                } else {
-                    message(
-                        "io throttle: new merge backlog; increase IO rate to $targetMBPerSec MB/sec"
+                        "io throttle: current merge backlog; leave IO rate at $targetMBPerSec MB/sec"
                     )
                 }
-            }
-        } else if (curBacklog) {
-            // We still have an existing backlog; leave the rate as is:
-            if (verbose()) {
-                message(
-                    "io throttle: current merge backlog; leave IO rate at $targetMBPerSec MB/sec"
-                )
-            }
-        } else {
-            // We are not falling behind: decrease IO throttle by 10%
-            targetMBPerSec /= 1.10
-            if (targetMBPerSec < MIN_MERGE_MB_PER_SEC) {
-                targetMBPerSec = MIN_MERGE_MB_PER_SEC
-            }
-            if (verbose()) {
-                if (curMBPerSec == targetMBPerSec) {
-                    message(
-                        "io throttle: no merge backlog; leave IO rate at floor $targetMBPerSec MB/sec"
-                    )
-                } else {
-                    message(
-                        "io throttle: no merge backlog; decrease IO rate to $targetMBPerSec MB/sec"
-                    )
+            } else {
+                // We are not falling behind: decrease IO throttle by 10%
+                targetMBPerSec /= 1.10
+                if (targetMBPerSec < MIN_MERGE_MB_PER_SEC) {
+                    targetMBPerSec = MIN_MERGE_MB_PER_SEC
+                }
+                if (verbose()) {
+                    if (curMBPerSec == targetMBPerSec) {
+                        message(
+                            "io throttle: no merge backlog; leave IO rate at floor $targetMBPerSec MB/sec"
+                        )
+                    } else {
+                        message(
+                            "io throttle: no merge backlog; decrease IO rate to $targetMBPerSec MB/sec"
+                        )
+                    }
                 }
             }
-        }
 
-        val rate: Double = if (newMerge.maxNumSegments != -1) {
-            forceMergeMBPerSec
-        } else {
-            targetMBPerSec
+            val rate: Double = if (newMerge.maxNumSegments != -1) {
+                forceMergeMBPerSec
+            } else {
+                targetMBPerSec
+            }
+            rateLimiter.mBPerSec = rate
+            targetMBPerSecChanged()
         }
-        rateLimiter.mBPerSec = rate
-        targetMBPerSecChanged()
     }
 
     /** Subclass can override to tweak targetMBPerSec.  */
@@ -1033,14 +1087,16 @@ open class ConcurrentMergeScheduler
 
             // TODO synchronized is not supported in KMP, need to think what to do here
             //synchronized(this@ConcurrentMergeScheduler) {
-                val max = maxThreadCount - mergeThreads.size - 1
-                val value: Int = activeCount.get()
-                if (value < max) {
-                    activeCount.incrementAndFetch()
-                    assert(activeCount.get() > 0) { "active count must be greater than 0 after increment" }
-                    isThreadAvailable = true
-                } else {
-                    isThreadAvailable = false
+            isThreadAvailable = withSchedulerStateLock {
+                    val max = maxThreadCount - mergeThreads.size - 1
+                    val value: Int = activeCount.get()
+                    if (value < max) {
+                        activeCount.incrementAndFetch()
+                        assert(activeCount.get() > 0) { "active count must be greater than 0 after increment" }
+                        true
+                    } else {
+                        false
+                    }
                 }
             //}
             if (isThreadAvailable) {
