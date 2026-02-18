@@ -26,11 +26,75 @@ jobs:
         include:
           # JVM
           - platform: jvm
-            module_name: core
+            module_name: core-analysis
             os: ubuntu-latest
             timeout: 40
             task: :core:jvmTest
-            artifact: jvm-core-reports
+            package_filter: --tests "org.gnit.lucenekmp.analysis*"
+            artifact: jvm-core-analysis-reports
+          - platform: jvm
+            module_name: core-codecs
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.codecs*"
+            artifact: jvm-core-codecs-reports
+          - platform: jvm
+            module_name: core-document
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.document*"
+            artifact: jvm-core-document-reports
+          - platform: jvm
+            module_name: core-geo
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.geo*"
+            artifact: jvm-core-geo-reports
+          - platform: jvm
+            module_name: core-index
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.index*"
+            artifact: jvm-core-index-reports
+          - platform: jvm
+            module_name: core-internal
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.internal*"
+            artifact: jvm-core-internal-reports
+          - platform: jvm
+            module_name: core-jdkport
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+            artifact: jvm-core-jdkport-reports
+          - platform: jvm
+            module_name: core-search
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.search*"
+            artifact: jvm-core-search-reports
+          - platform: jvm
+            module_name: core-store
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.store*"
+            artifact: jvm-core-store-reports
+          - platform: jvm
+            module_name: core-util
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.util*"
+            artifact: jvm-core-util-reports
           - platform: jvm
             module_name: analysis-common
             os: ubuntu-latest
@@ -76,11 +140,84 @@ jobs:
 
           # Android
           - platform: android
-            module_name: core
+            module_name: core-analysis
             os: ubuntu-latest
             timeout: 40
             task: :core:testAndroidHostTest
-            artifact: android-core-reports
+            package_filter: --tests "org.gnit.lucenekmp.analysis*"
+            artifact: android-core-analysis-reports
+            needs_android: true
+          - platform: android
+            module_name: core-codecs
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.codecs*"
+            artifact: android-core-codecs-reports
+            needs_android: true
+          - platform: android
+            module_name: core-document
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.document*"
+            artifact: android-core-document-reports
+            needs_android: true
+          - platform: android
+            module_name: core-geo
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.geo*"
+            artifact: android-core-geo-reports
+            needs_android: true
+          - platform: android
+            module_name: core-index
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.index*"
+            artifact: android-core-index-reports
+            needs_android: true
+          - platform: android
+            module_name: core-internal
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.internal*"
+            artifact: android-core-internal-reports
+            needs_android: true
+          - platform: android
+            module_name: core-jdkport
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+            artifact: android-core-jdkport-reports
+            needs_android: true
+          - platform: android
+            module_name: core-search
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.search*"
+            artifact: android-core-search-reports
+            needs_android: true
+          - platform: android
+            module_name: core-store
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.store*"
+            artifact: android-core-store-reports
+            needs_android: true
+          - platform: android
+            module_name: core-util
+            os: ubuntu-latest
+            timeout: 40
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.util*"
+            artifact: android-core-util-reports
             needs_android: true
           - platform: android
             module_name: analysis-common
@@ -134,11 +271,84 @@ jobs:
 
           # iOS
           - platform: ios
-            module_name: core
+            module_name: core-analysis
             os: macos-latest
             timeout: 40
             task: :core:iosSimulatorArm64Test
-            artifact: ios-core-reports
+            package_filter: --tests "org.gnit.lucenekmp.analysis*"
+            artifact: ios-core-analysis-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-codecs
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.codecs*"
+            artifact: ios-core-codecs-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-document
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.document*"
+            artifact: ios-core-document-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-geo
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.geo*"
+            artifact: ios-core-geo-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-index
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.index*"
+            artifact: ios-core-index-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-internal
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.internal*"
+            artifact: ios-core-internal-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-jdkport
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+            artifact: ios-core-jdkport-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-search
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.search*"
+            artifact: ios-core-search-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-store
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.store*"
+            artifact: ios-core-store-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-util
+            os: macos-latest
+            timeout: 40
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.util*"
+            artifact: ios-core-util-reports
             needs_konan_cache: true
           - platform: ios
             module_name: analysis-common
@@ -192,11 +402,84 @@ jobs:
 
           # Linux
           - platform: linux
-            module_name: core
+            module_name: core-analysis
             os: ubuntu-latest
             timeout: 50
             task: :core:linuxX64Test
-            artifact: linux-core-reports
+            package_filter: --tests "org.gnit.lucenekmp.analysis*"
+            artifact: linux-core-analysis-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-codecs
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.codecs*"
+            artifact: linux-core-codecs-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-document
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.document*"
+            artifact: linux-core-document-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-geo
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.geo*"
+            artifact: linux-core-geo-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-index
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.index*"
+            artifact: linux-core-index-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-internal
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.internal*"
+            artifact: linux-core-internal-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-jdkport
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+            artifact: linux-core-jdkport-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-search
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.search*"
+            artifact: linux-core-search-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-store
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.store*"
+            artifact: linux-core-store-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-util
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.util*"
+            artifact: linux-core-util-reports
             needs_konan_cache: true
           - platform: linux
             module_name: analysis-common
@@ -285,6 +568,7 @@ jobs:
           --stacktrace
           --console=plain
           ${{ matrix.task }}
+          ${{ matrix.package_filter || '' }}
 
       - name: Upload build reports
         if: ${{ always() && env.ACT != 'true' }}
