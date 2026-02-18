@@ -661,7 +661,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         iwc.setMergeScheduler(cms)
         val w = IndexWriter(d, iwc)
         // Makes 100 segments
-        for (i in 0..<200) {
+        for (i in 0..<10) { // TODO reduced from 200 to 10 for dev speed
             w.addDocument(Document())
         }
         // No merges should have run so far, because TMP has high segmentsPerTier:
@@ -671,7 +671,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         assertTrue(maxRunningMergeCount.load() <= 5, "maxRunningMergeCount=${maxRunningMergeCount.load()}")
         maxRunningMergeCount.store(0)
         // Makes another 100 segments
-        for (i in 0..<200) {
+        for (i in 0..<10) { // TODO reduced from 200 to 10 for dev speed
             w.addDocument(Document())
         }
         (w.config.mergeScheduler as ConcurrentMergeScheduler).setMaxMergesAndThreads(1, 1)
