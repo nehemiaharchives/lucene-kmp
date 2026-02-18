@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1075 | 78% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1077 | 78% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -79,7 +79,7 @@
 |     org.apache.lucene.codecs.lucene95 |         org.gnit.lucenekmp.codecs.lucene95 | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.lucene99 |         org.gnit.lucenekmp.codecs.lucene99 | 14 | 13 | 92% | [ ] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 5 | 4 | 80% | [ ] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 59 | 66% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 61 | 68% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 186 | 93% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 18 | 69% | [ ] |
@@ -145,7 +145,7 @@
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene99 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.perfield | 4 | 1 | 25% |
-|   org.apache.lucene.document | 50 | 8 | 16% |
+|   org.apache.lucene.document | 50 | 16 | 32% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
 |   org.apache.lucene.index | 197 | 14 | 7% |
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 196 | 29% |
+| Total | 673 | 204 | 30% |
 
 
 ## Tests To Port
@@ -208,15 +208,7 @@
 | [org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldDocValuesFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat2.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2 |
-| [org.apache.lucene.document.TestFeatureSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFeatureSort.java) | org.gnit.lucenekmp.document.TestFeatureSort |
 | [org.apache.lucene.document.TestFieldType](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFieldType.java) | org.gnit.lucenekmp.document.TestFieldType |
-| [org.apache.lucene.document.TestFloatRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestFloatRange.java) | org.gnit.lucenekmp.document.TestFloatRange |
-| [org.apache.lucene.document.TestInetAddressPoint](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestInetAddressPoint.java) | org.gnit.lucenekmp.document.TestInetAddressPoint |
-| [org.apache.lucene.document.TestIntRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestIntRange.java) | org.gnit.lucenekmp.document.TestIntRange |
-| [org.apache.lucene.document.TestKeywordField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestKeywordField.java) | org.gnit.lucenekmp.document.TestKeywordField |
-| [org.apache.lucene.document.TestLatLonDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonDocValuesField.java) | org.gnit.lucenekmp.document.TestLatLonDocValuesField |
-| [org.apache.lucene.document.TestLatLonDocValuesMultiPointPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonDocValuesMultiPointPointQueries.java) | org.gnit.lucenekmp.document.TestLatLonDocValuesMultiPointPointQueries |
-| [org.apache.lucene.document.TestLatLonDocValuesPointPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonDocValuesPointPointQueries.java) | org.gnit.lucenekmp.document.TestLatLonDocValuesPointPointQueries |
 | [org.apache.lucene.document.TestLatLonLineShapeDVQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonLineShapeDVQueries.java) | org.gnit.lucenekmp.document.TestLatLonLineShapeDVQueries |
 | [org.apache.lucene.document.TestLatLonLineShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonLineShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonLineShapeQueries |
 | [org.apache.lucene.document.TestLatLonMultiLineShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiLineShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiLineShapeQueries |
