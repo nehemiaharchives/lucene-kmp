@@ -251,9 +251,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
 
     @Throws(IOException::class)
     override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
-        logger.debug {
-            "[BooleanWeight.scorerSupplier] enter clauses=${weightedClauses.size} minShouldMatch=${query.minimumNumberShouldMatch}"
-        }
+        //logger.debug { "[BooleanWeight.scorerSupplier] enter clauses=${weightedClauses.size} minShouldMatch=${query.minimumNumberShouldMatch}" }
         var minShouldMatch: Int = query.minimumNumberShouldMatch
 
         val scorers: MutableMap<Occur, MutableCollection<ScorerSupplier>> = mutableMapOf<Occur, MutableCollection<ScorerSupplier>>().apply {
@@ -268,13 +266,9 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         for (wc in weightedClauses) {
             val w: Weight = wc.weight
             val c: BooleanClause = wc.clause
-            logger.debug {
-                "[BooleanWeight.scorerSupplier] sub enter occur=${c.occur} query=${c.query::class.simpleName}"
-            }
+            //logger.debug { "[BooleanWeight.scorerSupplier] sub enter occur=${c.occur} query=${c.query::class.simpleName}" }
             val subScorer = w.scorerSupplier(context)
-            logger.debug {
-                "[BooleanWeight.scorerSupplier] sub exit occur=${c.occur} query=${c.query::class.simpleName} hasScorer=${subScorer != null}"
-            }
+            //logger.debug { "[BooleanWeight.scorerSupplier] sub exit occur=${c.occur} query=${c.query::class.simpleName} hasScorer=${subScorer != null}" }
             if (subScorer == null) {
                 if (c.isRequired) {
                     return null

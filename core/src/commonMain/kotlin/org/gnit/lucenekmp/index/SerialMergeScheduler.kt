@@ -12,13 +12,13 @@ open class SerialMergeScheduler : MergeScheduler() {
 
     override suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger) {
         mergeMutex.withLock {
-            logger.debug { "SerialMergeScheduler: merge start trigger=$trigger" }
+            //logger.debug { "SerialMergeScheduler: merge start trigger=$trigger" }
             while (true) {
                 val merge = mergeSource.nextMerge ?: break
-                logger.debug { "SerialMergeScheduler: merge next ${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
+                //logger.debug { "SerialMergeScheduler: merge next ${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
                 mergeSource.merge(merge)
             }
-            logger.debug { "SerialMergeScheduler: merge end trigger=$trigger" }
+            //logger.debug { "SerialMergeScheduler: merge end trigger=$trigger" }
         }
     }
 

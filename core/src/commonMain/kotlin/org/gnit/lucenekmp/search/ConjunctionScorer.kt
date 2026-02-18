@@ -19,8 +19,8 @@ internal class ConjunctionScorer(required: MutableCollection<Scorer>, scorers: M
         this.required = required
     }
 
-    override fun twoPhaseIterator(): TwoPhaseIterator {
-        return TwoPhaseIterator.unwrap(disi)!!
+    override fun twoPhaseIterator(): TwoPhaseIterator? {
+        return TwoPhaseIterator.unwrap(disi)
     }
 
     override fun iterator(): DocIdSetIterator {

@@ -385,10 +385,10 @@ internal abstract class SpatialQuery protected constructor(
 
     /** Holds spatial logic for a bounding box that works in the encoded space  */
     open class EncodedRectangle protected constructor(
-        protected var minX: Int,
-        protected var maxX: Int,
-        protected var minY: Int,
-        protected var maxY: Int,
+        var minX: Int,
+        var maxX: Int,
+        var minY: Int,
+        var maxY: Int,
         protected var wrapsCoordinateSystem: Boolean
     ) {
         protected fun wrapsCoordinateSystem(): Boolean {

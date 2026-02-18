@@ -38,7 +38,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
         /** name of the LatLonShape indexed field */
         protected const val FIELD_NAME: String = "shape"
 
-        protected val POINT_LINE_RELATIONS: Array<QueryRelation> =
+        val POINT_LINE_RELATIONS: Array<QueryRelation> =
             arrayOf(QueryRelation.INTERSECTS, QueryRelation.DISJOINT, QueryRelation.CONTAINS)
     }
 
