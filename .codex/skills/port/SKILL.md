@@ -65,6 +65,7 @@ Step 7. Create a empty kotlin class/interface `jdkport` and try to find if all t
 Step 8. If all the super class/interface of the jdk class ported into `jdkport` package, start porting the jdkport class.
 Step 9. If there are no missing `jdkport` class, and if there are no un-ported-dependency class/interface from Java Lucene, port the code of the `ClazzToPort.kt`
 Step 10. After porting logic and behaviors code, run `get_file_problems` tool of jetbrains mcp server and edit and iterate over until all errors resolves.
+Step 11. Final parity pass: compare Java and Kotlin files side-by-side. Check for missing or misordered member properties, functions, and logic blocks. Add missing pieces and reorder Kotlin members/functions/logic to match Java ordering so both files stay side-by-side with full behavior and implementation parity.
 
 ## Non-negotiable defaults (do this without being asked)
 
@@ -107,6 +108,10 @@ Style 6. Use idiomatic kotlin: Get advantage of the kotlin language to write sim
     Style 6.2. Two comparisons should be converted to a range check: e.g. `assert docID >= 0 && docID < maxDoc;` to be `assert(docID in 0..<maxDoc)` 
 Style 7. Avoid numeric value mismatch: in Java Byte and Int or Long and Double is implicitly widened, but in Kotlin they are not; use explicit toX conversions or parentheses to preserve numeric type and operator behavior.
 Style 8. Junit Test method/function inheritance: in unit tests defined in Java Junit super classes are executed in sub test classes, but in Kotlin unit testing using kotlin.test, super class unit test functions needs to be explicitly inherited in sub classes to be executed. So find all `fun testXXX()` methods in super test class and add `@Test` annotation and define inherited class `override fun testXXX() = super.testXXX()` where XXX is the name of the test function.
+Style 8.1. For abstract/base test classes, do **not** put `@Test` on superclass test methods. Keep superclass methods as `open`, and in each concrete subclass add `@Test override fun testXXX() = super.testXXX()` for every inherited test that must run.
+Style 8.2. Place inherited test overrides at the **bottom** of the concrete test class, grouped by superclass with comments. Example:
+`// tests inherited from BaseSuperClassX`
+then contiguous `@Test override fun test...() = super.test...()` entries for that superclass.
 Style 9. Atomics: Add `@OptIn(ExperimentalAtomicApi::class)` to var/val/function when you use classes in `kotlin.concurrent.atomics`
     Style 9.1 `fun incrementAndGet()`: Int is deprecated. Use `incrementAndFetch()` instead.
     Style 9.2 do not use `fun get()`, use `fun load()` instead
