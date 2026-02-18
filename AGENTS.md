@@ -108,6 +108,17 @@ When you use ./gradlew command line tool, use like following (e.g. when you deve
 8. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
 9. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
 
+## Git Commit Policy (GPG Signed)
+
+- When user asks to commit, always create a GPG-signed commit.
+- Use per-command unsandboxed execution (escalated command) for signing commands.
+- Run commit command in a PTY and export `GPG_TTY=$(tty)` in the same command.
+- Standard commit flow:
+  1. `git add <intended files only>`
+  2. `export GPG_TTY=$(tty) && git commit -S -m "<message>"`
+  3. `git log --show-signature -1` and confirm `Good signature`.
+- Do not fall back to unsigned commit unless the user explicitly asks for unsigned commit.
+
 
 ### troubleshooting java/cacerts problem
 When you try to run `./gradldew` and get `Trust store file /etc/ssl/certs/java/cacerts does not exist or is not readable. This may lead to SSL connection failures.`, try to run following command to solve it:
