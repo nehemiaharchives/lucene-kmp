@@ -49,18 +49,14 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
         /**
          * Wraps an existing FloatArray into a FloatBuffer.
          * The resulting buffer’s capacity and limit are set to array.size.
-         * The buffer's byte order defaults to BIG_ENDIAN for wrapping,
-         * similar to how the LongBuffer wrap was implemented.
          */
-        fun wrap(array: FloatArray): FloatBuffer {
+        fun wrap(array: FloatArray, order: ByteOrder = ByteOrder.BIG_ENDIAN): FloatBuffer {
             val byteSize = array.size * BYTES_PER_FLOAT
             val buf = Buffer()
-            // Use native byte order for consistency with the default order of the buffer
-            val tempOrder = ByteOrder.nativeOrder()
 
             for (value in array) {
                 val bits = value.toBits() // Get IEEE 754 representation
-                when (tempOrder) {
+                when (order) {
                     ByteOrder.BIG_ENDIAN -> {
                         buf.writeByte((bits shr 24))
                         buf.writeByte((bits shr 16))
@@ -76,9 +72,9 @@ class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val bas
                     }
                 }
             }
-            // Create the FloatBuffer with the native byte order
+            // Create the FloatBuffer with the requested order.
             return FloatBuffer(buf, array.size).clear().apply {
-                order = ByteOrder.nativeOrder()
+                this.order = order
             }
         }
     }
