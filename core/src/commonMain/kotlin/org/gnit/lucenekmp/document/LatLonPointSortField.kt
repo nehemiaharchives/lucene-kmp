@@ -11,6 +11,7 @@ import org.gnit.lucenekmp.search.SortField
 internal class LatLonPointSortField(field: String, latitude: Double, longitude: Double) : SortField(field, Type.CUSTOM) {
     val latitude: Double
     val longitude: Double
+    private var missingValueObject: Any? = Double.POSITIVE_INFINITY
 
     init {
         requireNotNull(field) { "field must not be null" }
@@ -18,21 +19,20 @@ internal class LatLonPointSortField(field: String, latitude: Double, longitude: 
         GeoUtils.checkLongitude(longitude)
         this.latitude = latitude
         this.longitude = longitude
-        //this.missingValue = Double.POSITIVE_INFINITY
     }
 
     override fun getComparator(numHits: Int, pruning: Pruning): FieldComparator<*> {
         return LatLonPointDistanceComparator(field!!, latitude, longitude, numHits)
     }
 
-    override var missingValue: Any? = Double.POSITIVE_INFINITY
-        get() = super.missingValue as Double
+    override var missingValue: Any?
+        get() = missingValueObject
         set(missingValue) {
             require(Double.POSITIVE_INFINITY.equals(missingValue) != false) {
                 ("Missing value can only be Double.POSITIVE_INFINITY (missing values last), but got "
                         + missingValue)
             }
-            field = missingValue
+            missingValueObject = missingValue
         }
 
     override fun hashCode(): Int {
