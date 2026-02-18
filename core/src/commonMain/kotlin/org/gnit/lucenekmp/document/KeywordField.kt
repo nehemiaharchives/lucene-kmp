@@ -108,8 +108,8 @@ class KeywordField : Field {
         }
     }
 
-    override fun storedValue(): StoredValue {
-        return storedValue!!
+    override fun storedValue(): StoredValue? {
+        return storedValue
     }
 
     companion object {
