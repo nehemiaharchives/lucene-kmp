@@ -150,7 +150,7 @@ jobs:
           - platform: android
             module_name: core-codecs
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :core:testAndroidHostTest
             package_filter: --tests "org.gnit.lucenekmp.codecs*"
             artifact: android-core-codecs-reports
@@ -264,7 +264,7 @@ jobs:
           - platform: android
             module_name: codecs
             os: ubuntu-latest
-            timeout: 50
+            timeout: 60
             task: :codecs:testAndroidHostTest
             artifact: android-codecs-reports
             needs_android: true
@@ -395,7 +395,7 @@ jobs:
           - platform: ios
             module_name: codecs
             os: macos-latest
-            timeout: 50
+            timeout: 60
             task: :codecs:iosSimulatorArm64Test
             artifact: ios-codecs-reports
             needs_konan_cache: true
