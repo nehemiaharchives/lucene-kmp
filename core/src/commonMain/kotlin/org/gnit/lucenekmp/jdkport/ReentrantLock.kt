@@ -8,11 +8,11 @@ package org.gnit.lucenekmp.jdkport
  * TODO later we will implement or refactor with kotlin coroutines
  */
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.concurrent.Volatile
 
+@Ported(from = "java.util.concurrent.locks.ReentrantLock")
 class ReentrantLock: Lock {
 
     private val mutex = Mutex()
@@ -54,7 +54,10 @@ class ReentrantLock: Lock {
             holdCount = next
             return
         }
-        runBlocking { mutex.lock() }
+        while (!mutex.tryLock()) {
+            // Busy-spin for now: avoids nested runBlocking re-entrancy that can recurse
+            // into lock callers on the same thread and hang.
+        }
         ownerThreadId = current
         holdCount = 1
     }
@@ -98,8 +101,7 @@ class ReentrantLock: Lock {
             }
 
             private fun fullyLock(saved: Int) {
-                runBlocking { lock.mutex.lock() }
-                lock.ownerThreadId = currentThreadId()
+                lock.lock()
                 lock.holdCount = saved
             }
 
