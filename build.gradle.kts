@@ -1,5 +1,8 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import org.gradle.api.tasks.testing.AbstractTestTask
+import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestListener
+import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.api.tasks.Sync
@@ -135,6 +138,18 @@ subprojects {
     }
 
     tasks.withType<AbstractTestTask>().configureEach {
+        fun formatDuration(elapsedMs: Long): String {
+            if (elapsedMs < 1_000L) return "${elapsedMs} ms"
+            val totalSeconds = elapsedMs / 1_000L
+            if (totalSeconds < 60L) {
+                val tenths = (elapsedMs % 1_000L) / 100L
+                return "${totalSeconds}.${tenths} s"
+            }
+            val minutes = totalSeconds / 60L
+            val seconds = totalSeconds % 60L
+            return "${minutes}m ${seconds}s"
+        }
+
         testLogging {
             events = setOf(TestLogEvent.FAILED)
             exceptionFormat = TestExceptionFormat.FULL
@@ -143,6 +158,21 @@ subprojects {
             showStackTraces = true
             showStandardStreams = false
         }
+        addTestListener(object : TestListener {
+            override fun beforeSuite(suite: TestDescriptor) = Unit
+
+            override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+                if (suite.className != null && result.testCount > 0 && result.failedTestCount == 0L) {
+                    val elapsedMs = result.endTime - result.startTime
+                    val duration = formatDuration(elapsedMs).padStart(8, ' ')
+                    logger.lifecycle("PASSED SUITE: $duration | ${suite.className} (${result.testCount} tests)")
+                }
+            }
+
+            override fun beforeTest(testDescriptor: TestDescriptor) = Unit
+
+            override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) = Unit
+        })
     }
 
     tasks.matching { it.name in setOf("compileKotlinJvm", "compileTestKotlinJvm") }
