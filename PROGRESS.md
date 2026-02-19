@@ -145,7 +145,7 @@
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene99 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.perfield | 4 | 1 | 25% |
-|   org.apache.lucene.document | 50 | 21 | 42% |
+|   org.apache.lucene.document | 50 | 33 | 66% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
 |   org.apache.lucene.index | 197 | 14 | 7% |
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 209 | 31% |
+| Total | 673 | 221 | 32% |
 
 
 ## Tests To Port
@@ -208,18 +208,6 @@
 | [org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldDocValuesFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat2.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2 |
-| [org.apache.lucene.document.TestLatLonMultiLineShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiLineShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiLineShapeQueries |
-| [org.apache.lucene.document.TestLatLonMultiPointPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiPointPointQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiPointPointQueries |
-| [org.apache.lucene.document.TestLatLonMultiPointShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiPointShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiPointShapeQueries |
-| [org.apache.lucene.document.TestLatLonMultiPolygonShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonMultiPolygonShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonMultiPolygonShapeQueries |
-| [org.apache.lucene.document.TestLatLonPointDistanceFeatureQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointDistanceFeatureQuery.java) | org.gnit.lucenekmp.document.TestLatLonPointDistanceFeatureQuery |
-| [org.apache.lucene.document.TestLatLonPointDistanceSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointDistanceSort.java) | org.gnit.lucenekmp.document.TestLatLonPointDistanceSort |
-| [org.apache.lucene.document.TestLatLonPointPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointPointQueries.java) | org.gnit.lucenekmp.document.TestLatLonPointPointQueries |
-| [org.apache.lucene.document.TestLatLonPointShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPointShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonPointShapeQueries |
-| [org.apache.lucene.document.TestLatLonPolygonShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonPolygonShapeQueries.java) | org.gnit.lucenekmp.document.TestLatLonPolygonShapeQueries |
-| [org.apache.lucene.document.TestLatLonShape](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonShape.java) | org.gnit.lucenekmp.document.TestLatLonShape |
-| [org.apache.lucene.document.TestLatLonShapeEncoding](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonShapeEncoding.java) | org.gnit.lucenekmp.document.TestLatLonShapeEncoding |
-| [org.apache.lucene.document.TestLongDistanceFeatureQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLongDistanceFeatureQuery.java) | org.gnit.lucenekmp.document.TestLongDistanceFeatureQuery |
 | [org.apache.lucene.document.TestLongRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLongRange.java) | org.gnit.lucenekmp.document.TestLongRange |
 | [org.apache.lucene.document.TestManyKnnDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestManyKnnDocs.java) | org.gnit.lucenekmp.document.TestManyKnnDocs |
 | [org.apache.lucene.document.TestPerFieldConsistency](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestPerFieldConsistency.java) | org.gnit.lucenekmp.document.TestPerFieldConsistency |
