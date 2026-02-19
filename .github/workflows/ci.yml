@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
+        include: &ci_matrix
           # JVM
           - platform: jvm
             module_name: core-analysis
@@ -32,6 +32,10 @@ jobs:
             task: :core:jvmTest
             package_filter: --tests "org.gnit.lucenekmp.analysis*"
             artifact: jvm-core-analysis-reports
+            coverage_enabled: true
+            coverage_task: :core:koverXmlReport
+            coverage_report_path: core/build/reports/kover/report.xml
+            coverage_extra_args: ""
           - platform: jvm
             module_name: core-codecs
             os: ubuntu-latest
@@ -101,42 +105,94 @@ jobs:
             timeout: 40
             task: :analysis:common:jvmTest
             artifact: jvm-analysis-common-reports
+            coverage_enabled: true
+            coverage_task: :analysis:common:koverXmlReport
+            coverage_report_path: analysis/common/build/reports/kover/report.xml
+            coverage_extra_args: ""
           - platform: jvm
             module_name: analysis-morfologik
             os: ubuntu-latest
             timeout: 40
             task: :analysis:morfologik:jvmTest
             artifact: jvm-analysis-morfologik-reports
+            coverage_enabled: true
+            coverage_task: :analysis:morfologik:koverXmlReport
+            coverage_report_path: analysis/morfologik/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :analysis:morfologik:compileAndroidDeviceTest
+              -x :analysis:morfologik:compileAndroidHostTest
+              -x :analysis:morfologik:compileAndroidMain
+              -x :analysis:morfologik:koverGenerateArtifactAndroid
           - platform: jvm
             module_name: analysis-smartcn
             os: ubuntu-latest
             timeout: 40
             task: :analysis:smartcn:jvmTest
             artifact: jvm-analysis-smartcn-reports
+            coverage_enabled: true
+            coverage_task: :analysis:smartcn:koverXmlReport
+            coverage_report_path: analysis/smartcn/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :analysis:smartcn:compileAndroidDeviceTest
+              -x :analysis:smartcn:compileAndroidHostTest
+              -x :analysis:smartcn:compileAndroidMain
+              -x :analysis:smartcn:koverGenerateArtifactAndroid
           - platform: jvm
             module_name: analysis-nori
             os: ubuntu-latest
             timeout: 40
             task: :analysis:nori:jvmTest
             artifact: jvm-analysis-nori-reports
+            coverage_enabled: true
+            coverage_task: :analysis:nori:koverXmlReport
+            coverage_report_path: analysis/nori/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :analysis:nori:compileAndroidDeviceTest
+              -x :analysis:nori:compileAndroidHostTest
+              -x :analysis:nori:compileAndroidMain
+              -x :analysis:nori:koverGenerateArtifactAndroid
           - platform: jvm
             module_name: analysis-kuromoji
             os: ubuntu-latest
             timeout: 40
             task: :analysis:kuromoji:jvmTest
             artifact: jvm-analysis-kuromoji-reports
+            coverage_enabled: true
+            coverage_task: :analysis:kuromoji:koverXmlReport
+            coverage_report_path: analysis/kuromoji/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :analysis:kuromoji:compileAndroidDeviceTest
+              -x :analysis:kuromoji:compileAndroidHostTest
+              -x :analysis:kuromoji:compileAndroidMain
+              -x :analysis:kuromoji:koverGenerateArtifactAndroid
           - platform: jvm
             module_name: analysis-extra
             os: ubuntu-latest
             timeout: 40
             task: :analysis:extra:jvmTest
             artifact: jvm-analysis-extra-reports
+            coverage_enabled: true
+            coverage_task: :analysis:extra:koverXmlReport
+            coverage_report_path: analysis/extra/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :analysis:extra:compileAndroidDeviceTest
+              -x :analysis:extra:compileAndroidHostTest
+              -x :analysis:extra:compileAndroidMain
+              -x :analysis:extra:koverGenerateArtifactAndroid
           - platform: jvm
             module_name: codecs
             os: ubuntu-latest
             timeout: 60
             task: :codecs:jvmTest
             artifact: jvm-codecs-reports
+            coverage_enabled: true
+            coverage_task: :codecs:koverXmlReport
+            coverage_report_path: codecs/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :codecs:compileAndroidDeviceTest
+              -x :codecs:compileAndroidHostTest
+              -x :codecs:compileAndroidMain
+              -x :codecs:koverGenerateArtifactAndroid
 
           # Android
           - platform: android
@@ -589,10 +645,70 @@ jobs:
           echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
 
   coverage:
-    name: Coverage
+    name: Coverage (${{ matrix.module_name }})
     needs: [tests]
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module_name: core
+            task: :core:koverXmlReport
+            report_path: core/build/reports/kover/report.xml
+            extra_args: ""
+          - module_name: analysis-common
+            task: :analysis:common:koverXmlReport
+            report_path: analysis/common/build/reports/kover/report.xml
+            extra_args: ""
+          - module_name: analysis-morfologik
+            task: :analysis:morfologik:koverXmlReport
+            report_path: analysis/morfologik/build/reports/kover/report.xml
+            extra_args: >-
+              -x :analysis:morfologik:compileAndroidDeviceTest
+              -x :analysis:morfologik:compileAndroidHostTest
+              -x :analysis:morfologik:compileAndroidMain
+              -x :analysis:morfologik:koverGenerateArtifactAndroid
+          - module_name: analysis-smartcn
+            task: :analysis:smartcn:koverXmlReport
+            report_path: analysis/smartcn/build/reports/kover/report.xml
+            extra_args: >-
+              -x :analysis:smartcn:compileAndroidDeviceTest
+              -x :analysis:smartcn:compileAndroidHostTest
+              -x :analysis:smartcn:compileAndroidMain
+              -x :analysis:smartcn:koverGenerateArtifactAndroid
+          - module_name: analysis-nori
+            task: :analysis:nori:koverXmlReport
+            report_path: analysis/nori/build/reports/kover/report.xml
+            extra_args: >-
+              -x :analysis:nori:compileAndroidDeviceTest
+              -x :analysis:nori:compileAndroidHostTest
+              -x :analysis:nori:compileAndroidMain
+              -x :analysis:nori:koverGenerateArtifactAndroid
+          - module_name: analysis-kuromoji
+            task: :analysis:kuromoji:koverXmlReport
+            report_path: analysis/kuromoji/build/reports/kover/report.xml
+            extra_args: >-
+              -x :analysis:kuromoji:compileAndroidDeviceTest
+              -x :analysis:kuromoji:compileAndroidHostTest
+              -x :analysis:kuromoji:compileAndroidMain
+              -x :analysis:kuromoji:koverGenerateArtifactAndroid
+          - module_name: analysis-extra
+            task: :analysis:extra:koverXmlReport
+            report_path: analysis/extra/build/reports/kover/report.xml
+            extra_args: >-
+              -x :analysis:extra:compileAndroidDeviceTest
+              -x :analysis:extra:compileAndroidHostTest
+              -x :analysis:extra:compileAndroidMain
+              -x :analysis:extra:koverGenerateArtifactAndroid
+          - module_name: codecs
+            task: :codecs:koverXmlReport
+            report_path: codecs/build/reports/kover/report.xml
+            extra_args: >-
+              -x :codecs:compileAndroidDeviceTest
+              -x :codecs:compileAndroidHostTest
+              -x :codecs:compileAndroidMain
+              -x :codecs:koverGenerateArtifactAndroid
 
     steps:
       - name: Checkout code
@@ -618,73 +734,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-konan-
 
-      - name: Coverage :core
-        run: ./gradlew :core:koverXmlReport
+      - name: Coverage ${{ matrix.module_name }}
+        run: ./gradlew ${{ matrix.task }} ${{ matrix.extra_args }}
 
-      - name: Coverage :analysis:common
-        run: ./gradlew :analysis:common:koverXmlReport
-
-      - name: Coverage :analysis:morfologik
-        run: >
-          ./gradlew :analysis:morfologik:koverXmlReport
-          -x :analysis:morfologik:compileAndroidDeviceTest 
-          -x :analysis:morfologik:compileAndroidHostTest
-          -x :analysis:morfologik:compileAndroidMain
-          -x :analysis:morfologik:koverGenerateArtifactAndroid
-
-      - name: Coverage :analysis:smartcn
-        run: >
-          ./gradlew :analysis:smartcn:koverXmlReport
-          -x :analysis:smartcn:compileAndroidDeviceTest
-          -x :analysis:smartcn:compileAndroidHostTest
-          -x :analysis:smartcn:compileAndroidMain
-          -x :analysis:smartcn:koverGenerateArtifactAndroid
-
-      - name: Coverage :analysis:nori
-        run: >
-          ./gradlew :analysis:nori:koverXmlReport
-          -x :analysis:nori:compileAndroidDeviceTest
-          -x :analysis:nori:compileAndroidHostTest
-          -x :analysis:nori:compileAndroidMain
-          -x :analysis:nori:koverGenerateArtifactAndroid
-      
-      - name: Coverage :analysis:kuromoji
-        run: >
-          ./gradlew :analysis:kuromoji:koverXmlReport
-          -x :analysis:kuromoji:compileAndroidDeviceTest
-          -x :analysis:kuromoji:compileAndroidHostTest
-          -x :analysis:kuromoji:compileAndroidMain
-          -x :analysis:kuromoji:koverGenerateArtifactAndroid
-      
-      - name: Coverage :analysis:extra
-        run: >
-          ./gradlew :analysis:extra:koverXmlReport
-          -x :analysis:extra:compileAndroidDeviceTest
-          -x :analysis:extra:compileAndroidHostTest
-          -x :analysis:extra:compileAndroidMain
-          -x :analysis:extra:koverGenerateArtifactAndroid
-      - name: Coverage :codecs
-        run: >
-          ./gradlew :codecs:koverXmlReport
-          -x :codecs:compileAndroidDeviceTest
-          -x :codecs:compileAndroidHostTest
-          -x :codecs:compileAndroidMain
-          -x :codecs:koverGenerateArtifactAndroid
+      - name: Upload module coverage report
+        if: ${{ always() && env.ACT != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.module_name }}
+          path: ${{ matrix.report_path }}
 
       - name: Upload coverage reports to Codecov
         if: ${{ env.ACT != 'true' }}
         uses: codecov/codecov-action@v5
         with:
-          files: |
-            core/build/reports/kover/report.xml
-            analysis/common/build/reports/kover/report.xml
-            analysis/morfologik/build/reports/kover/report.xml
-            analysis/smartcn/build/reports/kover/report.xml
-            analysis/nori/build/reports/kover/report.xml
-            analysis/kuromoji/build/reports/kover/report.xml
-            analysis/extra/build/reports/kover/report.xml
-            codecs/build/reports/kover/report.xml
+          files: ${{ matrix.report_path }}
           token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.module_name }}
 
       - name: Upload build reports
         if: ${{ always() && env.ACT != 'true' }}
