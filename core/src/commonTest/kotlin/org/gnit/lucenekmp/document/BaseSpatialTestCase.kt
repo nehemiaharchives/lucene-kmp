@@ -696,7 +696,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
             return queryRelation != QueryRelation.INTERSECTS
         }
 
-        protected fun testWithinQuery(query: Component2D, fields: Array<Field>): Component2D.WithinRelation {
+        fun testWithinQuery(query: Component2D, fields: Array<Field>): Component2D.WithinRelation {
             var answer = Component2D.WithinRelation.DISJOINT
             val decodedTriangle = ShapeField.DecodedTriangle()
             for (field in fields) {
