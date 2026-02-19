@@ -1,23 +1,23 @@
 package org.gnit.lucenekmp.document
 
-import org.gnit.lucenekmp.geo.XYPoint
+import org.gnit.lucenekmp.geo.XYPolygon
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import kotlin.test.Test
 
-/** Tests queries over cartesian point shape doc values */
-class TestXYPointShapeDVQueries : BaseXYShapeDocValueTestCase() {
+/** Test queries over [org.gnit.lucenekmp.geo.XYPolygon] doc value geometries */
+class TestXYPolygonShapeDVQueries : BaseXYShapeDocValueTestCase() {
     override fun getShapeType(): Any {
-        return ShapeType.POINT
+        return ShapeType.POLYGON
     }
 
     override fun createIndexableFields(field: String, shape: Any): Array<Field> {
-        val point = shape as XYPoint
-        return arrayOf(XYShape.createDocValueField(FIELD_NAME, point.x, point.y))
+        val polygon = shape as XYPolygon
+        return arrayOf(XYShape.createDocValueField(FIELD_NAME, polygon))
     }
 
     override fun getValidator(): Validator {
-        return TestXYPointShapeQueries.PointValidator(this.ENCODER)
+        return TestXYPolygonShapeQueries.PolygonValidator(this.ENCODER)
     }
 
     /** test random line queries */
