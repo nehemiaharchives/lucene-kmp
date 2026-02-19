@@ -305,26 +305,6 @@ abstract class ShapeDocValues {
         return size
     }
 
-    private fun vIntSize(i: Int): Int {
-        return when {
-            (i and (-1 shl 7)) == 0 -> 1
-            (i and (-1 shl 14)) == 0 -> 2
-            (i and (-1 shl 21)) == 0 -> 3
-            (i and (-1 shl 28)) == 0 -> 4
-            else -> 5
-        }
-    }
-
-    private fun vLongSize(i: Long): Int {
-        var value = i
-        var bytes = 1
-        while ((value and -128L) != 0L) {
-            value = value ushr 7
-            bytes++
-        }
-        return bytes
-    }
-
     /**
      * Builds an in-memory binary tree of tessellated triangles.
      *
@@ -847,6 +827,26 @@ abstract class ShapeDocValues {
                 offset += bytes.size
             }
             return triangles
+        }
+
+        fun vIntSize(i: Int): Int {
+            return when {
+                (i and (-1 shl 7)) == 0 -> 1
+                (i and (-1 shl 14)) == 0 -> 2
+                (i and (-1 shl 21)) == 0 -> 3
+                (i and (-1 shl 28)) == 0 -> 4
+                else -> 5
+            }
+        }
+
+        fun vLongSize(i: Long): Int {
+            var value = i
+            var bytes = 1
+            while ((value and -128L) != 0L) {
+                value = value ushr 7
+                bytes++
+            }
+            return bytes
         }
     }
 }
