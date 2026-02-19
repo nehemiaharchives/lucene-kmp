@@ -45,8 +45,8 @@ actual class DeflateCompressor actual constructor(actual val level: Int) : Compr
             stream.avail_in = len.convert()
             stream.next_in = bytes.refTo(0).getPointer(memScope).reinterpret()
 
-            // Initialize with windowBits=15+16 for gzip format
-            val windowBits = 15 + 16
+            // Raw DEFLATE stream to match Deflater(level, true) on JVM.
+            val windowBits = -15
             val memLevel = 8
 
             deflateInit2(stream.ptr, level, Z_DEFLATED, windowBits, memLevel, Z_DEFAULT_STRATEGY)

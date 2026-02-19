@@ -44,10 +44,11 @@ actual class DeflateDecompressor : Decompressor() {
 
         memScoped {
             val stream = alloc<z_stream>()
-            stream.avail_in = compressedLength.convert()
+            stream.avail_in = paddedLength.convert()
             stream.next_in = compressed.refTo(0).getPointer(memScope).reinterpret()
 
-            val initResult = inflateInit2(stream.ptr, 15 + 32)
+            // Raw DEFLATE stream to match Inflater(true) on JVM.
+            val initResult = inflateInit2(stream.ptr, -15)
             if (initResult != Z_OK) {
                 throw IOException("Failed to initialize zlib inflater: $initResult")
             }
