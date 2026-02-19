@@ -26,7 +26,7 @@
 ### Total KMP classes: 1015
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1483
+### Total KMP Unit Test classes: 1489
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11661,8 +11661,8 @@
 | [org.apache.lucene.codecs.TermVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/TermVectorsWriter.java) | org.gnit.lucenekmp.codecs.TermVectorsWriter | Depth 4 | [x] | 2 | 2 | 35% |
 | [org.apache.lucene.codecs.TestCodecLoadingDeadlock](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecLoadingDeadlock.java) | org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock | Depth 1 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.codecs.TestCodecUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecUtil.java) | org.gnit.lucenekmp.codecs.TestCodecUtil | Depth 1 | [x] | 156 | 19 | 0% |
-| [org.apache.lucene.codecs.TestCompetitiveFreqNormAccumulator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCompetitiveFreqNormAccumulator.java) | org.gnit.lucenekmp.codecs.TestCompetitiveFreqNormAccumulator | Depth 1 | [] | 144 | 0 | 0% |
-| [org.apache.lucene.codecs.TestMinimalCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestMinimalCodec.java) | org.gnit.lucenekmp.codecs.TestMinimalCodec | Depth 1 | [] | 143 | 0 | 0% |
+| [org.apache.lucene.codecs.TestCompetitiveFreqNormAccumulator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCompetitiveFreqNormAccumulator.java) | org.gnit.lucenekmp.codecs.TestCompetitiveFreqNormAccumulator | Depth 1 | [x] | 144 | 9 | 36% |
+| [org.apache.lucene.codecs.TestMinimalCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestMinimalCodec.java) | org.gnit.lucenekmp.codecs.TestMinimalCodec | Depth 1 | [x] | 143 | 11 | 0% |
 | [org.apache.lucene.codecs.bitvectors.FlatBitVectorsScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/bitvectors/FlatBitVectorsScorer.java) | org.gnit.lucenekmp.codecs.bitvectors.FlatBitVectorsScorer | Depth 4 | [] | 4 | 0 | 0% |
 | [org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/bitvectors/HnswBitVectorsFormat.java) | org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat | Depth 3 | [] | 9 | 0 | 0% |
 | [org.apache.lucene.codecs.bitvectors.TestHnswBitVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/test/org/apache/lucene/codecs/bitvectors/TestHnswBitVectorsFormat.java) | org.gnit.lucenekmp.codecs.bitvectors.TestHnswBitVectorsFormat | Depth 1 | [] | 155 | 0 | 0% |
@@ -11688,10 +11688,10 @@
 | [org.apache.lucene.codecs.compressing.Decompressor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/compressing/Decompressor.java) | org.gnit.lucenekmp.codecs.compressing.Decompressor | Depth 2 | [x] | 1 | 1 | 85% |
 | [org.apache.lucene.codecs.compressing.MatchingReaders](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/compressing/MatchingReaders.java) | org.gnit.lucenekmp.codecs.compressing.MatchingReaders | Depth 3 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.codecs.compressing.TestDeflateWithPresetDictCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestDeflateWithPresetDictCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestDeflateWithPresetDictCompressionMode | Depth 1 | [x] | 155 | 15 | 57% |
-| [org.apache.lucene.codecs.compressing.TestFastCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestFastCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestFastCompressionMode | Depth 1 | [] | 155 | 0 | 0% |
-| [org.apache.lucene.codecs.compressing.TestFastDecompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestFastDecompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestFastDecompressionMode | Depth 1 | [] | 155 | 0 | 0% |
-| [org.apache.lucene.codecs.compressing.TestHighCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestHighCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestHighCompressionMode | Depth 1 | [] | 155 | 0 | 0% |
-| [org.apache.lucene.codecs.compressing.TestLZ4WithPresetDictCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestLZ4WithPresetDictCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestLZ4WithPresetDictCompressionMode | Depth 1 | [] | 155 | 0 | 0% |
+| [org.apache.lucene.codecs.compressing.TestFastCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestFastCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestFastCompressionMode | Depth 1 | [x] | 155 | 15 | 62% |
+| [org.apache.lucene.codecs.compressing.TestFastDecompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestFastDecompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestFastDecompressionMode | Depth 1 | [x] | 155 | 15 | 62% |
+| [org.apache.lucene.codecs.compressing.TestHighCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestHighCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestHighCompressionMode | Depth 1 | [x] | 155 | 15 | 62% |
+| [org.apache.lucene.codecs.compressing.TestLZ4WithPresetDictCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestLZ4WithPresetDictCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestLZ4WithPresetDictCompressionMode | Depth 1 | [x] | 155 | 15 | 62% |
 | [org.apache.lucene.codecs.hnsw.DefaultFlatVectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/hnsw/DefaultFlatVectorScorer.java) | org.gnit.lucenekmp.codecs.hnsw.DefaultFlatVectorScorer | Depth 3 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.codecs.hnsw.FlatFieldVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/hnsw/FlatFieldVectorsWriter.java) | org.gnit.lucenekmp.codecs.hnsw.FlatFieldVectorsWriter | Depth 3 | [x] | 4 | 4 | 93% |
 | [org.apache.lucene.codecs.hnsw.FlatVectorScorerUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/hnsw/FlatVectorScorerUtil.java) | org.gnit.lucenekmp.codecs.hnsw.FlatVectorScorerUtil | Depth 2 | [x] | 0 | 0 | 0% |
@@ -13633,8 +13633,8 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1424
+- Ported Unit Test Classes: 1430
 - Unit Test Porting Progress: 59%
 - **Unit Test Semantic Completion: 5%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 6948
+- Test Core Methods Implemented: 7005

@@ -134,8 +134,8 @@
 |   org.apache.lucene.analysis | 15 | 7 | 46% |
 |     org.apache.lucene.analysis.standard | 2 | 1 | 50% |
 |     org.apache.lucene.analysis.tokenattributes | 4 | 0 | 0% |
-|   org.apache.lucene.codecs | 4 | 1 | 25% |
-|     org.apache.lucene.codecs.compressing | 5 | 1 | 20% |
+|   org.apache.lucene.codecs | 4 | 3 | 75% |
+|     org.apache.lucene.codecs.compressing | 5 | 5 | 100% |
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene101 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.lucene102 | 2 | 2 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 236 | 35% |
+| Total | 673 | 242 | 35% |
 
 
 ## Tests To Port
@@ -190,12 +190,6 @@
 | [org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestPackedTokenAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestPackedTokenAttributeImpl |
 | [org.apache.lucene.analysis.tokenattributes.TestSimpleAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestSimpleAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestSimpleAttributeImpl |
 | [org.apache.lucene.codecs.TestCodecLoadingDeadlock](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecLoadingDeadlock.java) | org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock |
-| [org.apache.lucene.codecs.TestCompetitiveFreqNormAccumulator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCompetitiveFreqNormAccumulator.java) | org.gnit.lucenekmp.codecs.TestCompetitiveFreqNormAccumulator |
-| [org.apache.lucene.codecs.TestMinimalCodec](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestMinimalCodec.java) | org.gnit.lucenekmp.codecs.TestMinimalCodec |
-| [org.apache.lucene.codecs.compressing.TestFastCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestFastCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestFastCompressionMode |
-| [org.apache.lucene.codecs.compressing.TestFastDecompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestFastDecompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestFastDecompressionMode |
-| [org.apache.lucene.codecs.compressing.TestHighCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestHighCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestHighCompressionMode |
-| [org.apache.lucene.codecs.compressing.TestLZ4WithPresetDictCompressionMode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/compressing/TestLZ4WithPresetDictCompressionMode.java) | org.gnit.lucenekmp.codecs.compressing.TestLZ4WithPresetDictCompressionMode |
 | [org.apache.lucene.codecs.lucene101.TestLucene101PostingsFormatV0](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene101/TestLucene101PostingsFormatV0.java) | org.gnit.lucenekmp.codecs.lucene101.TestLucene101PostingsFormatV0 |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance |
 | [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatVariableSkipInterval.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval |
