@@ -444,8 +444,9 @@ class BooleanQuery private constructor(
                 var must = musts.iterator().next()
                 var boost = 1f
                 if (must is BoostQuery) {
-                    must = must.query
-                    boost = (must as BoostQuery).boost
+                    val boostQuery = must
+                    must = boostQuery.query
+                    boost = boostQuery.boost
                 }
                 if (must is MatchAllDocsQuery) {
                     // our single scoring clause matches everything: rewrite to a CSQ on the filter
