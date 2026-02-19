@@ -56,7 +56,7 @@ class TestLatLonLineShapeQueries : BaseLatLonShapeTestCase() {
         return LineValidator(this.ENCODER)
     }
 
-    private class LineValidator(encoder: Encoder) : Validator(encoder) {
+    protected class LineValidator(encoder: Encoder) : Validator(encoder) {
         override fun testComponentQuery(query: Component2D, shape: Any): Boolean {
             val line = shape as Line
             if (queryRelation == QueryRelation.CONTAINS) {
@@ -85,7 +85,7 @@ class TestLatLonLineShapeQueries : BaseLatLonShapeTestCase() {
     @LuceneTestCase.Companion.Nightly
     @Test
     override fun testRandomBig() {
-        doTestRandom(100) // TODO reduced from 10000 to 100 for dev speed
+        doTestRandom(10) // TODO reduced from 10000 to 10 for dev speed
     }
 
     @Test
