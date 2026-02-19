@@ -71,7 +71,7 @@ internal abstract class SpatialQuery protected constructor(
     protected abstract val spatialVisitor: SpatialVisitor
 
     /** Visitor used for walking the BKD tree.  */
-    protected abstract class SpatialVisitor {
+    abstract class SpatialVisitor {
         /** relates a range of points (internal node) to the query  */
         protected abstract fun relate(
             minPackedValue: ByteArray,
@@ -136,7 +136,7 @@ internal abstract class SpatialQuery protected constructor(
     }
 
     @Throws(IOException::class)
-    protected fun getScorerSupplier(
+    protected open fun getScorerSupplier(
         reader: LeafReader,
         spatialVisitor: SpatialVisitor,
         scoreMode: ScoreMode,

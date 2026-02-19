@@ -26,7 +26,7 @@ internal class XYShapeQuery(field: String, queryRelation: QueryRelation, vararg 
         get() = getSpatialVisitor(queryComponent2D)
 
     companion object {
-        private fun getSpatialVisitor(component2D: Component2D): SpatialVisitor {
+        internal fun getSpatialVisitor(component2D: Component2D): SpatialVisitor {
             return object : SpatialVisitor() {
                 override fun relate(minPackedValue: ByteArray, maxPackedValue: ByteArray): PointValues.Relation {
                     val minY = XYEncodingUtils.decode(NumericUtils.sortableBytesToInt(minPackedValue, 0)).toDouble()

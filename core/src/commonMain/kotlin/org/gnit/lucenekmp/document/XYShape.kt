@@ -167,7 +167,7 @@ object XYShape {
         minY: Float,
         maxY: Float
     ): Query {
-        throw UnsupportedOperationException("XYShape.newSlowDocValuesBoxQuery is not ported yet")
+        return XYShapeDocValuesQuery(field, queryRelation, XYRectangle(minX, maxX, minY, maxY))
     }
 
     /**
