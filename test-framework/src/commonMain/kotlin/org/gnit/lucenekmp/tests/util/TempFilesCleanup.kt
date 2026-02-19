@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.jdkport.System
 
 internal class TempFilesCleanup {
     private val cleanupQueue: MutableList<Path> = mutableListOf()
+    private val nextTempIndexByKey: MutableMap<String, Int> = mutableMapOf()
     private var tempDirBase: Path? = null
     private var javaTempDir: Path? = null
 
@@ -39,6 +40,7 @@ internal class TempFilesCleanup {
         for (path in toDelete) {
             deleteRecursively(path)
         }
+        nextTempIndexByKey.clear()
         tempDirBase = null
     }
 
@@ -79,6 +81,8 @@ internal class TempFilesCleanup {
         suffix: String = "",
         isDirectory: Boolean
     ): Path {
+        val key = "${base}|${prefix}|${suffix}|${isDirectory}"
+        val startIndex = nextTempIndexByKey[key] ?: 1
         var attempt = 0
         while (true) {
             if (attempt++ >= LuceneTestCase.TEMP_NAME_RETRY_THRESHOLD) {
@@ -86,7 +90,8 @@ internal class TempFilesCleanup {
                     "Failed to get a temporary name too many times, check your temp directory and consider manually cleaning it: ${base}"
                 )
             }
-            val attemptStr = attempt.toString().padStart(3, '0')
+            val candidateIndex = startIndex + attempt - 1
+            val attemptStr = candidateIndex.toString().padStart(3, '0')
             val path = base.resolve("${prefix}-${attemptStr}${suffix}")
             try {
                 if (isDirectory) {
@@ -98,6 +103,7 @@ internal class TempFilesCleanup {
                 } else {
                     Files.createFile(path)
                 }
+                nextTempIndexByKey[key] = candidateIndex + 1
                 return path
             } catch (_: IOException) {
                 // try another

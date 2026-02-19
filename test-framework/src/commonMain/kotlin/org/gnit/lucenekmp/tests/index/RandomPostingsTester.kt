@@ -4,6 +4,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.codecs.Codec
@@ -62,6 +63,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 
 /** Helper class extracted from BasePostingsFormatTestCase to exercise a postings format.  */
@@ -849,6 +852,15 @@ class RandomPostingsTester(random: Random) {
         if (LuceneTestCase.VERBOSE) {
             println("  verifyEnum: options=$options maxTestOptions=$maxTestOptions")
         }
+        val verifyEnumWatch = TimeSource.Monotonic.markNow()
+        fun checkVerifyEnumTimeout(phase: String, context: String) {
+            val elapsed = verifyEnumWatch.elapsedNow()
+            if (elapsed > 10.seconds) {
+                throw AssertionError(
+                    "verifyEnum timeout >10s phase=$phase field=$field term=${term.utf8ToString()} elapsed=$elapsed $context"
+                )
+            }
+        }
 
         // Make sure TermsEnum really is positioned on the
         // expected term:
@@ -1016,6 +1028,10 @@ class RandomPostingsTester(random: Random) {
         }
 
         while (expected.upto <= stopAt) {
+            checkVerifyEnumTimeout(
+                phase = "main.docsLoop",
+                context = "expectedUpto=${expected.upto} stopAt=$stopAt postingsDoc=${postingsEnum.docID()}"
+            )
             if (expected.upto == stopAt) {
                 if (stopAt == expected.docFreq) {
                     assertEquals(
@@ -1148,6 +1164,10 @@ class RandomPostingsTester(random: Random) {
                 }
 
                 for (i in 0..<numPosToConsume) {
+                    checkVerifyEnumTimeout(
+                        phase = "main.positionsLoop",
+                        context = "doc=${postingsEnum.docID()} i=$i numPosToConsume=$numPosToConsume"
+                    )
                     val pos = expected.nextPosition()
                     if (LuceneTestCase.VERBOSE) {
                         println("    now nextPosition to $pos")
@@ -1274,6 +1294,10 @@ class RandomPostingsTester(random: Random) {
             var postings: PostingsEnum? = termsEnum.postings(null, flags)
             var doc: Int = impactsEnum.nextDoc()
             while (true) {
+                checkVerifyEnumTimeout(
+                    phase = "impacts.syncLoop",
+                    context = "doc=$doc postingsDoc=${postings?.docID()} max=$max"
+                )
                 assertEquals(postings!!.nextDoc().toLong(), doc.toLong())
                 if (doc == DocIdSetIterator.NO_MORE_DOCS) {
                     break
@@ -1351,6 +1375,10 @@ class RandomPostingsTester(random: Random) {
 
             max = -1
             while (true) {
+                checkVerifyEnumTimeout(
+                    phase = "impacts.advanceLoop",
+                    context = "impactsDoc=${impactsEnum.docID()} postingsDoc=${postings?.docID()} max=$max"
+                )
                 var doc: Int = impactsEnum.docID()
                 val advance: Boolean
                 val target: Int
@@ -1508,6 +1536,10 @@ class RandomPostingsTester(random: Random) {
             val set2 = FixedBitSet(1024)
 
             while (true) {
+                checkVerifyEnumTimeout(
+                    phase = "intoBitSet.outerLoop",
+                    context = "pe1Doc=${pe1?.docID()} pe2Doc=${pe2?.docID()}"
+                )
                 pe1!!.nextDoc()
                 pe2!!.nextDoc()
 
@@ -1521,6 +1553,10 @@ class RandomPostingsTester(random: Random) {
                 pe1.intoBitSet(upTo, set1, offset)
                 var d: Int = pe2.docID()
                 while (d < upTo) {
+                    checkVerifyEnumTimeout(
+                        phase = "intoBitSet.innerLoop",
+                        context = "d=$d upTo=$upTo offset=$offset pe2Doc=${pe2.docID()}"
+                    )
                     set2.set(d - offset)
                     d = pe2.nextDoc()
                 }
@@ -1615,7 +1651,8 @@ class RandomPostingsTester(random: Random) {
                             options,
                             maxTestOptions,
                             maxIndexOptions,
-                            alwaysTestMax
+                            alwaysTestMax,
+                            "worker-start"
                         )
                     } catch (t: Throwable) {
                         throw RuntimeException(t)
@@ -1638,7 +1675,8 @@ class RandomPostingsTester(random: Random) {
                     options,
                     maxTestOptions,
                     maxIndexOptions,
-                    alwaysTestMax
+                    alwaysTestMax,
+                    "worker-runSuspend"
                 )
             } finally {
                 fieldsSource = null
@@ -1668,18 +1706,27 @@ class RandomPostingsTester(random: Random) {
                                 options,
                                 maxTestOptions,
                                 maxIndexOptions,
-                                alwaysTestMax
+                                alwaysTestMax,
+                                "thread-$threadUpto"
                             )
                         } catch (t: Throwable) {
                             throw RuntimeException(t)
                         }
                     }
                 }
-                jobs.joinAll()
+                withTimeout(60.seconds) {
+                    jobs.joinAll()
+                }
             }
         } else {
             testTermsOneThread(
-                random, fieldsSource, options, maxTestOptions, maxIndexOptions, alwaysTestMax
+                random,
+                fieldsSource,
+                options,
+                maxTestOptions,
+                maxIndexOptions,
+                alwaysTestMax,
+                "single"
             )
         }
     }
@@ -1691,8 +1738,19 @@ class RandomPostingsTester(random: Random) {
         options: EnumSet<Option>,
         maxTestOptions: IndexOptions,
         maxIndexOptions: IndexOptions,
-        alwaysTestMax: Boolean
+        alwaysTestMax: Boolean,
+        debugLabel: String
     ) {
+        val total = TimeSource.Monotonic.markNow()
+        var phase = "init"
+        fun checkTimeout() {
+            if (total.elapsedNow() > 60.seconds) {
+                throw AssertionError(
+                    "RandomPostingsTester.testTermsOneThread timeout >60s label=$debugLabel phase=$phase elapsed=${total.elapsedNow()} allTerms=${allTerms.size}"
+                )
+            }
+        }
+
         val threadState = ThreadState()
 
         // Test random terms/fields:
@@ -1706,6 +1764,7 @@ class RandomPostingsTester(random: Random) {
 
         var upto = 0
         while (upto < allTerms.size) {
+            checkTimeout()
             var useTermState = termStates.isNotEmpty() && random.nextInt(5) == 1
             val useTermOrd = supportsOrds && useTermState == false && random.nextInt(5) == 1
 
@@ -1800,6 +1859,7 @@ class RandomPostingsTester(random: Random) {
                 savedTermState = true
             }
 
+            phase = "verifyEnum.main upto=$upto field=${fieldAndTerm.field}"
             verifyEnum(
                 random,
                 threadState,
@@ -1830,6 +1890,7 @@ class RandomPostingsTester(random: Random) {
                     println("TEST: try enum again on same term")
                 }
 
+                phase = "verifyEnum.repeat upto=$upto field=${fieldAndTerm.field}"
                 verifyEnum(
                     random,
                     threadState,
@@ -1842,18 +1903,41 @@ class RandomPostingsTester(random: Random) {
                     alwaysTestMax
                 )
             }
+
         }
 
         // Test Terms.intersect:
+        phase = "intersect.start"
         for (field in fields.keys) {
+            checkTimeout()
+            phase = "intersect.field.start field=$field"
+            val fieldStart = TimeSource.Monotonic.markNow()
+            var attempts = 0
+            var allCount = 0
+            var noneCount = 0
+            var singleCount = 0
+            var normalCount = 0
             while (true) {
+                attempts++
                 var a: Automaton = AutomatonTestUtil.randomAutomaton(random)
                 a = Operations.determinize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
                 val ca = CompiledAutomaton(a, false, true, false)
                 if (ca.type != CompiledAutomaton.AUTOMATON_TYPE.NORMAL) {
+                    when (ca.type) {
+                        CompiledAutomaton.AUTOMATON_TYPE.ALL -> allCount++
+                        CompiledAutomaton.AUTOMATON_TYPE.NONE -> noneCount++
+                        CompiledAutomaton.AUTOMATON_TYPE.SINGLE -> singleCount++
+                        else -> {}
+                    }
+                    if (fieldStart.elapsedNow() > 10.seconds) {
+                        throw AssertionError(
+                            "intersect search timeout >10s label=$debugLabel field=$field attempts=$attempts all=$allCount none=$noneCount single=$singleCount normal=$normalCount elapsed=${fieldStart.elapsedNow()}"
+                        )
+                    }
                     // Keep retrying until we get an A that will really "use" the PF's intersect code:
                     continue
                 }
+                normalCount++
 
                 // System.out.println("A:\n" + a.toDot());
                 var startTerm: BytesRef? = null
@@ -1886,7 +1970,10 @@ class RandomPostingsTester(random: Random) {
 
                 val intersectedTerms: MutableSet<BytesRef> = mutableSetOf()
                 var term: BytesRef?
+                var intersectedCount = 0
                 while ((intersected.next().also { term = it }) != null) {
+                    checkTimeout()
+                    intersectedCount++
                     if (startTerm != null) {
                         // NOTE: not <=
                         assertTrue(startTerm < term!!)
