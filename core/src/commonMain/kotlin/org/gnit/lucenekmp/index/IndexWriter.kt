@@ -2668,27 +2668,29 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @Throws(IOException::class)
     private fun abortMerges() {
         merges.disable()
-        // Abort all pending & running merges:
-        IOUtils.applyToAll(
-            pendingMerges
-        ) { merge: MergePolicy.OneMerge ->
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message("IW", "now abort pending merge " + segString(merge.segments))
-            }
-            abortOneMerge(merge)
-            mergeFinish(merge)
-        }
-        pendingMerges.clear()
-
-        // abort any merges pending from addIndexes(CodecReader...)
-        addIndexesMergeSource.abortPendingMerges()
-
-        runBlocking {
-            for (merge in runningMerges) {
+        withIndexWriterLock {
+            // Abort all pending & running merges:
+            IOUtils.applyToAll(
+                pendingMerges
+            ) { merge: MergePolicy.OneMerge ->
                 if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "now abort running merge " + segString(merge.segments))
+                    infoStream.message("IW", "now abort pending merge " + segString(merge.segments))
                 }
-                merge.setAborted()
+                abortOneMerge(merge)
+                mergeFinish(merge)
+            }
+            pendingMerges.clear()
+
+            // abort any merges pending from addIndexes(CodecReader...)
+            addIndexesMergeSource.abortPendingMerges()
+
+            runBlocking {
+                for (merge in runningMerges) {
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "now abort running merge " + segString(merge.segments))
+                    }
+                    merge.setAborted()
+                }
             }
         }
 
@@ -2698,27 +2700,33 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         val abortWaitStartedAt = TimeSource.Monotonic.markNow()
         var loggedSlowAbortWait = false
         var abortWaitIters = 0
-        while (runningMerges.size + runningAddIndexesMerges.size != 0) {
+        while (true) {
+            val (runningMergeCount, runningAddIndexesMergeCount, pendingMergeCount) = withIndexWriterLock {
+                Triple(runningMerges.size, runningAddIndexesMerges.size, pendingMerges.size)
+            }
+            if (runningMergeCount + runningAddIndexesMergeCount == 0) {
+                break
+            }
             markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_ABORT_MERGES_WAIT)
             abortWaitIters++
             if (infoStream.isEnabled("IW")) {
                 infoStream.message(
                     "IW",
                     ("now wait for "
-                            + runningMerges.size
+                            + runningMergeCount
                             + " running merge/s to abort; currently running addIndexes: "
-                            + runningAddIndexesMerges.size)
+                            + runningAddIndexesMergeCount)
                 )
             }
             if (abortWaitIters % 10 == 0) {
                 logger.debug {
-                    "abortMerges: waiting iter=$abortWaitIters runningMerges=${runningMerges.size} runningAddIndexesMerges=${runningAddIndexesMerges.size} pendingMerges=${pendingMerges.size}"
+                    "abortMerges: waiting iter=$abortWaitIters runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
                 }
             }
             if (!loggedSlowAbortWait && abortWaitStartedAt.elapsedNow() > 5.seconds) {
                 loggedSlowAbortWait = true
                 logger.error {
-                    "abortMerges: slow wait elapsed=${abortWaitStartedAt.elapsedNow()} runningMerges=${runningMerges.size} runningAddIndexesMerges=${runningAddIndexesMerges.size} pendingMerges=${pendingMerges.size}"
+                    "abortMerges: slow wait elapsed=${abortWaitStartedAt.elapsedNow()} runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
                 }
                 NativeCrashProbe.requestNativeProbeDump(times = 1)
             }
@@ -3347,59 +3355,53 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         private val pendingAddIndexesMerges: ArrayDeque<MergePolicy.OneMerge> = ArrayDeque()
 
         fun registerMerge(merge: MergePolicy.OneMerge) {
-
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this@IndexWriter) {
-            pendingAddIndexesMerges.add(merge)
-            //}
+            withIndexWriterLock {
+                pendingAddIndexesMerges.add(merge)
+            }
         }
 
         override val nextMerge: MergePolicy.OneMerge?
             get() {
-
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this@IndexWriter) {
-                if (!hasPendingMerges()) {
-                    return null
+                return withIndexWriterLock {
+                    if (!hasPendingMerges()) {
+                        return@withIndexWriterLock null
+                    }
+                    val merge: MergePolicy.OneMerge = pendingAddIndexesMerges.poll()!! /*.remove()*/
+                    runningMerges.add(merge)
+                    merge
                 }
-                val merge: MergePolicy.OneMerge = pendingAddIndexesMerges.poll()!! /*.remove()*/
-                runningMerges.add(merge)
-                return merge
-                //}
             }
 
         override fun onMergeFinished(merge: MergePolicy.OneMerge) {
-
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this@IndexWriter) {
-            runningMerges.remove(merge)
-            //}
+            withIndexWriterLock {
+                runningMerges.remove(merge)
+            }
         }
 
         override fun hasPendingMerges(): Boolean {
-            return pendingAddIndexesMerges.isNotEmpty()
+            return withIndexWriterLock {
+                pendingAddIndexesMerges.isNotEmpty()
+            }
         }
 
         @Throws(IOException::class)
         fun abortPendingMerges() {
-
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this@IndexWriter) {
-            IOUtils.applyToAll(
-                pendingAddIndexesMerges
-            ) { merge: MergePolicy.OneMerge ->
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "now abort pending addIndexes merge")
+            withIndexWriterLock {
+                IOUtils.applyToAll(
+                    pendingAddIndexesMerges
+                ) { merge: MergePolicy.OneMerge ->
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "now abort pending addIndexes merge")
+                    }
+                    runBlocking { merge.setAborted() }
+                    merge.close(
+                        success = false,
+                        segmentDropped = false
+                    ) { `_`: MergePolicy.MergeReader -> }
+                    onMergeFinished(merge)
                 }
-                runBlocking { merge.setAborted() }
-                merge.close(
-                    success = false,
-                    segmentDropped = false
-                ) { `_`: MergePolicy.MergeReader -> }
-                onMergeFinished(merge)
+                pendingAddIndexesMerges.clear()
             }
-            pendingAddIndexesMerges.clear()
-            //}
         }
 
         @Throws(IOException::class)
