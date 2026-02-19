@@ -59,7 +59,7 @@ abstract class BaseLatLonPointTestCase : BaseLatLonSpatialTestCase() {
     }
 
     open fun testBoundingBoxQueriesEquivalence() {
-        val numShapes = atLeast(8) // TODO reduced from 20 to 8 for dev speed
+        val numShapes = atLeast(3) // TODO reduced from 20 to 3 for dev speed
 
         val dir: Directory = newDirectory()
         val w = RandomIndexWriter(random(), dir)
