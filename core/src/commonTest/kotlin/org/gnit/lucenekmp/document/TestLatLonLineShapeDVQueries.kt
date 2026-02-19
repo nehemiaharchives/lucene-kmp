@@ -23,22 +23,22 @@ class TestLatLonLineShapeDVQueries : BaseLatLonShapeDocValueTestCase() {
     }
 
     /** test random line queries */
-    override fun verifyRandomLineQueries(reader: IndexReader, vararg shapes: Any?) {
+    override fun verifyRandomLineQueries(reader: IndexReader, shapes: Array<Any?>) {
         // NOT IMPLEMENTED YET
     }
 
     /** test random polygon queries */
-    override fun verifyRandomPolygonQueries(reader: IndexReader, vararg shapes: Any?) {
+    override fun verifyRandomPolygonQueries(reader: IndexReader, shapes: Array<Any?>) {
         // NOT IMPLEMENTED YET
     }
 
     /** test random point queries */
-    override fun verifyRandomPointQueries(reader: IndexReader, vararg shapes: Any?) {
+    override fun verifyRandomPointQueries(reader: IndexReader, shapes: Array<Any?>) {
         // NOT IMPLEMENTED YET
     }
 
     /** test random distance queries */
-    override fun verifyRandomDistanceQueries(reader: IndexReader, vararg shapes: Any?) {
+    override fun verifyRandomDistanceQueries(reader: IndexReader, shapes: Array<Any?>) {
         // NOT IMPLEMENTED YET
     }
 

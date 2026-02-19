@@ -1,21 +1,23 @@
 package org.gnit.lucenekmp.document
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.document.ShapeField.QueryRelation
 import org.gnit.lucenekmp.geo.Component2D
 import org.gnit.lucenekmp.geo.Line
+import org.gnit.lucenekmp.geo.Point
 import org.gnit.lucenekmp.tests.geo.GeoTestUtil
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomNumbers
-import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.floor
 import kotlin.test.Test
 
-/** random bounding box, line, and polygon query tests for random generated [Line] types */
-class TestLatLonLineShapeQueries : BaseLatLonShapeTestCase() {
+/**
+ * random bounding box, line, and polygon query tests for random generated `latitude,
+ * longitude` points
+ */
+class TestLatLonPointShapeQueries : BaseLatLonShapeTestCase() {
 
     override fun getShapeType(): Any {
-        return ShapeType.LINE
+        return ShapeType.POINT
     }
 
     override fun randomQueryLine(shapes: Array<Any?>): Line {
@@ -31,11 +33,10 @@ class TestLatLonLineShapeQueries : BaseLatLonShapeTestCase() {
             var i = 0
             var j = 0
             while (j < lats.size && i < shapes.size) {
-                val l = shapes[i] as? Line
-                if (random().nextBoolean() && l != null) {
-                    val v = random().nextInt(l.numPoints() - 1)
-                    lats[j] = l.getLat(v)
-                    lons[j] = l.getLon(v)
+                val p = shapes[i] as? Point
+                if (random().nextBoolean() && p != null) {
+                    lats[j] = p.lat
+                    lons[j] = p.lon
                 } else {
                     lats[j] = GeoTestUtil.nextLatitude()
                     lons[j] = GeoTestUtil.nextLongitude()
@@ -48,21 +49,23 @@ class TestLatLonLineShapeQueries : BaseLatLonShapeTestCase() {
         return nextLine()
     }
 
-    override fun createIndexableFields(field: String, line: Any): Array<Field> {
-        return LatLonShape.createIndexableFields(field, line as Line)
+    override fun createIndexableFields(field: String, point: Any): Array<Field> {
+        val p = point as Point
+        return LatLonShape.createIndexableFields(field, p.lat, p.lon)
     }
 
     override fun getValidator(): Validator {
-        return LineValidator(this.ENCODER)
+        return PointValidator(this.ENCODER)
     }
 
-    protected class LineValidator(encoder: Encoder) : Validator(encoder) {
+    class PointValidator(encoder: Encoder) : Validator(encoder) {
         override fun testComponentQuery(query: Component2D, shape: Any): Boolean {
-            val line = shape as Line
+            val p = shape as Point
             if (queryRelation == QueryRelation.CONTAINS) {
-                return testWithinQuery(query, LatLonShape.createIndexableFields("dummy", line)) == Component2D.WithinRelation.CANDIDATE
+                return testWithinQuery(query, LatLonShape.createIndexableFields("dummy", p.lat, p.lon)) ==
+                    Component2D.WithinRelation.CANDIDATE
             }
-            return testComponentQuery(query, LatLonShape.createIndexableFields("dummy", line))
+            return testComponentQuery(query, LatLonShape.createIndexableFields("dummy", p.lat, p.lon))
         }
     }
 
@@ -85,11 +88,11 @@ class TestLatLonLineShapeQueries : BaseLatLonShapeTestCase() {
     @LuceneTestCase.Companion.Nightly
     @Test
     override fun testRandomBig() {
-        doTestRandom(10) // TODO reduced from 10000 to 10 for dev speed
+        doTestRandom(100) // TODO reduced from 10000 to 100 for dev speed
     }
 
     @Test
-    override fun testSameShapeManyTimes() = super.testSameShapeManyTimes() // TODO this test failed once but I did not take record, it usually pass need to be careful
+    override fun testSameShapeManyTimes() = super.testSameShapeManyTimes()
 
     @Test
     override fun testLowCardinalityShapeManyTimes() = super.testLowCardinalityShapeManyTimes()

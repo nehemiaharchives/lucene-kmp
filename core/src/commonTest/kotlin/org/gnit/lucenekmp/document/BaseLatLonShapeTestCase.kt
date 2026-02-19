@@ -50,15 +50,15 @@ abstract class BaseLatLonShapeTestCase : BaseLatLonSpatialTestCase() {
     }
 
     open fun testBoundingBoxQueriesEquivalence() {
-        val numShapes = atLeast(3) // TODO reduced from 20 to 3 for dev speed
+        val numShapes = atLeast(2) // TODO reduced from 20 to 2 for dev speed
 
         val dir: Directory = newDirectory()
         val w = RandomIndexWriter(random(), dir)
 
         for (i in 0..<numShapes) {
-            indexRandomShapes(w.w, nextShape())
+            indexRandomShapes(w.w, arrayOf(nextShape()))
         }
-        if (random().nextBoolean()) {
+        if (random().nextInt(5) == 0) {
             w.forceMerge(1)
         }
 

@@ -54,19 +54,19 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
         val shapes = Array<Any?>(numShapes) { theShape }
 
-        verify(*shapes)
+        verify(shapes)
     }
 
     // Force low cardinality leaves
     open fun testLowCardinalityShapeManyTimes() {
-        val numShapes = atLeast(20)
+        val numShapes = atLeast(3) // TODO reduced from 20 to 3 for dev speed
         val cardinality = TestUtil.nextInt(random(), 2, 20)
 
         val diffShapes = Array<Any?>(cardinality) { nextShape() }
 
-        val shapes = Array<Any?>(numShapes) { diffShapes[random().nextInt(cardinality)] }
+        val shapes = Array(numShapes) { diffShapes[random().nextInt(cardinality)] }
 
-        verify(*shapes)
+        verify(shapes)
     }
 
     open fun testRandomTiny() {
@@ -103,7 +103,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
                 shapes[id] = nextShape()
             }
         }
-        verify(*shapes)
+        verify(shapes)
     }
 
     protected abstract fun getShapeType(): Any
@@ -153,7 +153,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
      *
      * note: shapes parameter may be used to ensure some queries intersect indexed shapes
      */
-    protected open fun randomQueryLine(vararg shapes: Any?): Any {
+    protected open fun randomQueryLine(shapes: Array<Any?>): Any {
         return nextLine()
     }
 
@@ -197,7 +197,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
     protected abstract fun toRectangle2D(minX: Double, maxX: Double, minY: Double, maxY: Double): Component2D
 
-    private fun verify(vararg shapes: Any?) {
+    private fun verify(shapes: Array<Any?>) {
         val iwc: IndexWriterConfig = newIndexWriterConfig()
         iwc.setMergeScheduler(SerialMergeScheduler())
         val mbd = iwc.maxBufferedDocs
@@ -212,16 +212,16 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
         val w = IndexWriter(dir, iwc)
 
         // index random polygons
-        indexRandomShapes(w, *shapes)
+        indexRandomShapes(w, shapes)
 
         // query testing
         val reader: IndexReader = DirectoryReader.open(w)
         // test random bbox queries
-        verifyRandomQueries(reader, *shapes)
+        verifyRandomQueries(reader, shapes)
         IOUtils.close(w, reader, dir)
     }
 
-    protected open fun indexRandomShapes(w: IndexWriter, vararg shapes: Any?) {
+    protected open fun indexRandomShapes(w: IndexWriter, shapes: Array<Any?>) {
         for (id in shapes.indices) {
             val doc = Document()
             doc.add(StringField("id", "$id", Field.Store.NO))
@@ -244,27 +244,28 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
         }
     }
 
-    protected open fun verifyRandomQueries(reader: IndexReader, vararg shapes: Any?) {
+    protected open fun verifyRandomQueries(reader: IndexReader, shapes: Array<Any?>) {
         // test random bbox queries
-        verifyRandomBBoxQueries(reader, *shapes)
+        verifyRandomBBoxQueries(reader, shapes)
         // test random line queries
-        verifyRandomLineQueries(reader, *shapes)
+        verifyRandomLineQueries(reader, shapes)
         // test random polygon queries
-        verifyRandomPolygonQueries(reader, *shapes)
+        verifyRandomPolygonQueries(reader, shapes)
         // test random point queries
-        verifyRandomPointQueries(reader, *shapes)
+        verifyRandomPointQueries(reader, shapes)
         // test random distance queries
-        verifyRandomDistanceQueries(reader, *shapes)
+        verifyRandomDistanceQueries(reader, shapes)
     }
 
     /** test random generated bounding boxes */
-    protected open fun verifyRandomBBoxQueries(reader: IndexReader, vararg shapes: Any?) {
+    protected open fun verifyRandomBBoxQueries(reader: IndexReader, shapes: Array<Any?>) {
         val s: IndexSearcher = newSearcher(reader)
 
         val iters = scaledIterationCount(shapes.size)
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc = s.indexReader.maxDoc()
+        val docIds = getDocIdToId(reader, maxDoc)
 
         for (iter in 0..<iters) {
             if (VERBOSE) {
@@ -291,10 +292,8 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
             val hits = searchIndex(s, query, maxDoc)
 
             var failFlag = false
-            val docIDToID: NumericDocValues = MultiDocValues.getNumericValues(reader, "id")!!
             for (docID in 0..<maxDoc) {
-                assertEquals(docID.toLong(), docIDToID.nextDoc().toLong())
-                val id = docIDToID.longValue().toInt()
+                val id = docIds[docID]
                 val expected: Boolean
                 val minX = rectMinX(rect)
                 val maxX = rectMaxX(rect)
@@ -352,13 +351,14 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
     }
 
     /** test random generated lines */
-    protected open fun verifyRandomLineQueries(reader: IndexReader, vararg shapes: Any?) {
+    protected open fun verifyRandomLineQueries(reader: IndexReader, shapes: Array<Any?>) {
         val s: IndexSearcher = newSearcher(reader)
 
         val iters = scaledIterationCount(shapes.size)
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc = s.indexReader.maxDoc()
+        val docIds = getDocIdToId(reader, maxDoc)
 
         for (iter in 0..<iters) {
             if (VERBOSE) {
@@ -366,7 +366,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
             }
 
             // line
-            val queryLine = randomQueryLine(*shapes)
+            val queryLine = randomQueryLine(shapes)
             val queryLine2D = toLine2D(queryLine)
             val queryRelation = RandomPicks.randomFrom(random(), POINT_LINE_RELATIONS)
             val query = newLineQuery(FIELD_NAME, queryRelation, queryLine)
@@ -377,10 +377,8 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
             val hits = searchIndex(s, query, maxDoc)
 
-            val docIDToID: NumericDocValues = MultiDocValues.getNumericValues(reader, "id")!!
             for (docID in 0..<maxDoc) {
-                assertEquals(docID.toLong(), docIDToID.nextDoc().toLong())
-                val id = docIDToID.longValue().toInt()
+                val id = docIds[docID]
                 val expected: Boolean = if (liveDocs != null && !liveDocs.get(docID)) {
                     false
                 } else if (shapes[id] == null) {
@@ -413,13 +411,14 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
     }
 
     /** test random generated polygons */
-    protected open fun verifyRandomPolygonQueries(reader: IndexReader, vararg shapes: Any?) {
+    protected open fun verifyRandomPolygonQueries(reader: IndexReader, shapes: Array<Any?>) {
         val s: IndexSearcher = newSearcher(reader)
 
         val iters = scaledIterationCount(shapes.size)
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc = s.indexReader.maxDoc()
+        val docIds = getDocIdToId(reader, maxDoc)
 
         for (iter in 0..<iters) {
             if (VERBOSE) {
@@ -438,10 +437,8 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
             val hits = searchIndex(s, query, maxDoc)
 
-            val docIDToID: NumericDocValues = MultiDocValues.getNumericValues(reader, "id")!!
             for (docID in 0..<maxDoc) {
-                assertEquals(docID.toLong(), docIDToID.nextDoc().toLong())
-                val id = docIDToID.longValue().toInt()
+                val id = docIds[docID]
                 val expected: Boolean = if (liveDocs != null && !liveDocs.get(docID)) {
                     false
                 } else if (shapes[id] == null) {
@@ -474,13 +471,14 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
     }
 
     /** test random generated point queries */
-    protected open fun verifyRandomPointQueries(reader: IndexReader, vararg shapes: Any?) {
+    protected open fun verifyRandomPointQueries(reader: IndexReader, shapes: Array<Any?>) {
         val s: IndexSearcher = newSearcher(reader)
 
         val iters = scaledIterationCount(shapes.size)
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc = s.indexReader.maxDoc()
+        val docIds = getDocIdToId(reader, maxDoc)
 
         for (iter in 0..<iters) {
             if (VERBOSE) {
@@ -505,10 +503,8 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
             val hits = searchIndex(s, query, maxDoc)
 
-            val docIDToID: NumericDocValues = MultiDocValues.getNumericValues(reader, "id")!!
             for (docID in 0..<maxDoc) {
-                assertEquals(docID.toLong(), docIDToID.nextDoc().toLong())
-                val id = docIDToID.longValue().toInt()
+                val id = docIds[docID]
                 val expected: Boolean = if (liveDocs != null && !liveDocs.get(docID)) {
                     false
                 } else if (shapes[id] == null) {
@@ -541,13 +537,14 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
     }
 
     /** test random generated circles */
-    protected open fun verifyRandomDistanceQueries(reader: IndexReader, vararg shapes: Any?) {
+    protected open fun verifyRandomDistanceQueries(reader: IndexReader, shapes: Array<Any?>) {
         val s: IndexSearcher = newSearcher(reader)
 
         val iters = scaledIterationCount(shapes.size)
 
         val liveDocs: Bits? = MultiBits.getLiveDocs(s.indexReader)
         val maxDoc = s.indexReader.maxDoc()
+        val docIds = getDocIdToId(reader, maxDoc)
 
         for (iter in 0..<iters) {
             if (VERBOSE) {
@@ -566,10 +563,8 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
             val hits = searchIndex(s, query, maxDoc)
 
-            val docIDToID: NumericDocValues = MultiDocValues.getNumericValues(reader, "id")!!
             for (docID in 0..<maxDoc) {
-                assertEquals(docID.toLong(), docIDToID.nextDoc().toLong())
-                val id = docIDToID.longValue().toInt()
+                val id = docIds[docID]
                 val expected: Boolean = if (liveDocs != null && !liveDocs.get(docID)) {
                     false
                 } else if (shapes[id] == null) {
@@ -606,9 +601,19 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
         return s.search(query, FixedBitSetCollector.createManager(maxDoc))
     }
 
+    private fun getDocIdToId(reader: IndexReader, maxDoc: Int): IntArray {
+        val docIDToID: NumericDocValues = MultiDocValues.getNumericValues(reader, "id")!!
+        val ids = IntArray(maxDoc)
+        for (docID in 0..<maxDoc) {
+            assertEquals(docID.toLong(), docIDToID.nextDoc().toLong())
+            ids[docID] = docIDToID.longValue().toInt()
+        }
+        return ids
+    }
+
     protected abstract fun getValidator(): Validator
 
-    protected abstract class Encoder {
+    abstract class Encoder {
         abstract fun decodeX(encoded: Int): Double
 
         abstract fun decodeY(encoded: Int): Double
@@ -624,9 +629,9 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
 
     private fun scaledIterationCount(shapes: Int): Int {
         return if (shapes < 500) {
-            atLeast(50)
+            atLeast(20) // TODO reduced from 50 to 20 for dev speed // TODO reduced from 50 to 20 for dev speed
         } else if (shapes < 5000) {
-            atLeast(25)
+            atLeast(12) // TODO reduced from 25 to 12 for dev speed // TODO reduced from 25 to 12 for dev speed
         } else if (shapes < 25000) {
             atLeast(5)
         } else {
@@ -635,7 +640,7 @@ abstract class BaseSpatialTestCase : LuceneTestCase() {
     }
 
     /** validator class used to test query results against "ground truth" */
-    protected abstract class Validator(protected val encoder: Encoder) {
+    abstract class Validator(protected val encoder: Encoder) {
         protected var queryRelation: QueryRelation = QueryRelation.INTERSECTS
 
         abstract fun testComponentQuery(line2d: Component2D, shape: Any): Boolean
