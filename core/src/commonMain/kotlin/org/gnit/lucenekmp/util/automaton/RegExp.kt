@@ -942,7 +942,16 @@ class RegExp {
     }
 
     private fun peek(s: String): Boolean {
-        return more() && s.indexOf(originalString!!.codePointAt(pos).toChar()) != -1
+        if (!more()) {
+            return false
+        }
+        val codePoint = originalString!!.codePointAt(pos)
+        for (ch in s) {
+            if (ch.code == codePoint) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun match(c: Int): Boolean {
