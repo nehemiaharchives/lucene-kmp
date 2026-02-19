@@ -35,8 +35,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.sharedterms.STUniformSplitTermsWriter → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.STUniformSplitTermsWriter
 - org.apache.lucene.codecs.uniformsplit.sharedterms.UnionFieldMetadataBuilder → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.UnionFieldMetadataBuilder
 - org.apache.lucene.document.BinaryRangeDocValues → org.gnit.lucenekmp.document.BinaryRangeDocValues
-- org.apache.lucene.document.XYShapeDocValues → org.gnit.lucenekmp.document.XYShapeDocValues
-- org.apache.lucene.document.XYShapeQuery → org.gnit.lucenekmp.document.XYShapeQuery
 - org.apache.lucene.queryparser.flexible.core.QueryNodeError → org.gnit.lucenekmp.queryparser.flexible.core.QueryNodeError
 - org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.MatchAllDocsQueryNode
 - org.apache.lucene.queryparser.flexible.core.nodes.MatchNoDocsQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.MatchNoDocsQueryNode
@@ -129,7 +127,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.InetAddressRange → org.gnit.lucenekmp.document.InetAddressRange
 - org.apache.lucene.document.IntRangeSlowRangeQuery → org.gnit.lucenekmp.document.IntRangeSlowRangeQuery
 - org.apache.lucene.document.LatLonShapeDocValuesQuery → org.gnit.lucenekmp.document.LatLonShapeDocValuesQuery
-- org.apache.lucene.document.LongRange → org.gnit.lucenekmp.document.LongRange
 - org.apache.lucene.document.LongRangeSlowRangeQuery → org.gnit.lucenekmp.document.LongRangeSlowRangeQuery
 - org.apache.lucene.document.XYShapeDocValuesQuery → org.gnit.lucenekmp.document.XYShapeDocValuesQuery
 - org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
@@ -337,8 +334,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.FloatRangeDocValuesField → org.gnit.lucenekmp.document.FloatRangeDocValuesField
 - org.apache.lucene.document.IntRangeDocValuesField → org.gnit.lucenekmp.document.IntRangeDocValuesField
 - org.apache.lucene.document.LongRangeDocValuesField → org.gnit.lucenekmp.document.LongRangeDocValuesField
-- org.apache.lucene.document.XYShape → org.gnit.lucenekmp.document.XYShape
-- org.apache.lucene.document.XYShapeDocValuesField → org.gnit.lucenekmp.document.XYShapeDocValuesField
 - org.apache.lucene.index.NoMergeScheduler → org.gnit.lucenekmp.index.NoMergeScheduler
 - org.apache.lucene.index.PersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy
 - org.apache.lucene.index.QueryTimeoutImpl → org.gnit.lucenekmp.index.QueryTimeoutImpl
@@ -581,10 +576,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat
 - org.apache.lucene.document.BaseXYShapeDocValueTestCase → org.gnit.lucenekmp.document.BaseXYShapeDocValueTestCase
 - org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
-- org.apache.lucene.document.TestLongRange → org.gnit.lucenekmp.document.TestLongRange
 - org.apache.lucene.document.TestManyKnnDocs → org.gnit.lucenekmp.document.TestManyKnnDocs
-- org.apache.lucene.document.TestPerFieldConsistency → org.gnit.lucenekmp.document.TestPerFieldConsistency
-- org.apache.lucene.document.TestShapeDocValues → org.gnit.lucenekmp.document.TestShapeDocValues
 - org.apache.lucene.document.TestSortedSetDocValuesSetQuery → org.gnit.lucenekmp.document.TestSortedSetDocValuesSetQuery
 - org.apache.lucene.document.TestXYLineShapeDVQueries → org.gnit.lucenekmp.document.TestXYLineShapeDVQueries
 - org.apache.lucene.document.TestXYLineShapeQueries → org.gnit.lucenekmp.document.TestXYLineShapeQueries

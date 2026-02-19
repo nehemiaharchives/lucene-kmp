@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1084 | 79% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1089 | 79% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -79,7 +79,7 @@
 |     org.apache.lucene.codecs.lucene95 |         org.gnit.lucenekmp.codecs.lucene95 | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.lucene99 |         org.gnit.lucenekmp.codecs.lucene99 | 14 | 13 | 92% | [ ] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 5 | 4 | 80% | [ ] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 68 | 76% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 89 | 73 | 82% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 28 | 27 | 96% | [ ] |
 |   org.apache.lucene.index |       org.gnit.lucenekmp.index | 199 | 186 | 93% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 18 | 69% | [ ] |
@@ -145,7 +145,7 @@
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
 |     org.apache.lucene.codecs.lucene99 | 6 | 5 | 83% |
 |     org.apache.lucene.codecs.perfield | 4 | 1 | 25% |
-|   org.apache.lucene.document | 50 | 33 | 66% |
+|   org.apache.lucene.document | 50 | 36 | 72% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
 |   org.apache.lucene.index | 197 | 14 | 7% |
 |     org.apache.lucene.internal.hppc | 15 | 8 | 53% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 221 | 32% |
+| Total | 673 | 224 | 33% |
 
 
 ## Tests To Port
@@ -208,10 +208,7 @@
 | [org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldDocValuesFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat2.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2 |
-| [org.apache.lucene.document.TestLongRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLongRange.java) | org.gnit.lucenekmp.document.TestLongRange |
 | [org.apache.lucene.document.TestManyKnnDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestManyKnnDocs.java) | org.gnit.lucenekmp.document.TestManyKnnDocs |
-| [org.apache.lucene.document.TestPerFieldConsistency](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestPerFieldConsistency.java) | org.gnit.lucenekmp.document.TestPerFieldConsistency |
-| [org.apache.lucene.document.TestShapeDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestShapeDocValues.java) | org.gnit.lucenekmp.document.TestShapeDocValues |
 | [org.apache.lucene.document.TestSortedSetDocValuesSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestSortedSetDocValuesSetQuery.java) | org.gnit.lucenekmp.document.TestSortedSetDocValuesSetQuery |
 | [org.apache.lucene.document.TestXYLineShapeDVQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestXYLineShapeDVQueries.java) | org.gnit.lucenekmp.document.TestXYLineShapeDVQueries |
 | [org.apache.lucene.document.TestXYLineShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestXYLineShapeQueries.java) | org.gnit.lucenekmp.document.TestXYLineShapeQueries |

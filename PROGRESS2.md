@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 2413
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 1009
+### Total KMP classes: 1014
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1460
+### Total KMP Unit Test classes: 1468
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -11911,7 +11911,7 @@
 | [org.apache.lucene.document.LatLonShapeDocValuesQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LatLonShapeDocValuesQuery.java) | org.gnit.lucenekmp.document.LatLonShapeDocValuesQuery | Depth 3 | [] | 23 | 0 | 0% |
 | [org.apache.lucene.document.LongDistanceFeatureQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LongDistanceFeatureQuery.java) | org.gnit.lucenekmp.document.LongDistanceFeatureQuery | Depth 4 | [x] | 9 | 7 | 0% |
 | [org.apache.lucene.document.LongPoint](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LongPoint.java) | org.gnit.lucenekmp.document.LongPoint | Depth 3 | [x] | 7 | 0 | 0% |
-| [org.apache.lucene.document.LongRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LongRange.java) | org.gnit.lucenekmp.document.LongRange | Depth 3 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.document.LongRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LongRange.java) | org.gnit.lucenekmp.document.LongRange | Depth 3 | [x] | 8 | 7 | 67% |
 | [org.apache.lucene.document.LongRangeDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LongRangeDocValuesField.java) | org.gnit.lucenekmp.document.LongRangeDocValuesField | Depth 2 | [] | 14 | 0 | 0% |
 | [org.apache.lucene.document.LongRangeSlowRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LongRangeSlowRangeQuery.java) | org.gnit.lucenekmp.document.LongRangeSlowRangeQuery | Depth 3 | [] | 7 | 0 | 0% |
 | [org.apache.lucene.document.NearestNeighbor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/NearestNeighbor.java) | org.gnit.lucenekmp.document.NearestNeighbor | Depth 4 | [x] | 5 | 4 | 0% |
@@ -11964,10 +11964,10 @@
 | [org.apache.lucene.document.TestLatLonShape](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonShape.java) | org.gnit.lucenekmp.document.TestLatLonShape | Depth 1 | [x] | 170 | 2 | 83% |
 | [org.apache.lucene.document.TestLatLonShapeEncoding](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLatLonShapeEncoding.java) | org.gnit.lucenekmp.document.TestLatLonShapeEncoding | Depth 1 | [x] | 168 | 31 | 81% |
 | [org.apache.lucene.document.TestLongDistanceFeatureQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLongDistanceFeatureQuery.java) | org.gnit.lucenekmp.document.TestLongDistanceFeatureQuery | Depth 1 | [x] | 146 | 9 | 51% |
-| [org.apache.lucene.document.TestLongRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLongRange.java) | org.gnit.lucenekmp.document.TestLongRange | Depth 1 | [] | 140 | 0 | 0% |
+| [org.apache.lucene.document.TestLongRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestLongRange.java) | org.gnit.lucenekmp.document.TestLongRange | Depth 1 | [x] | 140 | 3 | 13% |
 | [org.apache.lucene.document.TestManyKnnDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestManyKnnDocs.java) | org.gnit.lucenekmp.document.TestManyKnnDocs | Depth 1 | [] | 141 | 0 | 0% |
-| [org.apache.lucene.document.TestPerFieldConsistency](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestPerFieldConsistency.java) | org.gnit.lucenekmp.document.TestPerFieldConsistency | Depth 1 | [] | 148 | 0 | 0% |
-| [org.apache.lucene.document.TestShapeDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestShapeDocValues.java) | org.gnit.lucenekmp.document.TestShapeDocValues | Depth 1 | [] | 152 | 0 | 0% |
+| [org.apache.lucene.document.TestPerFieldConsistency](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestPerFieldConsistency.java) | org.gnit.lucenekmp.document.TestPerFieldConsistency | Depth 1 | [x] | 148 | 9 | 72% |
+| [org.apache.lucene.document.TestShapeDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestShapeDocValues.java) | org.gnit.lucenekmp.document.TestShapeDocValues | Depth 1 | [x] | 152 | 1 | 83% |
 | [org.apache.lucene.document.TestSortedSetDocValuesSetQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestSortedSetDocValuesSetQuery.java) | org.gnit.lucenekmp.document.TestSortedSetDocValuesSetQuery | Depth 1 | [] | 144 | 0 | 0% |
 | [org.apache.lucene.document.TestXYLineShapeDVQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestXYLineShapeDVQueries.java) | org.gnit.lucenekmp.document.TestXYLineShapeDVQueries | Depth 1 | [] | 181 | 0 | 0% |
 | [org.apache.lucene.document.TestXYLineShapeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/document/TestXYLineShapeQueries.java) | org.gnit.lucenekmp.document.TestXYLineShapeQueries | Depth 1 | [] | 181 | 0 | 0% |
@@ -11987,11 +11987,8 @@
 | [org.apache.lucene.document.XYPointField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYPointField.java) | org.gnit.lucenekmp.document.XYPointField | Depth 2 | [x] | 15 | 5 | 89% |
 | [org.apache.lucene.document.XYPointInGeometryQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYPointInGeometryQuery.java) | org.gnit.lucenekmp.document.XYPointInGeometryQuery | Depth 4 | [x] | 7 | 7 | 77% |
 | [org.apache.lucene.document.XYPointSortField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYPointSortField.java) | org.gnit.lucenekmp.document.XYPointSortField | Depth 3 | [x] | 6 | 5 | 72% |
-| [org.apache.lucene.document.XYShape](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYShape.java) | org.gnit.lucenekmp.document.XYShape | Depth 2 | [] | 18 | 0 | 0% |
-| [org.apache.lucene.document.XYShapeDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYShapeDocValues.java) | org.gnit.lucenekmp.document.XYShapeDocValues | Depth 4 | [] | 4 | 0 | 0% |
-| [org.apache.lucene.document.XYShapeDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYShapeDocValuesField.java) | org.gnit.lucenekmp.document.XYShapeDocValuesField | Depth 2 | [] | 13 | 0 | 0% |
+| [org.apache.lucene.document.XYShapeDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYShapeDocValuesField.java) | org.gnit.lucenekmp.document.XYShapeDocValuesField | Depth 2 | [x] | 13 | 12 | 87% |
 | [org.apache.lucene.document.XYShapeDocValuesQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYShapeDocValuesQuery.java) | org.gnit.lucenekmp.document.XYShapeDocValuesQuery | Depth 3 | [] | 23 | 0 | 0% |
-| [org.apache.lucene.document.XYShapeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/XYShapeQuery.java) | org.gnit.lucenekmp.document.XYShapeQuery | Depth 4 | [] | 4 | 0 | 0% |
 | [org.apache.lucene.geo.Circle2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/geo/Circle2D.java) | org.gnit.lucenekmp.geo.Circle2D | Depth 4 | [x] | 6 | 5 | 65% |
 | [org.apache.lucene.geo.Component2D](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/geo/Component2D.java) | org.gnit.lucenekmp.geo.Component2D | Depth 2 | [x] | 19 | 1 | 0% |
 | [org.apache.lucene.geo.ComponentTree](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/geo/ComponentTree.java) | org.gnit.lucenekmp.geo.ComponentTree | Depth 3 | [x] | 21 | 4 | 50% |
@@ -13629,16 +13626,16 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Lucene Classes (Semantic Analysis)
 - Total Classes: 3554
-- Ported Classes: 990
+- Ported Classes: 995
 - Class Porting Progress: 27%
 - **Semantic Completion Progress: 9%**
 - Total Core Methods Needed: 32846
-- Core Methods Implemented: 3122
+- Core Methods Implemented: 3152
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1400
+- Ported Unit Test Classes: 1408
 - Unit Test Porting Progress: 58%
 - **Unit Test Semantic Completion: 5%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 6690
+- Test Core Methods Implemented: 6740
