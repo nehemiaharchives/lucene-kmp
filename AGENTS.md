@@ -13,6 +13,13 @@ Under this directory you find two sub directories:
 - The GitHub copilot never make any change to lucene java source code but only read, copy from, analyze and answer question based on its content. If it's in agent mode, it can use git commands which does not change any code but only read the code and history.
 
 - **Do not deviate from Java Lucene logic.** The Kotlin port must be an exact behavioral port. Only deviate when unavoidable for KMP (e.g., okio for IO, coroutines for threading). Any deviation must be explicitly justified and minimized.
+- Exception for development speed: Java-Kotlin numeric-value discrepancies are allowed only when reducing test/runtime iteration counts to speed up local iteration or CI.
+- For every such discrepancy, add an inline comment immediately after the exact reduced line (not above it).
+- Required comment format:
+  - Starts with `// TODO`
+  - States the reduction values explicitly (example: `reduced valueA = x1 to x2, valueB = y1 to y2`)
+  - Ends with `for dev speed`
+  - Example: `// TODO reduced valueA = 1025 to 5, valueB = 500 to 3 for dev speed`
 
 - When porting, class name, interface name, method name, variable name should be the same as much as possible especially for APIs which is used by other classes.
 
