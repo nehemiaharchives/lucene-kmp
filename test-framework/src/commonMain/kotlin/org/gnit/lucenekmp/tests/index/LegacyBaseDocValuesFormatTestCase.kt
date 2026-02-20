@@ -4286,7 +4286,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         IOUtils.close(r, w, directory)
     }
 
-    protected fun codecAcceptsHugeBinaryValues(field: String): Boolean {
+    protected open fun codecAcceptsHugeBinaryValues(field: String): Boolean {
         return true
     }
 }
