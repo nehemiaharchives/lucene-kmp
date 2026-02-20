@@ -212,6 +212,10 @@ constructor(
                 }
                 assert(readLength == 0)
             } catch (ioe: IOException) {
+                val msg = ioe.message?.lowercase()
+                if ((msg?.contains("bad file descriptor") == true) || (msg?.contains("closed") == true)) {
+                    throw AlreadyClosedException("Already closed: $this", ioe)
+                }
                 throw IOException(ioe.message + ": " + this, ioe)
             }
         }
