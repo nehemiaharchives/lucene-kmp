@@ -714,7 +714,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestUniqueTermCount → org.gnit.lucenekmp.index.TestUniqueTermCount
 - org.apache.lucene.internal.tests.TestTestSecrets → org.gnit.lucenekmp.internal.tests.TestTestSecrets
 - org.apache.lucene.internal.vectorization.BaseVectorizationTestCase → org.gnit.lucenekmp.internal.vectorization.BaseVectorizationTestCase
-- org.apache.lucene.internal.vectorization.TestPostingDecodingUtil → org.gnit.lucenekmp.internal.vectorization.TestPostingDecodingUtil
 - org.apache.lucene.internal.vectorization.TestVectorScorer → org.gnit.lucenekmp.internal.vectorization.TestVectorScorer
 - org.apache.lucene.internal.vectorization.TestVectorUtilSupport → org.gnit.lucenekmp.internal.vectorization.TestVectorUtilSupport
 - org.apache.lucene.internal.vectorization.TestVectorizationProvider → org.gnit.lucenekmp.internal.vectorization.TestVectorizationProvider
