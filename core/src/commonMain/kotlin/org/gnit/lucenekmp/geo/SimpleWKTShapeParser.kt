@@ -25,12 +25,12 @@ object SimpleWKTShapeParser {
     private const val EOL = "END-OF-LINE"
 
     @Throws(IOException::class, ParseException::class)
-    fun parse(wkt: String): Any {
+    fun parse(wkt: String): Any? {
         return parseExpectedType(wkt, null)
     }
 
     @Throws(IOException::class, ParseException::class)
-    fun parseExpectedType(wkt: String, shapeType: ShapeType?): Any {
+    fun parseExpectedType(wkt: String, shapeType: ShapeType?): Any? {
         StringReader(wkt).use { reader ->
             // set up the tokenizer; configured to read words w/o numbers
             val tokenizer = StreamTokenizer(reader)
@@ -52,7 +52,7 @@ object SimpleWKTShapeParser {
 
     /** parse geometry from the stream tokenizer  */
     @Throws(IOException::class, ParseException::class)
-    private fun parseGeometry(stream: StreamTokenizer, shapeType: ShapeType?): Any {
+    private fun parseGeometry(stream: StreamTokenizer, shapeType: ShapeType?): Any? {
         val type = ShapeType.Companion.forName(nextWord(stream))
         if (shapeType != null && shapeType != ShapeType.GEOMETRYCOLLECTION) {
             if (type.wktName() != shapeType.wktName()) {
@@ -63,14 +63,14 @@ object SimpleWKTShapeParser {
             }
         }
         return when (type) {
-            ShapeType.POINT -> parsePoint(stream)!!
-            ShapeType.MULTIPOINT -> parseMultiPoint(stream)!!
-            ShapeType.LINESTRING -> parseLine(stream)!!
-            ShapeType.MULTILINESTRING -> parseMultiLine(stream)!!
-            ShapeType.POLYGON -> parsePolygon(stream)!!
-            ShapeType.MULTIPOLYGON -> parseMultiPolygon(stream)!!
-            ShapeType.ENVELOPE -> parseBBox(stream)!!
-            ShapeType.GEOMETRYCOLLECTION -> parseGeometryCollection(stream)!!
+            ShapeType.POINT -> parsePoint(stream)
+            ShapeType.MULTIPOINT -> parseMultiPoint(stream)
+            ShapeType.LINESTRING -> parseLine(stream)
+            ShapeType.MULTILINESTRING -> parseMultiLine(stream)
+            ShapeType.POLYGON -> parsePolygon(stream)
+            ShapeType.MULTIPOLYGON -> parseMultiPolygon(stream)
+            ShapeType.ENVELOPE -> parseBBox(stream)
+            ShapeType.GEOMETRYCOLLECTION -> parseGeometryCollection(stream)
             //else -> throw IllegalArgumentException("Unknown geometry type: $type")
         }
     }
@@ -252,16 +252,16 @@ object SimpleWKTShapeParser {
 
     /** parses a GEOMETRYCOLLECTION  */
     @Throws(IOException::class, ParseException::class)
-    private fun parseGeometryCollection(stream: StreamTokenizer): Array<Any>? {
+    private fun parseGeometryCollection(stream: StreamTokenizer): Array<Any?>? {
         if (nextEmptyOrOpen(stream) == EMPTY) {
             return null
         }
-        val geometries: ArrayList<Any> = ArrayList()
+        val geometries: ArrayList<Any?> = ArrayList()
         geometries.add(parseGeometry(stream, ShapeType.GEOMETRYCOLLECTION))
         while (nextCloserOrComma(stream) == COMMA) {
             geometries.add(parseGeometry(stream, null))
         }
-        return geometries.toTypedArray<Any>()
+        return geometries.toTypedArray<Any?>()
     }
 
     /** next word in the stream  */
