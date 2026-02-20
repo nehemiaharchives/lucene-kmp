@@ -58,8 +58,7 @@ object TestSecrets {
 
     /** Return the accessor to internal secrets for an [IndexReader].  */
     fun getIndexPackageAccess(): IndexPackageAccess {
-
-        // ensureCaller() // TODO implement if needed
+        ensureCaller()
         ensureIndexWriterAccessInitialized()
         return requireNotNull(indexPackageAccess)
     }
@@ -82,8 +81,7 @@ object TestSecrets {
 
     /** Return the accessor to internal secrets for an [IndexWriter].  */
     fun getIndexWriterAccess(): IndexWriterAccess {
-
-        // ensureCaller() // TODO implement if needed
+        ensureCaller()
         ensureIndexWriterAccessInitialized()
         return requireNotNull(indexWriterAccess)
     }
@@ -96,26 +94,30 @@ object TestSecrets {
         }
 
     /** For internal initialization only.  */
-    fun setIndexWriterAccess(indexWriterAccess: IndexWriterAccess) {
+    fun setIndexWriterAccess(indexWriterAccess: IndexWriterAccess?) {
         ensureNull(TestSecrets.indexWriterAccess)
+        ensureNotNull(indexWriterAccess)
         TestSecrets.indexWriterAccess = indexWriterAccess
     }
 
     /** For internal initialization only.  */
-    fun setIndexPackageAccess(indexPackageAccess: IndexPackageAccess) {
+    fun setIndexPackageAccess(indexPackageAccess: IndexPackageAccess?) {
         ensureNull(TestSecrets.indexPackageAccess)
+        ensureNotNull(indexPackageAccess)
         TestSecrets.indexPackageAccess = indexPackageAccess
     }
 
     /** For internal initialization only.  */
-    fun setConcurrentMergeSchedulerAccess(cmsAccess: ConcurrentMergeSchedulerAccess) {
+    fun setConcurrentMergeSchedulerAccess(cmsAccess: ConcurrentMergeSchedulerAccess?) {
         ensureNull(TestSecrets.cmsAccess)
+        ensureNotNull(cmsAccess)
         TestSecrets.cmsAccess = cmsAccess
     }
 
     /** For internal initialization only.  */
-    fun setSegmentReaderAccess(segmentReaderAccess: SegmentReaderAccess) {
+    fun setSegmentReaderAccess(segmentReaderAccess: SegmentReaderAccess?) {
         ensureNull(TestSecrets.segmentReaderAccess as Any?)
+        ensureNotNull(segmentReaderAccess)
         TestSecrets.segmentReaderAccess = segmentReaderAccess
     }
 
@@ -127,6 +129,14 @@ object TestSecrets {
 
     private fun ensureNull(ob: Any?) {
         if (ob != null) {
+            throw AssertionError(
+                "The accessor is already set. It can only be called from inside Lucene Core."
+            )
+        }
+    }
+
+    private fun ensureNotNull(ob: Any?) {
+        if (ob == null) {
             throw AssertionError(
                 "The accessor is already set. It can only be called from inside Lucene Core."
             )
@@ -152,7 +162,17 @@ object TestSecrets {
     }
 
     private fun ensureCaller() {
-        if (!testFrameworkEnabled) {
+        val trace = Throwable().stackTraceToString()
+        val caller =
+            trace.lineSequence()
+                .map { it.trim() }
+                .firstOrNull {
+                    it.startsWith("at org.gnit.lucenekmp.")
+                        && !it.contains("internal.tests.TestSecrets")
+                }
+                ?: ""
+        val validCaller = caller.contains("org.gnit.lucenekmp.tests.")
+        if (!validCaller) {
             throw UnsupportedOperationException(
                 "Lucene TestSecrets can only be used by the test-framework."
             )
