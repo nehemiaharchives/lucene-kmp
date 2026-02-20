@@ -3936,18 +3936,20 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             eventListener.endMergeOnFullFlush(pointInTimeMerges)
 //             logger.debug { "prepareCommit: pointInTimeMerges done" }
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            // we need to call this under lock since mergeFinished above is also called under the IW
-            // lock
-            stopAddingMergedSegments.store(true)
-            //}
+            // Match Java's synchronized(this) intent: mergeFinished mutates toCommit under IW lock.
+            withIndexWriterLock {
+                // We need to call this under lock since mergeFinished above is also called under the
+                // IW lock.
+                stopAddingMergedSegments.store(true)
+            }
         }
 //         logger.debug { "prepareCommit: pointInTimeMerges ${if (pointInTimeMerges == null) "absent" else "handled"}" }
         // do this after handling any pointInTimeMerges since the files will have changed if any
         // merges
         // did complete
-        filesToCommit = toCommit.files(false)
+        withIndexWriterLock {
+            filesToCommit = toCommit.files(false)
+        }
         try {
             if (anyChanges) {
                 maybeMerge.store(true)
