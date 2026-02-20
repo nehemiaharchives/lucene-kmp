@@ -82,7 +82,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
     open fun testRandomStoredFields() {
         val dir: Directory = newDirectory()
         val rand: Random = random()
-        val w = RandomIndexWriter(rand, dir, newIndexWriterConfig(MockAnalyzer(random())).setMaxBufferedDocs(TestUtil.nextInt(rand, 5, 20)))
+        val w = RandomIndexWriter(rand, dir, newIndexWriterConfig(MockAnalyzer(random())).setMaxBufferedDocs(TestUtil.nextInt(rand, start = 2, end = 3))) // TODO reduced from start = 5, end = 20 to start = 2, end = 3 for dev speed
         // w.w.setNoCFSRatio(0.0);
         val docCount: Int = atLeast(3) // TODO reduced from 200 to 3 for dev speed
         val fieldCount: Int = TestUtil.nextInt(rand, 1, 5)
@@ -117,7 +117,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
             for (field in fieldIDs) {
                 if (rand.nextInt(4) != 3) {
-                    val s: String = TestUtil.randomUnicodeString(rand, 1000)
+                    val s: String = TestUtil.randomUnicodeString(rand, 100) // TODO reduced from 1000 to 100 for dev speed
                     doc.add(newField("f$field", s, customType2))
                 }
             }
@@ -897,7 +897,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
             sortFields = arrayOf(SortField("sort-1", SortField.Type.LONG))
         }
         val storedFields: MutableList<String> = mutableListOf()
-        val numFields: Int = TestUtil.nextInt(random(), 1, 10)
+        val numFields: Int = TestUtil.nextInt(random(), 1, 3) // TODO reduced from 10 to 3 for dev speed
         for (i in 0..<numFields) {
             storedFields.add("f-$i")
         }

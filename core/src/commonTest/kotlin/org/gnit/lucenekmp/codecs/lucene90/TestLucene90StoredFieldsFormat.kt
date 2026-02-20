@@ -25,7 +25,7 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestLucene90StoredFieldsFormat : BaseStoredFieldsFormatTestCase() {
+open class TestLucene90StoredFieldsFormat : BaseStoredFieldsFormatTestCase() {
     override val codec: Codec
         get() = TestUtil.getDefaultCodec()
 
@@ -63,7 +63,7 @@ class TestLucene90StoredFieldsFormat : BaseStoredFieldsFormatTestCase() {
 
     @Test
     @Throws(IOException::class)
-    fun testSkipRedundantPrefetches() {
+    open fun testSkipRedundantPrefetches() {
         // Use the "dummy" codec, which has the same base class as Lucene90StoredFieldsFormat but allows
         // configuring the number of docs per chunk.
         val codec: Codec = DummyCompressingCodec(1 shl 10, 2, false, 16)
