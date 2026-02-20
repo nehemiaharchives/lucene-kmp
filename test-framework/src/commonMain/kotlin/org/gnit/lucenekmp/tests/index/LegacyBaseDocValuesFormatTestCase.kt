@@ -4207,6 +4207,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val w = RandomIndexWriter(random(), directory, conf)
         val numChunks: Int = atLeast(3) // TODO reduced from 10 to 3 for dev speed
         var id = 0
+        var hasAnyValue = false
         val missingSet: MutableSet<Int> = mutableSetOf()
         for (i in 0..<numChunks) {
             // change sparseness for each chunk
@@ -4219,12 +4220,20 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 if (random().nextDouble() > sparseChance
                 ) {
                     doc.add(fieldCreator.next())
+                    hasAnyValue = true
                 } else {
                     missingSet.add(id)
                 }
                 id++
                 w.addDocument(doc)
             }
+        }
+        if (!hasAnyValue) {
+            val doc = Document()
+            doc.add(StoredField("id", id))
+            doc.add(fieldCreator.next())
+            id++
+            w.addDocument(doc)
         }
 
         if (random().nextBoolean()) {
