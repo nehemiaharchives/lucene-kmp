@@ -42,8 +42,11 @@ class MathTest {
 
     @Test
     fun testRound() {
+        assertEquals(3, Math.round(2.5f))
+        assertEquals(1, Math.round(0.5f))
+        assertEquals(-2, Math.round(-2.5f))
+        assertEquals(-1, Math.round(-1.5f))
         assertEquals(2, Math.round(1.5f))
-        assertEquals(-2, Math.round(-1.5f))
         assertEquals(0, Math.round(0.0f))
         assertEquals(Int.MAX_VALUE, Math.round(Float.POSITIVE_INFINITY))
         assertEquals(Int.MIN_VALUE, Math.round(Float.NEGATIVE_INFINITY))

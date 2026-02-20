@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 object Math {
 
@@ -158,15 +160,9 @@ object Math {
      * @see java.lang.Integer.MIN_VALUE
      */
     fun round(a: Float): Int {
-        // Special cases
+        // Java Math.round(float) returns 0 for NaN.
         if (a.isNaN()) return 0
-        if (a.isInfinite()) {
-            return if (a > 0) Int.MAX_VALUE else Int.MIN_VALUE
-        }
-
-        // Use Kotlin's built-in round function which correctly handles all cases
-        // including rounding -1.5f to -2
-        return kotlin.math.round(a).toInt()
+        return a.roundToInt()
     }
 
 
@@ -193,14 +189,9 @@ object Math {
      * @see java.lang.Long.MIN_VALUE
      */
     fun round(a: Double): Long {
-        // Special cases
+        // Java Math.round(double) returns 0 for NaN.
         if (a.isNaN()) return 0
-        if (a.isInfinite()) {
-            return if (a > 0) Long.MAX_VALUE else Long.MIN_VALUE
-        }
-
-        // Use Kotlin's built-in round function which correctly handles all cases
-        return kotlin.math.round(a).toLong()
+        return a.roundToLong()
     }
 
     /**
