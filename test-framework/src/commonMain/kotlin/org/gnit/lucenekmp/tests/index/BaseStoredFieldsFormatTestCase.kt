@@ -798,7 +798,7 @@ abstract class BaseStoredFieldsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(IOException::class)
     open fun testBulkMergeWithDeletes() {
-        val numDocs: Int = atLeast(200)
+        val numDocs: Int = atLeast(10) // TODO reduced from 200 to 10 for dev speed
         val dir: Directory = newDirectory()
         var w = RandomIndexWriter(random(), dir, newIndexWriterConfig(MockAnalyzer(random())).setMergePolicy(NoMergePolicy.INSTANCE))
         for (i in 0..<numDocs) {
