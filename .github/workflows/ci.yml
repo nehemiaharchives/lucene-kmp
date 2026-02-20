@@ -772,7 +772,7 @@ jobs:
         if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-reports
+          name: build-reports-${{ matrix.module_name }}
           path: |
             core/build/reports/kover/
             analysis/common/build/reports/kover/
