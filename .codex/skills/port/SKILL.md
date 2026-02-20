@@ -66,6 +66,7 @@ Step 8. If all the super class/interface of the jdk class ported into `jdkport` 
 Step 9. If there are no missing `jdkport` class, and if there are no un-ported-dependency class/interface from Java Lucene, port the code of the `ClazzToPort.kt`
 Step 10. After porting logic and behaviors code, run `get_file_problems` tool of jetbrains mcp server and edit and iterate over until all errors resolves.
 Step 11. Final parity pass: compare Java and Kotlin files side-by-side. Check for missing or misordered member properties, functions, and logic blocks. Add missing pieces and reorder Kotlin members/functions/logic to match Java ordering so both files stay side-by-side with full behavior and implementation parity.
+Step 12. Test execution order is mandatory: run and iterate on focused `jvmTest` first until all tests pass on JVM. Only after JVM is green, run focused `macosX64Test` (or active native target) as the final verification to detect Kotlin/Native-specific problems.
 
 ## Non-negotiable defaults (do this without being asked)
 
@@ -118,3 +119,8 @@ Style 9. Atomics: Add `@OptIn(ExperimentalAtomicApi::class)` to var/val/function
     Style 9.3 do not use `fun addAndGet()`, use `fun addAndFetch()` instead
 Style 10. assert keyword in java need to be replaced with `assert()` function with `import org.gnit.lucenekmp.jdkport.assert`
 Style 11. In `commonMain/commonTest`, any Java `Thread`-style test or production logic must be ported with coroutine/job semantics or existing `jdkport` synchronization tools; never introduce JVM-only thread helpers.
+
+## Test Iteration Requirement (mandatory)
+- For ported/modified tests, always iterate with focused `jvmTest` first because it is faster.
+- Keep fixing and rerunning on JVM until the focused tests pass.
+- After JVM pass, run focused `macosX64Test` last to detect native-only issues.
