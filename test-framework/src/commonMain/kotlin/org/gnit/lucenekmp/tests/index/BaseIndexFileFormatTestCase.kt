@@ -759,7 +759,7 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
      * Returns `false` if only the regular fields reader should be tested, and `true` if
      * only the merge instance should be tested.
      */
-    protected fun shouldTestMergeInstance(): Boolean {
+    protected open fun shouldTestMergeInstance(): Boolean {
         return false
     }
 

@@ -61,7 +61,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /** Tests Lucene90DocValuesFormat  */
-class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
+open class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     private val logger = KotlinLogging.logger {}
     override val codec: Codec = TestUtil.getDefaultCodec()
 
