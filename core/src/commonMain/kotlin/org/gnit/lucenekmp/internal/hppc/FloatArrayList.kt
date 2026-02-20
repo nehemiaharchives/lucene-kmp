@@ -20,7 +20,7 @@ import kotlin.reflect.cast
  *
  * @lucene.internal
  */
-class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELEMENTS) : Iterable<FloatCursor>, Cloneable<FloatArrayList>, Accountable {
+open class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELEMENTS) : Iterable<FloatCursor>, Cloneable<FloatArrayList>, Accountable {
     /**
      * Internal array for storing the list. The array may be larger than the current size ([ ][.size]).
      */
@@ -181,7 +181,7 @@ class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELE
      */
     fun removeAll(e: Float): Int {
         var to = 0
-        for (from in 0..elementsCount) {
+        for (from in 0..<elementsCount) {
             if (((e) == (buffer[from]))) {
                 continue
             }
@@ -307,7 +307,7 @@ class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELE
     override fun hashCode(): Int {
         var h = 1
         val max = elementsCount
-        for (i in 0..max) {
+        for (i in 0..<max) {
             h = 31 * h + BitMixer.mix(this.buffer[i])
         }
         return h
@@ -323,7 +323,7 @@ class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELE
     }
 
     /** Compare index-aligned elements against another [FloatArrayList].  */
-    protected fun equalElements(other: FloatArrayList): Boolean {
+    fun equalElements(other: FloatArrayList): Boolean {
         val max = size()
         if (other.size() != max) {
             return false
@@ -369,7 +369,7 @@ class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELE
     }
 
     /** An iterator implementation for [FloatArrayList.iterator].  */
-    internal class ValueIterator(buffer: FloatArray, size: Int) : MutableIterator<FloatCursor> {
+    internal class ValueIterator(buffer: FloatArray, size: Int) : AbstractIterator<FloatCursor>() {
         private val cursor: FloatCursor
 
         private val buffer: FloatArray
@@ -382,32 +382,16 @@ class FloatArrayList(expectedElements: Int = HashContainers.DEFAULT_EXPECTED_ELE
             this.buffer = buffer
         }
 
-        fun fetch(): FloatCursor {
+        override fun fetch(): FloatCursor? {
             if (cursor.index + 1 == size) return done()
 
             cursor.value = buffer[++cursor.index]
             return cursor
         }
-
-        private fun done(): FloatCursor{
-            TODO("Not yet implemented")
-        }
-
-        override fun remove() {
-            TODO("Not yet implemented")
-        }
-
-        override fun next(): FloatCursor {
-            TODO("Not yet implemented")
-        }
-
-        override fun hasNext(): Boolean {
-            TODO("Not yet implemented")
-        }
     }
 
     override fun iterator(): MutableIterator<FloatCursor> {
-        return ValueIterator(buffer, size())
+        return ValueIterator(buffer, size()) as MutableIterator<FloatCursor>
     }
 
     companion object {
