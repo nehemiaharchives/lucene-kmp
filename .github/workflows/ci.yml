@@ -656,15 +656,26 @@ jobs:
           - module_name: core
             task: :core:koverXmlReport
             report_path: core/build/reports/kover/report.xml
-            extra_args: ""
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
           - module_name: analysis-common
             task: :analysis:common:koverXmlReport
             report_path: analysis/common/build/reports/kover/report.xml
-            extra_args: ""
+            extra_args: >-
+              -x :analysis:common:testAndroidHostTest
+              -x :analysis:common:compileAndroidDeviceTest
+              -x :analysis:common:compileAndroidHostTest
+              -x :analysis:common:compileAndroidMain
+              -x :analysis:common:koverGenerateArtifactAndroid
           - module_name: analysis-morfologik
             task: :analysis:morfologik:koverXmlReport
             report_path: analysis/morfologik/build/reports/kover/report.xml
             extra_args: >-
+              -x :analysis:morfologik:testAndroidHostTest
               -x :analysis:morfologik:compileAndroidDeviceTest
               -x :analysis:morfologik:compileAndroidHostTest
               -x :analysis:morfologik:compileAndroidMain
@@ -673,6 +684,7 @@ jobs:
             task: :analysis:smartcn:koverXmlReport
             report_path: analysis/smartcn/build/reports/kover/report.xml
             extra_args: >-
+              -x :analysis:smartcn:testAndroidHostTest
               -x :analysis:smartcn:compileAndroidDeviceTest
               -x :analysis:smartcn:compileAndroidHostTest
               -x :analysis:smartcn:compileAndroidMain
@@ -681,6 +693,7 @@ jobs:
             task: :analysis:nori:koverXmlReport
             report_path: analysis/nori/build/reports/kover/report.xml
             extra_args: >-
+              -x :analysis:nori:testAndroidHostTest
               -x :analysis:nori:compileAndroidDeviceTest
               -x :analysis:nori:compileAndroidHostTest
               -x :analysis:nori:compileAndroidMain
@@ -689,6 +702,7 @@ jobs:
             task: :analysis:kuromoji:koverXmlReport
             report_path: analysis/kuromoji/build/reports/kover/report.xml
             extra_args: >-
+              -x :analysis:kuromoji:testAndroidHostTest
               -x :analysis:kuromoji:compileAndroidDeviceTest
               -x :analysis:kuromoji:compileAndroidHostTest
               -x :analysis:kuromoji:compileAndroidMain
@@ -697,6 +711,7 @@ jobs:
             task: :analysis:extra:koverXmlReport
             report_path: analysis/extra/build/reports/kover/report.xml
             extra_args: >-
+              -x :analysis:extra:testAndroidHostTest
               -x :analysis:extra:compileAndroidDeviceTest
               -x :analysis:extra:compileAndroidHostTest
               -x :analysis:extra:compileAndroidMain
@@ -705,6 +720,7 @@ jobs:
             task: :codecs:koverXmlReport
             report_path: codecs/build/reports/kover/report.xml
             extra_args: >-
+              -x :codecs:testAndroidHostTest
               -x :codecs:compileAndroidDeviceTest
               -x :codecs:compileAndroidHostTest
               -x :codecs:compileAndroidMain
