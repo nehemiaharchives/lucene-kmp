@@ -167,7 +167,7 @@ abstract class BasePostingsFormatTestCase : BaseIndexFileFormatTestCase() {
 
     @Throws(Exception::class)
     open fun testRandom() {
-        val iters = 5
+        val iters = 5 // TODO reduced from 5 to 2 for dev speed
 
         for (iter in 0..<iters) {
             val path: Path = createTempDir("testPostingsFormat")
