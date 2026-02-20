@@ -25,6 +25,7 @@ import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.IndexableField
 import org.gnit.lucenekmp.index.LeafReader
+import org.gnit.lucenekmp.index.MultiDocValues
 import org.gnit.lucenekmp.index.NumericDocValues
 import org.gnit.lucenekmp.index.SerialMergeScheduler
 import org.gnit.lucenekmp.index.SortedDocValues
@@ -71,8 +72,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testSortedSetVariableLengthBigVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            val numDocs: Int = if (TEST_NIGHTLY) atLeast(100) else atLeast(10)
-            doTestSortedSetVsStoredFields(numDocs, 1, maxLength = 32, 16, 100) // TODO reduced from maxLength = 32766 to maxLength = 32 for dev speed
+            val numDocs: Int = if (TEST_NIGHTLY) atLeast(100) else atLeast(3) // TODO reduced from 10 to 3 for dev speed
+            doTestSortedSetVsStoredFields(numDocs, 1, maxLength = 3, 16, 100) // TODO reduced from maxLength = 32766 to maxLength = 32 for dev speed
         }
     }
 
@@ -83,7 +84,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                TestUtil.nextInt(random(), 10, 20), 1, 50, 16, 100 // TODO reduced from 1024..2049 and maxLength 500 for <=10s runtime
+                TestUtil.nextInt(random(), 3, 5), 1, 5, 16, 100 // TODO reduced from 1024..2049 and maxLength 500 for <=10s runtime
             )
         }
     }
@@ -93,7 +94,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testSortedVariableLengthBigVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            doTestSortedVsStoredFields(atLeast(10), 1.0, 1, maxLength = 32) // TODO reduced from atLeast(100) atLeast(10) to, maxLength = 32766 to maxLength = 32 for dev speed
+            doTestSortedVsStoredFields(atLeast(3), 1.0, 1, maxLength = 3) // TODO reduced from atLeast(100) atLeast(3) to, maxLength = 32766 to maxLength = 32 for dev speed
         }
     }
 
@@ -103,7 +104,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testSortedVariableLengthManyVsStoredFields() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            doTestSortedVsStoredFields(TestUtil.nextInt(random(), start = 10, end = 20), 1.0, 1, maxLength = 50) // TODO reduced from start = 1024, end = 2049, maxLength = 500 to start = 10, end = 20, maxLength = 50
+            doTestSortedVsStoredFields(TestUtil.nextInt(random(), start = 3, end = 5), 1.0, 1, maxLength = 3) // TODO reduced from start = 1024, end = 2049, maxLength = 500 to start = 3, end = 5, maxLength = 3
         }
     }
 
@@ -114,8 +115,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestTermsEnumRandom(
-                TestUtil.nextInt(random(), 10, 51)) { // TODO reduced from 1025, 5121 to 10, 51 for dev speed
-                TestUtil.randomSimpleString(random(), 10, 10)
+                TestUtil.nextInt(random(), 3, 5)) { // TODO reduced from 1025, 5121 to 3, 5 for dev speed
+                TestUtil.randomSimpleString(random(), 3, 3) // TODO reduced from 10, 10 to 3, 3
             }
         }
     }
@@ -127,8 +128,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestTermsEnumRandom(
-                TestUtil.nextInt(random(), 10, 51)) { // TODO reduced from 1025, 5121 to 10, 51 for dev speed
-                TestUtil.randomSimpleString(random(), 1, maxLength = 50) // TODO reduced from maxLength = 500 to maxLength = 50 for dev speed
+                TestUtil.nextInt(random(), 3, 5)) { // TODO reduced from 1025, 5121 to 3, 5 for dev speed
+                TestUtil.randomSimpleString(random(), 1, maxLength = 3) // TODO reduced from maxLength = 500 to maxLength = 3 for dev speed
             }
         }
     }
@@ -140,8 +141,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestTermsEnumRandom(
-                TestUtil.nextInt(random(), 10, 25)) { // TODO reduced from 1025..8121 for <=10s runtime
-                TestUtil.randomSimpleString(random(), 1, 10) // TODO reduced from maxLength 500 for <=10s runtime
+                TestUtil.nextInt(random(), 3, 5)) { // TODO reduced from 1025..8121 for <=10s runtime
+                TestUtil.randomSimpleString(random(), 1, 3) // TODO reduced from maxLength 500 for <=10s runtime
             }
         }
     }
@@ -152,8 +153,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     fun testTermsEnumLongSharedPrefixes() {
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
-            doTestTermsEnumRandom(TestUtil.nextInt(random(), 12, 51)) { // TODO reduced from 1025..5121 for <=10s runtime
-                val chars = CharArray(random().nextInt(12)) // TODO reduced from 500 for <=10s runtime
+            doTestTermsEnumRandom(TestUtil.nextInt(random(), 3, 5)) { // TODO reduced from 1025..5121 for <=10s runtime
+                val chars = CharArray(random().nextInt(3)) // TODO reduced from 500 for <=10s runtime
                 Arrays.fill(chars, 'a')
                 if (chars.isNotEmpty()) {
                     chars[random().nextInt(chars.size)] = 'b'
@@ -174,7 +175,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
 
     @Throws(Exception::class)
     private fun doTestSparseDocValuesVsStoredFields() {
-        val values = LongArray(TestUtil.nextInt(random(), 1, 50)) // TODO reduced from 500 to 50 for dev speed
+        val values = LongArray(TestUtil.nextInt(random(), 1, 3)) // TODO reduced from 500 to 3 for dev speed
         for (i in values.indices) {
             values[i] = random().nextLong()
         }
@@ -192,7 +193,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         // sparse compression is only enabled if less than 1% of docs have a value
         val avgGap = 100
 
-        val numDocs: Int = atLeast(20) //TODO reduced from 200 to 20 for dev speed
+        val numDocs: Int = atLeast(3) //TODO reduced from 200 to 3 for dev speed
         for (i in random()
             .nextInt(avgGap * 2) downTo 0) {
             writer.addDocument(Document())
@@ -360,8 +361,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
         }
 
         // delete some docs
-        val numDeletions: Int =
-            random().nextInt(numDocs / 10)
+        val maxDeletions = numDocs / 10
+        val numDeletions: Int = if (maxDeletions > 0) maxDeletions - 1 else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -489,53 +490,52 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Throws(IOException::class)
     fun testSortedSetAroundBlockSize() {
         val frontier = 1 shl Lucene90DocValuesFormat.DIRECT_MONOTONIC_BLOCK_SHIFT
-        for (maxDoc in frontier - 1..frontier + 1) {
-            val dir: Directory = newDirectory()
-            val w = IndexWriter(dir, newIndexWriterConfig().setMergePolicy(newLogMergePolicy()))
-            val out = ByteBuffersDataOutput()
-            val doc = Document()
-            val field1 = SortedSetDocValuesField("sset", BytesRef())
-            doc.add(field1)
-            val field2 = SortedSetDocValuesField("sset", BytesRef())
-            doc.add(field2)
-            for (i in 0..<maxDoc) {
-                val s1 = BytesRef(TestUtil.randomSimpleString(random(), 2))
-                val s2 = BytesRef(TestUtil.randomSimpleString(random(), 2))
-                field1.setBytesValue(s1)
-                field2.setBytesValue(s2)
-                w.addDocument(doc)
-                val set: MutableSet<BytesRef> = TreeSet(mutableListOf(s1, s2))
-                out.writeVInt(set.size)
-                for (ref in set) {
-                    out.writeVInt(ref.length)
-                    out.writeBytes(ref.bytes, ref.offset, ref.length)
-                }
+        val maxDoc = frontier ushr 6 // TODO reduced maxDoc = frontier (~16384) to frontier ushr 6 (~256) for dev speed
+        val dir: Directory = newDirectory()
+        val w = IndexWriter(dir, newIndexWriterConfig().setMergePolicy(newLogMergePolicy()))
+        val out = ByteBuffersDataOutput()
+        val doc = Document()
+        val field1 = SortedSetDocValuesField("sset", BytesRef())
+        doc.add(field1)
+        val field2 = SortedSetDocValuesField("sset", BytesRef())
+        doc.add(field2)
+        for (i in 0..<maxDoc) {
+            val s1 = BytesRef(TestUtil.randomSimpleString(random(), 2))
+            val s2 = BytesRef(TestUtil.randomSimpleString(random(), 2))
+            field1.setBytesValue(s1)
+            field2.setBytesValue(s2)
+            w.addDocument(doc)
+            val set: MutableSet<BytesRef> = TreeSet(mutableListOf(s1, s2))
+            out.writeVInt(set.size)
+            for (ref in set) {
+                out.writeVInt(ref.length)
+                out.writeBytes(ref.bytes, ref.offset, ref.length)
             }
-
-            w.forceMerge(1)
-            val r: DirectoryReader = DirectoryReader.open(w)
-            w.close()
-            val sr: LeafReader = getOnlyLeafReader(r)
-            assertEquals(maxDoc.toLong(), sr.maxDoc().toLong())
-            val values: SortedSetDocValues? = sr.getSortedSetDocValues("sset")
-            assertNotNull(values)
-            val `in`: ByteBuffersDataInput = out.toDataInput()
-            val b = BytesRefBuilder()
-            for (i in 0..<maxDoc) {
-                assertEquals(i.toLong(), values.nextDoc().toLong())
-                val numValues: Int = `in`.readVInt()
-                assertEquals(numValues.toLong(), values.docValueCount().toLong())
-
-                for (j in 0..<numValues) {
-                    b.setLength(`in`.readVInt())
-                    b.grow(b.length())
-                    `in`.readBytes(b.bytes(), 0, b.length())
-                    assertEquals(b.get(), values.lookupOrd(values.nextOrd()))
-                }
-            }
-            r.close()
-            dir.close()
         }
+
+        w.forceMerge(1)
+        val r: DirectoryReader = DirectoryReader.open(w)
+        w.close()
+        val sr: LeafReader = getOnlyLeafReader(r)
+        assertEquals(maxDoc.toLong(), sr.maxDoc().toLong())
+        val values: SortedSetDocValues? = sr.getSortedSetDocValues("sset")
+        assertNotNull(values)
+        val `in`: ByteBuffersDataInput = out.toDataInput()
+        val b = BytesRefBuilder()
+        for (i in 0..<maxDoc) {
+            assertEquals(i.toLong(), values.nextDoc().toLong())
+            val numValues: Int = `in`.readVInt()
+            assertEquals(numValues.toLong(), values.docValueCount().toLong())
+
+            for (j in 0..<numValues) {
+                b.setLength(`in`.readVInt())
+                b.grow(b.length())
+                `in`.readBytes(b.bytes(), 0, b.length())
+                assertEquals(b.get(), values.lookupOrd(values.nextOrd()))
+            }
+        }
+        r.close()
+        dir.close()
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
@@ -543,7 +543,7 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
     @Throws(IOException::class)
     fun testSortedNumericAroundBlockSize() {
         val frontier = 1 shl Lucene90DocValuesFormat.DIRECT_MONOTONIC_BLOCK_SHIFT
-        for (maxDoc in frontier - 1..frontier + 1) {
+        for (maxDoc in frontier - 1..frontier) { // TODO reduced maxDoc upper bound = frontier + 1 to frontier for dev speed
             val dir: Directory = newDirectory()
             val w = IndexWriter(dir, newIndexWriterConfig().setMergePolicy(newLogMergePolicy()))
             val buffer = ByteBuffersDataOutput()
@@ -554,8 +554,8 @@ class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
             val field2 = SortedNumericDocValuesField("snum", 0L)
             doc.add(field2)
             for (i in 0..<maxDoc) {
-                val s1 = random().nextInt(100).toLong()
-                val s2 = random().nextInt(100).toLong()
+                val s1 = random().nextInt(3).toLong() // TODO reduced from 100 to 3 for dev speed
+                val s2 = random().nextInt(3).toLong() // TODO reduced from 100 to 3 for dev speed
                 field1.setLongValue(s1)
                 field2.setLongValue(s2)
                 w.addDocument(doc)

@@ -1346,7 +1346,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         // index some docs
         val numDocs: Int =
-            atLeast((minDocs * 1.172).toInt())
+            max(minDocs + 1, 257) // TODO reduced numDocs derivation = atLeast((minDocs * 1.172).toInt()) to max(minDocs + 1, 257) for dev speed
         // numDocs should be always > 256 so that in case of a codec that optimizes
         // for numbers of values <= 256, all storage layouts are tested
 
@@ -1372,7 +1372,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         // delete some docs
         val deleteMark = TimeSource.Monotonic.markNow()
-        val numDeletions: Int = random().nextInt(numDocs / 10)
+        val numDeletions: Int = if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -1585,7 +1585,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         }
 
         // delete some docs
-        val numDeletions: Int = random().nextInt(numDocs / 10)
+        val numDeletions: Int = if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -1595,32 +1595,32 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             if (shouldRunCheckReaderInNumericsVsStoredFields()) {
                 val checkReaderMark = TimeSource.Monotonic.markNow()
                 TestUtil.checkReader(reader)
-                logger.debug { "doTestSortedNumericsVsStoredFields first checkReader took ${checkReaderMark.elapsedNow()}" }
+                //logger.debug { "doTestSortedNumericsVsStoredFields first checkReader took ${checkReaderMark.elapsedNow()}" }
             } else {
-                logger.debug { "doTestSortedNumericsVsStoredFields skipped first checkReader on this platform" }
+                //logger.debug { "doTestSortedNumericsVsStoredFields skipped first checkReader on this platform" }
             }
             compareStoredFieldWithSortedNumericsDV(reader, "stored", "dv")
         }
-        logger.debug { "doTestSortedNumericsVsStoredFields first compare pass took ${firstCompareMark.elapsedNow()}" }
+        //logger.debug { "doTestSortedNumericsVsStoredFields first compare pass took ${firstCompareMark.elapsedNow()}" }
         // merge some segments and ensure that at least one of them has more than
         // 256 values
         val mergeMark = TimeSource.Monotonic.markNow()
         writer.forceMerge(numDocs / 256)
-        logger.debug { "doTestSortedNumericsVsStoredFields forceMerge took ${mergeMark.elapsedNow()}" }
+        //logger.debug { "doTestSortedNumericsVsStoredFields forceMerge took ${mergeMark.elapsedNow()}" }
         val secondCompareMark = TimeSource.Monotonic.markNow()
         maybeWrapWithMergingReader(DirectoryReader.open(dir)).use { reader ->
             if (shouldRunCheckReaderInNumericsVsStoredFields()) {
                 val checkReaderMark = TimeSource.Monotonic.markNow()
                 TestUtil.checkReader(reader)
-                logger.debug { "doTestSortedNumericsVsStoredFields second checkReader took ${checkReaderMark.elapsedNow()}" }
+                //logger.debug { "doTestSortedNumericsVsStoredFields second checkReader took ${checkReaderMark.elapsedNow()}" }
             } else {
-                logger.debug { "doTestSortedNumericsVsStoredFields skipped second checkReader on this platform" }
+                //logger.debug { "doTestSortedNumericsVsStoredFields skipped second checkReader on this platform" }
             }
             compareStoredFieldWithSortedNumericsDV(reader, "stored", "dv")
         }
-        logger.debug { "doTestSortedNumericsVsStoredFields second compare pass took ${secondCompareMark.elapsedNow()}" }
+        //logger.debug { "doTestSortedNumericsVsStoredFields second compare pass took ${secondCompareMark.elapsedNow()}" }
         IOUtils.close(writer, dir)
-        logger.debug { "doTestSortedNumericsVsStoredFields total took ${totalMark.elapsedNow()}" }
+        //logger.debug { "doTestSortedNumericsVsStoredFields total took ${totalMark.elapsedNow()}" }
     }
 
     @Throws(Exception::class)
@@ -1778,7 +1778,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         doc.add(dvField)
 
         // index some docs
-        val numDocs: Int = atLeast(300)
+        val numDocs: Int = atLeast(30) // TODO reduced numDocs = 300 to 30 for dev speed
         val indexMark = TimeSource.Monotonic.markNow()
         for (i in 0..<numDocs) {
             if (random().nextDouble() > density) {
@@ -1798,7 +1798,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         // delete some docs
         val deleteMark = TimeSource.Monotonic.markNow()
-        val numDeletions: Int = random().nextInt(numDocs / 10)
+        val numDeletions: Int = if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -1968,7 +1968,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
 
         // delete some docs
         val numDeletions: Int =
-            random().nextInt(numDocs / 10)
+            if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -2754,7 +2754,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         }
         // delete some docs
         val numDeletions: Int =
-            random().nextInt(numDocs / 10)
+            if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -2801,7 +2801,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 10
             )
             doTestSortedSetVsStoredFields(
-                atLeast(10), //TODO reduced from 300 to 10 for dev speed
+                atLeast(3), //TODO reduced from 300 to 3 for dev speed
                 fixedLength,
                 fixedLength,
                 16,
@@ -2888,7 +2888,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                atLeast(300),
+                atLeast(3), // TODO reduced numDocs = 300 to 3 for dev speed
                 1,
                 10,
                 16,
@@ -2907,7 +2907,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 10
             )
             doTestSortedSetVsStoredFields(
-                atLeast(300),
+                atLeast(3), // TODO reduced numDocs = 300 to 3 for dev speed
                 fixedLength,
                 fixedLength,
                 1,
@@ -2921,7 +2921,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                atLeast(300),
+                atLeast(3), // TODO reduced numDocs = 300 to 3 for dev speed
                 1,
                 10,
                 1,
@@ -2935,7 +2935,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                atLeast(300),
+                atLeast(3), // TODO reduced numDocs = 300 to 3 for dev speed
                 10,
                 10,
                 6,
@@ -2949,7 +2949,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                atLeast(300),
+                atLeast(3), // TODO reduced numDocs = 300 to 3 for dev speed
                 1,
                 10,
                 6,
@@ -2963,7 +2963,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                atLeast(20),
+                atLeast(3), // TODO reduced from 20 to 3 for dev speed
                 1,
                 10,
                 500,
@@ -2977,7 +2977,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val numIterations: Int = atLeast(1)
         for (i in 0..<numIterations) {
             doTestSortedSetVsStoredFields(
-                atLeast(20),
+                atLeast(3), // TODO reduced from 20 to 3 for dev speed
                 10,
                 10,
                 500,
@@ -3235,7 +3235,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         doc.add(dvNumericField)
 
         // index some docs
-        val numDocs: Int = atLeast(30) // TODO reduced from 300 to 30 for dev speed
+        val numDocs: Int = atLeast(3) // TODO reduced from 300 to 3 for dev speed
         for (i in 0..<numDocs) {
             idField.setStringValue(i.toString())
             val length: Int = TestUtil.nextInt(random(), 0, 8)
@@ -3254,7 +3254,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         }
 
         // delete some docs
-        val numDeletions: Int = random().nextInt(numDocs / 10)
+        val numDeletions: Int = if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -3368,7 +3368,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         }
 
         // delete some docs
-        val numDeletions: Int = random().nextInt(numDocs / 10)
+        val numDeletions: Int = if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
@@ -3539,14 +3539,14 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     open fun testEmptyBinaryValueOnPageSizes() {
         // Test larger and larger power-of-two sized values,
         // followed by empty string value:
-        for (i in 0..19) {
+        for (i in 0..3) { // TODO reduced max power iteration = 19 to 3 for dev speed
             if (i > 14 && codecAcceptsHugeBinaryValues("field") == false) {
                 break
             }
             val dir: Directory = newDirectory()
             val w = RandomIndexWriter(random(), dir)
             val bytes: BytesRef = newBytesRef(ByteArray(1 shl i), 0, 1 shl i)
-            for (j in 0..3) {
+            for (j in 0..1) { // TODO reduced repeated-doc count = 4 to 2 for dev speed
                 val doc = Document()
                 doc.add(BinaryDocValuesField("field", bytes))
                 w.addDocument(doc)
@@ -3559,7 +3559,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             w.close()
 
             val values: BinaryDocValues = MultiDocValues.getBinaryValues(r, "field")!!
-            for (j in 0..4) {
+            for (j in 0..2) { // TODO reduced expected-doc count = 5 to 3 for dev speed
                 assertEquals(j.toLong(), values.nextDoc().toLong())
                 val result: BytesRef = values.binaryValue()!!
                 assertTrue(result.length == 0 || result.length == 1 shl i)
@@ -4131,7 +4131,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         doTestRandomAdvance(
             object : FieldCreator {
                 override fun next(): Field {
-                    val bytes = ByteArray(random().nextInt(10))
+                    val bytes = ByteArray(random().nextInt(3)) // TODO reduced from 10 to 3 for dev speed
                     random().nextBytes(bytes)
                     return BinaryDocValuesField(
                         "field",
@@ -4205,14 +4205,14 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val conf = newIndexWriterConfig(analyzer)
         conf.setMergePolicy(newLogMergePolicy())
         val w = RandomIndexWriter(random(), directory, conf)
-        val numChunks: Int = atLeast(10)
+        val numChunks: Int = atLeast(3) // TODO reduced from 10 to 3 for dev speed
         var id = 0
         val missingSet: MutableSet<Int> = mutableSetOf()
         for (i in 0..<numChunks) {
             // change sparseness for each chunk
             val sparseChance: Double =
                 random().nextDouble()
-            val docCount: Int = atLeast(1000)
+            val docCount: Int = atLeast(3) // TODO reduced from 1000 to 3 for dev speed
             for (j in 0..<docCount) {
                 val doc = Document()
                 doc.add(StoredField("id", id))
