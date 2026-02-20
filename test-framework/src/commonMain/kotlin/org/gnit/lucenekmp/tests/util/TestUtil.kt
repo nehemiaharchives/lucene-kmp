@@ -1273,19 +1273,19 @@ class TestUtil {
          * Return a Codec that can read any of the default codecs and formats, but always writes in the
          * specified format.
          */
-        /*fun alwaysDocValuesFormat(format: DocValuesFormat): Codec {
+        fun alwaysDocValuesFormat(format: DocValuesFormat): Codec {
             // TODO: we really need for docvalues impls etc to announce themselves
             // (and maybe their params, too) to infostream on flush and merge.
             // otherwise in a real debugging situation we won't know whats going on!
             if (LuceneTestCase.VERBOSE) {
-                println("TestUtil: forcing docvalues format to:" + format)
+                println("TestUtil: forcing docvalues format to:$format")
             }
             return object : AssertingCodec() {
                 override fun getDocValuesFormatForField(field: String): DocValuesFormat {
                     return format
                 }
             }
-        }*/
+        }
 
         /**
          * Return a Codec that can read any of the default codecs and formats, but always writes in the
