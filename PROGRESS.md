@@ -137,13 +137,13 @@
 |   org.apache.lucene.codecs | 4 | 3 | 75% |
 |     org.apache.lucene.codecs.compressing | 5 | 5 | 100% |
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
-|     org.apache.lucene.codecs.lucene101 | 6 | 5 | 83% |
+|     org.apache.lucene.codecs.lucene101 | 6 | 6 | 100% |
 |     org.apache.lucene.codecs.lucene102 | 2 | 2 | 100% |
-|     org.apache.lucene.codecs.lucene90 | 14 | 9 | 64% |
-|       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
-|       org.apache.lucene.codecs.lucene90.compressing | 3 | 2 | 66% |
+|     org.apache.lucene.codecs.lucene90 | 14 | 14 | 100% |
+|       org.apache.lucene.codecs.lucene90.blocktree | 1 | 1 | 100% |
+|       org.apache.lucene.codecs.lucene90.compressing | 3 | 3 | 100% |
 |     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
-|     org.apache.lucene.codecs.lucene99 | 6 | 5 | 83% |
+|     org.apache.lucene.codecs.lucene99 | 6 | 6 | 100% |
 |     org.apache.lucene.codecs.perfield | 4 | 1 | 25% |
 |   org.apache.lucene.document | 50 | 48 | 96% |
 |   org.apache.lucene.geo | 17 | 16 | 94% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 242 | 35% |
+| Total | 673 | 251 | 37% |
 
 
 ## Tests To Port
@@ -190,15 +190,6 @@
 | [org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestPackedTokenAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestPackedTokenAttributeImpl |
 | [org.apache.lucene.analysis.tokenattributes.TestSimpleAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestSimpleAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestSimpleAttributeImpl |
 | [org.apache.lucene.codecs.TestCodecLoadingDeadlock](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecLoadingDeadlock.java) | org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock |
-| [org.apache.lucene.codecs.lucene101.TestLucene101PostingsFormatV0](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene101/TestLucene101PostingsFormatV0.java) | org.gnit.lucenekmp.codecs.lucene101.TestLucene101PostingsFormatV0 |
-| [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatMergeInstance |
-| [org.apache.lucene.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90DocValuesFormatVariableSkipInterval.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90DocValuesFormatVariableSkipInterval |
-| [org.apache.lucene.codecs.lucene90.TestLucene90NormsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90NormsFormat.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormat |
-| [org.apache.lucene.codecs.lucene90.TestLucene90NormsFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90NormsFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90NormsFormatMergeInstance |
-| [org.apache.lucene.codecs.lucene90.TestLucene90StoredFieldsFormatMergeInstance](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/TestLucene90StoredFieldsFormatMergeInstance.java) | org.gnit.lucenekmp.codecs.lucene90.TestLucene90StoredFieldsFormatMergeInstance |
-| [org.apache.lucene.codecs.lucene90.blocktree.TestMSBVLong](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/blocktree/TestMSBVLong.java) | org.gnit.lucenekmp.codecs.lucene90.blocktree.TestMSBVLong |
-| [org.apache.lucene.codecs.lucene90.compressing.TestStoredFieldsInt](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene90/compressing/TestStoredFieldsInt.java) | org.gnit.lucenekmp.codecs.lucene90.compressing.TestStoredFieldsInt |
-| [org.apache.lucene.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/lucene99/TestLucene99ScalarQuantizedVectorsWriter.java) | org.gnit.lucenekmp.codecs.lucene99.TestLucene99ScalarQuantizedVectorsWriter |
 | [org.apache.lucene.codecs.perfield.TestPerFieldDocValuesFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldDocValuesFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldDocValuesFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat |
 | [org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat2.java) | org.gnit.lucenekmp.codecs.perfield.TestPerFieldPostingsFormat2 |
