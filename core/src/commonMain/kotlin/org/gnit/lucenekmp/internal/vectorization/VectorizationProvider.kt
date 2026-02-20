@@ -6,7 +6,30 @@ import org.gnit.lucenekmp.store.IndexInput
 
 abstract class VectorizationProvider {
     companion object {
-        fun getInstance(): VectorizationProvider = DefaultVectorizationProvider()
+        private val VALID_CALLERS: Set<String> = setOf(
+            "org.gnit.lucenekmp.codecs.hnsw.FlatVectorScorerUtil",
+            "org.gnit.lucenekmp.util.VectorUtil",
+            "org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsReader",
+            "org.gnit.lucenekmp.codecs.lucene101.PostingIndexInput",
+            "org.gnit.lucenekmp.internal.vectorization.BaseVectorizationTestCase",
+            "org.gnit.lucenekmp.internal.vectorization.TestPostingDecodingUtil",
+            "org.gnit.lucenekmp.internal.vectorization.TestVectorScorer"
+        )
+
+        fun getInstance(): VectorizationProvider {
+            ensureCaller()
+            return DefaultVectorizationProvider()
+        }
+
+        private fun ensureCaller() {
+            val trace = Throwable().stackTraceToString()
+            val validCaller = VALID_CALLERS.any { trace.contains(it) }
+            if (!validCaller) {
+                throw UnsupportedOperationException(
+                    "VectorizationProvider is internal and can only be used by known Lucene classes."
+                )
+            }
+        }
     }
 
     /**

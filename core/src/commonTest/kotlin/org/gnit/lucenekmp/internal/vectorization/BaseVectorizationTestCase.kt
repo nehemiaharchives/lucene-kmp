@@ -11,8 +11,8 @@ abstract class BaseVectorizationTestCase : LuceneTestCase() {
     }
 
     companion object {
-        protected val LUCENE_PROVIDER: VectorizationProvider = defaultProvider()
-        protected val PANAMA_PROVIDER: VectorizationProvider = maybePanamaProvider()
+        val LUCENE_PROVIDER: VectorizationProvider = defaultProvider()
+        val PANAMA_PROVIDER: VectorizationProvider = maybePanamaProvider()
 
         fun defaultProvider(): VectorizationProvider {
             return DefaultVectorizationProvider()
