@@ -14,6 +14,10 @@ Under this directory you find two sub directories:
 
 - **Do not deviate from Java Lucene logic.** The Kotlin port must be an exact behavioral port. Only deviate when unavoidable for KMP (e.g., okio for IO, coroutines for threading). Any deviation must be explicitly justified and minimized.
 - Exception for development speed: Java-Kotlin numeric-value discrepancies are allowed only when reducing test/runtime iteration counts to speed up local iteration or CI.
+- Speed-up reductions must be order-of-magnitude changes, not tiny tweaks:
+  - Target example: if a test takes ~10 minutes, reduce to ~3 seconds when possible.
+  - Numeric example: if iteration/repeat is `1000`, reduce to `10`; if still >30 seconds, reduce to `3`.
+  - Counter example: do not treat small edits like `19 -> 15` as sufficient speed-up by default.
 - For every such discrepancy, add an inline comment immediately after the exact reduced line (not above it).
 - Required comment format:
   - Starts with `// TODO`
