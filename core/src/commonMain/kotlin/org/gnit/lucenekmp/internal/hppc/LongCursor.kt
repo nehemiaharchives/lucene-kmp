@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.internal.hppc
 
-
 /**
  * Forked from HPPC, holding int index and long value.
  *
@@ -14,7 +13,7 @@ class LongCursor {
     var index: Int = 0
 
     /** The current value.  */
-    var value: Long = 0
+    var value: Long = 0L
 
     override fun toString(): String {
         return "[cursor, index: $index, value: $value]"
