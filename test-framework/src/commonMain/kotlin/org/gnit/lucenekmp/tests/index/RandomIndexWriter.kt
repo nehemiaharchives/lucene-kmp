@@ -602,8 +602,9 @@ class RandomIndexWriter private constructor(
     }
 
     companion object {
-        private val INDEX_WRITER_ACCESS: IndexWriterAccess =
+        private val INDEX_WRITER_ACCESS: IndexWriterAccess by lazy {
             TestSecrets.getIndexWriterAccess()
+        }
 
         /**
          * Returns an indexwriter that randomly mixes up thread scheduling (by yielding at test points)

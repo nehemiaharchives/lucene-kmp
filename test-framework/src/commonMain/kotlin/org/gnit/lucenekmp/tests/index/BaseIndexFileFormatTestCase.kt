@@ -174,7 +174,11 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
     @Throws(Exception::class)
     @AfterTest
     fun tearDown() {
-        Codec.default = savedCodec!! // restore
+        // Some failures can occur before setUp completed; avoid NPE in tearDown in that case.
+        savedCodec?.let { codec ->
+            Codec.default = codec // restore
+            savedCodec = null
+        }
     }
 
     /** Add random fields to the provided document.  */
@@ -1012,7 +1016,7 @@ abstract class BaseIndexFileFormatTestCase : LuceneTestCase() {
     }
 
     companion object {
-        private val INDEX_WRITER_ACCESS: IndexWriterAccess = TestSecrets.getIndexWriterAccess()
+        private val INDEX_WRITER_ACCESS: IndexWriterAccess by lazy { TestSecrets.getIndexWriterAccess() }
 
         // metadata or Directory-level objects
         private val EXCLUDED_CLASSES: MutableSet<KClass<*>> = mutableSetOf()

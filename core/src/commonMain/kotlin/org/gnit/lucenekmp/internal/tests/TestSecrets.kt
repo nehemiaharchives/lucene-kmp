@@ -163,19 +163,39 @@ object TestSecrets {
 
     private fun ensureCaller() {
         val trace = Throwable().stackTraceToString()
-        val caller =
-            trace.lineSequence()
-                .map { it.trim() }
-                .firstOrNull {
-                    it.startsWith("at org.gnit.lucenekmp.")
-                        && !it.contains("internal.tests.TestSecrets")
+        val lines = trace.lineSequence().map { it.trim() }.toList()
+        val anchorIndex =
+            lines.indexOfFirst { line ->
+                line.contains("org.gnit.lucenekmp.internal.tests.TestSecrets#getIndexWriterAccess")
+                    || line.contains("org.gnit.lucenekmp.internal.tests.TestSecrets.getIndexWriterAccess")
+            }
+        val firstLuceneCallerLine =
+            if (anchorIndex >= 0) {
+                val neighborAfter = lines.getOrNull(anchorIndex + 1)
+                val neighborBefore = lines.getOrNull(anchorIndex - 1)
+                when {
+                    isNonTestSecretsLuceneLine(neighborAfter) -> neighborAfter
+                    isNonTestSecretsLuceneLine(neighborBefore) -> neighborBefore
+                    else ->
+                        lines.firstOrNull { line -> isNonTestSecretsLuceneLine(line) }
                 }
-                ?: ""
-        val validCaller = caller.contains("org.gnit.lucenekmp.tests.")
+            } else {
+                lines.firstOrNull { line -> isNonTestSecretsLuceneLine(line) }
+            }
+        val validCaller =
+            firstLuceneCallerLine?.contains("org.gnit.lucenekmp.tests.") == true
         if (!validCaller) {
             throw UnsupportedOperationException(
                 "Lucene TestSecrets can only be used by the test-framework."
             )
         }
+    }
+
+    private fun isNonTestSecretsLuceneLine(line: String?): Boolean {
+        if (line == null) {
+            return false
+        }
+        return line.contains("org.gnit.lucenekmp.")
+            && !line.contains("org.gnit.lucenekmp.internal.tests.TestSecrets")
     }
 }

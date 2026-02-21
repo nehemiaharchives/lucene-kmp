@@ -1622,6 +1622,8 @@ abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     companion object {
-        private val CONCURRENT_MERGE_SCHEDULER_ACCESS: ConcurrentMergeSchedulerAccess = TestSecrets.concurrentMergeSchedulerAccess
+        private val CONCURRENT_MERGE_SCHEDULER_ACCESS: ConcurrentMergeSchedulerAccess by lazy {
+            TestSecrets.concurrentMergeSchedulerAccess
+        }
     }
 }

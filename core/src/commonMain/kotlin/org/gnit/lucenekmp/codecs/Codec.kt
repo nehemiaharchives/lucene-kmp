@@ -116,9 +116,15 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
 
         /** looks up a codec by name  */
         fun forName(name: String): Codec {
+            // Ensure default codec is initialized/registered in classloader-free KMP mode.
+            Holder.defaultCodec
             registryLock.lock()
             try {
-                return registry[name] ?: Holder.defaultCodec
+                return registry[name]
+                    ?: throw IllegalArgumentException(
+                        "A codec with name '$name' does not exist. " +
+                            "The current classpath supports the following names: ${registry.keys}"
+                    )
             } finally {
                 registryLock.unlock()
             }
@@ -126,8 +132,14 @@ abstract class Codec protected constructor(override val name: String) : NamedSPI
 
         /** returns a list of all available codec names  */
         fun availableCodecs(): MutableSet<String> {
-            //return Holder.loader.availableServices()
-            TODO() // ClassLoader needs to be implemented for this
+            // Ensure default codec is initialized/registered in classloader-free KMP mode.
+            Holder.defaultCodec
+            registryLock.lock()
+            try {
+                return registry.keys.toMutableSet()
+            } finally {
+                registryLock.unlock()
+            }
         }
 
         /**

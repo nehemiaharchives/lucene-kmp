@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.codecs.KnnVectorsFormat
 import org.gnit.lucenekmp.codecs.KnnVectorsReader
 import org.gnit.lucenekmp.codecs.perfield.PerFieldKnnVectorsFormat
+import org.gnit.lucenekmp.codecs.simpletext.SimpleTextCodec
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.KnnByteVectorField
@@ -791,6 +792,8 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     // Write vectors, one segment with default codec, another with SimpleText, then forceMerge
     @Throws(Exception::class)
     open fun testDifferentCodecs1() {
+        // KMP workaround: ServiceLoader/ClassLoader is unavailable, so force codec registration.
+        SimpleTextCodec()
         newDirectory().use { dir ->
             IndexWriter(dir, newIndexWriterConfig()).use { w ->
                 val doc = Document()
@@ -811,6 +814,8 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     // Write vectors, one segment with SimpleText, another with default codec, then forceMerge
     @Throws(Exception::class)
     open fun testDifferentCodecs2() {
+        // KMP workaround: ServiceLoader/ClassLoader is unavailable, so force codec registration.
+        SimpleTextCodec()
         val iwc = newIndexWriterConfig()
         iwc.setCodec(Codec.forName("SimpleText"))
         newDirectory().use { dir ->
