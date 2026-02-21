@@ -5,6 +5,8 @@ import okio.Path
 import okio.FileSystem
 import okio.IOException
 import okio.SYSTEM
+import okio.Buffer
+import okio.BufferedSink
 import okio.buffer
 
 /**
@@ -194,3 +196,18 @@ object Files {
 }
 
 fun Path.toRealPath() = this.normalized()
+
+/**
+ * Platform-specific bulk write used by [OkioSinkOutputStream.write].
+ *
+ * Kotlin/Native showed a large throughput gap when writes fell back to slow generic paths
+ * (especially many small length-prefixed records). This function centralizes an optimized
+ * array write path per platform while preserving identical stream semantics.
+ */
+expect fun kmpWrite(
+    sink: BufferedSink?,
+    buffer: Buffer?,
+    b: ByteArray,
+    off: Int,
+    len: Int
+)

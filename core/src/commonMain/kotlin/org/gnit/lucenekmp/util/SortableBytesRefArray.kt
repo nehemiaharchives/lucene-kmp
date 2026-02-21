@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.util
 
 
-internal interface SortableBytesRefArray {
+interface SortableBytesRefArray {
     /** Append a new value  */
     fun append(bytes: BytesRef): Int
 

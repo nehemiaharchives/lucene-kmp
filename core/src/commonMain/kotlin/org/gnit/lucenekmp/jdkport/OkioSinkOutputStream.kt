@@ -53,6 +53,17 @@ class OkioSinkOutputStream : OutputStream {
         }
     }
 
+    override fun write(b: ByteArray, off: Int, len: Int) {
+        if (closed) {
+            throw IOException("Stream closed")
+        }
+        Objects.checkFromIndexSize(off, len, b.size)
+        if (len == 0) {
+            return
+        }
+        kmpWrite(sink, buffer, b, off, len)
+    }
+
     /**
      * Flushes this output stream and forces any buffered output bytes
      * to be written out.

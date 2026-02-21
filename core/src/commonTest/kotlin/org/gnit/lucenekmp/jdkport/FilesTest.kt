@@ -14,6 +14,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.AfterTest
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.StandardCopyOption
+import kotlin.math.min
+import kotlin.time.Clock
 
 class FilesTest {
     private lateinit var testFilePath: Path
@@ -529,4 +531,106 @@ class FilesTest {
             Files.newDirectoryStream(nonExistingPath)
         }
     }
+
+    @Test
+    fun testLengthPrefixedWriteProfileForJvmVsNative() {
+        // Use the real filesystem so the same test can be run on jvmTest and native tests
+        // to observe platform-specific write throughput differences.
+        val previousFileSystem = Files.getFileSystem()
+        Files.resetFileSystem()
+        val benchDir = "/tmp/lucene-kmp-files-bench".toPath()
+        val runId = Clock.System.now().toEpochMilliseconds()
+        val unsortedPath = benchDir / "length-prefixed-unsorted-$runId.bin"
+        val sortedPath = benchDir / "length-prefixed-sorted-$runId.bin"
+        try {
+            Files.createDirectories(benchDir)
+            val data = generateLengthPrefixedRecords(totalDataBytes = 8 * 1024 * 1024)
+            val sortedData = data.toMutableList()
+            sortedData.sortWith(unsignedByteOrderComparator)
+
+            val expectedBytes = data.fold(0L) { acc, bytes ->
+                acc + bytes.size + Short.SIZE_BYTES.toLong()
+            }
+
+            val unsortedElapsedMs = writeLengthPrefixedRecords(unsortedPath, data)
+            val sortedElapsedMs = writeLengthPrefixedRecords(sortedPath, sortedData)
+
+            assertEquals(expectedBytes, Files.size(unsortedPath))
+            assertEquals(expectedBytes, Files.size(sortedPath))
+
+            val totalMB = expectedBytes.toDouble() / (1024.0 * 1024.0)
+            val unsortedThroughputMBps = totalMB / (unsortedElapsedMs.coerceAtLeast(1).toDouble() / 1000.0)
+            val sortedThroughputMBps = totalMB / (sortedElapsedMs.coerceAtLeast(1).toDouble() / 1000.0)
+            println(
+                "[FilesTest] length-prefixed-write-profile " +
+                    "bytes=$expectedBytes records=${data.size} " +
+                    "unsortedMs=$unsortedElapsedMs sortedMs=$sortedElapsedMs " +
+                    "unsortedMBps=$unsortedThroughputMBps sortedMBps=$sortedThroughputMBps"
+            )
+        } finally {
+            deleteIfExists(unsortedPath)
+            deleteIfExists(sortedPath)
+            Files.setFileSystem(previousFileSystem)
+        }
+    }
+
+    private fun generateLengthPrefixedRecords(totalDataBytes: Int): List<ByteArray> {
+        val data = mutableListOf<ByteArray>()
+        var left = totalDataBytes
+        var seed = 0x12345678
+        while (left > 0) {
+            seed = seed * 1103515245 + 12345
+            val length = min(left, ((seed ushr 16) and 0xFF) + 1)
+            val record = ByteArray(length)
+            for (i in record.indices) {
+                seed = seed * 1103515245 + 12345
+                record[i] = (seed ushr 24).toByte()
+            }
+            data.add(record)
+            left -= length
+        }
+        return data
+    }
+
+    private fun writeLengthPrefixedRecords(path: Path, data: List<ByteArray>): Long {
+        val startMs = Clock.System.now().toEpochMilliseconds()
+        Files.newOutputStream(
+            path,
+            StandardOpenOption.CREATE,
+            StandardOpenOption.TRUNCATE_EXISTING,
+            StandardOpenOption.WRITE
+        ).use { output ->
+            for (record in data) {
+                writeShortLE(output, record.size)
+                output.write(record)
+            }
+        }
+        return Clock.System.now().toEpochMilliseconds() - startMs
+    }
+
+    private fun writeShortLE(output: OutputStream, value: Int) {
+        output.write(value and 0xFF)
+        output.write((value ushr 8) and 0xFF)
+    }
+
+    private fun deleteIfExists(path: Path) {
+        try {
+            if (Files.getFileSystem().exists(path)) {
+                Files.delete(path)
+            }
+        } catch (_: Throwable) {
+        }
+    }
+
+    private val unsignedByteOrderComparator: Comparator<ByteArray> =
+        Comparator { left, right ->
+            val max = min(left.size, right.size)
+            for (i in 0 until max) {
+                val diff = (left[i].toInt() and 0xFF) - (right[i].toInt() and 0xFF)
+                if (diff != 0) {
+                    return@Comparator diff
+                }
+            }
+            left.size - right.size
+        }
 }
