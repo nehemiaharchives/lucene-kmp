@@ -66,11 +66,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
     var sortInfo: SortInfo? = null
         private set
 
-    private inline fun trace(message: () -> String) {
-        val text = message()
-        logger.info { text }
-        println(text)
-    }
+    private fun trace(message: () -> String) {}
 
     init {
         if (exec != null) {

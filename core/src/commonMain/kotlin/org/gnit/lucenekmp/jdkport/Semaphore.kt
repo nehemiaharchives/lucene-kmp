@@ -1,7 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
@@ -25,13 +23,10 @@ class Semaphore(permits: Int) {
 
     @OptIn(ExperimentalAtomicApi::class)
     fun acquire() {
-        runBlocking {
-            while (true) {
-                val current = permits.load()
-                if (current > 0 && permits.compareAndSet(current, current - 1)) {
-                    return@runBlocking
-                }
-                yield()
+        while (true) {
+            val current = permits.load()
+            if (current > 0 && permits.compareAndSet(current, current - 1)) {
+                return
             }
         }
     }

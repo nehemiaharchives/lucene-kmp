@@ -8,7 +8,7 @@ import okio.IOException
  * A OutputStream implementation which uses either okio.Sink or okio.Buffer
  */
 class OkioSinkOutputStream : OutputStream {
-    private val sink: BufferedSink?
+    private val sink: KmpSink?
     private val buffer: Buffer?
     private var closed = false
 
@@ -18,7 +18,7 @@ class OkioSinkOutputStream : OutputStream {
      * @param sink the Sink to write to
      */
     constructor(sink: BufferedSink) {
-        this.sink = sink
+        this.sink = kmpSink(sink)
         this.buffer = null
     }
 

@@ -1,12 +1,12 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.AtomicReference
@@ -113,6 +113,8 @@ open class FutureTask<V> : RunnableFuture<V> {
 
     @OptIn(ExperimentalAtomicApi::class)
     private val runner = AtomicReference<Job?>(null)
+
+    private val completion = CompletableDeferred<Unit>()
 
     private companion object {
         private const val NEW = 0
@@ -428,6 +430,9 @@ open class FutureTask<V> : RunnableFuture<V> {
     private fun finishCompletion() {
         //logger.debug { "[FutureTask.finishCompletion] state=${state.load()} hash=${this.hashCode()}" }
         done()
+        if (!completion.isCompleted) {
+            completion.complete(Unit)
+        }
         callable = null // to reduce footprint
     }
 
@@ -440,28 +445,24 @@ open class FutureTask<V> : RunnableFuture<V> {
      */
     @OptIn(ExperimentalAtomicApi::class)
     private suspend fun awaitDone(timed: Boolean, duration: Duration): V {
-        val deadline = if (timed) System.nanoTime() + duration.inWholeNanoseconds else Long.MAX_VALUE
-        var spins = 0
-        while (true) {
-            val s = state.load()
-            if (s > COMPLETING) return report(s)
-            if (timed && System.nanoTime() >= deadline) {
-                if (state.compareAndSet(NEW, CANCELLED)) {
-                    finishCompletion()
+        try {
+            if (timed) {
+                val completed = withTimeoutOrNull(duration) {
+                    completion.await()
+                    true
+                } ?: false
+                if (!completed) {
+                    throw TimeoutException()
                 }
-                throw TimeoutException()
+            } else {
+                completion.await()
             }
-            if (!currentCoroutineContext().isActive) {
-                if (state.compareAndSet(NEW, CANCELLED)) {
-                    finishCompletion()
-                }
-                throw CancellationException()
+            return report(state.load())
+        } catch (e: CancellationException) {
+            if (state.compareAndSet(NEW, CANCELLED)) {
+                finishCompletion()
             }
-            spins++
-            if (spins % 100000 == 0) {
-                //logger.debug { "[FutureTask.awaitDone] still waiting state=$s hash=${this.hashCode()}" }
-            }
-            yield()
+            throw e
         }
     }
 

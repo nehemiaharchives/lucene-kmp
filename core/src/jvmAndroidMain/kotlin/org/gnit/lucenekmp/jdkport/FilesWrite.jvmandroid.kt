@@ -1,23 +1,25 @@
 package org.gnit.lucenekmp.jdkport
 
-import okio.Buffer
 import okio.BufferedSink
-import okio.IOException
 
-actual fun kmpWrite(
-    sink: BufferedSink?,
-    buffer: Buffer?,
-    b: ByteArray,
-    off: Int,
-    len: Int
-) {
-    if (sink != null) {
+private class JvmAndroidKmpSink(
+    private val sink: BufferedSink
+) : KmpSink {
+    override fun writeByte(b: Int) {
+        sink.writeByte(b)
+    }
+
+    override fun write(b: ByteArray, off: Int, len: Int) {
         sink.write(b, off, len)
-        return
     }
-    if (buffer != null) {
-        buffer.write(b, off, len)
-        return
+
+    override fun flush() {
+        sink.flush()
     }
-    throw IOException("No sink or buffer available")
+
+    override fun close() {
+        sink.close()
+    }
 }
+
+actual fun kmpSink(sink: BufferedSink): KmpSink = JvmAndroidKmpSink(sink)

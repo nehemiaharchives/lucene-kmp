@@ -1,12 +1,12 @@
 package org.gnit.lucenekmp.jdkport
 
-import okio.FileMetadata
-import okio.Path
-import okio.FileSystem
-import okio.IOException
-import okio.SYSTEM
 import okio.Buffer
 import okio.BufferedSink
+import okio.FileMetadata
+import okio.FileSystem
+import okio.IOException
+import okio.Path
+import okio.SYSTEM
 import okio.buffer
 
 /**
@@ -197,17 +197,36 @@ object Files {
 
 fun Path.toRealPath() = this.normalized()
 
+interface KmpSink {
+    fun writeByte(b: Int)
+    fun write(b: ByteArray, off: Int, len: Int)
+    fun flush()
+    fun close()
+}
+
+expect fun kmpSink(sink: BufferedSink): KmpSink
+
 /**
  * Platform-specific bulk write used by [OkioSinkOutputStream.write].
  *
  * Kotlin/Native showed a large throughput gap when writes fell back to slow generic paths
  * (especially many small length-prefixed records). This function centralizes an optimized
- * array write path per platform while preserving identical stream semantics.
+ * array write path while preserving identical stream semantics.
  */
-expect fun kmpWrite(
-    sink: BufferedSink?,
+fun kmpWrite(
+    sink: KmpSink?,
     buffer: Buffer?,
     b: ByteArray,
     off: Int,
     len: Int
-)
+) {
+    if (sink != null) {
+        sink.write(b, off, len)
+        return
+    }
+    if (buffer != null) {
+        buffer.write(b, off, len)
+        return
+    }
+    throw IOException("No sink or buffer available")
+}
