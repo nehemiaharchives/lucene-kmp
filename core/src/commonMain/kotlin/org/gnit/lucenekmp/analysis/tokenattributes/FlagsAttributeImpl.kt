@@ -45,9 +45,6 @@ class FlagsAttributeImpl : AttributeImpl(), FlagsAttribute {
     }
 
     override fun newInstance(): AttributeImpl {
-        throw UnsupportedOperationException(
-            "FlagsAttributeImpl cannot be instantiated directly, use init() instead"
-        )
+        return FlagsAttributeImpl()
     }
 }
-

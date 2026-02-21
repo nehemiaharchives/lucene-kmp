@@ -16,6 +16,10 @@ import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.OffsetAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttributeImpl
+import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttributeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -78,8 +82,8 @@ open class AttributeSource {
      * An AttributeSource using the supplied [AttributeFactory] for creating new [ ] instances.
      */
     constructor(factory: AttributeFactory) {
-        this.attributes = mutableMapOf()
-        this.attributeImpls =  mutableMapOf()
+        this.attributes = linkedMapOf()
+        this.attributeImpls = linkedMapOf()
         this.currentState = arrayOfNulls(1)
         this.factory = factory /*java.util.Objects.requireNonNull<AttributeFactory>(factory, "AttributeFactory must not be null")*/
     }
@@ -321,7 +325,7 @@ open class AttributeSource {
                 var thisState = this.getCurrentState()
                 var otherState = obj.getCurrentState()
                 while (thisState != null && otherState != null) {
-                    if (otherState.attribute!!::class !== thisState.attribute!!::class
+                    if (otherState.attribute!!::class != thisState.attribute!!::class
                         || !otherState.attribute!!.equals(thisState.attribute)
                     ) {
                         return false
@@ -473,6 +477,15 @@ open class AttributeSource {
                 PayloadAttributeImpl::class -> arrayOf(
                     PayloadAttribute::class
                 )
+                FlagsAttributeImpl::class -> arrayOf(
+                    FlagsAttribute::class
+                )
+                PositionIncrementAttributeImpl::class -> arrayOf(
+                    PositionIncrementAttribute::class
+                )
+                TypeAttributeImpl::class -> arrayOf(
+                    TypeAttribute::class
+                )
                 PackedTokenAttributeImpl::class -> arrayOf(
                     CharTermAttribute::class,
                     TypeAttribute::class,
@@ -497,6 +510,9 @@ open class AttributeSource {
                 CharTermAttributeImpl::class -> AttributeImpl::class
                 OffsetAttributeImpl::class -> AttributeImpl::class
                 PayloadAttributeImpl::class -> AttributeImpl::class
+                FlagsAttributeImpl::class -> AttributeImpl::class
+                PositionIncrementAttributeImpl::class -> AttributeImpl::class
+                TypeAttributeImpl::class -> AttributeImpl::class
                 PackedTokenAttributeImpl::class -> CharTermAttributeImpl::class
                 KeywordAttributeImpl::class -> AttributeImpl::class
                 AttributeImpl::class -> Any::class
@@ -519,7 +535,9 @@ open class AttributeSource {
                     do {
                         for (curInterface in getInterfaces(clazz!!)) {
                             if (curInterface != Attribute::class
-                                /*&& Attribute::class.java.isAssignableFrom(curInterface)*/
+                                && curInterface != Cloneable::class
+                                && curInterface != CharSequence::class
+                                && curInterface != Appendable::class
                             ) {
                                 intfSet.add(curInterface as KClass<out Attribute>)
                             }

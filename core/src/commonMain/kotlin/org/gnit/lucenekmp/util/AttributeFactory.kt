@@ -12,9 +12,11 @@ import org.gnit.lucenekmp.analysis.tokenattributes.PackedTokenAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TermFrequencyAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttributeImpl
 import org.gnit.lucenekmp.search.BoostAttribute
 import org.gnit.lucenekmp.search.BoostAttributeImpl
 import org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttribute
@@ -33,9 +35,9 @@ abstract class AttributeFactory {
                 // Minimal direct mappings for cases that are not covered by static combined impls
                 CharTermAttribute::class -> CharTermAttributeImpl()
                 OffsetAttribute::class -> OffsetAttributeImpl()
-                PositionIncrementAttribute::class -> PackedTokenAttributeImpl()
+                PositionIncrementAttribute::class -> PositionIncrementAttributeImpl()
                 PositionLengthAttribute::class -> PackedTokenAttributeImpl()
-                TypeAttribute::class -> PackedTokenAttributeImpl()
+                TypeAttribute::class -> TypeAttributeImpl()
                 TermFrequencyAttribute::class -> PackedTokenAttributeImpl()
                 KeywordAttribute::class -> KeywordAttributeImpl()
                 PayloadAttribute::class -> PayloadAttributeImpl()
@@ -100,6 +102,8 @@ abstract class AttributeFactory {
                 OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
                 PayloadAttributeImpl::class -> { { PayloadAttributeImpl() } }
                 FlagsAttributeImpl::class -> { { FlagsAttributeImpl() } }
+                PositionIncrementAttributeImpl::class -> { { PositionIncrementAttributeImpl() } }
+                TypeAttributeImpl::class -> { { TypeAttributeImpl() } }
                 KeywordAttributeImpl::class -> { { KeywordAttributeImpl() } }
                 BoostAttributeImpl::class -> { { BoostAttributeImpl() } }
                 MaxNonCompetitiveBoostAttributeImpl::class -> { { MaxNonCompetitiveBoostAttributeImpl() } }

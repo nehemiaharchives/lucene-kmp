@@ -60,12 +60,10 @@ class PayloadAttributeImpl : AttributeImpl,
     }
 
     override fun reflectWith(reflector: AttributeReflector) {
-        reflector.reflect(PayloadAttribute::class, "payload", payload!!)
+        reflector.reflect(PayloadAttribute::class, "payload", payload)
     }
 
     override fun newInstance(): AttributeImpl {
-        throw UnsupportedOperationException(
-            "AutomatonAttributeImpl cannot be instantiated directly, use init() instead"
-        )
+        return PayloadAttributeImpl()
     }
 }
