@@ -16,9 +16,22 @@ open class ByteBuffer private constructor(
     val capacity: Int
 ) : Comparable<ByteBuffer> {
 
+    private inline fun profileIfEnabled(onMeasured: (Long) -> Unit, block: () -> Unit) {
+        if (!profilingEnabled) {
+            block()
+            return
+        }
+        val startMs = Clock.System.now().toEpochMilliseconds()
+        block()
+        onMeasured(Clock.System.now().toEpochMilliseconds() - startMs)
+    }
+
     /** The current position. Must be between 0 and limit. */
     var position: Int = 0
         get() {
+            if (!profilingEnabled) {
+                return field
+            }
             val startMs = Clock.System.now().toEpochMilliseconds()
             val value = field
             positionGetCalls.addAndFetch(1L)
@@ -26,18 +39,24 @@ open class ByteBuffer private constructor(
             return value
         }
         set(value) {
-            val startMs = Clock.System.now().toEpochMilliseconds()
-            require(value in 0..limit) { "Position ($value) out of bounds (0..$limit)" }
-            field = value
-            // Invalidate mark if position becomes less than mark.
-            if (mark != -1 && mark > field) mark = -1
-            positionSetCalls.addAndFetch(1L)
-            positionSetMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+            profileIfEnabled(
+                onMeasured = { elapsedMs ->
+                    positionSetCalls.addAndFetch(1L)
+                    positionSetMs.addAndFetch(elapsedMs)
+                }
+            ) {
+                require(value in 0..limit) { "Position ($value) out of bounds (0..$limit)" }
+                field = value
+                if (mark != -1 && mark > field) mark = -1
+            }
         }
 
     /** The limit, i.e. the upper bound (exclusive) for read/writes. */
     var limit: Int = capacity
         get() {
+            if (!profilingEnabled) {
+                return field
+            }
             val startMs = Clock.System.now().toEpochMilliseconds()
             val value = field
             limitGetCalls.addAndFetch(1L)
@@ -45,13 +64,17 @@ open class ByteBuffer private constructor(
             return value
         }
         set(value) {
-            val startMs = Clock.System.now().toEpochMilliseconds()
-            require(value in 0..capacity) { "Limit ($value) out of bounds (0..$capacity)" }
-            field = value
-            if (position > field) position = field
-            if (mark != -1 && mark > field) mark = -1
-            limitSetCalls.addAndFetch(1L)
-            limitSetMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+            profileIfEnabled(
+                onMeasured = { elapsedMs ->
+                    limitSetCalls.addAndFetch(1L)
+                    limitSetMs.addAndFetch(elapsedMs)
+                }
+            ) {
+                require(value in 0..capacity) { "Limit ($value) out of bounds (0..$capacity)" }
+                field = value
+                if (position > field) position = field
+                if (mark != -1 && mark > field) mark = -1
+            }
         }
 
     /** The mark. When not set, equals -1. */
@@ -92,9 +115,11 @@ open class ByteBuffer private constructor(
      * Returns byte array that backs this buffer.
      */
     fun array(): ByteArray {
-        val startMs = Clock.System.now().toEpochMilliseconds()
-        arrayCalls.addAndFetch(1L)
-        arrayMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+        if (profilingEnabled) {
+            val startMs = Clock.System.now().toEpochMilliseconds()
+            arrayCalls.addAndFetch(1L)
+            arrayMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+        }
         return array
     }
 
@@ -144,19 +169,23 @@ open class ByteBuffer private constructor(
      * @throws IllegalArgumentException if newLimit is negative or greater than capacity.
      */
     fun limit(newLimit: Int): ByteBuffer {
-        val startMs = Clock.System.now().toEpochMilliseconds()
-        if (newLimit < 0 || newLimit > capacity) {
-            throw IllegalArgumentException("newLimit ($newLimit) out of bounds (0..$capacity)")
+        profileIfEnabled(
+            onMeasured = { elapsedMs ->
+                limitMethodCalls.addAndFetch(1L)
+                limitMethodMs.addAndFetch(elapsedMs)
+            }
+        ) {
+            if (newLimit < 0 || newLimit > capacity) {
+                throw IllegalArgumentException("newLimit ($newLimit) out of bounds (0..$capacity)")
+            }
+            limit = newLimit
+            if (position > newLimit) {
+                position = newLimit
+            }
+            if (mark > newLimit) {
+                mark = -1
+            }
         }
-        limit = newLimit
-        if (position > newLimit) {
-            position = newLimit
-        }
-        if (mark > newLimit) {
-            mark = -1
-        }
-        limitMethodCalls.addAndFetch(1L)
-        limitMethodMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
         return this
     }
 
@@ -164,10 +193,14 @@ open class ByteBuffer private constructor(
      * Sets this buffer's position. If the mark is defined and larger than the new position then it is discarded.
      */
     fun position(newPosition: Int): ByteBuffer {
-        val startMs = Clock.System.now().toEpochMilliseconds()
-        position = newPosition
-        positionMethodCalls.addAndFetch(1L)
-        positionMethodMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+        profileIfEnabled(
+            onMeasured = { elapsedMs ->
+                positionMethodCalls.addAndFetch(1L)
+                positionMethodMs.addAndFetch(elapsedMs)
+            }
+        ) {
+            position = newPosition
+        }
         return this
     }
 
@@ -259,9 +292,8 @@ open class ByteBuffer private constructor(
     }
 
     private fun getArray(index: Int, dst: ByteArray, offset: Int, length: Int): ByteBuffer {
-        val end = offset + length
-        for (i in offset until end) {
-            dst[i] = get(index + (i - offset))
+        if (length > 0) {
+            array.copyInto(dst, destinationOffset = offset, startIndex = index, endIndex = index + length)
         }
         return this
     }
@@ -552,19 +584,37 @@ open class ByteBuffer private constructor(
 
     fun putBuffer(pos: Int, src: ByteBuffer, srcPos: Int, n: Int) {
         checkWritable()
-        for (i in 0 until n) {
-            val b = src.get(srcPos + i)
-            put(pos + i, b)
+        if (n <= 0) {
+            return
         }
+
+        val srcArray = src.array
+        if (srcArray === array) {
+            val srcEnd = srcPos + n
+            val dstEnd = pos + n
+            val overlap = srcPos < dstEnd && pos < srcEnd
+            if (overlap) {
+                val temp = srcArray.copyOfRange(srcPos, srcEnd)
+                temp.copyInto(array, destinationOffset = pos)
+                return
+            }
+        }
+
+        srcArray.copyInto(array, destinationOffset = pos, startIndex = srcPos, endIndex = srcPos + n)
     }
 
     /** Bulk get: transfers remaining bytes into the given destination array. */
     fun get(dst: ByteArray, offset: Int = 0, length: Int = dst.size - offset): ByteBuffer {
         require(offset >= 0 && length >= 0 && offset + length <= dst.size)
-        if (length > remaining())
-            throw BufferUnderflowException("Not enough bytes remaining to read $length bytes (only ${remaining()} available)")
-        for (i in 0 until length) {
-            dst[offset + i] = get()
+        val pos = position
+        val lim = limit
+        val rem = if (pos <= lim) lim - pos else 0
+        if (length > rem) {
+            throw BufferUnderflowException("Not enough bytes remaining to read $length bytes (only $rem available)")
+        }
+        if (length > 0) {
+            array.copyInto(dst, destinationOffset = offset, startIndex = pos, endIndex = pos + length)
+            position = pos + length
         }
         return this
     }
@@ -573,10 +623,15 @@ open class ByteBuffer private constructor(
     fun put(src: ByteArray, offset: Int = 0, length: Int = src.size - offset): ByteBuffer {
         checkWritable()
         require(offset >= 0 && length >= 0 && offset + length <= src.size)
-        if (length > remaining())
-            throw BufferOverflowException("Not enough space remaining to write $length bytes (only ${remaining()} available)")
-        for (i in 0 until length) {
-            put(src[offset + i])
+        val pos = position
+        val lim = limit
+        val rem = if (pos <= lim) lim - pos else 0
+        if (length > rem) {
+            throw BufferOverflowException("Not enough space remaining to write $length bytes (only $rem available)")
+        }
+        if (length > 0) {
+            src.copyInto(array, destinationOffset = pos, startIndex = offset, endIndex = offset + length)
+            position = pos + length
         }
         return this
     }
@@ -663,10 +718,11 @@ open class ByteBuffer private constructor(
 
     /** Returns the number of bytes remaining between position and limit. */
     fun remaining(): Int {
-        val startMs = Clock.System.now().toEpochMilliseconds()
         val value = limit - position
-        remainingCalls.addAndFetch(1L)
-        remainingMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+        if (profilingEnabled) {
+            remainingCalls.addAndFetch(1L)
+            remainingMs.addAndFetch(0L)
+        }
         return value
     }
 
@@ -740,12 +796,16 @@ open class ByteBuffer private constructor(
 
     /** Compares the remaining bytes lexicographically. */
     override fun compareTo(other: ByteBuffer): Int {
-        val n = min(this.remaining(), other.remaining())
+        val thisPos = this.position
+        val otherPos = other.position
+        val thisRem = this.limit - thisPos
+        val otherRem = other.limit - otherPos
+        val n = min(thisRem, otherRem)
         for (i in 0 until n) {
-            val cmp = (this.get(this.position + i).toInt() and 0xff) - (other.get(other.position + i).toInt() and 0xff)
+            val cmp = (this.array[thisPos + i].toInt() and 0xff) - (other.array[otherPos + i].toInt() and 0xff)
             if (cmp != 0) return cmp
         }
-        return this.remaining() - other.remaining()
+        return thisRem - otherRem
     }
 
     /**
@@ -924,9 +984,7 @@ open class ByteBuffer private constructor(
         checkWritable()
         val rem = remaining()
         if (rem > 0) {
-            for (i in 0 until rem) {
-                array[i] = array[position + i]
-            }
+            array.copyInto(destination = array, destinationOffset = 0, startIndex = position, endIndex = position + rem)
         }
         position = rem
         limit = capacity
@@ -941,24 +999,30 @@ open class ByteBuffer private constructor(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ByteBuffer) return false
-        val thisRemaining = remaining()
-        if (thisRemaining != other.remaining()) return false
+        val thisPos = this.position
+        val otherPos = other.position
+        val thisRemaining = this.limit - thisPos
+        val otherRemaining = other.limit - otherPos
+        if (thisRemaining != otherRemaining) return false
         for (i in 0 until thisRemaining) {
-            if (get(position + i) != other.get(other.position + i)) return false
+            if (array[thisPos + i] != other.array[otherPos + i]) return false
         }
         return true
     }
 
     override fun hashCode(): Int {
         var result = 1
-        val end = position + remaining()
-        for (i in position until end) {
-            result = 31 * result + get(i)
+        val start = position
+        val end = limit
+        for (i in start until end) {
+            result = 31 * result + array[i]
         }
         return result
     }
 
     companion object {
+        private var profilingEnabled: Boolean = false
+
         private val arrayCalls: AtomicLong = AtomicLong(0L)
         private val arrayMs: AtomicLong = AtomicLong(0L)
         private val positionGetCalls: AtomicLong = AtomicLong(0L)
@@ -996,6 +1060,7 @@ open class ByteBuffer private constructor(
         )
 
         fun resetProfile() {
+            profilingEnabled = true
             arrayCalls.store(0L)
             arrayMs.store(0L)
             positionGetCalls.store(0L)
@@ -1012,6 +1077,10 @@ open class ByteBuffer private constructor(
             limitMethodMs.store(0L)
             remainingCalls.store(0L)
             remainingMs.store(0L)
+        }
+
+        fun disableProfile() {
+            profilingEnabled = false
         }
 
         fun profile(): Profile {
