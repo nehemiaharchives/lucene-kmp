@@ -40,9 +40,15 @@ class CRC32 : Checksum {
      * Updates the CRC32 checksum with the specified array of bytes.
      */
     override fun update(b: ByteArray, off: Int, len: Int) {
-        for (i in off until (off + len)) {
-            update(b[i].toInt() and 0xFF)
+        var localCrc = crc
+        val crcTable = table
+        val end = off + len
+        var index = off
+        while (index < end) {
+            localCrc = crcTable[(localCrc xor (b[index].toInt() and 0xFF)) and 0xFF] xor (localCrc ushr 8)
+            index++
         }
+        crc = localCrc
     }
 
     /**
