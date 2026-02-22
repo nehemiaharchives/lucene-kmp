@@ -7,8 +7,26 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import okio.IOException
+import kotlin.time.TimeSource
 
 class ByteBufferTest {
+
+    private data class PerfStats(
+        val elapsedNs: Long,
+        val bytesProcessed: Long
+    )
+
+    private fun formatMbPerSec(stats: PerfStats): Double {
+        if (stats.elapsedNs <= 0L) return 0.0
+        val seconds = stats.elapsedNs.toDouble() / 1_000_000_000.0
+        val megaBytes = stats.bytesProcessed.toDouble() / (1024.0 * 1024.0)
+        return megaBytes / seconds
+    }
+
+    private fun formatNsPerByte(stats: PerfStats): Double {
+        if (stats.bytesProcessed <= 0L) return 0.0
+        return stats.elapsedNs.toDouble() / stats.bytesProcessed.toDouble()
+    }
 
     @Test
     fun testAllocate() {
@@ -238,7 +256,6 @@ class ByteBufferTest {
             1, 3, 5, 7, 1, 3, 5, 7,  // Long 1
             2, 4, 6, 8, 2, 4, 6, 8, // Long 2
         )
-
         val long1BE = 0x0103050701030507L
         val long2BE = 0x0204060802040608L
         val long1LE = 0x0705030107050301L // Little Endian
@@ -871,5 +888,42 @@ class ByteBufferTest {
         assertFailsWith<IOException>("Resetting after flip and rewind should throw IOException") {
             buffer.reset()
         }
+    }
+
+    @Test
+    fun testPerformanceGetPut() {
+        val payloadSize = 64 * 1024
+        val iterations = 2_000
+        val payload = ByteArray(payloadSize) { ((it * 31) and 0xFF).toByte() }
+        val sink = ByteArray(payloadSize)
+
+        val warmup = ByteBuffer.allocate(payloadSize)
+        repeat(100) {
+            warmup.clear()
+            warmup.put(payload)
+            warmup.flip()
+            warmup.get(sink, 0, sink.size)
+        }
+
+        var checksum = 0L
+        val start = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            val buffer = ByteBuffer.allocate(payloadSize)
+            buffer.put(payload)
+            buffer.flip()
+            buffer.get(sink, 0, sink.size)
+            checksum += (sink[it % sink.size].toInt() and 0xFF).toLong()
+        }
+        val elapsedNs = start.elapsedNow().inWholeNanoseconds
+        val totalBytes = payloadSize.toLong() * iterations.toLong() * 2L
+        val stats = PerfStats(elapsedNs = elapsedNs, bytesProcessed = totalBytes)
+
+        println(
+            "[PERF][ByteBuffer][get_put] payloadBytes=$payloadSize iterations=$iterations " +
+                "elapsedNs=${stats.elapsedNs} totalBytes=${stats.bytesProcessed} " +
+                "nsPerByte=${formatNsPerByte(stats)} MBps=${formatMbPerSec(stats)} checksum=$checksum"
+        )
+
+        assertTrue(checksum > 0L)
     }
 }

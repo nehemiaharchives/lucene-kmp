@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.store
 
 import okio.Buffer
@@ -10,7 +12,10 @@ import okio.Path
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.assert
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
+import kotlin.time.Clock
 
 /**
  * An [FSDirectory] implementation that uses java.nio's FileChannel's positional read, which
@@ -50,6 +55,63 @@ constructor(
     path: Path,
     lockFactory: LockFactory = FSLockFactory.default
 ) : FSDirectory(path, lockFactory) {
+
+    companion object {
+        @OptIn(ExperimentalAtomicApi::class)
+        private val readInternalCalls: AtomicLong = AtomicLong(0L)
+        private val readInternalRequestedBytes: AtomicLong = AtomicLong(0L)
+        private val readInternalTotalMs: AtomicLong = AtomicLong(0L)
+        private val readInternalChunkIterations: AtomicLong = AtomicLong(0L)
+        private val readInternalTempBufferCreateMs: AtomicLong = AtomicLong(0L)
+        private val readInternalHandleReadCalls: AtomicLong = AtomicLong(0L)
+        private val readInternalHandleReadBytes: AtomicLong = AtomicLong(0L)
+        private val readInternalHandleReadMs: AtomicLong = AtomicLong(0L)
+        private val readInternalTransferMs: AtomicLong = AtomicLong(0L)
+        private val readInternalEofSignals: AtomicLong = AtomicLong(0L)
+
+        data class ReadInternalProfile(
+            val calls: Long,
+            val requestedBytes: Long,
+            val totalMs: Long,
+            val chunkIterations: Long,
+            val tempBufferCreateMs: Long,
+            val handleReadCalls: Long,
+            val handleReadBytes: Long,
+            val handleReadMs: Long,
+            val transferMs: Long,
+            val eofSignals: Long
+        )
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun resetReadInternalProfile() {
+            readInternalCalls.store(0L)
+            readInternalRequestedBytes.store(0L)
+            readInternalTotalMs.store(0L)
+            readInternalChunkIterations.store(0L)
+            readInternalTempBufferCreateMs.store(0L)
+            readInternalHandleReadCalls.store(0L)
+            readInternalHandleReadBytes.store(0L)
+            readInternalHandleReadMs.store(0L)
+            readInternalTransferMs.store(0L)
+            readInternalEofSignals.store(0L)
+        }
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun readInternalProfile(): ReadInternalProfile {
+            return ReadInternalProfile(
+                calls = readInternalCalls.load(),
+                requestedBytes = readInternalRequestedBytes.load(),
+                totalMs = readInternalTotalMs.load(),
+                chunkIterations = readInternalChunkIterations.load(),
+                tempBufferCreateMs = readInternalTempBufferCreateMs.load(),
+                handleReadCalls = readInternalHandleReadCalls.load(),
+                handleReadBytes = readInternalHandleReadBytes.load(),
+                handleReadMs = readInternalHandleReadMs.load(),
+                transferMs = readInternalTransferMs.load(),
+                eofSignals = readInternalEofSignals.load()
+            )
+        }
+    }
 
     private val fileSystem: FileSystem = Files.getFileSystem()
 
@@ -153,6 +215,9 @@ constructor(
 
         @Throws(IOException::class)
         override fun readInternal(b: ByteBuffer) {
+            readInternalCalls.addAndFetch(1L)
+            readInternalRequestedBytes.addAndFetch(b.remaining().toLong())
+            val readInternalStartMs = Clock.System.now().toEpochMilliseconds()
             var pos: Long = filePointer + off
 
             if (pos + b.remaining() > end) {
@@ -162,16 +227,26 @@ constructor(
             try {
                 var readLength: Int = b.remaining()
                 while (readLength > 0) {
+                    readInternalChunkIterations.addAndFetch(1L)
                     val toRead = min(CHUNK_SIZE, readLength)
                     b.limit(b.position + toRead)
                     assert(b.remaining() == toRead)
                     /*val i: Int = channel.read(b, pos)*/
+                    val createBufferStartMs = Clock.System.now().toEpochMilliseconds()
                     val tempOkioBuffer = Buffer()
+                    readInternalTempBufferCreateMs.addAndFetch(
+                        Clock.System.now().toEpochMilliseconds() - createBufferStartMs
+                    )
 
+                    readInternalHandleReadCalls.addAndFetch(1L)
+                    val handleReadStartMs = Clock.System.now().toEpochMilliseconds()
                     val numBytesReadFromHandle: Long = handle.read(
                         fileOffset = pos,
                         sink = tempOkioBuffer,
                         byteCount = toRead.toLong()
+                    )
+                    readInternalHandleReadMs.addAndFetch(
+                        Clock.System.now().toEpochMilliseconds() - handleReadStartMs
                     )
 
                     val i: Int
@@ -179,11 +254,16 @@ constructor(
                     if(numBytesReadFromHandle == -1L){
                         // EOF reached at the given fileOffset
                         i = -1
+                        readInternalEofSignals.addAndFetch(1L)
                     }else{
                         val actualByteCount = numBytesReadFromHandle.toInt()
                         if(actualByteCount > 0){
-                            val dataToTransfer = tempOkioBuffer.readByteArray(actualByteCount.toLong())
-                            b.put(dataToTransfer)
+                            readInternalHandleReadBytes.addAndFetch(actualByteCount.toLong())
+                            val transferStartMs = Clock.System.now().toEpochMilliseconds()
+                            transferTempOkioBufferToByteBuffer(tempOkioBuffer, actualByteCount, b)
+                            readInternalTransferMs.addAndFetch(
+                                Clock.System.now().toEpochMilliseconds() - transferStartMs
+                            )
                         }
                         i = actualByteCount
                     }
@@ -217,6 +297,8 @@ constructor(
                     throw AlreadyClosedException("Already closed: $this", ioe)
                 }
                 throw IOException(ioe.message + ": " + this, ioe)
+            } finally {
+                readInternalTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readInternalStartMs)
             }
         }
 

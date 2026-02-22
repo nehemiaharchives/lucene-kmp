@@ -1,7 +1,12 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.jdkport
 
 import okio.IOException
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
+import kotlin.time.Clock
 
 // A simple re-implementation of java.nio.ByteBuffer using a ByteArray as the backing store.
 @Ported(from = "java.nio.ByteBuffer")
@@ -13,20 +18,40 @@ open class ByteBuffer private constructor(
 
     /** The current position. Must be between 0 and limit. */
     var position: Int = 0
+        get() {
+            val startMs = Clock.System.now().toEpochMilliseconds()
+            val value = field
+            positionGetCalls.addAndFetch(1L)
+            positionGetMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+            return value
+        }
         set(value) {
+            val startMs = Clock.System.now().toEpochMilliseconds()
             require(value in 0..limit) { "Position ($value) out of bounds (0..$limit)" }
             field = value
             // Invalidate mark if position becomes less than mark.
             if (mark != -1 && mark > field) mark = -1
+            positionSetCalls.addAndFetch(1L)
+            positionSetMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
         }
 
     /** The limit, i.e. the upper bound (exclusive) for read/writes. */
     var limit: Int = capacity
+        get() {
+            val startMs = Clock.System.now().toEpochMilliseconds()
+            val value = field
+            limitGetCalls.addAndFetch(1L)
+            limitGetMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+            return value
+        }
         set(value) {
+            val startMs = Clock.System.now().toEpochMilliseconds()
             require(value in 0..capacity) { "Limit ($value) out of bounds (0..$capacity)" }
             field = value
             if (position > field) position = field
             if (mark != -1 && mark > field) mark = -1
+            limitSetCalls.addAndFetch(1L)
+            limitSetMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
         }
 
     /** The mark. When not set, equals -1. */
@@ -67,6 +92,9 @@ open class ByteBuffer private constructor(
      * Returns byte array that backs this buffer.
      */
     fun array(): ByteArray {
+        val startMs = Clock.System.now().toEpochMilliseconds()
+        arrayCalls.addAndFetch(1L)
+        arrayMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
         return array
     }
 
@@ -116,6 +144,7 @@ open class ByteBuffer private constructor(
      * @throws IllegalArgumentException if newLimit is negative or greater than capacity.
      */
     fun limit(newLimit: Int): ByteBuffer {
+        val startMs = Clock.System.now().toEpochMilliseconds()
         if (newLimit < 0 || newLimit > capacity) {
             throw IllegalArgumentException("newLimit ($newLimit) out of bounds (0..$capacity)")
         }
@@ -126,6 +155,8 @@ open class ByteBuffer private constructor(
         if (mark > newLimit) {
             mark = -1
         }
+        limitMethodCalls.addAndFetch(1L)
+        limitMethodMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
         return this
     }
 
@@ -133,7 +164,10 @@ open class ByteBuffer private constructor(
      * Sets this buffer's position. If the mark is defined and larger than the new position then it is discarded.
      */
     fun position(newPosition: Int): ByteBuffer {
+        val startMs = Clock.System.now().toEpochMilliseconds()
         position = newPosition
+        positionMethodCalls.addAndFetch(1L)
+        positionMethodMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
         return this
     }
 
@@ -628,7 +662,13 @@ open class ByteBuffer private constructor(
     }
 
     /** Returns the number of bytes remaining between position and limit. */
-    fun remaining(): Int = limit - position
+    fun remaining(): Int {
+        val startMs = Clock.System.now().toEpochMilliseconds()
+        val value = limit - position
+        remainingCalls.addAndFetch(1L)
+        remainingMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - startMs)
+        return value
+    }
 
     /**
      * Tells whether there are any elements between the current position and
@@ -919,6 +959,82 @@ open class ByteBuffer private constructor(
     }
 
     companion object {
+        private val arrayCalls: AtomicLong = AtomicLong(0L)
+        private val arrayMs: AtomicLong = AtomicLong(0L)
+        private val positionGetCalls: AtomicLong = AtomicLong(0L)
+        private val positionGetMs: AtomicLong = AtomicLong(0L)
+        private val positionSetCalls: AtomicLong = AtomicLong(0L)
+        private val positionSetMs: AtomicLong = AtomicLong(0L)
+        private val positionMethodCalls: AtomicLong = AtomicLong(0L)
+        private val positionMethodMs: AtomicLong = AtomicLong(0L)
+        private val limitGetCalls: AtomicLong = AtomicLong(0L)
+        private val limitGetMs: AtomicLong = AtomicLong(0L)
+        private val limitSetCalls: AtomicLong = AtomicLong(0L)
+        private val limitSetMs: AtomicLong = AtomicLong(0L)
+        private val limitMethodCalls: AtomicLong = AtomicLong(0L)
+        private val limitMethodMs: AtomicLong = AtomicLong(0L)
+        private val remainingCalls: AtomicLong = AtomicLong(0L)
+        private val remainingMs: AtomicLong = AtomicLong(0L)
+
+        data class Profile(
+            val arrayCalls: Long,
+            val arrayMs: Long,
+            val positionGetCalls: Long,
+            val positionGetMs: Long,
+            val positionSetCalls: Long,
+            val positionSetMs: Long,
+            val positionMethodCalls: Long,
+            val positionMethodMs: Long,
+            val limitGetCalls: Long,
+            val limitGetMs: Long,
+            val limitSetCalls: Long,
+            val limitSetMs: Long,
+            val limitMethodCalls: Long,
+            val limitMethodMs: Long,
+            val remainingCalls: Long,
+            val remainingMs: Long
+        )
+
+        fun resetProfile() {
+            arrayCalls.store(0L)
+            arrayMs.store(0L)
+            positionGetCalls.store(0L)
+            positionGetMs.store(0L)
+            positionSetCalls.store(0L)
+            positionSetMs.store(0L)
+            positionMethodCalls.store(0L)
+            positionMethodMs.store(0L)
+            limitGetCalls.store(0L)
+            limitGetMs.store(0L)
+            limitSetCalls.store(0L)
+            limitSetMs.store(0L)
+            limitMethodCalls.store(0L)
+            limitMethodMs.store(0L)
+            remainingCalls.store(0L)
+            remainingMs.store(0L)
+        }
+
+        fun profile(): Profile {
+            return Profile(
+                arrayCalls = arrayCalls.load(),
+                arrayMs = arrayMs.load(),
+                positionGetCalls = positionGetCalls.load(),
+                positionGetMs = positionGetMs.load(),
+                positionSetCalls = positionSetCalls.load(),
+                positionSetMs = positionSetMs.load(),
+                positionMethodCalls = positionMethodCalls.load(),
+                positionMethodMs = positionMethodMs.load(),
+                limitGetCalls = limitGetCalls.load(),
+                limitGetMs = limitGetMs.load(),
+                limitSetCalls = limitSetCalls.load(),
+                limitSetMs = limitSetMs.load(),
+                limitMethodCalls = limitMethodCalls.load(),
+                limitMethodMs = limitMethodMs.load(),
+                remainingCalls = remainingCalls.load(),
+                remainingMs = remainingMs.load()
+            )
+        }
+
         fun allocate(capacity: Int): ByteBuffer {
             require(capacity >= 0) { "Capacity must be non-negative" }
             val backing = ByteArray(capacity)

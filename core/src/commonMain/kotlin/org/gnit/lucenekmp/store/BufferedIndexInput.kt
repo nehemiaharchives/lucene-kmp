@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.store
 
 import org.gnit.lucenekmp.jdkport.ByteBuffer
@@ -7,8 +9,11 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.intBitsToFloat
 import org.gnit.lucenekmp.util.GroupVIntUtil
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Clock
 
 
 /** Base implementation class for buffered [IndexInput].  */
@@ -48,6 +53,9 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
     }
 
     override fun readBytes(b: ByteArray, offset: Int, len: Int, useBuffer: Boolean) {
+        val readBytesStartMs = Clock.System.now().toEpochMilliseconds()
+        readBytesCalls.addAndFetch(1L)
+        readBytesRequestedBytes.addAndFetch(len.toLong())
         var offset = offset
         var len = len
         val available: Int = buffer.remaining()
@@ -55,6 +63,7 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
             // the buffer contains enough data to satisfy this request
             if (len > 0)  // to allow b to be null if len is 0...
                 buffer.get(b, offset, len)
+            readBytesFastPathCalls.addAndFetch(1L)
         } else {
             // the buffer does not have enough data. First serve all we've got.
             if (available > 0) {
@@ -64,6 +73,7 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
             }
             // and now, read the remaining 'len' bytes:
             if (useBuffer && len < bufferSize) {
+                val refillPathStartMs = Clock.System.now().toEpochMilliseconds()
                 // If the amount left to read is small enough, and
                 // we are allowed to use our buffer, do it in the usual
                 // buffered way: fill the buffer and copy from it:
@@ -75,7 +85,10 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
                 } else {
                     buffer.get(b, offset, len)
                 }
+                readBytesRefillPathCalls.addAndFetch(1L)
+                readBytesRefillPathMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillPathStartMs)
             } else {
+                val directPathStartMs = Clock.System.now().toEpochMilliseconds()
                 // The amount left to read is larger than the buffer
                 // or we've been asked to not use our buffer -
                 // there's no performance reason not to read it all
@@ -85,11 +98,20 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
                 // had in the buffer.
                 val after: Long = bufferStart + buffer.position + len
                 if (after > length()) throw EOFException("read past EOF: $this")
+                readBytesDirectPathReadInternalCalls.addAndFetch(1L)
+                readBytesDirectPathReadInternalBytes.addAndFetch(len.toLong())
+                val readInternalStartMs = Clock.System.now().toEpochMilliseconds()
                 readInternal(ByteBuffer.wrap(b, offset, len))
+                readBytesDirectPathReadInternalMs.addAndFetch(
+                    Clock.System.now().toEpochMilliseconds() - readInternalStartMs
+                )
                 bufferStart = after
                 buffer.limit(0) // trigger refill() on read
+                readBytesDirectPathCalls.addAndFetch(1L)
+                readBytesDirectPathMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - directPathStartMs)
             }
         }
+        readBytesTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readBytesStartMs)
     }
 
     override fun readShort(): Short {
@@ -257,6 +279,8 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
 
     @Throws(IOException::class)
     private fun refill() {
+        refillCalls.addAndFetch(1L)
+        val refillStartMs = Clock.System.now().toEpochMilliseconds()
         val start: Long = bufferStart + buffer.position
         var end = start + bufferSize
         if (end > length())  // don't read past EOF
@@ -273,12 +297,17 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
         buffer.position(0)
         buffer.limit(newLength)
         bufferStart = start
+        refillReadInternalCalls.addAndFetch(1L)
+        refillReadInternalBytes.addAndFetch(newLength.toLong())
+        val refillReadInternalStartMs = Clock.System.now().toEpochMilliseconds()
         readInternal(buffer)
+        refillReadInternalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillReadInternalStartMs)
         // Make sure sub classes don't mess up with the buffer.
         assert(buffer.order() == ByteOrder.LITTLE_ENDIAN) { buffer.order() }
         assert(buffer.remaining() == 0) { "should have thrown EOFException" }
         assert(buffer.position == newLength)
         buffer.flip()
+        refillTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillStartMs)
     }
 
     /**
@@ -402,6 +431,87 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
         // LUCENE-888 for details.
         /** A buffer size for merges set to {@value #MERGE_BUFFER_SIZE}.  */
         const val MERGE_BUFFER_SIZE: Int = 4096
+
+        @OptIn(ExperimentalAtomicApi::class)
+        private val readBytesCalls: AtomicLong = AtomicLong(0L)
+        private val readBytesRequestedBytes: AtomicLong = AtomicLong(0L)
+        private val readBytesTotalMs: AtomicLong = AtomicLong(0L)
+        private val readBytesFastPathCalls: AtomicLong = AtomicLong(0L)
+        private val readBytesRefillPathCalls: AtomicLong = AtomicLong(0L)
+        private val readBytesRefillPathMs: AtomicLong = AtomicLong(0L)
+        private val readBytesDirectPathCalls: AtomicLong = AtomicLong(0L)
+        private val readBytesDirectPathMs: AtomicLong = AtomicLong(0L)
+        private val readBytesDirectPathReadInternalCalls: AtomicLong = AtomicLong(0L)
+        private val readBytesDirectPathReadInternalBytes: AtomicLong = AtomicLong(0L)
+        private val readBytesDirectPathReadInternalMs: AtomicLong = AtomicLong(0L)
+
+        private val refillCalls: AtomicLong = AtomicLong(0L)
+        private val refillTotalMs: AtomicLong = AtomicLong(0L)
+        private val refillReadInternalCalls: AtomicLong = AtomicLong(0L)
+        private val refillReadInternalBytes: AtomicLong = AtomicLong(0L)
+        private val refillReadInternalMs: AtomicLong = AtomicLong(0L)
+
+        @OptIn(ExperimentalAtomicApi::class)
+        data class Profile(
+            val readBytesCalls: Long,
+            val readBytesRequestedBytes: Long,
+            val readBytesTotalMs: Long,
+            val readBytesFastPathCalls: Long,
+            val readBytesRefillPathCalls: Long,
+            val readBytesRefillPathMs: Long,
+            val readBytesDirectPathCalls: Long,
+            val readBytesDirectPathMs: Long,
+            val readBytesDirectPathReadInternalCalls: Long,
+            val readBytesDirectPathReadInternalBytes: Long,
+            val readBytesDirectPathReadInternalMs: Long,
+            val refillCalls: Long,
+            val refillTotalMs: Long,
+            val refillReadInternalCalls: Long,
+            val refillReadInternalBytes: Long,
+            val refillReadInternalMs: Long
+        )
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun resetProfile() {
+            readBytesCalls.store(0L)
+            readBytesRequestedBytes.store(0L)
+            readBytesTotalMs.store(0L)
+            readBytesFastPathCalls.store(0L)
+            readBytesRefillPathCalls.store(0L)
+            readBytesRefillPathMs.store(0L)
+            readBytesDirectPathCalls.store(0L)
+            readBytesDirectPathMs.store(0L)
+            readBytesDirectPathReadInternalCalls.store(0L)
+            readBytesDirectPathReadInternalBytes.store(0L)
+            readBytesDirectPathReadInternalMs.store(0L)
+            refillCalls.store(0L)
+            refillTotalMs.store(0L)
+            refillReadInternalCalls.store(0L)
+            refillReadInternalBytes.store(0L)
+            refillReadInternalMs.store(0L)
+        }
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun profile(): Profile {
+            return Profile(
+                readBytesCalls = readBytesCalls.load(),
+                readBytesRequestedBytes = readBytesRequestedBytes.load(),
+                readBytesTotalMs = readBytesTotalMs.load(),
+                readBytesFastPathCalls = readBytesFastPathCalls.load(),
+                readBytesRefillPathCalls = readBytesRefillPathCalls.load(),
+                readBytesRefillPathMs = readBytesRefillPathMs.load(),
+                readBytesDirectPathCalls = readBytesDirectPathCalls.load(),
+                readBytesDirectPathMs = readBytesDirectPathMs.load(),
+                readBytesDirectPathReadInternalCalls = readBytesDirectPathReadInternalCalls.load(),
+                readBytesDirectPathReadInternalBytes = readBytesDirectPathReadInternalBytes.load(),
+                readBytesDirectPathReadInternalMs = readBytesDirectPathReadInternalMs.load(),
+                refillCalls = refillCalls.load(),
+                refillTotalMs = refillTotalMs.load(),
+                refillReadInternalCalls = refillReadInternalCalls.load(),
+                refillReadInternalBytes = refillReadInternalBytes.load(),
+                refillReadInternalMs = refillReadInternalMs.load()
+            )
+        }
 
         /** Returns default buffer sizes for the given [IOContext]  */
         fun bufferSize(context: IOContext): Int {

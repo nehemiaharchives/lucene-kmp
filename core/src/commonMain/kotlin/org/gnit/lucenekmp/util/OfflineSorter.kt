@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -58,6 +60,53 @@ open class OfflineSorter @Throws(IOException::class) constructor(
 
         /** Default comparator: sorts in binary (codepoint) order */
         val DEFAULT_COMPARATOR: Comparator<BytesRef> = Comparator { a, b -> a.compareTo(b) }
+
+        @OptIn(ExperimentalAtomicApi::class)
+        private val byteSeqNextCalls: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextEofCalls: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextTotalMs: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextReadLengthMs: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextPrepareRefMs: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextReadBytesMs: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextGetRefMs: AtomicLong = AtomicLong(0L)
+        private val byteSeqNextPayloadBytes: AtomicLong = AtomicLong(0L)
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun resetByteSequencesReaderProfile() {
+            byteSeqNextCalls.store(0L)
+            byteSeqNextEofCalls.store(0L)
+            byteSeqNextTotalMs.store(0L)
+            byteSeqNextReadLengthMs.store(0L)
+            byteSeqNextPrepareRefMs.store(0L)
+            byteSeqNextReadBytesMs.store(0L)
+            byteSeqNextGetRefMs.store(0L)
+            byteSeqNextPayloadBytes.store(0L)
+        }
+
+        data class ByteSequencesReaderProfile(
+            val calls: Long,
+            val eofCalls: Long,
+            val totalMs: Long,
+            val readLengthMs: Long,
+            val prepareRefMs: Long,
+            val readBytesMs: Long,
+            val getRefMs: Long,
+            val payloadBytes: Long
+        )
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun byteSequencesReaderProfile(): ByteSequencesReaderProfile {
+            return ByteSequencesReaderProfile(
+                calls = byteSeqNextCalls.load(),
+                eofCalls = byteSeqNextEofCalls.load(),
+                totalMs = byteSeqNextTotalMs.load(),
+                readLengthMs = byteSeqNextReadLengthMs.load(),
+                prepareRefMs = byteSeqNextPrepareRefMs.load(),
+                readBytesMs = byteSeqNextReadBytesMs.load(),
+                getRefMs = byteSeqNextGetRefMs.load(),
+                payloadBytes = byteSeqNextPayloadBytes.load()
+            )
+        }
     }
 
     private val exec: ExecutorService
@@ -141,6 +190,15 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         var mergeRounds: Int = 0
         var lineCount: Long = 0L
         val mergeTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeWaitTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeInitTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeLoopTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeLoopWriteTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeLoopNextTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeLoopPopTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeLoopUpdateTopTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeLoopTopLookupTimeMS: AtomicLong = AtomicLong(0L)
+        val mergeDeleteTimeMS: AtomicLong = AtomicLong(0L)
         val sortTimeMS: AtomicLong = AtomicLong(0L)
         var totalTimeMS: Long = 0L
         var readTimeMS: Long = 0L
@@ -394,16 +452,37 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         private val end: Long = `in`.length() - CodecUtil.footerLength().toLong()
         private val ref = BytesRefBuilder()
 
+        @OptIn(ExperimentalAtomicApi::class)
         @Throws(IOException::class)
         override open fun next(): BytesRef? {
+            byteSeqNextCalls.addAndFetch(1L)
+            val nextStartMs = Clock.System.now().toEpochMilliseconds()
             if (`in`.filePointer >= end) {
+                byteSeqNextEofCalls.addAndFetch(1L)
+                byteSeqNextTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - nextStartMs)
                 return null
             }
+
+            val readLengthStartMs = Clock.System.now().toEpochMilliseconds()
             val length = `in`.readShort().toInt() and 0xFFFF
+            byteSeqNextReadLengthMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readLengthStartMs)
+
+            val prepareRefStartMs = Clock.System.now().toEpochMilliseconds()
             ref.growNoCopy(length)
             ref.setLength(length)
+            byteSeqNextPrepareRefMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - prepareRefStartMs)
+
+            val readBytesStartMs = Clock.System.now().toEpochMilliseconds()
             `in`.readBytes(ref.bytes(), 0, length)
-            return ref.get()
+            byteSeqNextReadBytesMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readBytesStartMs)
+
+            val getRefStartMs = Clock.System.now().toEpochMilliseconds()
+            val result = ref.get()
+            byteSeqNextGetRefMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - getRefStartMs)
+
+            byteSeqNextPayloadBytes.addAndFetch(length.toLong())
+            byteSeqNextTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - nextStartMs)
+            return result
         }
 
         override open fun close() {
@@ -474,10 +553,14 @@ open class OfflineSorter @Throws(IOException::class) constructor(
             val taskStartMS = Clock.System.now().toEpochMilliseconds()
             val waitStartMS = Clock.System.now().toEpochMilliseconds()
             var totalCount = 0L
-            for (segment in segmentsToMerge) {
-                totalCount += getPartition(segment).count
+            val resolvedSegments = ArrayList<Partition>(segmentsToMerge.size)
+            for (segmentFuture in segmentsToMerge) {
+                val segment = getPartition(segmentFuture)
+                resolvedSegments.add(segment)
+                totalCount += segment.count
             }
             val waitElapsedMS = Clock.System.now().toEpochMilliseconds() - waitStartMS
+            sortInfo!!.mergeWaitTimeMS.addAndFetch(waitElapsedMS)
             val queue = object : PriorityQueue<FileAndTop>(segmentsToMerge.size) {
                 override fun lessThan(a: FileAndTop, b: FileAndTop): Boolean {
                     return comparator.compare(a.current, b.current) < 0
@@ -490,8 +573,8 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                 getWriter(dir.createTempOutput(tempFileNamePrefix, "sort", IOContext.DEFAULT), totalCount).use { writer ->
                     newSegmentName = writer.out.name!!
                     val initStartMS = Clock.System.now().toEpochMilliseconds()
-                    for (i in segmentsToMerge.indices) {
-                        val segment = getPartition(segmentsToMerge[i])
+                    for (i in resolvedSegments.indices) {
+                        val segment = resolvedSegments[i]
                         streams[i] = getReader(dir.openChecksumInput(segment.fileName!!), segment.fileName)
                         val item = try {
                             streams[i]!!.next()
@@ -502,24 +585,55 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                         queue.insertWithOverflow(FileAndTop(i, item))
                     }
                     val initElapsedMS = Clock.System.now().toEpochMilliseconds() - initStartMS
+                    sortInfo!!.mergeInitTimeMS.addAndFetch(initElapsedMS)
                     val mergeLoopStartMS = Clock.System.now().toEpochMilliseconds()
+                    var writeElapsedMS = 0L
+                    var nextElapsedMS = 0L
+                    var popElapsedMS = 0L
+                    var updateTopElapsedMS = 0L
+                    var topLookupElapsedMS = 0L
                     var mergedCount = 0L
+                    var topLookupStartMS = Clock.System.now().toEpochMilliseconds()
                     var top = queue.topOrNull()
+                    topLookupElapsedMS += Clock.System.now().toEpochMilliseconds() - topLookupStartMS
                     while (top != null) {
+                        val writeStartMS = Clock.System.now().toEpochMilliseconds()
                         writer.write(top.current)
+                        writeElapsedMS += Clock.System.now().toEpochMilliseconds() - writeStartMS
                         mergedCount++
+
+                        val nextStartMS = Clock.System.now().toEpochMilliseconds()
                         top.current = try {
                             streams[top.fd]!!.next()
                         } catch (t: Throwable) {
                             verifyChecksum(t, streams[top.fd]!!); null
                         } ?: run {
+                            nextElapsedMS += Clock.System.now().toEpochMilliseconds() - nextStartMS
+                            val popStartMS = Clock.System.now().toEpochMilliseconds()
                             queue.pop()
+                            popElapsedMS += Clock.System.now().toEpochMilliseconds() - popStartMS
+                            topLookupStartMS = Clock.System.now().toEpochMilliseconds()
                             top = queue.topOrNull()
+                            topLookupElapsedMS += Clock.System.now().toEpochMilliseconds() - topLookupStartMS
                             continue
                         }
+                        nextElapsedMS += Clock.System.now().toEpochMilliseconds() - nextStartMS
+
+                        val updateTopStartMS = Clock.System.now().toEpochMilliseconds()
                         queue.updateTop()
+                        updateTopElapsedMS += Clock.System.now().toEpochMilliseconds() - updateTopStartMS
+
+                        topLookupStartMS = Clock.System.now().toEpochMilliseconds()
                         top = queue.topOrNull()
+                        topLookupElapsedMS += Clock.System.now().toEpochMilliseconds() - topLookupStartMS
                     }
+                    val mergeLoopElapsedMS = Clock.System.now().toEpochMilliseconds() - mergeLoopStartMS
+                    sortInfo!!.mergeLoopTimeMS.addAndFetch(mergeLoopElapsedMS)
+                    sortInfo!!.mergeLoopWriteTimeMS.addAndFetch(writeElapsedMS)
+                    sortInfo!!.mergeLoopNextTimeMS.addAndFetch(nextElapsedMS)
+                    sortInfo!!.mergeLoopPopTimeMS.addAndFetch(popElapsedMS)
+                    sortInfo!!.mergeLoopUpdateTopTimeMS.addAndFetch(updateTopElapsedMS)
+                    sortInfo!!.mergeLoopTopLookupTimeMS.addAndFetch(topLookupElapsedMS)
                     CodecUtil.writeFooter(writer.out)
                     for (reader in streams) {
                         if (reader != null) {
@@ -531,7 +645,10 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                     trace {
                         "OfflineSorter.mergeTask mergedCount=$mergedCount totalCount=$totalCount " +
                             "segmentsToMerge=${segmentsToMerge.size} waitElapsedMs=$waitElapsedMS " +
-                            "initElapsedMs=$initElapsedMS mergeLoopElapsedMs=${Clock.System.now().toEpochMilliseconds() - mergeLoopStartMS} " +
+                            "initElapsedMs=$initElapsedMS mergeLoopElapsedMs=$mergeLoopElapsedMS " +
+                            "mergeLoopWriteMs=$writeElapsedMS mergeLoopNextMs=$nextElapsedMS " +
+                            "mergeLoopPopMs=$popElapsedMS mergeLoopUpdateTopMs=$updateTopElapsedMS " +
+                            "mergeLoopTopLookupMs=$topLookupElapsedMS " +
                             "mergeElapsedMs=$mergeElapsedMS taskElapsedMs=${Clock.System.now().toEpochMilliseconds() - taskStartMS}"
                     }
                 }
@@ -540,13 +657,15 @@ open class OfflineSorter @Throws(IOException::class) constructor(
             }
             val deleteStartMS = Clock.System.now().toEpochMilliseconds()
             val toDelete = mutableListOf<String>()
-            for (segment in segmentsToMerge) {
-                toDelete.add(getPartition(segment).fileName!!)
+            for (segment in resolvedSegments) {
+                toDelete.add(segment.fileName!!)
             }
             IOUtils.deleteFiles(dir, toDelete)
+            val deleteElapsedMs = Clock.System.now().toEpochMilliseconds() - deleteStartMS
+            sortInfo!!.mergeDeleteTimeMS.addAndFetch(deleteElapsedMs)
             trace {
                 "OfflineSorter.mergeTask deleteTempFiles count=${toDelete.size} " +
-                    "elapsedMs=${Clock.System.now().toEpochMilliseconds() - deleteStartMS}"
+                    "elapsedMs=$deleteElapsedMs"
             }
             return Partition(requireNotNull(newSegmentName), totalCount)
         }

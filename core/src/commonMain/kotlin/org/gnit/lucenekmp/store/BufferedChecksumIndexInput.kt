@@ -1,7 +1,12 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.store
 
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.CRC32
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.time.Clock
 
 
 /**
@@ -13,15 +18,31 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
 
     @Throws(IOException::class)
     override fun readByte(): Byte {
+        readByteCalls.addAndFetch(1L)
+        val readStartMs = Clock.System.now().toEpochMilliseconds()
         val b = main.readByte()
+        readByteDelegateReadMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readStartMs)
+        val checksumStartMs = Clock.System.now().toEpochMilliseconds()
         digest.update(b.toInt())
+        readByteChecksumMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - checksumStartMs)
         return b
     }
 
     @Throws(IOException::class)
     override fun readBytes(b: ByteArray, offset: Int, len: Int) {
-        main.readBytes(b, offset, len)
-        digest.update(b, offset, len)
+        readBytesCalls.addAndFetch(1L)
+        readBytesRequestedBytes.addAndFetch(len.toLong())
+        val stepTimesNs = readBytesWithChecksumStepTimesNs(
+            main = main,
+            digest = digest,
+            buffer = b,
+            offset = offset,
+            len = len
+        )
+        readBytesDelegateReadNs.addAndFetch(stepTimesNs.delegateReadNs)
+        readBytesChecksumNs.addAndFetch(stepTimesNs.checksumUpdateNs)
+        readBytesDelegateReadMs.addAndFetch(stepTimesNs.delegateReadNs / 1_000_000L)
+        readBytesChecksumMs.addAndFetch(stepTimesNs.checksumUpdateNs / 1_000_000L)
     }
 
     @Throws(IOException::class)
@@ -73,5 +94,58 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
     @Throws(IOException::class)
     override fun slice(sliceDescription: String, offset: Long, length: Long): IndexInput {
         throw UnsupportedOperationException()
+    }
+
+    companion object {
+        @OptIn(ExperimentalAtomicApi::class)
+        private val readByteCalls: AtomicLong = AtomicLong(0L)
+        private val readByteDelegateReadMs: AtomicLong = AtomicLong(0L)
+        private val readByteChecksumMs: AtomicLong = AtomicLong(0L)
+        private val readBytesCalls: AtomicLong = AtomicLong(0L)
+        private val readBytesRequestedBytes: AtomicLong = AtomicLong(0L)
+        private val readBytesDelegateReadMs: AtomicLong = AtomicLong(0L)
+        private val readBytesChecksumMs: AtomicLong = AtomicLong(0L)
+        private val readBytesDelegateReadNs: AtomicLong = AtomicLong(0L)
+        private val readBytesChecksumNs: AtomicLong = AtomicLong(0L)
+
+        data class Profile(
+            val readByteCalls: Long,
+            val readByteDelegateReadMs: Long,
+            val readByteChecksumMs: Long,
+            val readBytesCalls: Long,
+            val readBytesRequestedBytes: Long,
+            val readBytesDelegateReadMs: Long,
+            val readBytesChecksumMs: Long,
+            val readBytesDelegateReadNs: Long,
+            val readBytesChecksumNs: Long
+        )
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun resetProfile() {
+            readByteCalls.store(0L)
+            readByteDelegateReadMs.store(0L)
+            readByteChecksumMs.store(0L)
+            readBytesCalls.store(0L)
+            readBytesRequestedBytes.store(0L)
+            readBytesDelegateReadMs.store(0L)
+            readBytesChecksumMs.store(0L)
+            readBytesDelegateReadNs.store(0L)
+            readBytesChecksumNs.store(0L)
+        }
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun profile(): Profile {
+            return Profile(
+                readByteCalls = readByteCalls.load(),
+                readByteDelegateReadMs = readByteDelegateReadMs.load(),
+                readByteChecksumMs = readByteChecksumMs.load(),
+                readBytesCalls = readBytesCalls.load(),
+                readBytesRequestedBytes = readBytesRequestedBytes.load(),
+                readBytesDelegateReadMs = readBytesDelegateReadMs.load(),
+                readBytesChecksumMs = readBytesChecksumMs.load(),
+                readBytesDelegateReadNs = readBytesDelegateReadNs.load(),
+                readBytesChecksumNs = readBytesChecksumNs.load()
+            )
+        }
     }
 }
