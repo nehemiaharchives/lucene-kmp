@@ -2,7 +2,6 @@
 
 package org.gnit.lucenekmp.util
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.jdkport.Callable
@@ -39,8 +38,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
     maxPartitionsInRAM: Int
 ) {
     companion object {
-        private val logger = KotlinLogging.logger {}
-
         /** Convenience constant for megabytes */
         const val MB: Long = 1024L * 1024L
 
@@ -127,8 +124,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
 
     var sortInfo: SortInfo? = null
         private set
-
-    private fun trace(message: () -> String) {}
 
     init {
         if (exec != null) {
@@ -258,11 +253,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         sortInfo = SortInfo()
         val sortInfo = requireNotNull(sortInfo)
         val startMS = Clock.System.now().toEpochMilliseconds()
-        trace {
-            "OfflineSorter.sort start inputFileName=$inputFileName " +
-                "ramBufferBytes=${ramBufferSize.bytes} maxTempFiles=$maxTempFiles " +
-                "valueLength=$valueLength"
-        }
         val segments = mutableListOf<org.gnit.lucenekmp.jdkport.Future<Partition>>()
         var levelCounts = IntArray(1)
         val trackingDir = TrackingDirectoryWrapper(dir)
@@ -281,20 +271,10 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                     sortInfo.tempMergeFiles++
                     sortInfo.lineCount += part.count
                     levelCounts[0]++
-                    trace {
-                        "OfflineSorter.sort partitionScheduled count=${part.count} exhausted=${part.exhausted} " +
-                            "segments=${segments.size} elapsedMs=${Clock.System.now().toEpochMilliseconds() - startMS}"
-                    }
 
                     var mergeLevel = 0
                     while (levelCounts[mergeLevel] == maxTempFiles) {
-                        val mergeStartMS = Clock.System.now().toEpochMilliseconds()
                         mergePartitions(trackingDir, segments)
-                        trace {
-                            "OfflineSorter.sort intermediateMergeSubmitted mergeLevel=$mergeLevel " +
-                                "segmentsAfterSubmit=${segments.size} mergeScheduleElapsedMs=${Clock.System.now().toEpochMilliseconds() - mergeStartMS} " +
-                                "elapsedMs=${Clock.System.now().toEpochMilliseconds() - startMS}"
-                        }
                         if (mergeLevel + 2 > levelCounts.size) {
                             levelCounts = ArrayUtil.grow(levelCounts, mergeLevel + 2)
                         }
@@ -308,13 +288,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                 }
 
                 while (segments.size > 1) {
-                    val mergeStartMS = Clock.System.now().toEpochMilliseconds()
                     mergePartitions(trackingDir, segments)
-                    trace {
-                        "OfflineSorter.sort finalMergeSubmitted segmentsAfterSubmit=${segments.size} " +
-                            "mergeScheduleElapsedMs=${Clock.System.now().toEpochMilliseconds() - mergeStartMS} " +
-                            "elapsedMs=${Clock.System.now().toEpochMilliseconds() - startMS}"
-                    }
                 }
 
                 val result = if (segments.isEmpty()) {
@@ -327,12 +301,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                 }
 
                 sortInfo.totalTimeMS = Clock.System.now().toEpochMilliseconds() - startMS
-                trace {
-                    "OfflineSorter.sort finished inputFileName=$inputFileName result=$result " +
-                        "totalElapsedMs=${sortInfo.totalTimeMS} readTimeMs=${sortInfo.readTimeMS} " +
-                        "sortTimeMs=${sortInfo.sortTimeMS.load()} mergeTimeMs=${sortInfo.mergeTimeMS.load()} " +
-                        "lineCount=${sortInfo.lineCount} mergeRounds=${sortInfo.mergeRounds}"
-                }
                 CodecUtil.checkFooter(reader.`in`)
                 success = true
                 return result
@@ -356,8 +324,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         trackingDir: Directory,
         segments: MutableList<org.gnit.lucenekmp.jdkport.Future<Partition>>
     ) {
-        val startMS = Clock.System.now().toEpochMilliseconds()
-        val originalSegmentCount = segments.size
         val segmentsToMerge =
             if (segments.size > maxTempFiles) {
                 segments.subList(segments.size - maxTempFiles, segments.size).toMutableList()
@@ -373,11 +339,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         }
         segments.add(exec.submit(task))
         requireNotNull(sortInfo).tempMergeFiles++
-        trace {
-            "OfflineSorter.mergePartitions submitted originalSegments=$originalSegmentCount " +
-                "segmentsToMerge=${segmentsToMerge.size} segmentsAfterSubmit=${segments.size} " +
-                "elapsedMs=${Clock.System.now().toEpochMilliseconds() - startMS}"
-        }
     }
 
     @Throws(IOException::class)
@@ -425,12 +386,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
             val elapsed = Clock.System.now().toEpochMilliseconds() - start
             requireNotNull(sortInfo).readTimeMS += elapsed
             success = true
-            val result = Partition(buffer, exhausted)
-            trace {
-                "OfflineSorter.readPartition count=${result.count} exhausted=${result.exhausted} " +
-                    "elapsedMs=$elapsed"
-            }
-            return result
+            return Partition(buffer, exhausted)
         } finally {
             if (!success) {
                 partitionsInRAM.release()
@@ -525,7 +481,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
     ) : Callable<Partition> {
         @OptIn(ExperimentalAtomicApi::class)
         override fun call(): Partition {
-            val taskStartMS = Clock.System.now().toEpochMilliseconds()
             try {
                 dir.createTempOutput(tempFileNamePrefix, "sort", IOContext.DEFAULT).use { tempFile ->
                     getWriter(tempFile, part.buffer!!.size().toLong()).use { out ->
@@ -536,7 +491,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                             iteratorElapsedMS
                         )
                         var count = 0
-                        val writeStartMS = Clock.System.now().toEpochMilliseconds()
                         var spare = iter.next()
                         while (spare != null) {
                             out.write(spare)
@@ -546,11 +500,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                         assert(count.toLong() == part.count)
                         CodecUtil.writeFooter(out.out)
                         part.buffer.clear()
-                        trace {
-                            "OfflineSorter.sortPartition done file=${tempFile.name} count=$count " +
-                                "iteratorElapsedMs=$iteratorElapsedMS writeElapsedMs=${Clock.System.now().toEpochMilliseconds() - writeStartMS} " +
-                                "taskElapsedMs=${Clock.System.now().toEpochMilliseconds() - taskStartMS}"
-                        }
                         return Partition(tempFile.name!!, part.count)
                     }
                 }
@@ -577,7 +526,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
     ) : Callable<Partition> {
         @OptIn(ExperimentalAtomicApi::class)
         override fun call(): Partition {
-            val taskStartMS = Clock.System.now().toEpochMilliseconds()
             val waitStartMS = Clock.System.now().toEpochMilliseconds()
             var totalCount = 0L
             val resolvedSegments = ArrayList<Partition>(segmentsToMerge.size)
@@ -619,7 +567,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                     var popElapsedMS = 0L
                     var updateTopElapsedMS = 0L
                     var topLookupElapsedMS = 0L
-                    var mergedCount = 0L
                     var topLookupStartMS = Clock.System.now().toEpochMilliseconds()
                     var top = queue.topOrNull()
                     topLookupElapsedMS += Clock.System.now().toEpochMilliseconds() - topLookupStartMS
@@ -627,7 +574,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                         val writeStartMS = Clock.System.now().toEpochMilliseconds()
                         writer.write(top.current)
                         writeElapsedMS += Clock.System.now().toEpochMilliseconds() - writeStartMS
-                        mergedCount++
 
                         val nextStartMS = Clock.System.now().toEpochMilliseconds()
                         top.current = try {
@@ -669,15 +615,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                     }
                     val mergeElapsedMS = Clock.System.now().toEpochMilliseconds() - startMS
                     sortInfo!!.mergeTimeMS.addAndFetch(mergeElapsedMS)
-                    trace {
-                        "OfflineSorter.mergeTask mergedCount=$mergedCount totalCount=$totalCount " +
-                            "segmentsToMerge=${segmentsToMerge.size} waitElapsedMs=$waitElapsedMS " +
-                            "initElapsedMs=$initElapsedMS mergeLoopElapsedMs=$mergeLoopElapsedMS " +
-                            "mergeLoopWriteMs=$writeElapsedMS mergeLoopNextMs=$nextElapsedMS " +
-                            "mergeLoopPopMs=$popElapsedMS mergeLoopUpdateTopMs=$updateTopElapsedMS " +
-                            "mergeLoopTopLookupMs=$topLookupElapsedMS " +
-                            "mergeElapsedMs=$mergeElapsedMS taskElapsedMs=${Clock.System.now().toEpochMilliseconds() - taskStartMS}"
-                    }
                 }
             } finally {
                 IOUtils.closeWhileHandlingException(streams.filterNotNull())
@@ -690,10 +627,6 @@ open class OfflineSorter @Throws(IOException::class) constructor(
             IOUtils.deleteFiles(dir, toDelete)
             val deleteElapsedMs = Clock.System.now().toEpochMilliseconds() - deleteStartMS
             sortInfo!!.mergeDeleteTimeMS.addAndFetch(deleteElapsedMs)
-            trace {
-                "OfflineSorter.mergeTask deleteTempFiles count=${toDelete.size} " +
-                    "elapsedMs=$deleteElapsedMs"
-            }
             return Partition(requireNotNull(newSegmentName), totalCount)
         }
     }

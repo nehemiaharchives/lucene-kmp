@@ -14,7 +14,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlin.time.TimeSource
 
 class TestNIOFSDirectory : BaseDirectoryTestCase() {
     override fun getDirectory(path: Path): Directory {
@@ -256,38 +255,5 @@ class TestNIOFSDirectory : BaseDirectoryTestCase() {
         }
     }
 
-    @Test
-    fun testPerformanceTransferTempOkioBufferToByteBuffer() {
-        val payloadSize = 64 * 1024
-        val iterations = 2_000
-        val payload = ByteArray(payloadSize) { ((it * 17) and 0xFF).toByte() }
-        var checksum = 0L
-
-        repeat(100) {
-            val warmupSource = Buffer().write(payload)
-            val warmupDestination = ByteBuffer.allocate(payloadSize)
-            transferTempOkioBufferToByteBuffer(warmupSource, payloadSize, warmupDestination)
-        }
-
-        val start = TimeSource.Monotonic.markNow()
-        repeat(iterations) { index ->
-            val source = Buffer().write(payload)
-            val destination = ByteBuffer.allocate(payloadSize)
-            transferTempOkioBufferToByteBuffer(source, payloadSize, destination)
-            checksum += (destination.array()[index % payloadSize].toInt() and 0xFF).toLong()
-        }
-        val elapsedNs = start.elapsedNow().inWholeNanoseconds
-        val totalBytes = payloadSize.toLong() * iterations.toLong()
-        val nsPerByte = elapsedNs.toDouble() / totalBytes.toDouble()
-        val mbps = (totalBytes.toDouble() / (1024.0 * 1024.0)) / (elapsedNs.toDouble() / 1_000_000_000.0)
-
-        println(
-            "[PERF][NIOFSTransfer][transferTempOkioBufferToByteBuffer] payloadBytes=$payloadSize " +
-                "iterations=$iterations elapsedNs=$elapsedNs totalBytes=$totalBytes " +
-                "nsPerByte=$nsPerByte MBps=$mbps checksum=$checksum"
-        )
-
-        assertTrue(checksum > 0L)
-    }
 }
 

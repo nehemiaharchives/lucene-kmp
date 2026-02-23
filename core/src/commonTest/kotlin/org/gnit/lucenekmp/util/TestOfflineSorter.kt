@@ -6,9 +6,7 @@ import kotlinx.coroutines.runBlocking
 import okio.Path
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.index.CorruptIndexException
-import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
-import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.store.ChecksumIndexInput
@@ -16,9 +14,6 @@ import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FilterDirectory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.IndexOutput
-import org.gnit.lucenekmp.store.BufferedChecksumIndexInput
-import org.gnit.lucenekmp.store.BufferedIndexInput
-import org.gnit.lucenekmp.store.NIOFSDirectory
 import org.gnit.lucenekmp.tests.store.CorruptingIndexOutput
 import org.gnit.lucenekmp.tests.junitport.assertEquals
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -27,7 +22,6 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
-import kotlin.time.Clock
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -37,10 +31,6 @@ import kotlin.test.assertTrue
 /** Tests for on-disk merge sorting. */
 class TestOfflineSorter : LuceneTestCase() {
     private lateinit var tempDir: Path
-
-    private fun trace(message: String) {
-        println("[TestOfflineSorter] $message")
-    }
 
     @BeforeTest
     @Throws(Exception::class)
@@ -143,8 +133,6 @@ class TestOfflineSorter : LuceneTestCase() {
     @Nightly
     @Test
     fun testLargerRandom() {
-        val testStart = Clock.System.now().toEpochMilliseconds()
-        trace("testLargerRandom start")
         newFSDirectory(createTempDir()).use { dir ->
             val exec = randomExecutorServiceOrNull()
             val largerRandomBytes = if (TEST_NIGHTLY) {
@@ -152,13 +140,7 @@ class TestOfflineSorter : LuceneTestCase() {
             } else {
                 (OfflineSorter.MB * 5).toInt() // TODO reduced largerRandomBytes = 100MB to 5MB for dev speed
             }
-            val generateStart = Clock.System.now().toEpochMilliseconds()
             val data = generateRandom(largerRandomBytes)
-            trace(
-                "testLargerRandom generatedData bytes=$largerRandomBytes arrays=${data.size} " +
-                    "elapsedMs=${Clock.System.now().toEpochMilliseconds() - generateStart}"
-            )
-            val sortStart = Clock.System.now().toEpochMilliseconds()
             checkSort(
                 dir,
                 OfflineSorter(
@@ -173,40 +155,21 @@ class TestOfflineSorter : LuceneTestCase() {
                 ),
                 data
             )
-            trace(
-                "testLargerRandom checkSortElapsedMs=${Clock.System.now().toEpochMilliseconds() - sortStart}"
-            )
             if (exec != null) {
                 runBlocking { exec.shutdownNow() }
             }
         }
-        trace("testLargerRandom totalElapsedMs=${Clock.System.now().toEpochMilliseconds() - testStart}")
     }
 
     private fun generateRandom(howMuchDataInBytes: Int): Array<ByteArray> {
         val data = mutableListOf<ByteArray>()
-        val start = Clock.System.now().toEpochMilliseconds()
-        val total = howMuchDataInBytes
-        var nextLog = 10 * 1024 * 1024
         var left = howMuchDataInBytes
         while (left > 0) {
             val current = ByteArray(random().nextInt(256))
             random().nextBytes(current)
             data.add(current)
             left -= current.size
-            val generated = total - left
-            if (generated >= nextLog) {
-                trace(
-                    "generateRandom progress generatedBytes=$generated/$total arrays=${data.size} " +
-                        "elapsedMs=${Clock.System.now().toEpochMilliseconds() - start}"
-                )
-                nextLog += 10 * 1024 * 1024
-            }
         }
-        trace(
-            "generateRandom done generatedBytes=$total arrays=${data.size} " +
-                "elapsedMs=${Clock.System.now().toEpochMilliseconds() - start}"
-        )
         return data.toTypedArray()
     }
 
@@ -249,193 +212,46 @@ class TestOfflineSorter : LuceneTestCase() {
         sorter: OfflineSorter,
         data: Array<ByteArray>
     ): OfflineSorter.SortInfo {
-        val checkStart = Clock.System.now().toEpochMilliseconds()
-        val shouldTraceDetailed = data.size >= 100_000
-        trace("checkSort start items=${data.size}")
         val unsorted = dir.createTempOutput("unsorted", "tmp", IOContext.DEFAULT)
-        val unsortedWriteStart = Clock.System.now().toEpochMilliseconds()
-        writeAll(unsorted, data, "unsorted")
-        trace("checkSort writeUnsortedElapsedMs=${Clock.System.now().toEpochMilliseconds() - unsortedWriteStart}")
+        writeAll(unsorted, data)
 
         val golden = dir.createTempOutput("golden", "tmp", IOContext.DEFAULT)
-        val inMemorySortStart = Clock.System.now().toEpochMilliseconds()
         data.sortWith(unsignedByteOrderComparator)
-        trace("checkSort inMemorySortElapsedMs=${Clock.System.now().toEpochMilliseconds() - inMemorySortStart}")
-        val goldenWriteStart = Clock.System.now().toEpochMilliseconds()
-        writeAll(golden, data, "golden")
-        trace("checkSort writeGoldenElapsedMs=${Clock.System.now().toEpochMilliseconds() - goldenWriteStart}")
+        writeAll(golden, data)
 
-        val sortCallStart = Clock.System.now().toEpochMilliseconds()
-        val externalSortStart = Clock.System.now().toEpochMilliseconds()
-        val enableHotPathProfile =
-            shouldTraceDetailed && (System.getProperty("tests.profile.hotpath")?.toBoolean() == true)
-        if (enableHotPathProfile) {
-            OfflineSorter.resetByteSequencesReaderProfile()
-            OfflineSorter.enableByteSequencesReaderProfile()
-            BufferedIndexInput.resetProfile()
-            BufferedIndexInput.enableProfile()
-            BufferedChecksumIndexInput.resetProfile()
-            BufferedChecksumIndexInput.enableProfile()
-            NIOFSDirectory.resetReadInternalProfile()
-            NIOFSDirectory.enableReadInternalProfile()
-            ByteBuffer.resetProfile()
-        } else {
-            OfflineSorter.disableByteSequencesReaderProfile()
-            BufferedIndexInput.disableProfile()
-            BufferedChecksumIndexInput.disableProfile()
-            NIOFSDirectory.disableReadInternalProfile()
-            ByteBuffer.disableProfile()
-        }
         val sorted = sorter.sort(unsorted.name!!)
-        val externalSortElapsedMs = Clock.System.now().toEpochMilliseconds() - externalSortStart
-        trace("checkSort externalSortElapsedMs=$externalSortElapsedMs")
-        if (shouldTraceDetailed) {
-            val info = sorter.sortInfo
-            val readerProfile = OfflineSorter.byteSequencesReaderProfile()
-            val bufferedIndexInputProfile = BufferedIndexInput.profile()
-            val bufferedChecksumProfile = BufferedChecksumIndexInput.profile()
-            val nioReadInternalProfile = NIOFSDirectory.readInternalProfile()
-            val byteBufferProfile = ByteBuffer.profile()
-            if (info != null) {
-                trace(
-                    "checkSort externalSortDetails totalMs=${info.totalTimeMS} readMs=${info.readTimeMS} " +
-                        "sortMs=${info.sortTimeMS.load()} mergeMs=${info.mergeTimeMS.load()} " +
-                        "mergeWaitMs=${info.mergeWaitTimeMS.load()} mergeInitMs=${info.mergeInitTimeMS.load()} " +
-                        "mergeLoopMs=${info.mergeLoopTimeMS.load()} mergeLoopWriteMs=${info.mergeLoopWriteTimeMS.load()} " +
-                        "mergeLoopNextMs=${info.mergeLoopNextTimeMS.load()} mergeLoopPopMs=${info.mergeLoopPopTimeMS.load()} " +
-                        "mergeLoopUpdateTopMs=${info.mergeLoopUpdateTopTimeMS.load()} " +
-                        "mergeLoopTopLookupMs=${info.mergeLoopTopLookupTimeMS.load()} mergeDeleteMs=${info.mergeDeleteTimeMS.load()} " +
-                        "nextCalls=${readerProfile.calls} nextEofCalls=${readerProfile.eofCalls} nextTotalMs=${readerProfile.totalMs} " +
-                        "nextReadLengthMs=${readerProfile.readLengthMs} nextPrepareRefMs=${readerProfile.prepareRefMs} " +
-                        "nextReadBytesMs=${readerProfile.readBytesMs} nextGetRefMs=${readerProfile.getRefMs} " +
-                        "nextPayloadBytes=${readerProfile.payloadBytes} " +
-                        "bufferedReadBytesCalls=${bufferedIndexInputProfile.readBytesCalls} " +
-                        "bufferedReadBytesRequestedBytes=${bufferedIndexInputProfile.readBytesRequestedBytes} " +
-                        "bufferedReadBytesTotalMs=${bufferedIndexInputProfile.readBytesTotalMs} " +
-                        "bufferedReadBytesFastPathCalls=${bufferedIndexInputProfile.readBytesFastPathCalls} " +
-                        "bufferedReadBytesRefillPathCalls=${bufferedIndexInputProfile.readBytesRefillPathCalls} " +
-                        "bufferedReadBytesRefillPathMs=${bufferedIndexInputProfile.readBytesRefillPathMs} " +
-                        "bufferedReadBytesDirectPathCalls=${bufferedIndexInputProfile.readBytesDirectPathCalls} " +
-                        "bufferedReadBytesDirectPathMs=${bufferedIndexInputProfile.readBytesDirectPathMs} " +
-                        "bufferedReadBytesDirectReadInternalCalls=${bufferedIndexInputProfile.readBytesDirectPathReadInternalCalls} " +
-                        "bufferedReadBytesDirectReadInternalBytes=${bufferedIndexInputProfile.readBytesDirectPathReadInternalBytes} " +
-                        "bufferedReadBytesDirectReadInternalMs=${bufferedIndexInputProfile.readBytesDirectPathReadInternalMs} " +
-                        "bufferedRefillCalls=${bufferedIndexInputProfile.refillCalls} " +
-                        "bufferedRefillTotalMs=${bufferedIndexInputProfile.refillTotalMs} " +
-                        "bufferedRefillReadInternalCalls=${bufferedIndexInputProfile.refillReadInternalCalls} " +
-                        "bufferedRefillReadInternalBytes=${bufferedIndexInputProfile.refillReadInternalBytes} " +
-                        "bufferedRefillReadInternalMs=${bufferedIndexInputProfile.refillReadInternalMs} " +
-                        "checksumReadByteCalls=${bufferedChecksumProfile.readByteCalls} " +
-                        "checksumReadByteDelegateReadMs=${bufferedChecksumProfile.readByteDelegateReadMs} " +
-                        "checksumReadByteChecksumMs=${bufferedChecksumProfile.readByteChecksumMs} " +
-                        "checksumReadBytesCalls=${bufferedChecksumProfile.readBytesCalls} " +
-                        "checksumReadBytesRequestedBytes=${bufferedChecksumProfile.readBytesRequestedBytes} " +
-                        "checksumReadBytesDelegateReadMs=${bufferedChecksumProfile.readBytesDelegateReadMs} " +
-                        "checksumReadBytesChecksumMs=${bufferedChecksumProfile.readBytesChecksumMs} " +
-                        "checksumReadBytesDelegateReadNs=${bufferedChecksumProfile.readBytesDelegateReadNs} " +
-                        "checksumReadBytesChecksumNs=${bufferedChecksumProfile.readBytesChecksumNs} " +
-                        "nioReadInternalCalls=${nioReadInternalProfile.calls} " +
-                        "nioReadInternalRequestedBytes=${nioReadInternalProfile.requestedBytes} " +
-                        "nioReadInternalTotalMs=${nioReadInternalProfile.totalMs} " +
-                        "nioReadInternalChunkIterations=${nioReadInternalProfile.chunkIterations} " +
-                        "nioTempBufferCreateMs=${nioReadInternalProfile.tempBufferCreateMs} " +
-                        "nioHandleReadCalls=${nioReadInternalProfile.handleReadCalls} " +
-                        "nioHandleReadBytes=${nioReadInternalProfile.handleReadBytes} " +
-                        "nioHandleReadMs=${nioReadInternalProfile.handleReadMs} " +
-                        "nioTransferMs=${nioReadInternalProfile.transferMs} " +
-                        "nioEofSignals=${nioReadInternalProfile.eofSignals} " +
-                        "byteBufferArrayCalls=${byteBufferProfile.arrayCalls} " +
-                        "byteBufferArrayMs=${byteBufferProfile.arrayMs} " +
-                        "byteBufferPositionGetCalls=${byteBufferProfile.positionGetCalls} " +
-                        "byteBufferPositionGetMs=${byteBufferProfile.positionGetMs} " +
-                        "byteBufferPositionSetCalls=${byteBufferProfile.positionSetCalls} " +
-                        "byteBufferPositionSetMs=${byteBufferProfile.positionSetMs} " +
-                        "byteBufferPositionMethodCalls=${byteBufferProfile.positionMethodCalls} " +
-                        "byteBufferPositionMethodMs=${byteBufferProfile.positionMethodMs} " +
-                        "byteBufferLimitGetCalls=${byteBufferProfile.limitGetCalls} " +
-                        "byteBufferLimitGetMs=${byteBufferProfile.limitGetMs} " +
-                        "byteBufferLimitSetCalls=${byteBufferProfile.limitSetCalls} " +
-                        "byteBufferLimitSetMs=${byteBufferProfile.limitSetMs} " +
-                        "byteBufferLimitMethodCalls=${byteBufferProfile.limitMethodCalls} " +
-                        "byteBufferLimitMethodMs=${byteBufferProfile.limitMethodMs} " +
-                        "byteBufferRemainingCalls=${byteBufferProfile.remainingCalls} " +
-                        "byteBufferRemainingMs=${byteBufferProfile.remainingMs} " +
-                        "lineCount=${info.lineCount} mergeRounds=${info.mergeRounds} tempMergeFiles=${info.tempMergeFiles} " +
-                        "sortCallElapsedMs=${Clock.System.now().toEpochMilliseconds() - sortCallStart}"
-                )
-            }
-        }
-        val verifyStart = Clock.System.now().toEpochMilliseconds()
-        assertFilesIdentical(dir, golden.name!!, sorted, shouldTraceDetailed)
-        trace("checkSort verifyElapsedMs=${Clock.System.now().toEpochMilliseconds() - verifyStart}")
-        trace("checkSort totalElapsedMs=${Clock.System.now().toEpochMilliseconds() - checkStart}")
+        assertFilesIdentical(dir, golden.name!!, sorted)
         return sorter.sortInfo!!
     }
 
-    private fun assertFilesIdentical(dir: Directory, golden: String, sorted: String, traceDetailed: Boolean = false) {
-        val verifyStart = Clock.System.now().toEpochMilliseconds()
+    private fun assertFilesIdentical(dir: Directory, golden: String, sorted: String) {
         val numBytes = dir.fileLength(golden)
         assertEquals(numBytes, dir.fileLength(sorted))
 
         val buf1 = ByteArray(64 * 1024)
         val buf2 = ByteArray(64 * 1024)
-        var readElapsedMs = 0L
-        var compareElapsedMs = 0L
-        var comparedBytes = 0L
-        var nextProgressBytes = 8L * 1024L * 1024L
         dir.openInput(golden, IOContext.READONCE).use { in1 ->
             dir.openInput(sorted, IOContext.READONCE).use { in2 ->
                 var left = numBytes
                 while (left > 0) {
                     val chunk = min(buf1.size.toLong(), left).toInt()
                     left -= chunk.toLong()
-                    val readStart = Clock.System.now().toEpochMilliseconds()
                     in1.readBytes(buf1, 0, chunk)
                     in2.readBytes(buf2, 0, chunk)
-                    readElapsedMs += Clock.System.now().toEpochMilliseconds() - readStart
-                    val compareStart = Clock.System.now().toEpochMilliseconds()
                     assertEquals(buf1, 0, chunk, buf2, 0, chunk)
-                    compareElapsedMs += Clock.System.now().toEpochMilliseconds() - compareStart
-                    comparedBytes += chunk.toLong()
-                    if (traceDetailed && comparedBytes >= nextProgressBytes) {
-                        trace(
-                            "assertFilesIdentical progress comparedBytes=$comparedBytes/$numBytes " +
-                                "readElapsedMs=$readElapsedMs compareElapsedMs=$compareElapsedMs " +
-                                "totalElapsedMs=${Clock.System.now().toEpochMilliseconds() - verifyStart}"
-                        )
-                        nextProgressBytes += 8L * 1024L * 1024L
-                    }
                 }
             }
         }
-        if (traceDetailed) {
-            trace(
-                "assertFilesIdentical done bytes=$numBytes readElapsedMs=$readElapsedMs " +
-                    "compareElapsedMs=$compareElapsedMs totalElapsedMs=${Clock.System.now().toEpochMilliseconds() - verifyStart}"
-            )
-        }
     }
 
-    private fun writeAll(out: IndexOutput, data: Array<ByteArray>, label: String = "data") {
-        val start = Clock.System.now().toEpochMilliseconds()
-        val shouldTraceProgress = data.size >= 100_000
-        trace("writeAll[$label] outputClass=${out::class.simpleName}")
+    private fun writeAll(out: IndexOutput, data: Array<ByteArray>) {
         OfflineSorter.ByteSequencesWriter(out).use { w ->
             for (i in data.indices) {
                 val datum = data[i]
                 w.write(datum)
-                if (shouldTraceProgress && ((i + 1) % 100_000 == 0 || i == data.lastIndex)) {
-                    trace(
-                        "writeAll[$label] progress items=${i + 1}/${data.size} " +
-                            "elapsedMs=${Clock.System.now().toEpochMilliseconds() - start}"
-                    )
-                }
             }
-            val footerStart = Clock.System.now().toEpochMilliseconds()
             CodecUtil.writeFooter(out)
-            trace("writeAll[$label] footerElapsedMs=${Clock.System.now().toEpochMilliseconds() - footerStart}")
         }
-        trace("writeAll[$label] done items=${data.size} elapsedMs=${Clock.System.now().toEpochMilliseconds() - start}")
     }
 
     @Test

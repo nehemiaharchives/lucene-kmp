@@ -6,32 +6,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
-import kotlin.time.TimeSource
 
 class ArraysTest {
-
-    private data class PerfStats(
-        val elapsedNs: Long,
-        val operations: Long,
-        val bytesCompared: Long
-    )
-
-    private fun nsPerOperation(stats: PerfStats): Double {
-        if (stats.operations <= 0L) return 0.0
-        return stats.elapsedNs.toDouble() / stats.operations.toDouble()
-    }
-
-    private fun nsPerByte(stats: PerfStats): Double {
-        if (stats.bytesCompared <= 0L) return 0.0
-        return stats.elapsedNs.toDouble() / stats.bytesCompared.toDouble()
-    }
-
-    private fun megaBytesPerSecond(stats: PerfStats): Double {
-        if (stats.elapsedNs <= 0L) return 0.0
-        val seconds = stats.elapsedNs.toDouble() / 1_000_000_000.0
-        val megaBytes = stats.bytesCompared.toDouble() / (1024.0 * 1024.0)
-        return megaBytes / seconds
-    }
 
     @Test
     fun testMismatchByteArray() {
@@ -67,108 +43,6 @@ class ArraysTest {
         val c = intArrayOf(1, 2, 0, 4, 5)
         assertTrue(Arrays.equals(a, 0, 5, b, 0, 5))
         assertFalse(Arrays.equals(a, 0, 5, c, 0, 5))
-    }
-
-    @Test
-    fun testPerformanceByteArrayEquals() {
-        val payloadSize = 256 * 1024
-        val iterations = 800
-        val a = ByteArray(payloadSize) { ((it * 13) and 0xFF).toByte() }
-        val b = a.copyOf()
-
-        repeat(100) {
-            Arrays.equals(a, 0, a.size, b, 0, b.size)
-        }
-
-        val start = TimeSource.Monotonic.markNow()
-        var trueCount = 0
-        repeat(iterations) {
-            if (Arrays.equals(a, 0, a.size, b, 0, b.size)) {
-                trueCount++
-            }
-        }
-        val elapsedNs = start.elapsedNow().inWholeNanoseconds
-        val stats = PerfStats(
-            elapsedNs = elapsedNs,
-            operations = iterations.toLong(),
-            bytesCompared = payloadSize.toLong() * iterations.toLong()
-        )
-
-        println(
-            "[PERF][Arrays][equalsByteArray] payloadBytes=$payloadSize iterations=$iterations " +
-                "elapsedNs=${stats.elapsedNs} nsPerOp=${nsPerOperation(stats)} " +
-                "nsPerByte=${nsPerByte(stats)} MBps=${megaBytesPerSecond(stats)} trueCount=$trueCount"
-        )
-
-        assertEquals(iterations, trueCount)
-    }
-
-    @Test
-    fun testPerformanceIntArrayEquals() {
-        val length = 64 * 1024
-        val iterations = 1000
-        val a = IntArray(length) { it * 17 }
-        val b = a.copyOf()
-
-        repeat(100) {
-            Arrays.equals(a, 0, a.size, b, 0, b.size)
-        }
-
-        val start = TimeSource.Monotonic.markNow()
-        var trueCount = 0
-        repeat(iterations) {
-            if (Arrays.equals(a, 0, a.size, b, 0, b.size)) {
-                trueCount++
-            }
-        }
-        val elapsedNs = start.elapsedNow().inWholeNanoseconds
-        val stats = PerfStats(
-            elapsedNs = elapsedNs,
-            operations = iterations.toLong(),
-            bytesCompared = (length.toLong() * Int.SIZE_BYTES.toLong()) * iterations.toLong()
-        )
-
-        println(
-            "[PERF][Arrays][equalsIntArray] length=$length iterations=$iterations " +
-                "elapsedNs=${stats.elapsedNs} nsPerOp=${nsPerOperation(stats)} " +
-                "nsPerByte=${nsPerByte(stats)} MBps=${megaBytesPerSecond(stats)} trueCount=$trueCount"
-        )
-
-        assertEquals(iterations, trueCount)
-    }
-
-    @Test
-    fun testPerformanceLongArrayEquals() {
-        val length = 32 * 1024
-        val iterations = 1200
-        val a = LongArray(length) { it.toLong() * 31L }
-        val b = a.copyOf()
-
-        repeat(100) {
-            Arrays.equals(a, 0, a.size, b, 0, b.size)
-        }
-
-        val start = TimeSource.Monotonic.markNow()
-        var trueCount = 0
-        repeat(iterations) {
-            if (Arrays.equals(a, 0, a.size, b, 0, b.size)) {
-                trueCount++
-            }
-        }
-        val elapsedNs = start.elapsedNow().inWholeNanoseconds
-        val stats = PerfStats(
-            elapsedNs = elapsedNs,
-            operations = iterations.toLong(),
-            bytesCompared = (length.toLong() * Long.SIZE_BYTES.toLong()) * iterations.toLong()
-        )
-
-        println(
-            "[PERF][Arrays][equalsLongArray] length=$length iterations=$iterations " +
-                "elapsedNs=${stats.elapsedNs} nsPerOp=${nsPerOperation(stats)} " +
-                "nsPerByte=${nsPerByte(stats)} MBps=${megaBytesPerSecond(stats)} trueCount=$trueCount"
-        )
-
-        assertEquals(iterations, trueCount)
     }
 
     @Test

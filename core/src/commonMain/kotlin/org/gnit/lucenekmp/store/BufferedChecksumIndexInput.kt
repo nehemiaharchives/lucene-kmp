@@ -44,18 +44,13 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
 
         readBytesCalls.addAndFetch(1L)
         readBytesRequestedBytes.addAndFetch(len.toLong())
-        val stepTimesNs = readBytesWithChecksumStepTimesNs(
+        readBytesWithChecksum(
             main = main,
             digest = digest,
             buffer = b,
             offset = offset,
-            len = len,
-            collectTiming = true
+            len = len
         )
-        readBytesDelegateReadNs.addAndFetch(stepTimesNs.delegateReadNs)
-        readBytesChecksumNs.addAndFetch(stepTimesNs.checksumUpdateNs)
-        readBytesDelegateReadMs.addAndFetch(stepTimesNs.delegateReadNs / 1_000_000L)
-        readBytesChecksumMs.addAndFetch(stepTimesNs.checksumUpdateNs / 1_000_000L)
     }
 
     @Throws(IOException::class)
