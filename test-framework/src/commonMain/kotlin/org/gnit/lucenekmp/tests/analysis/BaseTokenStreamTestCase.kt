@@ -252,10 +252,10 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
             /*assertNotNull(output)*/
             val checkClearAtt: CheckClearAttributesAttribute =
                 if (ts.hasAttribute(CheckClearAttributesAttribute::class)) {
-                    ts.getAttribute(CheckClearAttributesAttribute::class)
+                    ts.getAttribute(CheckClearAttributesAttribute::class)!!
                 } else {
                     ts.addAttributeImpl(CheckClearAttributesAttributeImpl())
-                    ts.getAttribute(CheckClearAttributesAttribute::class)
+                    ts.getAttribute(CheckClearAttributesAttribute::class)!!
                 }
 
             var termAtt: CharTermAttribute? = null
@@ -274,7 +274,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
                 val bytesAtt: TermToBytesRefAttribute =
                     ts.getAttribute(
                         TermToBytesRefAttribute::class
-                    )
+                    )!!
 
                 // ConcatenateGraphFilter has some tricky logic violating this. We have an extra assert there:
                 if (bytesAtt::class.simpleName != "BytesRefBuilderTermAttributeImpl") {
@@ -293,7 +293,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
                     "has no OffsetAttribute"
                 )
                 offsetAtt =
-                    ts.getAttribute<OffsetAttribute>(OffsetAttribute::class)
+                    ts.getAttribute<OffsetAttribute>(OffsetAttribute::class)!!
             }
 
             var typeAtt: TypeAttribute? = null
@@ -1420,11 +1420,11 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
                     "dummy",
                     if (useCharFilter) MockCharFilter(reader, remainder) else reader
                 )
-            val termAtt: CharTermAttribute = ts.getAttribute(CharTermAttribute::class)
-            val offsetAtt: OffsetAttribute = ts.getAttribute(OffsetAttribute::class)
-            val posIncAtt: PositionIncrementAttribute = ts.getAttribute(PositionIncrementAttribute::class)
-            val posLengthAtt: PositionLengthAttribute = ts.getAttribute(PositionLengthAttribute::class)
-            val typeAtt: TypeAttribute = ts.getAttribute(TypeAttribute::class)
+            val termAtt: CharTermAttribute = ts.getAttribute(CharTermAttribute::class)!!
+            val offsetAtt: OffsetAttribute = ts.getAttribute(OffsetAttribute::class)!!
+            val posIncAtt: PositionIncrementAttribute = ts.getAttribute(PositionIncrementAttribute::class)!!
+            val posLengthAtt: PositionLengthAttribute = ts.getAttribute(PositionLengthAttribute::class)!!
+            val typeAtt: TypeAttribute = ts.getAttribute(TypeAttribute::class)!!
             val tokens: MutableList<String> = mutableListOf()
             val types: MutableList<String> = mutableListOf()
             val positions: MutableList<Int> = mutableListOf()
@@ -1862,10 +1862,10 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         fun toString(analyzer: Analyzer, text: String): String {
             analyzer.tokenStream("field", text).use { ts ->
                 val b = StringBuilder()
-                val termAtt: CharTermAttribute = ts.getAttribute(CharTermAttribute::class)
-                val posIncAtt: PositionIncrementAttribute = ts.getAttribute(PositionIncrementAttribute::class)
-                val posLengthAtt: PositionLengthAttribute = ts.getAttribute(PositionLengthAttribute::class)
-                val offsetAtt: OffsetAttribute = ts.getAttribute(OffsetAttribute::class)
+                val termAtt: CharTermAttribute = ts.getAttribute(CharTermAttribute::class)!!
+                val posIncAtt: PositionIncrementAttribute = ts.getAttribute(PositionIncrementAttribute::class)!!
+                val posLengthAtt: PositionLengthAttribute = ts.getAttribute(PositionLengthAttribute::class)!!
+                val offsetAtt: OffsetAttribute = ts.getAttribute(OffsetAttribute::class)!!
                 assertNotNull(offsetAtt)
                 ts.reset()
                 var pos = -1

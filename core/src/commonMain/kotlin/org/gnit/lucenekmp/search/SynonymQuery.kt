@@ -534,7 +534,7 @@ class SynonymQuery private constructor(
             }
     }
 
-    private class TermAndBoost(val term: BytesRef, val boost: Float)
+    private data class TermAndBoost(val term: BytesRef, val boost: Float)
 
     companion object {
         /** Merge impacts for multiple synonyms.  */

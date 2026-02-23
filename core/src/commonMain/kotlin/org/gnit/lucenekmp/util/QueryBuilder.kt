@@ -123,7 +123,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         field: String,
         queryText: String,
         operator: BooleanClause.Occur = BooleanClause.Occur.SHOULD
-    ): Query {
+    ): Query? {
         require(!(operator !== BooleanClause.Occur.SHOULD && operator !== BooleanClause.Occur.MUST)) { "invalid operator: only SHOULD or MUST are allowed" }
         return createFieldQuery(analyzer, operator, field, queryText, false, 0)
     }
@@ -147,7 +147,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
      * @return `TermQuery`, `BooleanQuery`, `PhraseQuery`, or `MultiPhraseQuery`, based on the analysis of `queryText`
      */
     @JvmOverloads
-    fun createPhraseQuery(field: String, queryText: String, phraseSlop: Int = 0): Query {
+    fun createPhraseQuery(field: String, queryText: String, phraseSlop: Int = 0): Query? {
         return createFieldQuery(
             analyzer,
             BooleanClause.Occur.MUST,
@@ -170,7 +170,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         field: String,
         queryText: String,
         fraction: Float
-    ): Query {
+    ): Query? {
         require(!(Float.isNaN(fraction) || fraction < 0 || fraction > 1)) { "fraction should be >= 0 and <= 1" }
 
         // TODO: weird that BQ equals/rewrite/scorer doesn't handle this
@@ -178,7 +178,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
             return createBooleanQuery(field, queryText, BooleanClause.Occur.MUST)
         }
 
-        var query: Query =
+        var query: Query? =
             createFieldQuery(analyzer, BooleanClause.Occur.SHOULD, field, queryText, false, 0)
         if (query is BooleanQuery) {
             query = addMinShouldMatchToBoolean(query, fraction)
@@ -237,14 +237,14 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         queryText: String,
         quoted: Boolean,
         phraseSlop: Int
-    ): Query {
+    ): Query? {
         assert(operator === BooleanClause.Occur.SHOULD || operator === BooleanClause.Occur.MUST)
 
         // Use the analyzer to get all the tokens, and then build an appropriate
         // query based on the analysis chain.
         try {
             analyzer.tokenStream(field, queryText).use { source ->
-                return createFieldQuery(source, operator, field, quoted, phraseSlop)!!
+                return createFieldQuery(source, operator, field, quoted, phraseSlop)
             }
         } catch (e: IOException) {
             throw RuntimeException("Error analyzing query text", e)
@@ -272,7 +272,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         // Build an appropriate query based on the analysis chain.
         try {
             CachingTokenFilter(source).use { stream ->
-                val termAtt: TermToBytesRefAttribute =
+                val termAtt: TermToBytesRefAttribute? =
                     stream.getAttribute(TermToBytesRefAttribute::class)
                 val posIncAtt: PositionIncrementAttribute =
                     stream.addAttribute(PositionIncrementAttribute::class)
@@ -351,7 +351,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         field: String,
         stream: TokenStream
     ): Query {
-        val termAtt: TermToBytesRefAttribute = stream.getAttribute(TermToBytesRefAttribute::class)
+        val termAtt: TermToBytesRefAttribute? = stream.getAttribute(TermToBytesRefAttribute::class)
         val boostAtt: BoostAttribute = stream.addAttribute(BoostAttribute::class)
 
         stream.reset()
@@ -359,7 +359,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
             throw AssertionError()
         }
 
-        return newTermQuery(Term(field, termAtt.bytesRef), boostAtt.boost)
+        return newTermQuery(Term(field, termAtt!!.bytesRef), boostAtt.boost)
     }
 
     /** Creates simple boolean query from the cached tokenstream contents  */
@@ -368,13 +368,13 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         field: String,
         stream: TokenStream
     ): Query {
-        val termAtt: TermToBytesRefAttribute = stream.getAttribute(TermToBytesRefAttribute::class)
+        val termAtt: TermToBytesRefAttribute? = stream.getAttribute(TermToBytesRefAttribute::class)
         val boostAtt: BoostAttribute = stream.addAttribute(BoostAttribute::class)
 
         stream.reset()
         val terms: MutableList<TermAndBoost> = mutableListOf()
         while (stream.incrementToken()) {
-            terms.add(TermAndBoost(termAtt.bytesRef, boostAtt.boost))
+            terms.add(TermAndBoost(termAtt!!.bytesRef, boostAtt.boost))
         }
 
         return newSynonymQuery(
@@ -418,9 +418,9 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         val currentQuery: MutableList<TermAndBoost> = mutableListOf()
 
         val termAtt: TermToBytesRefAttribute =
-            stream.getAttribute(TermToBytesRefAttribute::class)
+            stream.getAttribute(TermToBytesRefAttribute::class)!!
         val posIncrAtt: PositionIncrementAttribute =
-            stream.getAttribute(PositionIncrementAttribute::class)
+            stream.getAttribute(PositionIncrementAttribute::class)!!
         val boostAtt: BoostAttribute =
             stream.addAttribute(BoostAttribute::class)
 
@@ -448,11 +448,11 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         builder.setSlop(slop)
 
         val termAtt: TermToBytesRefAttribute =
-            stream.getAttribute(TermToBytesRefAttribute::class)
+            stream.getAttribute(TermToBytesRefAttribute::class)!!
         val boostAtt: BoostAttribute =
             stream.addAttribute(BoostAttribute::class)
         val posIncrAtt: PositionIncrementAttribute =
-            stream.getAttribute(PositionIncrementAttribute::class)
+            stream.getAttribute(PositionIncrementAttribute::class)!!
         var position = -1
         var phraseBoost: Float = BoostAttribute.DEFAULT_BOOST
         stream.reset()
@@ -483,10 +483,10 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
         mpqb.setSlop(slop)
 
         val termAtt: TermToBytesRefAttribute =
-            stream.getAttribute(TermToBytesRefAttribute::class)
+            stream.getAttribute(TermToBytesRefAttribute::class)!!
 
         val posIncrAtt: PositionIncrementAttribute =
-            stream.getAttribute(PositionIncrementAttribute::class)
+            stream.getAttribute(PositionIncrementAttribute::class)!!
         var position = -1
 
         val multiTerms: MutableList<Term> = mutableListOf()

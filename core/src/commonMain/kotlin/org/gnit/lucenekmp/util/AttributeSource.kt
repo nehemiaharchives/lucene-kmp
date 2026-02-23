@@ -20,6 +20,10 @@ import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttributeImpl
+import org.gnit.lucenekmp.search.BoostAttribute
+import org.gnit.lucenekmp.search.BoostAttributeImpl
+import org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttribute
+import org.gnit.lucenekmp.search.MaxNonCompetitiveBoostAttributeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -204,8 +208,9 @@ open class AttributeSource {
      * If you want to only use the attribute, if it is available (to optimize consuming), use
      * [.hasAttribute].
      */
-    fun <T : Attribute> getAttribute(attClass: KClass<T>): T {
-        return attClass.cast(attributes[attClass])
+    fun <T : Attribute> getAttribute(attClass: KClass<T>): T? {
+        val impl = attributes[attClass] ?: return null
+        return attClass.cast(impl)
     }
 
     private fun getCurrentState(): State? {
@@ -500,6 +505,12 @@ open class AttributeSource {
                 KeywordAttributeImpl::class -> arrayOf(
                     KeywordAttribute::class
                 )
+                BoostAttributeImpl::class -> arrayOf(
+                    BoostAttribute::class
+                )
+                MaxNonCompetitiveBoostAttributeImpl::class -> arrayOf(
+                    MaxNonCompetitiveBoostAttribute::class
+                )
                 AttributeImpl::class -> arrayOf(Cloneable::class)
                 else -> emptyArray()
             }
@@ -515,6 +526,8 @@ open class AttributeSource {
                 TypeAttributeImpl::class -> AttributeImpl::class
                 PackedTokenAttributeImpl::class -> CharTermAttributeImpl::class
                 KeywordAttributeImpl::class -> AttributeImpl::class
+                BoostAttributeImpl::class -> AttributeImpl::class
+                MaxNonCompetitiveBoostAttributeImpl::class -> AttributeImpl::class
                 AttributeImpl::class -> Any::class
                 Any::class -> null
                 else -> null
