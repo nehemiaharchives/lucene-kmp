@@ -53,11 +53,11 @@ class TestMorfologikAnalyzer : BaseTokenStreamTestCase() {
 
     private fun assertPOSToken(ts: TokenStream, term: String, vararg tags: String) {
         ts.incrementToken()
-        assertEquals(term, ts.getAttribute(CharTermAttribute::class).toString())
+        assertEquals(term, ts.getAttribute(CharTermAttribute::class)!!.toString())
 
         val actual = TreeSet<String>()
         val expected = TreeSet<String>()
-        val attribute = ts.getAttribute(MorphosyntacticTagsAttribute::class)
+        val attribute = ts.getAttribute(MorphosyntacticTagsAttribute::class)!!
         attribute.getTags()?.forEach { actual.add(it.toString()) }
         tags.forEach { expected.add(it) }
 
@@ -74,7 +74,7 @@ class TestMorfologikAnalyzer : BaseTokenStreamTestCase() {
         val a = getTestAnalyzer()
         val ts1 = a.tokenStream("dummy", "liście")
         try {
-            val termAtt1 = ts1.getAttribute(CharTermAttribute::class)
+            val termAtt1 = ts1.getAttribute(CharTermAttribute::class)!!
             ts1.reset()
             ts1.incrementToken()
             assertEquals("liście", termAtt1.toString(), "first stream")
@@ -85,7 +85,7 @@ class TestMorfologikAnalyzer : BaseTokenStreamTestCase() {
 
         val ts2 = a.tokenStream("dummy", "danych")
         try {
-            val termAtt2 = ts2.getAttribute(CharTermAttribute::class)
+            val termAtt2 = ts2.getAttribute(CharTermAttribute::class)!!
             ts2.reset()
             ts2.incrementToken()
             assertEquals("dany", termAtt2.toString(), "second stream")

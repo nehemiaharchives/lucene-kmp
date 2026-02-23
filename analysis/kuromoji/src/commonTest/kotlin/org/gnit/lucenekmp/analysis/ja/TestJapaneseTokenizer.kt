@@ -310,7 +310,7 @@ class TestJapaneseTokenizer : BaseTokenStreamTestCase() {
         val list: ArrayList<String> = ArrayList()
         val ts: TokenStream = a.tokenStream("dummy", `in`)
         val termAtt: CharTermAttribute =
-            ts.getAttribute(CharTermAttribute::class)
+            ts.getAttribute(CharTermAttribute::class)!!
 
         ts.reset()
         while (ts.incrementToken()) {

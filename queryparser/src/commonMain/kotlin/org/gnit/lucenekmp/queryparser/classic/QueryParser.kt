@@ -215,7 +215,7 @@ class QueryParser : QueryParserBase,
     // This makes sure that there is no garbage after the query string
     @Throws(ParseException::class)
     override fun TopLevelQuery(field: String): Query {
-        val q: Query
+        val q: Query?
         q = Query(field)
         jj_consume_token(0)
         run { if ("" != null) return q }
@@ -289,7 +289,7 @@ class QueryParser : QueryParserBase,
     @Throws(ParseException::class)
     fun Clause(field: String): Query {
         var field = field
-        val q: Query
+        val q: Query?
         var fieldToken: Token? = null
         var boost: Token? = null
         if (jj_2_3(2)) {
@@ -358,7 +358,7 @@ class QueryParser : QueryParserBase,
         var regexp = false
         var startInc = false
         var endInc = false
-        val q: Query
+        val q: Query?
         when (if (jj_ntk == -1) jj_ntk_f() else jj_ntk) {
             QueryParserConstants.BAREOPER, QueryParserConstants.STAR, QueryParserConstants.TERM, QueryParserConstants.PREFIXTERM, QueryParserConstants.WILDTERM, QueryParserConstants.REGEXPTERM, QueryParserConstants.NUMBER -> {
                 when (if (jj_ntk == -1) jj_ntk_f() else jj_ntk) {
@@ -652,7 +652,7 @@ class QueryParser : QueryParserBase,
         label_2@ while (true) {
             followingText = jj_consume_token(QueryParserConstants.TERM)
             if (splitOnWhitespace) {
-                val q: Query =
+                val q: Query? =
                     getFieldQuery(field, discardEscapeChar(followingText.image!!), false)
                 addClause(
                     clauses,

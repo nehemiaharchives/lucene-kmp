@@ -33,7 +33,7 @@ class TestElision : BaseTokenStreamTestCase() {
 
     private fun filter(filter: TokenFilter): MutableList<String> {
         val tas: MutableList<String> = mutableListOf()
-        val termAtt: CharTermAttribute = filter.getAttribute(CharTermAttribute::class)
+        val termAtt: CharTermAttribute = filter.getAttribute(CharTermAttribute::class)!!
         filter.reset()
         while (filter.incrementToken()) {
             tas.add(termAtt.toString())

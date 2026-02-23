@@ -369,7 +369,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getFieldQuery(field: String, queryText: String, quoted: Boolean): Query {
+    protected fun getFieldQuery(field: String, queryText: String, quoted: Boolean): Query? {
         return newFieldQuery(analyzer, field, queryText, quoted)
     }
 
@@ -383,7 +383,7 @@ protected constructor() : QueryBuilder(/*null*/),
         field: String,
         queryText: String,
         quoted: Boolean
-    ): Query {
+    ): Query? {
         val occur: Occur =
             if (operator == Operator.AND) Occur.MUST else Occur.SHOULD
         return createFieldQuery(
@@ -399,8 +399,12 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getFieldQuery(field: String, queryText: String, slop: Int): Query {
-        var query: Query = getFieldQuery(field, queryText, true)
+    protected fun getFieldQuery(field: String, queryText: String, slop: Int): Query? {
+        var query: Query? = getFieldQuery(field, queryText, true)
+
+        if (query == null) {
+            return null
+        }
 
         if (query is PhraseQuery) {
             query = addSlopToPhrase(query, slop)
@@ -752,7 +756,7 @@ protected constructor() : QueryBuilder(/*null*/),
         wildcard: Boolean,
         fuzzy: Boolean,
         regexp: Boolean
-    ): Query {
+    ): Query? {
         val q: Query?
 
         val termImage = discardEscapeChar(term.image!!)
@@ -816,7 +820,7 @@ protected constructor() : QueryBuilder(/*null*/),
         qfield: String,
         term: Token,
         fuzzySlop: Token?
-    ): Query {
+    ): Query? {
         var s = phraseSlop // default
         if (fuzzySlop != null) {
             try {
