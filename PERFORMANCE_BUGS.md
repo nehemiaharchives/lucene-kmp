@@ -158,3 +158,52 @@ lucene-kmp/core/src/commonMain/kotlin/org/gnit/lucenekmp/util/BitUtil.kt:359:359
 - Representative LinuxX64 measurements after fix:
   - `testDocsAndFreqsAndPositionsAndOffsetsAndPayloads[linuxX64]`: `2.83s` testcase time (user reported before: ~`1m14s`)
   - `testRandom[linuxX64]`: `6.881s` testcase time (user reported before: ~`36s`)
+
+15. Native-only bulk byte compare fast path (`memcmp`) for large array equality checks
+- Target use case:
+  - Hot byte-compare loops like `assertFilesIdentical` where Native compare elapsed time is much larger than JVM.
+- Optimization direction:
+  - Introduce `expect/actual` byte-range compare utility.
+  - JVM actual: keep simple current path or Java intrinsic-backed path.
+  - Native actual: use `kotlinx.cinterop` + `platform.posix.memcmp` with pinned arrays.
+- Expected effect:
+  - Significant reduction in Native compare-only CPU time for large blocks.
+
+16. Native-only bulk copy fast path (`memcpy`) in merge read/write payload movement
+- Target use case:
+  - Frequent payload moves in merge loop (`mergeLoopNext` / `mergeLoopWrite`) where per-byte Kotlin loops add overhead.
+- Optimization direction:
+  - Add `expect/actual` copy primitive for byte-range transfers.
+  - Native actual: `kotlinx.cinterop` + `platform.posix.memcpy` with pinned arrays.
+  - Apply in hot payload-copy points only, keep behavior identical.
+- Expected effect:
+  - Lower per-record copy overhead and reduced Native CPU time in merge loop.
+
+17. Native-only CRC32 backend via cinterop for checksum bulk updates
+- Target use case:
+  - Checksum update in read-heavy paths where Native remains slower than JVM intrinsics.
+- Optimization direction:
+  - Add `expect/actual` CRC32 bulk update backend.
+  - Native actual: call native CRC implementation (for example zlib `crc32`) via cinterop.
+  - Keep common Kotlin CRC implementation as fallback.
+- Expected effect:
+  - Reduce checksum CPU share in `next/readBytes` chain on Native.
+
+18. Native-only direct file-read path (`pread`) into destination buffers
+- Target use case:
+  - `NIOFSDirectory` read path where extra buffer choreography/copies increase Native overhead.
+- Optimization direction:
+  - Introduce `expect/actual` read-at-offset helper.
+  - Native actual: use `kotlinx.cinterop` + `platform.posix.pread` into pinned destination byte arrays where safe.
+  - Keep JVM path unchanged.
+- Expected effect:
+  - Fewer intermediate copies and lower read-path overhead per refill.
+
+19. Continue Native-only `PriorityQueue` micro-optimizations with JVM untouched
+- Target use case:
+  - Remaining Native gap in merge-loop heap operations (`updateTop`, `topOrNull`, `downHeap`).
+- Optimization direction:
+  - Keep `expect/actual` split; iterate only Native actual internals.
+  - Preserve JVM implementation for stability/comparison baseline.
+- Expected effect:
+  - Incremental reduction in merge-loop bookkeeping overhead on Native.
