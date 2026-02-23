@@ -653,9 +653,90 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - module_name: core
-            task: :core:koverXmlReport
-            report_path: core/build/reports/kover/report.xml
+          - module_name: core-analysis
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.analysis*" :core:koverXmlReport
+            report_path: core/analysis/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-codecs
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.codecs*" :core:koverXmlReport
+            report_path: core/codecs/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-document
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.document*" :core:koverXmlReport
+            report_path: core/document/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-geo
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.geo*" :core:koverXmlReport
+            report_path: core/geo/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-index
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.index*" :core:koverXmlReport
+            report_path: core/index/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-internal
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.internal*" :core:koverXmlReport
+            report_path: core/internal/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-jdkport
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.jdkport*" :core:koverXmlReport
+            report_path: core/jdkport/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-search
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.search*" :core:koverXmlReport
+            report_path: core/search/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-store
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.store*" :core:koverXmlReport
+            report_path: core/store/build/reports/kover/report.xml
+            extra_args: >-
+              -x :core:testAndroidHostTest
+              -x :core:compileAndroidDeviceTest
+              -x :core:compileAndroidHostTest
+              -x :core:compileAndroidMain
+              -x :core:koverGenerateArtifactAndroid
+          - module_name: core-util
+            task: :core:jvmTest --tests "org.gnit.lucenekmp.util*" :core:koverXmlReport
+            report_path: core/util/build/reports/kover/report.xml
             extra_args: >-
               -x :core:testAndroidHostTest
               -x :core:compileAndroidDeviceTest
@@ -753,6 +834,12 @@ jobs:
       - name: Coverage ${{ matrix.module_name }}
         run: ./gradlew ${{ matrix.task }} ${{ matrix.extra_args }}
 
+      - name: Normalize coverage report_path for core package splits
+        if: ${{ startsWith(matrix.module_name, 'core-') }}
+        run: |
+          mkdir -p "$(dirname "${{ matrix.report_path }}")"
+          cp "core/build/reports/kover/report.xml" "${{ matrix.report_path }}"
+
       - name: Upload module coverage report
         if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
@@ -775,6 +862,7 @@ jobs:
           name: build-reports-${{ matrix.module_name }}
           path: |
             core/build/reports/kover/
+            core/*/build/reports/kover/
             analysis/common/build/reports/kover/
             analysis/morfologik/build/reports/kover/
             analysis/smartcn/build/reports/kover/
@@ -783,3 +871,40 @@ jobs:
             analysis/extra/build/reports/kover/
             codecs/build/reports/kover/
             build/reports/
+
+  coverage-core-merged:
+    name: Coverage (core-merged)
+    needs: [coverage]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download core coverage artifacts
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-core-*
+          merge-multiple: true
+          path: coverage-core-shards
+
+      - name: Merge core coverage reports
+        if: ${{ env.ACT != 'true' }}
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.4.6
+        with:
+          reports: coverage-core-shards/**/*.xml
+          targetdir: coverage-core-merged
+          reporttypes: Cobertura
+
+      - name: Upload merged core coverage report
+        if: ${{ always() && env.ACT != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-core-merged
+          path: coverage-core-merged/Cobertura.xml
+
+      - name: Upload merged core coverage to Codecov
+        if: ${{ env.ACT != 'true' }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage-core-merged/Cobertura.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: core
