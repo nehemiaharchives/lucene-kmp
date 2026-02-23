@@ -7,9 +7,26 @@ import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.*
 import kotlin.test.assertEquals
+import kotlin.time.TimeSource
 
 @Suppress("BoxedPrimitiveEquality")
 class TestPriorityQueue : LuceneTestCase() {
+
+    private data class PerfStats(
+        val elapsedNs: Long,
+        val operations: Long
+    )
+
+    private fun nsPerOperation(stats: PerfStats): Double {
+        if (stats.operations <= 0L) return 0.0
+        return stats.elapsedNs.toDouble() / stats.operations.toDouble()
+    }
+
+    private fun opsPerSecond(stats: PerfStats): Double {
+        if (stats.elapsedNs <= 0L) return 0.0
+        val seconds = stats.elapsedNs.toDouble() / 1_000_000_000.0
+        return stats.operations.toDouble() / seconds
+    }
 
     private open class IntegerQueue(count: Int) : PriorityQueue<Int>(count) {
         override fun lessThan(a: Int, b: Int): Boolean {
@@ -324,5 +341,114 @@ class TestPriorityQueue : LuceneTestCase() {
             assertEquals(pq.pop(), referenceDataList[i])
             i++
         }
+    }
+
+    @Test
+    fun testPerformanceTopOrNull() {
+        val queueSize = 4096
+        val iterations = 5_000_000
+        val pq = IntegerQueue(queueSize)
+        for (i in 0 until queueSize) {
+            pq.add(i)
+        }
+
+        repeat(1000) {
+            pq.topOrNull()
+        }
+
+        var checksum = 0L
+        val start = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += pq.topOrNull()!!.toLong()
+        }
+        val elapsedNs = start.elapsedNow().inWholeNanoseconds
+        val stats = PerfStats(elapsedNs = elapsedNs, operations = iterations.toLong())
+
+        println(
+            "[PERF][PriorityQueue][topOrNull] queueSize=$queueSize iterations=$iterations " +
+                "elapsedNs=${stats.elapsedNs} operations=${stats.operations} " +
+                "nsPerOp=${nsPerOperation(stats)} opsPerSec=${opsPerSecond(stats)} checksum=$checksum"
+        )
+
+        assertTrue(checksum >= 0L)
+    }
+
+    @Test
+    fun testPerformancePop() {
+        val queueSize = 4096
+        val batches = 300
+        val random = Random(123456789)
+
+        var checksum = 0L
+        var elapsedNs = 0L
+        var operations = 0L
+
+        repeat(20) {
+            val warmupQueue = IntegerQueue(queueSize)
+            repeat(queueSize) {
+                warmupQueue.add(random.nextInt())
+            }
+            repeat(queueSize) {
+                warmupQueue.pop()
+            }
+        }
+
+        repeat(batches) {
+            val pq = IntegerQueue(queueSize)
+            repeat(queueSize) {
+                pq.add(random.nextInt())
+            }
+
+            val start = TimeSource.Monotonic.markNow()
+            while (pq.size() > 0) {
+                checksum += pq.pop()!!.toLong()
+                operations++
+            }
+            elapsedNs += start.elapsedNow().inWholeNanoseconds
+        }
+
+        val stats = PerfStats(elapsedNs = elapsedNs, operations = operations)
+        println(
+            "[PERF][PriorityQueue][pop] queueSize=$queueSize batches=$batches " +
+                "elapsedNs=${stats.elapsedNs} operations=${stats.operations} " +
+                "nsPerOp=${nsPerOperation(stats)} opsPerSec=${opsPerSecond(stats)} checksum=$checksum"
+        )
+
+        assertTrue(operations > 0L)
+    }
+
+    @Test
+    fun testPerformanceUpdateTop() {
+        val queueSize = 4096
+        val iterations = 2_000_000
+        val pq = IntegerQueue(queueSize)
+        for (i in 0 until queueSize) {
+            pq.add(i)
+        }
+
+        var state = 0x12345678
+        repeat(1000) {
+            state = state * 1664525 + 1013904223
+            val candidate = state and Int.MAX_VALUE
+            pq.updateTop(candidate)
+        }
+
+        var checksum = 0L
+        val start = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            state = state * 1664525 + 1013904223
+            val candidate = state and Int.MAX_VALUE
+            checksum += pq.updateTop(candidate).toLong()
+        }
+        val elapsedNs = start.elapsedNow().inWholeNanoseconds
+        val stats = PerfStats(elapsedNs = elapsedNs, operations = iterations.toLong())
+
+        println(
+            "[PERF][PriorityQueue][updateTop] queueSize=$queueSize iterations=$iterations " +
+                "elapsedNs=${stats.elapsedNs} operations=${stats.operations} " +
+                "nsPerOp=${nsPerOperation(stats)} opsPerSec=${opsPerSecond(stats)} checksum=$checksum"
+        )
+
+        assertTrue(checksum >= 0L)
     }
 }
