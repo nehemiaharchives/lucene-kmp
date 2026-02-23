@@ -68,6 +68,7 @@ constructor(
         private val readInternalHandleReadMs: AtomicLong = AtomicLong(0L)
         private val readInternalTransferMs: AtomicLong = AtomicLong(0L)
         private val readInternalEofSignals: AtomicLong = AtomicLong(0L)
+        private var readInternalProfileEnabled: Boolean = false
 
         data class ReadInternalProfile(
             val calls: Long,
@@ -94,6 +95,18 @@ constructor(
             readInternalHandleReadMs.store(0L)
             readInternalTransferMs.store(0L)
             readInternalEofSignals.store(0L)
+        }
+
+        fun enableReadInternalProfile() {
+            readInternalProfileEnabled = true
+        }
+
+        fun disableReadInternalProfile() {
+            readInternalProfileEnabled = false
+        }
+
+        fun isReadInternalProfileEnabled(): Boolean {
+            return readInternalProfileEnabled
         }
 
         @OptIn(ExperimentalAtomicApi::class)
@@ -215,9 +228,12 @@ constructor(
 
         @Throws(IOException::class)
         override fun readInternal(b: ByteBuffer) {
-            readInternalCalls.addAndFetch(1L)
-            readInternalRequestedBytes.addAndFetch(b.remaining().toLong())
-            val readInternalStartMs = Clock.System.now().toEpochMilliseconds()
+            val profileEnabled = isReadInternalProfileEnabled()
+            if (profileEnabled) {
+                readInternalCalls.addAndFetch(1L)
+                readInternalRequestedBytes.addAndFetch(b.remaining().toLong())
+            }
+            val readInternalStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
             var pos: Long = filePointer + off
 
             if (pos + b.remaining() > end) {
@@ -225,45 +241,61 @@ constructor(
             }
 
             try {
+                val createBufferStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
+                val tempOkioBuffer = Buffer()
+                if (profileEnabled) {
+                    readInternalTempBufferCreateMs.addAndFetch(
+                        Clock.System.now().toEpochMilliseconds() - createBufferStartMs
+                    )
+                }
+
                 var readLength: Int = b.remaining()
                 while (readLength > 0) {
-                    readInternalChunkIterations.addAndFetch(1L)
+                    if (profileEnabled) {
+                        readInternalChunkIterations.addAndFetch(1L)
+                    }
                     val toRead = min(CHUNK_SIZE, readLength)
                     b.limit(b.position + toRead)
                     assert(b.remaining() == toRead)
                     /*val i: Int = channel.read(b, pos)*/
-                    val createBufferStartMs = Clock.System.now().toEpochMilliseconds()
-                    val tempOkioBuffer = Buffer()
-                    readInternalTempBufferCreateMs.addAndFetch(
-                        Clock.System.now().toEpochMilliseconds() - createBufferStartMs
-                    )
+                    tempOkioBuffer.clear()
 
-                    readInternalHandleReadCalls.addAndFetch(1L)
-                    val handleReadStartMs = Clock.System.now().toEpochMilliseconds()
+                    if (profileEnabled) {
+                        readInternalHandleReadCalls.addAndFetch(1L)
+                    }
+                    val handleReadStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
                     val numBytesReadFromHandle: Long = handle.read(
                         fileOffset = pos,
                         sink = tempOkioBuffer,
                         byteCount = toRead.toLong()
                     )
-                    readInternalHandleReadMs.addAndFetch(
-                        Clock.System.now().toEpochMilliseconds() - handleReadStartMs
-                    )
+                    if (profileEnabled) {
+                        readInternalHandleReadMs.addAndFetch(
+                            Clock.System.now().toEpochMilliseconds() - handleReadStartMs
+                        )
+                    }
 
                     val i: Int
 
                     if(numBytesReadFromHandle == -1L){
                         // EOF reached at the given fileOffset
                         i = -1
-                        readInternalEofSignals.addAndFetch(1L)
+                        if (profileEnabled) {
+                            readInternalEofSignals.addAndFetch(1L)
+                        }
                     }else{
                         val actualByteCount = numBytesReadFromHandle.toInt()
                         if(actualByteCount > 0){
-                            readInternalHandleReadBytes.addAndFetch(actualByteCount.toLong())
-                            val transferStartMs = Clock.System.now().toEpochMilliseconds()
+                            if (profileEnabled) {
+                                readInternalHandleReadBytes.addAndFetch(actualByteCount.toLong())
+                            }
+                            val transferStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
                             transferTempOkioBufferToByteBuffer(tempOkioBuffer, actualByteCount, b)
-                            readInternalTransferMs.addAndFetch(
-                                Clock.System.now().toEpochMilliseconds() - transferStartMs
-                            )
+                            if (profileEnabled) {
+                                readInternalTransferMs.addAndFetch(
+                                    Clock.System.now().toEpochMilliseconds() - transferStartMs
+                                )
+                            }
                         }
                         i = actualByteCount
                     }
@@ -298,7 +330,9 @@ constructor(
                 }
                 throw IOException(ioe.message + ": " + this, ioe)
             } finally {
-                readInternalTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readInternalStartMs)
+                if (profileEnabled) {
+                    readInternalTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readInternalStartMs)
+                }
             }
         }
 

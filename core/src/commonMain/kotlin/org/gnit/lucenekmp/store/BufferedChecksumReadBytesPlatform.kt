@@ -12,8 +12,18 @@ internal fun readBytesWithChecksumStepTimesNs(
     digest: BufferedChecksum,
     buffer: ByteArray,
     offset: Int,
-    len: Int
+    len: Int,
+    collectTiming: Boolean
 ): ReadBytesChecksumStepTimesNs {
+    if (!collectTiming) {
+        main.readBytes(buffer, offset, len)
+        digest.update(buffer, offset, len)
+        return ReadBytesChecksumStepTimesNs(
+            delegateReadNs = 0L,
+            checksumUpdateNs = 0L
+        )
+    }
+
     val readStart = TimeSource.Monotonic.markNow()
     main.readBytes(buffer, offset, len)
     val delegateReadNs = readStart.elapsedNow().inWholeNanoseconds

@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.index.CorruptIndexException
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.store.ChecksumIndexInput
@@ -266,12 +267,24 @@ class TestOfflineSorter : LuceneTestCase() {
 
         val sortCallStart = Clock.System.now().toEpochMilliseconds()
         val externalSortStart = Clock.System.now().toEpochMilliseconds()
-        if (shouldTraceDetailed) {
+        val enableHotPathProfile =
+            shouldTraceDetailed && (System.getProperty("tests.profile.hotpath")?.toBoolean() == true)
+        if (enableHotPathProfile) {
             OfflineSorter.resetByteSequencesReaderProfile()
+            OfflineSorter.enableByteSequencesReaderProfile()
             BufferedIndexInput.resetProfile()
+            BufferedIndexInput.enableProfile()
             BufferedChecksumIndexInput.resetProfile()
+            BufferedChecksumIndexInput.enableProfile()
             NIOFSDirectory.resetReadInternalProfile()
+            NIOFSDirectory.enableReadInternalProfile()
             ByteBuffer.resetProfile()
+        } else {
+            OfflineSorter.disableByteSequencesReaderProfile()
+            BufferedIndexInput.disableProfile()
+            BufferedChecksumIndexInput.disableProfile()
+            NIOFSDirectory.disableReadInternalProfile()
+            ByteBuffer.disableProfile()
         }
         val sorted = sorter.sort(unsorted.name!!)
         val externalSortElapsedMs = Clock.System.now().toEpochMilliseconds() - externalSortStart

@@ -18,6 +18,12 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
 
     @Throws(IOException::class)
     override fun readByte(): Byte {
+        if (!isProfileEnabled()) {
+            val b = main.readByte()
+            digest.update(b.toInt())
+            return b
+        }
+
         readByteCalls.addAndFetch(1L)
         val readStartMs = Clock.System.now().toEpochMilliseconds()
         val b = main.readByte()
@@ -30,6 +36,12 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
 
     @Throws(IOException::class)
     override fun readBytes(b: ByteArray, offset: Int, len: Int) {
+        if (!isProfileEnabled()) {
+            main.readBytes(b, offset, len)
+            digest.update(b, offset, len)
+            return
+        }
+
         readBytesCalls.addAndFetch(1L)
         readBytesRequestedBytes.addAndFetch(len.toLong())
         val stepTimesNs = readBytesWithChecksumStepTimesNs(
@@ -37,7 +49,8 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
             digest = digest,
             buffer = b,
             offset = offset,
-            len = len
+            len = len,
+            collectTiming = true
         )
         readBytesDelegateReadNs.addAndFetch(stepTimesNs.delegateReadNs)
         readBytesChecksumNs.addAndFetch(stepTimesNs.checksumUpdateNs)
@@ -107,6 +120,7 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
         private val readBytesChecksumMs: AtomicLong = AtomicLong(0L)
         private val readBytesDelegateReadNs: AtomicLong = AtomicLong(0L)
         private val readBytesChecksumNs: AtomicLong = AtomicLong(0L)
+        private var profileEnabled: Boolean = false
 
         data class Profile(
             val readByteCalls: Long,
@@ -131,6 +145,18 @@ class BufferedChecksumIndexInput(val main: IndexInput) :
             readBytesChecksumMs.store(0L)
             readBytesDelegateReadNs.store(0L)
             readBytesChecksumNs.store(0L)
+        }
+
+        fun enableProfile() {
+            profileEnabled = true
+        }
+
+        fun disableProfile() {
+            profileEnabled = false
+        }
+
+        fun isProfileEnabled(): Boolean {
+            return profileEnabled
         }
 
         @OptIn(ExperimentalAtomicApi::class)

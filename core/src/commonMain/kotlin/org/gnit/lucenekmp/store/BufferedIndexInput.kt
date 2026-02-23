@@ -53,9 +53,12 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
     }
 
     override fun readBytes(b: ByteArray, offset: Int, len: Int, useBuffer: Boolean) {
-        val readBytesStartMs = Clock.System.now().toEpochMilliseconds()
-        readBytesCalls.addAndFetch(1L)
-        readBytesRequestedBytes.addAndFetch(len.toLong())
+        val profileEnabled = isProfileEnabled()
+        val readBytesStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
+        if (profileEnabled) {
+            readBytesCalls.addAndFetch(1L)
+            readBytesRequestedBytes.addAndFetch(len.toLong())
+        }
         var offset = offset
         var len = len
         val available: Int = buffer.remaining()
@@ -63,7 +66,9 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
             // the buffer contains enough data to satisfy this request
             if (len > 0)  // to allow b to be null if len is 0...
                 buffer.get(b, offset, len)
-            readBytesFastPathCalls.addAndFetch(1L)
+            if (profileEnabled) {
+                readBytesFastPathCalls.addAndFetch(1L)
+            }
         } else {
             // the buffer does not have enough data. First serve all we've got.
             if (available > 0) {
@@ -73,7 +78,7 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
             }
             // and now, read the remaining 'len' bytes:
             if (useBuffer && len < bufferSize) {
-                val refillPathStartMs = Clock.System.now().toEpochMilliseconds()
+                val refillPathStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
                 // If the amount left to read is small enough, and
                 // we are allowed to use our buffer, do it in the usual
                 // buffered way: fill the buffer and copy from it:
@@ -85,10 +90,12 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
                 } else {
                     buffer.get(b, offset, len)
                 }
-                readBytesRefillPathCalls.addAndFetch(1L)
-                readBytesRefillPathMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillPathStartMs)
+                if (profileEnabled) {
+                    readBytesRefillPathCalls.addAndFetch(1L)
+                    readBytesRefillPathMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillPathStartMs)
+                }
             } else {
-                val directPathStartMs = Clock.System.now().toEpochMilliseconds()
+                val directPathStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
                 // The amount left to read is larger than the buffer
                 // or we've been asked to not use our buffer -
                 // there's no performance reason not to read it all
@@ -98,20 +105,28 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
                 // had in the buffer.
                 val after: Long = bufferStart + buffer.position + len
                 if (after > length()) throw EOFException("read past EOF: $this")
-                readBytesDirectPathReadInternalCalls.addAndFetch(1L)
-                readBytesDirectPathReadInternalBytes.addAndFetch(len.toLong())
-                val readInternalStartMs = Clock.System.now().toEpochMilliseconds()
+                if (profileEnabled) {
+                    readBytesDirectPathReadInternalCalls.addAndFetch(1L)
+                    readBytesDirectPathReadInternalBytes.addAndFetch(len.toLong())
+                }
+                val readInternalStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
                 readInternal(ByteBuffer.wrap(b, offset, len))
-                readBytesDirectPathReadInternalMs.addAndFetch(
-                    Clock.System.now().toEpochMilliseconds() - readInternalStartMs
-                )
+                if (profileEnabled) {
+                    readBytesDirectPathReadInternalMs.addAndFetch(
+                        Clock.System.now().toEpochMilliseconds() - readInternalStartMs
+                    )
+                }
                 bufferStart = after
                 buffer.limit(0) // trigger refill() on read
-                readBytesDirectPathCalls.addAndFetch(1L)
-                readBytesDirectPathMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - directPathStartMs)
+                if (profileEnabled) {
+                    readBytesDirectPathCalls.addAndFetch(1L)
+                    readBytesDirectPathMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - directPathStartMs)
+                }
             }
         }
-        readBytesTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readBytesStartMs)
+        if (profileEnabled) {
+            readBytesTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readBytesStartMs)
+        }
     }
 
     override fun readShort(): Short {
@@ -279,8 +294,11 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
 
     @Throws(IOException::class)
     private fun refill() {
-        refillCalls.addAndFetch(1L)
-        val refillStartMs = Clock.System.now().toEpochMilliseconds()
+        val profileEnabled = isProfileEnabled()
+        if (profileEnabled) {
+            refillCalls.addAndFetch(1L)
+        }
+        val refillStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
         val start: Long = bufferStart + buffer.position
         var end = start + bufferSize
         if (end > length())  // don't read past EOF
@@ -297,17 +315,23 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
         buffer.position(0)
         buffer.limit(newLength)
         bufferStart = start
-        refillReadInternalCalls.addAndFetch(1L)
-        refillReadInternalBytes.addAndFetch(newLength.toLong())
-        val refillReadInternalStartMs = Clock.System.now().toEpochMilliseconds()
+        if (profileEnabled) {
+            refillReadInternalCalls.addAndFetch(1L)
+            refillReadInternalBytes.addAndFetch(newLength.toLong())
+        }
+        val refillReadInternalStartMs = if (profileEnabled) Clock.System.now().toEpochMilliseconds() else 0L
         readInternal(buffer)
-        refillReadInternalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillReadInternalStartMs)
+        if (profileEnabled) {
+            refillReadInternalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillReadInternalStartMs)
+        }
         // Make sure sub classes don't mess up with the buffer.
         assert(buffer.order() == ByteOrder.LITTLE_ENDIAN) { buffer.order() }
         assert(buffer.remaining() == 0) { "should have thrown EOFException" }
         assert(buffer.position == newLength)
         buffer.flip()
-        refillTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillStartMs)
+        if (profileEnabled) {
+            refillTotalMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - refillStartMs)
+        }
     }
 
     /**
@@ -450,6 +474,7 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
         private val refillReadInternalCalls: AtomicLong = AtomicLong(0L)
         private val refillReadInternalBytes: AtomicLong = AtomicLong(0L)
         private val refillReadInternalMs: AtomicLong = AtomicLong(0L)
+        private var profileEnabled: Boolean = false
 
         @OptIn(ExperimentalAtomicApi::class)
         data class Profile(
@@ -491,6 +516,18 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
             refillReadInternalMs.store(0L)
         }
 
+        fun enableProfile() {
+            profileEnabled = true
+        }
+
+        fun disableProfile() {
+            profileEnabled = false
+        }
+
+        fun isProfileEnabled(): Boolean {
+            return profileEnabled
+        }
+
         @OptIn(ExperimentalAtomicApi::class)
         fun profile(): Profile {
             return Profile(
@@ -517,7 +554,14 @@ abstract class BufferedIndexInput(resourceDesc: String, bufferSize: Int = BUFFER
         fun bufferSize(context: IOContext): Int {
             when (context.context) {
                 IOContext.Context.MERGE -> return MERGE_BUFFER_SIZE
-                IOContext.Context.DEFAULT, IOContext.Context.FLUSH -> return BUFFER_SIZE
+                IOContext.Context.DEFAULT -> {
+                    return if (context.readAdvice == ReadAdvice.SEQUENTIAL) {
+                        MERGE_BUFFER_SIZE
+                    } else {
+                        BUFFER_SIZE
+                    }
+                }
+                IOContext.Context.FLUSH -> return BUFFER_SIZE
                 else -> return BUFFER_SIZE
             }
         }

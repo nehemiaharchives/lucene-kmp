@@ -70,6 +70,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         private val byteSeqNextReadBytesMs: AtomicLong = AtomicLong(0L)
         private val byteSeqNextGetRefMs: AtomicLong = AtomicLong(0L)
         private val byteSeqNextPayloadBytes: AtomicLong = AtomicLong(0L)
+        private var byteSequencesReaderProfileEnabled: Boolean = false
 
         @OptIn(ExperimentalAtomicApi::class)
         fun resetByteSequencesReaderProfile() {
@@ -81,6 +82,18 @@ open class OfflineSorter @Throws(IOException::class) constructor(
             byteSeqNextReadBytesMs.store(0L)
             byteSeqNextGetRefMs.store(0L)
             byteSeqNextPayloadBytes.store(0L)
+        }
+
+        fun enableByteSequencesReaderProfile() {
+            byteSequencesReaderProfileEnabled = true
+        }
+
+        fun disableByteSequencesReaderProfile() {
+            byteSequencesReaderProfileEnabled = false
+        }
+
+        fun isByteSequencesReaderProfileEnabled(): Boolean {
+            return byteSequencesReaderProfileEnabled
         }
 
         data class ByteSequencesReaderProfile(
@@ -455,6 +468,17 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         @OptIn(ExperimentalAtomicApi::class)
         @Throws(IOException::class)
         override open fun next(): BytesRef? {
+            if (!isByteSequencesReaderProfileEnabled()) {
+                if (`in`.filePointer >= end) {
+                    return null
+                }
+                val length = `in`.readShort().toInt() and 0xFFFF
+                ref.growNoCopy(length)
+                ref.setLength(length)
+                `in`.readBytes(ref.bytes(), 0, length)
+                return ref.get()
+            }
+
             byteSeqNextCalls.addAndFetch(1L)
             val nextStartMs = Clock.System.now().toEpochMilliseconds()
             if (`in`.filePointer >= end) {
