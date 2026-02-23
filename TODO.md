@@ -109,7 +109,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
 
 ## Depth 3
-- org.apache.lucene.analysis.AnalyzerWrapper → org.gnit.lucenekmp.analysis.AnalyzerWrapper
 - org.apache.lucene.analysis.AutomatonToTokenStream → org.gnit.lucenekmp.analysis.AutomatonToTokenStream
 - org.apache.lucene.analysis.DelegatingAnalyzerWrapper → org.gnit.lucenekmp.analysis.DelegatingAnalyzerWrapper
 - org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat
@@ -292,20 +291,16 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleThreadAndTestName → org.gnit.lucenekmp.tests.util.TestRuleThreadAndTestName
 - org.apache.lucene.tests.util.VerifyTestClassNamingConvention → org.gnit.lucenekmp.tests.util.VerifyTestClassNamingConvention
 - org.apache.lucene.tests.util.WithNestedTests → org.gnit.lucenekmp.tests.util.WithNestedTests
-- org.apache.lucene.util.FixedLengthBytesRefArray → org.gnit.lucenekmp.util.FixedLengthBytesRefArray
 - org.apache.lucene.util.HotspotVMOptions → org.gnit.lucenekmp.util.HotspotVMOptions
 - org.apache.lucene.util.IgnoreRandomChains → org.gnit.lucenekmp.util.IgnoreRandomChains
-- org.apache.lucene.util.OfflineSorter → org.gnit.lucenekmp.util.OfflineSorter
 - org.apache.lucene.util.WeakIdentityMap → org.gnit.lucenekmp.util.WeakIdentityMap
 
 ## Depth 2
 - org.apache.lucene.analysis.GraphTokenFilter → org.gnit.lucenekmp.analysis.GraphTokenFilter
 - org.apache.lucene.analysis.standard.SpoonFeedMaxCharsReaderWrapper → org.gnit.lucenekmp.analysis.standard.SpoonFeedMaxCharsReaderWrapper
 - org.apache.lucene.analysis.tokenattributes.BytesTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttributeImpl
-- org.apache.lucene.analysis.tokenattributes.PositionIncrementAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.PositionLengthAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttributeImpl
 - org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
-- org.apache.lucene.analysis.tokenattributes.TypeAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TypeAttributeImpl
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockDecoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockDecoder
 - org.apache.lucene.codecs.uniformsplit.BlockHeader → org.gnit.lucenekmp.codecs.uniformsplit.BlockHeader
@@ -445,7 +440,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.analysis.MockPayloadAnalyzer → org.gnit.lucenekmp.tests.analysis.MockPayloadAnalyzer
 - org.apache.lucene.tests.analysis.MockRandomLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.MockRandomLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.MockSynonymAnalyzer → org.gnit.lucenekmp.tests.analysis.MockSynonymAnalyzer
-- org.apache.lucene.tests.analysis.MockSynonymFilter → org.gnit.lucenekmp.tests.analysis.MockSynonymFilter
 - org.apache.lucene.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1 → org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1
 - org.apache.lucene.tests.analysis.standard.WordBreakTestUnicode_12_1_0 → org.gnit.lucenekmp.tests.analysis.standard.WordBreakTestUnicode_12_1_0
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
@@ -473,7 +467,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.search.BaseRangeFieldQueryTestCase → org.gnit.lucenekmp.tests.search.BaseRangeFieldQueryTestCase
 - org.apache.lucene.tests.search.MatchesTestBase → org.gnit.lucenekmp.tests.search.MatchesTestBase
 - org.apache.lucene.tests.search.SearchEquivalenceTestBase → org.gnit.lucenekmp.tests.search.SearchEquivalenceTestBase
-- org.apache.lucene.tests.store.CorruptingIndexOutput → org.gnit.lucenekmp.tests.store.CorruptingIndexOutput
 - org.apache.lucene.tests.util.FailOnNonBulkMergesInfoStream → org.gnit.lucenekmp.tests.util.FailOnNonBulkMergesInfoStream
 - org.apache.lucene.tests.util.SorePoint → org.gnit.lucenekmp.tests.util.SorePoint
 - org.apache.lucene.tests.util.SoreType → org.gnit.lucenekmp.tests.util.SoreType
@@ -492,12 +485,8 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestSetupTeardownChaining → org.gnit.lucenekmp.tests.util.TestSetupTeardownChaining
 - org.apache.lucene.tests.util.TestWorstCaseTestBehavior → org.gnit.lucenekmp.tests.util.TestWorstCaseTestBehavior
 - org.apache.lucene.util.JavaLoggingInfoStream → org.gnit.lucenekmp.util.JavaLoggingInfoStream
-- org.apache.lucene.util.RecyclingByteBlockAllocator → org.gnit.lucenekmp.util.RecyclingByteBlockAllocator
-- org.apache.lucene.util.RecyclingIntBlockAllocator → org.gnit.lucenekmp.util.RecyclingIntBlockAllocator
 - org.apache.lucene.util.SentinelIntSet → org.gnit.lucenekmp.util.SentinelIntSet
 - org.apache.lucene.util.SuppressForbidden → org.gnit.lucenekmp.util.SuppressForbidden
-- org.apache.lucene.util.TestFilterIterator → org.gnit.lucenekmp.util.TestFilterIterator
-- org.apache.lucene.util.TestOfflineSorter → org.gnit.lucenekmp.util.TestOfflineSorter
 - org.apache.lucene.util.TestStressRamUsageEstimator → org.gnit.lucenekmp.util.TestStressRamUsageEstimator
 - org.apache.lucene.util.TestVirtualMethod → org.gnit.lucenekmp.util.TestVirtualMethod
 - org.apache.lucene.util.TestWeakIdentityMap → org.gnit.lucenekmp.util.TestWeakIdentityMap
@@ -712,11 +701,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestTryDelete → org.gnit.lucenekmp.index.TestTryDelete
 - org.apache.lucene.index.TestTwoPhaseCommitTool → org.gnit.lucenekmp.index.TestTwoPhaseCommitTool
 - org.apache.lucene.index.TestUniqueTermCount → org.gnit.lucenekmp.index.TestUniqueTermCount
-- org.apache.lucene.internal.tests.TestTestSecrets → org.gnit.lucenekmp.internal.tests.TestTestSecrets
-- org.apache.lucene.internal.vectorization.BaseVectorizationTestCase → org.gnit.lucenekmp.internal.vectorization.BaseVectorizationTestCase
-- org.apache.lucene.internal.vectorization.TestVectorScorer → org.gnit.lucenekmp.internal.vectorization.TestVectorScorer
-- org.apache.lucene.internal.vectorization.TestVectorUtilSupport → org.gnit.lucenekmp.internal.vectorization.TestVectorUtilSupport
-- org.apache.lucene.internal.vectorization.TestVectorizationProvider → org.gnit.lucenekmp.internal.vectorization.TestVectorizationProvider
 - org.apache.lucene.queryparser.classic.TestMultiAnalyzer → org.gnit.lucenekmp.queryparser.classic.TestMultiAnalyzer
 - org.apache.lucene.queryparser.classic.TestMultiFieldQueryParser → org.gnit.lucenekmp.queryparser.classic.TestMultiFieldQueryParser
 - org.apache.lucene.queryparser.classic.TestQueryParser → org.gnit.lucenekmp.queryparser.classic.TestQueryParser
@@ -905,9 +889,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.TestSleepingLockWrapper → org.gnit.lucenekmp.store.TestSleepingLockWrapper
 - org.apache.lucene.store.TestStressLockFactories → org.gnit.lucenekmp.store.TestStressLockFactories
 - org.apache.lucene.store.TestTrackingDirectoryWrapper → org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper
-- org.apache.lucene.tests.analysis.TestLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.TestMockAnalyzer → org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer
-- org.apache.lucene.tests.analysis.TestMockCharFilter → org.gnit.lucenekmp.tests.analysis.TestMockCharFilter
 - org.apache.lucene.tests.analysis.TestMockSynonymFilter → org.gnit.lucenekmp.tests.analysis.TestMockSynonymFilter
 - org.apache.lucene.tests.analysis.TestToken → org.gnit.lucenekmp.tests.analysis.TestToken
 - org.apache.lucene.tests.codecs.asserting.TestAssertingDocValuesFormat → org.gnit.lucenekmp.tests.codecs.asserting.TestAssertingDocValuesFormat
@@ -936,19 +918,8 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRunWithRestrictedPermissions → org.gnit.lucenekmp.tests.util.TestRunWithRestrictedPermissions
 - org.apache.lucene.util.SelectorBenchmark → org.gnit.lucenekmp.util.SelectorBenchmark
 - org.apache.lucene.util.SorterBenchmark → org.gnit.lucenekmp.util.SorterBenchmark
-- org.apache.lucene.util.Test2BPagedBytes → org.gnit.lucenekmp.util.Test2BPagedBytes
-- org.apache.lucene.util.TestAttributeSource → org.gnit.lucenekmp.util.TestAttributeSource
-- org.apache.lucene.util.TestCharsRefBuilder → org.gnit.lucenekmp.util.TestCharsRefBuilder
 - org.apache.lucene.util.TestClassLoaderUtils → org.gnit.lucenekmp.util.TestClassLoaderUtils
-- org.apache.lucene.util.TestCloseableThreadLocal → org.gnit.lucenekmp.util.TestCloseableThreadLocal
-- org.apache.lucene.util.TestFixedBitDocIdSet → org.gnit.lucenekmp.util.TestFixedBitDocIdSet
-- org.apache.lucene.util.TestFixedLengthBytesRefArray → org.gnit.lucenekmp.util.TestFixedLengthBytesRefArray
 - org.apache.lucene.util.TestJavaLoggingInfoStream → org.gnit.lucenekmp.util.TestJavaLoggingInfoStream
-- org.apache.lucene.util.TestNamedSPILoader → org.gnit.lucenekmp.util.TestNamedSPILoader
-- org.apache.lucene.util.TestPagedBytes → org.gnit.lucenekmp.util.TestPagedBytes
-- org.apache.lucene.util.TestQueryBuilder → org.gnit.lucenekmp.util.TestQueryBuilder
-- org.apache.lucene.util.TestRecyclingByteBlockAllocator → org.gnit.lucenekmp.util.TestRecyclingByteBlockAllocator
-- org.apache.lucene.util.TestRecyclingIntBlockAllocator → org.gnit.lucenekmp.util.TestRecyclingIntBlockAllocator
 - org.apache.lucene.util.TestSentinelIntSet → org.gnit.lucenekmp.util.TestSentinelIntSet
 - org.apache.lucene.util.TestSparseFixedBitDocIdSet → org.gnit.lucenekmp.util.TestSparseFixedBitDocIdSet
 - org.apache.lucene.util.TestVersion → org.gnit.lucenekmp.util.TestVersion

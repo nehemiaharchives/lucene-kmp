@@ -50,7 +50,7 @@
 | [org.apache.lucene.queryparser.classic.QueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/queryparser/classic/QueryParser.java) | org.gnit.lucenekmp.queryparser.classic.QueryParser | 0 | 0 | 0 | 100% | [ ] |
 | [org.apache.lucene.search.IndexSearcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndexSearcher.java) | org.gnit.lucenekmp.search.IndexSearcher | 42 | 42 | 0 | 100% | [x] |
 | [org.apache.lucene.store.FSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FSLockFactory.java) | org.gnit.lucenekmp.store.FSLockFactory | 4 | 4 | 0 | 100% | [ ] |
-| [org.apache.lucene.store.NIOFSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NIOFSDirectory.java) | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 5 | 0 | 100% | [x] |
+| [org.apache.lucene.store.NIOFSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NIOFSDirectory.java) | org.gnit.lucenekmp.store.NIOFSDirectory | 5 | 5 | 0 | 100% | [ ] |
 | [org.apache.lucene.document.IntPoint](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/IntPoint.java) | org.gnit.lucenekmp.document.IntPoint | 6 | 6 | 0 | 100% | [x] |
 | [org.apache.lucene.search.Query](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Query.java) | org.gnit.lucenekmp.search.Query | 3 | 3 | 0 | 100% | [ ] |
 | [org.apache.lucene.search.BooleanQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanQuery.java) | org.gnit.lucenekmp.search.BooleanQuery | 11 | 11 | 0 | 100% | [x] |
@@ -62,11 +62,11 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1098 | 80% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1107 | 80% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
-|   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 21 | 80% | [ ] |
+|   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 22 | 84% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
-|     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 17 | 68% | [ ] |
+|     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 19 | 76% | [ ] |
 |   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 40 | 97% | [ ] |
 |     org.apache.lucene.codecs.compressing |         org.gnit.lucenekmp.codecs.compressing | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.hnsw |         org.gnit.lucenekmp.codecs.hnsw | 10 | 9 | 90% | [ ] |
@@ -90,7 +90,7 @@
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 33 | 68% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 43 | 84% | [ ] |
-|     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 15 | 51% | [ ] |
+|     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 16 | 55% | [ ] |
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 9 | 90% | [ ] |
@@ -110,12 +110,12 @@
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 13 | 52% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
-|     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 9 | 69% | [ ] |
+|     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 10 | 76% | [ ] |
 |     org.apache.lucene.tests.util |         org.gnit.lucenekmp.tests.util | 36 | 15 | 41% | [ ] |
 |       org.apache.lucene.tests.util.automaton |           org.gnit.lucenekmp.tests.util.automaton | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.util.fst |           org.gnit.lucenekmp.tests.util.fst | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.util.hnsw |           org.gnit.lucenekmp.tests.util.hnsw | 1 | 0 | 0% | [ ] |
-|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 110 | 98 | 89% | [ ] |
+|   org.apache.lucene.util |       org.gnit.lucenekmp.util | 110 | 102 | 92% | [ ] |
 |     org.apache.lucene.util.automaton |         org.gnit.lucenekmp.util.automaton | 29 | 28 | 96% | [ ] |
 |     org.apache.lucene.util.bkd |         org.gnit.lucenekmp.util.bkd | 15 | 14 | 93% | [ ] |
 |     org.apache.lucene.util.compress |         org.gnit.lucenekmp.util.compress | 3 | 2 | 66% | [ ] |
@@ -149,13 +149,13 @@
 |   org.apache.lucene.geo | 17 | 17 | 100% |
 |   org.apache.lucene.index | 197 | 14 | 7% |
 |     org.apache.lucene.internal.hppc | 15 | 15 | 100% |
-|     org.apache.lucene.internal.tests | 1 | 0 | 0% |
-|     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
+|     org.apache.lucene.internal.tests | 1 | 1 | 100% |
+|     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
 |   org.apache.lucene.search | 149 | 10 | 6% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 15 | 60% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
-|   org.apache.lucene.util | 63 | 41 | 65% |
+|   org.apache.lucene.util | 63 | 54 | 85% |
 |     org.apache.lucene.util.automaton | 15 | 12 | 80% |
 |     org.apache.lucene.util.bkd | 8 | 7 | 87% |
 |     org.apache.lucene.util.compress | 3 | 3 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 0 | 0% |
 |     org.apache.lucene.util.packed | 3 | 2 | 66% |
 |     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 262 | 38% |
+| Total | 673 | 280 | 41% |
 
 
 ## Tests To Port
@@ -372,11 +372,6 @@
 | [org.apache.lucene.index.TestTryDelete](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestTryDelete.java) | org.gnit.lucenekmp.index.TestTryDelete |
 | [org.apache.lucene.index.TestTwoPhaseCommitTool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestTwoPhaseCommitTool.java) | org.gnit.lucenekmp.index.TestTwoPhaseCommitTool |
 | [org.apache.lucene.index.TestUniqueTermCount](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestUniqueTermCount.java) | org.gnit.lucenekmp.index.TestUniqueTermCount |
-| [org.apache.lucene.internal.tests.TestTestSecrets](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/tests/TestTestSecrets.java) | org.gnit.lucenekmp.internal.tests.TestTestSecrets |
-| [org.apache.lucene.internal.vectorization.TestPostingDecodingUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestPostingDecodingUtil.java) | org.gnit.lucenekmp.internal.vectorization.TestPostingDecodingUtil |
-| [org.apache.lucene.internal.vectorization.TestVectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorScorer.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorScorer |
-| [org.apache.lucene.internal.vectorization.TestVectorUtilSupport](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorUtilSupport.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorUtilSupport |
-| [org.apache.lucene.internal.vectorization.TestVectorizationProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorizationProvider.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorizationProvider |
 | [org.apache.lucene.search.TestApproximationSearchEquivalence](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestApproximationSearchEquivalence.java) | org.gnit.lucenekmp.search.TestApproximationSearchEquivalence |
 | [org.apache.lucene.search.TestAutomatonQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestAutomatonQuery.java) | org.gnit.lucenekmp.search.TestAutomatonQuery |
 | [org.apache.lucene.search.TestAutomatonQueryUnicode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestAutomatonQueryUnicode.java) | org.gnit.lucenekmp.search.TestAutomatonQueryUnicode |
@@ -539,21 +534,8 @@
 | [org.apache.lucene.store.TestSleepingLockWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSleepingLockWrapper.java) | org.gnit.lucenekmp.store.TestSleepingLockWrapper |
 | [org.apache.lucene.store.TestStressLockFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestStressLockFactories.java) | org.gnit.lucenekmp.store.TestStressLockFactories |
 | [org.apache.lucene.store.TestTrackingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestTrackingDirectoryWrapper.java) | org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper |
-| [org.apache.lucene.util.Test2BPagedBytes](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/Test2BPagedBytes.java) | org.gnit.lucenekmp.util.Test2BPagedBytes |
-| [org.apache.lucene.util.TestAttributeSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestAttributeSource.java) | org.gnit.lucenekmp.util.TestAttributeSource |
-| [org.apache.lucene.util.TestCharsRefBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestCharsRefBuilder.java) | org.gnit.lucenekmp.util.TestCharsRefBuilder |
 | [org.apache.lucene.util.TestClassLoaderUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestClassLoaderUtils.java) | org.gnit.lucenekmp.util.TestClassLoaderUtils |
-| [org.apache.lucene.util.TestCloseableThreadLocal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestCloseableThreadLocal.java) | org.gnit.lucenekmp.util.TestCloseableThreadLocal |
-| [org.apache.lucene.util.TestFilterIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFilterIterator.java) | org.gnit.lucenekmp.util.TestFilterIterator |
-| [org.apache.lucene.util.TestFixedBitDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFixedBitDocIdSet.java) | org.gnit.lucenekmp.util.TestFixedBitDocIdSet |
-| [org.apache.lucene.util.TestFixedLengthBytesRefArray](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestFixedLengthBytesRefArray.java) | org.gnit.lucenekmp.util.TestFixedLengthBytesRefArray |
 | [org.apache.lucene.util.TestJavaLoggingInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestJavaLoggingInfoStream.java) | org.gnit.lucenekmp.util.TestJavaLoggingInfoStream |
-| [org.apache.lucene.util.TestNamedSPILoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestNamedSPILoader.java) | org.gnit.lucenekmp.util.TestNamedSPILoader |
-| [org.apache.lucene.util.TestOfflineSorter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestOfflineSorter.java) | org.gnit.lucenekmp.util.TestOfflineSorter |
-| [org.apache.lucene.util.TestPagedBytes](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestPagedBytes.java) | org.gnit.lucenekmp.util.TestPagedBytes |
-| [org.apache.lucene.util.TestQueryBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestQueryBuilder.java) | org.gnit.lucenekmp.util.TestQueryBuilder |
-| [org.apache.lucene.util.TestRecyclingByteBlockAllocator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRecyclingByteBlockAllocator.java) | org.gnit.lucenekmp.util.TestRecyclingByteBlockAllocator |
-| [org.apache.lucene.util.TestRecyclingIntBlockAllocator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestRecyclingIntBlockAllocator.java) | org.gnit.lucenekmp.util.TestRecyclingIntBlockAllocator |
 | [org.apache.lucene.util.TestSentinelIntSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSentinelIntSet.java) | org.gnit.lucenekmp.util.TestSentinelIntSet |
 | [org.apache.lucene.util.TestSparseFixedBitDocIdSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestSparseFixedBitDocIdSet.java) | org.gnit.lucenekmp.util.TestSparseFixedBitDocIdSet |
 | [org.apache.lucene.util.TestStressRamUsageEstimator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestStressRamUsageEstimator.java) | org.gnit.lucenekmp.util.TestStressRamUsageEstimator |
