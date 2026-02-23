@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.tests.junitport.assertEquals
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class StringBufferTest {
@@ -73,7 +73,7 @@ class StringBufferTest {
         val sb = StringBuffer("abcdef")
         val dst = CharArray(3)
         sb.getChars(1, 4, dst, 0)
-        assertEquals(charArrayOf('b', 'c', 'd').toList(), dst.toList())
+        assertEquals(charArrayOf('b', 'c', 'd'), dst)
         assertFailsWith<IndexOutOfBoundsException> { sb.getChars(-1, 2, dst, 0) }
         assertFailsWith<IndexOutOfBoundsException> { sb.getChars(1, 7, dst, 0) }
         assertFailsWith<IndexOutOfBoundsException> { sb.getChars(3, 2, dst, 0) }

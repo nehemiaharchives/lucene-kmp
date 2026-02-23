@@ -2,8 +2,8 @@ package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
+import org.gnit.lucenekmp.tests.junitport.assertEquals
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.gnit.lucenekmp.jdkport.Charset // Explicit import for Charset
 
 class BufferedWriterTest {
@@ -23,7 +23,7 @@ class BufferedWriterTest {
         val expectedString = "Hello World"
         val expectedBytes = expectedString.encodeToByteArray() // Platform's default UTF-8 encoding for "Hello World"
         val actualBytes = baos.toByteArray()
-        assertEquals(expectedBytes.toList(), actualBytes.toList(), "Byte array content mismatch for 'Hello World'")
+        assertEquals(expectedBytes, actualBytes, "Byte array content mismatch for 'Hello World'")
         // Also check string conversion to see if it's specifically the problem
         assertEquals(expectedString, actualBytes.decodeToString(), "Simple write failed (string conversion)")
         bw.close()

@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import org.gnit.lucenekmp.tests.junitport.assertEquals
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

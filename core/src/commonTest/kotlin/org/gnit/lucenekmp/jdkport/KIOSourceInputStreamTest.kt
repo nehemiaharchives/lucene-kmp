@@ -1,13 +1,13 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.tests.junitport.assertEquals
 import okio.Buffer
 import okio.Source
 import okio.Timeout
 import okio.buffer
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
 
 class KIOSourceInputStreamTest {
 
@@ -44,7 +44,7 @@ class KIOSourceInputStreamTest {
         val buffer = ByteArray(5)
         val bytesRead = stream.read(buffer)
         assertEquals(5, bytesRead)
-        assertEquals(data.toList(), buffer.toList())
+        assertEquals(data, buffer)
     }
 
     @Test
@@ -54,7 +54,7 @@ class KIOSourceInputStreamTest {
         val buffer = ByteArray(5)
         val bytesRead = stream.read(buffer, 1, 3)
         assertEquals(3, bytesRead)
-        assertEquals(listOf<Byte>(0, 1, 2, 3, 0), buffer.toList())
+        assertEquals(byteArrayOf(0, 1, 2, 3, 0), buffer)
     }
 
     @Test
@@ -64,7 +64,7 @@ class KIOSourceInputStreamTest {
         val buffer = ByteArray(input.size)
         val bytesRead = stream.read(buffer)
         assertEquals(input.size, bytesRead)
-        assertEquals(input.toList(), buffer.toList())
+        assertEquals(input, buffer)
 
         // Verify the content can be decoded back to the original string
         val decodedString = buffer.decodeToString()
