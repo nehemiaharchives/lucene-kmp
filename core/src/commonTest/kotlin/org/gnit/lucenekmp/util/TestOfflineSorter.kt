@@ -20,6 +20,7 @@ import org.gnit.lucenekmp.store.BufferedChecksumIndexInput
 import org.gnit.lucenekmp.store.BufferedIndexInput
 import org.gnit.lucenekmp.store.NIOFSDirectory
 import org.gnit.lucenekmp.tests.store.CorruptingIndexOutput
+import org.gnit.lucenekmp.tests.junitport.assertEquals
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.Nightly
 import org.gnit.lucenekmp.tests.util.TestUtil
@@ -30,7 +31,6 @@ import kotlin.time.Clock
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -394,9 +394,7 @@ class TestOfflineSorter : LuceneTestCase() {
                     in2.readBytes(buf2, 0, chunk)
                     readElapsedMs += Clock.System.now().toEpochMilliseconds() - readStart
                     val compareStart = Clock.System.now().toEpochMilliseconds()
-                    for (i in 0 until chunk) {
-                        assertEquals(buf1[i], buf2[i])
-                    }
+                    assertEquals(buf1, 0, chunk, buf2, 0, chunk)
                     compareElapsedMs += Clock.System.now().toEpochMilliseconds() - compareStart
                     comparedBytes += chunk.toLong()
                     if (traceDetailed && comparedBytes >= nextProgressBytes) {

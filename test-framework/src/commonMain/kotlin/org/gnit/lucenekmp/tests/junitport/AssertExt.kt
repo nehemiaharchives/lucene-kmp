@@ -1,8 +1,76 @@
 package org.gnit.lucenekmp.tests.junitport
 
+import org.gnit.lucenekmp.jdkport.Arrays
 import kotlin.math.abs
-import kotlin.test.assertEquals
+import kotlin.test.assertEquals as kotlinAssertEquals
 import kotlin.test.assertTrue
+
+fun <T> assertEquals(expected: T, actual: T, message: String? = null) {
+    kotlinAssertEquals(expected, actual, message)
+}
+
+fun assertEquals(expected: ByteArray, actual: ByteArray, message: String? = null) {
+    val equal = Arrays.equals(expected, 0, expected.size, actual, 0, actual.size)
+    assertTrue(
+        equal,
+        message ?: "byte arrays differ"
+    )
+}
+
+fun assertEquals(
+    expected: ByteArray,
+    expectedFromIndex: Int,
+    expectedToIndex: Int,
+    actual: ByteArray,
+    actualFromIndex: Int,
+    actualToIndex: Int,
+    message: String? = null
+) {
+    val equal = Arrays.equals(
+        expected,
+        expectedFromIndex,
+        expectedToIndex,
+        actual,
+        actualFromIndex,
+        actualToIndex
+    )
+    assertTrue(
+        equal,
+        message ?: "byte array ranges differ"
+    )
+}
+
+fun assertEquals(expected: IntArray, actual: IntArray, message: String? = null) {
+    val equal = Arrays.equals(expected, 0, expected.size, actual, 0, actual.size)
+    assertTrue(
+        equal,
+        message ?: "int arrays differ"
+    )
+}
+
+fun assertEquals(expected: LongArray, actual: LongArray, message: String? = null) {
+    val equal = Arrays.equals(expected, 0, expected.size, actual, 0, actual.size)
+    assertTrue(
+        equal,
+        message ?: "long arrays differ"
+    )
+}
+
+fun assertEquals(expected: CharArray, actual: CharArray, message: String? = null) {
+    val equal = Arrays.equals(expected, 0, expected.size, actual, 0, actual.size)
+    assertTrue(
+        equal,
+        message ?: "char arrays differ"
+    )
+}
+
+fun assertEquals(expected: FloatArray, actual: FloatArray, message: String? = null) {
+    val equal = Arrays.equals(expected, 0, expected.size, actual, 0, actual.size)
+    assertTrue(
+        equal,
+        message ?: "float arrays differ"
+    )
+}
 
 
 /**
@@ -128,10 +196,10 @@ fun assertArrayEquals(
  * actual values
  */
 fun assertArrayEquals(expecteds: Array<String?>, actuals: Array<String?>, message: String? = null) {
-    assertEquals(expecteds.size, actuals.size, "${message ?: ""} size mismatch: expected ${expecteds.size} elements, got ${actuals.size}")
+    kotlinAssertEquals(expecteds.size, actuals.size, "${message ?: ""} size mismatch: expected ${expecteds.size} elements, got ${actuals.size}")
 
     for (i in expecteds.indices) {
-        assertEquals(
+        kotlinAssertEquals(
             expecteds[i],
             actuals[i],
             "${message ?: ""} arrays differ at index $i: expected=${expecteds[i]}, actual=${actuals[i]}"
