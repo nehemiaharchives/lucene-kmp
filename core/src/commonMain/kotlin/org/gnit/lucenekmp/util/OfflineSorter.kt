@@ -439,6 +439,8 @@ open class OfflineSorter @Throws(IOException::class) constructor(
     }
 
     class ByteSequencesWriter(val out: IndexOutput) : AutoCloseable {
+        private val shortScratch = ByteArray(2)
+
         @Throws(IOException::class)
         fun write(ref: BytesRef) {
             write(ref.bytes, ref.offset, ref.length)
@@ -452,7 +454,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
         @Throws(IOException::class)
         fun write(bytes: ByteArray, off: Int, len: Int) {
             require(len <= Short.MAX_VALUE.toInt()) { "len must be <= ${Short.MAX_VALUE}; got $len" }
-            out.writeShort(len.toShort())
+            writeLittleEndianShort(out, len, shortScratch)
             out.writeBytes(bytes, off, len)
         }
 
@@ -464,6 +466,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
     open class ByteSequencesReader(val `in`: ChecksumIndexInput, val name: String) : BytesRefIterator, AutoCloseable {
         private val end: Long = `in`.length() - CodecUtil.footerLength().toLong()
         private val ref = BytesRefBuilder()
+        private val shortScratch = ByteArray(2)
 
         @OptIn(ExperimentalAtomicApi::class)
         @Throws(IOException::class)
@@ -472,7 +475,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
                 if (`in`.filePointer >= end) {
                     return null
                 }
-                val length = `in`.readShort().toInt() and 0xFFFF
+                val length = readLittleEndianUnsignedShort(`in`, shortScratch)
                 ref.growNoCopy(length)
                 ref.setLength(length)
                 `in`.readBytes(ref.bytes(), 0, length)
@@ -488,7 +491,7 @@ open class OfflineSorter @Throws(IOException::class) constructor(
             }
 
             val readLengthStartMs = Clock.System.now().toEpochMilliseconds()
-            val length = `in`.readShort().toInt() and 0xFFFF
+            val length = readLittleEndianUnsignedShort(`in`, shortScratch)
             byteSeqNextReadLengthMs.addAndFetch(Clock.System.now().toEpochMilliseconds() - readLengthStartMs)
 
             val prepareRefStartMs = Clock.System.now().toEpochMilliseconds()
