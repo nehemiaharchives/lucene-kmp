@@ -89,6 +89,9 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
             for (fileName in snapshot) {
                 try {
                     if (decRefUnsafe(fileName)) {
+                        if (fileName.endsWith(".cfs")) {
+                            //logger.debug { "phase=fileDeleter.decRef.markDelete file=$fileName refCount=0 snapshotSize=${snapshot.size} trackedFiles=${refCounts.size}" }
+                        }
                         toDelete.add(fileName)
                     }
                 } catch (t: Throwable) {
@@ -243,6 +246,11 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
         try {
             directory.deleteFile(fileName)
         } catch (e: NoSuchFileException) {
+            if (!existsUnsafe(fileName)) {
+                //logger.debug { "phase=fileDeleter.delete.alreadyMissing file=$fileName reason=NoSuchFileException" }
+                return
+            }
+            //logger.error(e) { "phase=fileDeleter.delete.noSuchFile file=$fileName tracked=${refCounts.containsKey(fileName)} refCount=${refCounts[fileName]?.count ?: 0} pendingDeletion=${directory.pendingDeletions.contains(fileName)}" }
             if (Constants.WINDOWS) {
                 // TODO: can we remove this OS-specific hacky logic?  If windows deleteFile is buggy, we
                 // should instead contain this workaround in
@@ -255,6 +263,11 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
                 throw e
             }
         } catch (e: FileNotFoundException) {
+            if (!existsUnsafe(fileName)) {
+                //logger.debug { "phase=fileDeleter.delete.alreadyMissing file=$fileName reason=FileNotFoundException" }
+                return
+            }
+            //logger.error(e) { "phase=fileDeleter.delete.fileNotFound file=$fileName tracked=${refCounts.containsKey(fileName)} refCount=${refCounts[fileName]?.count ?: 0} pendingDeletion=${directory.pendingDeletions.contains(fileName)}" }
             if (Constants.WINDOWS) {
             } else {
                 throw e

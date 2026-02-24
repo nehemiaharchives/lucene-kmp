@@ -11,10 +11,15 @@ import org.gnit.lucenekmp.index.StoredFields
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.index.BaseStoredFieldsFormatTestCase
 import org.gnit.lucenekmp.tests.util.RandomPicks
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestLucene90StoredFieldsFormatHighCompression : BaseStoredFieldsFormatTestCase() {
+    init {
+        configureTestLogging()
+    }
+
     override val codec: Codec
         get() = Lucene101Codec(Lucene101Codec.Mode.BEST_COMPRESSION)
 

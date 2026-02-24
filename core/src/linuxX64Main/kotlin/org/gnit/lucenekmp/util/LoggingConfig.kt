@@ -100,6 +100,6 @@ private fun installNativeFatalSignalHooksIfNeeded() {
 }
 
 actual fun configureTestLogging() {
-    KotlinLoggingConfiguration.logLevel = Level.ERROR
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
     installNativeFatalSignalHooksIfNeeded()
 }
