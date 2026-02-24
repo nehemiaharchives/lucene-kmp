@@ -5655,11 +5655,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // this segment:
             val useCompoundFile: Boolean
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) { // Guard segmentInfos
             merge.markDebugPhase("iw.mergeMiddle.useCompoundFile")
-            useCompoundFile = mergePolicy.useCompoundFile(segmentInfos, merge.info!!, this)
-            //}
+            useCompoundFile = withIndexWriterLock {
+                // Mirror Java's synchronized(this) critical section: segmentInfos must not be
+                // concurrently mutated while MergePolicy iterates it to decide CFS usage.
+                mergePolicy.useCompoundFile(segmentInfos, merge.info!!, this)
+            }
 
             if (useCompoundFile) {
                 merge.markDebugPhase("iw.mergeMiddle.createCompoundFile")
