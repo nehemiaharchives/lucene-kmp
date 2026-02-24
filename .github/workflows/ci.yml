@@ -655,43 +655,43 @@ jobs:
         include:
           - module_name: core-analysis
             task: :core:koverXmlReportAnalysis
-            report_path: core/build/reports/kover/shards/analysis/report*.xml
+            report_path: core/build/reports/kover/shards/analysis/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-codecs
             task: :core:koverXmlReportCodecs
-            report_path: core/build/reports/kover/shards/codecs/report*.xml
+            report_path: core/build/reports/kover/shards/codecs/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-document
             task: :core:koverXmlReportDocument
-            report_path: core/build/reports/kover/shards/document/report*.xml
+            report_path: core/build/reports/kover/shards/document/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-geo
             task: :core:koverXmlReportGeo
-            report_path: core/build/reports/kover/shards/geo/report*.xml
+            report_path: core/build/reports/kover/shards/geo/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-index
             task: :core:koverXmlReportIndex
-            report_path: core/build/reports/kover/shards/index/report*.xml
+            report_path: core/build/reports/kover/shards/index/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-internal
             task: :core:koverXmlReportInternal
-            report_path: core/build/reports/kover/shards/internal/report*.xml
+            report_path: core/build/reports/kover/shards/internal/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-jdkport
             task: :core:koverXmlReportJdkport
-            report_path: core/build/reports/kover/shards/jdkport/report*.xml
+            report_path: core/build/reports/kover/shards/jdkport/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-search
             task: :core:koverXmlReportSearch
-            report_path: core/build/reports/kover/shards/search/report*.xml
+            report_path: core/build/reports/kover/shards/search/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-store
             task: :core:koverXmlReportStore
-            report_path: core/build/reports/kover/shards/store/report*.xml
+            report_path: core/build/reports/kover/shards/store/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: core-util
             task: :core:koverXmlReportUtil
-            report_path: core/build/reports/kover/shards/util/report*.xml
+            report_path: core/build/reports/kover/shards/util/reportJvm.xml
             extra_args: -x :core:jvmTest
           - module_name: analysis-common
             task: :analysis:common:koverXmlReport
