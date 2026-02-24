@@ -281,6 +281,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
     fun testMaxMergeCount() {
         val dir = newDirectory()
         val iwc = IndexWriterConfig(MockAnalyzer(random())).setCommitOnClose(false)
+        val maxWait = 60.seconds
 
         val maxMergeCount = TestUtil.nextInt(random(), 1, 5)
         val maxMergeThreads = TestUtil.nextInt(random(), 1, maxMergeCount)
@@ -296,8 +297,16 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                         try {
                             assertTrue(count <= maxMergeCount, "count=$count vs maxMergeCount=$maxMergeCount")
                             enoughMergesWaiting.countDown()
+                            val waitStart = TimeSource.Monotonic.markNow()
                             while (enoughMergesWaiting.getCount() != 0L && !failed.load()) {
-                                // busy wait until enough merge threads are blocked
+                                if (waitStart.elapsedNow() > maxWait) {
+                                    fail(
+                                        "timeout waiting for enoughMergesWaiting: " +
+                                                "latch=${enoughMergesWaiting.getCount()} " +
+                                                "maxMergeCount=$maxMergeCount maxMergeThreads=$maxMergeThreads"
+                                    )
+                                }
+                                runBlocking { delay(1) }
                             }
                             super.doMerge(mergeSource, merge)
                         } finally {
@@ -321,10 +330,19 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         val w = IndexWriter(dir, iwc)
         val doc = Document()
         doc.add(newTextField("field", "field", Field.Store.NO))
+        val producerWaitStart = TimeSource.Monotonic.markNow()
         while (enoughMergesWaiting.getCount() != 0L && !failed.load()) {
+            if (producerWaitStart.elapsedNow() > maxWait) {
+                fail(
+                    "timeout waiting for merge threads to block: " +
+                            "latch=${enoughMergesWaiting.getCount()} " +
+                            "maxMergeCount=$maxMergeCount maxMergeThreads=$maxMergeThreads"
+                )
+            }
             for (i in 0..<10) {
                 w.addDocument(doc)
             }
+            runBlocking { delay(1) }
         }
         try {
             w.commit()
