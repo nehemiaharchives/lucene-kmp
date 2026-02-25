@@ -49,9 +49,9 @@ Step 2. First copy import statements which starts with `org.apache.lucene` by re
     Step 2.1: create empty class with LuceneTestCase inheritance and import statements with correct org.gnit.lucenekmp packagess
     Step 2.2: Create inner classes with proper inheritance and property members
     Step 2.3: Add property members and no-op functions in inner class and main class
-    Step 2.4: Port and fill implementations of each no-op functions and try to follow as much java lucene behavior possible, run `get_file_problems` tool of jetbrains mcp server for each time after porting a function and fix error
-Step 3. run `get_file_problems` tool of jetbrains mcp server to the file. unresolved reference compilation error means un-ported-dependency class/interface, leave current class as it is and start over from Step 1 for that class.
-Step 4. After import-statements-only class/interface file `ClazzToPort.kt` get no compilation error with `get_file_problems`, start porting the body of the code.
+    Step 2.4: Port and fill implementations of each no-op functions and try to follow as much java lucene behavior possible, run `open_file_in_editor` first and then `get_file_problems` for each time after porting a function and fix error.
+Step 3. run `open_file_in_editor` tool of jetbrains mcp server for the file, then run `get_file_problems` tool for the same file. `get_file_problems` may not emit diagnostics unless the file is opened in the editor first. unresolved reference compilation error means un-ported-dependency class/interface, leave current class as it is and start over from Step 1 for that class.
+Step 4. After import-statements-only class/interface file `ClazzToPort.kt` get no compilation error with `open_file_in_editor` + `get_file_problems`, start porting the body of the code.
 Step 5. During porting body of the class, if you find any jdk specific class used, try to find it in `jdkport` package and if you find import it and use it.
 Step 6. If you did not find `jdkport` class/interface, do one of the following:
     Case 1 -> Functional interface: interfaces in `java.util.function` should be replaced with kotlin function representation, e.g. `Predicate<T>` to be `(T) -> Boolean`, `IntFunction<R>` to be `(Int) -> R` 
@@ -64,7 +64,7 @@ Step 6. If you did not find `jdkport` class/interface, do one of the following:
 Step 7. Create a empty kotlin class/interface `jdkport` and try to find if all the dependencies or super class, super interface is already in `jdkport` package, if not found, port super class/interface recursively.  
 Step 8. If all the super class/interface of the jdk class ported into `jdkport` package, start porting the jdkport class.
 Step 9. If there are no missing `jdkport` class, and if there are no un-ported-dependency class/interface from Java Lucene, port the code of the `ClazzToPort.kt`
-Step 10. After porting logic and behaviors code, run `get_file_problems` tool of jetbrains mcp server and edit and iterate over until all errors resolves.
+Step 10. After porting logic and behaviors code, run `open_file_in_editor` first, then run `get_file_problems` tool of jetbrains mcp server and edit and iterate over until all errors resolves.
 Step 11. Final parity pass: compare Java and Kotlin files side-by-side. Check for missing or misordered member properties, functions, and logic blocks. Add missing pieces and reorder Kotlin members/functions/logic to match Java ordering so both files stay side-by-side with full behavior and implementation parity.
 Step 12. Test execution order is mandatory: run and iterate on focused `jvmTest` first until all tests pass on JVM. Only after JVM is green, run focused `macosX64Test` (or active native target) as the final verification to detect Kotlin/Native-specific problems.
 
@@ -81,7 +81,8 @@ Step 12. Test execution order is mandatory: run and iterate on focused `jvmTest`
    - For lock/coordination behavior, prefer existing `jdkport` constructs (e.g. `ReentrantLock`, `CountDownLatch`) where parity benefits from them.
 
 3. **Compile-fix loop is mandatory**
-   - After each substantial edit chunk (or after each ported function for long files), run JetBrains `get_file_problems`.
+   - After each substantial edit chunk (or after each ported function for long files), run JetBrains `open_file_in_editor` first, then `get_file_problems`.
+   - `get_file_problems` may not emit diagnostics unless the file is opened in the editor first.
    - Fix all **errors** immediately before continuing.
    - Keep iterating until there are zero errors in edited files.
    - Warnings can remain unless they indicate a parity/correctness issue.
