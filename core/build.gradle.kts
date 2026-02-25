@@ -165,57 +165,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
     }
 }
 
-val coreJvmCoverageShards = listOf(
-    "Analysis" to "org.gnit.lucenekmp.analysis*",
-    "Codecs" to "org.gnit.lucenekmp.codecs*",
-    "Document" to "org.gnit.lucenekmp.document*",
-    "Geo" to "org.gnit.lucenekmp.geo*",
-    "Index" to "org.gnit.lucenekmp.index*",
-    "Internal" to "org.gnit.lucenekmp.internal*",
-    "Jdkport" to "org.gnit.lucenekmp.jdkport*",
-    "Search" to "org.gnit.lucenekmp.search*",
-    "Store" to "org.gnit.lucenekmp.store*",
-    "Util" to "org.gnit.lucenekmp.util*",
-)
-
-val jvmTestTask = tasks.named<Test>("jvmTest")
-
-coreJvmCoverageShards.forEach { (shardName, packagePattern) ->
-    val shardTestTask = tasks.register<Test>("test$shardName") {
-        group = "verification"
-        description = "Runs core JVM tests for shard $shardName ($packagePattern)."
-
-        val baseTask = jvmTestTask.get()
-        testClassesDirs = baseTask.testClassesDirs
-        classpath = baseTask.classpath
-        maxHeapSize = baseTask.maxHeapSize
-
-        filter {
-            includeTestsMatching(packagePattern)
-            isFailOnNoMatchingTests = true
-        }
-
-        shouldRunAfter(jvmTestTask)
-    }
-
-    tasks.matching { it.name == "koverXmlReportJvm" }.configureEach {
-        mustRunAfter(shardTestTask)
-    }
-
-    tasks.register<Copy>("koverXmlReport$shardName") {
-        group = "verification"
-        description = "Generates and materializes Kover XML report for core JVM shard $shardName."
-
-        dependsOn(shardTestTask)
-        dependsOn("koverXmlReportJvm")
-
-        from(layout.buildDirectory.dir("reports/kover")) {
-            include("report*.xml")
-        }
-        into(layout.buildDirectory.dir("reports/kover/shards/${shardName.lowercase()}"))
-    }
-}
-
 // To enable hang detection, run ./gradlew commands with -PenableHangDetection=true
 val enableHangDetection = providers
     .gradleProperty("enableHangDetection")
