@@ -487,14 +487,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.JavaLoggingInfoStream → org.gnit.lucenekmp.util.JavaLoggingInfoStream
 - org.apache.lucene.util.SuppressForbidden → org.gnit.lucenekmp.util.SuppressForbidden
 - org.apache.lucene.util.TestWeakIdentityMap → org.gnit.lucenekmp.util.TestWeakIdentityMap
-- org.apache.lucene.util.graph.TestGraphTokenStreamFiniteStrings → org.gnit.lucenekmp.util.graph.TestGraphTokenStreamFiniteStrings
-- org.apache.lucene.util.mutable.MutableValue → org.gnit.lucenekmp.util.mutable.MutableValue
-- org.apache.lucene.util.mutable.MutableValueBool → org.gnit.lucenekmp.util.mutable.MutableValueBool
-- org.apache.lucene.util.mutable.MutableValueDouble → org.gnit.lucenekmp.util.mutable.MutableValueDouble
-- org.apache.lucene.util.mutable.MutableValueFloat → org.gnit.lucenekmp.util.mutable.MutableValueFloat
-- org.apache.lucene.util.mutable.MutableValueInt → org.gnit.lucenekmp.util.mutable.MutableValueInt
-- org.apache.lucene.util.mutable.MutableValueLong → org.gnit.lucenekmp.util.mutable.MutableValueLong
-- org.apache.lucene.util.mutable.MutableValueStr → org.gnit.lucenekmp.util.mutable.MutableValueStr
 - org.apache.lucene.util.packed.PackedDataInput → org.gnit.lucenekmp.util.packed.PackedDataInput
 - org.apache.lucene.util.packed.PackedDataOutput → org.gnit.lucenekmp.util.packed.PackedDataOutput
 
@@ -917,22 +909,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.SorterBenchmark → org.gnit.lucenekmp.util.SorterBenchmark
 - org.apache.lucene.util.TestClassLoaderUtils → org.gnit.lucenekmp.util.TestClassLoaderUtils
 - org.apache.lucene.util.TestJavaLoggingInfoStream → org.gnit.lucenekmp.util.TestJavaLoggingInfoStream
-- org.apache.lucene.util.automaton.TestDeterminism → org.gnit.lucenekmp.util.automaton.TestDeterminism
-- org.apache.lucene.util.automaton.TestDeterminizeLexicon → org.gnit.lucenekmp.util.automaton.TestDeterminizeLexicon
 - org.apache.lucene.util.automaton.TestLevenshteinAutomata → org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata
-- org.apache.lucene.util.bkd.Test4BBKDPoints → org.gnit.lucenekmp.util.bkd.Test4BBKDPoints
-- org.apache.lucene.util.fst.Test2BFST → org.gnit.lucenekmp.util.fst.Test2BFST
-- org.apache.lucene.util.fst.Test2BFSTOffHeap → org.gnit.lucenekmp.util.fst.Test2BFSTOffHeap
 - org.apache.lucene.util.hnsw.MockByteVectorValues → org.gnit.lucenekmp.util.hnsw.MockByteVectorValues
 - org.apache.lucene.util.hnsw.MockVectorValues → org.gnit.lucenekmp.util.hnsw.MockVectorValues
-- org.apache.lucene.util.hnsw.TestHnswByteVectorGraph → org.gnit.lucenekmp.util.hnsw.TestHnswByteVectorGraph
-- org.apache.lucene.util.hnsw.TestHnswFloatVectorGraph → org.gnit.lucenekmp.util.hnsw.TestHnswFloatVectorGraph
-- org.apache.lucene.util.hnsw.TestHnswUtil → org.gnit.lucenekmp.util.hnsw.TestHnswUtil
-- org.apache.lucene.util.hnsw.TestNeighborQueue → org.gnit.lucenekmp.util.hnsw.TestNeighborQueue
-- org.apache.lucene.util.hnsw.TestOnHeapHnswGraph → org.gnit.lucenekmp.util.hnsw.TestOnHeapHnswGraph
-- org.apache.lucene.util.mutable.TestMutableValues → org.gnit.lucenekmp.util.mutable.TestMutableValues
-- org.apache.lucene.util.packed.TestDirectPacked → org.gnit.lucenekmp.util.packed.TestDirectPacked
-- org.apache.lucene.util.quantization.TestOptimizedScalarQuantizer → org.gnit.lucenekmp.util.quantization.TestOptimizedScalarQuantizer
-- org.apache.lucene.util.quantization.TestScalarQuantizedVectorSimilarity → org.gnit.lucenekmp.util.quantization.TestScalarQuantizedVectorSimilarity
-- org.apache.lucene.util.quantization.TestScalarQuantizer → org.gnit.lucenekmp.util.quantization.TestScalarQuantizer
 

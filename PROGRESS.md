@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1108 | 80% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1116 | 81% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 22 | 84% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -122,7 +122,7 @@
 |     org.apache.lucene.util.fst |         org.gnit.lucenekmp.util.fst | 25 | 23 | 92% | [ ] |
 |     org.apache.lucene.util.graph |         org.gnit.lucenekmp.util.graph | 2 | 1 | 50% | [ ] |
 |     org.apache.lucene.util.hnsw |         org.gnit.lucenekmp.util.hnsw | 26 | 25 | 96% | [ ] |
-|     org.apache.lucene.util.mutable |         org.gnit.lucenekmp.util.mutable | 9 | 0 | 0% | [ ] |
+|     org.apache.lucene.util.mutable |         org.gnit.lucenekmp.util.mutable | 9 | 8 | 88% | [ ] |
 |     org.apache.lucene.util.packed |         org.gnit.lucenekmp.util.packed | 53 | 48 | 90% | [ ] |
 |     org.apache.lucene.util.quantization |         org.gnit.lucenekmp.util.quantization | 6 | 5 | 83% | [ ] |
 
@@ -156,16 +156,16 @@
 |     org.apache.lucene.search.similarities | 25 | 15 | 60% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
 |   org.apache.lucene.util | 63 | 59 | 93% |
-|     org.apache.lucene.util.automaton | 15 | 12 | 80% |
-|     org.apache.lucene.util.bkd | 8 | 7 | 87% |
+|     org.apache.lucene.util.automaton | 15 | 14 | 93% |
+|     org.apache.lucene.util.bkd | 8 | 8 | 100% |
 |     org.apache.lucene.util.compress | 3 | 3 | 100% |
-|     org.apache.lucene.util.fst | 8 | 6 | 75% |
-|     org.apache.lucene.util.graph | 1 | 0 | 0% |
-|     org.apache.lucene.util.hnsw | 8 | 3 | 37% |
-|     org.apache.lucene.util.mutable | 1 | 0 | 0% |
-|     org.apache.lucene.util.packed | 3 | 2 | 66% |
-|     org.apache.lucene.util.quantization | 3 | 0 | 0% |
-| Total | 673 | 285 | 42% |
+|     org.apache.lucene.util.fst | 8 | 8 | 100% |
+|     org.apache.lucene.util.graph | 1 | 1 | 100% |
+|     org.apache.lucene.util.hnsw | 8 | 8 | 100% |
+|     org.apache.lucene.util.mutable | 1 | 1 | 100% |
+|     org.apache.lucene.util.packed | 3 | 3 | 100% |
+|     org.apache.lucene.util.quantization | 3 | 3 | 100% |
+| Total | 673 | 301 | 44% |
 
 
 ## Tests To Port
@@ -537,21 +537,5 @@
 | [org.apache.lucene.util.TestClassLoaderUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestClassLoaderUtils.java) | org.gnit.lucenekmp.util.TestClassLoaderUtils |
 | [org.apache.lucene.util.TestJavaLoggingInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestJavaLoggingInfoStream.java) | org.gnit.lucenekmp.util.TestJavaLoggingInfoStream |
 | [org.apache.lucene.util.TestWeakIdentityMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestWeakIdentityMap.java) | org.gnit.lucenekmp.util.TestWeakIdentityMap |
-| [org.apache.lucene.util.automaton.TestDeterminism](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminism.java) | org.gnit.lucenekmp.util.automaton.TestDeterminism |
-| [org.apache.lucene.util.automaton.TestDeterminizeLexicon](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminizeLexicon.java) | org.gnit.lucenekmp.util.automaton.TestDeterminizeLexicon |
 | [org.apache.lucene.util.automaton.TestLevenshteinAutomata](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLevenshteinAutomata.java) | org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata |
-| [org.apache.lucene.util.bkd.Test4BBKDPoints](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/bkd/Test4BBKDPoints.java) | org.gnit.lucenekmp.util.bkd.Test4BBKDPoints |
-| [org.apache.lucene.util.fst.Test2BFST](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/Test2BFST.java) | org.gnit.lucenekmp.util.fst.Test2BFST |
-| [org.apache.lucene.util.fst.Test2BFSTOffHeap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/fst/Test2BFSTOffHeap.java) | org.gnit.lucenekmp.util.fst.Test2BFSTOffHeap |
-| [org.apache.lucene.util.graph.TestGraphTokenStreamFiniteStrings](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/graph/TestGraphTokenStreamFiniteStrings.java) | org.gnit.lucenekmp.util.graph.TestGraphTokenStreamFiniteStrings |
-| [org.apache.lucene.util.hnsw.TestHnswByteVectorGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswByteVectorGraph.java) | org.gnit.lucenekmp.util.hnsw.TestHnswByteVectorGraph |
-| [org.apache.lucene.util.hnsw.TestHnswFloatVectorGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswFloatVectorGraph.java) | org.gnit.lucenekmp.util.hnsw.TestHnswFloatVectorGraph |
-| [org.apache.lucene.util.hnsw.TestHnswUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestHnswUtil.java) | org.gnit.lucenekmp.util.hnsw.TestHnswUtil |
-| [org.apache.lucene.util.hnsw.TestNeighborQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestNeighborQueue.java) | org.gnit.lucenekmp.util.hnsw.TestNeighborQueue |
-| [org.apache.lucene.util.hnsw.TestOnHeapHnswGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/hnsw/TestOnHeapHnswGraph.java) | org.gnit.lucenekmp.util.hnsw.TestOnHeapHnswGraph |
-| [org.apache.lucene.util.mutable.TestMutableValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/mutable/TestMutableValues.java) | org.gnit.lucenekmp.util.mutable.TestMutableValues |
-| [org.apache.lucene.util.packed.TestDirectPacked](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/packed/TestDirectPacked.java) | org.gnit.lucenekmp.util.packed.TestDirectPacked |
-| [org.apache.lucene.util.quantization.TestOptimizedScalarQuantizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/quantization/TestOptimizedScalarQuantizer.java) | org.gnit.lucenekmp.util.quantization.TestOptimizedScalarQuantizer |
-| [org.apache.lucene.util.quantization.TestScalarQuantizedVectorSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/quantization/TestScalarQuantizedVectorSimilarity.java) | org.gnit.lucenekmp.util.quantization.TestScalarQuantizedVectorSimilarity |
-| [org.apache.lucene.util.quantization.TestScalarQuantizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/quantization/TestScalarQuantizer.java) | org.gnit.lucenekmp.util.quantization.TestScalarQuantizer |
 
