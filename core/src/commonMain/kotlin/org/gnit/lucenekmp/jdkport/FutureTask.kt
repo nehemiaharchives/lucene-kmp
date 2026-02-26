@@ -521,4 +521,25 @@ object Executors {
             }
         }
     }
+
+    fun newFixedThreadPool(nThreads: Int): ExecutorService {
+        return ThreadPoolExecutor(
+            nThreads,
+            nThreads,
+            0L,
+            TimeUnit.MILLISECONDS,
+            LinkedBlockingQueue()
+        )
+    }
+
+    fun newFixedThreadPool(nThreads: Int, threadFactory: ThreadFactory): ExecutorService {
+        return ThreadPoolExecutor(
+            nThreads,
+            nThreads,
+            0L,
+            TimeUnit.MILLISECONDS,
+            LinkedBlockingQueue(),
+            threadFactory
+        )
+    }
 }

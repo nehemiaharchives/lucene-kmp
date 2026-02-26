@@ -1,20 +1,22 @@
 package org.gnit.lucenekmp.util.hnsw
 
 import org.gnit.lucenekmp.document.Field
-import org.gnit.lucenekmp.document.KnnByteVectorField
-import org.gnit.lucenekmp.index.ByteVectorValues
+import org.gnit.lucenekmp.document.KnnFloatVectorField
+import org.gnit.lucenekmp.index.FloatVectorValues
 import org.gnit.lucenekmp.index.KnnVectorValues
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.index.VectorSimilarityFunction
-import org.gnit.lucenekmp.search.KnnByteVectorQuery
+import org.gnit.lucenekmp.search.KnnFloatVectorQuery
 import org.gnit.lucenekmp.search.Query
-import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.util.FixedBitSet
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** Tests HNSW KNN graphs */
-class TestHnswByteVectorGraph : HnswGraphTestCase<ByteArray>() {
+class TestHnswFloatVectorGraph : HnswGraphTestCase<FloatArray>() {
 
     @BeforeTest
     fun setup() {
@@ -23,38 +25,20 @@ class TestHnswByteVectorGraph : HnswGraphTestCase<ByteArray>() {
     }
 
     override fun getVectorEncoding(): VectorEncoding {
-        return VectorEncoding.BYTE
+        return VectorEncoding.FLOAT32
     }
 
-    override fun randomVector(dim: Int): ByteArray {
-        return randomVector8(random(), dim)
+    override fun randomVector(dim: Int): FloatArray {
+        return randomVector(random(), dim)
     }
 
     override fun vectorValues(size: Int, dimension: Int): KnnVectorValues {
-        val vectors = Array(size) { randomVector8(random(), dimension) }
-        return ByteVectorValues.fromBytes(vectors.toMutableList(), dimension)
-    }
-
-    private fun fitsInByte(v: Float): Boolean {
-        return v <= 127 && v >= -128 && v % 1 == 0f
+        val vectors = Array(size) { randomVector(random(), dimension) }
+        return FloatVectorValues.fromFloats(vectors.toMutableList(), dimension)
     }
 
     override fun vectorValues(values: Array<FloatArray>): KnnVectorValues {
-        val bValues = Array(values.size) { ByteArray(values[it].size) }
-        // The case when all floats fit within a byte already.
-        val scaleSimple = fitsInByte(values[0][0])
-        for (i in values.indices) {
-            for (j in values[i].indices) {
-                val v = if (scaleSimple) {
-                    assert(fitsInByte(values[i][j]))
-                    values[i][j]
-                } else {
-                    values[i][j] * 127
-                }
-                bValues[i][j] = v.toInt().toByte()
-            }
-        }
-        return ByteVectorValues.fromBytes(bValues.toMutableList(), bValues[0].size)
+        return FloatVectorValues.fromFloats(values.toMutableList(), values[0].size)
     }
 
     override fun vectorValues(
@@ -63,9 +47,9 @@ class TestHnswByteVectorGraph : HnswGraphTestCase<ByteArray>() {
         pregeneratedVectorValues: KnnVectorValues,
         pregeneratedOffset: Int
     ): KnnVectorValues {
-        val pvv = pregeneratedVectorValues as ByteVectorValues
-        val vectors = Array(size) { ByteArray(dimension) }
-        val randomVectors = Array(size - pvv.size()) { randomVector8(random(), dimension) }
+        val pvv = pregeneratedVectorValues as FloatVectorValues
+        val vectors = Array(size) { FloatArray(dimension) }
+        val randomVectors = Array(size - pvv.size()) { randomVector(random(), dimension) }
 
         for (i in 0 until pregeneratedOffset) {
             vectors[i] = randomVectors[i]
@@ -79,32 +63,60 @@ class TestHnswByteVectorGraph : HnswGraphTestCase<ByteArray>() {
             vectors[i] = randomVectors[i - pvv.size()]
         }
 
-        return ByteVectorValues.fromBytes(vectors.toMutableList(), dimension)
+        return FloatVectorValues.fromFloats(vectors.toMutableList(), dimension)
     }
 
     override fun vectorValues(reader: LeafReader, fieldName: String): KnnVectorValues {
-        val vectorValues = reader.getByteVectorValues(fieldName)!!
-        val vectors = Array(vectorValues.size()) { ByteArray(vectorValues.dimension()) }
+        val vectorValues = reader.getFloatVectorValues(fieldName)!!
+        val vectors = Array(vectorValues.size()) { FloatArray(vectorValues.dimension()) }
         for (i in 0 until vectorValues.size()) {
             vectors[i] = vectorValues.vectorValue(i).copyOf()
         }
-        return ByteVectorValues.fromBytes(vectors.toMutableList(), vectorValues.dimension())
+        return FloatVectorValues.fromFloats(vectors.toMutableList(), vectorValues.dimension())
     }
 
-    override fun knnVectorField(name: String, vector: ByteArray, similarityFunction: VectorSimilarityFunction): Field {
-        return KnnByteVectorField(name, vector, similarityFunction)
+    override fun knnVectorField(name: String, vector: FloatArray, similarityFunction: VectorSimilarityFunction): Field {
+        return KnnFloatVectorField(name, vector, similarityFunction)
     }
 
-    override fun knnQuery(field: String, vector: ByteArray, k: Int): Query {
-        return KnnByteVectorQuery(field, vector, k)
+    override fun knnQuery(field: String, vector: FloatArray, k: Int): Query {
+        return KnnFloatVectorQuery(field, vector, k)
     }
 
     override fun circularVectorValues(nDoc: Int): KnnVectorValues {
-        return CircularByteVectorValues(nDoc)
+        return CircularFloatVectorValues(nDoc)
     }
 
-    override fun getTargetVector(): ByteArray {
-        return byteArrayOf(1, 0)
+    override fun getTargetVector(): FloatArray {
+        return floatArrayOf(1f, 0f)
+    }
+
+    @Test
+    fun testSearchWithSkewedAcceptOrds() {
+        val nDoc = 1000
+        similarityFunction = VectorSimilarityFunction.EUCLIDEAN
+        val vectors = circularVectorValues(nDoc) as FloatVectorValues
+        val scorerSupplier = buildScorerSupplier(vectors)
+        val builder = HnswGraphBuilder.create(scorerSupplier, 16, 100, random().nextLong())
+        val hnsw = builder.build(vectors.size())
+
+        // Skip over half of the documents that are closest to the query vector
+        val acceptOrds = FixedBitSet(nDoc)
+        for (i in 500 until nDoc) {
+            acceptOrds.set(i)
+        }
+        val nn = HnswGraphSearcher.search(buildScorer(vectors, getTargetVector()), 10, hnsw, acceptOrds, Int.MAX_VALUE)
+
+        val nodes = nn.topDocs()
+        assertEquals(10, nodes.scoreDocs!!.size, "Number of found results is not equal to [10].")
+        var sum = 0
+        for (node in nodes.scoreDocs!!) {
+            assertTrue(acceptOrds.get(node.doc), "the results include a deleted document: $node")
+            sum += node.doc
+        }
+        // We still expect to get reasonable recall. The lowest non-skipped docIds
+        // are closest to the query vector: sum(500,509) = 5045
+        assertTrue(sum < 5100, "sum(result docs)=$sum")
     }
 
     // tests inherited from HnswGraphTestCase
