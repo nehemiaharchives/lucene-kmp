@@ -1,16 +1,29 @@
 package org.gnit.lucenekmp.util.automaton
 
+import okio.IOException
+import org.gnit.lucenekmp.document.Document
+import org.gnit.lucenekmp.document.Field
+import org.gnit.lucenekmp.index.DirectoryReader
+import org.gnit.lucenekmp.index.Term
+import org.gnit.lucenekmp.search.AutomatonQuery
+import org.gnit.lucenekmp.search.IndexSearcher
+import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.tests.index.RandomIndexWriter
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RamUsageTester
+import org.gnit.lucenekmp.tests.util.TestUtil
 import kotlin.test.Test
-import kotlin.test.Ignore
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.jdkport.Character
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TestNFARunAutomaton : LuceneTestCase() {
+    private companion object {
+        const val FIELD = "field"
+    }
 
     @Test
     fun testRamUsageEstimation() {
@@ -67,12 +80,6 @@ class TestNFARunAutomaton : LuceneTestCase() {
         assertRandomAccessTransition(runAutomaton1, runAutomaton2, 0, HashSet())
     }
 
-    @Ignore
-    @Test
-    fun testRandomAutomatonQuery() {
-        // TODO implement after IndexWriter ported
-    }
-
     private fun assertRandomAccessTransition(
         automaton1: NFARunAutomaton,
         automaton2: NFARunAutomaton,
@@ -95,6 +102,85 @@ class TestNFARunAutomaton : LuceneTestCase() {
             assertEquals(t1.toString(), t2.toString())
             assertRandomAccessTransition(automaton1, automaton2, t1.dest, visited)
         }
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun testRandomAutomatonQuery() {
+        val docNum = 50
+        val automatonNum = 50
+        val directory: Directory = newDirectory()
+        val writer = RandomIndexWriter(random(), directory)
+
+        val vocab = hashSetOf<String>()
+        val perDocVocab = hashSetOf<String>()
+        for (i in 0 until docNum) {
+            perDocVocab.clear()
+            val termNum = random().nextInt(20) + 30
+            while (perDocVocab.size < termNum) {
+                var randomString: String
+                do {
+                    randomString = TestUtil.randomUnicodeString(random())
+                } while (randomString.isEmpty())
+                perDocVocab.add(randomString)
+                vocab.add(randomString)
+            }
+            val document = Document()
+            document.add(newTextField(FIELD, perDocVocab.joinToString(" "), Field.Store.NO))
+            writer.addDocument(document)
+        }
+        writer.commit()
+        val reader = DirectoryReader.open(directory)
+        val searcher = IndexSearcher(reader)
+
+        val foreignVocab = hashSetOf<String>()
+        while (foreignVocab.size < vocab.size) {
+            var randomString: String
+            do {
+                randomString = TestUtil.randomUnicodeString(random())
+            } while (randomString.isEmpty())
+            foreignVocab.add(randomString)
+        }
+
+        val vocabList = ArrayList(vocab)
+        val foreignVocabList = ArrayList(foreignVocab)
+        val perQueryVocab = hashSetOf<String>()
+
+        var i = 0
+        while (i < automatonNum) {
+            perQueryVocab.clear()
+            val termNum = random().nextInt(40) + 30
+            while (perQueryVocab.size < termNum) {
+                if (random().nextBoolean()) {
+                    perQueryVocab.add(vocabList[random().nextInt(vocabList.size)])
+                } else {
+                    perQueryVocab.add(foreignVocabList[random().nextInt(foreignVocabList.size)])
+                }
+            }
+            var a: Automaton? = null
+            for (term in perQueryVocab) {
+                a =
+                    if (a == null) {
+                        Automata.makeString(term)
+                    } else {
+                        Operations.union(listOf(a, Automata.makeString(term)))
+                    }
+            }
+            requireNotNull(a)
+            if (a.isDeterministic) {
+                continue
+            }
+            val dfaQuery = AutomatonQuery(Term(FIELD), Operations.determinize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT))
+            val nfaQuery = object : AutomatonQuery(Term(FIELD), a) {
+                fun nfaRunAutomaton() = compiled.nfaRunAutomaton
+            }
+            assertNotNull(nfaQuery.nfaRunAutomaton())
+            assertEquals(searcher.count(dfaQuery), searcher.count(nfaQuery))
+            i++
+        }
+        reader.close()
+        writer.close()
+        directory.close()
     }
 
     private fun testAcceptedString(
