@@ -9,7 +9,6 @@ import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.jdkport.Character
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.random.Random
 
 class TestNFARunAutomaton : LuceneTestCase() {
 
