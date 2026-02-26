@@ -909,7 +909,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.SorterBenchmark → org.gnit.lucenekmp.util.SorterBenchmark
 - org.apache.lucene.util.TestClassLoaderUtils → org.gnit.lucenekmp.util.TestClassLoaderUtils
 - org.apache.lucene.util.TestJavaLoggingInfoStream → org.gnit.lucenekmp.util.TestJavaLoggingInfoStream
-- org.apache.lucene.util.automaton.TestLevenshteinAutomata → org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata
 - org.apache.lucene.util.hnsw.MockByteVectorValues → org.gnit.lucenekmp.util.hnsw.MockByteVectorValues
 - org.apache.lucene.util.hnsw.MockVectorValues → org.gnit.lucenekmp.util.hnsw.MockVectorValues
 

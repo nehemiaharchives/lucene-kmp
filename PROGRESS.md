@@ -156,7 +156,7 @@
 |     org.apache.lucene.search.similarities | 25 | 15 | 60% |
 |   org.apache.lucene.store | 27 | 14 | 51% |
 |   org.apache.lucene.util | 63 | 59 | 93% |
-|     org.apache.lucene.util.automaton | 15 | 14 | 93% |
+|     org.apache.lucene.util.automaton | 15 | 15 | 100% |
 |     org.apache.lucene.util.bkd | 8 | 8 | 100% |
 |     org.apache.lucene.util.compress | 3 | 3 | 100% |
 |     org.apache.lucene.util.fst | 8 | 8 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 673 | 301 | 44% |
+| Total | 673 | 302 | 44% |
 
 
 ## Tests To Port
@@ -537,5 +537,4 @@
 | [org.apache.lucene.util.TestClassLoaderUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestClassLoaderUtils.java) | org.gnit.lucenekmp.util.TestClassLoaderUtils |
 | [org.apache.lucene.util.TestJavaLoggingInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestJavaLoggingInfoStream.java) | org.gnit.lucenekmp.util.TestJavaLoggingInfoStream |
 | [org.apache.lucene.util.TestWeakIdentityMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/TestWeakIdentityMap.java) | org.gnit.lucenekmp.util.TestWeakIdentityMap |
-| [org.apache.lucene.util.automaton.TestLevenshteinAutomata](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLevenshteinAutomata.java) | org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata |
 

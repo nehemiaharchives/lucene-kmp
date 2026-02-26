@@ -26,7 +26,7 @@
 ### Total KMP classes: 1041
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1578
+### Total KMP Unit Test classes: 1579
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -13496,10 +13496,10 @@
 | [org.apache.lucene.util.automaton.TestDeterminizeLexicon](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestDeterminizeLexicon.java) | org.gnit.lucenekmp.util.automaton.TestDeterminizeLexicon | Depth 1 | [x] | 141 | 4 | 23% |
 | [org.apache.lucene.util.automaton.TestFiniteStringsIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestFiniteStringsIterator.java) | org.gnit.lucenekmp.util.automaton.TestFiniteStringsIterator | Depth 1 | [x] | 148 | 11 | 58% |
 | [org.apache.lucene.util.automaton.TestIntSet](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestIntSet.java) | org.gnit.lucenekmp.util.automaton.TestIntSet | Depth 1 | [x] | 145 | 8 | 47% |
-| [org.apache.lucene.util.automaton.TestLevenshteinAutomata](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLevenshteinAutomata.java) | org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata | Depth 1 | [] | 155 | 0 | 0% |
+| [org.apache.lucene.util.automaton.TestLevenshteinAutomata](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLevenshteinAutomata.java) | org.gnit.lucenekmp.util.automaton.TestLevenshteinAutomata | Depth 1 | [x] | 155 | 18 | 70% |
 | [org.apache.lucene.util.automaton.TestLimitedFiniteStringsIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestLimitedFiniteStringsIterator.java) | org.gnit.lucenekmp.util.automaton.TestLimitedFiniteStringsIterator | Depth 1 | [x] | 145 | 9 | 44% |
 | [org.apache.lucene.util.automaton.TestMinimize](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestMinimize.java) | org.gnit.lucenekmp.util.automaton.TestMinimize | Depth 1 | [x] | 142 | 5 | 31% |
-| [org.apache.lucene.util.automaton.TestNFARunAutomaton](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestNFARunAutomaton.java) | org.gnit.lucenekmp.util.automaton.TestNFARunAutomaton | Depth 1 | [x] | 146 | 9 | 51% |
+| [org.apache.lucene.util.automaton.TestNFARunAutomaton](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestNFARunAutomaton.java) | org.gnit.lucenekmp.util.automaton.TestNFARunAutomaton | Depth 1 | [x] | 146 | 10 | 0% |
 | [org.apache.lucene.util.automaton.TestOperations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestOperations.java) | org.gnit.lucenekmp.util.automaton.TestOperations | Depth 1 | [x] | 170 | 6 | 93% |
 | [org.apache.lucene.util.automaton.TestRegExp](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestRegExp.java) | org.gnit.lucenekmp.util.automaton.TestRegExp | Depth 1 | [x] | 154 | 14 | 64% |
 | [org.apache.lucene.util.automaton.TestRegExpParsing](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestRegExpParsing.java) | org.gnit.lucenekmp.util.automaton.TestRegExpParsing | Depth 1 | [x] | 201 | 1 | 0% |
@@ -13654,8 +13654,8 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1514
+- Ported Unit Test Classes: 1515
 - Unit Test Porting Progress: 62%
 - **Unit Test Semantic Completion: 6%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 7832
+- Test Core Methods Implemented: 7841
