@@ -13,6 +13,7 @@ import org.gnit.lucenekmp.util.Sorter
 import org.gnit.lucenekmp.util.InPlaceMergeSorter
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
+import kotlin.time.TimeSource
 
 
 // TODO
@@ -32,6 +33,14 @@ import kotlin.math.max
  */
 class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: Int = 2) : Accountable,
     TransitionAccessor {
+    data class BuilderFinishTimingSnapshot(
+        val enabled: Boolean,
+        val finishTotalNs: Long,
+        val createStatesNs: Long,
+        val sortTransitionsNs: Long,
+        val emitTransitionsNs: Long,
+        val finishStateNs: Long,
+    )
     /**
      * Where we next write to the int[] states; this increments by 2 for each added state because we
      * pack a pointer to the transitions array and a count of how many transitions leave the state.
@@ -148,7 +157,6 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
         val bounds = nextState / 2
         Objects.checkIndex(source, bounds)
         Objects.checkIndex(dest, bounds)
-
         growTransitions()
         if (curState != source) {
             if (curState != -1) {
@@ -766,65 +774,7 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
          * Sorts transitions first then min label ascending, then max label ascending, then dest
          * ascending
          */
-        private val sorter: Sorter = object : InPlaceMergeSorter() {
-            private fun swapOne(i: Int, j: Int) {
-                val x = transitions[i]
-                transitions[i] = transitions[j]
-                transitions[j] = x
-            }
-
-            protected override fun swap(i: Int, j: Int) {
-                val iStart = 4 * i
-                val jStart = 4 * j
-                swapOne(iStart, jStart)
-                swapOne(iStart + 1, jStart + 1)
-                swapOne(iStart + 2, jStart + 2)
-                swapOne(iStart + 3, jStart + 3)
-            }
-
-            protected override fun compare(i: Int, j: Int): Int {
-                val iStart = 4 * i
-                val jStart = 4 * j
-
-                // First src:
-                val iSrc = transitions[iStart]
-                val jSrc = transitions[jStart]
-                if (iSrc < jSrc) {
-                    return -1
-                } else if (iSrc > jSrc) {
-                    return 1
-                }
-
-                // Then min:
-                val iMin = transitions[iStart + 2]
-                val jMin = transitions[jStart + 2]
-                if (iMin < jMin) {
-                    return -1
-                } else if (iMin > jMin) {
-                    return 1
-                }
-
-                // Then max:
-                val iMax = transitions[iStart + 3]
-                val jMax = transitions[jStart + 3]
-                if (iMax < jMax) {
-                    return -1
-                } else if (iMax > jMax) {
-                    return 1
-                }
-
-                // First dest:
-                val iDest = transitions[iStart + 1]
-                val jDest = transitions[jStart + 1]
-                if (iDest < jDest) {
-                    return -1
-                } else if (iDest > jDest) {
-                    return 1
-                }
-
-                return 0
-            }
-        }
+        private val sorter: AutomatonInPlaceMergeSorter = AutomatonInPlaceMergeSorter(IntArray(0))
 
         /**
          * Constructor which creates a builder with enough space for the given number of states and
@@ -837,23 +787,32 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
         init {
             isAccept = BitSet(numStates)
             transitions = IntArray(numTransitions * 4)
+            sorter.transitions = transitions
         }
 
         /** Compiles all added states and transitions into a new `Automaton` and returns it.  */
         fun finish(): Automaton {
+            val timingEnabled = companionBuilderFinishTimingEnabled
+            val totalStart = if (timingEnabled) TimeSource.Monotonic.markNow() else null
             // Create automaton with the correct size.
             val numStates = this.numStates
             val numTransitions = nextTransition / 4
             val a = Automaton(numStates, numTransitions)
 
             // Create all states.
+            val createStatesStart = if (timingEnabled) TimeSource.Monotonic.markNow() else null
             for (state in 0..<numStates) {
                 a.createState()
                 a.setAccept(state, isAccept(state))
             }
+            val createStatesNs = createStatesStart?.elapsedNow()?.inWholeNanoseconds ?: 0L
 
             // Create all transitions
+            val sortStart = if (timingEnabled) TimeSource.Monotonic.markNow() else null
+            sorter.transitions = transitions
             sorter.sort(0, numTransitions)
+            val sortNs = sortStart?.elapsedNow()?.inWholeNanoseconds ?: 0L
+            val emitTransitionsStart = if (timingEnabled) TimeSource.Monotonic.markNow() else null
             var upto = 0
             while (upto < nextTransition) {
                 a.addTransition(
@@ -861,8 +820,18 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
                 )
                 upto += 4
             }
+            val emitTransitionsNs = emitTransitionsStart?.elapsedNow()?.inWholeNanoseconds ?: 0L
 
+            val finishStateStart = if (timingEnabled) TimeSource.Monotonic.markNow() else null
             a.finishState()
+            val finishStateNs = finishStateStart?.elapsedNow()?.inWholeNanoseconds ?: 0L
+            if (timingEnabled) {
+                companionBuilderFinishTotalNs += totalStart!!.elapsedNow().inWholeNanoseconds
+                companionBuilderFinishCreateStatesNs += createStatesNs
+                companionBuilderFinishSortTransitionsNs += sortNs
+                companionBuilderFinishEmitTransitionsNs += emitTransitionsNs
+                companionBuilderFinishFinishStateNs += finishStateNs
+            }
 
             return a
         }
@@ -924,6 +893,36 @@ class Automaton @JvmOverloads constructor(numStates: Int = 2, numTransitions: In
     }
 
     companion object {
+        private var companionBuilderFinishTimingEnabled = false
+        private var companionBuilderFinishTotalNs = 0L
+        private var companionBuilderFinishCreateStatesNs = 0L
+        private var companionBuilderFinishSortTransitionsNs = 0L
+        private var companionBuilderFinishEmitTransitionsNs = 0L
+        private var companionBuilderFinishFinishStateNs = 0L
+
+        fun setBuilderFinishTimingEnabled(enabled: Boolean) {
+            companionBuilderFinishTimingEnabled = enabled
+        }
+
+        fun resetBuilderFinishTiming() {
+            companionBuilderFinishTotalNs = 0L
+            companionBuilderFinishCreateStatesNs = 0L
+            companionBuilderFinishSortTransitionsNs = 0L
+            companionBuilderFinishEmitTransitionsNs = 0L
+            companionBuilderFinishFinishStateNs = 0L
+        }
+
+        fun snapshotBuilderFinishTiming(): BuilderFinishTimingSnapshot {
+            return BuilderFinishTimingSnapshot(
+                enabled = companionBuilderFinishTimingEnabled,
+                finishTotalNs = companionBuilderFinishTotalNs,
+                createStatesNs = companionBuilderFinishCreateStatesNs,
+                sortTransitionsNs = companionBuilderFinishSortTransitionsNs,
+                emitTransitionsNs = companionBuilderFinishEmitTransitionsNs,
+                finishStateNs = companionBuilderFinishFinishStateNs,
+            )
+        }
+
         @OptIn(ExperimentalStdlibApi::class)
         fun appendCharString(c: Int, b: StringBuilder) {
             if (c >= 0x21 && c <= 0x7e && c != '\\'.code && c != '"'.code) b.appendCodePoint(c)

@@ -20,6 +20,7 @@ import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.util.IntsRefBuilder
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.automaton.Automaton.Builder
+import kotlin.time.TimeSource
 
 
 /**
@@ -28,6 +29,141 @@ import org.gnit.lucenekmp.util.automaton.Automaton.Builder
  * @lucene.experimental
  */
 object Operations {
+    data class OpsTimingSummary(
+        val unionListNs: Long,
+        val unionListCopyNs: Long,
+        val unionListRemoveDeadNs: Long,
+        val unionListMergeAcceptNs: Long,
+        val getLiveStatesNs: Long,
+        val getLiveStatesFromInitialNs: Long,
+        val getLiveStatesToAcceptNs: Long,
+        val getLiveStatesToAcceptReverseCreateStatesNs: Long,
+        val getLiveStatesToAcceptReverseTransitionsNs: Long,
+        val getLiveStatesToAcceptReverseGetNextTransitionNs: Long,
+        val getLiveStatesToAcceptReverseAddTransitionNs: Long,
+        val getLiveStatesToAcceptReverseFinishNs: Long,
+        val getLiveStatesToAcceptSeedAcceptStatesNs: Long,
+        val getLiveStatesToAcceptBfsNs: Long,
+        val getLiveStatesToAcceptBfsGetNextTransitionNs: Long,
+        val removeDeadStatesNs: Long,
+        val removeDeadBuildStatesNs: Long,
+        val removeDeadCopyTransitionsNs: Long,
+        val removeDeadGetNextTransitionNs: Long,
+        val removeDeadAddTransitionNs: Long,
+        val mergeAcceptNoTransitionsNs: Long,
+        val mergeAcceptScanAcceptNs: Long,
+        val mergeAcceptCopyStatesNs: Long,
+        val mergeAcceptRemapStatesNs: Long,
+        val mergeAcceptCopyTransitionsNs: Long,
+        val mergeAcceptGetNextTransitionNs: Long,
+        val mergeAcceptRemapDestNs: Long,
+        val mergeAcceptAddTransitionNs: Long,
+        val reverseBuilderFinishTotalNs: Long,
+        val reverseBuilderFinishCreateStatesNs: Long,
+        val reverseBuilderFinishSortTransitionsNs: Long,
+        val reverseBuilderFinishEmitTransitionsNs: Long,
+        val reverseBuilderFinishFinishStateNs: Long,
+    )
+
+    private var unionListNs = 0L
+    private var unionListCopyNs = 0L
+    private var unionListRemoveDeadNs = 0L
+    private var unionListMergeAcceptNs = 0L
+    private var getLiveStatesNs = 0L
+    private var getLiveStatesFromInitialNs = 0L
+    private var getLiveStatesToAcceptNs = 0L
+    private var getLiveStatesToAcceptReverseCreateStatesNs = 0L
+    private var getLiveStatesToAcceptReverseTransitionsNs = 0L
+    private var getLiveStatesToAcceptReverseGetNextTransitionNs = 0L
+    private var getLiveStatesToAcceptReverseAddTransitionNs = 0L
+    private var getLiveStatesToAcceptReverseFinishNs = 0L
+    private var getLiveStatesToAcceptSeedAcceptStatesNs = 0L
+    private var getLiveStatesToAcceptBfsNs = 0L
+    private var getLiveStatesToAcceptBfsGetNextTransitionNs = 0L
+    private var removeDeadStatesNs = 0L
+    private var removeDeadBuildStatesNs = 0L
+    private var removeDeadCopyTransitionsNs = 0L
+    private var removeDeadGetNextTransitionNs = 0L
+    private var removeDeadAddTransitionNs = 0L
+    private var mergeAcceptNoTransitionsNs = 0L
+    private var mergeAcceptScanAcceptNs = 0L
+    private var mergeAcceptCopyStatesNs = 0L
+    private var mergeAcceptRemapStatesNs = 0L
+    private var mergeAcceptCopyTransitionsNs = 0L
+    private var mergeAcceptGetNextTransitionNs = 0L
+    private var mergeAcceptRemapDestNs = 0L
+    private var mergeAcceptAddTransitionNs = 0L
+
+    fun resetOpsTiming() {
+        Automaton.resetBuilderFinishTiming()
+        unionListNs = 0L
+        unionListCopyNs = 0L
+        unionListRemoveDeadNs = 0L
+        unionListMergeAcceptNs = 0L
+        getLiveStatesNs = 0L
+        getLiveStatesFromInitialNs = 0L
+        getLiveStatesToAcceptNs = 0L
+        getLiveStatesToAcceptReverseCreateStatesNs = 0L
+        getLiveStatesToAcceptReverseTransitionsNs = 0L
+        getLiveStatesToAcceptReverseGetNextTransitionNs = 0L
+        getLiveStatesToAcceptReverseAddTransitionNs = 0L
+        getLiveStatesToAcceptReverseFinishNs = 0L
+        getLiveStatesToAcceptSeedAcceptStatesNs = 0L
+        getLiveStatesToAcceptBfsNs = 0L
+        getLiveStatesToAcceptBfsGetNextTransitionNs = 0L
+        removeDeadStatesNs = 0L
+        removeDeadBuildStatesNs = 0L
+        removeDeadCopyTransitionsNs = 0L
+        removeDeadGetNextTransitionNs = 0L
+        removeDeadAddTransitionNs = 0L
+        mergeAcceptNoTransitionsNs = 0L
+        mergeAcceptScanAcceptNs = 0L
+        mergeAcceptCopyStatesNs = 0L
+        mergeAcceptRemapStatesNs = 0L
+        mergeAcceptCopyTransitionsNs = 0L
+        mergeAcceptGetNextTransitionNs = 0L
+        mergeAcceptRemapDestNs = 0L
+        mergeAcceptAddTransitionNs = 0L
+    }
+
+    fun snapshotOpsTiming(): OpsTimingSummary {
+        val builderFinishTiming = Automaton.snapshotBuilderFinishTiming()
+        return OpsTimingSummary(
+            unionListNs = unionListNs,
+            unionListCopyNs = unionListCopyNs,
+            unionListRemoveDeadNs = unionListRemoveDeadNs,
+            unionListMergeAcceptNs = unionListMergeAcceptNs,
+            getLiveStatesNs = getLiveStatesNs,
+            getLiveStatesFromInitialNs = getLiveStatesFromInitialNs,
+            getLiveStatesToAcceptNs = getLiveStatesToAcceptNs,
+            getLiveStatesToAcceptReverseCreateStatesNs = getLiveStatesToAcceptReverseCreateStatesNs,
+            getLiveStatesToAcceptReverseTransitionsNs = getLiveStatesToAcceptReverseTransitionsNs,
+            getLiveStatesToAcceptReverseGetNextTransitionNs = getLiveStatesToAcceptReverseGetNextTransitionNs,
+            getLiveStatesToAcceptReverseAddTransitionNs = getLiveStatesToAcceptReverseAddTransitionNs,
+            getLiveStatesToAcceptReverseFinishNs = getLiveStatesToAcceptReverseFinishNs,
+            getLiveStatesToAcceptSeedAcceptStatesNs = getLiveStatesToAcceptSeedAcceptStatesNs,
+            getLiveStatesToAcceptBfsNs = getLiveStatesToAcceptBfsNs,
+            getLiveStatesToAcceptBfsGetNextTransitionNs = getLiveStatesToAcceptBfsGetNextTransitionNs,
+            removeDeadStatesNs = removeDeadStatesNs,
+            removeDeadBuildStatesNs = removeDeadBuildStatesNs,
+            removeDeadCopyTransitionsNs = removeDeadCopyTransitionsNs,
+            removeDeadGetNextTransitionNs = removeDeadGetNextTransitionNs,
+            removeDeadAddTransitionNs = removeDeadAddTransitionNs,
+            mergeAcceptNoTransitionsNs = mergeAcceptNoTransitionsNs,
+            mergeAcceptScanAcceptNs = mergeAcceptScanAcceptNs,
+            mergeAcceptCopyStatesNs = mergeAcceptCopyStatesNs,
+            mergeAcceptRemapStatesNs = mergeAcceptRemapStatesNs,
+            mergeAcceptCopyTransitionsNs = mergeAcceptCopyTransitionsNs,
+            mergeAcceptGetNextTransitionNs = mergeAcceptGetNextTransitionNs,
+            mergeAcceptRemapDestNs = mergeAcceptRemapDestNs,
+            mergeAcceptAddTransitionNs = mergeAcceptAddTransitionNs,
+            reverseBuilderFinishTotalNs = builderFinishTiming.finishTotalNs,
+            reverseBuilderFinishCreateStatesNs = builderFinishTiming.createStatesNs,
+            reverseBuilderFinishSortTransitionsNs = builderFinishTiming.sortTransitionsNs,
+            reverseBuilderFinishEmitTransitionsNs = builderFinishTiming.emitTransitionsNs,
+            reverseBuilderFinishFinishStateNs = builderFinishTiming.finishStateNs,
+        )
+    }
     /**
      * Default maximum effort that [Operations.determinize] should spend before giving up and
      * throwing [TooComplexToDeterminizeException].
@@ -481,15 +617,18 @@ object Operations {
      * @param list List of automata to be unioned.
      */
     fun union(list: Collection<Automaton>): Automaton {
+        val totalStart = TimeSource.Monotonic.markNow()
         val result = Automaton()
 
         // Create initial state:
         result.createState()
 
         // Copy over all automata
+        val copyStart = TimeSource.Monotonic.markNow()
         for (a in list) {
             result.copy(a)
         }
+        val copyNs = copyStart.elapsedNow().inWholeNanoseconds
 
         // Add epsilon transition from new initial state
         var stateOffset = 1
@@ -503,7 +642,17 @@ object Operations {
 
         result.finishState()
 
-        return mergeAcceptStatesWithNoTransition(removeDeadStates(result))
+        val removeDeadStart = TimeSource.Monotonic.markNow()
+        val noDead = removeDeadStates(result)
+        val removeDeadNs = removeDeadStart.elapsedNow().inWholeNanoseconds
+        val mergeAcceptStart = TimeSource.Monotonic.markNow()
+        val merged = mergeAcceptStatesWithNoTransition(noDead)
+        val mergeAcceptNs = mergeAcceptStart.elapsedNow().inWholeNanoseconds
+        unionListNs += totalStart.elapsedNow().inWholeNanoseconds
+        unionListCopyNs += copyNs
+        unionListRemoveDeadNs += removeDeadNs
+        unionListMergeAcceptNs += mergeAcceptNs
+        return merged
     }
 
     /**
@@ -813,8 +962,14 @@ object Operations {
      * if it is reachable from the initial state.
      */
     private fun getLiveStates(a: Automaton): BitSet {
+        val totalStart = TimeSource.Monotonic.markNow()
+        val fromInitialStart = TimeSource.Monotonic.markNow()
         val live: BitSet = getLiveStatesFromInitial(a)
-        live.and(getLiveStatesToAccept(a))
+        val fromInitialNs = fromInitialStart.elapsedNow().inWholeNanoseconds
+        val toAccept = getLiveStatesToAccept(a)
+        live.and(toAccept)
+        getLiveStatesNs += totalStart.elapsedNow().inWholeNanoseconds
+        getLiveStatesFromInitialNs += fromInitialNs
         return live
     }
 
@@ -847,44 +1002,79 @@ object Operations {
 
     /** Returns bitset marking states that can reach an accept state.  */
     private fun getLiveStatesToAccept(a: Automaton): BitSet {
+        val totalStart = TimeSource.Monotonic.markNow()
         val builder = Builder()
 
         // NOTE: not quite the same thing as what reverse() does:
         val t = Transition()
         val numStates: Int = a.numStates
+        val reverseCreateStatesStart = TimeSource.Monotonic.markNow()
         for (s in 0..<numStates) {
             builder.createState()
         }
+        val reverseCreateStatesNs = reverseCreateStatesStart.elapsedNow().inWholeNanoseconds
+        val reverseTransitionsStart = TimeSource.Monotonic.markNow()
+        var reverseGetNextTransitionNs = 0L
+        var reverseAddTransitionNs = 0L
         for (s in 0..<numStates) {
             val count = a.initTransition(s, t)
             for (i in 0..<count) {
+                val getNextStart = TimeSource.Monotonic.markNow()
                 a.getNextTransition(t)
+                reverseGetNextTransitionNs += getNextStart.elapsedNow().inWholeNanoseconds
+                val addTransitionStart = TimeSource.Monotonic.markNow()
                 builder.addTransition(t.dest, s, t.min, t.max)
+                reverseAddTransitionNs += addTransitionStart.elapsedNow().inWholeNanoseconds
             }
         }
-        val a2 = builder.finish()
+        val reverseTransitionsNs = reverseTransitionsStart.elapsedNow().inWholeNanoseconds
+        val reverseFinishStart = TimeSource.Monotonic.markNow()
+        Automaton.setBuilderFinishTimingEnabled(true)
+        val a2 =
+            try {
+                builder.finish()
+            } finally {
+                Automaton.setBuilderFinishTimingEnabled(false)
+            }
+        val reverseFinishNs = reverseFinishStart.elapsedNow().inWholeNanoseconds
 
         val workList: ArrayDeque<Int?> = ArrayDeque()
         val live = BitSet(numStates)
         val acceptBits: BitSet = a.acceptStates
+        val seedAcceptStatesStart = TimeSource.Monotonic.markNow()
         var s = 0
         while (s < numStates && (acceptBits.nextSetBit(s).also { s = it }) != -1) {
             live.set(s)
             workList.add(s)
             s++
         }
+        val seedAcceptStatesNs = seedAcceptStatesStart.elapsedNow().inWholeNanoseconds
 
+        val bfsStart = TimeSource.Monotonic.markNow()
+        var bfsGetNextTransitionNs = 0L
         while (workList.isEmpty() == false) {
             s = workList.removeFirst()!!
             val count = a2.initTransition(s, t)
             for (i in 0..<count) {
+                val getNextStart = TimeSource.Monotonic.markNow()
                 a2.getNextTransition(t)
+                bfsGetNextTransitionNs += getNextStart.elapsedNow().inWholeNanoseconds
                 if (live[t.dest] == false) {
                     live.set(t.dest)
                     workList.add(t.dest)
                 }
             }
         }
+        val bfsNs = bfsStart.elapsedNow().inWholeNanoseconds
+        getLiveStatesToAcceptNs += totalStart.elapsedNow().inWholeNanoseconds
+        getLiveStatesToAcceptReverseCreateStatesNs += reverseCreateStatesNs
+        getLiveStatesToAcceptReverseTransitionsNs += reverseTransitionsNs
+        getLiveStatesToAcceptReverseGetNextTransitionNs += reverseGetNextTransitionNs
+        getLiveStatesToAcceptReverseAddTransitionNs += reverseAddTransitionNs
+        getLiveStatesToAcceptReverseFinishNs += reverseFinishNs
+        getLiveStatesToAcceptSeedAcceptStatesNs += seedAcceptStatesNs
+        getLiveStatesToAcceptBfsNs += bfsNs
+        getLiveStatesToAcceptBfsGetNextTransitionNs += bfsGetNextTransitionNs
 
         return live
     }
@@ -894,9 +1084,11 @@ object Operations {
      * state or no accept state is reachable from it.)
      */
     fun removeDeadStates(a: Automaton): Automaton {
+        val totalStart = TimeSource.Monotonic.markNow()
         val numStates: Int = a.numStates
         val liveSet: BitSet = getLiveStates(a)
         if (liveSet.cardinality() == numStates) {
+            removeDeadStatesNs += totalStart.elapsedNow().inWholeNanoseconds
             return a
         }
 
@@ -904,30 +1096,45 @@ object Operations {
 
         val result = Automaton()
         // System.out.println("liveSet: " + liveSet + " numStates=" + numStates);
+        val buildStatesStart = TimeSource.Monotonic.markNow()
         for (i in 0..<numStates) {
             if (liveSet[i]) {
                 map[i] = result.createState()
                 result.setAccept(map[i], a.isAccept(i))
             }
         }
+        val buildStatesNs = buildStatesStart.elapsedNow().inWholeNanoseconds
 
         val t = Transition()
 
+        val copyTransitionsStart = TimeSource.Monotonic.markNow()
+        var getNextTransitionNs = 0L
+        var addTransitionNs = 0L
         for (i in 0..<numStates) {
             if (liveSet[i]) {
                 val numTransitions = a.initTransition(i, t)
                 // filter out transitions to dead states:
                 for (j in 0..<numTransitions) {
+                    val nextStart = TimeSource.Monotonic.markNow()
                     a.getNextTransition(t)
+                    getNextTransitionNs += nextStart.elapsedNow().inWholeNanoseconds
                     if (liveSet[t.dest]) {
+                        val addStart = TimeSource.Monotonic.markNow()
                         result.addTransition(map[i], map[t.dest], t.min, t.max)
+                        addTransitionNs += addStart.elapsedNow().inWholeNanoseconds
                     }
                 }
             }
         }
+        val copyTransitionsNs = copyTransitionsStart.elapsedNow().inWholeNanoseconds
 
         result.finishState()
         require(hasDeadStates(result) == false)
+        removeDeadStatesNs += totalStart.elapsedNow().inWholeNanoseconds
+        removeDeadBuildStatesNs += buildStatesNs
+        removeDeadCopyTransitionsNs += copyTransitionsNs
+        removeDeadGetNextTransitionNs += getNextTransitionNs
+        removeDeadAddTransitionNs += addTransitionNs
         return result
     }
 
@@ -938,11 +1145,13 @@ object Operations {
      * one, so having fewer accept states makes the produced automata simpler.
      */
     fun mergeAcceptStatesWithNoTransition(a: Automaton): Automaton {
+        val totalStart = TimeSource.Monotonic.markNow()
         val numStates: Int = a.numStates
 
         var numAcceptStatesWithNoTransition = 0
         var acceptStatesWithNoTransition = IntArray(0)
 
+        val scanAcceptStart = TimeSource.Monotonic.markNow()
         val acceptStates: BitSet = a.acceptStates
         for (i in 0..<numStates) {
             if (acceptStates[i] && a.getNumTransitions(i) == 0) {
@@ -951,9 +1160,11 @@ object Operations {
                 acceptStatesWithNoTransition[numAcceptStatesWithNoTransition++] = i
             }
         }
+        val scanAcceptNs = scanAcceptStart.elapsedNow().inWholeNanoseconds
 
         if (numAcceptStatesWithNoTransition <= 1) {
-            // No states to merge
+            mergeAcceptNoTransitionsNs += totalStart.elapsedNow().inWholeNanoseconds
+            mergeAcceptScanAcceptNs += scanAcceptNs
             return a
         }
 
@@ -963,8 +1174,12 @@ object Operations {
 
         // Now copy states, preserving accept states.
         val result = Automaton()
+        val copyStatesStart = TimeSource.Monotonic.markNow()
+        var remapStatesNs = 0L
         for (s in 0..<numStates) {
+            val remapStart = TimeSource.Monotonic.markNow()
             val remappedS = remap(s, acceptStatesWithNoTransition)
+            remapStatesNs += remapStart.elapsedNow().inWholeNanoseconds
             while (result.numStates <= remappedS) {
                 result.createState()
             }
@@ -972,20 +1187,40 @@ object Operations {
                 result.setAccept(remappedS, true)
             }
         }
+        val copyStatesNs = copyStatesStart.elapsedNow().inWholeNanoseconds
 
         // Now copy transitions, making sure to remap states.
         val t = Transition()
+        val copyTransitionsStart = TimeSource.Monotonic.markNow()
+        var getNextTransitionNs = 0L
+        var remapDestNs = 0L
+        var addTransitionNs = 0L
         for (s in 0..<numStates) {
             val remappedSource = remap(s, acceptStatesWithNoTransition)
             val numTransitions = a.initTransition(s, t)
             for (j in 0..<numTransitions) {
+                val nextStart = TimeSource.Monotonic.markNow()
                 a.getNextTransition(t)
+                getNextTransitionNs += nextStart.elapsedNow().inWholeNanoseconds
+                val remapDestStart = TimeSource.Monotonic.markNow()
                 val remappedDest = remap(t.dest, acceptStatesWithNoTransition)
+                remapDestNs += remapDestStart.elapsedNow().inWholeNanoseconds
+                val addStart = TimeSource.Monotonic.markNow()
                 result.addTransition(remappedSource, remappedDest, t.min, t.max)
+                addTransitionNs += addStart.elapsedNow().inWholeNanoseconds
             }
         }
+        val copyTransitionsNs = copyTransitionsStart.elapsedNow().inWholeNanoseconds
 
         result.finishState()
+        mergeAcceptNoTransitionsNs += totalStart.elapsedNow().inWholeNanoseconds
+        mergeAcceptScanAcceptNs += scanAcceptNs
+        mergeAcceptCopyStatesNs += copyStatesNs
+        mergeAcceptRemapStatesNs += remapStatesNs
+        mergeAcceptCopyTransitionsNs += copyTransitionsNs
+        mergeAcceptGetNextTransitionNs += getNextTransitionNs
+        mergeAcceptRemapDestNs += remapDestNs
+        mergeAcceptAddTransitionNs += addTransitionNs
         return result
     }
 
