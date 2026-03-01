@@ -304,11 +304,10 @@ open class IndexSearcher(
                 return countTerm1 + countTerm2 - count(queries[2])
             }
         }
-        return search(
-            ConstantScoreQuery(query), TotalHitCountCollectorManager(
-                this.slices
-            )
-        )
+        val manager = TotalHitCountCollectorManager(this.slices)
+        val firstCollector = manager.newCollector()
+        val weight = createWeight(ConstantScoreQuery(query), firstCollector.scoreMode(), 1f)
+        return search(weight, manager, firstCollector)
     }
 
     val slices: Array<LeafSlice>

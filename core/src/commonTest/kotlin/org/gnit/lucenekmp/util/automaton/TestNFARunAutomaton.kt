@@ -116,6 +116,7 @@ class TestNFARunAutomaton : LuceneTestCase() {
         val testStart = TimeSource.Monotonic.markNow()
         logger.debug { "NFAQueryTiming phase=start" }
         Operations.resetOpsTiming()
+        Operations.setOpsTimingEnabled(false)
         val slowStepThresholdMs = 500L
 
         val docNum = 1 // TODO reduced from 50 to 1 for dev speed
@@ -135,11 +136,7 @@ class TestNFARunAutomaton : LuceneTestCase() {
         for (i in 0 until docNum) {
             perDocVocab.clear()
             val termNum = random().nextInt(20) + 30
-            var j = 0
             while (perDocVocab.size < termNum) {
-                j++
-                logger.debug { "running inside of while (perDocVocab.size < termNum) $j" }
-
                 var randomString: String
                 do {
                     randomString = TestUtil.randomUnicodeString(random())
@@ -171,7 +168,6 @@ class TestNFARunAutomaton : LuceneTestCase() {
         val queryLoopStart = TimeSource.Monotonic.markNow()
         var i = 0
         while (i < automatonNum) {
-            val queryStart = TimeSource.Monotonic.markNow()
             perQueryVocab.clear()
             val termNum = random().nextInt(40) + 30
             while (perQueryVocab.size < termNum) {
@@ -208,11 +204,7 @@ class TestNFARunAutomaton : LuceneTestCase() {
             unionMergeElapsed += unionMergeMs
             requireNotNull(a)
             if (a.isDeterministic) {
-                if (i % 10 == 0) {
-                    logger.debug {
-                        "NFAQueryTiming phase=heartbeat query_idx=$i elapsed_ms=${queryLoopStart.elapsedNow().inWholeMilliseconds} deterministic_skip=true"
-                    }
-                }
+                i++
                 continue
             }
             val determinizeStart = TimeSource.Monotonic.markNow()
@@ -259,11 +251,6 @@ class TestNFARunAutomaton : LuceneTestCase() {
             nfaCountElapsed += nfaCountMs
 
             assertEquals(dfaCount, nfaCount)
-            if (i % 5 == 0) {
-                logger.debug {
-                    "NFAQueryTiming phase=heartbeat query_idx=$i query_elapsed_ms=${queryStart.elapsedNow().inWholeMilliseconds} loop_elapsed_ms=${queryLoopStart.elapsedNow().inWholeMilliseconds}"
-                }
-            }
             i++
         }
         logger.debug {
