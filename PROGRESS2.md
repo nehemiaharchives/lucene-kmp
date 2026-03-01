@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 2413
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 1041
+### Total KMP classes: 1042
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1579
+### Total KMP Unit Test classes: 1580
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
