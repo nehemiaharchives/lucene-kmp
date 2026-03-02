@@ -27,9 +27,7 @@ import org.gnit.lucenekmp.util.Constants
 import org.gnit.lucenekmp.store.IOContext
 import kotlin.random.Random
 
-/**
- * Partial Kotlin port of Lucene's BaseDirectoryTestCase.
- */
+/** Base class for [Directory] implementations. */
 abstract class BaseDirectoryTestCase : LuceneTestCase() {
     /**
      * Subclasses must create a Directory, optionally using the provided path if
@@ -58,10 +56,31 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
 
     @Throws(Exception::class)
     open fun testCopyFrom() {
-        newDirectory().use { source ->
+        getDirectory(createTempDir("testCopy")).use { source ->
             newDirectory().use { dest ->
                 runCopyFrom(source, dest)
             }
+        }
+        newDirectory().use { source ->
+            getDirectory(createTempDir("testCopyDestination")).use { dest ->
+                runCopyFrom(source, dest)
+            }
+        }
+    }
+
+    private fun runCopyFrom(source: Directory, dest: Directory) {
+        val output = source.createOutput("foobar", LuceneTestCase.newIOContext(random()))
+        val bytes = ByteArray(20000).apply { Random.nextBytes(this) }
+        output.writeBytes(bytes, bytes.size)
+        output.close()
+
+        dest.copyFrom(source, "foobar", "foobaz", LuceneTestCase.newIOContext(random()))
+        kotlin.test.assertTrue(slowFileExists(dest, "foobaz"))
+
+        dest.openInput("foobaz", LuceneTestCase.newIOContext(random())).use { input ->
+            val bytes2 = ByteArray(bytes.size)
+            input.readBytes(bytes2, 0, bytes2.size)
+            kotlin.test.assertContentEquals(bytes, bytes2)
         }
     }
 
@@ -87,7 +106,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
 
     @Throws(Exception::class)
     open fun testDeleteFile() {
-        newDirectory().use { dir ->
+        getDirectory(createTempDir("testDeleteFile")).use { dir ->
             val file = "foo.txt"
             kotlin.test.assertFalse(dir.listAll().contains(file))
 
@@ -96,6 +115,13 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
 
             dir.deleteFile(file)
             kotlin.test.assertFalse(dir.listAll().contains(file))
+
+            val deleteError = kotlin.test.assertFails {
+                dir.deleteFile(file)
+            }
+            kotlin.test.assertTrue(
+                deleteError is NoSuchFileException || deleteError is FileNotFoundException
+            )
         }
     }
 
@@ -912,6 +938,20 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
         }
     }
 
+    protected fun assertBytes(slice: RandomAccessInput, bytes: ByteArray, bytesOffset: Int) {
+        val toRead = bytes.size - bytesOffset
+        for (i in 0 until toRead) {
+            kotlin.test.assertEquals(bytes[bytesOffset + i], slice.readByte(i.toLong()))
+            val offset = Random.nextInt(1000)
+            val sub1 = ByteArray(offset + i)
+            slice.readBytes(0, sub1, offset, i)
+            kotlin.test.assertContentEquals(bytes.copyOfRange(bytesOffset, bytesOffset + i), sub1.copyOfRange(offset, sub1.size))
+            val sub2 = ByteArray(offset + toRead - i)
+            slice.readBytes(i.toLong(), sub2, offset, toRead - i)
+            kotlin.test.assertContentEquals(bytes.copyOfRange(bytesOffset + i, bytes.size), sub2.copyOfRange(offset, sub2.size))
+        }
+    }
+
     @Throws(Exception::class)
     open fun testSliceOfSlice() {
         newDirectory().use { dir ->
@@ -1330,36 +1370,6 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
                     kotlin.test.assertFalse(loaded.isPresent)
                 }
             }
-        }
-    }
-
-    protected fun assertBytes(slice: RandomAccessInput, bytes: ByteArray, bytesOffset: Int) {
-        val toRead = bytes.size - bytesOffset
-        for (i in 0 until toRead) {
-            kotlin.test.assertEquals(bytes[bytesOffset + i], slice.readByte(i.toLong()))
-            val offset = Random.nextInt(1000)
-            val sub1 = ByteArray(offset + i)
-            slice.readBytes(0, sub1, offset, i)
-            kotlin.test.assertContentEquals(bytes.copyOfRange(bytesOffset, bytesOffset + i), sub1.copyOfRange(offset, sub1.size))
-            val sub2 = ByteArray(offset + toRead - i)
-            slice.readBytes(i.toLong(), sub2, offset, toRead - i)
-            kotlin.test.assertContentEquals(bytes.copyOfRange(bytesOffset + i, bytes.size), sub2.copyOfRange(offset, sub2.size))
-        }
-    }
-
-    private fun runCopyFrom(source: Directory, dest: Directory) {
-        val output = source.createOutput("foobar", IOContext.DEFAULT)
-        val bytes = ByteArray(20000).apply { Random.nextBytes(this) }
-        output.writeBytes(bytes, bytes.size)
-        output.close()
-
-        dest.copyFrom(source, "foobar", "foobaz", IOContext.DEFAULT)
-        kotlin.test.assertTrue(slowFileExists(dest, "foobaz"))
-
-        dest.openInput("foobaz", IOContext.DEFAULT).use { input ->
-            val bytes2 = ByteArray(bytes.size)
-            input.readBytes(bytes2, 0, bytes2.size)
-            kotlin.test.assertContentEquals(bytes, bytes2)
         }
     }
 
