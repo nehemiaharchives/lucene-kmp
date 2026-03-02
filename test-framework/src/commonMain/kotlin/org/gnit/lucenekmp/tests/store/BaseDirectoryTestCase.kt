@@ -1263,7 +1263,7 @@ abstract class BaseDirectoryTestCase : LuceneTestCase() {
         testIsLoaded(TestUtil.nextInt(Random, 1, 1024))
     }
 
-    private fun doTestGroupVInt(
+    protected fun doTestGroupVInt(
         dir: Directory,
         iterations: Int,
         minBpv: Int,
