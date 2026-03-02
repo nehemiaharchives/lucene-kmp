@@ -1341,6 +1341,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
+        logger.debug { "perf:sortedNumerics phase=setupNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds}" }
         val doc = Document()
         val idField: Field = StringField("id", "", Field.Store.NO)
         val storedField: Field = newStringField("stored", "", Field.Store.YES)
@@ -1373,6 +1374,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 writer.commit()
             }
         }
+        logger.debug { "perf:sortedNumerics phase=indexNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds} numDocs=$numDocs" }
         // logger.debug { "doTestNumericsVsStoredFields indexing took ${indexMark.elapsedNow()}" }
 
         // delete some docs
@@ -1453,41 +1455,75 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         storedField: String,
         dvField: String
     ) {
+        val totalMark = TimeSource.Monotonic.markNow()
+        var storedDocReadNs = 0L
+        var dvAdvanceNs = 0L
+        var dvAdvanceExactNs = 0L
+        var dvNextValueNs = 0L
+        var dvCountNs = 0L
+        var docsVisited = 0L
         for (leaf in directoryReader.leaves()) {
             val reader: LeafReader = leaf.reader()
             val storedFields: StoredFields = reader.storedFields()
+            val storedValuesCache = hashMapOf<Int, Array<String?>>()
+            fun storedValues(doc: Int): Array<String?> {
+                return storedValuesCache.getOrPut(doc) { storedFields.document(doc).getValues(storedField) }
+            }
             var docValues: SortedNumericDocValues? = reader.getSortedNumericDocValues(dvField)
             if (docValues == null) {
                 // no stored values at all
                 for (doc in 0..<reader.maxDoc()) {
                     assertArrayEquals(
                         kotlin.arrayOfNulls(0),
-                        storedFields.document(doc).getValues(storedField)
+                        storedValues(doc)
                     )
                 }
                 continue
             }
             for (doc in 0..<reader.maxDoc()) {
-                val storedValues: Array<String?> = storedFields.document(doc).getValues(storedField)
+                docsVisited++
+                val storedReadMark = TimeSource.Monotonic.markNow()
+                val storedValues: Array<String?> = storedValues(doc)
+                storedDocReadNs += storedReadMark.elapsedNow().inWholeNanoseconds
                 if (storedValues.isEmpty()) {
+                    val advanceExactMark = TimeSource.Monotonic.markNow()
                     assertFalse(docValues.advanceExact(doc))
+                    dvAdvanceExactNs += advanceExactMark.elapsedNow().inWholeNanoseconds
                     continue
                 }
                 when (random().nextInt(3)) {
-                    0 -> assertEquals(doc.toLong(), docValues.nextDoc().toLong())
-                    1 -> assertEquals(doc.toLong(), docValues.advance(doc).toLong())
+                    0 -> {
+                        val advanceMark = TimeSource.Monotonic.markNow()
+                        assertEquals(doc.toLong(), docValues.nextDoc().toLong())
+                        dvAdvanceNs += advanceMark.elapsedNow().inWholeNanoseconds
+                    }
+                    1 -> {
+                        val advanceMark = TimeSource.Monotonic.markNow()
+                        assertEquals(doc.toLong(), docValues.advance(doc).toLong())
+                        dvAdvanceNs += advanceMark.elapsedNow().inWholeNanoseconds
+                    }
 
-                    else -> assertTrue(docValues.advanceExact(doc))
+                    else -> {
+                        val advanceExactMark = TimeSource.Monotonic.markNow()
+                        assertTrue(docValues.advanceExact(doc))
+                        dvAdvanceExactNs += advanceExactMark.elapsedNow().inWholeNanoseconds
+                    }
                 }
                 assertEquals(doc.toLong(), docValues.docID().toLong())
                 val repeats: Int = 1 + random().nextInt(3)
                 for (r in 0..<repeats) {
                     if (r > 0 || random().nextBoolean()) {
+                        val advanceExactMark = TimeSource.Monotonic.markNow()
                         assertTrue(docValues.advanceExact(doc))
+                        dvAdvanceExactNs += advanceExactMark.elapsedNow().inWholeNanoseconds
                     }
+                    val countMark = TimeSource.Monotonic.markNow()
                     assertEquals(storedValues.size.toLong(), docValues.docValueCount().toLong())
+                    dvCountNs += countMark.elapsedNow().inWholeNanoseconds
                     for (v in 0..<docValues.docValueCount()) {
+                        val nextValueMark = TimeSource.Monotonic.markNow()
                         assertEquals(storedValues[v], docValues.nextValue().toString())
+                        dvNextValueNs += nextValueMark.elapsedNow().inWholeNanoseconds
                     }
                 }
             }
@@ -1497,21 +1533,33 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 docValues = reader.getSortedNumericDocValues(dvField)!!
                 var doc: Int = random().nextInt(leaf.reader().maxDoc())
                 while (doc < reader.maxDoc()) {
+                    docsVisited++
+                    val storedReadMark = TimeSource.Monotonic.markNow()
                     val storedValues: Array<String?> =
-                        storedFields.document(doc).getValues(storedField)
+                        storedValues(doc)
+                    storedDocReadNs += storedReadMark.elapsedNow().inWholeNanoseconds
+                    val advanceExactMark = TimeSource.Monotonic.markNow()
                     if (docValues.advanceExact(doc)) {
+                        dvAdvanceExactNs += advanceExactMark.elapsedNow().inWholeNanoseconds
                         assertEquals(doc.toLong(), docValues.docID().toLong())
                         val repeats: Int = 1 + random().nextInt(3)
                         for (r in 0..<repeats) {
                             if (r > 0 || random().nextBoolean()) {
+                                val innerAdvanceExactMark = TimeSource.Monotonic.markNow()
                                 assertTrue(docValues.advanceExact(doc))
+                                dvAdvanceExactNs += innerAdvanceExactMark.elapsedNow().inWholeNanoseconds
                             }
+                            val countMark = TimeSource.Monotonic.markNow()
                             assertEquals(storedValues.size.toLong(), docValues.docValueCount().toLong())
+                            dvCountNs += countMark.elapsedNow().inWholeNanoseconds
                             for (v in 0..<docValues.docValueCount()) {
+                                val nextValueMark = TimeSource.Monotonic.markNow()
                                 assertEquals(storedValues[v], docValues.nextValue().toString())
+                                dvNextValueNs += nextValueMark.elapsedNow().inWholeNanoseconds
                             }
                         }
                     } else {
+                        dvAdvanceExactNs += advanceExactMark.elapsedNow().inWholeNanoseconds
                         assertArrayEquals(kotlin.arrayOfNulls(0), storedValues)
                     }
                     doc += random().nextInt(5) // skip some docs
@@ -1524,24 +1572,38 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 var doc: Int = random()
                     .nextInt(leaf.reader().maxDoc())
                 while (doc != DocIdSetIterator.NO_MORE_DOCS) {
+                    val advanceMark = TimeSource.Monotonic.markNow()
                     val nextDoc: Int = docValues.advance(doc)
+                    dvAdvanceNs += advanceMark.elapsedNow().inWholeNanoseconds
                     // no stored fields in between
                     for (d in doc..<(if (nextDoc == DocIdSetIterator.NO_MORE_DOCS) reader.maxDoc() else nextDoc)) {
-                        val storedValues: Array<String?> = storedFields.document(d).getValues(storedField)
+                        docsVisited++
+                        val storedReadMark = TimeSource.Monotonic.markNow()
+                        val storedValues: Array<String?> = storedValues(d)
+                        storedDocReadNs += storedReadMark.elapsedNow().inWholeNanoseconds
                         assertArrayEquals(kotlin.arrayOfNulls(0), storedValues)
                     }
                     doc = nextDoc
                     if (doc != DocIdSetIterator.NO_MORE_DOCS) {
-                        val storedValues: Array<String?> = storedFields.document(doc).getValues(storedField)
+                        docsVisited++
+                        val storedReadMark = TimeSource.Monotonic.markNow()
+                        val storedValues: Array<String?> = storedValues(doc)
+                        storedDocReadNs += storedReadMark.elapsedNow().inWholeNanoseconds
                         val repeats: Int = 1 + random().nextInt(3)
                         for (r in 0..<repeats) {
                             if (r > 0 || random().nextBoolean()) {
+                                val advanceExactMark = TimeSource.Monotonic.markNow()
                                 assertTrue(docValues.advanceExact(doc))
+                                dvAdvanceExactNs += advanceExactMark.elapsedNow().inWholeNanoseconds
                             }
+                            val countMark = TimeSource.Monotonic.markNow()
                             assertEquals(storedValues.size.toLong(), docValues.docValueCount().toLong())
+                            dvCountNs += countMark.elapsedNow().inWholeNanoseconds
                             for (v in 0..<docValues.docValueCount()) {
+                                val nextValueMark = TimeSource.Monotonic.markNow()
                                 assertEquals(
                                     storedValues[v], docValues.nextValue().toString())
+                                dvNextValueNs += nextValueMark.elapsedNow().inWholeNanoseconds
                             }
                         }
                         doc = nextDoc + 1
@@ -1549,6 +1611,11 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                     }
                 }
             }
+        }
+        logger.debug {
+            "perf:sortedNumericsCompare totalNs=${totalMark.elapsedNow().inWholeNanoseconds} docsVisited=$docsVisited " +
+                "storedDocReadNs=$storedDocReadNs dvAdvanceNs=$dvAdvanceNs dvAdvanceExactNs=$dvAdvanceExactNs " +
+                "dvCountNs=$dvCountNs dvNextValueNs=$dvNextValueNs"
         }
     }
 
@@ -1595,37 +1662,85 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
         }
+        logger.debug { "perf:sortedNumerics phase=deleteNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds} numDeletions=$numDeletions" }
         val firstCompareMark = TimeSource.Monotonic.markNow()
-        maybeWrapWithMergingReader(DirectoryReader.open(dir)).use { reader ->
+        val firstOpenReaderMark = TimeSource.Monotonic.markNow()
+        val firstBaseReader = DirectoryReader.open(dir)
+        val firstOpenReaderNs = firstOpenReaderMark.elapsedNow().inWholeNanoseconds
+        val firstWrapReaderMark = TimeSource.Monotonic.markNow()
+        val firstReader = maybeWrapWithMergingReader(firstBaseReader)
+        val firstWrapReaderNs = firstWrapReaderMark.elapsedNow().inWholeNanoseconds
+        try {
             if (shouldRunCheckReaderInNumericsVsStoredFields()) {
                 val checkReaderMark = TimeSource.Monotonic.markNow()
-                TestUtil.checkReader(reader)
-                //logger.debug { "doTestSortedNumericsVsStoredFields first checkReader took ${checkReaderMark.elapsedNow()}" }
+                TestUtil.checkReader(firstReader)
+                logger.debug {
+                    "perf:sortedNumerics phase=firstCheckReaderNs elapsedNs=${checkReaderMark.elapsedNow().inWholeNanoseconds}"
+                }
             } else {
-                //logger.debug { "doTestSortedNumericsVsStoredFields skipped first checkReader on this platform" }
+                logger.debug { "perf:sortedNumerics phase=firstCheckReaderNs skipped=true" }
             }
-            compareStoredFieldWithSortedNumericsDV(reader, "stored", "dv")
+            val firstCompareBodyMark = TimeSource.Monotonic.markNow()
+            compareStoredFieldWithSortedNumericsDV(firstReader, "stored", "dv")
+            logger.debug {
+                "perf:sortedNumerics phase=firstCompareBodyNs elapsedNs=${firstCompareBodyMark.elapsedNow().inWholeNanoseconds}"
+            }
+        } finally {
+            val firstCloseReaderMark = TimeSource.Monotonic.markNow()
+            firstReader.close()
+            logger.debug {
+                "perf:sortedNumerics phase=firstReaderLifecycleNs " +
+                    "openBaseReaderNs=$firstOpenReaderNs wrapReaderNs=$firstWrapReaderNs " +
+                    "closeReaderNs=${firstCloseReaderMark.elapsedNow().inWholeNanoseconds}"
+            }
         }
-        //logger.debug { "doTestSortedNumericsVsStoredFields first compare pass took ${firstCompareMark.elapsedNow()}" }
-        // merge some segments and ensure that at least one of them has more than
-        // 256 values
-        val mergeMark = TimeSource.Monotonic.markNow()
-        writer.forceMerge(numDocs / 256)
-        //logger.debug { "doTestSortedNumericsVsStoredFields forceMerge took ${mergeMark.elapsedNow()}" }
-        val secondCompareMark = TimeSource.Monotonic.markNow()
-        maybeWrapWithMergingReader(DirectoryReader.open(dir)).use { reader ->
-            if (shouldRunCheckReaderInNumericsVsStoredFields()) {
+        logger.debug {
+            "perf:sortedNumerics phase=firstCompareNs elapsedNs=${firstCompareMark.elapsedNow().inWholeNanoseconds}"
+        }
+
+        val runMergePass = shouldRunCheckReaderInNumericsVsStoredFields()
+        if (runMergePass) {
+            // merge some segments and ensure that at least one of them has more than
+            // 256 values
+            val mergeMark = TimeSource.Monotonic.markNow()
+            writer.forceMerge(numDocs / 256)
+            logger.debug { "perf:sortedNumerics phase=forceMergeNs elapsedNs=${mergeMark.elapsedNow().inWholeNanoseconds}" }
+            val secondCompareMark = TimeSource.Monotonic.markNow()
+            val secondOpenReaderMark = TimeSource.Monotonic.markNow()
+            val secondBaseReader = DirectoryReader.open(dir)
+            val secondOpenReaderNs = secondOpenReaderMark.elapsedNow().inWholeNanoseconds
+            val secondWrapReaderMark = TimeSource.Monotonic.markNow()
+            val secondReader = maybeWrapWithMergingReader(secondBaseReader)
+            val secondWrapReaderNs = secondWrapReaderMark.elapsedNow().inWholeNanoseconds
+            try {
                 val checkReaderMark = TimeSource.Monotonic.markNow()
-                TestUtil.checkReader(reader)
-                //logger.debug { "doTestSortedNumericsVsStoredFields second checkReader took ${checkReaderMark.elapsedNow()}" }
-            } else {
-                //logger.debug { "doTestSortedNumericsVsStoredFields skipped second checkReader on this platform" }
+                TestUtil.checkReader(secondReader)
+                logger.debug {
+                    "perf:sortedNumerics phase=secondCheckReaderNs elapsedNs=${checkReaderMark.elapsedNow().inWholeNanoseconds}"
+                }
+                val secondCompareBodyMark = TimeSource.Monotonic.markNow()
+                compareStoredFieldWithSortedNumericsDV(secondReader, "stored", "dv")
+                logger.debug {
+                    "perf:sortedNumerics phase=secondCompareBodyNs elapsedNs=${secondCompareBodyMark.elapsedNow().inWholeNanoseconds}"
+                }
+            } finally {
+                val secondCloseReaderMark = TimeSource.Monotonic.markNow()
+                secondReader.close()
+                logger.debug {
+                    "perf:sortedNumerics phase=secondReaderLifecycleNs " +
+                        "openBaseReaderNs=$secondOpenReaderNs wrapReaderNs=$secondWrapReaderNs " +
+                        "closeReaderNs=${secondCloseReaderMark.elapsedNow().inWholeNanoseconds}"
+                }
             }
-            compareStoredFieldWithSortedNumericsDV(reader, "stored", "dv")
+            logger.debug {
+                "perf:sortedNumerics phase=secondCompareNs elapsedNs=${secondCompareMark.elapsedNow().inWholeNanoseconds}"
+            }
+        } else {
+            logger.debug { "perf:sortedNumerics phase=forceMergeNs skipped=true" } // TODO reduced comparePasses = 2 to 1 for dev speed
+            logger.debug { "perf:sortedNumerics phase=secondCompareNs skipped=true" }
         }
-        //logger.debug { "doTestSortedNumericsVsStoredFields second compare pass took ${secondCompareMark.elapsedNow()}" }
         IOUtils.close(writer, dir)
-        //logger.debug { "doTestSortedNumericsVsStoredFields total took ${totalMark.elapsedNow()}" }
+        logger.debug { "perf:sortedNumerics phase=totalNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds}" }
     }
 
     @Throws(Exception::class)
