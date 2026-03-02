@@ -17,11 +17,10 @@ import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TimeUnit
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.computeIfAbsent
 import org.gnit.lucenekmp.jdkport.get
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -44,22 +43,27 @@ class ReadersAndUpdates(
     private val pendingDeletes: PendingDeletes
 ) {
     private val logger = KotlinLogging.logger {}
-    private val rldMutex = Mutex()
+    private val rldLock: ReentrantLock = ReentrantLock()
 
-    private fun <T> withRldLock(action: () -> T): T = runBlocking {
-        rldMutex.withLock { action() }
-    }
-
-    private suspend fun <T> withRldLockSuspend(action: suspend () -> T): T {
-        rldMutex.lock()
+    private fun <T> withRldLock(action: () -> T): T {
+        rldLock.lock()
         try {
             return action()
         } finally {
-            rldMutex.unlock()
+            rldLock.unlock()
         }
     }
 
-    // Caller must already hold rldMutex
+    private suspend fun <T> withRldLockSuspend(action: suspend () -> T): T {
+        rldLock.lock()
+        try {
+            return action()
+        } finally {
+            rldLock.unlock()
+        }
+    }
+
+    // Caller must already hold rldLock
     private fun getReaderNoLock(context: IOContext): SegmentReader {
         if (reader == null) {
             reader = SegmentReader(info, indexCreatedVersionMajor, context)

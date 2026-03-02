@@ -1341,7 +1341,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val dir: Directory = newDirectory()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
         val writer = RandomIndexWriter(random(), dir, conf)
-        logger.debug { "perf:sortedNumerics phase=setupNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds}" }
         val doc = Document()
         val idField: Field = StringField("id", "", Field.Store.NO)
         val storedField: Field = newStringField("stored", "", Field.Store.YES)
@@ -1374,7 +1373,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 writer.commit()
             }
         }
-        logger.debug { "perf:sortedNumerics phase=indexNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds} numDocs=$numDocs" }
         // logger.debug { "doTestNumericsVsStoredFields indexing took ${indexMark.elapsedNow()}" }
 
         // delete some docs
@@ -1384,34 +1382,35 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
         }
-        // logger.debug { "doTestNumericsVsStoredFields deletions took ${deleteMark.elapsedNow()} (numDeletions=$numDeletions)" }
 
         // merge some segments and ensure that at least one of them has more than
         // max(256, minDocs) values
         val mergeMark = TimeSource.Monotonic.markNow()
         writer.forceMerge(numDocs / max(256, minDocs))
-        // logger.debug { "doTestNumericsVsStoredFields forceMerge took ${mergeMark.elapsedNow()}" }
 
+        val closeWriterMark = TimeSource.Monotonic.markNow()
         writer.close()
         // compare
         val compareMark = TimeSource.Monotonic.markNow()
         assertDVIterate(dir)
-        // logger.debug { "doTestNumericsVsStoredFields assertDVIterate took ${compareMark.elapsedNow()}" }
+        val closeDirMark = TimeSource.Monotonic.markNow()
         dir.close()
-        // logger.debug { "doTestNumericsVsStoredFields total took ${totalMark.elapsedNow()}" }
     }
 
     // Asserts equality of stored value vs. DocValue by iterating DocValues one at a time
     @Throws(IOException::class)
     protected fun assertDVIterate(dir: Directory) {
         val totalMark = TimeSource.Monotonic.markNow()
-        val ir: DirectoryReader = maybeWrapWithMergingReader(DirectoryReader.open(dir))
+        val openReaderMark = TimeSource.Monotonic.markNow()
+        val baseReader = DirectoryReader.open(dir)
+        val openReaderNs = openReaderMark.elapsedNow().inWholeNanoseconds
+        val wrapReaderMark = TimeSource.Monotonic.markNow()
+        val ir: DirectoryReader = maybeWrapWithMergingReader(baseReader)
+        val wrapReaderNs = wrapReaderMark.elapsedNow().inWholeNanoseconds
         val checkReaderMark = TimeSource.Monotonic.markNow()
         if (shouldRunCheckReaderInNumericsVsStoredFields()) {
             TestUtil.checkReader(ir)
-            // logger.debug { "assertDVIterate TestUtil.checkReader took ${checkReaderMark.elapsedNow()}" }
         } else {
-            // logger.debug { "assertDVIterate skipped TestUtil.checkReader on this platform" }
         }
         val leavesMark = TimeSource.Monotonic.markNow()
         for (context in ir.leaves()) {
@@ -1444,9 +1443,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             }
             assertEquals(DocIdSetIterator.NO_MORE_DOCS.toLong(), docValues.docID().toLong())
         }
-        // logger.debug { "assertDVIterate leaves/doc compare took ${leavesMark.elapsedNow()}" }
+        val closeReaderMark = TimeSource.Monotonic.markNow()
         ir.close()
-        // logger.debug { "assertDVIterate total took ${totalMark.elapsedNow()}" }
     }
 
     @Throws(IOException::class)
@@ -1612,11 +1610,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 }
             }
         }
-        logger.debug {
-            "perf:sortedNumericsCompare totalNs=${totalMark.elapsedNow().inWholeNanoseconds} docsVisited=$docsVisited " +
-                "storedDocReadNs=$storedDocReadNs dvAdvanceNs=$dvAdvanceNs dvAdvanceExactNs=$dvAdvanceExactNs " +
-                "dvCountNs=$dvCountNs dvNextValueNs=$dvNextValueNs"
-        }
     }
 
     @Throws(Exception::class)
@@ -1662,7 +1655,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
         }
-        logger.debug { "perf:sortedNumerics phase=deleteNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds} numDeletions=$numDeletions" }
         val firstCompareMark = TimeSource.Monotonic.markNow()
         val firstOpenReaderMark = TimeSource.Monotonic.markNow()
         val firstBaseReader = DirectoryReader.open(dir)
@@ -1674,28 +1666,13 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             if (shouldRunCheckReaderInNumericsVsStoredFields()) {
                 val checkReaderMark = TimeSource.Monotonic.markNow()
                 TestUtil.checkReader(firstReader)
-                logger.debug {
-                    "perf:sortedNumerics phase=firstCheckReaderNs elapsedNs=${checkReaderMark.elapsedNow().inWholeNanoseconds}"
-                }
             } else {
-                logger.debug { "perf:sortedNumerics phase=firstCheckReaderNs skipped=true" }
             }
             val firstCompareBodyMark = TimeSource.Monotonic.markNow()
             compareStoredFieldWithSortedNumericsDV(firstReader, "stored", "dv")
-            logger.debug {
-                "perf:sortedNumerics phase=firstCompareBodyNs elapsedNs=${firstCompareBodyMark.elapsedNow().inWholeNanoseconds}"
-            }
         } finally {
             val firstCloseReaderMark = TimeSource.Monotonic.markNow()
             firstReader.close()
-            logger.debug {
-                "perf:sortedNumerics phase=firstReaderLifecycleNs " +
-                    "openBaseReaderNs=$firstOpenReaderNs wrapReaderNs=$firstWrapReaderNs " +
-                    "closeReaderNs=${firstCloseReaderMark.elapsedNow().inWholeNanoseconds}"
-            }
-        }
-        logger.debug {
-            "perf:sortedNumerics phase=firstCompareNs elapsedNs=${firstCompareMark.elapsedNow().inWholeNanoseconds}"
         }
 
         val runMergePass = shouldRunCheckReaderInNumericsVsStoredFields()
@@ -1704,7 +1681,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             // 256 values
             val mergeMark = TimeSource.Monotonic.markNow()
             writer.forceMerge(numDocs / 256)
-            logger.debug { "perf:sortedNumerics phase=forceMergeNs elapsedNs=${mergeMark.elapsedNow().inWholeNanoseconds}" }
             val secondCompareMark = TimeSource.Monotonic.markNow()
             val secondOpenReaderMark = TimeSource.Monotonic.markNow()
             val secondBaseReader = DirectoryReader.open(dir)
@@ -1715,32 +1691,15 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             try {
                 val checkReaderMark = TimeSource.Monotonic.markNow()
                 TestUtil.checkReader(secondReader)
-                logger.debug {
-                    "perf:sortedNumerics phase=secondCheckReaderNs elapsedNs=${checkReaderMark.elapsedNow().inWholeNanoseconds}"
-                }
                 val secondCompareBodyMark = TimeSource.Monotonic.markNow()
                 compareStoredFieldWithSortedNumericsDV(secondReader, "stored", "dv")
-                logger.debug {
-                    "perf:sortedNumerics phase=secondCompareBodyNs elapsedNs=${secondCompareBodyMark.elapsedNow().inWholeNanoseconds}"
-                }
             } finally {
                 val secondCloseReaderMark = TimeSource.Monotonic.markNow()
                 secondReader.close()
-                logger.debug {
-                    "perf:sortedNumerics phase=secondReaderLifecycleNs " +
-                        "openBaseReaderNs=$secondOpenReaderNs wrapReaderNs=$secondWrapReaderNs " +
-                        "closeReaderNs=${secondCloseReaderMark.elapsedNow().inWholeNanoseconds}"
-                }
             }
-            logger.debug {
-                "perf:sortedNumerics phase=secondCompareNs elapsedNs=${secondCompareMark.elapsedNow().inWholeNanoseconds}"
-            }
-        } else {
-            logger.debug { "perf:sortedNumerics phase=forceMergeNs skipped=true" } // TODO reduced comparePasses = 2 to 1 for dev speed
-            logger.debug { "perf:sortedNumerics phase=secondCompareNs skipped=true" }
+        } else { // TODO reduced comparePasses = 2 to 1 for dev speed
         }
         IOUtils.close(writer, dir)
-        logger.debug { "perf:sortedNumerics phase=totalNs elapsedNs=${totalMark.elapsedNow().inWholeNanoseconds}" }
     }
 
     @Throws(Exception::class)
@@ -3433,13 +3392,10 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         if (dir is BaseDirectoryWrapper) {
             dir.checkIndexOnClose = false // TODO reduced checkIndexOnClose = true to false for dev speed
         }
-        logger.debug { "perf:testThreads2-setup newDirectoryNs=${setupDirMark.elapsedNow().inWholeNanoseconds}" }
         val setupConfigMark = TimeSource.Monotonic.markNow()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
-        logger.debug { "perf:testThreads2-setup writerConfigNs=${setupConfigMark.elapsedNow().inWholeNanoseconds}" }
         val setupWriterMark = TimeSource.Monotonic.markNow()
         val writer = RandomIndexWriter(random(), dir, conf)
-        logger.debug { "perf:testThreads2-setup newRandomIndexWriterNs=${setupWriterMark.elapsedNow().inWholeNanoseconds}" }
         val idField: Field = StringField("id", "", Field.Store.NO)
         val storedBinField: Field = StoredField("storedBin", ByteArray(0))
         val dvBinField: Field = BinaryDocValuesField("dvBin", newBytesRef())
@@ -3502,10 +3458,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 commitNs += commitMark.elapsedNow().inWholeNanoseconds
             }
         }
-        logger.debug {
-            "perf:testThreads2-phase indexNs=${indexMark.elapsedNow().inWholeNanoseconds} " +
-                "numDocs=$numDocs addDocNs=$addDocNs commitNs=$commitNs"
-        }
 
         // delete some docs
         val deleteMark = TimeSource.Monotonic.markNow()
@@ -3514,10 +3466,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
         }
-        logger.debug { "perf:testThreads2-phase deleteNs=${deleteMark.elapsedNow().inWholeNanoseconds} numDeletions=$numDeletions" }
         val closeWriterMark = TimeSource.Monotonic.markNow()
         writer.close()
-        logger.debug { "perf:testThreads2-phase closeWriterNs=${closeWriterMark.elapsedNow().inWholeNanoseconds}" }
 
         // compare
         val openReaderMark = TimeSource.Monotonic.markNow()
@@ -3525,10 +3475,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         val openBaseReaderNs = openReaderMark.elapsedNow().inWholeNanoseconds
         val wrapReaderMark = TimeSource.Monotonic.markNow()
         val ir: DirectoryReader = maybeWrapWithMergingReader(baseReader)
-        logger.debug {
-            "perf:testThreads2-phase openReaderNs=${openBaseReaderNs + wrapReaderMark.elapsedNow().inWholeNanoseconds} " +
-                "openBaseReaderNs=$openBaseReaderNs wrapReaderNs=${wrapReaderMark.elapsedNow().inWholeNanoseconds}"
-        }
         val threadingMark = TimeSource.Monotonic.markNow()
         val numThreads: Int = TestUtil.nextInt(
             random(),
@@ -3621,7 +3567,6 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         for (job in jobs) {
             job.join()
         }
-        logger.debug { "perf:testThreads2-phase threadCompareNs=${threadingMark.elapsedNow().inWholeNanoseconds} threads=$numThreads" }
         val totalDocFetchNs = docFetchNs.sum()
         val totalBinaryNs = binaryNs.sum()
         val totalNumericNs = numericNs.sum()
@@ -3633,23 +3578,12 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
             TestUtil.checkReader(ir)
             totalCheckReaderNs = checkReaderStart.elapsedNow().inWholeNanoseconds
         }
-        logger.debug {
-            "perf:testThreads2-substeps docFetchNs=$totalDocFetchNs " +
-                "binaryNs=$totalBinaryNs numericNs=$totalNumericNs " +
-                "sortedSetNs=$totalSortedSetNs sortedNumericNs=$totalSortedNumericNs " +
-                "checkReaderNs=$totalCheckReaderNs threads=$numThreads"
-        }
         val closeReaderMark = TimeSource.Monotonic.markNow()
         ir.close()
         val closeReaderNs = closeReaderMark.elapsedNow().inWholeNanoseconds
         val closeDirMark = TimeSource.Monotonic.markNow()
         dir.close()
         val closeDirNs = closeDirMark.elapsedNow().inWholeNanoseconds
-        logger.debug {
-            "perf:testThreads2-phase closeResourcesNs=${closeReaderNs + closeDirNs} " +
-                "closeReaderNs=$closeReaderNs closeDirNs=$closeDirNs"
-        }
-        logger.debug { "perf:testThreads2-phase totalNs=${totalMark.elapsedNow().inWholeNanoseconds}" }
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
