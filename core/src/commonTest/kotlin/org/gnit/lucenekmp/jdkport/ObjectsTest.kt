@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.time.TimeSource
 
 class ObjectsTest {
 
@@ -27,5 +28,27 @@ class ObjectsTest {
     fun testToString() {
         assertEquals("test", Objects.toString("test"))
         assertEquals("null", Objects.toString(null))
+    }
+
+    @Test
+    fun testStringBuilderGetCharsPerformanceRepro() {
+        val dst = CharArray(20000)
+        val sb = StringBuilder("a")
+        val totalMark = TimeSource.Monotonic.markNow()
+        var copyNanos = 0L
+
+        for (i in 0..<20000) {
+            val copyMark = TimeSource.Monotonic.markNow()
+            sb.getChars(0, sb.length, dst, 0)
+            copyNanos += copyMark.elapsedNow().inWholeNanoseconds
+            sb.append('a')
+        }
+
+        // basic correctness guard so the benchmarked path actually copied expected data
+        assertEquals('a', dst[0])
+        println(
+            "ObjectsTest.stringBuilderGetChars perf elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} " +
+                "copyNs=$copyNanos finalLength=${sb.length}"
+        )
     }
 }

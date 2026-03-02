@@ -133,11 +133,17 @@ fun StringBuilder.getChars(srcBegin: Int, srcEnd: Int, dst: CharArray, dstBegin:
     Objects.checkFromToIndex(dstBegin, dstBegin + n, dst.size)
 
     // Copy characters from this builder to dst.
-    for (i in srcBegin until srcEnd) {
-        dst[dstBegin + i - srcBegin] = this[i]
-    }
+    stringBuilderGetChars(this, srcBegin, srcEnd, dst, dstBegin)
 }
 
+
+expect fun stringBuilderGetChars(
+    src: StringBuilder,
+    srcBegin: Int,
+    srcEnd: Int,
+    dst: CharArray,
+    dstBegin: Int
+)
 
 /**
  * Appends the Unicode code point represented by [codePoint] to this StringBuilder.
