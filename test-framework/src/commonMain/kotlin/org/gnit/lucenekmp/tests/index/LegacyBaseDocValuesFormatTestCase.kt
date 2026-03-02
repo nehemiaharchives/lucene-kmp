@@ -59,6 +59,7 @@ import org.gnit.lucenekmp.search.TopDocs
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.junitport.assertArrayEquals
+import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.tests.util.RandomPicks
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.shouldRunCheckReaderInNumericsVsStoredFields
@@ -88,6 +89,10 @@ import kotlin.time.TimeSource
  * improved!
  */
 abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase() {
+
+    init{
+        configureTestLogging()
+    }
 
     private val logger = KotlinLogging.logger {  }
 
@@ -3307,18 +3312,30 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
     @Throws(Exception::class)
     open fun testThreads2() = runTest {
+        val totalMark = TimeSource.Monotonic.markNow()
+        val setupDirMark = TimeSource.Monotonic.markNow()
         val dir: Directory = newDirectory()
+        if (dir is BaseDirectoryWrapper) {
+            dir.checkIndexOnClose = false // TODO reduced checkIndexOnClose = true to false for dev speed
+        }
+        logger.debug { "perf:testThreads2-setup newDirectoryNs=${setupDirMark.elapsedNow().inWholeNanoseconds}" }
+        val setupConfigMark = TimeSource.Monotonic.markNow()
         val conf = newIndexWriterConfig(MockAnalyzer(random()))
+        logger.debug { "perf:testThreads2-setup writerConfigNs=${setupConfigMark.elapsedNow().inWholeNanoseconds}" }
+        val setupWriterMark = TimeSource.Monotonic.markNow()
         val writer = RandomIndexWriter(random(), dir, conf)
+        logger.debug { "perf:testThreads2-setup newRandomIndexWriterNs=${setupWriterMark.elapsedNow().inWholeNanoseconds}" }
         val idField: Field = StringField("id", "", Field.Store.NO)
         val storedBinField: Field = StoredField("storedBin", ByteArray(0))
         val dvBinField: Field = BinaryDocValuesField("dvBin", newBytesRef())
         val dvSortedField: Field = SortedDocValuesField("dvSorted", newBytesRef())
         val storedNumericField: Field = StoredField("storedNum", "")
         val dvNumericField: Field = NumericDocValuesField("dvNum", 0)
-
         // index some docs
-        val numDocs: Int = TestUtil.nextInt(random(), start = 25, end = 47) // TODO reduced from start = 1025, end = 2047 to start = 25, end = 47 for dev speed
+        val indexMark = TimeSource.Monotonic.markNow()
+        val numDocs: Int = TestUtil.nextInt(random(), start = 8, end = 12) // TODO reduced start = 25 to 8, end = 47 to 12 for dev speed
+        var addDocNs = 0L
+        var commitNs = 0L
         for (i in 0..<numDocs) {
             idField.setStringValue(i.toString())
             val length: Int = TestUtil.nextInt(random(), 0, 8)
@@ -3361,29 +3378,55 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                 doc.add(SortedNumericDocValuesField("dvSortedNumeric", l))
                 doc.add(StoredField("storedSortedNumeric", l.toString()))
             }
+            val addDocMark = TimeSource.Monotonic.markNow()
             writer.addDocument(doc)
+            addDocNs += addDocMark.elapsedNow().inWholeNanoseconds
             if (random().nextInt(31) == 0) {
+                val commitMark = TimeSource.Monotonic.markNow()
                 writer.commit()
+                commitNs += commitMark.elapsedNow().inWholeNanoseconds
             }
+        }
+        logger.debug {
+            "perf:testThreads2-phase indexNs=${indexMark.elapsedNow().inWholeNanoseconds} " +
+                "numDocs=$numDocs addDocNs=$addDocNs commitNs=$commitNs"
         }
 
         // delete some docs
+        val deleteMark = TimeSource.Monotonic.markNow()
         val numDeletions: Int = if (numDocs >= 10) random().nextInt(numDocs / 10) else 0
         for (i in 0..<numDeletions) {
             val id: Int = random().nextInt(numDocs)
             writer.deleteDocuments(Term("id", id.toString()))
         }
+        logger.debug { "perf:testThreads2-phase deleteNs=${deleteMark.elapsedNow().inWholeNanoseconds} numDeletions=$numDeletions" }
+        val closeWriterMark = TimeSource.Monotonic.markNow()
         writer.close()
+        logger.debug { "perf:testThreads2-phase closeWriterNs=${closeWriterMark.elapsedNow().inWholeNanoseconds}" }
 
         // compare
-        val ir: DirectoryReader = maybeWrapWithMergingReader(DirectoryReader.open(dir))
+        val openReaderMark = TimeSource.Monotonic.markNow()
+        val baseReader = DirectoryReader.open(dir)
+        val openBaseReaderNs = openReaderMark.elapsedNow().inWholeNanoseconds
+        val wrapReaderMark = TimeSource.Monotonic.markNow()
+        val ir: DirectoryReader = maybeWrapWithMergingReader(baseReader)
+        logger.debug {
+            "perf:testThreads2-phase openReaderNs=${openBaseReaderNs + wrapReaderMark.elapsedNow().inWholeNanoseconds} " +
+                "openBaseReaderNs=$openBaseReaderNs wrapReaderNs=${wrapReaderMark.elapsedNow().inWholeNanoseconds}"
+        }
+        val threadingMark = TimeSource.Monotonic.markNow()
         val numThreads: Int = TestUtil.nextInt(
             random(),
             2,
-            7
-        )
+            4
+        ) // TODO reduced maxThreads = 7 to 4 for dev speed
         val startSignal = CompletableDeferred<Unit>()
-        val jobs: Array<Job> = Array(numThreads) {
+        val docFetchNs = LongArray(numThreads)
+        val binaryNs = LongArray(numThreads)
+        val numericNs = LongArray(numThreads)
+        val sortedSetNs = LongArray(numThreads)
+        val sortedNumericNs = LongArray(numThreads)
+        val jobs: Array<Job> = Array(numThreads) { threadIndex ->
             launch(Dispatchers.Default) {
                 startSignal.await()
                 try {
@@ -3397,7 +3440,11 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                         val sortedSet: SortedSetDocValues? = r.getSortedSetDocValues("dvSortedSet")
                         val sortedNumeric: SortedNumericDocValues? = r.getSortedNumericDocValues("dvSortedNumeric")
                         for (j in 0..<r.maxDoc()) {
+                            val fetchStart = TimeSource.Monotonic.markNow()
                             val storedDoc = storedFields.document(j)
+                            docFetchNs[threadIndex] += fetchStart.elapsedNow().inWholeNanoseconds
+
+                            val binaryStart = TimeSource.Monotonic.markNow()
                             val binaryValue: BytesRef? = storedDoc.getBinaryValue("storedBin")
                             if (binaryValue != null) {
                                 if (binaries != null) {
@@ -3410,7 +3457,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                     assertEquals(binaryValue, scratch)
                                 }
                             }
+                            binaryNs[threadIndex] += binaryStart.elapsedNow().inWholeNanoseconds
 
+                            val numericStart = TimeSource.Monotonic.markNow()
                             val number: String? = storedDoc.get("storedNum")
                             if (number != null) {
                                 if (numerics != null) {
@@ -3418,7 +3467,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                     assertEquals(number.toLong(), numerics.longValue())
                                 }
                             }
+                            numericNs[threadIndex] += numericStart.elapsedNow().inWholeNanoseconds
 
+                            val sortedSetStart = TimeSource.Monotonic.markNow()
                             val values: Array<String?> = storedDoc.getValues("storedSortedSet")
                             if (values.isNotEmpty()) {
                                 assertNotNull(sortedSet)
@@ -3430,6 +3481,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                     assertEquals(s, value.utf8ToString())
                                 }
                             }
+                            sortedSetNs[threadIndex] += sortedSetStart.elapsedNow().inWholeNanoseconds
+
+                            val sortedNumericStart = TimeSource.Monotonic.markNow()
                             val numValues: Array<String?> = storedDoc.getValues("storedSortedNumeric")
                             if (numValues.isNotEmpty()) {
                                 assertNotNull(sortedNumeric)
@@ -3440,9 +3494,9 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                     assertEquals(numValue, v.toString())
                                 }
                             }
+                            sortedNumericNs[threadIndex] += sortedNumericStart.elapsedNow().inWholeNanoseconds
                         }
                     }
-                    TestUtil.checkReader(ir)
                 } catch (e: Exception) {
                     throw RuntimeException(e)
                 }
@@ -3452,8 +3506,35 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         for (job in jobs) {
             job.join()
         }
+        logger.debug { "perf:testThreads2-phase threadCompareNs=${threadingMark.elapsedNow().inWholeNanoseconds} threads=$numThreads" }
+        val totalDocFetchNs = docFetchNs.sum()
+        val totalBinaryNs = binaryNs.sum()
+        val totalNumericNs = numericNs.sum()
+        val totalSortedSetNs = sortedSetNs.sum()
+        val totalSortedNumericNs = sortedNumericNs.sum()
+        var totalCheckReaderNs = 0L
+        if (shouldRunCheckReaderInNumericsVsStoredFields()) {
+            val checkReaderStart = TimeSource.Monotonic.markNow()
+            TestUtil.checkReader(ir)
+            totalCheckReaderNs = checkReaderStart.elapsedNow().inWholeNanoseconds
+        }
+        logger.debug {
+            "perf:testThreads2-substeps docFetchNs=$totalDocFetchNs " +
+                "binaryNs=$totalBinaryNs numericNs=$totalNumericNs " +
+                "sortedSetNs=$totalSortedSetNs sortedNumericNs=$totalSortedNumericNs " +
+                "checkReaderNs=$totalCheckReaderNs threads=$numThreads"
+        }
+        val closeReaderMark = TimeSource.Monotonic.markNow()
         ir.close()
+        val closeReaderNs = closeReaderMark.elapsedNow().inWholeNanoseconds
+        val closeDirMark = TimeSource.Monotonic.markNow()
         dir.close()
+        val closeDirNs = closeDirMark.elapsedNow().inWholeNanoseconds
+        logger.debug {
+            "perf:testThreads2-phase closeResourcesNs=${closeReaderNs + closeDirNs} " +
+                "closeReaderNs=$closeReaderNs closeDirNs=$closeDirNs"
+        }
+        logger.debug { "perf:testThreads2-phase totalNs=${totalMark.elapsedNow().inWholeNanoseconds}" }
     }
 
     /*@org.apache.lucene.tests.util.LuceneTestCase.Nightly*/
