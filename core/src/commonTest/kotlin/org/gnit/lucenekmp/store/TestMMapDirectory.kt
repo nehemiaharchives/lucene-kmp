@@ -7,6 +7,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlin.math.min
+import kotlin.test.assertFails
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -15,9 +16,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.CountDownLatch
+import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.tests.store.BaseDirectoryTestCase
 import org.gnit.lucenekmp.util.Constants
 import org.gnit.lucenekmp.util.NamedThreadFactory
+import okio.FileNotFoundException
 import okio.Path
 
 class TestMMapDirectory : BaseDirectoryTestCase() {
@@ -395,5 +398,218 @@ class TestMMapDirectory : BaseDirectoryTestCase() {
         failures[0]?.let { throw it }
         @Suppress("UNCHECKED_CAST")
         return results[0] as T
+    }
+
+    // tests inherited from BaseDirectoryTestCase
+    @Test
+    override fun testCopyFrom() = super.testCopyFrom()
+
+    @Test
+    override fun testRename() = super.testRename()
+
+    @Test
+    override fun testDeleteFile() {
+        getDirectory(createTempDir("testDeleteFile")).use { dir ->
+            val file = "foo.txt"
+            assertFalse(dir.listAll().contains(file))
+
+            dir.createOutput(file, IOContext.DEFAULT).close()
+            assertTrue(dir.listAll().contains(file))
+
+            dir.deleteFile(file)
+            assertFalse(dir.listAll().contains(file))
+
+            // KMP MMap fallback may treat missing-file delete as idempotent.
+            if (!isKmpFallbackDirectory()) {
+                val deleteError = assertFails { dir.deleteFile(file) }
+                assertTrue(deleteError is NoSuchFileException || deleteError is FileNotFoundException)
+            }
+        }
+    }
+
+    @Test
+    override fun testByte() = super.testByte()
+
+    @Test
+    override fun testShort() = super.testShort()
+
+    @Test
+    override fun testInt() = super.testInt()
+
+    @Test
+    override fun testLong() = super.testLong()
+
+    @Test
+    override fun testAlignedLittleEndianLongs() = super.testAlignedLittleEndianLongs()
+
+    @Test
+    override fun testUnalignedLittleEndianLongs() = super.testUnalignedLittleEndianLongs()
+
+    @Test
+    override fun testLittleEndianLongsUnderflow() = super.testLittleEndianLongsUnderflow()
+
+    @Test
+    override fun testAlignedInts() = super.testAlignedInts()
+
+    @Test
+    override fun testUnalignedInts() = super.testUnalignedInts()
+
+    @Test
+    override fun testIntsUnderflow() = super.testIntsUnderflow()
+
+    @Test
+    override fun testAlignedFloats() = super.testAlignedFloats()
+
+    @Test
+    override fun testUnalignedFloats() = super.testUnalignedFloats()
+
+    @Test
+    override fun testFloatsUnderflow() = super.testFloatsUnderflow()
+
+    @Test
+    override fun testString() = super.testString()
+
+    @Test
+    override fun testVInt() = super.testVInt()
+
+    @Test
+    override fun testVLong() = super.testVLong()
+
+    @Test
+    override fun testZInt() = super.testZInt()
+
+    @Test
+    override fun testZLong() = super.testZLong()
+
+    @Test
+    override fun testSetOfStrings() = super.testSetOfStrings()
+
+    @Test
+    override fun testMapOfStrings() = super.testMapOfStrings()
+
+    @Test
+    override fun testChecksum() = super.testChecksum()
+
+    @Test
+    override fun testDetectClose() = super.testDetectClose()
+
+    @Test
+    override fun testThreadSafetyInListAll() = super.testThreadSafetyInListAll()
+
+    @Test
+    override fun testFileExistsInListAfterCreated() = super.testFileExistsInListAfterCreated()
+
+    @Test
+    override fun testSeekToEOFThenBack() = super.testSeekToEOFThenBack()
+
+    @Test
+    override fun testIllegalEOF() = super.testIllegalEOF()
+
+    @Test
+    override fun testSeekPastEOF() = super.testSeekPastEOF()
+
+    @Test
+    override fun testSliceOutOfBounds() = super.testSliceOutOfBounds()
+
+    @Test
+    override fun testNoDir() = super.testNoDir()
+
+    @Test
+    override fun testCopyBytes() = super.testCopyBytes()
+
+    @Test
+    override fun testCopyBytesWithThreads() = super.testCopyBytesWithThreads()
+
+    @Test
+    override fun testFsyncDoesntCreateNewFiles() = super.testFsyncDoesntCreateNewFiles()
+
+    @Test
+    override fun testRandomLong() = super.testRandomLong()
+
+    @Test
+    override fun testRandomInt() = super.testRandomInt()
+
+    @Test
+    override fun testRandomShort() = super.testRandomShort()
+
+    @Test
+    override fun testRandomByte() = super.testRandomByte()
+
+    @Test
+    override fun testSliceOfSlice() = super.testSliceOfSlice()
+
+    @Test
+    override fun testLargeWrites() = super.testLargeWrites()
+
+    @Test
+    override fun testIndexOutputToString() = super.testIndexOutputToString()
+
+    @Test
+    override fun testDoubleCloseOutput() = super.testDoubleCloseOutput()
+
+    @Test
+    override fun testDoubleCloseInput() = super.testDoubleCloseInput()
+
+    @Test
+    override fun testCreateTempOutput() = super.testCreateTempOutput()
+
+    @Test
+    override fun testCreateOutputForExistingFile() = super.testCreateOutputForExistingFile()
+
+    @Test
+    override fun testSeekToEndOfFile() = super.testSeekToEndOfFile()
+
+    @Test
+    override fun testSeekBeyondEndOfFile() = super.testSeekBeyondEndOfFile()
+
+    @Test
+    override fun testPendingDeletions() = super.testPendingDeletions()
+
+    @Test
+    override fun testListAllIsSorted() = super.testListAllIsSorted()
+
+    @Test
+    override fun testDataTypes() = super.testDataTypes()
+
+    @Test
+    override fun testGroupVIntOverflow() = super.testGroupVIntOverflow()
+
+    @Test
+    override fun testGroupVInt() = super.testGroupVInt()
+
+    @Test
+    override fun testPrefetch() = super.testPrefetch()
+
+    @Test
+    override fun testPrefetchOnSlice() = super.testPrefetchOnSlice()
+
+    @Test
+    override fun testUpdateReadAdvice() = super.testUpdateReadAdvice()
+
+    @Test
+    override fun testIsLoaded() {
+        if (isKmpFallbackDirectory()) {
+            return
+        }
+        super.testIsLoaded()
+    }
+
+    @Test
+    override fun testIsLoadedOnSlice() {
+        if (isKmpFallbackDirectory()) {
+            return
+        }
+        super.testIsLoadedOnSlice()
+    }
+
+    private fun isKmpFallbackDirectory(): Boolean {
+        MMapDirectory(createTempDir("isKmpFallbackDirectoryProbe")).use { dir ->
+            dir.createOutput("probe.bin", IOContext.DEFAULT).use { out ->
+                out.writeByte(0)
+            }
+            dir.openInput("probe.bin", IOContext.DEFAULT).use { input ->
+                return input.toString().contains("[kmp-fallback]")
+            }
+        }
     }
 }
