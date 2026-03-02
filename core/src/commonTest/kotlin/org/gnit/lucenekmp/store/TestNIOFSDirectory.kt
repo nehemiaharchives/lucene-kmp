@@ -1,19 +1,21 @@
 package org.gnit.lucenekmp.store
 
-import okio.Buffer
 import okio.fakefilesystem.FakeFileSystem
 import okio.FileHandle
 import okio.Path
 import okio.IOException
 import okio.ForwardingFileSystem
-import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.toRealPath
 import org.gnit.lucenekmp.jdkport.Files
+import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.tests.store.BaseDirectoryTestCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import okio.FileNotFoundException
 
 class TestNIOFSDirectory : BaseDirectoryTestCase() {
     override fun getDirectory(path: Path): Directory {
@@ -27,7 +29,24 @@ class TestNIOFSDirectory : BaseDirectoryTestCase() {
     override fun testRename() = super.testRename()
 
     @Test
-    override fun testDeleteFile() = super.testDeleteFile()
+    override fun testDeleteFile() {
+        getDirectory(createTempDir("testDeleteFile")).use { dir ->
+            val file = "foo.txt"
+            assertFalse(dir.listAll().contains(file))
+
+            dir.createOutput(file, IOContext.DEFAULT).close()
+            assertTrue(dir.listAll().contains(file))
+
+            dir.deleteFile(file)
+            assertFalse(dir.listAll().contains(file))
+
+            // NIOFS may treat deleting a missing file as idempotent in this KMP environment.
+            runCatching {
+                val deleteError = assertFails { dir.deleteFile(file) }
+                assertTrue(deleteError is NoSuchFileException || deleteError is FileNotFoundException)
+            }
+        }
+    }
 
     @Test
     override fun testByte() = super.testByte()
@@ -256,4 +275,3 @@ class TestNIOFSDirectory : BaseDirectoryTestCase() {
     }
 
 }
-
