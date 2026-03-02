@@ -37,7 +37,6 @@ class FileSwitchDirectory(
         return getDirectory(name).obtainLock(name)
     }
 
-    @Throws(IOException::class)
     override fun close() {
         if (doClose) {
             IOUtils.close(primaryDir, secondaryDir)
