@@ -62,11 +62,11 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1116 | 81% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1118 | 81% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 22 | 84% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
-|     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 19 | 76% | [ ] |
+|     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 21 | 84% | [ ] |
 |   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 40 | 97% | [ ] |
 |     org.apache.lucene.codecs.compressing |         org.gnit.lucenekmp.codecs.compressing | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.codecs.hnsw |         org.gnit.lucenekmp.codecs.hnsw | 10 | 9 | 90% | [ ] |
@@ -133,7 +133,7 @@
 | org.apache.lucene | 6 | 0 | 0% |
 |   org.apache.lucene.analysis | 15 | 7 | 46% |
 |     org.apache.lucene.analysis.standard | 2 | 1 | 50% |
-|     org.apache.lucene.analysis.tokenattributes | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.tokenattributes | 4 | 4 | 100% |
 |   org.apache.lucene.codecs | 4 | 3 | 75% |
 |     org.apache.lucene.codecs.compressing | 5 | 5 | 100% |
 |     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
@@ -154,7 +154,7 @@
 |   org.apache.lucene.search | 149 | 10 | 6% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 15 | 60% |
-|   org.apache.lucene.store | 27 | 14 | 51% |
+|   org.apache.lucene.store | 27 | 15 | 55% |
 |   org.apache.lucene.util | 63 | 62 | 98% |
 |     org.apache.lucene.util.automaton | 15 | 15 | 100% |
 |     org.apache.lucene.util.bkd | 8 | 8 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 673 | 306 | 45% |
+| Total | 673 | 311 | 46% |
 
 
 ## Tests To Port
@@ -185,10 +185,6 @@
 | [org.apache.lucene.analysis.TestGraphTokenizers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestGraphTokenizers.java) | org.gnit.lucenekmp.analysis.TestGraphTokenizers |
 | [org.apache.lucene.analysis.TestWordlistLoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestWordlistLoader.java) | org.gnit.lucenekmp.analysis.TestWordlistLoader |
 | [org.apache.lucene.analysis.standard.TestStandardFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/standard/TestStandardFactories.java) | org.gnit.lucenekmp.analysis.standard.TestStandardFactories |
-| [org.apache.lucene.analysis.tokenattributes.TestBytesRefAttImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestBytesRefAttImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestBytesRefAttImpl |
-| [org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestCharTermAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl |
-| [org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestPackedTokenAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestPackedTokenAttributeImpl |
-| [org.apache.lucene.analysis.tokenattributes.TestSimpleAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/tokenattributes/TestSimpleAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TestSimpleAttributeImpl |
 | [org.apache.lucene.codecs.TestCodecLoadingDeadlock](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecLoadingDeadlock.java) | org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock |
 | [org.apache.lucene.index.Test2BBinaryDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BBinaryDocValues.java) | org.gnit.lucenekmp.index.Test2BBinaryDocValues |
 | [org.apache.lucene.index.Test2BDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BDocs.java) | org.gnit.lucenekmp.index.Test2BDocs |
@@ -520,7 +516,6 @@
 | [org.apache.lucene.search.similarities.TestRawTFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestRawTFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestRawTFSimilarity |
 | [org.apache.lucene.search.similarities.TestSimilarity2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarity2.java) | org.gnit.lucenekmp.search.similarities.TestSimilarity2 |
 | [org.apache.lucene.search.similarities.TestSimilarityBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarityBase.java) | org.gnit.lucenekmp.search.similarities.TestSimilarityBase |
-| [org.apache.lucene.store.TestByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestByteBuffersDirectory |
 | [org.apache.lucene.store.TestFileSwitchDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFileSwitchDirectory.java) | org.gnit.lucenekmp.store.TestFileSwitchDirectory |
 | [org.apache.lucene.store.TestIndexOutputAlignment](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestIndexOutputAlignment.java) | org.gnit.lucenekmp.store.TestIndexOutputAlignment |
 | [org.apache.lucene.store.TestMultiByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestMultiByteBuffersDirectory |

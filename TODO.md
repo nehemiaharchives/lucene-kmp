@@ -298,9 +298,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 ## Depth 2
 - org.apache.lucene.analysis.GraphTokenFilter → org.gnit.lucenekmp.analysis.GraphTokenFilter
 - org.apache.lucene.analysis.standard.SpoonFeedMaxCharsReaderWrapper → org.gnit.lucenekmp.analysis.standard.SpoonFeedMaxCharsReaderWrapper
-- org.apache.lucene.analysis.tokenattributes.BytesTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttributeImpl
-- org.apache.lucene.analysis.tokenattributes.PositionLengthAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.PositionLengthAttributeImpl
-- org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestCharTermAttributeImpl
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockDecoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockDecoder
 - org.apache.lucene.codecs.uniformsplit.BlockHeader → org.gnit.lucenekmp.codecs.uniformsplit.BlockHeader
@@ -486,7 +483,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestWorstCaseTestBehavior → org.gnit.lucenekmp.tests.util.TestWorstCaseTestBehavior
 - org.apache.lucene.util.JavaLoggingInfoStream → org.gnit.lucenekmp.util.JavaLoggingInfoStream
 - org.apache.lucene.util.SuppressForbidden → org.gnit.lucenekmp.util.SuppressForbidden
-- org.apache.lucene.util.TestWeakIdentityMap → org.gnit.lucenekmp.util.TestWeakIdentityMap
 - org.apache.lucene.util.packed.PackedDataInput → org.gnit.lucenekmp.util.packed.PackedDataInput
 - org.apache.lucene.util.packed.PackedDataOutput → org.gnit.lucenekmp.util.packed.PackedDataOutput
 
@@ -505,9 +501,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.analysis.TestGraphTokenizers → org.gnit.lucenekmp.analysis.TestGraphTokenizers
 - org.apache.lucene.analysis.TestWordlistLoader → org.gnit.lucenekmp.analysis.TestWordlistLoader
 - org.apache.lucene.analysis.standard.TestStandardFactories → org.gnit.lucenekmp.analysis.standard.TestStandardFactories
-- org.apache.lucene.analysis.tokenattributes.TestBytesRefAttImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestBytesRefAttImpl
-- org.apache.lucene.analysis.tokenattributes.TestPackedTokenAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestPackedTokenAttributeImpl
-- org.apache.lucene.analysis.tokenattributes.TestSimpleAttributeImpl → org.gnit.lucenekmp.analysis.tokenattributes.TestSimpleAttributeImpl
 - org.apache.lucene.codecs.TestCodecLoadingDeadlock → org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock
 - org.apache.lucene.codecs.bitvectors.TestHnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.TestHnswBitVectorsFormat
 - org.apache.lucene.codecs.blockterms.TestFixedGapPostingsFormat → org.gnit.lucenekmp.codecs.blockterms.TestFixedGapPostingsFormat
@@ -525,7 +518,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.TestUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.TestUniformSplitPostingFormat
 - org.apache.lucene.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat
 - org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
-- org.apache.lucene.document.TestManyKnnDocs → org.gnit.lucenekmp.document.TestManyKnnDocs
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test2BBinaryDocValues → org.gnit.lucenekmp.index.Test2BBinaryDocValues
@@ -866,7 +858,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.similarities.TestRawTFSimilarity → org.gnit.lucenekmp.search.similarities.TestRawTFSimilarity
 - org.apache.lucene.search.similarities.TestSimilarity2 → org.gnit.lucenekmp.search.similarities.TestSimilarity2
 - org.apache.lucene.search.similarities.TestSimilarityBase → org.gnit.lucenekmp.search.similarities.TestSimilarityBase
-- org.apache.lucene.store.TestByteBuffersDirectory → org.gnit.lucenekmp.store.TestByteBuffersDirectory
 - org.apache.lucene.store.TestFileSwitchDirectory → org.gnit.lucenekmp.store.TestFileSwitchDirectory
 - org.apache.lucene.store.TestIndexOutputAlignment → org.gnit.lucenekmp.store.TestIndexOutputAlignment
 - org.apache.lucene.store.TestMultiByteBuffersDirectory → org.gnit.lucenekmp.store.TestMultiByteBuffersDirectory
@@ -907,8 +898,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRunWithRestrictedPermissions → org.gnit.lucenekmp.tests.util.TestRunWithRestrictedPermissions
 - org.apache.lucene.util.SelectorBenchmark → org.gnit.lucenekmp.util.SelectorBenchmark
 - org.apache.lucene.util.SorterBenchmark → org.gnit.lucenekmp.util.SorterBenchmark
-- org.apache.lucene.util.TestClassLoaderUtils → org.gnit.lucenekmp.util.TestClassLoaderUtils
-- org.apache.lucene.util.TestJavaLoggingInfoStream → org.gnit.lucenekmp.util.TestJavaLoggingInfoStream
 - org.apache.lucene.util.hnsw.MockByteVectorValues → org.gnit.lucenekmp.util.hnsw.MockByteVectorValues
 - org.apache.lucene.util.hnsw.MockVectorValues → org.gnit.lucenekmp.util.hnsw.MockVectorValues
 
