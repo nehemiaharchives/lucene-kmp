@@ -119,6 +119,14 @@ When you use ./gradlew command line tool, use like following (e.g. when you deve
 8. If the specific test passes, run `./gradlew jvmTest` to run all jvm tests.
 9. If all jvm tests pass, run `./gradlew allTests` to run all tests for all platforms.
 
+### OOM guard for command-line Gradle (required on local desktop)
+When running any `./gradlew` command locally, start `earlyoom` first so memory pressure kills Gradle/Java processes before system-wide freeze.
+
+1. Start `/usr/bin/earlyoom` with Gradle/Java prefer-regex:
+   - `sudo /usr/bin/earlyoom -r 60 --prefer '(^|/)(gradle|gradlew|java|kotlinc)( |$)' --avoid '(Xorg|Xwayland|gnome-shell|plasmashell|kwin_wayland)'`
+2. Run the intended `./gradlew ...` command(s).
+3. Stop `earlyoom` when done if you started it manually. If managed by service, keep service enabled with equivalent regex config.
+
 ## Git Commit Policy (GPG Signed)
 
 - When user asks to commit, always create a GPG-signed commit.

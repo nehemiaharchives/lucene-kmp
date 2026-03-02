@@ -3397,7 +3397,8 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                         val sortedSet: SortedSetDocValues? = r.getSortedSetDocValues("dvSortedSet")
                         val sortedNumeric: SortedNumericDocValues? = r.getSortedNumericDocValues("dvSortedNumeric")
                         for (j in 0..<r.maxDoc()) {
-                            val binaryValue: BytesRef? = storedFields.document(j).getBinaryValue("storedBin")
+                            val storedDoc = storedFields.document(j)
+                            val binaryValue: BytesRef? = storedDoc.getBinaryValue("storedBin")
                             if (binaryValue != null) {
                                 if (binaries != null) {
                                     val sortedNonNull = assertNotNull(sorted)
@@ -3410,7 +3411,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                 }
                             }
 
-                            val number: String? = storedFields.document(j).get("storedNum")
+                            val number: String? = storedDoc.get("storedNum")
                             if (number != null) {
                                 if (numerics != null) {
                                     assertEquals(j.toLong(), numerics.advance(j).toLong())
@@ -3418,7 +3419,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                 }
                             }
 
-                            val values: Array<String?> = storedFields.document(j).getValues("storedSortedSet")
+                            val values: Array<String?> = storedDoc.getValues("storedSortedSet")
                             if (values.isNotEmpty()) {
                                 assertNotNull(sortedSet)
                                 assertEquals(j.toLong(), sortedSet.nextDoc().toLong())
@@ -3429,7 +3430,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
                                     assertEquals(s, value.utf8ToString())
                                 }
                             }
-                            val numValues: Array<String?> = storedFields.document(j).getValues("storedSortedNumeric")
+                            val numValues: Array<String?> = storedDoc.getValues("storedSortedNumeric")
                             if (numValues.isNotEmpty()) {
                                 assertNotNull(sortedNumeric)
                                 assertEquals(j.toLong(), sortedNumeric.nextDoc().toLong())

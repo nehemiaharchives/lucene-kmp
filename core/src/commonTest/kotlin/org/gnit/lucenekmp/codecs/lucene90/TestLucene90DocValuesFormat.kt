@@ -51,6 +51,7 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.CollectionUtil
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.test.Test
@@ -62,6 +63,11 @@ import kotlin.test.assertTrue
 
 /** Tests Lucene90DocValuesFormat  */
 open class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
+
+    init {
+        configureTestLogging()
+    }
+
     private val logger = KotlinLogging.logger {}
     override val codec: Codec = TestUtil.getDefaultCodec()
 
