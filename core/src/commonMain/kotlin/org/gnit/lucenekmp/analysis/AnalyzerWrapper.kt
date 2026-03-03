@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
 import org.gnit.lucenekmp.jdkport.Reader
+import org.gnit.lucenekmp.util.AttributeFactory
 
 /**
  * Extension to [Analyzer] suitable for Analyzers which wrap other Analyzers.
@@ -28,7 +29,12 @@ abstract class AnalyzerWrapper
  * instantiating this subclass: `super(delegate.getReuseStrategy());`.
  *
  * If you choose different analyzers per field, use `PER_FIELD_REUSE_STRATEGY`.
- */ protected constructor(reuseStrategy: ReuseStrategy) : Analyzer(UnwrappingReuseStrategy(reuseStrategy)) {
+ */ protected constructor(reuseStrategy: ReuseStrategy) : Analyzer(
+    if (reuseStrategy is DelegatingAnalyzerWrapper.DelegatingReuseStrategy)
+        reuseStrategy
+    else
+        UnwrappingReuseStrategy(reuseStrategy)
+) {
 
     /**
      * Retrieves the wrapped Analyzer appropriate for analyzing the field with the given name
@@ -116,6 +122,10 @@ abstract class AnalyzerWrapper
             fieldName,
             wrapReaderForNormalization(fieldName ?: "", reader)
         )
+    }
+
+    protected final override fun attributeFactory(fieldName: String?): AttributeFactory {
+        return getWrappedAnalyzer(fieldName ?: "").attributeFactoryInternal(fieldName)
     }
 
     /**

@@ -150,7 +150,7 @@ open class AttributeSource {
      */
     fun addAttributeImpl(att: AttributeImpl) {
         val clazz: KClass<out AttributeImpl> = att::class
-        if (attributeImpls.containsKey(clazz)) return
+        val impl = attributeImpls[clazz] ?: att
 
         // add all interfaces of this AttributeImpl to the maps
         for (curInterface in getAttributeInterfaces(clazz)) {
@@ -158,9 +158,11 @@ open class AttributeSource {
             if (!attributes.containsKey(curInterface)) {
                 // invalidate state to force recomputation in captureState()
                 currentState[0] = null
-                attributes[curInterface] = att
-                attributeImpls[clazz] = att
+                attributes[curInterface] = impl
             }
+        }
+        if (!attributeImpls.containsKey(clazz)) {
+            attributeImpls[clazz] = impl
         }
     }
 
@@ -177,7 +179,8 @@ open class AttributeSource {
                         + attClass.getName()
                         + " does not fulfil this contract.")
             }*/
-            addAttributeImpl(factory.createAttributeInstance(attClass).also { attImpl = it })
+            addAttributeImpl(factory.createAttributeInstance(attClass))
+            attImpl = attributes[attClass]
         }
         return attClass.cast(attImpl)
     }

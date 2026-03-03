@@ -273,7 +273,7 @@ abstract class Analyzer
      * Return the [AttributeFactory] to be used for [analysis][.tokenStream] and [ ][.normalize] on the given `FieldName`. The default
      * implementation returns [TokenStream.DEFAULT_TOKEN_ATTRIBUTE_FACTORY].
      */
-    protected fun attributeFactory(fieldName: String?): AttributeFactory {
+    protected open fun attributeFactory(fieldName: String?): AttributeFactory {
         return TokenStream.DEFAULT_TOKEN_ATTRIBUTE_FACTORY
     }
 
