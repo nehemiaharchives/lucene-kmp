@@ -86,12 +86,20 @@ abstract class Analyzer
      */
     protected abstract fun createComponents(fieldName: String): TokenStreamComponents
 
+    internal fun createComponentsInternal(fieldName: String): TokenStreamComponents {
+        return createComponents(fieldName)
+    }
+
     /**
      * Wrap the given [TokenStream] in order to apply normalization filters. The default
      * implementation returns the [TokenStream] as-is. This is used by [.normalize].
      */
     protected open fun normalize(fieldName: String, `in`: TokenStream): TokenStream {
         return `in`
+    }
+
+    internal fun normalizeInternal(fieldName: String, `in`: TokenStream): TokenStream {
+        return normalize(fieldName, `in`)
     }
 
     /**
@@ -245,6 +253,10 @@ abstract class Analyzer
         return reader
     }
 
+    internal fun initReaderInternal(fieldName: String, reader: Reader): Reader {
+        return initReader(fieldName, reader)
+    }
+
     /**
      * Wrap the given [Reader] with [CharFilter]s that make sense for normalization. This
      * is typically a subset of the [CharFilter]s that are applied in [.initReader]. This is used by [.normalize].
@@ -253,12 +265,20 @@ abstract class Analyzer
         return reader
     }
 
+    internal fun initReaderForNormalizationInternal(fieldName: String?, reader: Reader): Reader {
+        return initReaderForNormalization(fieldName, reader)
+    }
+
     /**
      * Return the [AttributeFactory] to be used for [analysis][.tokenStream] and [ ][.normalize] on the given `FieldName`. The default
      * implementation returns [TokenStream.DEFAULT_TOKEN_ATTRIBUTE_FACTORY].
      */
     protected fun attributeFactory(fieldName: String?): AttributeFactory {
         return TokenStream.DEFAULT_TOKEN_ATTRIBUTE_FACTORY
+    }
+
+    internal fun attributeFactoryInternal(fieldName: String?): AttributeFactory {
+        return attributeFactory(fieldName)
     }
 
     /**
@@ -300,7 +320,7 @@ abstract class Analyzer
      * This class encapsulates the outer components of a token stream. It provides access to the
      * source (a [Reader] [Consumer] and the outer end (sink), an instance of [ ] which also serves as the [TokenStream] returned by [ ][Analyzer.tokenStream].
      */
-    class TokenStreamComponents(source: Consumer<Reader>, result: TokenStream) {
+    open class TokenStreamComponents(source: Consumer<Reader>, result: TokenStream) {
         /** Original source of the tokens.  */
         private val source: Consumer<Reader> = source
 
