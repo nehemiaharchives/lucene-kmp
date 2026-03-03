@@ -41,6 +41,14 @@ class MathTest {
     }
 
     @Test
+    fun testMultiplyExactLong() {
+        assertEquals(6L, Math.multiplyExact(2L, 3L))
+        assertEquals(0L, Math.multiplyExact(0L, 100L))
+        assertFailsWith<ArithmeticException> { Math.multiplyExact(Long.MAX_VALUE, 2L) }
+        assertFailsWith<ArithmeticException> { Math.multiplyExact(Long.MIN_VALUE, 2L) }
+    }
+
+    @Test
     fun testRound() {
         assertEquals(3, Math.round(2.5f))
         assertEquals(1, Math.round(0.5f))
@@ -51,6 +59,16 @@ class MathTest {
         assertEquals(Int.MAX_VALUE, Math.round(Float.POSITIVE_INFINITY))
         assertEquals(Int.MIN_VALUE, Math.round(Float.NEGATIVE_INFINITY))
         assertEquals(0, Math.round(Float.NaN))
+    }
+
+    @Test
+    fun testRoundDouble() {
+        assertEquals(3L, Math.round(2.5))
+        assertEquals(1L, Math.round(0.5))
+        assertEquals(-2L, Math.round(-2.5))
+        assertEquals(Long.MAX_VALUE, Math.round(Double.POSITIVE_INFINITY))
+        assertEquals(Long.MIN_VALUE, Math.round(Double.NEGATIVE_INFINITY))
+        assertEquals(0L, Math.round(Double.NaN))
     }
 
     @Test
@@ -81,6 +99,46 @@ class MathTest {
         assertEquals(Float.NaN, Math.nextDown(Float.NaN))
         assertEquals(-Float.MIN_VALUE, Math.nextDown(0.0f))
         assertEquals(-Float.MIN_VALUE, Math.nextDown(-0.0f))
+    }
+
+    @Test
+    fun testNextUpDouble() {
+        val d = 1.0
+        val next = Math.nextUp(d)
+        assertTrue(next > d)
+        assertEquals(Double.POSITIVE_INFINITY, Math.nextUp(Double.POSITIVE_INFINITY))
+        assertEquals(Double.NaN, Math.nextUp(Double.NaN))
+        assertEquals(Double.MIN_VALUE, Math.nextUp(0.0))
+        assertEquals(Double.MIN_VALUE, Math.nextUp(-0.0))
+    }
+
+    @Test
+    fun testNextDownDouble() {
+        val d = 1.0
+        val next = Math.nextDown(d)
+        assertTrue(next < d)
+        assertEquals(Double.NEGATIVE_INFINITY, Math.nextDown(Double.NEGATIVE_INFINITY))
+        assertEquals(Double.NaN, Math.nextDown(Double.NaN))
+        assertEquals(-Double.MIN_VALUE, Math.nextDown(0.0))
+        assertEquals(-Double.MIN_VALUE, Math.nextDown(-0.0))
+    }
+
+    @Test
+    fun testNextAfterDouble() {
+        assertEquals(0.0, Math.nextAfter(0.0, 0.0))
+        assertTrue(Math.nextAfter(1.0, 2.0) > 1.0)
+        assertTrue(Math.nextAfter(1.0, 0.0) < 1.0)
+        assertEquals(-Double.MIN_VALUE, Math.nextAfter(0.0, -1.0))
+        assertEquals(Double.NaN, Math.nextAfter(Double.NaN, 1.0))
+    }
+
+    @Test
+    fun testNextAfterFloat() {
+        assertEquals(0.0f, Math.nextAfter(0.0f, 0.0))
+        assertTrue(Math.nextAfter(1.0f, 2.0) > 1.0f)
+        assertTrue(Math.nextAfter(1.0f, 0.0) < 1.0f)
+        assertEquals(-Float.MIN_VALUE, Math.nextAfter(0.0f, -1.0))
+        assertEquals(Float.NaN, Math.nextAfter(Float.NaN, 1.0))
     }
 
     @Test
@@ -121,4 +179,36 @@ class MathTest {
         assertEquals(45.0, Math.toDegrees(Math.PI / 4), 1e-12)
     }
 
+    @Test
+    fun testCeilDiv() {
+        assertEquals(4, Math.ceilDiv(10, 3))
+        assertEquals(-3, Math.ceilDiv(-10, 3))
+        assertEquals(-3, Math.ceilDiv(10, -3))
+        assertEquals(4, Math.ceilDiv(-10, -3))
+    }
+
+    @Test
+    fun testUlp() {
+        assertEquals(Float.MIN_VALUE, Math.ulp(0.0f))
+        assertEquals(Float.MIN_VALUE, Math.ulp(-0.0f))
+        assertEquals(Float.POSITIVE_INFINITY, Math.ulp(Float.POSITIVE_INFINITY))
+        assertEquals(Float.NaN, Math.ulp(Float.NaN))
+    }
+
+    @Test
+    fun testGetExponentFloat() {
+        assertEquals(0, Math.getExponent(1.0f))
+        assertEquals(1, Math.getExponent(2.0f))
+        assertEquals(-1, Math.getExponent(0.5f))
+        assertEquals(Float.MAX_EXPONENT + 1, Math.getExponent(Float.POSITIVE_INFINITY))
+        assertEquals(Float.MAX_EXPONENT + 1, Math.getExponent(Float.NaN))
+        assertEquals(Float.MIN_EXPONENT - 1, Math.getExponent(0.0f))
+    }
+
+    @Test
+    fun testPowerOfTwoF() {
+        assertEquals(1.0f, Math.powerOfTwoF(0))
+        assertEquals(2.0f, Math.powerOfTwoF(1))
+        assertEquals(0.5f, Math.powerOfTwoF(-1))
+    }
 }
