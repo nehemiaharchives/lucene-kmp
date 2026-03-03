@@ -62,9 +62,9 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1124 | 82% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1132 | 82% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
-|   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 22 | 84% | [ ] |
+|   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 25 | 96% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 25 | 21 | 84% | [ ] |
 |   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 41 | 40 | 97% | [ ] |
@@ -90,8 +90,8 @@
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 33 | 68% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 48 | 94% | [ ] |
-|     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 16 | 55% | [ ] |
-|       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 0 | 0% | [ ] |
+|     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 19 | 65% | [ ] |
+|       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 2 | 66% | [ ] |
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 9 | 90% | [ ] |
 |       org.apache.lucene.tests.codecs.blockterms |           org.gnit.lucenekmp.tests.codecs.blockterms | 4 | 1 | 25% | [ ] |
@@ -131,8 +131,8 @@
 | Subpackage | Count | Ported | % |
 | --- | --- | --- | --- |
 | org.apache.lucene | 6 | 0 | 0% |
-|   org.apache.lucene.analysis | 15 | 7 | 46% |
-|     org.apache.lucene.analysis.standard | 2 | 1 | 50% |
+|   org.apache.lucene.analysis | 15 | 15 | 100% |
+|     org.apache.lucene.analysis.standard | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.tokenattributes | 4 | 4 | 100% |
 |   org.apache.lucene.codecs | 4 | 3 | 75% |
 |     org.apache.lucene.codecs.compressing | 5 | 5 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 673 | 322 | 47% |
+| Total | 673 | 331 | 49% |
 
 
 ## Tests To Port
@@ -176,15 +176,6 @@
 | [org.apache.lucene.TestExternalCodecs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestExternalCodecs.java) | org.gnit.lucenekmp.TestExternalCodecs |
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
-| [org.apache.lucene.analysis.TestAnalysisSPILoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAnalysisSPILoader.java) | org.gnit.lucenekmp.analysis.TestAnalysisSPILoader |
-| [org.apache.lucene.analysis.TestAnalyzerWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAnalyzerWrapper.java) | org.gnit.lucenekmp.analysis.TestAnalyzerWrapper |
-| [org.apache.lucene.analysis.TestAutomatonToTokenStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestAutomatonToTokenStream.java) | org.gnit.lucenekmp.analysis.TestAutomatonToTokenStream |
-| [org.apache.lucene.analysis.TestCachingTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestCachingTokenFilter.java) | org.gnit.lucenekmp.analysis.TestCachingTokenFilter |
-| [org.apache.lucene.analysis.TestDelegatingAnalyzerWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestDelegatingAnalyzerWrapper.java) | org.gnit.lucenekmp.analysis.TestDelegatingAnalyzerWrapper |
-| [org.apache.lucene.analysis.TestGraphTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestGraphTokenFilter.java) | org.gnit.lucenekmp.analysis.TestGraphTokenFilter |
-| [org.apache.lucene.analysis.TestGraphTokenizers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestGraphTokenizers.java) | org.gnit.lucenekmp.analysis.TestGraphTokenizers |
-| [org.apache.lucene.analysis.TestWordlistLoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/TestWordlistLoader.java) | org.gnit.lucenekmp.analysis.TestWordlistLoader |
-| [org.apache.lucene.analysis.standard.TestStandardFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/analysis/standard/TestStandardFactories.java) | org.gnit.lucenekmp.analysis.standard.TestStandardFactories |
 | [org.apache.lucene.codecs.TestCodecLoadingDeadlock](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecLoadingDeadlock.java) | org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock |
 | [org.apache.lucene.index.Test2BBinaryDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BBinaryDocValues.java) | org.gnit.lucenekmp.index.Test2BBinaryDocValues |
 | [org.apache.lucene.index.Test2BDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test2BDocs.java) | org.gnit.lucenekmp.index.Test2BDocs |

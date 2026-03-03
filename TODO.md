@@ -108,8 +108,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
 
 ## Depth 3
-- org.apache.lucene.analysis.AutomatonToTokenStream → org.gnit.lucenekmp.analysis.AutomatonToTokenStream
-- org.apache.lucene.analysis.DelegatingAnalyzerWrapper → org.gnit.lucenekmp.analysis.DelegatingAnalyzerWrapper
 - org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat
 - org.apache.lucene.codecs.memory.DirectPostingsFormat → org.gnit.lucenekmp.codecs.memory.DirectPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockEncoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockEncoder
@@ -247,7 +245,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.SeededKnnVectorQuery → org.gnit.lucenekmp.search.SeededKnnVectorQuery
 - org.apache.lucene.search.similarities.RawTFSimilarity → org.gnit.lucenekmp.search.similarities.RawTFSimilarity
 - org.apache.lucene.tests.analysis.MockPayloadFilter → org.gnit.lucenekmp.tests.analysis.MockPayloadFilter
-- org.apache.lucene.tests.analysis.MockUTF16TermAttributeImpl → org.gnit.lucenekmp.tests.analysis.MockUTF16TermAttributeImpl
 - org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec → org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec
 - org.apache.lucene.tests.codecs.cranky.CrankyCompoundFormat → org.gnit.lucenekmp.tests.codecs.cranky.CrankyCompoundFormat
 - org.apache.lucene.tests.codecs.cranky.CrankyFieldInfosFormat → org.gnit.lucenekmp.tests.codecs.cranky.CrankyFieldInfosFormat
@@ -292,8 +289,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.WeakIdentityMap → org.gnit.lucenekmp.util.WeakIdentityMap
 
 ## Depth 2
-- org.apache.lucene.analysis.GraphTokenFilter → org.gnit.lucenekmp.analysis.GraphTokenFilter
-- org.apache.lucene.analysis.standard.SpoonFeedMaxCharsReaderWrapper → org.gnit.lucenekmp.analysis.standard.SpoonFeedMaxCharsReaderWrapper
 - org.apache.lucene.codecs.memory.FSTPostingsFormat → org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockDecoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockDecoder
 - org.apache.lucene.codecs.uniformsplit.BlockHeader → org.gnit.lucenekmp.codecs.uniformsplit.BlockHeader
@@ -425,13 +420,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.LockStressTest → org.gnit.lucenekmp.store.LockStressTest
 - org.apache.lucene.tests.analysis.CannedBinaryTokenStream → org.gnit.lucenekmp.tests.analysis.CannedBinaryTokenStream
 - org.apache.lucene.tests.analysis.CrankyTokenFilter → org.gnit.lucenekmp.tests.analysis.CrankyTokenFilter
-- org.apache.lucene.tests.analysis.MockBytesAnalyzer → org.gnit.lucenekmp.tests.analysis.MockBytesAnalyzer
-- org.apache.lucene.tests.analysis.MockHoleInjectingTokenFilter → org.gnit.lucenekmp.tests.analysis.MockHoleInjectingTokenFilter
 - org.apache.lucene.tests.analysis.MockPayloadAnalyzer → org.gnit.lucenekmp.tests.analysis.MockPayloadAnalyzer
 - org.apache.lucene.tests.analysis.MockRandomLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.MockRandomLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.MockSynonymAnalyzer → org.gnit.lucenekmp.tests.analysis.MockSynonymAnalyzer
-- org.apache.lucene.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1 → org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1
-- org.apache.lucene.tests.analysis.standard.WordBreakTestUnicode_12_1_0 → org.gnit.lucenekmp.tests.analysis.standard.WordBreakTestUnicode_12_1_0
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
 - org.apache.lucene.tests.codecs.cranky.CrankyCodec → org.gnit.lucenekmp.tests.codecs.cranky.CrankyCodec
@@ -485,15 +476,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.TestExternalCodecs → org.gnit.lucenekmp.TestExternalCodecs
 - org.apache.lucene.TestMergeSchedulerExternal → org.gnit.lucenekmp.TestMergeSchedulerExternal
 - org.apache.lucene.TestSearchForDuplicates → org.gnit.lucenekmp.TestSearchForDuplicates
-- org.apache.lucene.analysis.TestAnalysisSPILoader → org.gnit.lucenekmp.analysis.TestAnalysisSPILoader
-- org.apache.lucene.analysis.TestAnalyzerWrapper → org.gnit.lucenekmp.analysis.TestAnalyzerWrapper
-- org.apache.lucene.analysis.TestAutomatonToTokenStream → org.gnit.lucenekmp.analysis.TestAutomatonToTokenStream
-- org.apache.lucene.analysis.TestCachingTokenFilter → org.gnit.lucenekmp.analysis.TestCachingTokenFilter
-- org.apache.lucene.analysis.TestDelegatingAnalyzerWrapper → org.gnit.lucenekmp.analysis.TestDelegatingAnalyzerWrapper
-- org.apache.lucene.analysis.TestGraphTokenFilter → org.gnit.lucenekmp.analysis.TestGraphTokenFilter
-- org.apache.lucene.analysis.TestGraphTokenizers → org.gnit.lucenekmp.analysis.TestGraphTokenizers
-- org.apache.lucene.analysis.TestWordlistLoader → org.gnit.lucenekmp.analysis.TestWordlistLoader
-- org.apache.lucene.analysis.standard.TestStandardFactories → org.gnit.lucenekmp.analysis.standard.TestStandardFactories
 - org.apache.lucene.codecs.TestCodecLoadingDeadlock → org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock
 - org.apache.lucene.codecs.bitvectors.TestHnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.TestHnswBitVectorsFormat
 - org.apache.lucene.codecs.blockterms.TestFixedGapPostingsFormat → org.gnit.lucenekmp.codecs.blockterms.TestFixedGapPostingsFormat
