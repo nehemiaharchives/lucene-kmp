@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.store.RateLimiter.SimpleRateLimiter
@@ -24,13 +25,11 @@ class TestRateLimiter : LuceneTestCase() {
 
     // LUCENE-6075
     @Test
-    fun testOverflowInt() {
-        runBlocking {
-            expectThrows(ThreadInterruptedException::class) {
-                runBlocking {
-                    withTimeout(10) {
-                        SimpleRateLimiter(1.0).pause((1.5 * Int.MAX_VALUE * 1024 * 1024 / 1000).toLong())
-                    }
+    fun testOverflowInt() = runTest {
+        expectThrows(ThreadInterruptedException::class) {
+            runBlocking {
+                withTimeout(10) {
+                    SimpleRateLimiter(1.0).pause((1.5 * Int.MAX_VALUE * 1024 * 1024 / 1000).toLong())
                 }
             }
         }
@@ -38,7 +37,7 @@ class TestRateLimiter : LuceneTestCase() {
 
     @OptIn(ExperimentalAtomicApi::class)
     @Test
-    fun testThreads() = runBlocking {
+    fun testThreads() = runTest {
         val targetMBPerSec = 10.0 + 20 * random().nextDouble()
         val limiter = SimpleRateLimiter(targetMBPerSec)
 
