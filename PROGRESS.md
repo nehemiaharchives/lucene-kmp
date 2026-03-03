@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1132 | 82% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1146 | 83% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 25 | 96% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -88,7 +88,7 @@
 |   org.apache.lucene.search |       org.gnit.lucenekmp.search | 197 | 166 | 84% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 9 | 8 | 88% | [ ] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
-|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 33 | 68% | [ ] |
+|     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 47 | 97% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 48 | 94% | [ ] |
 |     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 19 | 65% | [ ] |
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 2 | 66% | [ ] |
@@ -152,9 +152,9 @@
 |     org.apache.lucene.internal.tests | 1 | 1 | 100% |
 |     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
 |   org.apache.lucene.search | 149 | 10 | 6% |
-|     org.apache.lucene.search.knn | 1 | 0 | 0% |
-|     org.apache.lucene.search.similarities | 25 | 15 | 60% |
-|   org.apache.lucene.store | 27 | 26 | 96% |
+|     org.apache.lucene.search.knn | 1 | 1 | 100% |
+|     org.apache.lucene.search.similarities | 25 | 25 | 100% |
+|   org.apache.lucene.store | 27 | 27 | 100% |
 |   org.apache.lucene.util | 63 | 62 | 98% |
 |     org.apache.lucene.util.automaton | 15 | 15 | 100% |
 |     org.apache.lucene.util.bkd | 8 | 8 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 673 | 331 | 49% |
+| Total | 673 | 343 | 50% |
 
 
 ## Tests To Port
@@ -496,16 +496,4 @@
 | [org.apache.lucene.search.TestWildcardQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestWildcardQuery.java) | org.gnit.lucenekmp.search.TestWildcardQuery |
 | [org.apache.lucene.search.TestWildcardRandom](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestWildcardRandom.java) | org.gnit.lucenekmp.search.TestWildcardRandom |
 | [org.apache.lucene.search.TestXYPointDistanceSort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestXYPointDistanceSort.java) | org.gnit.lucenekmp.search.TestXYPointDistanceSort |
-| [org.apache.lucene.search.knn.TestMultiLeafKnnCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/knn/TestMultiLeafKnnCollector.java) | org.gnit.lucenekmp.search.knn.TestMultiLeafKnnCollector |
-| [org.apache.lucene.search.similarities.TestAxiomaticSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestAxiomaticSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestAxiomaticSimilarity |
-| [org.apache.lucene.search.similarities.TestDistributionLL](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestDistributionLL.java) | org.gnit.lucenekmp.search.similarities.TestDistributionLL |
-| [org.apache.lucene.search.similarities.TestDistributionSPL](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestDistributionSPL.java) | org.gnit.lucenekmp.search.similarities.TestDistributionSPL |
-| [org.apache.lucene.search.similarities.TestIndependenceChiSquared](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceChiSquared.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceChiSquared |
-| [org.apache.lucene.search.similarities.TestIndependenceSaturated](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceSaturated.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceSaturated |
-| [org.apache.lucene.search.similarities.TestIndependenceStandardized](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestIndependenceStandardized.java) | org.gnit.lucenekmp.search.similarities.TestIndependenceStandardized |
-| [org.apache.lucene.search.similarities.TestLMJelinekMercerSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestLMJelinekMercerSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestLMJelinekMercerSimilarity |
-| [org.apache.lucene.search.similarities.TestRawTFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestRawTFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestRawTFSimilarity |
-| [org.apache.lucene.search.similarities.TestSimilarity2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarity2.java) | org.gnit.lucenekmp.search.similarities.TestSimilarity2 |
-| [org.apache.lucene.search.similarities.TestSimilarityBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarityBase.java) | org.gnit.lucenekmp.search.similarities.TestSimilarityBase |
-| [org.apache.lucene.store.TestRateLimiter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestRateLimiter.java) | org.gnit.lucenekmp.store.TestRateLimiter |
 
