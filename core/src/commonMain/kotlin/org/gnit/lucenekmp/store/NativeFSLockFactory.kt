@@ -7,6 +7,9 @@ import org.gnit.lucenekmp.jdkport.StandardOpenOption
 import okio.IOException
 import okio.Path
 import okio.SYSTEM
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -86,7 +89,7 @@ class NativeFSLockFactory constructor(
         // used as a best-effort check, to see if the underlying file has changed
         val creationTime = Files.creationTime(realPath)
 
-        if (LOCK_HELD.add(realPath.toString())) {
+        if (markLockHeld(realPath)) {
             /*var channel: FileChannel = null*/
             /*var lock: FileLock = null*/
 
@@ -145,7 +148,8 @@ class NativeFSLockFactory constructor(
         val creationTime: Long? /*FileTime*/ //implement if needed
 
         @Volatile
-        var closed: Boolean = false
+        private var closed: Boolean = false
+        private val closeMutex = Mutex()
 
         init {
             /*this.lock = lock
@@ -162,7 +166,7 @@ class NativeFSLockFactory constructor(
                 throw AlreadyClosedException("Lock instance already released: $this")
             }
             // check we are still in the locks map (some debugger or something crazy didn't remove us)
-            if (!LOCK_HELD.contains(path.toString())) {
+            if (!isLockHeld(path)) {
                 throw AlreadyClosedException("Lock path unexpectedly cleared from map: $this")
             }
             // check our lock wasn't invalidated.
@@ -189,7 +193,17 @@ class NativeFSLockFactory constructor(
         }
 
         override fun close() {
-            if (closed) {
+            val shouldClose = runBlocking {
+                closeMutex.withLock {
+                    if (closed) {
+                        false
+                    } else {
+                        closed = true
+                        true
+                    }
+                }
+            }
+            if (!shouldClose) {
                 return
             }
             // NOTE: we don't validate, as unlike SimpleFSLockFactory, we can't break others locks
@@ -205,7 +219,6 @@ class NativeFSLockFactory constructor(
                 fs.delete(path) // delete the lock file
 
             } finally {
-                closed = true
                 clearLockHeld(path)
             }
         }
@@ -221,10 +234,31 @@ class NativeFSLockFactory constructor(
 
         private val LOCK_HELD: MutableSet<String> =
             mutableSetOf() /*java.util.Collections.synchronizedSet<String>(HashSet<String>())*/
+        private val lockHeldMutex = Mutex()
+
+        private fun markLockHeld(path: Path): Boolean {
+            return runBlocking {
+                lockHeldMutex.withLock {
+                    LOCK_HELD.add(path.toString())
+                }
+            }
+        }
+
+        private fun isLockHeld(path: Path): Boolean {
+            return runBlocking {
+                lockHeldMutex.withLock {
+                    LOCK_HELD.contains(path.toString())
+                }
+            }
+        }
 
         @Throws(IOException::class)
         private fun clearLockHeld(path: Path) {
-            val remove = LOCK_HELD.remove(path.toString())
+            val remove = runBlocking {
+                lockHeldMutex.withLock {
+                    LOCK_HELD.remove(path.toString())
+                }
+            }
             if (remove == false) {
                 throw AlreadyClosedException("Lock path was cleared but never marked as held: $path")
             }
