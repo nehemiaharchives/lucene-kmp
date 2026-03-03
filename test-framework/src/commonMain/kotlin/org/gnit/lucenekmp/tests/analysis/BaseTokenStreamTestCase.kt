@@ -1421,10 +1421,22 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
                     if (useCharFilter) MockCharFilter(reader, remainder) else reader
                 )
             val termAtt: CharTermAttribute = ts.getAttribute(CharTermAttribute::class)!!
-            val offsetAtt: OffsetAttribute = ts.getAttribute(OffsetAttribute::class)!!
-            val posIncAtt: PositionIncrementAttribute = ts.getAttribute(PositionIncrementAttribute::class)!!
-            val posLengthAtt: PositionLengthAttribute = ts.getAttribute(PositionLengthAttribute::class)!!
-            val typeAtt: TypeAttribute = ts.getAttribute(TypeAttribute::class)!!
+            val offsetAtt: OffsetAttribute? =
+                if (ts.hasAttribute(OffsetAttribute::class)) ts.getAttribute(OffsetAttribute::class) else null
+            val posIncAtt: PositionIncrementAttribute? =
+                if (ts.hasAttribute(PositionIncrementAttribute::class)) {
+                    ts.getAttribute(PositionIncrementAttribute::class)
+                } else {
+                    null
+                }
+            val posLengthAtt: PositionLengthAttribute? =
+                if (ts.hasAttribute(PositionLengthAttribute::class)) {
+                    ts.getAttribute(PositionLengthAttribute::class)
+                } else {
+                    null
+                }
+            val typeAtt: TypeAttribute? =
+                if (ts.hasAttribute(TypeAttribute::class)) ts.getAttribute(TypeAttribute::class) else null
             val tokens: MutableList<String> = mutableListOf()
             val types: MutableList<String> = mutableListOf()
             val positions: MutableList<Int> = mutableListOf()
