@@ -309,6 +309,31 @@ object Math {
         }
     }
 
+    fun nextDown(d: Double): Double {
+        return if (Double.isNaN(d) || d == Double.NEGATIVE_INFINITY) {
+            d
+        } else {
+            if (d == 0.0) {
+                -Double.MIN_VALUE
+            } else {
+                Double.longBitsToDouble(
+                    Double.doubleToRawLongBits(d) + if (d > 0.0) -1L else +1L
+                )
+            }
+        }
+    }
+
+    fun nextUp(d: Double): Double {
+        // Use a single conditional and handle the likely cases first.
+        return if (d < Double.POSITIVE_INFINITY) {
+            // Add +0.0 to get rid of a -0.0 (+0.0 + -0.0 => +0.0).
+            val transducer = Double.doubleToRawLongBits(d + 0.0)
+            Double.longBitsToDouble(transducer + if (transducer >= 0L) 1L else -1L)
+        } else { // d is NaN or +Infinity
+            d
+        }
+    }
+
 
     /**
      * Returns the floating-point number adjacent to the first
