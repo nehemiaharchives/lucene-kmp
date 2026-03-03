@@ -16,16 +16,11 @@ import kotlin.test.Test
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.IntsRef
 import org.gnit.lucenekmp.jdkport.Character
-import org.gnit.lucenekmp.util.configureTestLogging
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlin.time.TimeSource
 
 class TestNFARunAutomaton : LuceneTestCase() {
-    private val logger = KotlinLogging.logger {}
-
     private companion object {
         const val FIELD = "field"
     }
@@ -112,22 +107,8 @@ class TestNFARunAutomaton : LuceneTestCase() {
     @Test
     @Throws(IOException::class)
     fun testRandomAutomatonQuery() {
-        configureTestLogging()
-        val testStart = TimeSource.Monotonic.markNow()
-        logger.debug { "NFAQueryTiming phase=start" }
-        Operations.resetOpsTiming()
-        Operations.setOpsTimingEnabled(false)
-        val slowStepThresholdMs = 500L
-
         val docNum = 1 // TODO reduced from 50 to 1 for dev speed
         val automatonNum = 50
-        var unionAutomatonElapsed = 0L
-        var unionInitElapsed = 0L
-        var unionMergeElapsed = 0L
-        var determinizeElapsed = 0L
-        var constructQueriesElapsed = 0L
-        var dfaCountElapsed = 0L
-        var nfaCountElapsed = 0L
         val directory: Directory = newDirectory()
         val writer = RandomIndexWriter(random(), directory)
 
@@ -163,13 +144,16 @@ class TestNFARunAutomaton : LuceneTestCase() {
 
         val vocabList = ArrayList(vocab)
         val foreignVocabList = ArrayList(foreignVocab)
+        val queryTermCandidates = LinkedHashSet<String>()
+        queryTermCandidates.addAll(vocabList)
+        queryTermCandidates.addAll(foreignVocabList)
         val perQueryVocab = hashSetOf<String>()
 
-        val queryLoopStart = TimeSource.Monotonic.markNow()
         var i = 0
         while (i < automatonNum) {
             perQueryVocab.clear()
-            val termNum = random().nextInt(40) + 30
+            val requestedTermNum = random().nextInt(40) + 30
+            val termNum = minOf(requestedTermNum, queryTermCandidates.size)
             while (perQueryVocab.size < termNum) {
                 if (random().nextBoolean()) {
                     perQueryVocab.add(vocabList[random().nextInt(vocabList.size)])
@@ -179,102 +163,36 @@ class TestNFARunAutomaton : LuceneTestCase() {
             }
 
             var a: Automaton? = null
-            var unionInitMs = 0L
-            var unionMergeMs = 0L
-            val unionStart = TimeSource.Monotonic.markNow()
             for (term in perQueryVocab) {
                 if (a == null) {
-                    val initStart = TimeSource.Monotonic.markNow()
                     a = Automata.makeString(term)
-                    unionInitMs += initStart.elapsedNow().inWholeMilliseconds
                 } else {
-                    val mergeStart = TimeSource.Monotonic.markNow()
                     a = Operations.union(listOf(a, Automata.makeString(term)))
-                    unionMergeMs += mergeStart.elapsedNow().inWholeMilliseconds
                 }
             }
-            val unionMs = unionStart.elapsedNow().inWholeMilliseconds
-            if (unionMs >= slowStepThresholdMs) {
-                logger.debug {
-                    "NFAQuerySlow phase=union query_idx=$i terms=${perQueryVocab.size} elapsed_ms=$unionMs"
-                }
-            }
-            unionAutomatonElapsed += unionMs
-            unionInitElapsed += unionInitMs
-            unionMergeElapsed += unionMergeMs
             requireNotNull(a)
             if (a.isDeterministic) {
                 i++
                 continue
             }
-            val determinizeStart = TimeSource.Monotonic.markNow()
             val deterministicAutomaton = Operations.determinize(a, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
-            val determinizeMs = determinizeStart.elapsedNow().inWholeMilliseconds
-            if (determinizeMs >= slowStepThresholdMs) {
-                logger.debug {
-                    "NFAQuerySlow phase=determinize query_idx=$i terms=${perQueryVocab.size} elapsed_ms=$determinizeMs"
-                }
-            }
-            determinizeElapsed += determinizeMs
-            val constructQueriesStart = TimeSource.Monotonic.markNow()
             val dfaQuery = AutomatonQuery(Term(FIELD), deterministicAutomaton)
             val nfaQuery = object : AutomatonQuery(Term(FIELD), a) {
                 fun nfaRunAutomaton() = compiled.nfaRunAutomaton
             }
-            val constructQueriesMs = constructQueriesStart.elapsedNow().inWholeMilliseconds
-            if (constructQueriesMs >= slowStepThresholdMs) {
-                logger.debug {
-                    "NFAQuerySlow phase=construct_queries query_idx=$i terms=${perQueryVocab.size} elapsed_ms=$constructQueriesMs"
-                }
-            }
-            constructQueriesElapsed += constructQueriesMs
             assertNotNull(nfaQuery.nfaRunAutomaton())
 
-            val dfaCountStart = TimeSource.Monotonic.markNow()
             val dfaCount = searcher.count(dfaQuery)
-            val dfaCountMs = dfaCountStart.elapsedNow().inWholeMilliseconds
-            if (dfaCountMs >= slowStepThresholdMs) {
-                logger.debug {
-                    "NFAQuerySlow phase=dfa_count query_idx=$i terms=${perQueryVocab.size} elapsed_ms=$dfaCountMs"
-                }
-            }
-            dfaCountElapsed += dfaCountMs
 
-            val nfaCountStart = TimeSource.Monotonic.markNow()
             val nfaCount = searcher.count(nfaQuery)
-            val nfaCountMs = nfaCountStart.elapsedNow().inWholeMilliseconds
-            if (nfaCountMs >= slowStepThresholdMs) {
-                logger.debug {
-                    "NFAQuerySlow phase=nfa_count query_idx=$i terms=${perQueryVocab.size} elapsed_ms=$nfaCountMs"
-                }
-            }
-            nfaCountElapsed += nfaCountMs
 
             assertEquals(dfaCount, nfaCount)
             i++
-        }
-        logger.debug {
-            "NFAQueryTiming phase=query_loop_done elapsed_ms=${queryLoopStart.elapsedNow().inWholeMilliseconds} " +
-                "queries=$automatonNum docs=$docNum"
         }
 
         reader.close()
         writer.close()
         directory.close()
-        val opsTiming = Operations.snapshotOpsTiming()
-        logger.debug {
-            "NFAQueryTiming phase=summary total_elapsed_ms=${testStart.elapsedNow().inWholeMilliseconds} " +
-                "determinize_ms=$determinizeElapsed " +
-                "construct_queries_ms=$constructQueriesElapsed dfa_count_ms=$dfaCountElapsed " +
-                "nfa_count_ms=$nfaCountElapsed"
-        }
-        logger.debug {
-            "NFAOpsTiming phase=summary to_accept_reverse_finish_ns=${opsTiming.getLiveStatesToAcceptReverseFinishNs} " +
-                "reverse_builder_finish_total_ns=${opsTiming.reverseBuilderFinishTotalNs} " +
-                "reverse_builder_finish_sort_ns=${opsTiming.reverseBuilderFinishSortTransitionsNs} " +
-                "reverse_builder_finish_emit_transitions_ns=${opsTiming.reverseBuilderFinishEmitTransitionsNs} " +
-                "reverse_builder_finish_finish_state_ns=${opsTiming.reverseBuilderFinishFinishStateNs}"
-        }
     }
 
     private fun testAcceptedString(
