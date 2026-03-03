@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.store
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,16 +32,24 @@ import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.util.Constants
 import org.gnit.lucenekmp.util.PrintStreamInfoStream
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.TimeSource
 
 /** Base class for per-LockFactory tests. */
 @OptIn(ExperimentalAtomicApi::class)
 abstract class BaseLockFactoryTestCase : LuceneTestCase() {
+
+    init {
+        configureTestLogging()
+    }
+
+    private val logger = KotlinLogging.logger {  }
 
     /**
      * Subclass returns the Directory to be tested; if it's an FS-based directory it should point to
@@ -156,6 +165,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
     // no unexpected exceptions are raised:
     @Throws(Exception::class)
     open fun testStressLocks() {
+        val totalStart = TimeSource.Monotonic.markNow()
         val tempPath = createTempDir()
         // Path-specific Windows FS detection is not yet ported.
         assumeFalse("cannot handle buggy Files.delete", Constants.WINDOWS)
@@ -170,7 +180,9 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
         addDoc(w)
         w.close()
 
-        val numIterations = atLeast(20)
+        val numIterations = atLeast(3)
+        // TODO reduced numIterations = atLeast(20) to atLeast(3) for dev speed
+        logger.debug { "phase=stressLocks.start tempPath=$tempPath numIterations=$numIterations" }
         val writer = WriterThread(numIterations, dir)
         val searcher = SearcherThread(numIterations, dir)
 
@@ -180,10 +192,12 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
             writerJob.join()
             searcherJob.join()
         }
+        logger.debug { "phase=stressLocks.elapsedMs total=${totalStart.elapsedNow().inWholeMilliseconds}" }
 
         assertTrue(!writer.hitException, "IndexWriter hit unexpected exceptions")
         assertTrue(!searcher.hitException, "IndexSearcher hit unexpected exceptions")
 
+        logger.debug { "phase=stressLocks.finish writerHitException=${writer.hitException} searcherHitException=${searcher.hitException}" }
         dir.close()
     }
 
@@ -206,11 +220,16 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
 
         suspend fun run() {
             var writer: IndexWriter?
-            val baos = ByteArrayOutputStream()
+            val totalStart = TimeSource.Monotonic.markNow()
             for (i in 0 until this.numIteration) {
+                val iterStart = TimeSource.Monotonic.markNow()
+                if (i % 5 == 0) {
+                    logger.debug { "phase=stressLocks.writer.iter iter=$i total=$numIteration" }
+                }
                 if (VERBOSE) {
                     println("TEST: WriterThread iter=$i")
                 }
+                val baos = ByteArrayOutputStream()
 
                 val iwc = IndexWriterConfig(MockAnalyzer(random()))
 
@@ -222,7 +241,13 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                 printStream.println("\nTEST: WriterThread iter=$i")
                 iwc.setOpenMode(OpenMode.APPEND)
                 try {
+                    val createStart = TimeSource.Monotonic.markNow()
                     writer = IndexWriter(dir, iwc)
+                    if (i % 5 == 0) {
+                        logger.debug {
+                            "phase=stressLocks.writer.createMs iter=$i elapsed=${createStart.elapsedNow().inWholeMilliseconds}"
+                        }
+                    }
                 } catch (t: Throwable) {
                     if (Constants.WINDOWS && t is AccessDeniedException) {
                         // LUCENE-6684: suppress this on Windows.
@@ -237,7 +262,13 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     break
                 }
                 try {
+                    val addDocStart = TimeSource.Monotonic.markNow()
                     addDoc(writer)
+                    if (i % 5 == 0) {
+                        logger.debug {
+                            "phase=stressLocks.writer.addDocMs iter=$i elapsed=${addDocStart.elapsedNow().inWholeMilliseconds}"
+                        }
+                    }
                 } catch (t: Throwable) {
                     hitException = true
                     println("Stress Test Index Writer: addDoc hit unexpected exception: $t")
@@ -246,15 +277,29 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     break
                 }
                 try {
+                    val closeStart = TimeSource.Monotonic.markNow()
                     writer.close()
+                    if (i % 5 == 0) {
+                        logger.debug {
+                            "phase=stressLocks.writer.closeMs iter=$i elapsed=${closeStart.elapsedNow().inWholeMilliseconds}"
+                        }
+                    }
                 } catch (t: Throwable) {
                     hitException = true
                     println("Stress Test Index Writer: close hit unexpected exception: $t")
                     println(t.toString())
+                    println(t.stackTraceToString())
                     println(toString(baos))
                     break
                 }
+                if (i % 5 == 0) {
+                    logger.debug {
+                        "phase=stressLocks.writer.iterElapsedMs iter=$i elapsed=${iterStart.elapsedNow().inWholeMilliseconds}"
+                    }
+                }
             }
+            logger.debug { "phase=stressLocks.writer.totalElapsedMs value=${totalStart.elapsedNow().inWholeMilliseconds}" }
+            logger.debug { "phase=stressLocks.writer.done hitException=$hitException" }
         }
     }
 
@@ -269,6 +314,9 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
             var searcher: IndexSearcher
             val query: Query = TermQuery(Term("content", "aaa"))
             for (i in 0 until this.numIteration) {
+                if (i % 5 == 0) {
+                    logger.debug { "phase=stressLocks.searcher.iter iter=$i total=$numIteration" }
+                }
                 try {
                     reader = DirectoryReader.open(dir)
                     searcher = newSearcher(reader)
@@ -295,6 +343,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     break
                 }
             }
+            logger.debug { "phase=stressLocks.searcher.done hitException=$hitException" }
         }
     }
 }

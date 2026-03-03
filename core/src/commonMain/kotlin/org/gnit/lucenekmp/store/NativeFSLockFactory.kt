@@ -1,15 +1,14 @@
 package org.gnit.lucenekmp.store
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.FileSystem
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Files
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.StandardOpenOption
 import okio.IOException
 import okio.Path
 import okio.SYSTEM
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -51,6 +50,8 @@ import kotlin.time.ExperimentalTime
 class NativeFSLockFactory constructor(
     val fs: FileSystem = FileSystem.SYSTEM
 ) : FSLockFactory() {
+    private val logger = KotlinLogging.logger {}
+
     @OptIn(ExperimentalTime::class)
     override fun obtainFSLock(
         dir: FSDirectory,
@@ -149,7 +150,7 @@ class NativeFSLockFactory constructor(
 
         @Volatile
         private var closed: Boolean = false
-        private val closeMutex = Mutex()
+        private val closeLock = ReentrantLock()
 
         init {
             /*this.lock = lock
@@ -193,15 +194,16 @@ class NativeFSLockFactory constructor(
         }
 
         override fun close() {
-            val shouldClose = runBlocking {
-                closeMutex.withLock {
-                    if (closed) {
-                        false
-                    } else {
-                        closed = true
-                        true
-                    }
+            val shouldClose: Boolean = try {
+                closeLock.lock()
+                if (closed) {
+                    false
+                } else {
+                    closed = true
+                    true
                 }
+            } finally {
+                closeLock.unlock()
             }
             if (!shouldClose) {
                 return
@@ -216,7 +218,7 @@ class NativeFSLockFactory constructor(
                     }
                 }*/
 
-                fs.delete(path) // delete the lock file
+                // Keep lock file on disk. Native lock semantics release the lock, not the file.
 
             } finally {
                 clearLockHeld(path)
@@ -231,35 +233,40 @@ class NativeFSLockFactory constructor(
     companion object {
         /** Singleton instance  */
         val INSTANCE: NativeFSLockFactory = NativeFSLockFactory()
+        private val logger = KotlinLogging.logger {}
 
         private val LOCK_HELD: MutableSet<String> =
             mutableSetOf() /*java.util.Collections.synchronizedSet<String>(HashSet<String>())*/
-        private val lockHeldMutex = Mutex()
+        private val lockHeldLock = ReentrantLock()
 
         private fun markLockHeld(path: Path): Boolean {
-            return runBlocking {
-                lockHeldMutex.withLock {
-                    LOCK_HELD.add(path.toString())
-                }
+            return try {
+                lockHeldLock.lock()
+                LOCK_HELD.add(path.toString())
+            } finally {
+                lockHeldLock.unlock()
             }
         }
 
         private fun isLockHeld(path: Path): Boolean {
-            return runBlocking {
-                lockHeldMutex.withLock {
-                    LOCK_HELD.contains(path.toString())
-                }
+            return try {
+                lockHeldLock.lock()
+                LOCK_HELD.contains(path.toString())
+            } finally {
+                lockHeldLock.unlock()
             }
         }
 
         @Throws(IOException::class)
         private fun clearLockHeld(path: Path) {
-            val remove = runBlocking {
-                lockHeldMutex.withLock {
-                    LOCK_HELD.remove(path.toString())
-                }
+            val remove = try {
+                lockHeldLock.lock()
+                LOCK_HELD.remove(path.toString())
+            } finally {
+                lockHeldLock.unlock()
             }
             if (remove == false) {
+                logger.error { "phase=nativeLock.clear.missing path=$path" }
                 throw AlreadyClosedException("Lock path was cleared but never marked as held: $path")
             }
         }

@@ -299,8 +299,8 @@ class StandardDirectoryReader internal constructor(
                             segmentFileName,
                             minSupportedMajorVersion
                         )
-                    val readers: Array<SegmentReader> =
-                        kotlin.arrayOfNulls<SegmentReader>(sis.size()) as Array<SegmentReader>
+                    val readers: Array<SegmentReader?> =
+                        kotlin.arrayOfNulls(sis.size())
                     var success = false
                     try {
                         for (i in sis.size() - 1 downTo 0) {
@@ -314,7 +314,7 @@ class StandardDirectoryReader internal constructor(
                         // This may throw CorruptIndexException if there are too many docs, so
                         // it must be inside try clause so we close readers in that case:
                         val reader: DirectoryReader =
-                            StandardDirectoryReader(directory, readers, null, sis, leafSorter,
+                            StandardDirectoryReader(directory, readers.requireNoNulls(), null, sis, leafSorter,
                                 applyAllDeletes = false,
                                 writeAllDeletes = false
                             )

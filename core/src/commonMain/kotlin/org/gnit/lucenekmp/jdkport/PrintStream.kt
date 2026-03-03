@@ -38,6 +38,7 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
 
     private var trouble = false
     private var charset: Charset
+    private val streamLock = ReentrantLock()
     /**
      * Track both the text- and character-output streams, so that their buffers
      * can be flushed without flushing the entire stream.
@@ -74,7 +75,19 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
     }
 
     open fun print(x: String?){
-        kotlin.io.print(x)
+        val s = x ?: "null"
+        streamLock.lock()
+        try {
+            ensureOpen()
+            textOut!!.write(s)
+            textOut!!.flushBuffer()
+            charOut!!.flushBuffer()
+            if (autoFlush) out!!.flush()
+        } catch (_: IOException) {
+            trouble = true
+        } finally {
+            streamLock.unlock()
+        }
     }
 
     /**
@@ -85,17 +98,7 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
      * @param x  The `String` to be printed.
      */
     open fun println(x: String?) {
-        if (this::class == PrintStream::class) {
-            writeln(x.toString())
-        } else {
-            /*synchronized(this) {
-                print(x)
-                newLine()
-            }*/
-
-            kotlin.io.print(x)
-            newLine()
-        }
+        writeln(x.toString())
     }
 
     /**
@@ -113,35 +116,37 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
     // observing a call to print followed by newLine we only use this if
     // getClass() == PrintStream.class to avoid compatibility issues.
     private fun writeln(s: String) {
+        streamLock.lock()
         try {
-            //synchronized(this) {
-                ensureOpen()
-                textOut!!.write(s)
-                textOut!!.newLine()
-                textOut!!.flushBuffer()
-                charOut!!.flushBuffer()
-                if (autoFlush) out!!.flush()
-            //}
+            ensureOpen()
+            textOut!!.write(s)
+            textOut!!.newLine()
+            textOut!!.flushBuffer()
+            charOut!!.flushBuffer()
+            if (autoFlush) out!!.flush()
         } catch (x: /*java.io.Interrupted*/IOException) {/*
             java.lang.Thread.currentThread().interrupt()
         } catch (x: java.io.IOException) {*/
             trouble = true
+        } finally {
+            streamLock.unlock()
         }
     }
 
     private fun newLine() {
+        streamLock.lock()
         try {
-            //synchronized(this) {
-                ensureOpen()
-                textOut!!.newLine()
-                textOut!!.flushBuffer()
-                charOut!!.flushBuffer()
-                if (autoFlush) out!!.flush()
-            //}
+            ensureOpen()
+            textOut!!.newLine()
+            textOut!!.flushBuffer()
+            charOut!!.flushBuffer()
+            if (autoFlush) out!!.flush()
         } catch (x: /*Interrupted*/IOException){ /*
             java.lang.Thread.currentThread().interrupt()
         } catch (x: java.io.IOException) {*/
             trouble = true
+        } finally {
+            streamLock.unlock()
         }
     }
 
@@ -160,14 +165,15 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
      * @see java.io.OutputStream.flush
      */
     override fun flush() {
-        //synchronized(this) {
-            try {
-                ensureOpen()
-                out!!.flush()
-            } catch (x: IOException) {
-                trouble = true
-            }
-        //}
+        streamLock.lock()
+        try {
+            ensureOpen()
+            out!!.flush()
+        } catch (_: IOException) {
+            trouble = true
+        } finally {
+            streamLock.unlock()
+        }
     }
 
     private var closing = false /* To avoid recursive closing */
@@ -179,19 +185,22 @@ open class PrintStream(private val autoFlush: Boolean = false, out: OutputStream
      * @see java.io.OutputStream.close
      */
     override fun close() {
-        //synchronized(this) {
+        streamLock.lock()
+        try {
             if (!closing) {
                 closing = true
                 try {
                     textOut!!.close()
                     out!!.close()
-                } catch (x: IOException) {
+                } catch (_: IOException) {
                     trouble = true
                 }
                 textOut = null
                 charOut = null
                 out = null
             }
-        //}
+        } finally {
+            streamLock.unlock()
+        }
     }
 }
