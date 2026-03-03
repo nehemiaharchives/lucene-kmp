@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 2413
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 1044
+### Total KMP classes: 1049
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1591
+### Total KMP Unit Test classes: 1608
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -440,7 +440,7 @@
 | [org.apache.lucene.store.MMapDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/MMapDirectory.java) | org.gnit.lucenekmp.store.MMapDirectory | Depth 2 | [x] | 3 | 2 | 0% | 3 |
 | [org.apache.lucene.store.MergeInfo](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/MergeInfo.java) | org.gnit.lucenekmp.store.MergeInfo | Depth 1 | [x] | 3 | 0 | 28% | 3 |
 | [org.apache.lucene.store.NIOFSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NIOFSDirectory.java) | org.gnit.lucenekmp.store.NIOFSDirectory | Depth 1 | [x] | 24 | 0 | 100% | 24 |
-| [org.apache.lucene.store.NativeFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NativeFSLockFactory.java) | org.gnit.lucenekmp.store.NativeFSLockFactory | Depth 2 | [x] | 2 | 2 | 47% | 0 |
+| [org.apache.lucene.store.NativeFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NativeFSLockFactory.java) | org.gnit.lucenekmp.store.NativeFSLockFactory | Depth 2 | [x] | 2 | 2 | 64% | 0 |
 | [org.apache.lucene.store.OutputStreamIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/OutputStreamIndexOutput.java) | org.gnit.lucenekmp.store.OutputStreamIndexOutput | Depth 2 | [x] | 20 | 11 | 26% | 16 |
 | [org.apache.lucene.store.RandomAccessInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/RandomAccessInput.java) | org.gnit.lucenekmp.store.RandomAccessInput | Depth 2 | [x] | 6 | 2 | 0% | 6 |
 | [org.apache.lucene.store.RateLimitedIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/RateLimitedIndexOutput.java) | org.gnit.lucenekmp.store.RateLimitedIndexOutput | Depth 4 | [x] | 22 | 3 | 0% | 22 |
@@ -8378,10 +8378,10 @@
 - **Java Auto-Generated**: 1
 - **Java Synthetic**: 0
 - **KMP Core Business Logic**: 2
-- **KMP Property Accessors**: 4
+- **KMP Property Accessors**: 2
 - **KMP Auto-Generated**: 1
 - **KMP Synthetic**: 0
-- **Semantic Completion**: 47%
+- **Semantic Completion**: 64%
 
 
 ## Detailed Analysis: org.apache.lucene.store.OutputStreamIndexOutput -> org.gnit.lucenekmp.store.OutputStreamIndexOutput
@@ -13062,15 +13062,14 @@
 | [org.apache.lucene.store.ByteBuffersIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/ByteBuffersIndexInput.java) | org.gnit.lucenekmp.store.ByteBuffersIndexInput | Depth 2 | [x] | 32 | 32 | 97% |
 | [org.apache.lucene.store.ByteBuffersIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/ByteBuffersIndexOutput.java) | org.gnit.lucenekmp.store.ByteBuffersIndexOutput | Depth 2 | [x] | 22 | 21 | 95% |
 | [org.apache.lucene.store.FSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FSDirectory.java) | org.gnit.lucenekmp.store.FSDirectory | Depth 3 | [x] | 20 | 5 | 14% |
-| [org.apache.lucene.store.FileSwitchDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FileSwitchDirectory.java) | org.gnit.lucenekmp.store.FileSwitchDirectory | Depth 2 | [] | 17 | 0 | 0% |
 | [org.apache.lucene.store.FilterIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FilterIndexInput.java) | org.gnit.lucenekmp.store.FilterIndexInput | Depth 2 | [x] | 28 | 2 | 76% |
 | [org.apache.lucene.store.FlushInfo](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/FlushInfo.java) | org.gnit.lucenekmp.store.FlushInfo | Depth 2 | [x] | 2 | 0 | 23% |
 | [org.apache.lucene.store.IndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/IndexInput.java) | org.gnit.lucenekmp.store.IndexInput | Depth 3 | [x] | 6 | 6 | 94% |
 | [org.apache.lucene.store.LockObtainFailedException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockObtainFailedException.java) | org.gnit.lucenekmp.store.LockObtainFailedException | Depth 2 | [x] | 0 | 0 | 0% |
-| [org.apache.lucene.store.LockReleaseFailedException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockReleaseFailedException.java) | org.gnit.lucenekmp.store.LockReleaseFailedException | Depth 4 | [] | 0 | 0 | 0% |
+| [org.apache.lucene.store.LockReleaseFailedException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockReleaseFailedException.java) | org.gnit.lucenekmp.store.LockReleaseFailedException | Depth 4 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.store.LockStressTest](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockStressTest.java) | org.gnit.lucenekmp.store.LockStressTest | Depth 2 | [] | 3 | 0 | 0% |
 | [org.apache.lucene.store.LockValidatingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockValidatingDirectoryWrapper.java) | org.gnit.lucenekmp.store.LockValidatingDirectoryWrapper | Depth 3 | [x] | 16 | 14 | 96% |
-| [org.apache.lucene.store.LockVerifyServer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockVerifyServer.java) | org.gnit.lucenekmp.store.LockVerifyServer | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.store.LockVerifyServer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/LockVerifyServer.java) | org.gnit.lucenekmp.store.LockVerifyServer | Depth 3 | [x] | 1 | 3 | 0% |
 | [org.apache.lucene.store.MMapDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/MMapDirectory.java) | org.gnit.lucenekmp.store.MMapDirectory | Depth 3 | [x] | 3 | 2 | 0% |
 | [org.apache.lucene.store.MergeInfo](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/MergeInfo.java) | org.gnit.lucenekmp.store.MergeInfo | Depth 2 | [x] | 3 | 0 | 28% |
 | [org.apache.lucene.store.NRTCachingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/NRTCachingDirectory.java) | org.gnit.lucenekmp.store.NRTCachingDirectory | Depth 2 | [x] | 22 | 4 | 0% |
@@ -13080,8 +13079,7 @@
 | [org.apache.lucene.store.RateLimitedIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/RateLimitedIndexOutput.java) | org.gnit.lucenekmp.store.RateLimitedIndexOutput | Depth 4 | [x] | 22 | 3 | 0% |
 | [org.apache.lucene.store.RateLimiter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/RateLimiter.java) | org.gnit.lucenekmp.store.RateLimiter | Depth 2 | [x] | 1 | 1 | 0% |
 | [org.apache.lucene.store.ReadAdvice](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/ReadAdvice.java) | org.gnit.lucenekmp.store.ReadAdvice | Depth 2 | [x] | 1 | 1 | 75% |
-| [org.apache.lucene.store.SimpleFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/SimpleFSLockFactory.java) | org.gnit.lucenekmp.store.SimpleFSLockFactory | Depth 3 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.store.SleepingLockWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/SleepingLockWrapper.java) | org.gnit.lucenekmp.store.SleepingLockWrapper | Depth 2 | [] | 16 | 0 | 0% |
+| [org.apache.lucene.store.SleepingLockWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/SleepingLockWrapper.java) | org.gnit.lucenekmp.store.SleepingLockWrapper | Depth 2 | [x] | 16 | 3 | 0% |
 | [org.apache.lucene.store.TestBufferedChecksum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestBufferedChecksum.java) | org.gnit.lucenekmp.store.TestBufferedChecksum | Depth 1 | [x] | 149 | 12 | 60% |
 | [org.apache.lucene.store.TestBufferedIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestBufferedIndexInput.java) | org.gnit.lucenekmp.store.TestBufferedIndexInput | Depth 1 | [x] | 152 | 37 | 0% |
 | [org.apache.lucene.store.TestByteArrayDataInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestByteArrayDataInput.java) | org.gnit.lucenekmp.store.TestByteArrayDataInput | Depth 1 | [x] | 141 | 4 | 23% |
@@ -13090,25 +13088,24 @@
 | [org.apache.lucene.store.TestByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestByteBuffersDirectory | Depth 1 | [x] | 206 | 7 | 14% |
 | [org.apache.lucene.store.TestChecksumIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestChecksumIndexInput.java) | org.gnit.lucenekmp.store.TestChecksumIndexInput | Depth 1 | [x] | 140 | 27 | 0% |
 | [org.apache.lucene.store.TestDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestDirectory.java) | org.gnit.lucenekmp.store.TestDirectory | Depth 1 | [x] | 142 | 8 | 23% |
-| [org.apache.lucene.store.TestFileSwitchDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFileSwitchDirectory.java) | org.gnit.lucenekmp.store.TestFileSwitchDirectory | Depth 1 | [] | 209 | 0 | 0% |
+| [org.apache.lucene.store.TestFileSwitchDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFileSwitchDirectory.java) | org.gnit.lucenekmp.store.TestFileSwitchDirectory | Depth 1 | [x] | 209 | 94 | 73% |
 | [org.apache.lucene.store.TestFilterDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFilterDirectory.java) | org.gnit.lucenekmp.store.TestFilterDirectory | Depth 1 | [x] | 206 | 14 | 0% |
 | [org.apache.lucene.store.TestFilterIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFilterIndexOutput.java) | org.gnit.lucenekmp.store.TestFilterIndexOutput | Depth 1 | [x] | 145 | 19 | 0% |
-| [org.apache.lucene.store.TestIndexOutputAlignment](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestIndexOutputAlignment.java) | org.gnit.lucenekmp.store.TestIndexOutputAlignment | Depth 1 | [] | 144 | 0 | 0% |
+| [org.apache.lucene.store.TestIndexOutputAlignment](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestIndexOutputAlignment.java) | org.gnit.lucenekmp.store.TestIndexOutputAlignment | Depth 1 | [x] | 144 | 10 | 34% |
 | [org.apache.lucene.store.TestInputStreamDataInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestInputStreamDataInput.java) | org.gnit.lucenekmp.store.TestInputStreamDataInput | Depth 1 | [x] | 147 | 19 | 0% |
 | [org.apache.lucene.store.TestLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestLockFactory.java) | org.gnit.lucenekmp.store.TestLockFactory | Depth 1 | [x] | 142 | 2 | 0% |
 | [org.apache.lucene.store.TestMMapDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMMapDirectory.java) | org.gnit.lucenekmp.store.TestMMapDirectory | Depth 1 | [x] | 217 | 15 | 0% |
-| [org.apache.lucene.store.TestMultiByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestMultiByteBuffersDirectory | Depth 1 | [] | 220 | 0 | 0% |
-| [org.apache.lucene.store.TestMultiMMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiMMap.java) | org.gnit.lucenekmp.store.TestMultiMMap | Depth 1 | [] | 225 | 0 | 0% |
+| [org.apache.lucene.store.TestMultiByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestMultiByteBuffersDirectory | Depth 1 | [x] | 220 | 108 | 73% |
+| [org.apache.lucene.store.TestMultiMMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiMMap.java) | org.gnit.lucenekmp.store.TestMultiMMap | Depth 1 | [x] | 225 | 123 | 68% |
 | [org.apache.lucene.store.TestNIOFSDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNIOFSDirectory.java) | org.gnit.lucenekmp.store.TestNIOFSDirectory | Depth 2 | [x] | 31 | 6 | 0% |
-| [org.apache.lucene.store.TestNRTCachingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNRTCachingDirectory.java) | org.gnit.lucenekmp.store.TestNRTCachingDirectory | Depth 1 | [] | 209 | 0 | 0% |
-| [org.apache.lucene.store.TestNativeFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNativeFSLockFactory.java) | org.gnit.lucenekmp.store.TestNativeFSLockFactory | Depth 2 | [] | 28 | 0 | 0% |
+| [org.apache.lucene.store.TestNRTCachingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNRTCachingDirectory.java) | org.gnit.lucenekmp.store.TestNRTCachingDirectory | Depth 1 | [x] | 209 | 23 | 0% |
+| [org.apache.lucene.store.TestNativeFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNativeFSLockFactory.java) | org.gnit.lucenekmp.store.TestNativeFSLockFactory | Depth 2 | [x] | 28 | 23 | 0% |
 | [org.apache.lucene.store.TestOutputStreamIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestOutputStreamIndexOutput.java) | org.gnit.lucenekmp.store.TestOutputStreamIndexOutput | Depth 1 | [x] | 141 | 4 | 23% |
 | [org.apache.lucene.store.TestRateLimiter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestRateLimiter.java) | org.gnit.lucenekmp.store.TestRateLimiter | Depth 1 | [] | 141 | 0 | 0% |
-| [org.apache.lucene.store.TestSimpleFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSimpleFSLockFactory.java) | org.gnit.lucenekmp.store.TestSimpleFSLockFactory | Depth 1 | [] | 148 | 0 | 0% |
-| [org.apache.lucene.store.TestSingleInstanceLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSingleInstanceLockFactory.java) | org.gnit.lucenekmp.store.TestSingleInstanceLockFactory | Depth 1 | [] | 148 | 0 | 0% |
-| [org.apache.lucene.store.TestSleepingLockWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSleepingLockWrapper.java) | org.gnit.lucenekmp.store.TestSleepingLockWrapper | Depth 1 | [] | 147 | 0 | 0% |
-| [org.apache.lucene.store.TestStressLockFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestStressLockFactories.java) | org.gnit.lucenekmp.store.TestStressLockFactories | Depth 1 | [] | 146 | 0 | 0% |
-| [org.apache.lucene.store.TestTrackingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestTrackingDirectoryWrapper.java) | org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper | Depth 1 | [] | 209 | 0 | 0% |
+| [org.apache.lucene.store.TestSimpleFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSimpleFSLockFactory.java) | org.gnit.lucenekmp.store.TestSimpleFSLockFactory | Depth 1 | [x] | 148 | 17 | 40% |
+| [org.apache.lucene.store.TestSingleInstanceLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSingleInstanceLockFactory.java) | org.gnit.lucenekmp.store.TestSingleInstanceLockFactory | Depth 1 | [x] | 148 | 17 | 40% |
+| [org.apache.lucene.store.TestSleepingLockWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSleepingLockWrapper.java) | org.gnit.lucenekmp.store.TestSleepingLockWrapper | Depth 1 | [x] | 147 | 15 | 40% |
+| [org.apache.lucene.store.TestTrackingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestTrackingDirectoryWrapper.java) | org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper | Depth 1 | [x] | 209 | 92 | 74% |
 | [org.apache.lucene.store.TrackingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/TrackingDirectoryWrapper.java) | org.gnit.lucenekmp.store.TrackingDirectoryWrapper | Depth 2 | [x] | 17 | 15 | 96% |
 | [org.apache.lucene.store.VerifyingLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/store/VerifyingLockFactory.java) | org.gnit.lucenekmp.store.VerifyingLockFactory | Depth 4 | [] | 3 | 0 | 0% |
 | [org.apache.lucene.tests.analysis.BaseTokenStreamFactoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/BaseTokenStreamFactoryTestCase.java) | org.gnit.lucenekmp.tests.analysis.BaseTokenStreamFactoryTestCase | Depth 2 | [x] | 206 | 13 | 62% |
@@ -13272,10 +13269,10 @@
 | [org.apache.lucene.tests.search.TestPerThreadPKLookup](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/search/TestPerThreadPKLookup.java) | org.gnit.lucenekmp.tests.search.TestPerThreadPKLookup | Depth 1 | [] | 141 | 0 | 0% |
 | [org.apache.lucene.tests.search.similarities.AssertingSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/similarities/AssertingSimilarity.java) | org.gnit.lucenekmp.tests.search.similarities.AssertingSimilarity | Depth 4 | [x] | 2 | 2 | 62% |
 | [org.apache.lucene.tests.search.similarities.BaseSimilarityTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/similarities/BaseSimilarityTestCase.java) | org.gnit.lucenekmp.tests.search.similarities.BaseSimilarityTestCase | Depth 2 | [x] | 146 | 3 | 93% |
-| [org.apache.lucene.tests.store.BaseChunkedDirectoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseChunkedDirectoryTestCase.java) | org.gnit.lucenekmp.tests.store.BaseChunkedDirectoryTestCase | Depth 2 | [x] | 220 | 101 | 76% |
+| [org.apache.lucene.tests.store.BaseChunkedDirectoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseChunkedDirectoryTestCase.java) | org.gnit.lucenekmp.tests.store.BaseChunkedDirectoryTestCase | Depth 2 | [x] | 220 | 107 | 74% |
 | [org.apache.lucene.tests.store.BaseDirectoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseDirectoryTestCase.java) | org.gnit.lucenekmp.tests.store.BaseDirectoryTestCase | Depth 2 | [x] | 204 | 87 | 73% |
 | [org.apache.lucene.tests.store.BaseDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseDirectoryWrapper.java) | org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper | Depth 2 | [x] | 16 | 14 | 93% |
-| [org.apache.lucene.tests.store.BaseLockFactoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseLockFactoryTestCase.java) | org.gnit.lucenekmp.tests.store.BaseLockFactoryTestCase | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.tests.store.BaseLockFactoryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/BaseLockFactoryTestCase.java) | org.gnit.lucenekmp.tests.store.BaseLockFactoryTestCase | Depth 3 | [x] | 1 | 3 | 0% |
 | [org.apache.lucene.tests.store.CorruptingIndexOutput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/CorruptingIndexOutput.java) | org.gnit.lucenekmp.tests.store.CorruptingIndexOutput | Depth 2 | [x] | 22 | 20 | 92% |
 | [org.apache.lucene.tests.store.MockDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/MockDirectoryWrapper.java) | org.gnit.lucenekmp.tests.store.MockDirectoryWrapper | Depth 2 | [x] | 35 | 3 | 0% |
 | [org.apache.lucene.tests.store.MockIndexOutputWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/store/MockIndexOutputWrapper.java) | org.gnit.lucenekmp.tests.store.MockIndexOutputWrapper | Depth 3 | [x] | 24 | 3 | 0% |
@@ -13642,16 +13639,16 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Lucene Classes (Semantic Analysis)
 - Total Classes: 3554
-- Ported Classes: 1022
+- Ported Classes: 1027
 - Class Porting Progress: 28%
 - **Semantic Completion Progress: 9%**
 - Total Core Methods Needed: 32846
-- Core Methods Implemented: 3187
+- Core Methods Implemented: 3189
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1526
+- Ported Unit Test Classes: 1543
 - Unit Test Porting Progress: 63%
 - **Unit Test Semantic Completion: 6%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 7859
+- Test Core Methods Implemented: 8212

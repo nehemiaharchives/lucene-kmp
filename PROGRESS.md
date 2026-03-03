@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1118 | 81% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1124 | 82% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 22 | 84% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -89,7 +89,7 @@
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 9 | 8 | 88% | [ ] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 33 | 68% | [ ] |
-|   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 43 | 84% | [ ] |
+|   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 48 | 94% | [ ] |
 |     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 16 | 55% | [ ] |
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
@@ -110,7 +110,7 @@
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 22 | 3 | 13% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 25 | 13 | 52% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 4 | 3 | 75% | [ ] |
-|     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 10 | 76% | [ ] |
+|     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 13 | 11 | 84% | [ ] |
 |     org.apache.lucene.tests.util |         org.gnit.lucenekmp.tests.util | 36 | 15 | 41% | [ ] |
 |       org.apache.lucene.tests.util.automaton |           org.gnit.lucenekmp.tests.util.automaton | 2 | 1 | 50% | [ ] |
 |       org.apache.lucene.tests.util.fst |           org.gnit.lucenekmp.tests.util.fst | 2 | 1 | 50% | [ ] |
@@ -154,7 +154,7 @@
 |   org.apache.lucene.search | 149 | 10 | 6% |
 |     org.apache.lucene.search.knn | 1 | 0 | 0% |
 |     org.apache.lucene.search.similarities | 25 | 15 | 60% |
-|   org.apache.lucene.store | 27 | 15 | 55% |
+|   org.apache.lucene.store | 27 | 26 | 96% |
 |   org.apache.lucene.util | 63 | 62 | 98% |
 |     org.apache.lucene.util.automaton | 15 | 15 | 100% |
 |     org.apache.lucene.util.bkd | 8 | 8 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 673 | 311 | 46% |
+| Total | 673 | 322 | 47% |
 
 
 ## Tests To Port
@@ -516,16 +516,5 @@
 | [org.apache.lucene.search.similarities.TestRawTFSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestRawTFSimilarity.java) | org.gnit.lucenekmp.search.similarities.TestRawTFSimilarity |
 | [org.apache.lucene.search.similarities.TestSimilarity2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarity2.java) | org.gnit.lucenekmp.search.similarities.TestSimilarity2 |
 | [org.apache.lucene.search.similarities.TestSimilarityBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/similarities/TestSimilarityBase.java) | org.gnit.lucenekmp.search.similarities.TestSimilarityBase |
-| [org.apache.lucene.store.TestFileSwitchDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestFileSwitchDirectory.java) | org.gnit.lucenekmp.store.TestFileSwitchDirectory |
-| [org.apache.lucene.store.TestIndexOutputAlignment](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestIndexOutputAlignment.java) | org.gnit.lucenekmp.store.TestIndexOutputAlignment |
-| [org.apache.lucene.store.TestMultiByteBuffersDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiByteBuffersDirectory.java) | org.gnit.lucenekmp.store.TestMultiByteBuffersDirectory |
-| [org.apache.lucene.store.TestMultiMMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestMultiMMap.java) | org.gnit.lucenekmp.store.TestMultiMMap |
-| [org.apache.lucene.store.TestNRTCachingDirectory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNRTCachingDirectory.java) | org.gnit.lucenekmp.store.TestNRTCachingDirectory |
-| [org.apache.lucene.store.TestNativeFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestNativeFSLockFactory.java) | org.gnit.lucenekmp.store.TestNativeFSLockFactory |
 | [org.apache.lucene.store.TestRateLimiter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestRateLimiter.java) | org.gnit.lucenekmp.store.TestRateLimiter |
-| [org.apache.lucene.store.TestSimpleFSLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSimpleFSLockFactory.java) | org.gnit.lucenekmp.store.TestSimpleFSLockFactory |
-| [org.apache.lucene.store.TestSingleInstanceLockFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSingleInstanceLockFactory.java) | org.gnit.lucenekmp.store.TestSingleInstanceLockFactory |
-| [org.apache.lucene.store.TestSleepingLockWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestSleepingLockWrapper.java) | org.gnit.lucenekmp.store.TestSleepingLockWrapper |
-| [org.apache.lucene.store.TestStressLockFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestStressLockFactories.java) | org.gnit.lucenekmp.store.TestStressLockFactories |
-| [org.apache.lucene.store.TestTrackingDirectoryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/store/TestTrackingDirectoryWrapper.java) | org.gnit.lucenekmp.store.TestTrackingDirectoryWrapper |
 
