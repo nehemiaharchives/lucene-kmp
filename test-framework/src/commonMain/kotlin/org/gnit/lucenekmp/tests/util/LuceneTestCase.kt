@@ -42,6 +42,7 @@ import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FSDirectory
 import org.gnit.lucenekmp.store.FSLockFactory
+import org.gnit.lucenekmp.store.FileSwitchDirectory
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.LockFactory
@@ -65,6 +66,7 @@ import org.gnit.lucenekmp.tests.search.similarities.RandomSimilarity
 import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
+import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.newDirectory
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
@@ -852,7 +854,6 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          * Returns a new Directory instance. Use this when the test does not care about the specific
          * Directory implementation (most tests).
          *
-         *
          * The Directory is wrapped with [BaseDirectoryWrapper]. this means usually it will be
          * picky, such as ensuring that you properly close it and all open files in your test. It will
          * emulate some features of Windows, such as not allowing open files to be overwritten.
@@ -877,15 +878,15 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          * more information.
          */
         fun newDirectory(r: Random): BaseDirectoryWrapper {
-            return wrapDirectory(
-                r,
-                newDirectoryImpl(
-                    r,
-                    TEST_DIRECTORY
-                ),
-                rarely(r),
-                false
-            )
+            return wrapDirectory(r, newDirectoryImpl(r, TEST_DIRECTORY), rarely(r), false)
+        }
+
+        /**
+         * Returns a new Directory instance, using the specified random. See [.newDirectory] for
+         * more information.
+         */
+        fun newDirectory(r: Random, lf: LockFactory): BaseDirectoryWrapper {
+            return wrapDirectory(r, newDirectoryImpl(r, TEST_DIRECTORY, lf), rarely(r), false)
         }
 
         fun newMockDirectory(): MockDirectoryWrapper {
@@ -893,59 +894,25 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         }
 
         fun newMockDirectory(r: Random): MockDirectoryWrapper {
-            return wrapDirectory(
-                r,
-                newDirectoryImpl(
-                    r,
-                    TEST_DIRECTORY
-                ),
-                false,
-                false
-            ) as MockDirectoryWrapper
+            return wrapDirectory(r, newDirectoryImpl(r, TEST_DIRECTORY), false, false) as MockDirectoryWrapper
         }
 
-        fun newMockDirectory(
-            r: Random,
-            lf: LockFactory
-        ): MockDirectoryWrapper {
-            return wrapDirectory(
-                r,
-                newDirectoryImpl(
-                    r,
-                    TEST_DIRECTORY,
-                    lf
-                ),
-                false,
-                false
-            ) as MockDirectoryWrapper
+        fun newMockDirectory(r: Random, lf: LockFactory): MockDirectoryWrapper {
+            return wrapDirectory(r, newDirectoryImpl(r, TEST_DIRECTORY, lf), false, false) as MockDirectoryWrapper
         }
 
         fun newMockFSDirectory(f: Path): MockDirectoryWrapper {
-            return newFSDirectory(
-                f,
-                FSLockFactory.default,
-                false
-            ) as MockDirectoryWrapper
+            return newFSDirectory(f, FSLockFactory.default, false) as MockDirectoryWrapper
         }
 
-        fun newMockFSDirectory(
-            f: Path,
-            lf: LockFactory
-        ): MockDirectoryWrapper {
-            return newFSDirectory(
-                f,
-                lf,
-                false
-            ) as MockDirectoryWrapper
+        fun newMockFSDirectory(f: Path, lf: LockFactory): MockDirectoryWrapper {
+            return newFSDirectory(f, lf, false) as MockDirectoryWrapper
         }
 
         /*fun addVirusChecker(path: Path): Path {
             var path: Path = path
             if (TestUtil.hasVirusChecker(path) == false) {
-                val fs: VirusCheckingFS = VirusCheckingFS(
-                    path.getFileSystem(),
-                    .random().nextLong()
-                )
+                val fs: VirusCheckingFS = VirusCheckingFS(path.getFileSystem(),.random().nextLong())
                 path = fs.wrapPath(path)
             }
             return path
@@ -956,10 +923,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          */
         @Throws(IOException::class)
         fun newDirectory(d: Directory): BaseDirectoryWrapper {
-            return newDirectory(
-                random(),
-                d
-            )
+            return newDirectory(random(), d)
         }
 
         /** Returns a new FSDirectory instance over the given file, which must be a folder.  */
@@ -977,25 +941,14 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         }*/
 
         /** Returns a new FSDirectory instance over the given file, which must be a folder.  */
-        fun newFSDirectory(
-            f: Path,
-            lf: LockFactory
-        ): BaseDirectoryWrapper {
+        fun newFSDirectory(f: Path, lf: LockFactory): BaseDirectoryWrapper {
             return newFSDirectory(f, lf, rarely())
         }
 
-        private fun newFSDirectory(
-            f: Path,
-            lf: LockFactory,
-            bare: Boolean
-        ): BaseDirectoryWrapper {
+        private fun newFSDirectory(f: Path, lf: LockFactory, bare: Boolean): BaseDirectoryWrapper {
             var fsdirClass: String = TEST_DIRECTORY
             if (fsdirClass == "random") {
-                fsdirClass =
-                    RandomPicks.randomFrom(
-                        random(),
-                        FS_DIRECTORIES
-                    )
+                fsdirClass = RandomPicks.randomFrom(random(), FS_DIRECTORIES)
             }
 
             var clazz: KClass<out FSDirectory>
@@ -1004,82 +957,44 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                     clazz = CommandLineUtil.loadFSDirectoryClass(fsdirClass)
                 } catch (e: ClassCastException) {
                     // TEST_DIRECTORY is not a sub-class of FSDirectory, so draw one at random
-                    fsdirClass =
-                        RandomPicks.randomFrom(
-                            random(),
-                            FS_DIRECTORIES
-                        )
+                    fsdirClass = RandomPicks.randomFrom(random(), FS_DIRECTORIES)
                     clazz = CommandLineUtil.loadFSDirectoryClass(fsdirClass)
                 }
 
-                val fsdir: Directory =
-                    newFSDirectoryImpl(clazz, f, lf)
-                return wrapDirectory(
-                    random(),
-                    fsdir,
-                    bare,
-                    true
-                )
+                val fsdir: Directory = newFSDirectoryImpl(clazz, f, lf)
+                return wrapDirectory(random(), fsdir, bare, true)
             } catch (e: Exception) {
                 Rethrow.rethrow(e)
                 throw e // dummy to prevent compiler failure
             }
         }
 
-        /*private fun newFileSwitchDirectory(
-            random: Random,
-            dir1: Directory?,
-            dir2: Directory?
-        ): Directory {
-            var fileExtensions = mutableListOf<String?>(
+        private fun newFileSwitchDirectory(
+            random: Random, dir1: Directory, dir2: Directory): Directory {
+            var fileExtensions = mutableListOf(
                 "fdt", "fdx", "tim", "tip", "si", "fnm", "pos", "dii", "dim", "nvm", "nvd", "dvm",
-                "dvd"
-            )
+                "dvd")
             fileExtensions.shuffle(random)
             fileExtensions = fileExtensions.subList(0, 1 + random.nextInt(fileExtensions.size))
-            return FileSwitchDirectory(HashSet<String?>(fileExtensions), dir1, dir2, true)
-        }*/
+            return FileSwitchDirectory(fileExtensions.toSet() , dir1, dir2, true)
+        }
 
         /**
          * Returns a new Directory instance, using the specified random with contents copied from the
          * provided directory. See [.newDirectory] for more information.
          */
         @Throws(IOException::class)
-        fun newDirectory(
-            r: Random,
-            d: Directory
-        ): BaseDirectoryWrapper {
-            val impl: Directory =
-                newDirectoryImpl(
-                    r,
-                    TEST_DIRECTORY
-                )
+        fun newDirectory(r: Random, d: Directory): BaseDirectoryWrapper {
+            val impl: Directory = newDirectoryImpl(r, TEST_DIRECTORY)
             for (file in d.listAll()) {
-                if (file.startsWith(IndexFileNames.SEGMENTS)
-                    || IndexFileNames.CODEC_FILE_PATTERN.matches(file)
-                ) {
-                    impl.copyFrom(
-                        d,
-                        file,
-                        file,
-                        newIOContext(r)
-                    )
+                if (file.startsWith(IndexFileNames.SEGMENTS) || IndexFileNames.CODEC_FILE_PATTERN.matches(file)) {
+                    impl.copyFrom(d, file, file, newIOContext(r))
                 }
             }
-            return wrapDirectory(
-                r,
-                impl,
-                rarely(r),
-                false
-            )
+            return wrapDirectory(r, impl, rarely(r), false)
         }
 
-        private fun wrapDirectory(
-            random: Random,
-            directory: Directory,
-            bare: Boolean,
-            filesystem: Boolean
-        ): BaseDirectoryWrapper {
+        private fun wrapDirectory(random: Random, directory: Directory, bare: Boolean, filesystem: Boolean): BaseDirectoryWrapper {
             // IOContext randomization might make NRTCachingDirectory make bad decisions, so avoid
             // using it if the user requested a filesystem directory.
             var directory: Directory = directory
@@ -1091,33 +1006,19 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
                 val base: BaseDirectoryWrapper = RawDirectoryWrapper(directory)
 
                 // TODO do something if it breaks without following
-                /*LuceneTestCase.closeAfterSuite<CloseableDirectory>(
-                    CloseableDirectory(
-                        base,
-                        LuceneTestCase.suiteFailureMarker
-                    )
-                )*/
+                /*LuceneTestCase.closeAfterSuite<CloseableDirectory>(CloseableDirectory(base, LuceneTestCase.suiteFailureMarker))*/
                 return base
             } else {
                 val mock = MockDirectoryWrapper(random, directory)
 
                 // TODO do something if it breaks without following
                 /*mock.setThrottling(LuceneTestCase.TEST_THROTTLING)
-                LuceneTestCase.closeAfterSuite<CloseableDirectory>(
-                    CloseableDirectory(
-                        mock,
-                        LuceneTestCase.suiteFailureMarker
-                    )
-                )*/
+                LuceneTestCase.closeAfterSuite<CloseableDirectory>(CloseableDirectory(mock, LuceneTestCase.suiteFailureMarker))*/
                 return mock
             }
         }
 
-        fun newStringField(
-            name: String,
-            value: String?,
-            stored: Field.Store
-        ): Field {
+        fun newStringField(name: String, value: String?, stored: Field.Store): Field {
             return newField(
                 random(),
                 name,
@@ -1126,11 +1027,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
 
-        fun newStringField(
-            name: String,
-            value: BytesRef?,
-            stored: Field.Store
-        ): Field {
+        fun newStringField(name: String, value: BytesRef?, stored: Field.Store): Field {
             return newField(
                 random(),
                 name,
@@ -1139,11 +1036,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
 
-        fun newTextField(
-            name: String,
-            value: String?,
-            stored: Field.Store
-        ): Field {
+        fun newTextField(name: String, value: String?, stored: Field.Store): Field {
             return newField(
                 random(),
                 name,
@@ -1152,12 +1045,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
 
-        fun newStringField(
-            random: Random,
-            name: String,
-            value: String?,
-            stored: Field.Store
-        ): Field {
+        fun newStringField(random: Random, name: String, value: String?, stored: Field.Store): Field {
             return newField(
                 random,
                 name,
@@ -1166,12 +1054,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
 
-        fun newStringField(
-            random: Random,
-            name: String,
-            value: BytesRef?,
-            stored: Field.Store
-        ): Field {
+        fun newStringField(random: Random, name: String, value: BytesRef?, stored: Field.Store): Field {
             return newField(
                 random,
                 name,
@@ -1180,12 +1063,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
 
-        fun newTextField(
-            random: Random,
-            name: String,
-            value: String?,
-            stored: Field.Store
-        ): Field {
+        fun newTextField(random: Random, name: String, value: String?, stored: Field.Store): Field {
             return newField(
                 random,
                 name,
@@ -1194,11 +1072,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
 
-        fun newField(
-            name: String,
-            value: String?,
-            type: FieldType
-        ): Field {
+        fun newField(name: String, value: String?, type: FieldType): Field {
             return newField(random(), name, value, type)
         }
 
@@ -1208,12 +1082,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         // remove the sync here.  We can also fold the random
         // "enable norms" (now commented out, below) into that:
         /*@Synchronized*/
-        fun newField(
-            random: Random,
-            name: String,
-            value: Any?,
-            type: FieldType
-        ): Field {
+        fun newField(random: Random, name: String, value: Any?, type: FieldType): Field {
             // Defeat any consumers that illegally rely on intern'd
             // strings (we removed this from Lucene a while back):
 
@@ -1269,19 +1138,11 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             return createField(name, value, newType)
         }
 
-        private fun createField(
-            name: String,
-            value: Any?,
-            fieldType: FieldType
-        ): Field {
+        private fun createField(name: String, value: Any?, fieldType: FieldType): Field {
             if (value is String) {
                 return Field(name, value, fieldType)
             } else if (value is BytesRef) {
-                return Field(
-                    name,
-                    value,
-                    fieldType
-                )
+                return Field(name, value, fieldType)
             } else {
                 throw IllegalArgumentException("value must be String or BytesRef")
             }
