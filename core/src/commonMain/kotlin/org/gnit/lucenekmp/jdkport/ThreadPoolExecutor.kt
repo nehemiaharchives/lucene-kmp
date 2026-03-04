@@ -2003,7 +2003,7 @@ open class ThreadPoolExecutor(
          * @throws RejectedExecutionException always
          */
         override fun rejectedExecution(r: Runnable, e: ThreadPoolExecutor) {
-            throw /*java.util.concurrent.RejectedExecution*/Exception(
+            throw RejectedExecutionException(
                 "Task " + r.toString() +
                         " rejected from " +
                         e.toString()

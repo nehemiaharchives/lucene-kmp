@@ -78,7 +78,7 @@ open class IndexSearcher(
     val leafContexts: MutableList<LeafReaderContext>
 
     @Volatile
-    private lateinit var leafSlices: Array<LeafSlice>
+    private var leafSlices: Array<LeafSlice>? = null
 
     // Used internally for load balancing threads executing for the query
     private val taskExecutor: TaskExecutor
