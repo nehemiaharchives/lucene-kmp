@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.runBlocking
 import okio.IOException
@@ -17,14 +18,23 @@ import org.gnit.lucenekmp.tests.index.RandomIndexWriter
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.NamedThreadFactory
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.TimeSource
 
 class TestTaskExecutor : LuceneTestCase() {
+
+    init {
+        configureTestLogging()
+    }
+
+    private val logger = KotlinLogging.logger {  }
+
     private fun createExecutor(): ExecutorService =
         Executors.newFixedThreadPool(
             1,
@@ -310,6 +320,68 @@ class TestTaskExecutor : LuceneTestCase() {
             val res = runBlocking { taskExecutor.invokeAll(callables) }
             assertEquals(taskCount, res.size)
             assertEquals(taskCount, executedTasks.load())
+        }
+    }
+
+    @Test
+    fun testInvokeAllSingleSliceNativePerfProbe() {
+        val executorService = createExecutor()
+        try {
+            val taskExecutor = TaskExecutor(executorService)
+            val timeSource = TimeSource.Monotonic
+
+            val iterations = 20_000 // TODO reduced iterations = 200000 to 20000 for dev speed
+            val leafSlices = intArrayOf(7) // one slice -> same shape as the single-slice search path
+            val collectors = mutableListOf(11)
+
+            var invokeAllChecksum = 0L
+            val invokeAllMark = timeSource.markNow()
+            for (n in 0..<iterations) {
+                val listTasks: MutableList<Callable<Int>> = ArrayList(leafSlices.size)
+                for (i in leafSlices.indices) {
+                    val leaves = leafSlices[i]
+                    val collector = collectors[i]
+                    listTasks.add(
+                        Callable {
+                            // mimic `search(leaves, weight, collector)` with deterministic work
+                            collector + leaves + (n and 1)
+                        }
+                    )
+                }
+                val results: MutableList<Int> = runBlocking { taskExecutor.invokeAll(listTasks) }
+                invokeAllChecksum += results[0].toLong()
+            }
+            val invokeAllElapsedMs = invokeAllMark.elapsedNow().inWholeMilliseconds
+
+            var directChecksum = 0L
+            val directMark = timeSource.markNow()
+            for (n in 0..<iterations) {
+                val listTasks: MutableList<Callable<Int>> = ArrayList(leafSlices.size)
+                for (i in leafSlices.indices) {
+                    val leaves = leafSlices[i]
+                    val collector = collectors[i]
+                    listTasks.add(
+                        Callable {
+                            collector + leaves + (n and 1)
+                        }
+                    )
+                }
+                val results: MutableList<Int> = mutableListOf()
+                for (task in listTasks) {
+                    results.add(task.call())
+                }
+                directChecksum += results[0].toLong()
+            }
+            val directElapsedMs = directMark.elapsedNow().inWholeMilliseconds
+
+            assertEquals(directChecksum, invokeAllChecksum)
+            logger.debug {
+                "PERF taskExecutor.singleSliceProbe iterations=$iterations " +
+                    "invokeAllMs=$invokeAllElapsedMs directMs=$directElapsedMs " +
+                    "ratio=${if (directElapsedMs == 0L) -1 else invokeAllElapsedMs.toDouble() / directElapsedMs.toDouble()}"
+            }
+        } finally {
+            TestUtil.shutdownExecutorService(executorService)
         }
     }
 
