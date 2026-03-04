@@ -14,6 +14,7 @@ import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.Executor
 import org.gnit.lucenekmp.jdkport.Math
+import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.similarities.BM25Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity
@@ -579,6 +580,11 @@ open class IndexSearcher(
             // there are no segments, nothing to offload to the executor, but we do need to call reduce to
             // create some kind of empty result
             assert(leafContexts.isEmpty())
+            return collectorManager.reduce(mutableListOf(firstCollector))!!
+        } else if (leafSlices.size == 1) {
+            // Fast path avoids task allocation + runBlocking overhead for single-slice searches.
+            val leaves = leafSlices[0].partitions
+            search(leaves, weight, firstCollector)
             return collectorManager.reduce(mutableListOf(firstCollector))!!
         } else {
             val collectors: MutableList<C> = ArrayList(leafSlices.size)
