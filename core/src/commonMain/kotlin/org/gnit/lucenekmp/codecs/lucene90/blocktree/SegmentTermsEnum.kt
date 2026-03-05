@@ -48,7 +48,6 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
     private var eof = false
 
     val term: BytesRefBuilder = BytesRefBuilder()
-    private var impactsReuse: ImpactsEnum? = null
     private val fstReader: BytesReader?
 
     private var arcs: Array<Arc<BytesRef>?> = kotlin.arrayOfNulls(1)
@@ -1105,8 +1104,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
         // if (DEBUG) {
         // System.out.println("  state=" + currentFrame.state);
         // }
-        impactsReuse = fr.parent.postingsReader.impacts(fr.fieldInfo, currentFrame.state, flags, impactsReuse)
-        return impactsReuse!!
+        return fr.parent.postingsReader.impacts(fr.fieldInfo, currentFrame.state, flags)
     }
 
     override fun seekExact(target: BytesRef, otherState: TermState) {
