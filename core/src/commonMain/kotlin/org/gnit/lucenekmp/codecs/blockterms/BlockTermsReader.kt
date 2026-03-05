@@ -656,10 +656,13 @@ class BlockTermsReader(
                 return postingsReader.postings(fieldInfo, state, reuse, flags)
             }
 
+            private var impactsReuse: ImpactsEnum? = null
+
             @Throws(IOException::class)
             override fun impacts(flags: Int): ImpactsEnum {
                 decodeMetaData()
-                return postingsReader.impacts(fieldInfo, state, flags)
+                impactsReuse = postingsReader.impacts(fieldInfo, state, flags, impactsReuse)
+                return impactsReuse!!
             }
 
             override fun seekExact(

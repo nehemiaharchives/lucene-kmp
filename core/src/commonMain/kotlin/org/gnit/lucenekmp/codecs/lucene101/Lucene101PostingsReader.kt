@@ -254,7 +254,23 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
     @Throws(IOException::class)
     override fun impacts(fieldInfo: FieldInfo, state: BlockTermState, flags: Int): ImpactsEnum {
-        return this.BlockPostingsEnum(fieldInfo, flags, true).reset(state as IntBlockTermState, flags)
+        return impacts(fieldInfo, state, flags, null)
+    }
+
+    @Throws(IOException::class)
+    override fun impacts(
+        fieldInfo: FieldInfo,
+        state: BlockTermState,
+        flags: Int,
+        reuse: ImpactsEnum?
+    ): ImpactsEnum {
+        val impactsEnum =
+            if (reuse is BlockPostingsEnum && reuse.canReuse(docIn!!, fieldInfo, flags, true)) {
+                reuse
+            } else {
+                this.BlockPostingsEnum(fieldInfo, flags, true)
+            }
+        return impactsEnum.reset(state as IntBlockTermState, flags)
     }
 
     private enum class DeltaEncoding {
@@ -1265,7 +1281,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 val scratch: ByteArrayDataInput = this.scratch
                 scratch.reset(serialized.bytes, 0, serialized.length)
                 readImpacts(scratch, impactsList)
-                return impactsList.toMutableList()
+                return impactsList
             }
         }
             get() {
@@ -1331,7 +1347,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         }
     }
 
-    class MutableImpactList(capacity: Int) : AbstractList<Impact>(), RandomAccess {
+    class MutableImpactList(capacity: Int) : AbstractMutableList<Impact>(), RandomAccess {
         override var size: Int = 0
         val impacts: Array<Impact?> = kotlin.arrayOfNulls(capacity)
 
@@ -1343,6 +1359,18 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
         override fun get(index: Int): Impact {
             return impacts[index]!!
+        }
+
+        override fun add(index: Int, element: Impact) {
+            throw UnsupportedOperationException()
+        }
+
+        override fun removeAt(index: Int): Impact {
+            throw UnsupportedOperationException()
+        }
+
+        override fun set(index: Int, element: Impact): Impact {
+            throw UnsupportedOperationException()
         }
     }
 

@@ -59,6 +59,20 @@ protected constructor() : AutoCloseable {
     abstract fun impacts(fieldInfo: FieldInfo, state: BlockTermState, flags: Int): ImpactsEnum
 
     /**
+     * Optional reuse-aware variant of [impacts]. Implementations may override to reuse platform
+     * objects for performance while preserving semantics.
+     */
+    @Throws(IOException::class)
+    open fun impacts(
+        fieldInfo: FieldInfo,
+        state: BlockTermState,
+        flags: Int,
+        reuse: ImpactsEnum?
+    ): ImpactsEnum {
+        return impacts(fieldInfo, state, flags)
+    }
+
+    /**
      * Checks consistency of this reader.
      *
      *

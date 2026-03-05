@@ -48,6 +48,7 @@ internal class IntersectTermsEnum(
     private var currentTransition: Transition
 
     private val term: BytesRef = BytesRef()
+    private var impactsReuse: ImpactsEnum? = null
 
     private val fstReader: BytesReader
 
@@ -217,7 +218,9 @@ internal class IntersectTermsEnum(
     @Throws(IOException::class)
     override fun impacts(flags: Int): ImpactsEnum {
         currentFrame!!.decodeMetaData()
-        return fr.parent.postingsReader.impacts(fr.fieldInfo, currentFrame!!.termState, flags)
+        impactsReuse =
+            fr.parent.postingsReader.impacts(fr.fieldInfo, currentFrame!!.termState, flags, impactsReuse)
+        return impactsReuse!!
     }
 
     private val state: Int
