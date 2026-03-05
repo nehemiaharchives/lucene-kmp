@@ -25,11 +25,7 @@ import kotlin.math.max
  * @since 1.5
  */
 fun Long.Companion.numberOfLeadingZeros(i: Long): Int {
-    val x = (i ushr 32).toInt()
-    return if (x == 0)
-        32 + Int.numberOfLeadingZeros(i.toInt())
-    else
-        Int.numberOfLeadingZeros(x)
+    return longNumberOfLeadingZerosPlatform(i)
 }
 
 /**
@@ -48,11 +44,7 @@ fun Long.Companion.numberOfLeadingZeros(i: Long): Int {
  */
 
 fun Long.Companion.numberOfTrailingZeros(i: Long): Int {
-    val x = i.toInt()
-    return if (x == 0)
-        32 + Int.numberOfTrailingZeros((i ushr 32).toInt())
-    else
-        Int.numberOfTrailingZeros(x)
+    return longNumberOfTrailingZerosPlatform(i)
 }
 
 /**
@@ -82,14 +74,7 @@ fun Long.Companion.compare(x: Long, y: Long): Int {
  * @return the number of one-bits in the two's complement binary representation of [i].
  */
 fun Long.Companion.bitCount(i: Long): Int {
-    var x = i
-    x = x - ((x ushr 1) and 0x5555555555555555L)
-    x = (x and 0x3333333333333333L) + ((x ushr 2) and 0x3333333333333333L)
-    x = (x + (x ushr 4)) and 0x0f0f0f0f0f0f0f0fL
-    x += x ushr 8
-    x += x ushr 16
-    x += x ushr 32
-    return (x and 0x7f).toInt()
+    return longBitCountPlatform(i)
 }
 
 /**

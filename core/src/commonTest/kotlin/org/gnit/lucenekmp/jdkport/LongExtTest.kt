@@ -1,10 +1,18 @@
 package org.gnit.lucenekmp.jdkport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class LongExtTest {
+    init {
+        configureTestLogging()
+    }
+
+    private val logger = KotlinLogging.logger {}
 
     @Test
     fun testCompare() {
@@ -74,5 +82,57 @@ class LongExtTest {
         val value = 0x0102030405060708L
         val reversed = Long.reverseBytes(value)
         assertEquals(0x0807060504030201L, reversed)
+    }
+
+    @Test
+    fun testPerfBitOpsProbe() {
+        val values = LongArray(1_000) { i -> (i.toLong() * -7046029254386353131L) + -3335678366873096957L }
+        val iterations = 500_000
+
+        val baselineMark = TimeSource.Monotonic.markNow()
+        var baseline = 0L
+        repeat(iterations) { i ->
+            val v = values[i % values.size]
+            baseline += baselineNumberOfLeadingZeros(v).toLong()
+            baseline += baselineNumberOfTrailingZeros(v).toLong()
+            baseline += baselineBitCount(v).toLong()
+        }
+        val baselineMs = baselineMark.elapsedNow().inWholeMilliseconds
+
+        val optimizedMark = TimeSource.Monotonic.markNow()
+        var optimized = 0L
+        repeat(iterations) { i ->
+            val v = values[i % values.size]
+            optimized += Long.numberOfLeadingZeros(v).toLong()
+            optimized += Long.numberOfTrailingZeros(v).toLong()
+            optimized += Long.bitCount(v).toLong()
+        }
+        val optimizedMs = optimizedMark.elapsedNow().inWholeMilliseconds
+
+        assertEquals(baseline, optimized)
+        logger.debug {
+            "perf:LongExt bitOps iterations=$iterations baselineMs=$baselineMs optimizedMs=$optimizedMs checksum=$optimized"
+        }
+    }
+
+    private fun baselineNumberOfLeadingZeros(i: Long): Int {
+        val x = (i ushr 32).toInt()
+        return if (x == 0) 32 + Int.numberOfLeadingZeros(i.toInt()) else Int.numberOfLeadingZeros(x)
+    }
+
+    private fun baselineNumberOfTrailingZeros(i: Long): Int {
+        val x = i.toInt()
+        return if (x == 0) 32 + Int.numberOfTrailingZeros((i ushr 32).toInt()) else Int.numberOfTrailingZeros(x)
+    }
+
+    private fun baselineBitCount(i: Long): Int {
+        var x = i
+        x = x - ((x ushr 1) and 0x5555555555555555L)
+        x = (x and 0x3333333333333333L) + ((x ushr 2) and 0x3333333333333333L)
+        x = (x + (x ushr 4)) and 0x0f0f0f0f0f0f0f0fL
+        x += x ushr 8
+        x += x ushr 16
+        x += x ushr 32
+        return (x and 0x7f).toInt()
     }
 }
