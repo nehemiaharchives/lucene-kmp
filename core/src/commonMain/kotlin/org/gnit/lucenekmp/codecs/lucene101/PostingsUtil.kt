@@ -21,19 +21,7 @@ internal object PostingsUtil {
         decodeFreq: Boolean
     ) {
         GroupVIntUtil.readGroupVInts(docIn, docBuffer, num)
-        if (indexHasFreq && decodeFreq) {
-            for (i in 0..<num) {
-                freqBuffer[i] = docBuffer[i] and 0x01
-                docBuffer[i] = docBuffer[i] ushr 1
-                if (freqBuffer[i] == 0) {
-                    freqBuffer[i] = docIn.readVInt()
-                }
-            }
-        } else if (indexHasFreq) {
-            for (i in 0..<num) {
-                docBuffer[i] = docBuffer[i] ushr 1
-            }
-        }
+        readVIntBlockPlatform(docIn, docBuffer, freqBuffer, num, indexHasFreq, decodeFreq)
     }
 
     /** Write freq buffer with variable-length encoding and doc buffer with group-varint encoding.  */
