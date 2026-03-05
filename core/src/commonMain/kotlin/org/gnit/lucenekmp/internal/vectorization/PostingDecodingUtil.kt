@@ -26,15 +26,6 @@ class PostingDecodingUtil(`in`: IndexInput) {
     fun splitInts(
         count: Int, b: IntArray, bShift: Int, dec: Int, bMask: Int, c: IntArray, cIndex: Int, cMask: Int
     ) {
-        // Default implementation, which takes advantage of the C2 compiler's loop unrolling and
-        // auto-vectorization.
-        `in`.readInts(c, cIndex, count)
-        val maxIter = (bShift - 1) / dec
-        for (i in 0..<count) {
-            for (j in 0..maxIter) {
-                b[count * j + i] = (c[cIndex + i] ushr (bShift - j * dec)) and bMask
-            }
-            c[cIndex + i] = c[cIndex + i] and cMask
-        }
+        splitIntsPlatform(`in`, count, b, bShift, dec, bMask, c, cIndex, cMask)
     }
 }
