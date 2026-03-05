@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.search
 
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.IndexReaderContext
 import org.gnit.lucenekmp.index.LeafReader
@@ -12,6 +13,8 @@ import org.gnit.lucenekmp.index.Term
 import org.gnit.lucenekmp.index.TermState
 import org.gnit.lucenekmp.index.TermStates
 import org.gnit.lucenekmp.index.TermsEnum
+import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.search.similarities.Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity.SimScorer
 import org.gnit.lucenekmp.util.IOSupplier
@@ -178,19 +181,38 @@ class TermQuery : Query {
          * exist in the given context
          */
         @Throws(IOException::class) private fun getTermsEnum(context: LeafReaderContext): TermsEnum? {
+            return getTermsEnum(context, null)
+        }
+
+        @Throws(IOException::class) private fun getTermsEnum(
+            context: LeafReaderContext,
+            probe: TermCountProbe?
+        ): TermsEnum? {
             checkNotNull(termStates)
             require(termStates.wasBuiltFor(ReaderUtil.getTopLevelContext(context))
             ) {("The top-reader used to create Weight is not the same as the current reader's top-reader ("
                     + ReaderUtil.getTopLevelContext(context))}
+            var stepStartNs = if (probe != null) System.nanoTime() else 0L
             val supplier: IOSupplier<TermState?>? = termStates.get(context)
             val state: TermState? = supplier?.get()
+            if (probe != null) {
+                probe.stateLookupNs += System.nanoTime() - stepStartNs
+            }
             if (state == null) { // term is not present in that reader
                 require(termNotInReader(context.reader(), term)
                 ) { "no termstate found but term exists in reader term=$term" }
                 return null
             }
+            stepStartNs = if (probe != null) System.nanoTime() else 0L
             val termsEnum: TermsEnum = context.reader().terms(term.field())!!.iterator()
+            if (probe != null) {
+                probe.iteratorNs += System.nanoTime() - stepStartNs
+            }
+            stepStartNs = if (probe != null) System.nanoTime() else 0L
             termsEnum.seekExact(term.bytes(), state)
+            if (probe != null) {
+                probe.seekNs += System.nanoTime() - stepStartNs
+            }
             return termsEnum
         }
 
@@ -233,14 +255,35 @@ class TermQuery : Query {
         }
 
         @Throws(IOException::class) override fun count(context: LeafReaderContext): Int {
-            return if (!context.reader().hasDeletions()) {
-                val termsEnum: TermsEnum? = getTermsEnum(context)
-                // termsEnum is not null if term state is available
-                termsEnum?.docFreq() ?: // the term cannot be found in the dictionary so the count is 0
-                0
+            val probe = if (logger.isDebugEnabled()) TermCountProbe() else null
+            val totalStartNs = if (probe != null) System.nanoTime() else 0L
+            val result = if (!context.reader().hasDeletions()) {
+                val termsEnum: TermsEnum? = getTermsEnum(context, probe)
+                var stepStartNs = if (probe != null) System.nanoTime() else 0L
+                val docFreq = termsEnum?.docFreq() ?: 0
+                if (probe != null) {
+                    probe.docFreqNs += System.nanoTime() - stepStartNs
+                }
+                docFreq
             } else {
-                super.count(context)
+                val stepStartNs = if (probe != null) System.nanoTime() else 0L
+                val superCount = super.count(context)
+                if (probe != null) {
+                    probe.fallbackNs += System.nanoTime() - stepStartNs
+                }
+                superCount
             }
+            if (probe != null) {
+                probe.totalNs = System.nanoTime() - totalStartNs
+                countPerfStats.calls++
+                countPerfStats.stateLookupNs += probe.stateLookupNs
+                countPerfStats.iteratorNs += probe.iteratorNs
+                countPerfStats.seekNs += probe.seekNs
+                countPerfStats.docFreqNs += probe.docFreqNs
+                countPerfStats.fallbackNs += probe.fallbackNs
+                countPerfStats.totalNs += probe.totalNs
+            }
+            return result
         }
     }
 
@@ -309,5 +352,64 @@ class TermQuery : Query {
 
     override fun hashCode(): Int {
         return classHash() xor term.hashCode()
+    }
+
+    private class TermCountProbe {
+        var stateLookupNs: Long = 0
+        var iteratorNs: Long = 0
+        var seekNs: Long = 0
+        var docFreqNs: Long = 0
+        var fallbackNs: Long = 0
+        var totalNs: Long = 0
+    }
+
+    private class TermCountStats {
+        var calls: Long = 0
+        var stateLookupNs: Long = 0
+        var iteratorNs: Long = 0
+        var seekNs: Long = 0
+        var docFreqNs: Long = 0
+        var fallbackNs: Long = 0
+        var totalNs: Long = 0
+
+        fun reset() {
+            calls = 0
+            stateLookupNs = 0
+            iteratorNs = 0
+            seekNs = 0
+            docFreqNs = 0
+            fallbackNs = 0
+            totalNs = 0
+        }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+        private val countPerfStats = TermCountStats()
+
+        fun resetCountPerfStats() {
+            countPerfStats.reset()
+        }
+
+        fun logCountPerfStats(tag: String = "") {
+            if (!logger.isDebugEnabled()) {
+                return
+            }
+            val calls = countPerfStats.calls
+            if (calls == 0L) {
+                logger.debug { "phase=termQuery.count.stats tag=$tag calls=0" }
+                return
+            }
+            fun toMs(ns: Long): Long = TimeUnit.NANOSECONDS.toMillis(ns)
+            logger.debug {
+                "phase=termQuery.count.stats tag=$tag calls=$calls " +
+                    "stateLookupMs=${toMs(countPerfStats.stateLookupNs)} " +
+                    "iteratorMs=${toMs(countPerfStats.iteratorNs)} " +
+                    "seekMs=${toMs(countPerfStats.seekNs)} " +
+                    "docFreqMs=${toMs(countPerfStats.docFreqNs)} " +
+                    "fallbackMs=${toMs(countPerfStats.fallbackNs)} " +
+                    "totalMs=${toMs(countPerfStats.totalNs)}"
+            }
+        }
     }
 }

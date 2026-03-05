@@ -12,9 +12,13 @@ internal class ReverseBytesReader(private val bytes: ByteArray) : BytesReader() 
     }
 
     override fun readBytes(b: ByteArray, offset: Int, len: Int) {
-        for (i in 0..<len) {
-            b[offset + i] = bytes[pos--]
+        var src = pos
+        var dst = offset
+        val end = offset + len
+        while (dst < end) {
+            b[dst++] = bytes[src--]
         }
+        pos = src
     }
 
     override fun skipBytes(count: Long) {

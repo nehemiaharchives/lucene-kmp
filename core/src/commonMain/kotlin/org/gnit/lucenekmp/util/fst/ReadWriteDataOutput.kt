@@ -69,9 +69,21 @@ internal class ReadWriteDataOutput(private val blockBits: Int) : DataOutput(), F
             }
 
             override fun readBytes(b: ByteArray, offset: Int, len: Int) {
-                for (i in 0..<len) {
-                    b[offset + i] = readByte()
+                var dst = offset
+                val end = offset + len
+                var localCurrent = current
+                var localNextBuffer = nextBuffer
+                var localNextRead = nextRead
+                while (dst < end) {
+                    if (localNextRead == -1) {
+                        localCurrent = byteBuffers!![localNextBuffer--].array()
+                        localNextRead = blockSize - 1
+                    }
+                    b[dst++] = localCurrent[localNextRead--]
                 }
+                current = localCurrent
+                nextBuffer = localNextBuffer
+                nextRead = localNextRead
             }
 
             override var position: Long

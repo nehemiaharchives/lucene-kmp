@@ -5,6 +5,7 @@ import okio.IOException
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TermToBytesRefAttribute
+import org.gnit.lucenekmp.codecs.lucene90.blocktree.SegmentTermsEnum
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.FieldType
@@ -25,6 +26,8 @@ import org.gnit.lucenekmp.util.AttributeReflector
 import org.gnit.lucenekmp.util.AttributeSource
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.configureTestLogging
+import org.gnit.lucenekmp.util.fst.ByteSequenceOutputs
+import org.gnit.lucenekmp.util.fst.FST
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.test.Test
@@ -123,6 +126,82 @@ Test2BTerms native speedup record (from this investigation cycle):
      - recursively instrument count/seek internals down to lowest-level term seek/decode operations.
      - optimize only low-level native seams; keep Lucene algorithm unchanged.
      - keep iteration rule: measure -> keep only win -> revert regressions.
+
+10) [Measured] testSavedTerms count path deep split (IndexSearcher)
+    files:
+      - core/src/commonMain/.../search/IndexSearcher.kt
+      - core/src/commonTest/.../index/Test2BTerms.kt
+    measured from generated test XML (same cycle):
+      - jvm: countMs=932, searchMs=703, leafGetCollectorMs=688
+      - native: countMs=7053, searchMs=5870, leafGetCollectorMs=5761
+    conclusion:
+      - dominant native gap is `IndexSearcher.count -> searchLeaf -> collector.getLeafCollector`.
+      - scorerSupplier/bulkScorer/score path is ~0 in both targets here, so this is not a scoring loop issue.
+
+11) [Now] recursive substep target under item 10
+    focus path:
+      - `TotalHitCountCollector.getLeafCollector -> weight.count(context)`
+      - next split planned in `TermQuery.TermWeight.count`:
+        state lookup, terms iterator acquisition, seekExact, docFreq.
+    rule:
+      - keep lucene logic; optimize only lowest-level native-heavy seam after measured proof.
+
+12) [Measured] deeper split under `TermQuery.count` / `TermStates.get` / `SegmentTermsEnum.prepareSeekExact`
+    files:
+      - core/src/commonMain/.../search/TermQuery.kt
+      - core/src/commonMain/.../index/TermStates.kt
+      - core/src/commonMain/.../codecs/lucene90/blocktree/SegmentTermsEnum.kt
+    findings:
+      - in native, `TermStates.get` cold-path was dominant and mostly `prepareSeekExact`.
+      - recursive split inside `prepareSeekExact` showed `indexWalk` is the largest native-only gap.
+    sample measured gap (same run cycle):
+      - segmentTermsEnum.prepareSeek total: native ~4211ms vs jvm ~119ms
+      - inside native prepareSeek: indexWalk ~3827ms (largest), setup/floor much smaller.
+    TODO:
+      - recursively split `indexWalk` into lowest substeps (`findTargetArc` branch costs, arc-read path, byte/label compares).
+      - after lowest hotspot is proven, optimize only native low-level impl, keep algorithm same.
+
+13) [Reverted] native-only count fast path seam
+    reverted files:
+      - core/src/commonMain/.../search/TermQueryCountPlatform.kt
+      - core/src/jvmAndroidMain/.../search/TermQueryCountPlatform.jvmandroid.kt
+      - core/src/nativeMain/.../search/TermQueryCountPlatform.native.kt
+    reason:
+      - measurable gain existed but not enough to justify logic-path divergence from Java Lucene expectations.
+    TODO:
+      - keep single common count logic and focus optimization on `SegmentTermsEnum.prepareSeekExact` indexWalk internals.
+
+14) [Measured] bottom hotspot under `prepareSeek/indexWalk/findTargetArc`
+    files:
+      - core/src/commonMain/.../util/fst/FST.kt
+      - core/src/commonMain/.../util/fst/ByteSequenceOutputs.kt
+    findings:
+      - dominant path is `findTargetArc -> continuous -> readNextRealArc -> readArcOutputRead -> ByteSequenceOutputs.read`.
+      - reader type in this path is almost entirely `ReverseRandomAccessReader` (not `ReverseBytesReader`).
+      - representative gap before reader optimization:
+        - native `byteSequenceOutputs.read totalMs ~= 4451` vs jvm `~= 544`
+        - native `readBytesMs ~= 4128` vs jvm `~= 503`
+        - native `readVIntMs ~= 219` vs jvm `~= 30`
+
+15) [Applied patch, speedup success] `ReverseRandomAccessReader.readBytes` bulk-read + in-place reverse
+    files:
+      - core/src/commonMain/.../util/fst/ReverseRandomAccessReader.kt
+      - (related measurement) core/src/commonMain/.../util/fst/ByteSequenceOutputs.kt
+    change:
+      - replaced per-byte `readByte(pos--)` loop with single `RandomAccessInput.readBytes(start,len)` then in-place reverse.
+      - keeps same logical reverse-read behavior, only lower-level implementation changed.
+    result (representative):
+      - native test wall-clock: ~15s -> ~10~11s
+      - native `testSavedTerms countMs`: ~7600ms -> ~4400~4600ms
+      - native `segmentTermsEnum.prepareSeek indexWalkMs`: ~4800ms -> ~1900~2100ms
+      - native `byteSequenceOutputs.read totalMs`: ~4451ms -> ~534ms
+      - native `readBytesMs`: ~4128ms -> ~224~228ms
+
+16) [Tried then reverted] `ReverseRandomAccessReader.readVInt` local-position override
+    reason:
+      - native improved slightly in some runs, but jvm impact was noisy/regression-prone.
+    status:
+      - reverted to default `DataInput.readVInt`; kept only the clear `readBytes` win patch.
  */
 
 // NOTE: SimpleText codec will consume very large amounts of
@@ -272,6 +351,12 @@ class Test2BTerms : LuceneTestCase() {
     private fun testSavedTerms(r: IndexReader, terms: MutableList<BytesRef>) {
         println("TEST: run ${terms.size} terms on reader=$r")
         val s = newSearcher(r)
+        s.resetCountPerfStats()
+        TermQuery.resetCountPerfStats()
+        TermStates.resetGetPerfStats()
+        SegmentTermsEnum.resetPrepareSeekPerfStats()
+        FST.resetFindTargetArcPerfStats()
+        ByteSequenceOutputs.resetReadPerfStats()
         terms.shuffle(random())
         val termsEnum = MultiTerms.getTerms(r, "field")!!.iterator()
         var failed = false
@@ -319,6 +404,12 @@ class Test2BTerms : LuceneTestCase() {
                 "seekMs=${TimeUnit.NANOSECONDS.toMillis(seekNanos)} " +
                 "loggingMs=${TimeUnit.NANOSECONDS.toMillis(loggingNanos)}"
         }
+        s.logCountPerfStats("testSavedTerms")
+        TermQuery.logCountPerfStats("testSavedTerms")
+        TermStates.logGetPerfStats("testSavedTerms")
+        SegmentTermsEnum.logPrepareSeekPerfStats("testSavedTerms")
+        FST.logFindTargetArcPerfStats("testSavedTerms")
+        ByteSequenceOutputs.logReadPerfStats("testSavedTerms")
         assertFalse(failed)
     }
 

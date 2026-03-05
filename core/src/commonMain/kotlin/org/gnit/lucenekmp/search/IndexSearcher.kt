@@ -15,6 +15,7 @@ import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.Executor
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.similarities.BM25Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity
@@ -82,6 +83,7 @@ open class IndexSearcher(
 
     // Used internally for load balancing threads executing for the query
     private val taskExecutor: TaskExecutor
+    private val countPerfStats = CountPerfStats()
 
     var queryCache: QueryCache? = DEFAULT_QUERY_CACHE
     var queryCachingPolicy: QueryCachingPolicy = DEFAULT_CACHING_POLICY
@@ -282,14 +284,27 @@ open class IndexSearcher(
      */
     @Throws(IOException::class)
     fun count(query: Query): Int {
+        val perfEnabled = logger.isDebugEnabled()
+        val countStartNs = if (perfEnabled) System.nanoTime() else 0L
+        var rewriteNs = 0L
+        var boolOptNs = 0L
+        var managerNs = 0L
+        var weightNs = 0L
+        var searchNs = 0L
+
         // Rewrite query before optimization check
         var query: Query = query
+        var stepStartNs = if (perfEnabled) System.nanoTime() else 0L
         query = rewrite(ConstantScoreQuery(query))
         if (query is ConstantScoreQuery) {
             query = query.query
         }
+        if (perfEnabled) {
+            rewriteNs += System.nanoTime() - stepStartNs
+        }
 
         // Check if two clause disjunction optimization applies
+        stepStartNs = if (perfEnabled) System.nanoTime() else 0L
         if (query is BooleanQuery && !this.reader.hasDeletions() && query.isTwoClausePureDisjunctionWithTerms
         ) {
             val queries: Array<Query> =
@@ -305,10 +320,71 @@ open class IndexSearcher(
                 return countTerm1 + countTerm2 - count(queries[2])
             }
         }
+        if (perfEnabled) {
+            boolOptNs += System.nanoTime() - stepStartNs
+        }
+        stepStartNs = if (perfEnabled) System.nanoTime() else 0L
         val manager = TotalHitCountCollectorManager(this.slices)
         val firstCollector = manager.newCollector()
+        if (perfEnabled) {
+            managerNs += System.nanoTime() - stepStartNs
+        }
+        stepStartNs = if (perfEnabled) System.nanoTime() else 0L
         val weight = createWeight(ConstantScoreQuery(query), firstCollector.scoreMode(), 1f)
-        return search(weight, manager, firstCollector)
+        if (perfEnabled) {
+            weightNs += System.nanoTime() - stepStartNs
+        }
+        stepStartNs = if (perfEnabled) System.nanoTime() else 0L
+        val result = search(weight, manager, firstCollector, countPerfStats)
+        if (perfEnabled) {
+            searchNs += System.nanoTime() - stepStartNs
+            countPerfStats.calls++
+            countPerfStats.rewriteNs += rewriteNs
+            countPerfStats.boolOptNs += boolOptNs
+            countPerfStats.managerNs += managerNs
+            countPerfStats.weightNs += weightNs
+            countPerfStats.searchNs += searchNs
+            countPerfStats.totalNs += System.nanoTime() - countStartNs
+        }
+        return result
+    }
+
+    fun resetCountPerfStats() {
+        countPerfStats.reset()
+    }
+
+    fun logCountPerfStats(tag: String = "") {
+        if (!logger.isDebugEnabled()) {
+            return
+        }
+        val calls = countPerfStats.calls
+        if (calls == 0L) {
+            logger.debug { "phase=indexSearcher.count.stats tag=$tag calls=0" }
+            return
+        }
+        fun toMs(ns: Long): Long = TimeUnit.NANOSECONDS.toMillis(ns)
+        logger.debug {
+            "phase=indexSearcher.count.stats tag=$tag calls=$calls " +
+                "rewriteMs=${toMs(countPerfStats.rewriteNs)} " +
+                "boolOptMs=${toMs(countPerfStats.boolOptNs)} " +
+                "managerMs=${toMs(countPerfStats.managerNs)} " +
+                "weightMs=${toMs(countPerfStats.weightNs)} " +
+                "searchMs=${toMs(countPerfStats.searchNs)} " +
+                "totalMs=${toMs(countPerfStats.totalNs)} " +
+                "dispatchMs=${toMs(countPerfStats.dispatchNs)} " +
+                "singleSliceSearchMs=${toMs(countPerfStats.singleSliceSearchNs)} " +
+                "singleSliceReduceMs=${toMs(countPerfStats.singleSliceReduceNs)} " +
+                "multiCollectorInitMs=${toMs(countPerfStats.multiCollectorInitNs)} " +
+                "multiInvokeAllMs=${toMs(countPerfStats.multiInvokeAllNs)} " +
+                "multiReduceMs=${toMs(countPerfStats.multiReduceNs)} " +
+                "searchCalls=${countPerfStats.searchCalls} " +
+                "leafCalls=${countPerfStats.leafCalls} " +
+                "leafGetCollectorMs=${toMs(countPerfStats.leafGetCollectorNs)} " +
+                "leafScorerSupplierMs=${toMs(countPerfStats.leafScorerSupplierNs)} " +
+                "leafBulkScorerMs=${toMs(countPerfStats.leafBulkScorerNs)} " +
+                "leafScoreMs=${toMs(countPerfStats.leafScoreNs)} " +
+                "leafFinishMs=${toMs(countPerfStats.leafFinishNs)}"
+        }
     }
 
     val slices: Array<LeafSlice>
@@ -573,27 +649,51 @@ open class IndexSearcher(
     private fun <C : Collector, T> search(
         weight: Weight,
         collectorManager: CollectorManager<C, T>,
-        firstCollector: C
+        firstCollector: C,
+        perfStats: CountPerfStats? = null
     ): T {
+        perfStats?.searchCalls = perfStats.searchCalls + 1
+        var stepStartNs = if (perfStats != null) System.nanoTime() else 0L
         val leafSlices = this.slices
+        if (perfStats != null) {
+            perfStats.dispatchNs += System.nanoTime() - stepStartNs
+        }
         if (leafSlices.isEmpty()) {
             // there are no segments, nothing to offload to the executor, but we do need to call reduce to
             // create some kind of empty result
             assert(leafContexts.isEmpty())
-            return collectorManager.reduce(mutableListOf(firstCollector))!!
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
+            val reduced = collectorManager.reduce(mutableListOf(firstCollector))!!
+            if (perfStats != null) {
+                perfStats.singleSliceReduceNs += System.nanoTime() - stepStartNs
+            }
+            return reduced
         } else if (leafSlices.size == 1) {
             // Fast path avoids task allocation + runBlocking overhead for single-slice searches.
             val leaves = leafSlices[0].partitions
-            search(leaves, weight, firstCollector)
-            return collectorManager.reduce(mutableListOf(firstCollector))!!
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
+            searchWithProbe(leaves, weight, firstCollector, perfStats)
+            if (perfStats != null) {
+                perfStats.singleSliceSearchNs += System.nanoTime() - stepStartNs
+            }
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
+            val reduced = collectorManager.reduce(mutableListOf(firstCollector))!!
+            if (perfStats != null) {
+                perfStats.singleSliceReduceNs += System.nanoTime() - stepStartNs
+            }
+            return reduced
         } else {
             val collectors: MutableList<C> = ArrayList(leafSlices.size)
             collectors.add(firstCollector)
             val scoreMode: ScoreMode = firstCollector.scoreMode()
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
             for (i in 1..<leafSlices.size) {
                 val collector: C = collectorManager.newCollector()
                 collectors.add(collector)
                 check(scoreMode == collector.scoreMode()) { "CollectorManager does not always produce collectors with the same score mode" }
+            }
+            if (perfStats != null) {
+                perfStats.multiCollectorInitNs += System.nanoTime() - stepStartNs
             }
             val listTasks: MutableList<Callable<C>> = ArrayList(leafSlices.size)
             for (i in leafSlices.indices) {
@@ -602,13 +702,22 @@ open class IndexSearcher(
                 listTasks.add(
                     Callable {
                         //logger.debug { "[IndexSearcher.search] task start slice=$i partitions=${leaves.size} collector=${collector::class.simpleName}" }
-                        search(leaves, weight, collector)
+                        searchWithProbe(leaves, weight, collector, perfStats)
                         //logger.debug { "[IndexSearcher.search] task end slice=$i" }
                         collector
                     })
             }
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
             val results: MutableList<C> = runBlocking { taskExecutor.invokeAll(listTasks) }
-            return collectorManager.reduce(results)!!
+            if (perfStats != null) {
+                perfStats.multiInvokeAllNs += System.nanoTime() - stepStartNs
+            }
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
+            val reduced = collectorManager.reduce(results)!!
+            if (perfStats != null) {
+                perfStats.multiReduceNs += System.nanoTime() - stepStartNs
+            }
+            return reduced
         }
     }
 
@@ -635,10 +744,26 @@ open class IndexSearcher(
         weight: Weight,
         collector: Collector
     ) {
+        searchWithProbe(partitions, weight, collector, null)
+    }
+
+    private fun searchWithProbe(
+        partitions: Array<LeafReaderContextPartition>,
+        weight: Weight,
+        collector: Collector,
+        perfStats: CountPerfStats?
+    ) {
         collector.weight = weight
 
         for (partition in partitions) { // search each subreader partition
-            searchLeaf(partition.ctx, partition.minDocId, partition.maxDocId, weight, collector)
+            searchLeafWithProbe(
+                partition.ctx,
+                partition.minDocId,
+                partition.maxDocId,
+                weight,
+                collector,
+                perfStats
+            )
         }
     }
 
@@ -664,22 +789,51 @@ open class IndexSearcher(
         weight: Weight,
         collector: Collector
     ) {
+        searchLeafWithProbe(ctx, minDocId, maxDocId, weight, collector, null)
+    }
+
+    private fun searchLeafWithProbe(
+        ctx: LeafReaderContext,
+        minDocId: Int,
+        maxDocId: Int,
+        weight: Weight,
+        collector: Collector,
+        perfStats: CountPerfStats?
+    ) {
+        if (perfStats != null) {
+            perfStats.leafCalls = perfStats.leafCalls + 1
+        }
         //logger.debug { "[IndexSearcher.searchLeaf] enter ord=${ctx.ord} minDocId=$minDocId maxDocId=$maxDocId" }
+        var stepStartNs = if (perfStats != null) System.nanoTime() else 0L
         val leafCollector: LeafCollector
         try {
             leafCollector = collector.getLeafCollector(ctx)
         } catch (e: CollectionTerminatedException) {
             // there is no doc of interest in this reader context
             // continue with the following leaf
+            if (perfStats != null) {
+                perfStats.leafGetCollectorNs += System.nanoTime() - stepStartNs
+            }
             return
         }
+        if (perfStats != null) {
+            perfStats.leafGetCollectorNs += System.nanoTime() - stepStartNs
+        }
         //logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier start weight=${weight::class.simpleName} query=${weight.query::class.simpleName}" }
+        stepStartNs = if (perfStats != null) System.nanoTime() else 0L
         val scorerSupplier: ScorerSupplier? = weight.scorerSupplier(ctx)
+        if (perfStats != null) {
+            perfStats.leafScorerSupplierNs += System.nanoTime() - stepStartNs
+        }
         //logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier done weight=${weight::class.simpleName} query=${weight.query::class.simpleName} hasScorer=${scorerSupplier != null}" }
         if (scorerSupplier != null) {
             //logger.debug { "[IndexSearcher.searchLeaf] scorerSupplier ready ord=${ctx.ord}" }
             scorerSupplier.setTopLevelScoringClause()
+            stepStartNs = if (perfStats != null) System.nanoTime() else 0L
             val scorer: BulkScorer = scorerSupplier.bulkScorer()!!
+            if (perfStats != null) {
+                perfStats.leafBulkScorerNs += System.nanoTime() - stepStartNs
+            }
             //logger.debug { "[IndexSearcher.searchLeaf] bulkScorer ready ord=${ctx.ord}" }
             var maybeTimedScorer: BulkScorer = scorer
             if (queryTimeout != null) {
@@ -689,18 +843,32 @@ open class IndexSearcher(
                 // Optimize for the case when live docs are stored in a FixedBitSet.
                 val acceptDocs: Bits? = ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)
                 //logger.debug { "[IndexSearcher.searchLeaf] scoring start ord=${ctx.ord}" }
+                stepStartNs = if (perfStats != null) System.nanoTime() else 0L
                 maybeTimedScorer.score(leafCollector, acceptDocs, minDocId, maxDocId)
+                if (perfStats != null) {
+                    perfStats.leafScoreNs += System.nanoTime() - stepStartNs
+                }
                 //logger.debug { "[IndexSearcher.searchLeaf] scoring end ord=${ctx.ord}" }
             } catch (e: CollectionTerminatedException) {
                 // collection was terminated prematurely
                 // continue with the following leaf
+                if (perfStats != null) {
+                    perfStats.leafScoreNs += System.nanoTime() - stepStartNs
+                }
             } catch (e: TimeLimitingBulkScorer.TimeExceededException) {
+                if (perfStats != null) {
+                    perfStats.leafScoreNs += System.nanoTime() - stepStartNs
+                }
                 partialResult = true
             }
         }
         // Note: this is called if collection ran successfully, including the above special cases of
         // CollectionTerminatedException and TimeExceededException, but no other exception.
+        stepStartNs = if (perfStats != null) System.nanoTime() else 0L
         leafCollector.finish()
+        if (perfStats != null) {
+            perfStats.leafFinishNs += System.nanoTime() - stepStartNs
+        }
         //logger.debug { "[IndexSearcher.searchLeaf] finish ord=${ctx.ord}" }
     }
 
@@ -996,6 +1164,52 @@ open class IndexSearcher(
         "Query contains too many nested clauses; maxClauseCount is set to "
                 + maxClauseCount
     )
+
+    private class CountPerfStats {
+        var calls: Long = 0
+        var rewriteNs: Long = 0
+        var boolOptNs: Long = 0
+        var managerNs: Long = 0
+        var weightNs: Long = 0
+        var searchNs: Long = 0
+        var totalNs: Long = 0
+        var dispatchNs: Long = 0
+        var singleSliceSearchNs: Long = 0
+        var singleSliceReduceNs: Long = 0
+        var multiCollectorInitNs: Long = 0
+        var multiInvokeAllNs: Long = 0
+        var multiReduceNs: Long = 0
+        var searchCalls: Long = 0
+        var leafCalls: Long = 0
+        var leafGetCollectorNs: Long = 0
+        var leafScorerSupplierNs: Long = 0
+        var leafBulkScorerNs: Long = 0
+        var leafScoreNs: Long = 0
+        var leafFinishNs: Long = 0
+
+        fun reset() {
+            calls = 0
+            rewriteNs = 0
+            boolOptNs = 0
+            managerNs = 0
+            weightNs = 0
+            searchNs = 0
+            totalNs = 0
+            dispatchNs = 0
+            singleSliceSearchNs = 0
+            singleSliceReduceNs = 0
+            multiCollectorInitNs = 0
+            multiInvokeAllNs = 0
+            multiReduceNs = 0
+            searchCalls = 0
+            leafCalls = 0
+            leafGetCollectorNs = 0
+            leafScorerSupplierNs = 0
+            leafBulkScorerNs = 0
+            leafScoreNs = 0
+            leafFinishNs = 0
+        }
+    }
 
     companion object {
         var maxClauseCount: Int = 1024

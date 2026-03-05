@@ -14,11 +14,22 @@ class ReverseRandomAccessReader(private val `in`: RandomAccessInput) : FST.Bytes
 
     @Throws(IOException::class)
     override fun readBytes(b: ByteArray, offset: Int, len: Int) {
-        var i = offset
-        val end = offset + len
-        while (i < end) {
-            b[i++] = `in`.readByte(this.position--)
+        if (len == 0) {
+            return
         }
+        val currentPos = this.position
+        val startPos = currentPos - len + 1
+        `in`.readBytes(startPos, b, offset, len)
+        var left = offset
+        var right = offset + len - 1
+        while (left < right) {
+            val tmp = b[left]
+            b[left] = b[right]
+            b[right] = tmp
+            left++
+            right--
+        }
+        this.position = currentPos - len
     }
 
     override fun skipBytes(count: Long) {

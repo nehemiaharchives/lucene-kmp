@@ -1,7 +1,10 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.search.IndexSearcher
+import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.IOBooleanSupplier
 import org.gnit.lucenekmp.util.IOSupplier
@@ -111,45 +114,101 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
     @Throws(IOException::class)
     fun get(ctx: LeafReaderContext): IOSupplier<TermState?>? {
         require(ctx.ord >= 0 && ctx.ord < states.size)
+        val probeEnabled = logger.isDebugEnabled()
+        val stats = if (probeEnabled) getPerfStats else null
+        if (stats != null) {
+            stats.calls++
+        }
         if (term == null) {
+            if (stats != null) {
+                stats.termNullCalls++
+            }
             return if (states[ctx.ord] == null) {
                 null
             } else {
                 IOSupplier { states[ctx.ord] }
             }
         }
+        if (states[ctx.ord] == null && stats != null) {
+            stats.coldPathCalls++
+        }
         if (states[ctx.ord] == null) {
+            var stepStartNs = if (stats != null) System.nanoTime() else 0L
             val terms: Terms? = ctx.reader().terms(term.field())
+            if (stats != null) {
+                stats.termsLookupNs += System.nanoTime() - stepStartNs
+            }
             if (terms == null) {
                 this.states[ctx.ord] = EMPTY_TERMSTATE
                 return null
             }
+            stepStartNs = if (stats != null) System.nanoTime() else 0L
             val termsEnum = terms.iterator()
+            if (stats != null) {
+                stats.iteratorNs += System.nanoTime() - stepStartNs
+            }
+            stepStartNs = if (stats != null) System.nanoTime() else 0L
             val termExistsSupplier: IOBooleanSupplier? = termsEnum.prepareSeekExact(term.bytes())
+            if (stats != null) {
+                stats.prepareSeekNs += System.nanoTime() - stepStartNs
+            }
             if (termExistsSupplier == null) {
                 this.states[ctx.ord] = EMPTY_TERMSTATE
                 return null
             }
             return IOSupplier {
+                var supplierStepStartNs = if (stats != null) System.nanoTime() else 0L
                 if (this.states[ctx.ord] == null) {
                     var state: TermState? = null
-                    if (termExistsSupplier.get()) {
+                    var exists = false
+                    var existsCheckNs = 0L
+                    if (stats != null) {
+                        supplierStepStartNs = System.nanoTime()
+                    }
+                    exists = termExistsSupplier.get()
+                    if (stats != null) {
+                        existsCheckNs = System.nanoTime() - supplierStepStartNs
+                    }
+                    if (exists) {
+                        if (stats != null) {
+                            supplierStepStartNs = System.nanoTime()
+                        }
                         state = termsEnum.termState()
+                        if (stats != null) {
+                            stats.termStateNs += System.nanoTime() - supplierStepStartNs
+                        }
                         this.states[ctx.ord] = state
                     } else {
                         this.states[ctx.ord] = EMPTY_TERMSTATE
                     }
+                    if (stats != null) {
+                        stats.termExistsCheckNs += existsCheckNs
+                    }
                 }
                 val state = this.states[ctx.ord]
                 if (state === EMPTY_TERMSTATE) {
+                    if (stats != null) {
+                        stats.supplierCalls++
+                        stats.supplierNs += System.nanoTime() - supplierStepStartNs
+                    }
                     return@IOSupplier null
+                }
+                if (stats != null) {
+                    stats.supplierCalls++
+                    stats.supplierNs += System.nanoTime() - supplierStepStartNs
                 }
                 state
             }
         }
         val state = this.states[ctx.ord]
         if (state === EMPTY_TERMSTATE) {
+            if (stats != null) {
+                stats.cacheHitCalls++
+            }
             return null
+        }
+        if (stats != null) {
+            stats.cacheHitCalls++
         }
         return IOSupplier { state }
     }
@@ -186,7 +245,67 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
         return sb.toString()
     }
 
+    private class GetPerfStats {
+        var calls: Long = 0
+        var coldPathCalls: Long = 0
+        var cacheHitCalls: Long = 0
+        var termNullCalls: Long = 0
+        var termsLookupNs: Long = 0
+        var iteratorNs: Long = 0
+        var prepareSeekNs: Long = 0
+        var supplierCalls: Long = 0
+        var supplierNs: Long = 0
+        var termExistsCheckNs: Long = 0
+        var termStateNs: Long = 0
+
+        fun reset() {
+            calls = 0
+            coldPathCalls = 0
+            cacheHitCalls = 0
+            termNullCalls = 0
+            termsLookupNs = 0
+            iteratorNs = 0
+            prepareSeekNs = 0
+            supplierCalls = 0
+            supplierNs = 0
+            termExistsCheckNs = 0
+            termStateNs = 0
+        }
+    }
+
     companion object {
+        private val logger = KotlinLogging.logger {}
+        private val getPerfStats = GetPerfStats()
+
+        fun resetGetPerfStats() {
+            getPerfStats.reset()
+        }
+
+        fun logGetPerfStats(tag: String = "") {
+            if (!logger.isDebugEnabled()) {
+                return
+            }
+            val calls = getPerfStats.calls
+            if (calls == 0L) {
+                logger.debug { "phase=termStates.get.stats tag=$tag calls=0" }
+                return
+            }
+            fun toMs(ns: Long): Long = TimeUnit.NANOSECONDS.toMillis(ns)
+            logger.debug {
+                "phase=termStates.get.stats tag=$tag calls=$calls " +
+                    "coldPathCalls=${getPerfStats.coldPathCalls} " +
+                    "cacheHitCalls=${getPerfStats.cacheHitCalls} " +
+                    "termNullCalls=${getPerfStats.termNullCalls} " +
+                    "termsLookupMs=${toMs(getPerfStats.termsLookupNs)} " +
+                    "iteratorMs=${toMs(getPerfStats.iteratorNs)} " +
+                    "prepareSeekMs=${toMs(getPerfStats.prepareSeekNs)} " +
+                    "supplierCalls=${getPerfStats.supplierCalls} " +
+                    "supplierMs=${toMs(getPerfStats.supplierNs)} " +
+                    "termExistsCheckMs=${toMs(getPerfStats.termExistsCheckNs)} " +
+                    "termStateMs=${toMs(getPerfStats.termStateNs)}"
+            }
+        }
+
         private val EMPTY_TERMSTATE: TermState = object : TermState() {
             override fun copyFrom(other: TermState) {}
         }
