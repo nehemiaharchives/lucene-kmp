@@ -2,8 +2,6 @@ package org.gnit.lucenekmp.util.fst
 
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.index.CorruptIndexException
-import org.gnit.lucenekmp.jdkport.System
-import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.store.ByteBuffersDataOutput
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.DataOutput
@@ -20,7 +18,6 @@ import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.reverseBytes
 import kotlin.experimental.and
 import kotlin.experimental.or
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.jdkport.toHexString
@@ -719,56 +716,33 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
     /** Never returns null, but you should never call this if arc.isLast() is true.  */
     @Throws(IOException::class)
     fun readNextRealArc(arc: Arc<T>, `in`: BytesReader): Arc<T> {
-        val readNextRealArcStartNs = System.nanoTime()
-        val stats = findTargetArcPerfStats
-        stats.readNextRealArcCalls++
         // TODO: can't assert this because we call from readFirstArc
         // assert !flag(arc.flags, BIT_LAST_ARC);
 
         when (arc.nodeFlags()) {
             ARCS_FOR_BINARY_SEARCH, ARCS_FOR_CONTINUOUS -> {
-                stats.readNextRealArcFixedCalls++
-                val fixedHeaderStartNs = System.nanoTime()
                 require(arc.bytesPerArc() > 0)
                 arc.arcIdx++
                 require(arc.arcIdx() >= 0 && arc.arcIdx() < arc.numArcs())
                 `in`.position = arc.posArcsStart() - arc.arcIdx() * arc.bytesPerArc().toLong()
                 arc.flags = `in`.readByte()
-                stats.readNextRealArcFixedHeaderNs += System.nanoTime() - fixedHeaderStartNs
-                val fixedReadArcStartNs = System.nanoTime()
-                val result = readArc(arc, `in`)
-                stats.readNextRealArcFixedReadArcNs += System.nanoTime() - fixedReadArcStartNs
-                stats.readNextRealArcTotalNs += System.nanoTime() - readNextRealArcStartNs
-                return result
             }
 
             ARCS_FOR_DIRECT_ADDRESSING -> {
-                stats.readNextRealArcDirectCalls++
-                val directStartNs = System.nanoTime()
                 require(BitTable.assertIsValid(arc, `in`))
                 require(arc.arcIdx() == -1 || BitTable.isBitSet(arc.arcIdx(), arc, `in`))
                 val nextIndex: Int = BitTable.nextBitSet(arc.arcIdx(), arc, `in`)
-                val result = readArcByDirectAddressing(arc, `in`, nextIndex, arc.presenceIndex + 1)
-                stats.readNextRealArcDirectNs += System.nanoTime() - directStartNs
-                stats.readNextRealArcTotalNs += System.nanoTime() - readNextRealArcStartNs
-                return result
+                return readArcByDirectAddressing(arc, `in`, nextIndex, arc.presenceIndex + 1)
             }
 
             else -> {
-                stats.readNextRealArcLinearCalls++
-                val linearHeaderStartNs = System.nanoTime()
                 // Variable length arcs - linear search.
                 require(arc.bytesPerArc() == 0)
                 `in`.position = arc.nextArc()
                 arc.flags = `in`.readByte()
-                stats.readNextRealArcLinearHeaderNs += System.nanoTime() - linearHeaderStartNs
-                val linearReadArcStartNs = System.nanoTime()
-                val result = readArc(arc, `in`)
-                stats.readNextRealArcLinearReadArcNs += System.nanoTime() - linearReadArcStartNs
-                stats.readNextRealArcTotalNs += System.nanoTime() - readNextRealArcStartNs
-                return result
             }
         }
+        return readArc(arc, `in`)
     }
 
     /**
@@ -778,39 +752,25 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
      */
     @Throws(IOException::class)
     private fun readArc(arc: Arc<T>, `in`: BytesReader): Arc<T> {
-        val readArcStartNs = System.nanoTime()
-        val stats = findTargetArcPerfStats
-        stats.readArcCalls++
         if (arc.nodeFlags() == ARCS_FOR_DIRECT_ADDRESSING || arc.nodeFlags() == ARCS_FOR_CONTINUOUS) {
-            stats.readArcFixedLabelCalls++
             arc.label = arc.firstLabel() + arc.arcIdx()
         } else {
-            stats.readArcReadLabelCalls++
-            val readLabelStartNs = System.nanoTime()
             arc.label = readLabel(`in`)
-            stats.readArcReadLabelNs += System.nanoTime() - readLabelStartNs
         }
 
         if (arc.flag(BIT_ARC_HAS_OUTPUT)) {
-            stats.readArcOutputReadCalls++
-            val outputReadStartNs = System.nanoTime()
             arc.output = outputs.read(`in`)
-            stats.readArcOutputReadNs += System.nanoTime() - outputReadStartNs
         } else {
             arc.output = outputs.noOutput
         }
 
         if (arc.flag(BIT_ARC_HAS_FINAL_OUTPUT)) {
-            stats.readArcFinalOutputReadCalls++
-            val finalOutputReadStartNs = System.nanoTime()
             arc.nextFinalOutput = outputs.readFinalOutput(`in`)
-            stats.readArcFinalOutputReadNs += System.nanoTime() - finalOutputReadStartNs
         } else {
             arc.nextFinalOutput = outputs.noOutput
         }
 
         if (arc.flag(BIT_STOP_NODE)) {
-            stats.readArcStopNodeCalls++
             if (arc.flag(BIT_FINAL_ARC)) {
                 arc.target = FINAL_END_NODE
             } else {
@@ -818,36 +778,27 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             }
             arc.nextArc = `in`.position // Only useful for list.
         } else if (arc.flag(BIT_TARGET_NEXT)) {
-            stats.readArcTargetNextCalls++
             arc.nextArc = `in`.position // Only useful for list.
             // TODO: would be nice to make this lazy -- maybe
             // caller doesn't need the target and is scanning arcs...
             if (!arc.flag(BIT_LAST_ARC)) {
                 if (arc.bytesPerArc() == 0) {
                     // must scan
-                    val seekToNextNodeStartNs = System.nanoTime()
                     seekToNextNode(`in`)
-                    stats.readArcTargetNextSeekToNextNodeNs += System.nanoTime() - seekToNextNodeStartNs
                 } else {
-                    val targetNextPosCalcStartNs = System.nanoTime()
                     val numArcs =
                         if (arc.nodeFlags == ARCS_FOR_DIRECT_ADDRESSING)
                             BitTable.countBits(arc, `in`)
                         else
                             arc.numArcs()
                     `in`.position = arc.posArcsStart() - arc.bytesPerArc() * numArcs.toLong()
-                    stats.readArcTargetNextPositionCalcNs += System.nanoTime() - targetNextPosCalcStartNs
                 }
             }
             arc.target = `in`.position
         } else {
-            stats.readArcUnpackedTargetCalls++
-            val unpackedTargetStartNs = System.nanoTime()
             arc.target = readUnpackedNodeTarget(`in`)
-            stats.readArcUnpackedTargetNs += System.nanoTime() - unpackedTargetStartNs
             arc.nextArc = `in`.position // Only useful for list.
         }
-        stats.readArcTotalNs += System.nanoTime() - readArcStartNs
         return arc
     }
 
@@ -859,86 +810,7 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
      */
     @Throws(IOException::class)
     fun findTargetArc(labelToMatch: Int, follow: Arc<T>, arc: Arc<T>, `in`: BytesReader): Arc<T>? {
-        val totalStartNs = System.nanoTime()
-        var readNodeHeaderNs = 0L
-        var directNs = 0L
-        var directHeaderNs = 0L
-        var directRangeCheckNs = 0L
-        var directBitCheckNs = 0L
-        var directReadArcNs = 0L
-        var binaryNs = 0L
-        var binaryHeaderNs = 0L
-        var binaryLoopNs = 0L
-        var binaryReadArcNs = 0L
-        var binaryIterations = 0L
-        var continuousNs = 0L
-        var continuousHeaderNs = 0L
-        var continuousReadArcNs = 0L
-        var linearNs = 0L
-        var linearReadFirstArcInfoNs = 0L
-        var linearLoopNs = 0L
-        var linearSkipNs = 0L
-        var linearReadArcNs = 0L
-        var linearIterations = 0L
-        var endLabelPath = false
-        var noArcsPath = false
-        var directPath = false
-        var binaryPath = false
-        var continuousPath = false
-        var linearPath = false
-
-        fun record(result: Arc<T>?): Arc<T>? {
-            val stats = findTargetArcPerfStats
-            stats.calls++
-            if (endLabelPath) {
-                stats.endLabelCalls++
-            }
-            if (noArcsPath) {
-                stats.noArcsReturns++
-            }
-            if (directPath) {
-                stats.directCalls++
-            }
-            if (binaryPath) {
-                stats.binaryCalls++
-            }
-            if (continuousPath) {
-                stats.continuousCalls++
-            }
-            if (linearPath) {
-                stats.linearCalls++
-            }
-            if (result == null) {
-                stats.nullReturns++
-            } else {
-                stats.nonNullReturns++
-            }
-            stats.readNodeHeaderNs += readNodeHeaderNs
-            stats.directNs += directNs
-            stats.directHeaderNs += directHeaderNs
-            stats.directRangeCheckNs += directRangeCheckNs
-            stats.directBitCheckNs += directBitCheckNs
-            stats.directReadArcNs += directReadArcNs
-            stats.binaryNs += binaryNs
-            stats.binaryHeaderNs += binaryHeaderNs
-            stats.binaryLoopNs += binaryLoopNs
-            stats.binaryReadArcNs += binaryReadArcNs
-            stats.binaryIterations += binaryIterations
-            stats.continuousNs += continuousNs
-            stats.continuousHeaderNs += continuousHeaderNs
-            stats.continuousReadArcNs += continuousReadArcNs
-            stats.linearNs += linearNs
-            stats.linearReadFirstArcInfoNs += linearReadFirstArcInfoNs
-            stats.linearLoopNs += linearLoopNs
-            stats.linearSkipNs += linearSkipNs
-            stats.linearReadArcNs += linearReadArcNs
-            stats.linearIterations += linearIterations
-            stats.totalNs += System.nanoTime() - totalStartNs
-            return result
-        }
-
         if (labelToMatch == END_LABEL) {
-            endLabelPath = true
             if (follow.isFinal) {
                 if (follow.target() <= 0) {
                     arc.flags = BIT_LAST_ARC.toByte()
@@ -950,79 +822,50 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 arc.output = follow.nextFinalOutput()
                 arc.label = END_LABEL
                 arc.nodeFlags = arc.flags
-                return record(arc)
+                return arc
             } else {
-                return record(null)
+                return null
             }
         }
 
         if (!targetHasArcs(follow)) {
-            noArcsPath = true
-            return record(null)
+            return null
         }
 
         `in`.position = follow.target()
 
         // System.out.println("fta label=" + (char) labelToMatch);
-        val readNodeHeaderStartNs = System.nanoTime()
         arc.nodeFlags = `in`.readByte()
-        readNodeHeaderNs += System.nanoTime() - readNodeHeaderStartNs
         var flags = arc.nodeFlags
         if (flags == ARCS_FOR_DIRECT_ADDRESSING) {
-            directPath = true
-            val directStartNs = System.nanoTime()
-            val directHeaderStartNs = System.nanoTime()
             arc.numArcs = `in`.readVInt() // This is in fact the label range.
             arc.bytesPerArc = `in`.readVInt()
             readPresenceBytes(arc, `in`)
             arc.firstLabel = readLabel(`in`)
             arc.posArcsStart = `in`.position
-            directHeaderNs += System.nanoTime() - directHeaderStartNs
 
-            val rangeCheckStartNs = System.nanoTime()
             val arcIndex = labelToMatch - arc.firstLabel()
             if (arcIndex < 0 || arcIndex >= arc.numArcs()) {
-                directRangeCheckNs += System.nanoTime() - rangeCheckStartNs
-                directNs += System.nanoTime() - directStartNs
-                return record(null) // Before or after label range.
+                return null // Before or after label range.
+            } else if (!BitTable.isBitSet(arcIndex, arc, `in`)) {
+                return null // Arc missing in the range.
             }
-            directRangeCheckNs += System.nanoTime() - rangeCheckStartNs
-
-            val directBitCheckStartNs = System.nanoTime()
-            if (!BitTable.isBitSet(arcIndex, arc, `in`)) {
-                directBitCheckNs += System.nanoTime() - directBitCheckStartNs
-                directNs += System.nanoTime() - directStartNs
-                return record(null) // Arc missing in the range.
-            }
-            directBitCheckNs += System.nanoTime() - directBitCheckStartNs
-
-            val directReadArcStartNs = System.nanoTime()
-            val result = readArcByDirectAddressing(arc, `in`, arcIndex)
-            directReadArcNs += System.nanoTime() - directReadArcStartNs
-            directNs += System.nanoTime() - directStartNs
-            return record(result)
+            return readArcByDirectAddressing(arc, `in`, arcIndex)
         } else if (flags == ARCS_FOR_BINARY_SEARCH) {
-            binaryPath = true
-            val binaryStartNs = System.nanoTime()
-            val binaryHeaderStartNs = System.nanoTime()
             arc.numArcs = `in`.readVInt()
             arc.bytesPerArc = `in`.readVInt()
             arc.posArcsStart = `in`.position
-            binaryHeaderNs += System.nanoTime() - binaryHeaderStartNs
 
             // Array is sparse; do binary search:
             var low = 0
             var high = arc.numArcs() - 1
             while (low <= high) {
                 // System.out.println("    cycle");
-                binaryIterations++
-                val binaryLoopStartNs = System.nanoTime()
                 val mid = (low + high) ushr 1
                 // +1 to skip over flags
                 `in`.position = arc.posArcsStart() - (arc.bytesPerArc() * mid + 1)
                 val midLabel = readLabel(`in`)
                 val cmp = midLabel - labelToMatch
-                binaryLoopNs += System.nanoTime() - binaryLoopStartNs
                 if (cmp < 0) {
                     low = mid + 1
                 } else if (cmp > 0) {
@@ -1030,47 +873,27 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 } else {
                     arc.arcIdx = mid - 1
                     // System.out.println("    found!");
-                    val binaryReadArcStartNs = System.nanoTime()
-                    val result = readNextRealArc(arc, `in`)
-                    binaryReadArcNs += System.nanoTime() - binaryReadArcStartNs
-                    binaryNs += System.nanoTime() - binaryStartNs
-                    return record(result)
+                    return readNextRealArc(arc, `in`)
                 }
             }
-            binaryNs += System.nanoTime() - binaryStartNs
-            return record(null)
+            return null
         } else if (flags == ARCS_FOR_CONTINUOUS) {
-            continuousPath = true
-            val continuousStartNs = System.nanoTime()
-            val continuousHeaderStartNs = System.nanoTime()
             arc.numArcs = `in`.readVInt()
             arc.bytesPerArc = `in`.readVInt()
             arc.firstLabel = readLabel(`in`)
             arc.posArcsStart = `in`.position
-            continuousHeaderNs += System.nanoTime() - continuousHeaderStartNs
             val arcIndex = labelToMatch - arc.firstLabel()
             if (arcIndex < 0 || arcIndex >= arc.numArcs()) {
-                continuousNs += System.nanoTime() - continuousStartNs
-                return record(null) // Before or after label range.
+                return null // Before or after label range.
             }
             arc.arcIdx = arcIndex - 1
-            val continuousReadArcStartNs = System.nanoTime()
-            val result = readNextRealArc(arc, `in`)
-            continuousReadArcNs += System.nanoTime() - continuousReadArcStartNs
-            continuousNs += System.nanoTime() - continuousStartNs
-            return record(result)
+            return readNextRealArc(arc, `in`)
         }
 
         // Linear scan
-        linearPath = true
-        val linearStartNs = System.nanoTime()
-        val linearReadFirstArcInfoStartNs = System.nanoTime()
         readFirstArcInfo(follow.target(), arc, `in`)
-        linearReadFirstArcInfoNs += System.nanoTime() - linearReadFirstArcInfoStartNs
         `in`.position = arc.nextArc()
         while (true) {
-            linearIterations++
-            val linearLoopStartNs = System.nanoTime()
             require(arc.bytesPerArc() == 0)
             arc.flags = `in`.readByte()
             flags = arc.flags
@@ -1078,22 +901,12 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
             val label = readLabel(`in`)
             if (label == labelToMatch) {
                 `in`.position = pos
-                val linearReadArcStartNs = System.nanoTime()
-                val result = readArc(arc, `in`)
-                linearReadArcNs += System.nanoTime() - linearReadArcStartNs
-                linearLoopNs += System.nanoTime() - linearLoopStartNs
-                linearNs += System.nanoTime() - linearStartNs
-                return record(result)
+                return readArc(arc, `in`)
             } else if (label > labelToMatch) {
-                linearLoopNs += System.nanoTime() - linearLoopStartNs
-                linearNs += System.nanoTime() - linearStartNs
-                return record(null)
+                return null
             } else if (arc.isLast) {
-                linearLoopNs += System.nanoTime() - linearLoopStartNs
-                linearNs += System.nanoTime() - linearStartNs
-                return record(null)
+                return null
             } else {
-                val linearSkipStartNs = System.nanoTime()
                 if (flag(flags.toInt(), BIT_ARC_HAS_OUTPUT)) {
                     outputs.skipOutput(`in`)
                 }
@@ -1103,8 +916,6 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
                 if (!flag(flags.toInt(), BIT_STOP_NODE) && !flag(flags.toInt(), BIT_TARGET_NEXT)) {
                     readUnpackedNodeTarget(`in`)
                 }
-                linearSkipNs += System.nanoTime() - linearSkipStartNs
-                linearLoopNs += System.nanoTime() - linearLoopStartNs
             }
         }
     }
@@ -1225,199 +1036,8 @@ class FST<T> internal constructor(metadata: FSTMetadata<T>, fstReader: FSTReader
         }
     }
 
-    private class FindTargetArcPerfStats {
-        var calls: Long = 0
-        var endLabelCalls: Long = 0
-        var noArcsReturns: Long = 0
-        var directCalls: Long = 0
-        var binaryCalls: Long = 0
-        var continuousCalls: Long = 0
-        var linearCalls: Long = 0
-        var nullReturns: Long = 0
-        var nonNullReturns: Long = 0
-        var readNodeHeaderNs: Long = 0
-        var directNs: Long = 0
-        var directHeaderNs: Long = 0
-        var directRangeCheckNs: Long = 0
-        var directBitCheckNs: Long = 0
-        var directReadArcNs: Long = 0
-        var binaryNs: Long = 0
-        var binaryHeaderNs: Long = 0
-        var binaryLoopNs: Long = 0
-        var binaryReadArcNs: Long = 0
-        var binaryIterations: Long = 0
-        var continuousNs: Long = 0
-        var continuousHeaderNs: Long = 0
-        var continuousReadArcNs: Long = 0
-        var linearNs: Long = 0
-        var linearReadFirstArcInfoNs: Long = 0
-        var linearLoopNs: Long = 0
-        var linearSkipNs: Long = 0
-        var linearReadArcNs: Long = 0
-        var linearIterations: Long = 0
-        var readNextRealArcCalls: Long = 0
-        var readNextRealArcFixedCalls: Long = 0
-        var readNextRealArcDirectCalls: Long = 0
-        var readNextRealArcLinearCalls: Long = 0
-        var readNextRealArcFixedHeaderNs: Long = 0
-        var readNextRealArcFixedReadArcNs: Long = 0
-        var readNextRealArcDirectNs: Long = 0
-        var readNextRealArcLinearHeaderNs: Long = 0
-        var readNextRealArcLinearReadArcNs: Long = 0
-        var readNextRealArcTotalNs: Long = 0
-        var readArcCalls: Long = 0
-        var readArcFixedLabelCalls: Long = 0
-        var readArcReadLabelCalls: Long = 0
-        var readArcReadLabelNs: Long = 0
-        var readArcOutputReadCalls: Long = 0
-        var readArcOutputReadNs: Long = 0
-        var readArcFinalOutputReadCalls: Long = 0
-        var readArcFinalOutputReadNs: Long = 0
-        var readArcStopNodeCalls: Long = 0
-        var readArcTargetNextCalls: Long = 0
-        var readArcTargetNextSeekToNextNodeNs: Long = 0
-        var readArcTargetNextPositionCalcNs: Long = 0
-        var readArcUnpackedTargetCalls: Long = 0
-        var readArcUnpackedTargetNs: Long = 0
-        var readArcTotalNs: Long = 0
-        var totalNs: Long = 0
-
-        fun reset() {
-            calls = 0
-            endLabelCalls = 0
-            noArcsReturns = 0
-            directCalls = 0
-            binaryCalls = 0
-            continuousCalls = 0
-            linearCalls = 0
-            nullReturns = 0
-            nonNullReturns = 0
-            readNodeHeaderNs = 0
-            directNs = 0
-            directHeaderNs = 0
-            directRangeCheckNs = 0
-            directBitCheckNs = 0
-            directReadArcNs = 0
-            binaryNs = 0
-            binaryHeaderNs = 0
-            binaryLoopNs = 0
-            binaryReadArcNs = 0
-            binaryIterations = 0
-            continuousNs = 0
-            continuousHeaderNs = 0
-            continuousReadArcNs = 0
-            linearNs = 0
-            linearReadFirstArcInfoNs = 0
-            linearLoopNs = 0
-            linearSkipNs = 0
-            linearReadArcNs = 0
-            linearIterations = 0
-            readNextRealArcCalls = 0
-            readNextRealArcFixedCalls = 0
-            readNextRealArcDirectCalls = 0
-            readNextRealArcLinearCalls = 0
-            readNextRealArcFixedHeaderNs = 0
-            readNextRealArcFixedReadArcNs = 0
-            readNextRealArcDirectNs = 0
-            readNextRealArcLinearHeaderNs = 0
-            readNextRealArcLinearReadArcNs = 0
-            readNextRealArcTotalNs = 0
-            readArcCalls = 0
-            readArcFixedLabelCalls = 0
-            readArcReadLabelCalls = 0
-            readArcReadLabelNs = 0
-            readArcOutputReadCalls = 0
-            readArcOutputReadNs = 0
-            readArcFinalOutputReadCalls = 0
-            readArcFinalOutputReadNs = 0
-            readArcStopNodeCalls = 0
-            readArcTargetNextCalls = 0
-            readArcTargetNextSeekToNextNodeNs = 0
-            readArcTargetNextPositionCalcNs = 0
-            readArcUnpackedTargetCalls = 0
-            readArcUnpackedTargetNs = 0
-            readArcTotalNs = 0
-            totalNs = 0
-        }
-    }
-
     companion object {
         private val BASE_RAM_BYTES_USED: Long = RamUsageEstimator.shallowSizeOfInstance(FST::class)
-        private val findTargetArcPerfLogger = KotlinLogging.logger {}
-        private val findTargetArcPerfStats = FindTargetArcPerfStats()
-
-        fun resetFindTargetArcPerfStats() {
-            findTargetArcPerfStats.reset()
-        }
-
-        fun logFindTargetArcPerfStats(tag: String = "") {
-            if (!findTargetArcPerfLogger.isDebugEnabled()) {
-                return
-            }
-            val stats = findTargetArcPerfStats
-            if (stats.calls == 0L) {
-                findTargetArcPerfLogger.debug { "phase=fst.findTargetArc.stats tag=$tag calls=0" }
-                return
-            }
-            fun toMs(ns: Long): Long = TimeUnit.NANOSECONDS.toMillis(ns)
-            findTargetArcPerfLogger.debug {
-                "phase=fst.findTargetArc.stats tag=$tag calls=${stats.calls} " +
-                    "endLabelCalls=${stats.endLabelCalls} " +
-                    "noArcsReturns=${stats.noArcsReturns} " +
-                    "directCalls=${stats.directCalls} " +
-                    "binaryCalls=${stats.binaryCalls} " +
-                    "continuousCalls=${stats.continuousCalls} " +
-                    "linearCalls=${stats.linearCalls} " +
-                    "nullReturns=${stats.nullReturns} " +
-                    "nonNullReturns=${stats.nonNullReturns} " +
-                    "readNodeHeaderMs=${toMs(stats.readNodeHeaderNs)} " +
-                    "directMs=${toMs(stats.directNs)} " +
-                    "directHeaderMs=${toMs(stats.directHeaderNs)} " +
-                    "directRangeCheckMs=${toMs(stats.directRangeCheckNs)} " +
-                    "directBitCheckMs=${toMs(stats.directBitCheckNs)} " +
-                    "directReadArcMs=${toMs(stats.directReadArcNs)} " +
-                    "binaryMs=${toMs(stats.binaryNs)} " +
-                    "binaryHeaderMs=${toMs(stats.binaryHeaderNs)} " +
-                    "binaryLoopMs=${toMs(stats.binaryLoopNs)} " +
-                    "binaryReadArcMs=${toMs(stats.binaryReadArcNs)} " +
-                    "binaryIterations=${stats.binaryIterations} " +
-                    "continuousMs=${toMs(stats.continuousNs)} " +
-                    "continuousHeaderMs=${toMs(stats.continuousHeaderNs)} " +
-                    "continuousReadArcMs=${toMs(stats.continuousReadArcNs)} " +
-                    "linearMs=${toMs(stats.linearNs)} " +
-                    "linearReadFirstArcInfoMs=${toMs(stats.linearReadFirstArcInfoNs)} " +
-                    "linearLoopMs=${toMs(stats.linearLoopNs)} " +
-                    "linearSkipMs=${toMs(stats.linearSkipNs)} " +
-                    "linearReadArcMs=${toMs(stats.linearReadArcNs)} " +
-                    "linearIterations=${stats.linearIterations} " +
-                    "readNextRealArcCalls=${stats.readNextRealArcCalls} " +
-                    "readNextRealArcFixedCalls=${stats.readNextRealArcFixedCalls} " +
-                    "readNextRealArcDirectCalls=${stats.readNextRealArcDirectCalls} " +
-                    "readNextRealArcLinearCalls=${stats.readNextRealArcLinearCalls} " +
-                    "readNextRealArcFixedHeaderMs=${toMs(stats.readNextRealArcFixedHeaderNs)} " +
-                    "readNextRealArcFixedReadArcMs=${toMs(stats.readNextRealArcFixedReadArcNs)} " +
-                    "readNextRealArcDirectMs=${toMs(stats.readNextRealArcDirectNs)} " +
-                    "readNextRealArcLinearHeaderMs=${toMs(stats.readNextRealArcLinearHeaderNs)} " +
-                    "readNextRealArcLinearReadArcMs=${toMs(stats.readNextRealArcLinearReadArcNs)} " +
-                    "readNextRealArcTotalMs=${toMs(stats.readNextRealArcTotalNs)} " +
-                    "readArcCalls=${stats.readArcCalls} " +
-                    "readArcFixedLabelCalls=${stats.readArcFixedLabelCalls} " +
-                    "readArcReadLabelCalls=${stats.readArcReadLabelCalls} " +
-                    "readArcReadLabelMs=${toMs(stats.readArcReadLabelNs)} " +
-                    "readArcOutputReadCalls=${stats.readArcOutputReadCalls} " +
-                    "readArcOutputReadMs=${toMs(stats.readArcOutputReadNs)} " +
-                    "readArcFinalOutputReadCalls=${stats.readArcFinalOutputReadCalls} " +
-                    "readArcFinalOutputReadMs=${toMs(stats.readArcFinalOutputReadNs)} " +
-                    "readArcStopNodeCalls=${stats.readArcStopNodeCalls} " +
-                    "readArcTargetNextCalls=${stats.readArcTargetNextCalls} " +
-                    "readArcTargetNextSeekToNextNodeMs=${toMs(stats.readArcTargetNextSeekToNextNodeNs)} " +
-                    "readArcTargetNextPositionCalcMs=${toMs(stats.readArcTargetNextPositionCalcNs)} " +
-                    "readArcUnpackedTargetCalls=${stats.readArcUnpackedTargetCalls} " +
-                    "readArcUnpackedTargetMs=${toMs(stats.readArcUnpackedTargetNs)} " +
-                    "readArcTotalMs=${toMs(stats.readArcTotalNs)} " +
-                    "totalMs=${toMs(stats.totalNs)}"
-            }
-        }
 
         const val BIT_FINAL_ARC: Int = 1 shl 0
         const val BIT_LAST_ARC: Int = 1 shl 1

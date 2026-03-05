@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs.lucene101
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.lucene101.ForUtil.Companion.BLOCK_SIZE
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat.Companion.DOC_CODEC
 import org.gnit.lucenekmp.codecs.lucene101.Lucene101PostingsFormat.Companion.LEVEL1_NUM_DOCS
@@ -39,7 +38,6 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.bitCount
 import kotlin.math.min
-import kotlin.time.TimeSource
 
 /**
  * Concrete class that reads docId(maybe frq,pos,offset,payloads) list with postings format.
@@ -47,7 +45,6 @@ import kotlin.time.TimeSource
  * @lucene.experimental
  */
 class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
-    private val logger = KotlinLogging.logger { }
     private var docIn: IndexInput? = null
     private var posIn: IndexInput? = null
     private var payIn: IndexInput? = null
@@ -56,25 +53,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
     private var maxImpactNumBytesAtLevel0 = 0
     private var maxNumImpactsAtLevel1 = 0
     private var maxImpactNumBytesAtLevel1 = 0
-    private var postingsCallCount = 0L
-    private var postingsReuseHitCount = 0L
-    private var postingsReuseMissCount = 0L
-    private var postingsCanReuseNs = 0L
-    private var postingsConstructNs = 0L
-    private var postingsResetNs = 0L
-    private var postingsResetCloneInitNs = 0L
-    private var postingsResetPrefetchNs = 0L
-    private var postingsResetSeekNs = 0L
-    private var postingsResetStateInitNs = 0L
-    private var postingsConstructInitFreqNs = 0L
-    private var postingsConstructInitImpactsNs = 0L
-    private var postingsConstructInitPosNs = 0L
-    private var postingsConstructInitPayNs = 0L
-    private var postingsConstructInitOffsetsNs = 0L
-    private var postingsConstructInitPayloadNs = 0L
-    private var postingsConstructAllocDocBufferNs = 0L
-    private var postingsConstructAllocDocBitSetNs = 0L
-    private var postingsConstructAllocFreqBufferNs = 0L
 
     /** Sole constructor.  */
     init {
@@ -265,31 +243,12 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
     override fun postings(
         fieldInfo: FieldInfo, termState: BlockTermState, reuse: PostingsEnum?, flags: Int
     ): PostingsEnum {
-        val canReuseMark = TimeSource.Monotonic.markNow()
-        val canReuse = reuse is BlockPostingsEnum && reuse.canReuse(docIn!!, fieldInfo, flags, false)
-        postingsCanReuseNs += canReuseMark.elapsedNow().inWholeNanoseconds
-
-        val blockPostingsEnum =
-            if (canReuse) {
-                postingsReuseHitCount++
-                reuse
-            } else {
-                postingsReuseMissCount++
-                val constructMark = TimeSource.Monotonic.markNow()
-                val created = this.BlockPostingsEnum(fieldInfo, flags, false)
-                postingsConstructNs += constructMark.elapsedNow().inWholeNanoseconds
-                created
-            }
-        val resetMark = TimeSource.Monotonic.markNow()
-        val reset = blockPostingsEnum.reset(termState as IntBlockTermState, flags)
-        postingsResetNs += resetMark.elapsedNow().inWholeNanoseconds
-        postingsCallCount++
-        if (postingsCallCount <= 4L || postingsCallCount % 256L == 0L) {
-            logger.debug {
-                "phase=postingsReader.postings.progress calls=$postingsCallCount reuseHits=$postingsReuseHitCount reuseMisses=$postingsReuseMissCount canReuseMs=${postingsCanReuseNs / 1_000_000} constructMs=${postingsConstructNs / 1_000_000} constructNs=$postingsConstructNs constructAllocDocBufferNs=$postingsConstructAllocDocBufferNs constructAllocDocBitSetNs=$postingsConstructAllocDocBitSetNs constructAllocFreqBufferNs=$postingsConstructAllocFreqBufferNs constructInitFreqNs=$postingsConstructInitFreqNs constructInitImpactsNs=$postingsConstructInitImpactsNs constructInitPosNs=$postingsConstructInitPosNs constructInitPayNs=$postingsConstructInitPayNs constructInitOffsetsNs=$postingsConstructInitOffsetsNs constructInitPayloadNs=$postingsConstructInitPayloadNs resetMs=${postingsResetNs / 1_000_000} resetCloneInitMs=${postingsResetCloneInitNs / 1_000_000} resetPrefetchMs=${postingsResetPrefetchNs / 1_000_000} resetSeekMs=${postingsResetSeekNs / 1_000_000} resetStateInitMs=${postingsResetStateInitNs / 1_000_000}"
-            }
-        }
-        return reset
+        return (if (reuse is BlockPostingsEnum
+            && reuse.canReuse(docIn!!, fieldInfo, flags, false)
+        )
+            reuse
+        else
+            this.BlockPostingsEnum(fieldInfo, flags, false)).reset(termState as IntBlockTermState, flags)
     }
 
     @Throws(IOException::class)
@@ -337,18 +296,17 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         /* Variables that store the content of a block and the current position within this block */ /* Shared variables */
         private var encoding: DeltaEncoding? = null
         private var doc = 0 // doc we last read
-        private var debugCalls: Long = 0
 
         /* Variables when the block is stored as packed deltas (Frame Of Reference) */
-        private val docBuffer: IntArray
+        private val docBuffer = IntArray(BLOCK_SIZE)
 
         /* Variables when the block is stored as a bit set */ // Since we use a bit set when it's more storage-efficient, the bit set cannot have more than
         // BLOCK_SIZE*32 bits, which is the maximum possible storage requirement with FOR.
-        private val docBitSet: FixedBitSet
+        private val docBitSet: FixedBitSet = FixedBitSet(BLOCK_SIZE * Int.SIZE_BITS)
         private var docBitSetBase = 0
 
         // Reuse docBuffer for cumulative pop counts of the words of the bit set.
-        private val docCumulativeWordPopCounts: IntArray
+        private val docCumulativeWordPopCounts = docBuffer
 
         // level 0 skip data
         private var level0LastDocID = 0
@@ -373,7 +331,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
         private var docIn: IndexInput? = null
         private var docInUtil: PostingDecodingUtil? = null
 
-        private val freqBuffer: IntArray
+        private val freqBuffer = IntArray(BLOCK_SIZE)
         private val posDeltaBuffer: IntArray?
 
         private val payloadLengthBuffer: IntArray?
@@ -460,7 +418,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
 
         @Throws(IOException::class)
         fun reset(termState: IntBlockTermState, flags: Int): BlockPostingsEnum {
-            val resetCloneInitMark = TimeSource.Monotonic.markNow()
             docFreq = termState.docFreq
             singletonDocID = termState.singletonDocID
             if (docFreq > 1) {
@@ -469,18 +426,9 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                     docIn = this@Lucene101PostingsReader.docIn!!.clone()
                     docInUtil = VECTORIZATION_PROVIDER.newPostingDecodingUtil(docIn!!)
                 }
-                this@Lucene101PostingsReader.postingsResetCloneInitNs +=
-                    resetCloneInitMark.elapsedNow().inWholeNanoseconds
-                val resetPrefetchMark = TimeSource.Monotonic.markNow()
                 prefetchPostings(docIn!!, termState)
-                this@Lucene101PostingsReader.postingsResetPrefetchNs +=
-                    resetPrefetchMark.elapsedNow().inWholeNanoseconds
-            } else {
-                this@Lucene101PostingsReader.postingsResetCloneInitNs +=
-                    resetCloneInitMark.elapsedNow().inWholeNanoseconds
             }
 
-            val resetStateMark = TimeSource.Monotonic.markNow()
             if (forDeltaUtil == null && docFreq >= BLOCK_SIZE) {
                 forDeltaUtil = ForDeltaUtil()
             }
@@ -495,13 +443,10 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             // file:
             val payTermStartFP: Long = termState.payStartFP
             if (posIn != null) {
-                val resetSeekMark = TimeSource.Monotonic.markNow()
                 posIn!!.seek(posTermStartFP)
                 if (payIn != null) {
                     payIn!!.seek(payTermStartFP)
                 }
-                this@Lucene101PostingsReader.postingsResetSeekNs +=
-                    resetSeekMark.elapsedNow().inWholeNanoseconds
             }
             level1PosEndFP = posTermStartFP
             level1PayEndFP = payTermStartFP
@@ -541,8 +486,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             docBufferSize = BLOCK_SIZE
             docBufferUpto = BLOCK_SIZE
             posDocBufferUpto = BLOCK_SIZE
-            this@Lucene101PostingsReader.postingsResetStateInitNs +=
-                resetStateMark.elapsedNow().inWholeNanoseconds
 
             return this
         }
@@ -884,21 +827,11 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             skipLevel0To(target)
         }
 
-        val logger = KotlinLogging.logger {  }
-
         @Throws(IOException::class)
         override fun nextDoc(): Int {
             if (doc == NO_MORE_DOCS) {
                 return NO_MORE_DOCS
             }
-            debugCalls++
-            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
-                logger.debug {
-                    "[BlockPostingsEnum.nextDoc] enter doc=$doc level0LastDocID=$level0LastDocID " +
-                        "needsRefilling=$needsRefilling docBufferUpto=$docBufferUpto docBufferSize=$docBufferSize " +
-                        "encoding=$encoding"
-                }
-            }*/
             if (doc == level0LastDocID || needsRefilling) {
                 if (needsRefilling) {
                     refillDocs()
@@ -923,12 +856,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             }
 
             ++docBufferUpto
-            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
-                logger.debug { "[BlockPostingsEnum.nextDoc] exit doc=$doc docBufferUpto=$docBufferUpto" }
-            }
-            if (doc == NO_MORE_DOCS) {
-                logger.debug { "[BlockPostingsEnum.nextDoc] reached NO_MORE_DOCS" }
-            }*/
             return this.doc
         }
 
@@ -937,14 +864,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             if (doc == NO_MORE_DOCS) {
                 return NO_MORE_DOCS
             }
-            debugCalls++
-            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
-                logger.debug {
-                    "[BlockPostingsEnum.advance] enter target=$target doc=$doc level0LastDocID=$level0LastDocID " +
-                        "needsRefilling=$needsRefilling docBufferUpto=$docBufferUpto docBufferSize=$docBufferSize " +
-                        "encoding=$encoding"
-                }
-            }*/
             if (target > level0LastDocID || needsRefilling) {
                 if (target > level0LastDocID) {
                     doAdvanceShallow(target)
@@ -987,12 +906,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 }
             }
 
-            /*if (debugCalls <= 5 || debugCalls % 10000L == 0L) {
-                logger.debug { "[BlockPostingsEnum.advance] exit doc=$doc docBufferUpto=$docBufferUpto" }
-            }
-            if (doc == NO_MORE_DOCS) {
-                logger.debug { "[BlockPostingsEnum.advance] reached NO_MORE_DOCS target=$target" }
-            }*/
             return doc
         }
 
@@ -1345,31 +1258,11 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
             }
 
         init {
-            val allocDocBufferMark = TimeSource.Monotonic.markNow()
-            docBuffer = IntArray(BLOCK_SIZE)
-            this@Lucene101PostingsReader.postingsConstructAllocDocBufferNs +=
-                allocDocBufferMark.elapsedNow().inWholeNanoseconds
 
-            val allocDocBitSetMark = TimeSource.Monotonic.markNow()
-            docBitSet = FixedBitSet(BLOCK_SIZE * Int.SIZE_BITS)
-            this@Lucene101PostingsReader.postingsConstructAllocDocBitSetNs +=
-                allocDocBitSetMark.elapsedNow().inWholeNanoseconds
-
-            docCumulativeWordPopCounts = docBuffer
-
-            val allocFreqBufferMark = TimeSource.Monotonic.markNow()
-            freqBuffer = IntArray(BLOCK_SIZE)
-            this@Lucene101PostingsReader.postingsConstructAllocFreqBufferNs +=
-                allocFreqBufferMark.elapsedNow().inWholeNanoseconds
-
-            val initFreqMark = TimeSource.Monotonic.markNow()
             if (!needsFreq) {
                 Arrays.fill(freqBuffer, 1)
             }
-            this@Lucene101PostingsReader.postingsConstructInitFreqNs +=
-                initFreqMark.elapsedNow().inWholeNanoseconds
 
-            val initImpactsMark = TimeSource.Monotonic.markNow()
             if (needsFreq && needsImpacts) {
                 level0SerializedImpacts = BytesRef(maxImpactNumBytesAtLevel0)
                 level1SerializedImpacts = BytesRef(maxImpactNumBytesAtLevel1)
@@ -1381,10 +1274,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 level0Impacts = null
                 level1Impacts = null
             }
-            this@Lucene101PostingsReader.postingsConstructInitImpactsNs +=
-                initImpactsMark.elapsedNow().inWholeNanoseconds
 
-            val initPosMark = TimeSource.Monotonic.markNow()
             if (needsPos) {
                 this.posIn = this@Lucene101PostingsReader.posIn!!.clone()
                 posInUtil = VECTORIZATION_PROVIDER.newPostingDecodingUtil(posIn!!)
@@ -1394,10 +1284,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 this.posInUtil = null
                 posDeltaBuffer = null
             }
-            this@Lucene101PostingsReader.postingsConstructInitPosNs +=
-                initPosMark.elapsedNow().inWholeNanoseconds
 
-            val initPayMark = TimeSource.Monotonic.markNow()
             if (needsOffsets || needsPayloads) {
                 this.payIn = this@Lucene101PostingsReader.payIn!!.clone()
                 payInUtil = VECTORIZATION_PROVIDER.newPostingDecodingUtil(payIn!!)
@@ -1405,10 +1292,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 this.payIn = null
                 payInUtil = null
             }
-            this@Lucene101PostingsReader.postingsConstructInitPayNs +=
-                initPayMark.elapsedNow().inWholeNanoseconds
 
-            val initOffsetsMark = TimeSource.Monotonic.markNow()
             if (needsOffsets) {
                 offsetStartDeltaBuffer = IntArray(BLOCK_SIZE)
                 offsetLengthBuffer = IntArray(BLOCK_SIZE)
@@ -1418,10 +1302,7 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 startOffset = -1
                 endOffset = -1
             }
-            this@Lucene101PostingsReader.postingsConstructInitOffsetsNs +=
-                initOffsetsMark.elapsedNow().inWholeNanoseconds
 
-            val initPayloadMark = TimeSource.Monotonic.markNow()
             if (indexHasPayloads) {
                 payloadLengthBuffer = IntArray(BLOCK_SIZE)
                 payloadBytes = ByteArray(128)
@@ -1431,8 +1312,6 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                 payloadBytes = null
                 payload = null
             }
-            this@Lucene101PostingsReader.postingsConstructInitPayloadNs +=
-                initPayloadMark.elapsedNow().inWholeNanoseconds
         }
     }
 

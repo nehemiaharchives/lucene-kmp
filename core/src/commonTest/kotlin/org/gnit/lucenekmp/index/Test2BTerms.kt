@@ -1,11 +1,9 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TermToBytesRefAttribute
-import org.gnit.lucenekmp.codecs.lucene90.blocktree.SegmentTermsEnum
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.FieldType
@@ -25,184 +23,11 @@ import org.gnit.lucenekmp.util.AttributeImpl
 import org.gnit.lucenekmp.util.AttributeReflector
 import org.gnit.lucenekmp.util.AttributeSource
 import org.gnit.lucenekmp.util.BytesRef
-import org.gnit.lucenekmp.util.configureTestLogging
-import org.gnit.lucenekmp.util.fst.ByteSequenceOutputs
-import org.gnit.lucenekmp.util.fst.FST
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.time.TimeSource
-
-//TODO this test has huge performance gap between jvmTest and linuxX64Test we tried to find bottle neck steps and sub steps recursively and found slow causing part and tried to fix, but still much needs fix. following is the list of those records and done/todo list:
-/*
-Test2BTerms native speedup record (from this investigation cycle):
-
-1) [Acknowledged] End-to-end gap
-   file: core/src/commonTest/kotlin/org/gnit/lucenekmp/index/Test2BTerms.kt
-   class: Test2BTerms
-   function: test2BTerms
-   gap: jvmTest ~= 5.8~6.0s, linuxX64Test > 6 min (killed)
-   status: measured, still open
-
-2) [Measured] testSavedTerms sub-step gap
-   file: core/src/commonTest/kotlin/org/gnit/lucenekmp/index/Test2BTerms.kt
-   class: Test2BTerms
-   function: testSavedTerms
-   gap:
-     - jvm: countMs=1244, seekMs=330, loggingMs=118, phase ~= 1723ms
-     - native: countMs=7705~8818, seekMs=579~1969, loggingMs=182~194, phase ~= 9684~9986ms
-   status: measured, partially improved by downstream native optimizations, still much slower than jvm
-
-3) [Measured] stall point after saved-terms phase
-   file: core/src/commonMain/kotlin/org/gnit/lucenekmp/index/CheckIndex.kt
-   class: CheckIndex (+ companion)
-   function: postings/checkFields path (starts after "TEST: now CheckIndex...")
-   gap: native often stalls around/after
-     "phase=checkIndex.postings.field.start field=field maxDoc=40 isVectors=false"
-   status: measured stall location, root cause not fully isolated yet
-
-4) [Applied patch, speedup success] single-slice task execution overhead
-   file: core/src/commonTest/kotlin/org/gnit/lucenekmp/search/TestTaskExecutor.kt
-   class: TestTaskExecutor
-   function: testInvokeAllSingleSliceNativePerfProbe
-   gap before fix: jvm ~= 752ms vs native > 3 min (killed)
-   related impl area: TaskExecutor + jdkport concurrency internals
-   status: optimized and kept (separate commit history)
-
-5) [Applied patches, speedup success] native hot-loop primitive/vectorization seams
-   files/classes/functions:
-     - core/src/commonMain/.../jdkport/LongExt.kt (LongExt)
-     - core/src/commonMain/.../codecs/lucene101/PostingsUtil.kt (PostingsUtil)
-     - core/src/commonMain/.../internal/vectorization/PostingDecodingUtil.kt (PostingDecodingUtil)
-     - core/src/commonMain/.../internal/vectorization/VectorizationProvider.kt (VectorizationProvider)
-   gap: native slower in tight decode/bit-op loops; platform seams added and optimized
-   status: optimized and kept (separate commits)
-
-6) [Applied patch, speedup success] impacts reuse
-   files:
-     - core/src/commonMain/.../codecs/PostingsReaderBase.kt
-     - core/src/commonMain/.../codecs/blockterms/BlockTermsReader.kt
-     - core/src/commonMain/.../codecs/lucene101/Lucene101PostingsReader.kt
-     - core/src/commonMain/.../codecs/lucene90/blocktree/IntersectTermsEnum.kt
-     - core/src/commonMain/.../codecs/lucene90/blocktree/SegmentTermsEnum.kt
-   change: reuse `ImpactsEnum` via `private var impactsReuse: ImpactsEnum? = null` and reuse-aware impacts API
-   status: optimized and kept (commit: 9d4a4ec7...)
-
-7) [Applied patch, speedup success + one revert] ByteBuffer path (supports postings/checkindex I/O)
-   files:
-     - core/src/commonMain/.../jdkport/ByteBuffer.kt
-     - core/src/commonMain/.../jdkport/ByteBufferPlatform.kt (+ jvm/native actuals)
-     - core/src/commonTest/.../jdkport/ByteBufferTest.kt
-   gap (native microbench):
-     - before: getInt=100~105ms, getShort=142~150ms, getLong=88~91ms
-     - after kept patches: getInt=91ms, getShort=127ms, getLong=79ms
-   note: checked+decode platform seam attempt regressed and was reverted
-   status: optimized and kept current best variant
-
-8) [Applied patch, speedup success] CheckIndex postings reuse pooling (native)
-   files:
-     - core/src/commonMain/.../index/CheckIndex.kt
-     - core/src/commonMain/.../codecs/lucene101/Lucene101PostingsReader.kt (measurement logs)
-   findings before patch:
-     - CheckIndex term-loop dominant time was postings acquisition; docs walk/impacts advance were near zero.
-     - constructor misses in BlockPostingsEnum dominated native time.
-   change:
-     - keep behavior same, but use per-flag postings reuse slots in CheckIndex (`ALL`, `NONE`, `FREQS`).
-     - keep Java-style single-slot line as commented reference at changed call sites.
-   result:
-     - reuseMisses dropped to 3 while reuseHits grew to ~38k.
-     - postings constructNs stopped growing (no repeated constructor pressure).
-     - Test2BTerms linuxX64Test run completed ~17s; CheckIndex postings phase dropped to sub-second.
-
-9) [Next] recursive testSavedTerms bottleneck tracking (native vs jvm gap remains)
-   gap now:
-     - jvm testSavedTerms-all ~1.7s (reference run)
-     - native testSavedTerms-all ~9.8~10.4s (after CheckIndex speedup)
-   current substeps:
-     - countMs and seekMs dominate testSavedTerms timing.
-   next:
-     - recursively instrument count/seek internals down to lowest-level term seek/decode operations.
-     - optimize only low-level native seams; keep Lucene algorithm unchanged.
-     - keep iteration rule: measure -> keep only win -> revert regressions.
-
-10) [Measured] testSavedTerms count path deep split (IndexSearcher)
-    files:
-      - core/src/commonMain/.../search/IndexSearcher.kt
-      - core/src/commonTest/.../index/Test2BTerms.kt
-    measured from generated test XML (same cycle):
-      - jvm: countMs=932, searchMs=703, leafGetCollectorMs=688
-      - native: countMs=7053, searchMs=5870, leafGetCollectorMs=5761
-    conclusion:
-      - dominant native gap is `IndexSearcher.count -> searchLeaf -> collector.getLeafCollector`.
-      - scorerSupplier/bulkScorer/score path is ~0 in both targets here, so this is not a scoring loop issue.
-
-11) [Now] recursive substep target under item 10
-    focus path:
-      - `TotalHitCountCollector.getLeafCollector -> weight.count(context)`
-      - next split planned in `TermQuery.TermWeight.count`:
-        state lookup, terms iterator acquisition, seekExact, docFreq.
-    rule:
-      - keep lucene logic; optimize only lowest-level native-heavy seam after measured proof.
-
-12) [Measured] deeper split under `TermQuery.count` / `TermStates.get` / `SegmentTermsEnum.prepareSeekExact`
-    files:
-      - core/src/commonMain/.../search/TermQuery.kt
-      - core/src/commonMain/.../index/TermStates.kt
-      - core/src/commonMain/.../codecs/lucene90/blocktree/SegmentTermsEnum.kt
-    findings:
-      - in native, `TermStates.get` cold-path was dominant and mostly `prepareSeekExact`.
-      - recursive split inside `prepareSeekExact` showed `indexWalk` is the largest native-only gap.
-    sample measured gap (same run cycle):
-      - segmentTermsEnum.prepareSeek total: native ~4211ms vs jvm ~119ms
-      - inside native prepareSeek: indexWalk ~3827ms (largest), setup/floor much smaller.
-    TODO:
-      - recursively split `indexWalk` into lowest substeps (`findTargetArc` branch costs, arc-read path, byte/label compares).
-      - after lowest hotspot is proven, optimize only native low-level impl, keep algorithm same.
-
-13) [Reverted] native-only count fast path seam
-    reverted files:
-      - core/src/commonMain/.../search/TermQueryCountPlatform.kt
-      - core/src/jvmAndroidMain/.../search/TermQueryCountPlatform.jvmandroid.kt
-      - core/src/nativeMain/.../search/TermQueryCountPlatform.native.kt
-    reason:
-      - measurable gain existed but not enough to justify logic-path divergence from Java Lucene expectations.
-    TODO:
-      - keep single common count logic and focus optimization on `SegmentTermsEnum.prepareSeekExact` indexWalk internals.
-
-14) [Measured] bottom hotspot under `prepareSeek/indexWalk/findTargetArc`
-    files:
-      - core/src/commonMain/.../util/fst/FST.kt
-      - core/src/commonMain/.../util/fst/ByteSequenceOutputs.kt
-    findings:
-      - dominant path is `findTargetArc -> continuous -> readNextRealArc -> readArcOutputRead -> ByteSequenceOutputs.read`.
-      - reader type in this path is almost entirely `ReverseRandomAccessReader` (not `ReverseBytesReader`).
-      - representative gap before reader optimization:
-        - native `byteSequenceOutputs.read totalMs ~= 4451` vs jvm `~= 544`
-        - native `readBytesMs ~= 4128` vs jvm `~= 503`
-        - native `readVIntMs ~= 219` vs jvm `~= 30`
-
-15) [Applied patch, speedup success] `ReverseRandomAccessReader.readBytes` bulk-read + in-place reverse
-    files:
-      - core/src/commonMain/.../util/fst/ReverseRandomAccessReader.kt
-      - (related measurement) core/src/commonMain/.../util/fst/ByteSequenceOutputs.kt
-    change:
-      - replaced per-byte `readByte(pos--)` loop with single `RandomAccessInput.readBytes(start,len)` then in-place reverse.
-      - keeps same logical reverse-read behavior, only lower-level implementation changed.
-    result (representative):
-      - native test wall-clock: ~15s -> ~10~11s
-      - native `testSavedTerms countMs`: ~7600ms -> ~4400~4600ms
-      - native `segmentTermsEnum.prepareSeek indexWalkMs`: ~4800ms -> ~1900~2100ms
-      - native `byteSequenceOutputs.read totalMs`: ~4451ms -> ~534ms
-      - native `readBytesMs`: ~4128ms -> ~224~228ms
-
-16) [Tried then reverted] `ReverseRandomAccessReader.readVInt` local-position override
-    reason:
-      - native improved slightly in some runs, but jvm impact was noisy/regression-prone.
-    status:
-      - reverted to default `DataInput.readVInt`; kept only the clear `readBytes` win patch.
- */
 
 // NOTE: SimpleText codec will consume very large amounts of
 // disk (but, should run successfully).  Best to run w/
@@ -216,18 +41,9 @@ Test2BTerms native speedup record (from this investigation cycle):
 //@SuppressSysoutChecks(bugUrl = "Stuff gets printed")
 class Test2BTerms : LuceneTestCase() {
 
-    init {
-        configureTestLogging()
-    }
-
-    private val logger = KotlinLogging.logger {  }
-
     @Test
     @Throws(IOException::class)
     fun test2BTerms() {
-        val timeSource = TimeSource.Monotonic
-        val testMark = timeSource.markNow()
-
         println("Starting Test2B")
         val TERM_COUNT = Test2BConstants.MAX_DOCS.toLong() * 100 // TODO reduced TERM_COUNT = Int.MAX_VALUE + 100000000 to Test2BConstants.MAX_DOCS * 100 for dev speed
 
@@ -243,8 +59,6 @@ class Test2BTerms : LuceneTestCase() {
         dir.checkIndexOnClose = false // don't double-checkindex
 
         run {
-            val writerMark = timeSource.markNow()
-
             val w = IndexWriter(
                 dir,
                 IndexWriterConfig(MockAnalyzer(random()))
@@ -276,56 +90,38 @@ class Test2BTerms : LuceneTestCase() {
             println("TERMS_PER_DOC=$TERMS_PER_DOC")
             println("numDocs=$numDocs")
 
-            val addDocsMark = timeSource.markNow()
             for (i in 0..<numDocs) {
                 val t0 = System.nanoTime()
                 w.addDocument(doc)
                 println("$i of $numDocs ${TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0)} ms")
             }
-            logger.debug { "phase=addDocuments elapsedMs=${addDocsMark.elapsedNow().inWholeMilliseconds} numDocs=$numDocs termsPerDoc=$TERMS_PER_DOC" }
             savedTerms = ts.savedTerms
 
             println("TEST: full merge")
-            val mergeMark = timeSource.markNow()
             w.forceMerge(1)
-            logger.debug { "phase=forceMerge elapsedMs=${mergeMark.elapsedNow().inWholeMilliseconds}" }
             println("TEST: close writer")
-            val closeMark = timeSource.markNow()
             w.close()
-            logger.debug { "phase=closeWriter elapsedMs=${closeMark.elapsedNow().inWholeMilliseconds}" }
-            logger.debug { "phase=writerScope elapsedMs=${writerMark.elapsedNow().inWholeMilliseconds}" }
         }
 
         println("TEST: open reader")
-        val openReaderMark = timeSource.markNow()
         val r = DirectoryReader.open(dir)
-        logger.debug { "phase=openReader elapsedMs=${openReaderMark.elapsedNow().inWholeMilliseconds}" }
         if (savedTerms == null) {
-            val findTermsMark = timeSource.markNow()
             savedTerms = findTerms(r)
-            logger.debug { "phase=findTerms elapsedMs=${findTermsMark.elapsedNow().inWholeMilliseconds} savedCount=${savedTerms.size}" }
         }
         val numSavedTerms = savedTerms.size
         val bigOrdTerms = savedTerms.subList(maxOf(0, numSavedTerms - 10), numSavedTerms).toMutableList()
         println("TEST: test big ord terms...")
-        val bigOrdMark = timeSource.markNow()
         testSavedTerms(r, bigOrdTerms)
-        logger.debug { "phase=testSavedTerms-bigOrd elapsedMs=${bigOrdMark.elapsedNow().inWholeMilliseconds} termCount=${bigOrdTerms.size}" }
         println("TEST: test all saved terms...")
-        val allTermsMark = timeSource.markNow()
         testSavedTerms(r, savedTerms)
-        logger.debug { "phase=testSavedTerms-all elapsedMs=${allTermsMark.elapsedNow().inWholeMilliseconds} termCount=${savedTerms.size}" }
         r.close()
 
         println("TEST: now CheckIndex...")
-        val checkIndexMark = timeSource.markNow()
         val status = TestUtil.checkIndex(dir)
-        logger.debug { "phase=checkIndex elapsedMs=${checkIndexMark.elapsedNow().inWholeMilliseconds}" }
         val tc = status.segmentInfos[0].termIndexStatus!!.termCount
         assertTrue(tc > 0) // TODO reduced termCountThreshold = Int.MAX_VALUE to 0 for dev speed
 
         dir.close()
-        logger.debug { "phase=test2BTerms-total elapsedMs=${testMark.elapsedNow().inWholeMilliseconds}" }
         println("TEST: done!")
     }
 
@@ -351,65 +147,30 @@ class Test2BTerms : LuceneTestCase() {
     private fun testSavedTerms(r: IndexReader, terms: MutableList<BytesRef>) {
         println("TEST: run ${terms.size} terms on reader=$r")
         val s = newSearcher(r)
-        s.resetCountPerfStats()
-        TermQuery.resetCountPerfStats()
-        TermStates.resetGetPerfStats()
-        SegmentTermsEnum.resetPrepareSeekPerfStats()
-        FST.resetFindTargetArcPerfStats()
-        ByteSequenceOutputs.resetReadPerfStats()
         terms.shuffle(random())
         val termsEnum = MultiTerms.getTerms(r, "field")!!.iterator()
         var failed = false
-        var countNanos = 0L
-        var seekNanos = 0L
-        var loggingNanos = 0L
         for (iter in 0..<(10 * terms.size)) {
             val term = terms[random().nextInt(terms.size)]
-            var subStepStart = System.nanoTime()
             println("TEST: search $term")
-            loggingNanos += System.nanoTime() - subStepStart
             val t0 = System.nanoTime()
-            subStepStart = System.nanoTime()
             val count = s.count(TermQuery(Term("field", term)))
-            countNanos += System.nanoTime() - subStepStart
             if (count <= 0) {
-                subStepStart = System.nanoTime()
                 println("  FAILED: count=$count")
-                loggingNanos += System.nanoTime() - subStepStart
                 failed = true
             }
-            subStepStart = System.nanoTime()
             println("  took ${TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0)} ms")
-            loggingNanos += System.nanoTime() - subStepStart
 
-            subStepStart = System.nanoTime()
             val result = termsEnum.seekCeil(term)
-            seekNanos += System.nanoTime() - subStepStart
             if (result != TermsEnum.SeekStatus.FOUND) {
                 if (result == TermsEnum.SeekStatus.END) {
-                    subStepStart = System.nanoTime()
                     println("  FAILED: got END")
-                    loggingNanos += System.nanoTime() - subStepStart
                 } else {
-                    subStepStart = System.nanoTime()
                     println("  FAILED: wrong term: got ${termsEnum.term()}")
-                    loggingNanos += System.nanoTime() - subStepStart
                 }
                 failed = true
             }
         }
-        logger.debug {
-            "phase=testSavedTerms-substeps iterations=${10 * terms.size} " +
-                "countMs=${TimeUnit.NANOSECONDS.toMillis(countNanos)} " +
-                "seekMs=${TimeUnit.NANOSECONDS.toMillis(seekNanos)} " +
-                "loggingMs=${TimeUnit.NANOSECONDS.toMillis(loggingNanos)}"
-        }
-        s.logCountPerfStats("testSavedTerms")
-        TermQuery.logCountPerfStats("testSavedTerms")
-        TermStates.logGetPerfStats("testSavedTerms")
-        SegmentTermsEnum.logPrepareSeekPerfStats("testSavedTerms")
-        FST.logFindTargetArcPerfStats("testSavedTerms")
-        ByteSequenceOutputs.logReadPerfStats("testSavedTerms")
         assertFalse(failed)
     }
 

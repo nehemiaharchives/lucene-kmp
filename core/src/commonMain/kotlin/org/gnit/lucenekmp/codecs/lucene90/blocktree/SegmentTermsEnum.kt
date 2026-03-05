@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs.lucene90.blocktree
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.BlockTermState
 import org.gnit.lucenekmp.index.BaseTermsEnum
 import org.gnit.lucenekmp.index.ImpactsEnum
@@ -21,7 +20,6 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.PrintStream
 import org.gnit.lucenekmp.jdkport.System
-import org.gnit.lucenekmp.jdkport.TimeUnit
 import kotlin.experimental.and
 import kotlin.math.min
 //import java.io.PrintStream
@@ -303,45 +301,10 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
 
     @Throws(IOException::class)
     private fun prepareSeekExact(target: BytesRef, prefetch: Boolean): IOBooleanSupplier? {
-        val perfEnabled = prepareSeekPerfLogger.isDebugEnabled()
-        val callStartNs = if (perfEnabled) System.nanoTime() else 0L
-        var setupNs = 0L
-        var indexWalkNs = 0L
-        var findTargetArcNs = 0L
-        var arcFollowNs = 0L
-        var floorScanNs = 0L
-        var stepStartNs = if (perfEnabled) System.nanoTime() else 0L
-
-        fun recordAndReturn(result: IOBooleanSupplier?): IOBooleanSupplier? {
-            if (perfEnabled) {
-                prepareSeekPerfStats.calls++
-                if (prefetch) {
-                    prepareSeekPerfStats.prefetchCalls++
-                } else {
-                    prepareSeekPerfStats.noPrefetchCalls++
-                }
-                if (result == null) {
-                    prepareSeekPerfStats.nullReturns++
-                } else {
-                    prepareSeekPerfStats.nonNullReturns++
-                }
-                prepareSeekPerfStats.setupNs += setupNs
-                prepareSeekPerfStats.indexWalkNs += indexWalkNs
-                prepareSeekPerfStats.findTargetArcNs += findTargetArcNs
-                prepareSeekPerfStats.arcFollowNs += arcFollowNs
-                prepareSeekPerfStats.floorScanNs += floorScanNs
-                prepareSeekPerfStats.totalNs += System.nanoTime() - callStartNs
-            }
-            return result
-        }
-
         checkNotNull(fr.index) { "terms index was not loaded" }
 
         if (fr.size() > 0 && (target < fr.min!! || target > fr.max!!)) {
-            if (perfEnabled) {
-                setupNs += System.nanoTime() - stepStartNs
-            }
-            return recordAndReturn(null)
+            return null
         }
 
         term.grow(1 + target.length)
@@ -459,10 +422,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                     // if (DEBUG) {
                     //   System.out.println("  target is same as current; return true");
                     // }
-                    if (perfEnabled) {
-                        setupNs += System.nanoTime() - stepStartNs
-                    }
-                    return recordAndReturn(IOBooleanSupplier { true })
+                    return IOBooleanSupplier { true }
                 } else {
                     // if (DEBUG) {
                     //   System.out.println("  target is same as current but term doesn't exist");
@@ -494,10 +454,6 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
             outputAccumulator.pop(arc.nextFinalOutput()!!)
         }
 
-        if (perfEnabled) {
-            setupNs += System.nanoTime() - stepStartNs
-        }
-
         // if (DEBUG) {
         //   System.out.println("  start index loop targetUpto=" + targetUpto + " output=" + output +
         // " currentFrame.ord=" + currentFrame.ord + " targetBeforeCurrentLength=" +
@@ -507,20 +463,12 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
         // We are done sharing the common prefix with the incoming target and where we are currently
         // seek'd; now continue walking the index:
         while (targetUpto < target.length) {
-            val loopStartNs = if (perfEnabled) System.nanoTime() else 0L
             val targetLabel: Int = target.bytes[target.offset + targetUpto].toInt() and 0xFF
 
-            val findArcStartNs = if (perfEnabled) System.nanoTime() else 0L
             val nextArc: Arc<BytesRef>? =
                 fr.index.findTargetArc(targetLabel, arc, getArc(1 + targetUpto), fstReader!!)
-            if (perfEnabled) {
-                findTargetArcNs += System.nanoTime() - findArcStartNs
-            }
 
             if (nextArc == null) {
-                if (perfEnabled) {
-                    indexWalkNs += System.nanoTime() - loopStartNs
-                }
                 // Index is exhausted
                 // if (DEBUG) {
                 //   System.out.println("    index: index exhausted label=" + ((char) targetLabel) + " " +
@@ -530,7 +478,6 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                 validIndexPrefix = currentFrame.prefixLength
 
                 // validIndexPrefix = targetUpto;
-                val floorStartNs = if (perfEnabled) System.nanoTime() else 0L
                 currentFrame.scanToFloorFrame(target)
 
                 if (!currentFrame.hasTerms) {
@@ -540,20 +487,14 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                     // if (DEBUG) {
                     //   System.out.println("  FAST NOT_FOUND term=" + ToStringUtils.bytesRefToString(term));
                     // }
-                    if (perfEnabled) {
-                        floorScanNs += System.nanoTime() - floorStartNs
-                    }
-                    return recordAndReturn(null)
+                    return null
                 }
 
                 if (prefetch) {
                     currentFrame.prefetchBlock()
                 }
-                if (perfEnabled) {
-                    floorScanNs += System.nanoTime() - floorStartNs
-                }
 
-                return recordAndReturn(IOBooleanSupplier {
+                return IOBooleanSupplier {
                     currentFrame.loadBlock()
                     val result: SeekStatus = currentFrame.scanToTerm(target, true)
                     if (result === SeekStatus.FOUND) {
@@ -568,9 +509,8 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                         // }
                         return@IOBooleanSupplier false
                     }
-                })
+                }
             } else {
-                val followStartNs = if (perfEnabled) System.nanoTime() else 0L
                 // Follow this arc
                 arc = nextArc
                 term.setByteAt(targetUpto, targetLabel.toByte())
@@ -592,19 +532,12 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
                     // if (DEBUG) System.out.println("    curFrame.ord=" + currentFrame.ord + " hasTerms=" +
                     // currentFrame.hasTerms);
                 }
-                if (perfEnabled) {
-                    arcFollowNs += System.nanoTime() - followStartNs
-                }
-                if (perfEnabled) {
-                    indexWalkNs += System.nanoTime() - loopStartNs
-                }
             }
         }
 
         // validIndexPrefix = targetUpto;
         validIndexPrefix = currentFrame.prefixLength
 
-        val floorStartNs = if (perfEnabled) System.nanoTime() else 0L
         currentFrame.scanToFloorFrame(target)
 
         // Target term is entirely contained in the index:
@@ -614,20 +547,14 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
             // if (DEBUG) {
             //   System.out.println("  FAST NOT_FOUND term=" + ToStringUtils.bytesRefToString(term));
             // }
-            if (perfEnabled) {
-                floorScanNs += System.nanoTime() - floorStartNs
-            }
-            return recordAndReturn(null)
+            return null
         }
 
         if (prefetch) {
             currentFrame.prefetchBlock()
         }
-        if (perfEnabled) {
-            floorScanNs += System.nanoTime() - floorStartNs
-        }
 
-        return recordAndReturn(IOBooleanSupplier {
+        return IOBooleanSupplier {
             currentFrame.loadBlock()
             val result: SeekStatus = currentFrame.scanToTerm(target, true)
             if (result === SeekStatus.FOUND) {
@@ -643,7 +570,7 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
 
                 return@IOBooleanSupplier false
             }
-        })
+        }
     }
 
     @Throws(IOException::class)
@@ -1218,68 +1145,6 @@ class SegmentTermsEnum(val fr: FieldReader) : BaseTermsEnum() {
 
     override fun ord(): Long {
         throw UnsupportedOperationException()
-    }
-
-    private class PrepareSeekPerfStats {
-        var calls: Long = 0
-        var prefetchCalls: Long = 0
-        var noPrefetchCalls: Long = 0
-        var nullReturns: Long = 0
-        var nonNullReturns: Long = 0
-        var setupNs: Long = 0
-        var indexWalkNs: Long = 0
-        var findTargetArcNs: Long = 0
-        var arcFollowNs: Long = 0
-        var floorScanNs: Long = 0
-        var totalNs: Long = 0
-
-        fun reset() {
-            calls = 0
-            prefetchCalls = 0
-            noPrefetchCalls = 0
-            nullReturns = 0
-            nonNullReturns = 0
-            setupNs = 0
-            indexWalkNs = 0
-            findTargetArcNs = 0
-            arcFollowNs = 0
-            floorScanNs = 0
-            totalNs = 0
-        }
-    }
-
-    companion object {
-        private val prepareSeekPerfLogger = KotlinLogging.logger {}
-        private val prepareSeekPerfStats = PrepareSeekPerfStats()
-
-        fun resetPrepareSeekPerfStats() {
-            prepareSeekPerfStats.reset()
-        }
-
-        fun logPrepareSeekPerfStats(tag: String = "") {
-            if (!prepareSeekPerfLogger.isDebugEnabled()) {
-                return
-            }
-            val calls = prepareSeekPerfStats.calls
-            if (calls == 0L) {
-                prepareSeekPerfLogger.debug { "phase=segmentTermsEnum.prepareSeek.stats tag=$tag calls=0" }
-                return
-            }
-            fun toMs(ns: Long): Long = TimeUnit.NANOSECONDS.toMillis(ns)
-            prepareSeekPerfLogger.debug {
-                "phase=segmentTermsEnum.prepareSeek.stats tag=$tag calls=$calls " +
-                    "prefetchCalls=${prepareSeekPerfStats.prefetchCalls} " +
-                    "noPrefetchCalls=${prepareSeekPerfStats.noPrefetchCalls} " +
-                    "nullReturns=${prepareSeekPerfStats.nullReturns} " +
-                    "nonNullReturns=${prepareSeekPerfStats.nonNullReturns} " +
-                    "setupMs=${toMs(prepareSeekPerfStats.setupNs)} " +
-                    "indexWalkMs=${toMs(prepareSeekPerfStats.indexWalkNs)} " +
-                    "findTargetArcMs=${toMs(prepareSeekPerfStats.findTargetArcNs)} " +
-                    "arcFollowMs=${toMs(prepareSeekPerfStats.arcFollowNs)} " +
-                    "floorScanMs=${toMs(prepareSeekPerfStats.floorScanNs)} " +
-                    "totalMs=${toMs(prepareSeekPerfStats.totalNs)}"
-            }
-        }
     }
 
     class OutputAccumulator : DataInput() {

@@ -6,10 +6,8 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.StringHelper
 import okio.IOException
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
-import org.gnit.lucenekmp.jdkport.TimeUnit
 
 /**
  * An FST [Outputs] implementation where each output is a sequence of bytes.
@@ -102,32 +100,13 @@ class ByteSequenceOutputs private constructor() : Outputs<BytesRef>() {
 
     @Throws(IOException::class)
     override fun read(`in`: DataInput): BytesRef {
-        val totalStartNs = System.nanoTime()
-        val stats = readPerfStats
-        when (`in`) {
-            is ReverseBytesReader -> stats.reverseBytesReaderCalls++
-            is ReverseRandomAccessReader -> stats.reverseRandomAccessReaderCalls++
-            else -> stats.otherReaderCalls++
-        }
-        val readVIntStartNs = System.nanoTime()
         val len: Int = `in`.readVInt()
-        stats.readVIntNs += System.nanoTime() - readVIntStartNs
-        stats.calls++
         if (len == 0) {
-            stats.noOutputReturns++
-            stats.totalNs += System.nanoTime() - totalStartNs
             return NO_OUTPUT
         } else {
-            stats.nonZeroLenReturns++
-            stats.totalLen += len.toLong()
-            val allocStartNs = System.nanoTime()
             val output = BytesRef(len)
-            stats.allocNs += System.nanoTime() - allocStartNs
-            val readBytesStartNs = System.nanoTime()
             `in`.readBytes(output.bytes, 0, len)
-            stats.readBytesNs += System.nanoTime() - readBytesStartNs
             output.length = len
-            stats.totalNs += System.nanoTime() - totalStartNs
             return output
         }
     }
@@ -156,68 +135,9 @@ class ByteSequenceOutputs private constructor() : Outputs<BytesRef>() {
     }
 
     companion object {
-        private class ReadPerfStats {
-            var calls: Long = 0
-            var noOutputReturns: Long = 0
-            var nonZeroLenReturns: Long = 0
-            var totalLen: Long = 0
-            var reverseBytesReaderCalls: Long = 0
-            var reverseRandomAccessReaderCalls: Long = 0
-            var otherReaderCalls: Long = 0
-            var readVIntNs: Long = 0
-            var allocNs: Long = 0
-            var readBytesNs: Long = 0
-            var totalNs: Long = 0
-
-            fun reset() {
-                calls = 0
-                noOutputReturns = 0
-                nonZeroLenReturns = 0
-                totalLen = 0
-                reverseBytesReaderCalls = 0
-                reverseRandomAccessReaderCalls = 0
-                otherReaderCalls = 0
-                readVIntNs = 0
-                allocNs = 0
-                readBytesNs = 0
-                totalNs = 0
-            }
-        }
-
-        private val readPerfLogger = KotlinLogging.logger {}
-        private val readPerfStats = ReadPerfStats()
         private val NO_OUTPUT: BytesRef = BytesRef()
         val singleton: ByteSequenceOutputs = ByteSequenceOutputs()
 
         private val BASE_NUM_BYTES: Long = RamUsageEstimator.shallowSizeOf(NO_OUTPUT)
-
-        fun resetReadPerfStats() {
-            readPerfStats.reset()
-        }
-
-        fun logReadPerfStats(tag: String = "") {
-            if (!readPerfLogger.isDebugEnabled()) {
-                return
-            }
-            val stats = readPerfStats
-            if (stats.calls == 0L) {
-                readPerfLogger.debug { "phase=byteSequenceOutputs.read.stats tag=$tag calls=0" }
-                return
-            }
-            fun toMs(ns: Long): Long = TimeUnit.NANOSECONDS.toMillis(ns)
-            readPerfLogger.debug {
-                "phase=byteSequenceOutputs.read.stats tag=$tag calls=${stats.calls} " +
-                    "noOutputReturns=${stats.noOutputReturns} " +
-                    "nonZeroLenReturns=${stats.nonZeroLenReturns} " +
-                    "totalLen=${stats.totalLen} " +
-                    "reverseBytesReaderCalls=${stats.reverseBytesReaderCalls} " +
-                    "reverseRandomAccessReaderCalls=${stats.reverseRandomAccessReaderCalls} " +
-                    "otherReaderCalls=${stats.otherReaderCalls} " +
-                    "readVIntMs=${toMs(stats.readVIntNs)} " +
-                    "allocMs=${toMs(stats.allocNs)} " +
-                    "readBytesMs=${toMs(stats.readBytesNs)} " +
-                    "totalMs=${toMs(stats.totalNs)}"
-            }
-        }
     }
 }
