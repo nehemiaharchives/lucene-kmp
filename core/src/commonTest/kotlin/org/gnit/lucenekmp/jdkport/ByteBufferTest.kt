@@ -1,5 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.random.Random
+import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -9,6 +13,11 @@ import kotlin.test.assertTrue
 import okio.IOException
 
 class ByteBufferTest {
+    init {
+        configureTestLogging()
+    }
+
+    private val logger = KotlinLogging.logger {}
 
     @Test
     fun testAllocate() {
@@ -869,6 +878,144 @@ class ByteBufferTest {
         assertEquals(limitAfterFlip, buffer.limit, "Limit after flip and rewind")
         assertFailsWith<IOException>("Resetting after flip and rewind should throw IOException") {
             buffer.reset()
+        }
+    }
+
+    @Test
+    fun testPerfGetIntProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(1337).nextBytes(bytes)
+        val buffer = ByteBuffer.wrap(bytes)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        val maxIndex = bytes.size - Int.SIZE_BYTES
+        val iterations = 2_000_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += buffer.getInt(index).toLong()
+            index += Int.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        logger.debug {
+            "perf:ByteBufferTest getInt iterations=$iterations elapsedMs=${mark.elapsedNow().inWholeMilliseconds} checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfGetShortProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(4242).nextBytes(bytes)
+        val buffer = ByteBuffer.wrap(bytes)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        val maxIndex = bytes.size - Short.SIZE_BYTES
+        val iterations = 3_000_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += buffer.getShort(index).toLong()
+            index += Short.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        logger.debug {
+            "perf:ByteBufferTest getShort iterations=$iterations elapsedMs=${mark.elapsedNow().inWholeMilliseconds} checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfGetLongProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(9001).nextBytes(bytes)
+        val buffer = ByteBuffer.wrap(bytes)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        val maxIndex = bytes.size - Long.SIZE_BYTES
+        val iterations = 1_500_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += buffer.getLong(index)
+            index += Long.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        logger.debug {
+            "perf:ByteBufferTest getLong iterations=$iterations elapsedMs=${mark.elapsedNow().inWholeMilliseconds} checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfPlatformGetIntProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(1337).nextBytes(bytes)
+        val maxIndex = bytes.size - Int.SIZE_BYTES
+        val iterations = 2_000_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += byteBufferGetIntPlatform(bytes, index, bigEndian = false).toLong()
+            index += Int.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        logger.debug {
+            "perf:ByteBufferTest platformGetInt iterations=$iterations elapsedMs=${mark.elapsedNow().inWholeMilliseconds} checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfPlatformGetShortProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(4242).nextBytes(bytes)
+        val maxIndex = bytes.size - Short.SIZE_BYTES
+        val iterations = 3_000_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += byteBufferGetShortPlatform(bytes, index, bigEndian = false).toLong()
+            index += Short.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        logger.debug {
+            "perf:ByteBufferTest platformGetShort iterations=$iterations elapsedMs=${mark.elapsedNow().inWholeMilliseconds} checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfPlatformGetLongProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(9001).nextBytes(bytes)
+        val maxIndex = bytes.size - Long.SIZE_BYTES
+        val iterations = 1_500_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += byteBufferGetLongPlatform(bytes, index, bigEndian = false)
+            index += Long.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        logger.debug {
+            "perf:ByteBufferTest platformGetLong iterations=$iterations elapsedMs=${mark.elapsedNow().inWholeMilliseconds} checksum=$checksum"
         }
     }
 

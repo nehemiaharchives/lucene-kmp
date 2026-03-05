@@ -29,7 +29,7 @@ open class ByteBuffer private constructor(
     /** The current position. Must be between 0 and limit. */
     var position: Int = 0
         get() {
-            if (!profilingEnabled) {
+            if (!byteBufferProfileGettersPlatform() || !profilingEnabled) {
                 return field
             }
             val startMs = Clock.System.now().toEpochMilliseconds()
@@ -54,7 +54,7 @@ open class ByteBuffer private constructor(
     /** The limit, i.e. the upper bound (exclusive) for read/writes. */
     var limit: Int = capacity
         get() {
-            if (!profilingEnabled) {
+            if (!byteBufferProfileGettersPlatform() || !profilingEnabled) {
                 return field
             }
             val startMs = Clock.System.now().toEpochMilliseconds()
@@ -316,22 +316,12 @@ open class ByteBuffer private constructor(
      * minus three
      */
     fun getInt(index: Int): Int {
-        if (index < 0 || limit - index < 4) {
+        if ((index or (limit - index - 4)) < 0) {
             throw IndexOutOfBoundsException(
                 "Index $index out of bounds: need 4 bytes from index (limit: $limit)"
             )
         }
-        return if (bigEndian) {
-            ((array[index].toInt() and 0xFF) shl 24) or
-            ((array[index + 1].toInt() and 0xFF) shl 16) or
-            ((array[index + 2].toInt() and 0xFF) shl 8) or
-            (array[index + 3].toInt() and 0xFF)
-        } else {
-            (array[index].toInt() and 0xFF) or
-            ((array[index + 1].toInt() and 0xFF) shl 8) or
-            ((array[index + 2].toInt() and 0xFF) shl 16) or
-            ((array[index + 3].toInt() and 0xFF) shl 24)
-        }
+        return byteBufferGetIntPlatform(array, index, bigEndian)
     }
 
     /**
@@ -373,20 +363,12 @@ open class ByteBuffer private constructor(
      * minus one
      */
     fun getShort(index: Int): Short {
-        if (index < 0 || limit - index < 2) {
+        if ((index or (limit - index - 2)) < 0) {
             throw IndexOutOfBoundsException(
                 "Index $index out of bounds: need 2 bytes from index (limit: $limit)"
             )
         }
-        return if (bigEndian) {
-            val hi = array[index].toInt() and 0xFF
-            val lo = array[index + 1].toInt() and 0xFF
-            ((hi shl 8) or lo).toShort()
-        } else {
-            val lo = array[index].toInt() and 0xFF
-            val hi = array[index + 1].toInt() and 0xFF
-            ((hi shl 8) or lo).toShort()
-        }
+        return byteBufferGetShortPlatform(array, index, bigEndian)
     }
 
     /**
@@ -647,28 +629,10 @@ open class ByteBuffer private constructor(
      * @throws IndexOutOfBoundsException if there are fewer than 8 bytes available starting at [index].
      */
     fun getLong(index: Int): Long {
-        if (index < 0 || limit - index < 8) {
+        if ((index or (limit - index - 8)) < 0) {
             throw IndexOutOfBoundsException("Index $index out of bounds: need 8 bytes from index (limit: $limit)")
         }
-        return if (order() == ByteOrder.BIG_ENDIAN) {
-            ((array[index].toLong() and 0xFF) shl 56) or
-            ((array[index + 1].toLong() and 0xFF) shl 48) or
-            ((array[index + 2].toLong() and 0xFF) shl 40) or
-            ((array[index + 3].toLong() and 0xFF) shl 32) or
-            ((array[index + 4].toLong() and 0xFF) shl 24) or
-            ((array[index + 5].toLong() and 0xFF) shl 16) or
-            ((array[index + 6].toLong() and 0xFF) shl 8) or
-            (array[index + 7].toLong() and 0xFF)
-        } else {
-            (array[index].toLong() and 0xFF) or
-            ((array[index + 1].toLong() and 0xFF) shl 8) or
-            ((array[index + 2].toLong() and 0xFF) shl 16) or
-            ((array[index + 3].toLong() and 0xFF) shl 24) or
-            ((array[index + 4].toLong() and 0xFF) shl 32) or
-            ((array[index + 5].toLong() and 0xFF) shl 40) or
-            ((array[index + 6].toLong() and 0xFF) shl 48) or
-            ((array[index + 7].toLong() and 0xFF) shl 56)
-        }
+        return byteBufferGetLongPlatform(array, index, bigEndian)
     }
 
     /**
