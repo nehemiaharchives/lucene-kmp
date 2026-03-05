@@ -204,21 +204,48 @@ class ByteBuffersDataInput(buffers: MutableList<ByteBuffer>) : DataInput(), Acco
     @Throws(IOException::class)
     override fun readGroupVInt(dst: IntArray, offset: Int) {
         val block: ByteBuffer = blocks[blockIndex(pos)]
-        val blockOffset = blockOffset(pos)
-        // We MUST save the return value to local variable, could not use pos += readGroupVInt(...).
-        // because `pos +=` in java will move current value(not address) of pos to register first,
-        // then call the function, but we will update pos value in function via readByte(), then
-        // `pos +=` will use an old pos value plus return value, thereby missing 1 byte.
-        val len: Int =
-            GroupVIntUtil.readGroupVInt(
-                this,
-                (block.limit - blockOffset).toLong(),
-                { p -> block.getInt(p.toInt()) },
-                blockOffset.toLong(),
-                dst,
-                offset
-            )
-        pos += len.toLong()
+        val start = blockOffset(pos)
+        val remaining = block.limit - start
+        if (remaining < GroupVIntUtil.MAX_LENGTH_PER_GROUP) {
+            GroupVIntUtil.readGroupVInt(this, dst, offset)
+            return
+        }
+
+        val bytes = block.array()
+        var p = start
+        val flag = bytes[p].toInt() and 0xFF
+        p++
+
+        val n1 = (flag ushr 6) + 1
+        val n2 = ((flag ushr 4) and 0x03) + 1
+        val n3 = ((flag ushr 2) and 0x03) + 1
+        val n4 = (flag and 0x03) + 1
+
+        dst[offset] = readIntInGroupUnchecked(bytes, p, n1)
+        p += n1
+        dst[offset + 1] = readIntInGroupUnchecked(bytes, p, n2)
+        p += n2
+        dst[offset + 2] = readIntInGroupUnchecked(bytes, p, n3)
+        p += n3
+        dst[offset + 3] = readIntInGroupUnchecked(bytes, p, n4)
+        p += n4
+
+        pos += (p - start).toLong()
+    }
+
+    private inline fun readIntInGroupUnchecked(bytes: ByteArray, index: Int, numBytes: Int): Int {
+        return when (numBytes) {
+            1 -> bytes[index].toInt() and 0xFF
+            2 -> (bytes[index].toInt() and 0xFF) or
+                ((bytes[index + 1].toInt() and 0xFF) shl 8)
+            3 -> (bytes[index].toInt() and 0xFF) or
+                ((bytes[index + 1].toInt() and 0xFF) shl 8) or
+                ((bytes[index + 2].toInt() and 0xFF) shl 16)
+            else -> (bytes[index].toInt() and 0xFF) or
+                ((bytes[index + 1].toInt() and 0xFF) shl 8) or
+                ((bytes[index + 2].toInt() and 0xFF) shl 16) or
+                ((bytes[index + 3].toInt() and 0xFF) shl 24)
+        }
     }
 
     override fun length(): Long {

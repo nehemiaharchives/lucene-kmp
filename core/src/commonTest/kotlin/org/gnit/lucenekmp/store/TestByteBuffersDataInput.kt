@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.store
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.tests.util.RandomizedTest
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomNumbers
@@ -7,8 +8,11 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.IOConsumer
 import org.gnit.lucenekmp.jdkport.ByteBuffer
+import org.gnit.lucenekmp.jdkport.ByteOrder
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.min
 import kotlin.random.Random
+import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,6 +20,11 @@ import kotlin.test.assertContentEquals
 import okio.EOFException
 
 class TestByteBuffersDataInput : RandomizedTest() {
+    init {
+        configureTestLogging()
+    }
+
+    private val logger = KotlinLogging.logger {}
 
     private fun addRandomData(out: ByteBuffersDataOutput, rnd: Random, maxAddCalls: Int): List<(ByteBuffersDataInput) -> Unit> {
         val operations = mutableListOf<(ByteBuffersDataInput) -> Unit>()
@@ -283,6 +292,78 @@ class TestByteBuffersDataInput : RandomizedTest() {
                 assertEquals(expected, slice.readByte(i.toLong()))
             }
             offset += RandomNumbers.randomIntBetween(LuceneTestCase.random(), MB, 4 * MB).toLong()
+        }
+    }
+
+    @Test
+    fun testPerfGetIntProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(1337).nextBytes(bytes)
+        val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+        val maxIndex = bytes.size - Int.SIZE_BYTES
+        val iterations = 2_000_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += buffer.getInt(index).toLong()
+            index += Int.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        val elapsedMs = mark.elapsedNow().inWholeMilliseconds
+        logger.debug {
+            "perf:ByteBuffer getInt iterations=$iterations elapsedMs=$elapsedMs checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfGetShortProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(4242).nextBytes(bytes)
+        val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+        val maxIndex = bytes.size - Short.SIZE_BYTES
+        val iterations = 3_000_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += buffer.getShort(index).toLong()
+            index += Short.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        val elapsedMs = mark.elapsedNow().inWholeMilliseconds
+        logger.debug {
+            "perf:ByteBuffer getShort iterations=$iterations elapsedMs=$elapsedMs checksum=$checksum"
+        }
+    }
+
+    @Test
+    fun testPerfGetLongProbe() {
+        val bytes = ByteArray(1 shl 18)
+        Random(9001).nextBytes(bytes)
+        val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+        val maxIndex = bytes.size - Long.SIZE_BYTES
+        val iterations = 1_500_000
+
+        var checksum = 0L
+        var index = 0
+        val mark = TimeSource.Monotonic.markNow()
+        repeat(iterations) {
+            checksum += buffer.getLong(index)
+            index += Long.SIZE_BYTES
+            if (index > maxIndex) {
+                index = 0
+            }
+        }
+        val elapsedMs = mark.elapsedNow().inWholeMilliseconds
+        logger.debug {
+            "perf:ByteBuffer getLong iterations=$iterations elapsedMs=$elapsedMs checksum=$checksum"
         }
     }
 }

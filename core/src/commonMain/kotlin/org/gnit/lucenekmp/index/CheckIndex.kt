@@ -86,6 +86,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.TimeSource
 
 /**
  * Basic tool and API to check the health of an index and write a new segments file that removes
@@ -1033,48 +1034,74 @@ class CheckIndex(
             }
             if (level >= Level.MIN_LEVEL_FOR_INTEGRITY_CHECKS) {
                 phase = "deepChecks"
+                logger.debug { "phase=checkIndex.deepChecks.start segment=${info.info.name} maxDoc=${reader.maxDoc()}" }
                 // Test Livedocs
+                var stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.liveDocStatus = testLiveDocs(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=liveDocs elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test Fieldinfos
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.fieldInfoStatus = testFieldInfos(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=fieldInfos elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test Field Norms
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.fieldNormStatus = testFieldNorms(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=fieldNorms elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test the Term Index
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.termIndexStatus = testPostings(reader, infoStream, verbose, level, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=postings elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test Stored Fields
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.storedFieldStatus = testStoredFields(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=storedFields elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test Term Vectors
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.termVectorStatus =
                     testTermVectors(reader, infoStream, verbose, level, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=termVectors elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test Docvalues
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.docValuesStatus = testDocValues(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=docValues elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test PointValues
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.pointsStatus = testPoints(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=points elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test FloatVectorValues and ByteVectorValues
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.vectorValuesStatus = testVectors(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=vectors elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test HNSW graph
+                stepMark = TimeSource.Monotonic.markNow()
                 segInfoStat.hnswGraphsStatus = testHnswGraphs(reader, infoStream, failFast)
+                logger.debug { "phase=checkIndex.step segment=${info.info.name} step=hnswGraphs elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
 
                 // Test Index Sort
                 if (indexSort != null) {
+                    stepMark = TimeSource.Monotonic.markNow()
                     segInfoStat.indexSortStatus = testSort(reader, indexSort, infoStream, failFast)
+                    logger.debug { "phase=checkIndex.step segment=${info.info.name} step=indexSort elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
                 }
 
                 // Test Soft Deletes
                 val softDeletesField: String? = reader.fieldInfos.softDeletesField
                 if (softDeletesField != null) {
+                    stepMark = TimeSource.Monotonic.markNow()
                     segInfoStat.softDeletesStatus =
                         checkSoftDeletes(softDeletesField, info, reader, infoStream, failFast)
+                    logger.debug { "phase=checkIndex.step segment=${info.info.name} step=softDeletes elapsedMs=${stepMark.elapsedNow().inWholeMilliseconds}" }
                 }
+                logger.debug { "phase=checkIndex.deepChecks.done segment=${info.info.name}" }
 
                 // Rethrow the first exception we encountered
                 //  This will cause stats for failed segments to be incremented properly
@@ -1915,6 +1942,7 @@ class CheckIndex(
             }
 
             val status: Status.TermIndexStatus = Status.TermIndexStatus()
+            val checkFieldsMark = TimeSource.Monotonic.markNow()
             var computedFieldCount = 0
 
             /**
@@ -1923,9 +1951,22 @@ class CheckIndex(
             val seenFields: MutableList<String> = mutableListOf()
 
             var postings: PostingsEnum? = null
+            // Native performance note:
+            // Java Lucene keeps one reuse slot (`postings`) and passes it to all postings() calls.
+            // On Kotlin/Native this creates high allocation pressure in this loop because reuse depends
+            // on requested flags (ALL/NONE/FREQS), causing frequent constructor misses.
+            // We keep equivalent postings semantics but maintain per-flag reuse slots.
+            // Java-style reference:
+            // postings = termsEnum.postings(postings, PostingsEnum.ALL.toInt())
+            var postingsReuseAll: PostingsEnum? = null
+            var postingsReuseNone: PostingsEnum? = null
+            var postingsReuseFreqs: PostingsEnum? = null
 
             var lastField: String? = null
             for (field in fields) {
+                logger.debug { "phase=checkIndex.postings.field.start field=$field maxDoc=$maxDoc isVectors=$isVectors" }
+                val fieldPreLoopMark = TimeSource.Monotonic.markNow()
+                msg(infoStream, "      debug: stage=fieldInfo.lookup.start field=$field")
                 // MultiFieldsEnum relies upon this order...
 
                 if (lastField != null && field <= lastField) {
@@ -1979,6 +2020,7 @@ class CheckIndex(
                 // check that the field is in fieldinfos, and is indexed.
                 // TODO: add a separate test to check this for different reader impls
                 val fieldInfo: FieldInfo? = fieldInfos.fieldInfo(field)
+                msg(infoStream, "      debug: stage=fieldInfo.lookup.done field=$field found=${fieldInfo != null}")
                 if (fieldInfo == null) {
                     throw CheckIndexException(
                         "fieldsEnum inconsistent with fieldInfos, no fieldInfos for: $field"
@@ -1989,6 +2031,9 @@ class CheckIndex(
                         "fieldsEnum inconsistent with fieldInfos, isIndexed == false for: $field"
                     )
                 }
+                logger.debug {
+                    "phase=checkIndex.postings.field.stage field=$field stage=fieldInfo.ready elapsedMs=${fieldPreLoopMark.elapsedNow().inWholeMilliseconds}"
+                }
 
                 // TODO: really the codec should not return a field
                 // from FieldsEnum if it has no Terms... but we do
@@ -1996,9 +2041,14 @@ class CheckIndex(
                 // assert fields.terms(field) != null;
                 computedFieldCount++
 
+                msg(infoStream, "      debug: stage=terms.lookup.start field=$field")
                 val terms: Terms? = fields.terms(field)
+                msg(infoStream, "      debug: stage=terms.lookup.done field=$field found=${terms != null}")
                 if (terms == null) {
                     continue
+                }
+                logger.debug {
+                    "phase=checkIndex.postings.field.stage field=$field stage=terms.loaded elapsedMs=${fieldPreLoopMark.elapsedNow().inWholeMilliseconds}"
                 }
 
                 if (terms.docCount > maxDoc) {
@@ -2016,6 +2066,9 @@ class CheckIndex(
                 val hasPositions: Boolean = terms.hasPositions()
                 val hasPayloads: Boolean = terms.hasPayloads()
                 val hasOffsets: Boolean = terms.hasOffsets()
+                logger.debug {
+                    "phase=checkIndex.postings.field.stage field=$field stage=terms.flags elapsedMs=${fieldPreLoopMark.elapsedNow().inWholeMilliseconds} hasFreqs=$hasFreqs hasPositions=$hasPositions hasPayloads=$hasPayloads hasOffsets=$hasOffsets"
+                }
 
                 val maxTerm: BytesRef?
                 val minTerm: BytesRef?
@@ -2024,6 +2077,10 @@ class CheckIndex(
                     maxTerm = null
                     minTerm = null
                 } else {
+                    msg(infoStream, "      debug: stage=terms.minmax.start field=$field")
+                    logger.debug {
+                        "phase=checkIndex.postings.field.stage field=$field stage=terms.minmax.start elapsedMs=${fieldPreLoopMark.elapsedNow().inWholeMilliseconds}"
+                    }
                     var bb: BytesRef? = terms.min
                     if (bb != null) {
                         assert(bb.isValid())
@@ -2049,6 +2106,10 @@ class CheckIndex(
                             )
                         }
                     }
+                    logger.debug {
+                        "phase=checkIndex.postings.field.stage field=$field stage=terms.minmax.done elapsedMs=${fieldPreLoopMark.elapsedNow().inWholeMilliseconds}"
+                    }
+                    msg(infoStream, "      debug: stage=terms.minmax.done field=$field")
                 }
 
                 // term vectors cannot omit TF:
@@ -2106,7 +2167,12 @@ class CheckIndex(
                     }
                 }
 
+                msg(infoStream, "      debug: stage=terms.iterator.start field=$field")
                 val termsEnum: TermsEnum = terms.iterator()
+                msg(infoStream, "      debug: stage=terms.iterator.done field=$field")
+                logger.debug {
+                    "phase=checkIndex.postings.field.stage field=$field stage=terms.iterator.ready elapsedMs=${fieldPreLoopMark.elapsedNow().inWholeMilliseconds}"
+                }
 
                 var hasOrd = true
                 val termCountStart: Long = status.delTermCount + status.termCount
@@ -2116,10 +2182,47 @@ class CheckIndex(
                 var sumTotalTermFreq: Long = 0
                 var sumDocFreq: Long = 0
                 val visitedDocs = FixedBitSet(maxDoc)
+                var postingsAcquireNs = 0L
+                var postingsAcquireMainNs = 0L
+                var postingsAcquireSkipNs = 0L
+                var postingsAcquireImpactsNs = 0L
+                var postingsAcquireMainCalls = 0L
+                var postingsAcquireSkipCalls = 0L
+                var postingsAcquireImpactsCalls = 0L
+                var postingsDocsWalkNs = 0L
+                var skipChecksNs = 0L
+                var impactsChecksNs = 0L
+                var impactsAcquireNs = 0L
+                var impactsAdvanceShallowNs = 0L
+                var impactsGetMaxScoreNs = 0L
+                var impactsAdvanceNs = 0L
+                var termsVisited = 0L
+                val progressLogEveryTerms = 16L
+                val termLoopMark = TimeSource.Monotonic.markNow()
+                var termFetchAttempts = 0L
                 while (true) {
+                    termFetchAttempts++
+                    if (termFetchAttempts <= 4L) {
+                        logger.debug {
+                            "phase=checkIndex.postings.field.next.start field=$field attempt=$termFetchAttempts elapsedMs=${termLoopMark.elapsedNow().inWholeMilliseconds}"
+                        }
+                    }
+                    val nextStartNs = System.nanoTime()
                     val term: BytesRef? = termsEnum.next()
+                    val nextElapsedMs = (System.nanoTime() - nextStartNs) / 1_000_000
+                    if (termFetchAttempts <= 4L || nextElapsedMs >= 1000L) {
+                        logger.debug {
+                            "phase=checkIndex.postings.field.next.done field=$field attempt=$termFetchAttempts elapsedMs=$nextElapsedMs termNull=${term == null}"
+                        }
+                    }
                     if (term == null) {
                         break
+                    }
+                    termsVisited++
+                    if (termsVisited % progressLogEveryTerms == 0L) {
+                        logger.debug {
+                            "phase=checkIndex.postings.field.progress field=$field termsVisited=$termsVisited elapsedMs=${termLoopMark.elapsedNow().inWholeMilliseconds} postingsAcquireMs=${postingsAcquireNs / 1_000_000} postingsAcquireMainMs=${postingsAcquireMainNs / 1_000_000} postingsAcquireSkipMs=${postingsAcquireSkipNs / 1_000_000} postingsAcquireImpactsMs=${postingsAcquireImpactsNs / 1_000_000} postingsAcquireMainCalls=$postingsAcquireMainCalls postingsAcquireSkipCalls=$postingsAcquireSkipCalls postingsAcquireImpactsCalls=$postingsAcquireImpactsCalls postingsDocsWalkMs=${postingsDocsWalkNs / 1_000_000} skipChecksMs=${skipChecksNs / 1_000_000} impactsChecksMs=${impactsChecksNs / 1_000_000} impactsAcquireMs=${impactsAcquireNs / 1_000_000} impactsAdvanceShallowMs=${impactsAdvanceShallowNs / 1_000_000} impactsGetMaxScoreMs=${impactsGetMaxScoreNs / 1_000_000} impactsAdvanceMs=${impactsAdvanceNs / 1_000_000}"
+                        }
                     }
 
                     // System.out.println("CI: field=" + field + " check term=" + term + " docFreq=" + termsEnum.docFreq());
@@ -2167,7 +2270,15 @@ class CheckIndex(
                     }
                     sumDocFreq += docFreq.toLong()
 
-                    postings = termsEnum.postings(postings, PostingsEnum.ALL.toInt())
+                    var localStartNs = System.nanoTime()
+                    // Java reference:
+                    // postings = termsEnum.postings(postings, PostingsEnum.ALL.toInt())
+                    postings = termsEnum.postings(postingsReuseAll, PostingsEnum.ALL.toInt())
+                    postingsReuseAll = postings
+                    val postingsAcquireElapsedNs = System.nanoTime() - localStartNs
+                    postingsAcquireNs += postingsAcquireElapsedNs
+                    postingsAcquireMainNs += postingsAcquireElapsedNs
+                    postingsAcquireMainCalls++
 
                     if (!hasFreqs) {
                         if (termsEnum.totalTermFreq() != termsEnum.docFreq().toLong()) {
@@ -2205,6 +2316,7 @@ class CheckIndex(
                     var docCount = 0
                     var hasNonDeletedDocs = false
                     var totalTermFreq: Long = 0
+                    localStartNs = System.nanoTime()
                     while (true) {
                         val doc: Int = postings!!.nextDoc()
                         if (doc == DocIdSetIterator.NO_MORE_DOCS) {
@@ -2363,6 +2475,7 @@ class CheckIndex(
                             }
                         }
                     }
+                    postingsDocsWalkNs += System.nanoTime() - localStartNs
 
                     if (hasNonDeletedDocs) {
                         status.termCount++
@@ -2403,175 +2516,205 @@ class CheckIndex(
                     }
 
                     // Test skipping
+                    val skipChecksStartNs = System.nanoTime()
                     if (hasPositions) {
-                        for (idx in 0..6) {
-                            val skipDocID = (((idx + 1) * maxDoc.toLong()) / 8).toInt()
-                            postings = termsEnum.postings(postings, PostingsEnum.ALL.toInt())
-                            val docID: Int = postings!!.advance(skipDocID)
-                            if (docID == DocIdSetIterator.NO_MORE_DOCS) {
-                                break
-                            } else {
-                                if (docID < skipDocID) {
-                                    throw CheckIndexException(
-                                        "term $term: advance(docID=$skipDocID) returned docID=$docID"
-                                    )
-                                }
-                                val freq: Int = postings.freq()
-                                if (freq <= 0) {
-                                    throw CheckIndexException("termFreq $freq is out of bounds")
-                                }
-                                var lastPosition = -1
-                                var lastOffset = 0
-                                for (posUpto in 0..<freq) {
-                                    val pos: Int = postings.nextPosition()
-
-                                    if (pos < 0) {
-                                        throw CheckIndexException("position $pos is out of bounds")
-                                    }
-                                    if (pos < lastPosition) {
+                            for (idx in 0..6) {
+                                val skipDocID = (((idx + 1) * maxDoc.toLong()) / 8).toInt()
+                                val postingsAcquireStartNs = System.nanoTime()
+                                // Java reference:
+                                // postings = termsEnum.postings(postings, PostingsEnum.ALL.toInt())
+                                postings = termsEnum.postings(postingsReuseAll, PostingsEnum.ALL.toInt())
+                                postingsReuseAll = postings
+                                val postingsAcquireElapsedNs = System.nanoTime() - postingsAcquireStartNs
+                                postingsAcquireNs += postingsAcquireElapsedNs
+                                postingsAcquireSkipNs += postingsAcquireElapsedNs
+                                postingsAcquireSkipCalls++
+                                val docID: Int = postings!!.advance(skipDocID)
+                                if (docID == DocIdSetIterator.NO_MORE_DOCS) {
+                                    break
+                                } else {
+                                    if (docID < skipDocID) {
                                         throw CheckIndexException(
-                                            "position $pos is < lastPosition $lastPosition"
+                                            "term $term: advance(docID=$skipDocID) returned docID=$docID"
                                         )
                                     }
-                                    lastPosition = pos
-                                    if (hasOffsets) {
-                                        val startOffset: Int = postings.startOffset()
-                                        val endOffset: Int = postings.endOffset()
-                                        // NOTE: we cannot enforce any bounds whatsoever on vectors... they were a
-                                        // free-for-all before
-                                        // but for offsets in the postings lists these checks are fine: they were always
-                                        // enforced by IndexWriter
-                                        if (!isVectors) {
-                                            if (startOffset < 0) {
-                                                throw CheckIndexException(
-                                                    ("term "
-                                                            + term
-                                                            + ": doc "
-                                                            + docID
-                                                            + ": pos "
-                                                            + pos
-                                                            + ": startOffset "
-                                                            + startOffset
-                                                            + " is out of bounds")
-                                                )
-                                            }
-                                            if (startOffset < lastOffset) {
-                                                throw CheckIndexException(
-                                                    ("term "
-                                                            + term
-                                                            + ": doc "
-                                                            + docID
-                                                            + ": pos "
-                                                            + pos
-                                                            + ": startOffset "
-                                                            + startOffset
-                                                            + " < lastStartOffset "
-                                                            + lastOffset)
-                                                )
-                                            }
-                                            if (endOffset < 0) {
-                                                throw CheckIndexException(
-                                                    ("term "
-                                                            + term
-                                                            + ": doc "
-                                                            + docID
-                                                            + ": pos "
-                                                            + pos
-                                                            + ": endOffset "
-                                                            + endOffset
-                                                            + " is out of bounds")
-                                                )
-                                            }
-                                            if (endOffset < startOffset) {
-                                                throw CheckIndexException(
-                                                    ("term "
-                                                            + term
-                                                            + ": doc "
-                                                            + docID
-                                                            + ": pos "
-                                                            + pos
-                                                            + ": endOffset "
-                                                            + endOffset
-                                                            + " < startOffset "
-                                                            + startOffset)
-                                                )
-                                            }
+                                    val freq: Int = postings.freq()
+                                    if (freq <= 0) {
+                                        throw CheckIndexException("termFreq $freq is out of bounds")
+                                    }
+                                    var lastPosition = -1
+                                    var lastOffset = 0
+                                    for (posUpto in 0..<freq) {
+                                        val pos: Int = postings.nextPosition()
+
+                                        if (pos < 0) {
+                                            throw CheckIndexException("position $pos is out of bounds")
                                         }
-                                        lastOffset = startOffset
+                                        if (pos < lastPosition) {
+                                            throw CheckIndexException(
+                                                "position $pos is < lastPosition $lastPosition"
+                                            )
+                                        }
+                                        lastPosition = pos
+                                        if (hasOffsets) {
+                                            val startOffset: Int = postings.startOffset()
+                                            val endOffset: Int = postings.endOffset()
+                                            // NOTE: we cannot enforce any bounds whatsoever on vectors... they were a
+                                            // free-for-all before
+                                            // but for offsets in the postings lists these checks are fine: they were always
+                                            // enforced by IndexWriter
+                                            if (!isVectors) {
+                                                if (startOffset < 0) {
+                                                    throw CheckIndexException(
+                                                        ("term "
+                                                                + term
+                                                                + ": doc "
+                                                                + docID
+                                                                + ": pos "
+                                                                + pos
+                                                                + ": startOffset "
+                                                                + startOffset
+                                                                + " is out of bounds")
+                                                    )
+                                                }
+                                                if (startOffset < lastOffset) {
+                                                    throw CheckIndexException(
+                                                        ("term "
+                                                                + term
+                                                                + ": doc "
+                                                                + docID
+                                                                + ": pos "
+                                                                + pos
+                                                                + ": startOffset "
+                                                                + startOffset
+                                                                + " < lastStartOffset "
+                                                                + lastOffset)
+                                                    )
+                                                }
+                                                if (endOffset < 0) {
+                                                    throw CheckIndexException(
+                                                        ("term "
+                                                                + term
+                                                                + ": doc "
+                                                                + docID
+                                                                + ": pos "
+                                                                + pos
+                                                                + ": endOffset "
+                                                                + endOffset
+                                                                + " is out of bounds")
+                                                    )
+                                                }
+                                                if (endOffset < startOffset) {
+                                                    throw CheckIndexException(
+                                                        ("term "
+                                                                + term
+                                                                + ": doc "
+                                                                + docID
+                                                                + ": pos "
+                                                                + pos
+                                                                + ": endOffset "
+                                                                + endOffset
+                                                                + " < startOffset "
+                                                                + startOffset)
+                                                    )
+                                                }
+                                            }
+                                            lastOffset = startOffset
+                                        }
+                                    }
+
+                                    val nextDocID: Int = postings.nextDoc()
+                                    if (nextDocID == DocIdSetIterator.NO_MORE_DOCS) {
+                                        break
+                                    }
+                                    if (nextDocID <= docID) {
+                                        throw CheckIndexException(
+                                            ("term "
+                                                    + term
+                                                    + ": advance(docID="
+                                                    + skipDocID
+                                                    + "), then .next() returned docID="
+                                                    + nextDocID
+                                                    + " vs prev docID="
+                                                    + docID)
+                                        )
                                     }
                                 }
 
-                                val nextDocID: Int = postings.nextDoc()
-                                if (nextDocID == DocIdSetIterator.NO_MORE_DOCS) {
+                                if (isVectors) {
+                                    // Only 1 doc in the postings for term vectors, so we only test 1 advance:
                                     break
                                 }
-                                if (nextDocID <= docID) {
-                                    throw CheckIndexException(
-                                        ("term "
-                                                + term
-                                                + ": advance(docID="
-                                                + skipDocID
-                                                + "), then .next() returned docID="
-                                                + nextDocID
-                                                + " vs prev docID="
-                                                + docID)
-                                    )
-                                }
                             }
-
-                            if (isVectors) {
-                                // Only 1 doc in the postings for term vectors, so we only test 1 advance:
-                                break
-                            }
-                        }
                     } else {
-                        for (idx in 0..6) {
-                            val skipDocID = (((idx + 1) * maxDoc.toLong()) / 8).toInt()
-                            postings = termsEnum.postings(postings, PostingsEnum.NONE.toInt())
-                            val docID: Int = postings!!.advance(skipDocID)
-                            if (docID == DocIdSetIterator.NO_MORE_DOCS) {
-                                break
-                            } else {
-                                if (docID < skipDocID) {
-                                    throw CheckIndexException(
-                                        "term $term: advance(docID=$skipDocID) returned docID=$docID"
-                                    )
+                            for (idx in 0..6) {
+                                val skipDocID = (((idx + 1) * maxDoc.toLong()) / 8).toInt()
+                                val postingsAcquireStartNs = System.nanoTime()
+                                // Java reference:
+                                // postings = termsEnum.postings(postings, PostingsEnum.NONE.toInt())
+                                postings = termsEnum.postings(postingsReuseNone, PostingsEnum.NONE.toInt())
+                                postingsReuseNone = postings
+                                val postingsAcquireElapsedNs = System.nanoTime() - postingsAcquireStartNs
+                                postingsAcquireNs += postingsAcquireElapsedNs
+                                postingsAcquireSkipNs += postingsAcquireElapsedNs
+                                postingsAcquireSkipCalls++
+                                val docID: Int = postings!!.advance(skipDocID)
+                                if (docID == DocIdSetIterator.NO_MORE_DOCS) {
+                                    break
+                                } else {
+                                    if (docID < skipDocID) {
+                                        throw CheckIndexException(
+                                            "term $term: advance(docID=$skipDocID) returned docID=$docID"
+                                        )
+                                    }
+                                    val nextDocID: Int = postings.nextDoc()
+                                    if (nextDocID == DocIdSetIterator.NO_MORE_DOCS) {
+                                        break
+                                    }
+                                    if (nextDocID <= docID) {
+                                        throw CheckIndexException(
+                                            ("term "
+                                                    + term
+                                                    + ": advance(docID="
+                                                    + skipDocID
+                                                    + "), then .next() returned docID="
+                                                    + nextDocID
+                                                    + " vs prev docID="
+                                                    + docID)
+                                        )
+                                    }
                                 }
-                                val nextDocID: Int = postings.nextDoc()
-                                if (nextDocID == DocIdSetIterator.NO_MORE_DOCS) {
+                                if (isVectors) {
+                                    // Only 1 doc in the postings for term vectors, so we only test 1 advance:
                                     break
                                 }
-                                if (nextDocID <= docID) {
-                                    throw CheckIndexException(
-                                        ("term "
-                                                + term
-                                                + ": advance(docID="
-                                                + skipDocID
-                                                + "), then .next() returned docID="
-                                                + nextDocID
-                                                + " vs prev docID="
-                                                + docID)
-                                    )
-                                }
                             }
-                            if (isVectors) {
-                                // Only 1 doc in the postings for term vectors, so we only test 1 advance:
-                                break
-                            }
-                        }
                     }
+                    skipChecksNs += System.nanoTime() - skipChecksStartNs
 
                     // Checking score blocks is heavy, we only do it on long postings lists, on every 1024th
                     // term or if slow checks are enabled.
                     if (level >= Level.MIN_LEVEL_FOR_SLOW_CHECKS || docFreq > 1024 || (status.termCount + status.delTermCount) % 1024 == 0L) {
+                        var impactsLocalNs = 0L
                         // First check max scores and block uptos
                         // But only if slow checks are enabled since we visit all docs
+                        val maxScorePhaseStartNs = System.nanoTime()
                         if (level >= Level.MIN_LEVEL_FOR_SLOW_CHECKS) {
                             var max = -1
                             var maxFreq = 0
+                            val impactsAcquireStartNs = System.nanoTime()
                             val impactsEnum: ImpactsEnum =
                                 termsEnum.impacts(PostingsEnum.FREQS.toInt())
-                            postings = termsEnum.postings(postings, PostingsEnum.FREQS.toInt())
+                            impactsAcquireNs += System.nanoTime() - impactsAcquireStartNs
+                            val postingsAcquireStartNs = System.nanoTime()
+                            // Java reference:
+                            // postings = termsEnum.postings(postings, PostingsEnum.FREQS.toInt())
+                            postings = termsEnum.postings(postingsReuseFreqs, PostingsEnum.FREQS.toInt())
+                            postingsReuseFreqs = postings
+                            val postingsAcquireElapsedNs = System.nanoTime() - postingsAcquireStartNs
+                            postingsAcquireNs += postingsAcquireElapsedNs
+                            postingsAcquireImpactsNs += postingsAcquireElapsedNs
+                            postingsAcquireImpactsCalls++
                             var doc: Int = impactsEnum.nextDoc()
                             while (true) {
                                 if (postings!!.nextDoc() != doc) {
@@ -2588,12 +2731,16 @@ class CheckIndex(
                                     )
                                 }
                                 if (doc > max) {
+                                    val impactsAdvanceShallowStartNs = System.nanoTime()
                                     impactsEnum.advanceShallow(doc)
+                                    impactsAdvanceShallowNs += System.nanoTime() - impactsAdvanceShallowStartNs
+                                    val impactsGetMaxScoreStartNs = System.nanoTime()
                                     val impacts: Impacts = impactsEnum.impacts
                                     checkImpacts(impacts, doc)
                                     max = impacts.getDocIdUpTo(0)
                                     val impacts0: MutableList<Impact> = impacts.getImpacts(0)
                                     maxFreq = impacts0[impacts0.size - 1].freq
+                                    impactsGetMaxScoreNs += System.nanoTime() - impactsGetMaxScoreStartNs
                                 }
                                 if (impactsEnum.freq() > maxFreq) {
                                     throw CheckIndexException(
@@ -2606,11 +2753,24 @@ class CheckIndex(
                                 doc = impactsEnum.nextDoc()
                             }
                         }
+                        val maxScoreNs = System.nanoTime() - maxScorePhaseStartNs
+                        impactsLocalNs += maxScoreNs
 
                         // Now check advancing
+                        val advancePhaseStartNs = System.nanoTime()
+                        val impactsAcquireStartNs = System.nanoTime()
                         val impactsEnum: ImpactsEnum =
                             termsEnum.impacts(PostingsEnum.FREQS.toInt())
-                        postings = termsEnum.postings(postings, PostingsEnum.FREQS.toInt())
+                        impactsAcquireNs += System.nanoTime() - impactsAcquireStartNs
+                        val postingsAcquireStartNs = System.nanoTime()
+                        // Java reference:
+                        // postings = termsEnum.postings(postings, PostingsEnum.FREQS.toInt())
+                        postings = termsEnum.postings(postingsReuseFreqs, PostingsEnum.FREQS.toInt())
+                        postingsReuseFreqs = postings
+                        val postingsAcquireElapsedNs = System.nanoTime() - postingsAcquireStartNs
+                        postingsAcquireNs += postingsAcquireElapsedNs
+                        postingsAcquireImpactsNs += postingsAcquireElapsedNs
+                        postingsAcquireImpactsCalls++
 
                         var max = -1
                         var maxFreq = 0
@@ -2636,7 +2796,10 @@ class CheckIndex(
                                     DocIdSetIterator.NO_MORE_DOCS - target
                                 )
                                 max = target + delta
+                                val impactsAdvanceShallowStartNs = System.nanoTime()
                                 impactsEnum.advanceShallow(target)
+                                impactsAdvanceShallowNs += System.nanoTime() - impactsAdvanceShallowStartNs
+                                val impactsGetMaxScoreStartNs = System.nanoTime()
                                 val impacts: Impacts = impactsEnum.impacts
                                 checkImpacts(impacts, doc)
                                 maxFreq = Int.MAX_VALUE
@@ -2648,10 +2811,14 @@ class CheckIndex(
                                         break
                                     }
                                 }
+                                impactsGetMaxScoreNs += System.nanoTime() - impactsGetMaxScoreStartNs
                             }
 
                             doc = if (advance) {
-                                impactsEnum.advance(target)
+                                val impactsAdvanceStartNs = System.nanoTime()
+                                val advancedDoc = impactsEnum.advance(target)
+                                impactsAdvanceNs += System.nanoTime() - impactsAdvanceStartNs
+                                advancedDoc
                             } else {
                                 impactsEnum.nextDoc()
                             }
@@ -2681,7 +2848,10 @@ class CheckIndex(
                                     DocIdSetIterator.NO_MORE_DOCS - doc
                                 )
                                 max = doc + delta
+                                val impactsAdvanceShallowStartNs = System.nanoTime()
                                 impactsEnum.advanceShallow(doc)
+                                impactsAdvanceShallowNs += System.nanoTime() - impactsAdvanceShallowStartNs
+                                val impactsGetMaxScoreStartNs = System.nanoTime()
                                 val impacts: Impacts = impactsEnum.impacts
                                 checkImpacts(impacts, doc)
                                 maxFreq = Int.MAX_VALUE
@@ -2693,6 +2863,7 @@ class CheckIndex(
                                         break
                                     }
                                 }
+                                impactsGetMaxScoreNs += System.nanoTime() - impactsGetMaxScoreStartNs
                             }
 
                             if (impactsEnum.freq() > maxFreq) {
@@ -2704,7 +2875,13 @@ class CheckIndex(
                                 )
                             }
                         }
+                        val advanceNs = System.nanoTime() - advancePhaseStartNs
+                        impactsLocalNs += advanceNs
+                        impactsChecksNs += impactsLocalNs
                     }
+                }
+                logger.debug {
+                    "phase=checkIndex.postings.fieldTermLoop field=$field termsVisited=$termsVisited elapsedMs=${termLoopMark.elapsedNow().inWholeMilliseconds} postingsAcquireMs=${postingsAcquireNs / 1_000_000} postingsAcquireMainMs=${postingsAcquireMainNs / 1_000_000} postingsAcquireSkipMs=${postingsAcquireSkipNs / 1_000_000} postingsAcquireImpactsMs=${postingsAcquireImpactsNs / 1_000_000} postingsAcquireMainCalls=$postingsAcquireMainCalls postingsAcquireSkipCalls=$postingsAcquireSkipCalls postingsAcquireImpactsCalls=$postingsAcquireImpactsCalls postingsDocsWalkMs=${postingsDocsWalkNs / 1_000_000} skipChecksMs=${skipChecksNs / 1_000_000} impactsChecksMs=${impactsChecksNs / 1_000_000} impactsAcquireMs=${impactsAcquireNs / 1_000_000} impactsAdvanceShallowMs=${impactsAdvanceShallowNs / 1_000_000} impactsGetMaxScoreMs=${impactsGetMaxScoreNs / 1_000_000} impactsAdvanceMs=${impactsAdvanceNs / 1_000_000}"
                 }
 
                 if (minTerm != null && status.termCount + status.delTermCount == 0L) {
@@ -2842,6 +3019,8 @@ class CheckIndex(
                         }
                     }
 
+                    val tailChecksMark = TimeSource.Monotonic.markNow()
+
                     // Test seek to last term:
                     if (lastTerm != null) {
                         if (termsEnum.seekCeil(lastTerm.get()) != TermsEnum.SeekStatus.FOUND) {
@@ -2960,7 +3139,14 @@ class CheckIndex(
                         )
                     )
                     checkTermsIntersect(terms, automaton, startTerm)
+                    logger.debug {
+                        "phase=checkIndex.postings.fieldTail field=$field elapsedMs=${tailChecksMark.elapsedNow().inWholeMilliseconds}"
+                    }
                 }
+            }
+
+            logger.debug {
+                "phase=checkIndex.postings.checkFields.done computedFieldCount=$computedFieldCount elapsedMs=${checkFieldsMark.elapsedNow().inWholeMilliseconds}"
             }
 
             val fieldCount: Int = fields.size()
@@ -3156,23 +3342,33 @@ class CheckIndex(
 
             var status: Status.TermIndexStatus
             val maxDoc: Int = reader.maxDoc()
+            val postingsMark = TimeSource.Monotonic.markNow()
 
             try {
                 if (infoStream != null) {
                     infoStream.print("    test: terms, freq, prox...")
                 }
+                logger.debug { "phase=checkIndex.postings.start maxDoc=$maxDoc level=$level" }
 
                 var fields: FieldsProducer? = reader.postingsReader
+                logger.debug { "phase=checkIndex.postings.reader acquired=${fields != null}" }
                 if (fields != null) {
+                    val mergeMark = TimeSource.Monotonic.markNow()
                     fields = fields.mergeInstance
+                    logger.debug { "phase=checkIndex.postings.reader.merge elapsedMs=${mergeMark.elapsedNow().inWholeMilliseconds}" }
                 } else {
+                    logger.debug { "phase=checkIndex.postings.reader.none" }
                     return Status.TermIndexStatus()
                 }
                 val fieldInfos: FieldInfos = reader.fieldInfos
                 var normsProducer: NormsProducer? = reader.normsReader
+                logger.debug { "phase=checkIndex.postings.norms acquired=${normsProducer != null}" }
                 if (normsProducer != null) {
+                    val mergeMark = TimeSource.Monotonic.markNow()
                     normsProducer = normsProducer.mergeInstance
+                    logger.debug { "phase=checkIndex.postings.norms.merge elapsedMs=${mergeMark.elapsedNow().inWholeMilliseconds}" }
                 }
+                logger.debug { "phase=checkIndex.postings.checkFields.start" }
                 status =
                     checkFields(
                         fields,
@@ -3186,6 +3382,9 @@ class CheckIndex(
                         verbose = verbose,
                         level = level
                     )
+                logger.debug {
+                    "phase=checkIndex.postings.checkFields.done elapsedMs=${postingsMark.elapsedNow().inWholeMilliseconds}"
+                }
             } catch (e: Throwable) {
                 if (failFast) {
                     throw IOUtils.rethrowAlways(e)
@@ -3193,6 +3392,7 @@ class CheckIndex(
                 msg(infoStream, "ERROR: $e")
                 status = Status.TermIndexStatus()
                 status.error = e
+                logger.error(e) { "phase=checkIndex.postings.error elapsedMs=${postingsMark.elapsedNow().inWholeMilliseconds}" }
                 if (infoStream != null) {
                     e.printStackTrace(infoStream)
                 }

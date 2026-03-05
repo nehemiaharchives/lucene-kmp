@@ -32,6 +32,99 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.TimeSource
 
+//TODO this test has huge performance gap between jvmTest and linuxX64Test we tried to find bottle neck steps and sub steps recursively and found slow causing part and tried to fix, but still much needs fix. following is the list of those records and done/todo list:
+/*
+Test2BTerms native speedup record (from this investigation cycle):
+
+1) [Acknowledged] End-to-end gap
+   file: core/src/commonTest/kotlin/org/gnit/lucenekmp/index/Test2BTerms.kt
+   class: Test2BTerms
+   function: test2BTerms
+   gap: jvmTest ~= 5.8~6.0s, linuxX64Test > 6 min (killed)
+   status: measured, still open
+
+2) [Measured] testSavedTerms sub-step gap
+   file: core/src/commonTest/kotlin/org/gnit/lucenekmp/index/Test2BTerms.kt
+   class: Test2BTerms
+   function: testSavedTerms
+   gap:
+     - jvm: countMs=1244, seekMs=330, loggingMs=118, phase ~= 1723ms
+     - native: countMs=7705~8818, seekMs=579~1969, loggingMs=182~194, phase ~= 9684~9986ms
+   status: measured, partially improved by downstream native optimizations, still much slower than jvm
+
+3) [Measured] stall point after saved-terms phase
+   file: core/src/commonMain/kotlin/org/gnit/lucenekmp/index/CheckIndex.kt
+   class: CheckIndex (+ companion)
+   function: postings/checkFields path (starts after "TEST: now CheckIndex...")
+   gap: native often stalls around/after
+     "phase=checkIndex.postings.field.start field=field maxDoc=40 isVectors=false"
+   status: measured stall location, root cause not fully isolated yet
+
+4) [Applied patch, speedup success] single-slice task execution overhead
+   file: core/src/commonTest/kotlin/org/gnit/lucenekmp/search/TestTaskExecutor.kt
+   class: TestTaskExecutor
+   function: testInvokeAllSingleSliceNativePerfProbe
+   gap before fix: jvm ~= 752ms vs native > 3 min (killed)
+   related impl area: TaskExecutor + jdkport concurrency internals
+   status: optimized and kept (separate commit history)
+
+5) [Applied patches, speedup success] native hot-loop primitive/vectorization seams
+   files/classes/functions:
+     - core/src/commonMain/.../jdkport/LongExt.kt (LongExt)
+     - core/src/commonMain/.../codecs/lucene101/PostingsUtil.kt (PostingsUtil)
+     - core/src/commonMain/.../internal/vectorization/PostingDecodingUtil.kt (PostingDecodingUtil)
+     - core/src/commonMain/.../internal/vectorization/VectorizationProvider.kt (VectorizationProvider)
+   gap: native slower in tight decode/bit-op loops; platform seams added and optimized
+   status: optimized and kept (separate commits)
+
+6) [Applied patch, speedup success] impacts reuse
+   files:
+     - core/src/commonMain/.../codecs/PostingsReaderBase.kt
+     - core/src/commonMain/.../codecs/blockterms/BlockTermsReader.kt
+     - core/src/commonMain/.../codecs/lucene101/Lucene101PostingsReader.kt
+     - core/src/commonMain/.../codecs/lucene90/blocktree/IntersectTermsEnum.kt
+     - core/src/commonMain/.../codecs/lucene90/blocktree/SegmentTermsEnum.kt
+   change: reuse `ImpactsEnum` via `private var impactsReuse: ImpactsEnum? = null` and reuse-aware impacts API
+   status: optimized and kept (commit: 9d4a4ec7...)
+
+7) [Applied patch, speedup success + one revert] ByteBuffer path (supports postings/checkindex I/O)
+   files:
+     - core/src/commonMain/.../jdkport/ByteBuffer.kt
+     - core/src/commonMain/.../jdkport/ByteBufferPlatform.kt (+ jvm/native actuals)
+     - core/src/commonTest/.../jdkport/ByteBufferTest.kt
+   gap (native microbench):
+     - before: getInt=100~105ms, getShort=142~150ms, getLong=88~91ms
+     - after kept patches: getInt=91ms, getShort=127ms, getLong=79ms
+   note: checked+decode platform seam attempt regressed and was reverted
+   status: optimized and kept current best variant
+
+8) [Applied patch, speedup success] CheckIndex postings reuse pooling (native)
+   files:
+     - core/src/commonMain/.../index/CheckIndex.kt
+     - core/src/commonMain/.../codecs/lucene101/Lucene101PostingsReader.kt (measurement logs)
+   findings before patch:
+     - CheckIndex term-loop dominant time was postings acquisition; docs walk/impacts advance were near zero.
+     - constructor misses in BlockPostingsEnum dominated native time.
+   change:
+     - keep behavior same, but use per-flag postings reuse slots in CheckIndex (`ALL`, `NONE`, `FREQS`).
+     - keep Java-style single-slot line as commented reference at changed call sites.
+   result:
+     - reuseMisses dropped to 3 while reuseHits grew to ~38k.
+     - postings constructNs stopped growing (no repeated constructor pressure).
+     - Test2BTerms linuxX64Test run completed ~17s; CheckIndex postings phase dropped to sub-second.
+
+9) [Next] recursive testSavedTerms bottleneck tracking (native vs jvm gap remains)
+   gap now:
+     - jvm testSavedTerms-all ~1.7s (reference run)
+     - native testSavedTerms-all ~9.8~10.4s (after CheckIndex speedup)
+   current substeps:
+     - countMs and seekMs dominate testSavedTerms timing.
+   next:
+     - recursively instrument count/seek internals down to lowest-level term seek/decode operations.
+     - optimize only low-level native seams; keep Lucene algorithm unchanged.
+     - keep iteration rule: measure -> keep only win -> revert regressions.
+ */
+
 // NOTE: SimpleText codec will consume very large amounts of
 // disk (but, should run successfully).  Best to run w/
 // -Dtests.codec=<current codec>, and w/ plenty of RAM, eg:
