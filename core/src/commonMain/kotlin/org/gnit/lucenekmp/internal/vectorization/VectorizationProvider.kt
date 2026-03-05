@@ -22,8 +22,7 @@ abstract class VectorizationProvider {
         }
 
         private fun ensureCaller() {
-            val trace = Throwable().stackTraceToString()
-            val validCaller = VALID_CALLERS.any { trace.contains(it) }
+            val validCaller = hasValidVectorizationCallerPlatform(VALID_CALLERS)
             if (!validCaller) {
                 throw UnsupportedOperationException(
                     "VectorizationProvider is internal and can only be used by known Lucene classes."
