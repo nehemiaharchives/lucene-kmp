@@ -303,7 +303,7 @@ class LineFileDocs(
             doc.add(date)
 
             // A numeric DV field that can be used for DV updates
-            pageViews = NumericDocValuesField("page_views", 0L)
+            pageViews = NumericDocValuesField("page_views", 0L, NumericDocValuesField.TYPE)
             doc.add(pageViews)
         }
     }
