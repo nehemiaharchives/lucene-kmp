@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.util
 
+import org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.FlagsAttribute
@@ -33,6 +35,7 @@ abstract class AttributeFactory {
         override fun createAttributeInstance(attClass: KClass<out Attribute>): AttributeImpl {
             return when (attClass) {
                 // Minimal direct mappings for cases that are not covered by static combined impls
+                BytesTermAttribute::class -> BytesTermAttributeImpl()
                 CharTermAttribute::class -> CharTermAttributeImpl()
                 OffsetAttribute::class -> OffsetAttributeImpl()
                 PositionIncrementAttribute::class -> PositionIncrementAttributeImpl()
@@ -98,6 +101,7 @@ abstract class AttributeFactory {
         private fun ctorFor(clazz: KClass<out AttributeImpl>): () -> AttributeImpl {
             return when (clazz) {
                 PackedTokenAttributeImpl::class -> { { PackedTokenAttributeImpl() } }
+                BytesTermAttributeImpl::class -> { { BytesTermAttributeImpl() } }
                 CharTermAttributeImpl::class -> { { CharTermAttributeImpl() } }
                 OffsetAttributeImpl::class -> { { OffsetAttributeImpl() } }
                 PayloadAttributeImpl::class -> { { PayloadAttributeImpl() } }

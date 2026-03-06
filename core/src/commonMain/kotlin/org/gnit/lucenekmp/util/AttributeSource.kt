@@ -2,6 +2,8 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.KClassValue
+import org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.BytesTermAttributeImpl
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TermToBytesRefAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.TypeAttribute
@@ -479,6 +481,10 @@ open class AttributeSource {
                     CharSequence::class,
                     Appendable::class
                 )
+                BytesTermAttributeImpl::class -> arrayOf(
+                    BytesTermAttribute::class,
+                    TermToBytesRefAttribute::class
+                )
                 OffsetAttributeImpl::class -> arrayOf(
                     OffsetAttribute::class
                 )
@@ -522,6 +528,7 @@ open class AttributeSource {
         fun getSuperclass(clazz: KClass<*>): KClass<*>? {
             return when (clazz) {
                 CharTermAttributeImpl::class -> AttributeImpl::class
+                BytesTermAttributeImpl::class -> AttributeImpl::class
                 OffsetAttributeImpl::class -> AttributeImpl::class
                 PayloadAttributeImpl::class -> AttributeImpl::class
                 FlagsAttributeImpl::class -> AttributeImpl::class
