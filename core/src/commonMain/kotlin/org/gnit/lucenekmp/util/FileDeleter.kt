@@ -117,9 +117,8 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
         val rc = refCounts[fileName] ?: return false
         messenger(MsgType.REF, "DecRef \"" + fileName + "\": pre-decr count is " + rc.count)
         if (rc.count == 0) {
-            // KMP port currently has concurrent close/merge paths that may race decRef calls.
-            // Java code relies on external synchronization; be defensive here.
-            return false
+            refCounts.remove(fileName)
+            return true
         }
         if (rc.decRef() == 0) {
             refCounts.remove(fileName)
