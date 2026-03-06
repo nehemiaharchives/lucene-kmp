@@ -429,7 +429,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.mockfile.VirusCheckingFS → org.gnit.lucenekmp.tests.mockfile.VirusCheckingFS
 - org.apache.lucene.tests.mockfile.WindowsFS → org.gnit.lucenekmp.tests.mockfile.WindowsFS
 - org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
-- org.apache.lucene.tests.search.AssertingQuery → org.gnit.lucenekmp.tests.search.AssertingQuery
 - org.apache.lucene.tests.search.BaseExplanationTestCase → org.gnit.lucenekmp.tests.search.BaseExplanationTestCase
 - org.apache.lucene.tests.search.BaseRangeFieldQueryTestCase → org.gnit.lucenekmp.tests.search.BaseRangeFieldQueryTestCase
 - org.apache.lucene.tests.search.MatchesTestBase → org.gnit.lucenekmp.tests.search.MatchesTestBase
@@ -768,7 +767,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.TestSimpleExplanations → org.gnit.lucenekmp.search.TestSimpleExplanations
 - org.apache.lucene.search.TestSimpleExplanationsOfNonMatches → org.gnit.lucenekmp.search.TestSimpleExplanationsOfNonMatches
 - org.apache.lucene.search.TestSimpleExplanationsWithFillerDocs → org.gnit.lucenekmp.search.TestSimpleExplanationsWithFillerDocs
-- org.apache.lucene.search.TestSimpleSearchEquivalence → org.gnit.lucenekmp.search.TestSimpleSearchEquivalence
 - org.apache.lucene.search.TestSloppyPhraseQuery2 → org.gnit.lucenekmp.search.TestSloppyPhraseQuery2
 - org.apache.lucene.search.TestSortOptimization → org.gnit.lucenekmp.search.TestSortOptimization
 - org.apache.lucene.search.TestSortRandom → org.gnit.lucenekmp.search.TestSortRandom
