@@ -485,7 +485,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestAllFilesDetectMismatchedChecksum → org.gnit.lucenekmp.index.TestAllFilesDetectMismatchedChecksum
 - org.apache.lucene.index.TestAllFilesDetectTruncation → org.gnit.lucenekmp.index.TestAllFilesDetectTruncation
 - org.apache.lucene.index.TestAllFilesHaveChecksumFooter → org.gnit.lucenekmp.index.TestAllFilesHaveChecksumFooter
-- org.apache.lucene.index.TestApproximatePriorityQueue → org.gnit.lucenekmp.index.TestApproximatePriorityQueue
 - org.apache.lucene.index.TestBagOfPositions → org.gnit.lucenekmp.index.TestBagOfPositions
 - org.apache.lucene.index.TestBagOfPostings → org.gnit.lucenekmp.index.TestBagOfPostings
 - org.apache.lucene.index.TestBinaryDocValuesUpdates → org.gnit.lucenekmp.index.TestBinaryDocValuesUpdates
