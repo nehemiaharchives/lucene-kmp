@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.store
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +24,8 @@ import kotlin.test.assertTrue
 /** Simple testcase for RateLimiter.SimpleRateLimiter */
 class TestRateLimiter : LuceneTestCase() {
 
+    private val logger = KotlinLogging.logger {  }
+
     // LUCENE-6075
     @Test
     fun testOverflowInt() = runTest {
@@ -35,8 +38,8 @@ class TestRateLimiter : LuceneTestCase() {
         }
     }
 
-    @OptIn(ExperimentalAtomicApi::class)
     @Test
+    @OptIn(ExperimentalAtomicApi::class)
     fun testThreads() = runTest {
         val targetMBPerSec = 10.0 + 20 * random().nextDouble()
         val limiter = SimpleRateLimiter(targetMBPerSec)
@@ -77,8 +80,9 @@ class TestRateLimiter : LuceneTestCase() {
         val ratio = actualMBPerSec / targetMBPerSec
 
         // Only enforce that it wasn't too fast; if machine is bogged down (can't schedule threads /
-        // sleep properly) then it may falsely be too slow:
-        assumeTrue("actualMBPerSec=$actualMBPerSec targetMBPerSec=$targetMBPerSec", 0.9 <= ratio)
+        // sleep properly) then it may falsely be too slow. Upstream uses assumeTrue here, but in
+        // this KMP test framework assumeTrue is a hard failure rather than a skip, so keep slow
+        // environments from tripping the test.
         assertTrue(ratio <= 1.1, "targetMBPerSec=$targetMBPerSec actualMBPerSec=$actualMBPerSec")
     }
 }
