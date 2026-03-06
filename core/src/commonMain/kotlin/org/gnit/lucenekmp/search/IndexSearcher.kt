@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.runBlocking
 import okio.IOException
@@ -24,6 +25,9 @@ import org.gnit.lucenekmp.util.automaton.ByteRunAutomaton
 import kotlin.concurrent.Volatile
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.TimeSource
+
+private val indexSearcherPerfLogger = KotlinLogging.logger {}
 
 
 /**
@@ -60,6 +64,7 @@ open class IndexSearcher(
     context: IndexReaderContext,
     executor: Executor? = null
 ) {
+    private val logger = KotlinLogging.logger {}
     private var queryTimeout: QueryTimeout? = null
 
     // partialResult may be set on one of the threads of the executor. It may be correct to not make
@@ -527,6 +532,7 @@ open class IndexSearcher(
         sort: Sort,
         doDocScores: Boolean
     ): TopFieldDocs {
+        val totalMark = TimeSource.Monotonic.markNow()
         val limit = max(1, reader.maxDoc())
         require(!(after != null && after.doc >= limit)) {
             ("after.doc exceeds the number of documents in the reader: after.doc="
@@ -535,14 +541,29 @@ open class IndexSearcher(
                     + limit)
         }
         val cappedNumHits = min(numHits, limit)
+        val rewriteSortMark = TimeSource.Monotonic.markNow()
         val rewrittenSort: Sort = sort.rewrite(this)
+        val rewriteSortMs = rewriteSortMark.elapsedNow().inWholeMilliseconds
 
+        val managerMark = TimeSource.Monotonic.markNow()
         val manager: CollectorManager<TopFieldCollector, TopFieldDocs> =
             TopFieldCollectorManager(rewrittenSort, cappedNumHits, after, TOTAL_HITS_THRESHOLD)
+        val managerMs = managerMark.elapsedNow().inWholeMilliseconds
 
+        val searchMark = TimeSource.Monotonic.markNow()
         val topDocs: TopFieldDocs = search(query, manager)
+        val searchMs = searchMark.elapsedNow().inWholeMilliseconds
+        var populateScoresMs = 0L
         if (doDocScores) {
+            val populateScoresMark = TimeSource.Monotonic.markNow()
             TopFieldCollector.populateScores(topDocs.scoreDocs, this, query)
+            populateScoresMs = populateScoresMark.elapsedNow().inWholeMilliseconds
+        }
+        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+        if (totalMs >= 20L || rewriteSortMs >= 20L || managerMs >= 20L || searchMs >= 20L || populateScoresMs >= 20L) {
+            indexSearcherPerfLogger.debug {
+                "phase=indexSearcher.search.sort sort=$sort rewrittenSort=$rewrittenSort numHits=$numHits cappedNumHits=$cappedNumHits rewriteSortMs=$rewriteSortMs managerMs=$managerMs searchMs=$searchMs populateScoresMs=$populateScoresMs totalMs=$totalMs"
+            }
         }
         return topDocs
     }
@@ -563,8 +584,13 @@ open class IndexSearcher(
     ): T {
         var query: Query = query
         val firstCollector: C = collectorManager.newCollector()
+        val rewriteMark = TimeSource.Monotonic.markNow()
         query = rewrite(query, firstCollector.scoreMode().needsScores())
+        val rewriteElapsedMs = rewriteMark.elapsedNow().inWholeMilliseconds
+        val createWeightMark = TimeSource.Monotonic.markNow()
         val weight: Weight = createWeight(query, firstCollector.scoreMode(), 1f)
+        val createWeightElapsedMs = createWeightMark.elapsedNow().inWholeMilliseconds
+        // logger.debug { "phase=indexSearcher.search.setup query=${query::class.simpleName} scoreMode=${firstCollector.scoreMode()} rewriteMs=$rewriteElapsedMs createWeightMs=$createWeightElapsedMs" }
         return search(weight, collectorManager, firstCollector)
     }
 
@@ -661,6 +687,7 @@ open class IndexSearcher(
         weight: Weight,
         collector: Collector
     ) {
+        val leafMark = TimeSource.Monotonic.markNow()
         val leafCollector: LeafCollector
         try {
             leafCollector = collector.getLeafCollector(ctx)
@@ -669,10 +696,15 @@ open class IndexSearcher(
             // continue with the following leaf
             return
         }
+        val getLeafCollectorElapsedMs = leafMark.elapsedNow().inWholeMilliseconds
+        val scorerSupplierMark = TimeSource.Monotonic.markNow()
         val scorerSupplier: ScorerSupplier? = weight.scorerSupplier(ctx)
+        val scorerSupplierElapsedMs = scorerSupplierMark.elapsedNow().inWholeMilliseconds
         if (scorerSupplier != null) {
             scorerSupplier.setTopLevelScoringClause()
+            val bulkScorerMark = TimeSource.Monotonic.markNow()
             val scorer: BulkScorer = scorerSupplier.bulkScorer()!!
+            val bulkScorerElapsedMs = bulkScorerMark.elapsedNow().inWholeMilliseconds
             var maybeTimedScorer: BulkScorer = scorer
             if (queryTimeout != null) {
                 maybeTimedScorer = TimeLimitingBulkScorer(scorer, queryTimeout!!)
@@ -680,13 +712,20 @@ open class IndexSearcher(
             try {
                 // Optimize for the case when live docs are stored in a FixedBitSet.
                 val acceptDocs: Bits? = ScorerUtil.likelyLiveDocs(ctx.reader().liveDocs)
+                val scoreMark = TimeSource.Monotonic.markNow()
                 maybeTimedScorer.score(leafCollector, acceptDocs, minDocId, maxDocId)
+                val scoreElapsedMs = scoreMark.elapsedNow().inWholeMilliseconds
+                val totalMs = leafMark.elapsedNow().inWholeMilliseconds
+                // logger.debug { "phase=indexSearcher.searchLeaf ctxDocBase=${ctx.docBase} minDocId=$minDocId maxDocId=$maxDocId getLeafCollectorMs=$getLeafCollectorElapsedMs scorerSupplierMs=$scorerSupplierElapsedMs bulkScorerMs=$bulkScorerElapsedMs scoreMs=$scoreElapsedMs totalMs=$totalMs weight=${weight::class.simpleName}" }
             } catch (e: CollectionTerminatedException) {
                 // collection was terminated prematurely
                 // continue with the following leaf
             } catch (e: TimeLimitingBulkScorer.TimeExceededException) {
                 partialResult = true
             }
+        } else {
+            val totalMs = leafMark.elapsedNow().inWholeMilliseconds
+            // logger.debug { "phase=indexSearcher.searchLeaf ctxDocBase=${ctx.docBase} minDocId=$minDocId maxDocId=$maxDocId getLeafCollectorMs=$getLeafCollectorElapsedMs scorerSupplierMs=$scorerSupplierElapsedMs bulkScorerMs=0 scoreMs=0 totalMs=$totalMs weight=${weight::class.simpleName}" }
         }
         // Note: this is called if collection ran successfully, including the above special cases of
         // CollectionTerminatedException and TimeExceededException, but no other exception.
@@ -934,6 +973,7 @@ open class IndexSearcher(
      */
     @Throws(IOException::class)
     fun collectionStatistics(field: String): CollectionStatistics? {
+        val totalMark = TimeSource.Monotonic.markNow()
         //checkNotNull(field)
         var docCount: Long = 0
         var sumTotalTermFreq: Long = 0
@@ -943,6 +983,13 @@ open class IndexSearcher(
             docCount += terms.docCount.toLong()
             sumTotalTermFreq += terms.sumTotalTermFreq
             sumDocFreq += terms.sumDocFreq
+        }
+        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+        if (totalMs >= 20) {
+            indexSearcherPerfLogger.debug {
+                "phase=indexSearcher.collectionStatistics field=$field leaves=${reader.leaves().size} " +
+                    "docCount=$docCount sumTotalTermFreq=$sumTotalTermFreq sumDocFreq=$sumDocFreq totalMs=$totalMs"
+            }
         }
         if (docCount == 0L) {
             return null

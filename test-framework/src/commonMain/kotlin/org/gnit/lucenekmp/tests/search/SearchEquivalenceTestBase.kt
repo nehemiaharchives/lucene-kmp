@@ -26,6 +26,7 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.automaton.Automata
 import org.gnit.lucenekmp.util.automaton.CharacterRunAutomaton
+import kotlin.time.TimeSource
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -45,12 +46,19 @@ abstract class SearchEquivalenceTestBase : LuceneTestCase() {
     @BeforeTest
     @Throws(Exception::class)
     fun beforeClass() {
+        val totalMark = TimeSource.Monotonic.markNow()
         val random = random()
+        val directoryMark = TimeSource.Monotonic.markNow()
         directory = newDirectory()
+        val directoryElapsedMs = directoryMark.elapsedNow().inWholeMilliseconds
+        val analyzerMark = TimeSource.Monotonic.markNow()
         stopword = "${randomChar()}"
         val stopset = CharacterRunAutomaton(Automata.makeString(stopword))
         analyzer = MockAnalyzer(random, MockTokenizer.WHITESPACE, false, stopset)
+        val analyzerElapsedMs = analyzerMark.elapsedNow().inWholeMilliseconds
+        val writerMark = TimeSource.Monotonic.markNow()
         val iw = RandomIndexWriter(random, directory, analyzer)
+        val writerElapsedMs = writerMark.elapsedNow().inWholeMilliseconds
         val doc = Document()
         val id: Field = StringField("id", "", Field.Store.NO)
         val field: Field = TextField("field", "", Field.Store.NO)
@@ -59,14 +67,17 @@ abstract class SearchEquivalenceTestBase : LuceneTestCase() {
 
         // index some docs
         val numDocs = if (TEST_NIGHTLY) atLeast(1000) else atLeast(100)
+        val indexDocsMark = TimeSource.Monotonic.markNow()
         for (i in 0..<numDocs) {
             id.setStringValue(i.toString())
             field.setStringValue(randomFieldContents())
             iw.addDocument(doc)
         }
+        val indexDocsElapsedMs = indexDocsMark.elapsedNow().inWholeMilliseconds
 
         // delete some docs
         val numDeletes = numDocs / 20
+        val deleteDocsMark = TimeSource.Monotonic.markNow()
         repeat(numDeletes) {
             val toDelete = Term("id", random.nextInt(numDocs).toString())
             if (random.nextBoolean()) {
@@ -75,15 +86,25 @@ abstract class SearchEquivalenceTestBase : LuceneTestCase() {
                 iw.deleteDocuments(TermQuery(toDelete))
             }
         }
+        val deleteDocsElapsedMs = deleteDocsMark.elapsedNow().inWholeMilliseconds
 
+        val readerMark = TimeSource.Monotonic.markNow()
         reader = iw.getReader(applyDeletions = true, writeAllDeletes = true)
+        val readerElapsedMs = readerMark.elapsedNow().inWholeMilliseconds
+        val searcherMark = TimeSource.Monotonic.markNow()
         s1 = newSearcher(reader)
         // Disable the query cache, which converts two-phase iterators to normal iterators, while we
         // want to make sure two-phase iterators are exercised.
         s1.queryCache = null
         s2 = newSearcher(reader)
         s2.queryCache = null
+        val searcherElapsedMs = searcherMark.elapsedNow().inWholeMilliseconds
+        val closeWriterMark = TimeSource.Monotonic.markNow()
         iw.close()
+        val closeWriterElapsedMs = closeWriterMark.elapsedNow().inWholeMilliseconds
+        logger.debug {
+            "phase=searchEquivalence.beforeClass elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} maxDoc=${reader.maxDoc()} directoryMs=$directoryElapsedMs analyzerMs=$analyzerElapsedMs writerMs=$writerElapsedMs indexDocsMs=$indexDocsElapsedMs deleteDocsMs=$deleteDocsElapsedMs readerMs=$readerElapsedMs searcherMs=$searcherElapsedMs writerCloseMs=$closeWriterElapsedMs"
+        }
     }
 
     @AfterTest
@@ -161,39 +182,59 @@ abstract class SearchEquivalenceTestBase : LuceneTestCase() {
      */
     @Throws(Exception::class)
     protected fun assertSubsetOf(q1: Query, q2: Query, filter: Query?) {
+        val totalMark = TimeSource.Monotonic.markNow()
         QueryUtils.check(q1)
         QueryUtils.check(q2)
 
         var q1 = q1
         var q2 = q2
+        var wrapFilterMs = 0L
         if (filter != null) {
+            val wrapFilterMark = TimeSource.Monotonic.markNow()
             q1 = BooleanQuery.Builder().add(q1, BooleanClause.Occur.MUST).add(filter, BooleanClause.Occur.FILTER).build()
             q2 = BooleanQuery.Builder().add(q2, BooleanClause.Occur.MUST).add(filter, BooleanClause.Occur.FILTER).build()
+            wrapFilterMs = wrapFilterMark.elapsedNow().inWholeMilliseconds
         }
         // we test both INDEXORDER and RELEVANCE because we want to test needsScores=true/false
         for (sort in arrayOf(Sort.INDEXORDER, Sort.RELEVANCE)) {
             // not efficient, but simple!
+            val td1Mark = TimeSource.Monotonic.markNow()
             val td1: TopDocs = s1.search(q1, reader.maxDoc(), sort)
+            val td1ElapsedMs = td1Mark.elapsedNow().inWholeMilliseconds
+            val td2Mark = TimeSource.Monotonic.markNow()
             val td2: TopDocs = s2.search(q2, reader.maxDoc(), sort)
+            val td2ElapsedMs = td2Mark.elapsedNow().inWholeMilliseconds
             assertTrue(td1.totalHits.value <= td2.totalHits.value, "too many hits: ${td1.totalHits.value} > ${td2.totalHits.value}")
 
             // fill the superset into a bitset
+            val bitsetMark = TimeSource.Monotonic.markNow()
             val bitset = BitSet()
             for (i in td2.scoreDocs.indices) {
                 bitset.set(td2.scoreDocs[i].doc)
             }
+            val bitsetElapsedMs = bitsetMark.elapsedNow().inWholeMilliseconds
 
             // check in the subset, that every bit was set by the super
+            val verifyMark = TimeSource.Monotonic.markNow()
             for (i in td1.scoreDocs.indices) {
                 assertTrue(bitset[td1.scoreDocs[i].doc])
             }
+            val verifyElapsedMs = verifyMark.elapsedNow().inWholeMilliseconds
+            val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalElapsedMs >= 20L || td1ElapsedMs >= 20L || td2ElapsedMs >= 20L || bitsetElapsedMs >= 20L || verifyElapsedMs >= 20L || wrapFilterMs >= 20L) {
+                logger.debug {
+                    "phase=searchEquivalence.assertSubsetOf sort=$sort wrapFilterMs=$wrapFilterMs td1Ms=$td1ElapsedMs td2Ms=$td2ElapsedMs bitsetMs=$bitsetElapsedMs verifyMs=$verifyElapsedMs td1Hits=${td1.totalHits.value} td2Hits=${td2.totalHits.value} totalMs=$totalElapsedMs"
+                }
+            }
         }
+        logger.debug { "phase=searchEquivalence.assertSubsetOf.total elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} filterPresent=${filter != null}" }
     }
 
     /** Assert that two queries return the same documents and with the same scores. */
     @Suppress("unused")
     @Throws(Exception::class)
     protected fun assertSameScores(q1: Query, q2: Query) {
+        val totalMark = TimeSource.Monotonic.markNow()
         assertSameSet(q1, q2)
 
         assertSameScores(q1, q2, null)
@@ -205,23 +246,35 @@ abstract class SearchEquivalenceTestBase : LuceneTestCase() {
             assertSameScores(q1, q2, filter)
             assertSameScores(filteredQuery(q1, filter), filteredQuery(q2, filter), null)
         }
+        logger.debug {
+            "phase=searchEquivalence.assertSameScores.entry totalMs=${totalMark.elapsedNow().inWholeMilliseconds} " +
+                "numFilters=$numFilters"
+        }
     }
 
     @Throws(IOException::class)
     protected fun assertSameScores(q1: Query, q2: Query, filter: Query?) {
         // not efficient, but simple!
+        val totalMark = TimeSource.Monotonic.markNow()
         var q1 = q1
         var q2 = q2
         if (filter != null) {
             q1 = BooleanQuery.Builder().add(q1, BooleanClause.Occur.MUST).add(filter, BooleanClause.Occur.FILTER).build()
             q2 = BooleanQuery.Builder().add(q2, BooleanClause.Occur.MUST).add(filter, BooleanClause.Occur.FILTER).build()
         }
+        val td1Mark = TimeSource.Monotonic.markNow()
         val td1 = s1.search(q1, reader.maxDoc())
+        val td1ElapsedMs = td1Mark.elapsedNow().inWholeMilliseconds
+        val td2Mark = TimeSource.Monotonic.markNow()
         val td2 = s2.search(q2, reader.maxDoc())
+        val td2ElapsedMs = td2Mark.elapsedNow().inWholeMilliseconds
         assertEquals(td1.totalHits.value, td2.totalHits.value)
         for (i in td1.scoreDocs.indices) {
             assertEquals(td1.scoreDocs[i].doc, td2.scoreDocs[i].doc)
             assertEquals(td1.scoreDocs[i].score, td2.scoreDocs[i].score, 10e-5f)
+        }
+        logger.debug {
+            "phase=searchEquivalence.assertSameScores elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} td1Ms=$td1ElapsedMs td2Ms=$td2ElapsedMs filterPresent=${filter != null} hits=${td1.totalHits.value}"
         }
     }
 

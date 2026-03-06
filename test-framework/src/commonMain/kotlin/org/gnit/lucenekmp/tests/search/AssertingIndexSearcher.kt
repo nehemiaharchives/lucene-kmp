@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.IndexReader
 import org.gnit.lucenekmp.index.IndexReaderContext
@@ -11,6 +12,9 @@ import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.ScoreMode
 import org.gnit.lucenekmp.search.Weight
 import kotlin.random.Random
+import kotlin.time.TimeSource
+
+private val assertingIndexSearcherLogger = KotlinLogging.logger {}
 
 /**
  * Helper class that adds some extra checks to ensure correct usage of `IndexSearcher` and
@@ -53,7 +57,16 @@ open class AssertingIndexSearcher : IndexSearcher {
         boost: Float
     ): Weight {
         // this adds assertions to the inner weights/scorers too
-        return AssertingWeight(random, super.createWeight(query, scoreMode, boost), scoreMode)
+        val totalMark = TimeSource.Monotonic.markNow()
+        val innerMark = TimeSource.Monotonic.markNow()
+        val innerWeight = super.createWeight(query, scoreMode, boost)
+        val innerMs = innerMark.elapsedNow().inWholeMilliseconds
+        val wrapMark = TimeSource.Monotonic.markNow()
+        val weight = AssertingWeight(random, innerWeight, scoreMode)
+        val wrapMs = wrapMark.elapsedNow().inWholeMilliseconds
+        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+        // assertingIndexSearcherLogger.debug { "phase=assertingIndexSearcher.createWeight query=${query::class.simpleName} scoreMode=$scoreMode innerMs=$innerMs wrapMs=$wrapMs totalMs=$totalMs" }
+        return weight
     }
 
     @Throws(IOException::class)

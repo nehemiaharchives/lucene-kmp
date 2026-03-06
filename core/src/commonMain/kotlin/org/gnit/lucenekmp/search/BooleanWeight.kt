@@ -1,17 +1,19 @@
 package org.gnit.lucenekmp.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.search.BooleanClause.Occur
 import org.gnit.lucenekmp.search.similarities.Similarity
+import kotlin.time.TimeSource
 
+private val booleanWeightLogger = KotlinLogging.logger {}
 
 /** Expert: the Weight for BooleanQuery, used to normalize, score and explain these queries.  */
 internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSearcher, val scoreMode: ScoreMode, boost: Float) :
     Weight(
         query
     ) {
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     /** The Similarity implementation.  */
     val similarity: Similarity = searcher.similarity
 
@@ -20,12 +22,29 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
     val weightedClauses: ArrayList<WeightedBooleanClause> = ArrayList<WeightedBooleanClause>()
 
     init {
+        val initMark = TimeSource.Monotonic.markNow()
         for (c in query) {
+            val childMark = TimeSource.Monotonic.markNow()
             val w =
                 searcher.createWeight(
                     c.query, if (c.isScoring) scoreMode else ScoreMode.COMPLETE_NO_SCORES, boost
                 )
+            val childElapsedMs = childMark.elapsedNow().inWholeMilliseconds
+            if (childElapsedMs >= 120) {
+                booleanWeightLogger.debug {
+                    "phase=booleanWeight.init clauseOccur=${c.occur} query=${c.query::class.simpleName} " +
+                        "elapsedMs=$childElapsedMs scoreMode=" +
+                        (if (c.isScoring) scoreMode else ScoreMode.COMPLETE_NO_SCORES)
+                }
+            }
             weightedClauses.add(WeightedBooleanClause(c, w))
+        }
+        val initElapsedMs = initMark.elapsedNow().inWholeMilliseconds
+        if (initElapsedMs >= 260) {
+            booleanWeightLogger.debug {
+                "phase=booleanWeight.init.total queryClauses=${query.clauses().size} " +
+                    "elapsedMs=$initElapsedMs scoreMode=$scoreMode"
+            }
         }
     }
 
@@ -251,7 +270,7 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
 
     @Throws(IOException::class)
     override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
-        //logger.debug { "[BooleanWeight.scorerSupplier] enter clauses=${weightedClauses.size} minShouldMatch=${query.minimumNumberShouldMatch}" }
+        val totalMark = TimeSource.Monotonic.markNow()
         var minShouldMatch: Int = query.minimumNumberShouldMatch
 
         val scorers: MutableMap<Occur, MutableCollection<ScorerSupplier>> = mutableMapOf<Occur, MutableCollection<ScorerSupplier>>().apply {
@@ -266,11 +285,22 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
         for (wc in weightedClauses) {
             val w: Weight = wc.weight
             val c: BooleanClause = wc.clause
-            //logger.debug { "[BooleanWeight.scorerSupplier] sub enter occur=${c.occur} query=${c.query::class.simpleName}" }
+            val childMark = TimeSource.Monotonic.markNow()
             val subScorer = w.scorerSupplier(context)
-            //logger.debug { "[BooleanWeight.scorerSupplier] sub exit occur=${c.occur} query=${c.query::class.simpleName} hasScorer=${subScorer != null}" }
+            val childElapsedMs = childMark.elapsedNow().inWholeMilliseconds
+            if (childElapsedMs >= 60) {
+                booleanWeightLogger.debug {
+                    "phase=booleanWeight.scorerSupplier.child occur=${c.occur} " +
+                        "weight=${w::class.simpleName} elapsedMs=$childElapsedMs " +
+                        "hasScorer=${subScorer != null}"
+                }
+            }
             if (subScorer == null) {
                 if (c.isRequired) {
+                    booleanWeightLogger.debug {
+                        "phase=booleanWeight.scorerSupplier.total elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} " +
+                            "result=null reason=requiredChildMissing scoreMode=$scoreMode"
+                    }
                     return null
                 }
             } else {
@@ -291,11 +321,19 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
             && scorers[Occur.SHOULD]!!.isEmpty()
         ) {
             // no required and optional clauses.
+            booleanWeightLogger.debug {
+                "phase=booleanWeight.scorerSupplier.total elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} " +
+                    "result=null reason=noPositiveClauses scoreMode=$scoreMode"
+            }
             return null
         } else if (scorers[Occur.SHOULD]!!.size < minShouldMatch) {
             // either >1 req scorer, or there are 0 req scorers and at least 1
             // optional scorer. Therefore if there are not enough optional scorers
             // no documents will be matched by the query
+            booleanWeightLogger.debug {
+                "phase=booleanWeight.scorerSupplier.total elapsedMs=${totalMark.elapsedNow().inWholeMilliseconds} " +
+                    "result=null reason=notEnoughShould scoreMode=$scoreMode"
+            }
             return null
         }
 
@@ -305,8 +343,18 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
             scorers[Occur.SHOULD]!!.clear()
         }
 
-        return BooleanScorerSupplier(
+            val supplier = BooleanScorerSupplier(
             this, scorers, scoreMode, minShouldMatch, context.reader().maxDoc()
         )
+        val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
+        if (totalElapsedMs >= 100) {
+            booleanWeightLogger.debug {
+                "phase=booleanWeight.scorerSupplier.total elapsedMs=$totalElapsedMs " +
+                    "result=BooleanScorerSupplier should=${scorers[Occur.SHOULD]!!.size} " +
+                    "must=${scorers[Occur.MUST]!!.size} filter=${scorers[Occur.FILTER]!!.size} " +
+                    "mustNot=${scorers[Occur.MUST_NOT]!!.size} scoreMode=$scoreMode minShouldMatch=$minShouldMatch"
+            }
+        }
+        return supplier
     }
 }

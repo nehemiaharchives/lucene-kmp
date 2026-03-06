@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.tests.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 
 import org.gnit.lucenekmp.index.LeafReaderContext
@@ -13,6 +14,9 @@ import org.gnit.lucenekmp.search.ScorerSupplier
 import org.gnit.lucenekmp.search.Weight
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import kotlin.random.Random
+import kotlin.time.TimeSource
+
+private val assertingWeightLogger = KotlinLogging.logger {}
 
 internal class AssertingWeight(
     random: Random,
@@ -63,12 +67,23 @@ internal class AssertingWeight(
                 assert(getCalled == false)
                 getCalled = true
                 assert(leadCost >= 0) { leadCost }
-                return AssertingScorer.wrap(
-                    Random(random.nextLong()),
-                    inScorerSupplier.get(leadCost),
+                val splitMark = TimeSource.Monotonic.markNow()
+                val splitRandom = Random(random.nextLong())
+                val splitMs = splitMark.elapsedNow().inWholeMilliseconds
+                val innerMark = TimeSource.Monotonic.markNow()
+                val scorer = inScorerSupplier.get(leadCost)
+                val innerMs = innerMark.elapsedNow().inWholeMilliseconds
+                val wrapMark = TimeSource.Monotonic.markNow()
+                val wrapped = AssertingScorer.wrap(
+                    splitRandom,
+                    scorer,
                     scoreMode,
                     topLevelScoringClause
                 )
+                val wrapMs = wrapMark.elapsedNow().inWholeMilliseconds
+                val totalMs = splitMs + innerMs + wrapMs
+                // assertingWeightLogger.debug { "phase=assertingWeight.scorerSupplier.get leadCost=$leadCost splitMs=$splitMs innerMs=$innerMs wrapMs=$wrapMs totalMs=$totalMs" }
+                return wrapped
             }
 
             @Throws(IOException::class)
@@ -76,6 +91,7 @@ internal class AssertingWeight(
                 assert(getCalled == false)
 
                 val inScorer: BulkScorer?
+                val innerMark = TimeSource.Monotonic.markNow()
                 // We explicitly test both the delegate's bulk scorer, and also the normal scorer.
                 // This ensures that normal scorers are sometimes tested with an asserting wrapper.
                 if (LuceneTestCase.usually(random)) {
@@ -86,10 +102,19 @@ internal class AssertingWeight(
                     inScorer = super.bulkScorer()
                     assert(getCalled)
                 }
-
-                return AssertingBulkScorer.wrap(
-                    Random(random.nextLong()), inScorer!!, context.reader().maxDoc()
+                val innerMs = innerMark.elapsedNow().inWholeMilliseconds
+                val splitMark = TimeSource.Monotonic.markNow()
+                val splitRandom = Random(random.nextLong())
+                val splitMs = splitMark.elapsedNow().inWholeMilliseconds
+                val wrapMark = TimeSource.Monotonic.markNow()
+                val wrapped = AssertingBulkScorer.wrap(
+                    splitRandom, inScorer!!, context.reader().maxDoc()
                 )
+                val wrapMs = wrapMark.elapsedNow().inWholeMilliseconds
+                val totalMs = splitMs + innerMs + wrapMs
+                // assertingWeightLogger.debug { "phase=assertingWeight.scorerSupplier.bulkScorer splitMs=$splitMs innerMs=$innerMs wrapMs=$wrapMs totalMs=$totalMs" }
+
+                return wrapped
             }
 
             override fun cost(): Long {

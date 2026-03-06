@@ -9,6 +9,9 @@ import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.FieldValueHitQueue.Entry
 import org.gnit.lucenekmp.search.TotalHits.Relation
 import kotlin.math.max
+import kotlin.time.TimeSource
+
+private val topFieldCollectorLogger = KotlinLogging.logger {}
 
 /**
  * A [Collector] that sorts by [SortField] using [FieldComparator]s.
@@ -26,7 +29,6 @@ abstract class TopFieldCollector private constructor(
     val needsScores: Boolean,
     minScoreAcc: MaxScoreAccumulator?
 ) : TopDocsCollector<Entry>(pq) {
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     // TODO: one optimization we could do is to pre-fill
     // the queue with sentinel value that guaranteed to
     // always compare lower than a real hit; this would
@@ -149,73 +151,29 @@ abstract class TopFieldCollector private constructor(
         totalHitsThreshold: Int,
         minScoreAcc: MaxScoreAccumulator?
     ) : TopFieldCollector(queue, numHits, totalHitsThreshold, sort.needsScores(), minScoreAcc) {
-
-        val logger = KotlinLogging.logger { }
-
         override var weight: Weight? = null
 
         @Throws(IOException::class)
         override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
-            logger.debug { "[TopFieldCollector.SimpleFieldCollector] getLeafCollector enter ord=${context.ord}" }
+            // topFieldCollectorLogger.debug { "[TopFieldCollector.SimpleFieldCollector] getLeafCollector enter ord=${context.ord}" }
             // reset the minimum competitive score
             minCompetitiveScore = 0f
             docBase = context.docBase
 
             var collector: LeafCollector =
                 object : TopFieldLeafCollector(queue, sort, context) {
-                    private var debugCollectCount = 0
                     @Throws(IOException::class)
                     override fun collect(doc: Int) {
-                        if (debugCollectCount < 5) {
-                            logger.debug {
-                                "[TopFieldCollector.SimpleFieldCollector.collect] enter doc=$doc " +
-                                    "queueFull=$queueFull totalHits=$totalHits"
-                            }
-                        }
                         countHit(doc)
-                        if (debugCollectCount < 5) {
-                            logger.debug {
-                                "[TopFieldCollector.SimpleFieldCollector.collect] after countHit " +
-                                    "doc=$doc queueFull=$queueFull totalHits=$totalHits"
-                            }
-                        }
                         if (queueFull) {
                             if (thresholdCheck(doc)) {
-                                if (debugCollectCount < 5) {
-                                    logger.debug {
-                                        "[TopFieldCollector.SimpleFieldCollector.collect] thresholdCheck true doc=$doc"
-                                    }
-                                }
                                 return
                             }
-                            if (debugCollectCount < 5) {
-                                logger.debug {
-                                    "[TopFieldCollector.SimpleFieldCollector.collect] collectCompetitiveHit start doc=$doc"
-                                }
-                            }
                             collectCompetitiveHit(doc)
-                            if (debugCollectCount < 5) {
-                                logger.debug {
-                                    "[TopFieldCollector.SimpleFieldCollector.collect] collectCompetitiveHit done doc=$doc"
-                                }
-                            }
                         } else {
-                            if (debugCollectCount < 5) {
-                                logger.debug {
-                                    "[TopFieldCollector.SimpleFieldCollector.collect] collectAnyHit start doc=$doc"
-                                }
-                            }
                             collectAnyHit(doc, totalHits)
-                            if (debugCollectCount < 5) {
-                                logger.debug {
-                                    "[TopFieldCollector.SimpleFieldCollector.collect] collectAnyHit done doc=$doc"
-                                }
-                            }
                         }
-                        if (debugCollectCount < 5) {
-                            logger.debug { "[TopFieldCollector.SimpleFieldCollector.collect] exit doc=$doc" }
-                        }
-                        debugCollectCount++
+                        // topFieldCollectorLogger.debug { "[TopFieldCollector.SimpleFieldCollector.collect] doc=$doc queueFull=$queueFull totalHits=$totalHits" }
                     }
                 }
 
@@ -225,7 +183,7 @@ abstract class TopFieldCollector private constructor(
                 collector = ScoreCachingWrappingScorer.wrap(collector)
             }
 
-            logger.debug { "[TopFieldCollector.SimpleFieldCollector] getLeafCollector exit ord=${context.ord}" }
+            // topFieldCollectorLogger.debug { "[TopFieldCollector.SimpleFieldCollector] getLeafCollector exit ord=${context.ord}" }
             return collector
         }
     }
@@ -256,11 +214,9 @@ abstract class TopFieldCollector private constructor(
             }
         }
 
-        val logger = KotlinLogging.logger {  }
-
         @Throws(IOException::class)
         override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
-            logger.debug { "[TopFieldCollector.PagingFieldCollector] getLeafCollector enter ord=${context.ord}" }
+            // topFieldCollectorLogger.debug { "[TopFieldCollector.PagingFieldCollector] getLeafCollector enter ord=${context.ord}" }
             // reset the minimum competitive score
             minCompetitiveScore = 0f
             docBase = context.docBase
@@ -301,7 +257,7 @@ abstract class TopFieldCollector private constructor(
                 collector = ScoreCachingWrappingScorer.wrap(collector)
             }
 
-            logger.debug { "[TopFieldCollector.PagingFieldCollector] getLeafCollector exit ord=${context.ord}" }
+            // topFieldCollectorLogger.debug { "[TopFieldCollector.PagingFieldCollector] getLeafCollector exit ord=${context.ord}" }
             return collector
         }
     }
@@ -330,6 +286,7 @@ abstract class TopFieldCollector private constructor(
     // visibility, then anyone will be able to extend the class, which is not what
     // we want.
     init {
+        val initMark = TimeSource.Monotonic.markNow()
         this.numComparators = pq.comparators.size
         this.firstComparator = pq.comparators[0]
         val reverseMul: Int = pq.reverseMul[0]
@@ -349,6 +306,12 @@ abstract class TopFieldCollector private constructor(
             }
         }
         this.minScoreAcc = minScoreAcc
+        val totalMs = initMark.elapsedNow().inWholeMilliseconds
+        if (totalMs >= 20L) {
+            topFieldCollectorLogger.debug {
+                "phase=topFieldCollector.init numComparators=$numComparators numHits=$numHits needsScores=$needsScores totalHitsThreshold=${this.totalHitsThreshold} totalMs=$totalMs"
+            }
+        }
     }
 
     override fun scoreMode(): ScoreMode {

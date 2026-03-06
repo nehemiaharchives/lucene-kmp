@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.index.ImpactsEnum
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.LeafReaderContext
@@ -25,6 +26,9 @@ import org.gnit.lucenekmp.jdkport.assert
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.Transient
 import kotlin.reflect.cast
+import kotlin.time.TimeSource
+
+private val phraseQueryPerfLogger = KotlinLogging.logger {}
 
 /**
  * A Query that matches documents containing a particular sequence of terms. A PhraseQuery is built
@@ -349,6 +353,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
 
             @Throws(IOException::class)
             override fun getStats(searcher: IndexSearcher): SimScorer? {
+                val totalStart = TimeSource.Monotonic.markNow()
                 val positions = this@PhraseQuery.positions
                 check(positions.size >= 2) { "PhraseWeight does not support less than 2 terms, call rewrite first" }
                 check(positions[0] == 0) { "PhraseWeight requires that the first position is 0, call rewrite first" }
@@ -356,19 +361,27 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
                 val termStats: Array<TermStatistics> =
                     kotlin.arrayOfNulls<TermStatistics>(terms.size) as Array<TermStatistics>
                 var termUpTo = 0
+                var buildStatesMs = 0L
+                var termStatsMs = 0L
                 for (i in terms.indices) {
                     val term: Term = terms[i]
+                    val buildStart = TimeSource.Monotonic.markNow()
                     states[i] = TermStates.build(searcher, term, scoreMode.needsScores())
+                    buildStatesMs += buildStart.elapsedNow().inWholeMilliseconds
                     if (scoreMode.needsScores()) {
                         val ts: TermStates = states[i]
                         if (ts.docFreq() > 0) {
+                            val termStatsStart = TimeSource.Monotonic.markNow()
                             termStats[termUpTo++] =
                                 searcher.termStatistics(term, ts.docFreq(), ts.totalTermFreq())!!
+                            termStatsMs += termStatsStart.elapsedNow().inWholeMilliseconds
                         }
                     }
                 }
+                val simScorerStart = TimeSource.Monotonic.markNow()
+                val simScorer =
                 if (termUpTo > 0) {
-                    return similarity.scorer(
+                    similarity.scorer(
                         boost,
                         searcher.collectionStatistics(field)!!,
                         *ArrayUtil.copyOfSubArray<TermStatistics>(
@@ -378,8 +391,16 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
                         )
                     )
                 } else {
-                    return null // no terms at all, we won't use similarity
+                    null // no terms at all, we won't use similarity
                 }
+                val simScorerMs = simScorerStart.elapsedNow().inWholeMilliseconds
+                val totalMs = totalStart.elapsedNow().inWholeMilliseconds
+                if (totalMs >= 20L || buildStatesMs >= 20L || termStatsMs >= 20L || simScorerMs >= 20L) {
+                    phraseQueryPerfLogger.debug {
+                        "phase=phraseQuery.getStats terms=${terms.size} scoreMode=$scoreMode buildStatesMs=$buildStatesMs termStatsMs=$termStatsMs simScorerMs=$simScorerMs totalMs=$totalMs"
+                    }
+                }
+                return simScorer
             }
 
             @Throws(IOException::class)
@@ -388,6 +409,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
                 scorer: SimScorer,
                 exposeOffsets: Boolean
             ): PhraseMatcher? {
+                val totalStart = TimeSource.Monotonic.markNow()
                 assert(terms.size > 0)
                 val reader: LeafReader = context.reader()
                 val postingsFreqs = kotlin.arrayOfNulls<PostingsAndFreq>(terms.size) as Array<PostingsAndFreq>
@@ -408,20 +430,29 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
                 // Reuse single TermsEnum below:
                 val te: TermsEnum = fieldTerms.iterator()
                 var totalMatchCost = 0f
+                var stateLookupMs = 0L
+                var seekExactMs = 0L
+                var postingsMs = 0L
+                var postingsAndFreqMs = 0L
 
                 for (i in terms.indices) {
                     val t: Term = terms[i]
+                    val stateLookupStart = TimeSource.Monotonic.markNow()
                     val supplier: IOSupplier<TermState?>? =
                         states[i].get(context)
                     val state: TermState? = supplier?.get()
+                    stateLookupMs += stateLookupStart.elapsedNow().inWholeMilliseconds
                     if (state == null) {
                         /* term doesnt exist in this segment */
                         assert(termNotInReader(reader, t)) { "no termstate found but term exists in reader" }
                         return null
                     }
+                    val seekStart = TimeSource.Monotonic.markNow()
                     te.seekExact(t.bytes(), state)
+                    seekExactMs += seekStart.elapsedNow().inWholeMilliseconds
                     val postingsEnum: PostingsEnum
                     val impactsEnum: ImpactsEnum
+                    val postingsStart = TimeSource.Monotonic.markNow()
                     if (scoreMode == ScoreMode.TOP_SCORES) {
                         impactsEnum =
                             te.impacts((if (exposeOffsets) PostingsEnum.OFFSETS else PostingsEnum.POSITIONS).toInt())
@@ -434,19 +465,32 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
                             )!!
                         impactsEnum = SlowImpactsEnum(postingsEnum)
                     }
+                    postingsMs += postingsStart.elapsedNow().inWholeMilliseconds
+                    val postingsAndFreqStart = TimeSource.Monotonic.markNow()
                     postingsFreqs[i] = PostingsAndFreq(postingsEnum, impactsEnum, positions[i], t)
                     totalMatchCost += termPositionsCost(te)
+                    postingsAndFreqMs += postingsAndFreqStart.elapsedNow().inWholeMilliseconds
                 }
 
                 // sort by increasing docFreq order
+                val matcherStart = TimeSource.Monotonic.markNow()
+                val matcher =
                 if (slop == 0) {
                     ArrayUtil.timSort<PostingsAndFreq>(postingsFreqs)
-                    return ExactPhraseMatcher(postingsFreqs, scoreMode, scorer, totalMatchCost)
+                    ExactPhraseMatcher(postingsFreqs, scoreMode, scorer, totalMatchCost)
                 } else {
-                    return SloppyPhraseMatcher(
+                    SloppyPhraseMatcher(
                         postingsFreqs, slop, scoreMode, scorer, totalMatchCost, exposeOffsets
                     )
                 }
+                val matcherMs = matcherStart.elapsedNow().inWholeMilliseconds
+                val totalMs = totalStart.elapsedNow().inWholeMilliseconds
+                if (totalMs >= 20L || stateLookupMs >= 20L || seekExactMs >= 20L || postingsMs >= 20L || postingsAndFreqMs >= 20L || matcherMs >= 20L) {
+                    phraseQueryPerfLogger.debug {
+                        "phase=phraseQuery.getPhraseMatcher terms=${terms.size} scoreMode=$scoreMode slop=$slop stateLookupMs=$stateLookupMs seekExactMs=$seekExactMs postingsMs=$postingsMs postingsAndFreqMs=$postingsAndFreqMs matcherMs=$matcherMs totalMs=$totalMs"
+                    }
+                }
+                return matcher
             }
         }
     }

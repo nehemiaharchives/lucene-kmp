@@ -1,11 +1,15 @@
 package org.gnit.lucenekmp.search
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.search.BooleanClause.Occur
 import org.gnit.lucenekmp.search.Weight.DefaultBulkScorer
 import org.gnit.lucenekmp.util.Bits
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.TimeSource
+
+private val booleanScorerSupplierLogger = KotlinLogging.logger {}
 
 internal class BooleanScorerSupplier(
     weight: Weight,
@@ -94,26 +98,53 @@ internal class BooleanScorerSupplier(
 
     @Throws(IOException::class)
     private fun getInternal(leadCost: Long): Scorer {
+        val totalMark = TimeSource.Monotonic.markNow()
         // three cases: conjunction, disjunction, or mix
         var leadCost = leadCost
         leadCost = min(leadCost, cost())
 
         // pure conjunction
         if (subs[Occur.SHOULD]!!.isEmpty()) {
-            return excl(
-                req(subs[Occur.FILTER]!!, subs[Occur.MUST]!!, leadCost, topLevelScoringClause),
+            val reqMark = TimeSource.Monotonic.markNow()
+            val reqScorer = req(subs[Occur.FILTER]!!, subs[Occur.MUST]!!, leadCost, topLevelScoringClause)
+            val reqMs = reqMark.elapsedNow().inWholeMilliseconds
+            val exclMark = TimeSource.Monotonic.markNow()
+            val scorer = excl(
+                reqScorer,
                 subs[Occur.MUST_NOT]!!,
                 leadCost
             )
+            val exclMs = exclMark.elapsedNow().inWholeMilliseconds
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40 || reqMs >= 20 || exclMs >= 20) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.getInternal branch=pureConjunction reqMs=$reqMs " +
+                        "exclMs=$exclMs totalMs=$totalMs"
+                }
+            }
+            return scorer
         }
 
         // pure disjunction
         if (subs[Occur.FILTER]!!.isEmpty() && subs[Occur.MUST]!!.isEmpty()) {
-            return excl(
-                opt(subs[Occur.SHOULD]!!, minShouldMatch, scoreMode, leadCost, topLevelScoringClause),
+            val optMark = TimeSource.Monotonic.markNow()
+            val optScorer = opt(subs[Occur.SHOULD]!!, minShouldMatch, scoreMode, leadCost, topLevelScoringClause)
+            val optMs = optMark.elapsedNow().inWholeMilliseconds
+            val exclMark = TimeSource.Monotonic.markNow()
+            val scorer = excl(
+                optScorer,
                 subs[Occur.MUST_NOT]!!,
                 leadCost
             )
+            val exclMs = exclMark.elapsedNow().inWholeMilliseconds
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40 || optMs >= 20 || exclMs >= 20) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.getInternal branch=pureDisjunction optMs=$optMs " +
+                        "exclMs=$exclMs totalMs=$totalMs"
+                }
+            }
+            return scorer
         }
 
         // conjunction-disjunction mix:
@@ -121,42 +152,78 @@ internal class BooleanScorerSupplier(
         // combine the two: if minNrShouldMatch > 0, then it's a conjunction: because the
         // optional side must match. otherwise it's required + optional
         if (minShouldMatch > 0) {
+            val reqMark = TimeSource.Monotonic.markNow()
             val req =
                 excl(
                     req(subs[Occur.FILTER]!!, subs[Occur.MUST]!!, leadCost, false),
                     subs[Occur.MUST_NOT]!!,
                     leadCost
                 )
+            val reqMs = reqMark.elapsedNow().inWholeMilliseconds
+            val optMark = TimeSource.Monotonic.markNow()
             val opt: Scorer = opt(subs[Occur.SHOULD]!!, minShouldMatch, scoreMode, leadCost, false)
-            return ConjunctionScorer(mutableListOf(req, opt), mutableListOf(req, opt))
+            val optMs = optMark.elapsedNow().inWholeMilliseconds
+            val scorer = ConjunctionScorer(mutableListOf(req, opt), mutableListOf(req, opt))
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40 || reqMs >= 20 || optMs >= 20) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.getInternal branch=mixConjunction reqMs=$reqMs " +
+                        "optMs=$optMs totalMs=$totalMs"
+                }
+            }
+            return scorer
         } else {
             require(scoreMode.needsScores())
-            return ReqOptSumScorer(
-                excl(
+            val reqMark = TimeSource.Monotonic.markNow()
+            val req = excl(
                     req(subs[Occur.FILTER]!!, subs[Occur.MUST]!!, leadCost, false),
                     subs[Occur.MUST_NOT]!!,
                     leadCost
-                ),
-                opt(subs[Occur.SHOULD]!!, minShouldMatch, scoreMode, leadCost, false),
+                )
+            val reqMs = reqMark.elapsedNow().inWholeMilliseconds
+            val optMark = TimeSource.Monotonic.markNow()
+            val opt = opt(subs[Occur.SHOULD]!!, minShouldMatch, scoreMode, leadCost, false)
+            val optMs = optMark.elapsedNow().inWholeMilliseconds
+            val scorer = ReqOptSumScorer(
+                req,
+                opt,
                 scoreMode
             )
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40 || reqMs >= 20 || optMs >= 20) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.getInternal branch=mixReqOpt reqMs=$reqMs " +
+                        "optMs=$optMs totalMs=$totalMs"
+                }
+            }
+            return scorer
         }
     }
 
     @Throws(IOException::class)
     override fun bulkScorer(): BulkScorer? {
+        val totalMark = TimeSource.Monotonic.markNow()
         val bulkScorer = booleanScorer()
-        return if (bulkScorer != null) {
+        val result = if (bulkScorer != null) {
             // bulk scoring is applicable, use it
             bulkScorer
         } else {
             // use a Scorer-based impl (BS2)
             super.bulkScorer()
         }
+        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+        if (totalMs >= 40) {
+            booleanScorerSupplierLogger.debug {
+                "phase=booleanScorerSupplier.bulkScorer elapsedMs=$totalMs " +
+                    "usedBooleanScorer=${bulkScorer != null}"
+            }
+        }
+        return result
     }
 
     @Throws(IOException::class)
     fun booleanScorer(): BulkScorer? {
+        val totalMark = TimeSource.Monotonic.markNow()
         val numOptionalClauses = subs[Occur.SHOULD]!!.size
         val numMustClauses = subs[Occur.MUST]!!.size
         val numRequiredClauses = numMustClauses + subs[Occur.FILTER]!!.size
@@ -196,6 +263,13 @@ internal class BooleanScorerSupplier(
         }
 
         if (positiveScorer == null) {
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.booleanScorer elapsedMs=$totalMs " +
+                        "result=null reason=noPositiveScorer"
+                }
+            }
             return null
         }
         val positiveScorerCost = positiveScorer.cost()
@@ -206,6 +280,13 @@ internal class BooleanScorerSupplier(
         }
 
         if (prohibited.isEmpty()) {
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.booleanScorer elapsedMs=$totalMs " +
+                        "result=positiveOnly"
+                }
+            }
             return positiveScorer
         } else {
             val prohibitedScorer =
@@ -215,7 +296,15 @@ internal class BooleanScorerSupplier(
                     DisjunctionSumScorer(
                         prohibited, ScoreMode.COMPLETE_NO_SCORES, positiveScorerCost
                     )
-            return ReqExclBulkScorer(positiveScorer, prohibitedScorer)
+            val scorer = ReqExclBulkScorer(positiveScorer, prohibitedScorer)
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.booleanScorer elapsedMs=$totalMs " +
+                        "result=reqExcl prohibited=${prohibited.size}"
+                }
+            }
+            return scorer
         }
     }
 
@@ -287,6 +376,7 @@ internal class BooleanScorerSupplier(
     // Return a BulkScorer for the required clauses only
     @Throws(IOException::class)
     private fun requiredBulkScorer(): BulkScorer? {
+        val totalMark = TimeSource.Monotonic.markNow()
         if (subs[Occur.MUST]!!.size + subs[Occur.FILTER]!!.size == 0) {
             // No required clauses at all.
             return null
@@ -298,6 +388,13 @@ internal class BooleanScorerSupplier(
                 scorer = subs[Occur.FILTER]!!.iterator().next().bulkScorer()
                 if (scoreMode.needsScores()) {
                     scorer = disableScoring(scorer!!)
+                }
+            }
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.requiredBulkScorer elapsedMs=$totalMs " +
+                        "result=singleRequired"
                 }
             }
             return scorer
@@ -327,13 +424,21 @@ internal class BooleanScorerSupplier(
             for (filter in requiredNoScoring) {
                 requiredScoring.add(ConstantScoreScorer(0f, ScoreMode.COMPLETE, filter.iterator()))
             }
-            return BlockMaxConjunctionBulkScorer(maxDoc, requiredScoring)
-        }
+                val scorer = BlockMaxConjunctionBulkScorer(maxDoc, requiredScoring)
+                val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+                if (totalMs >= 40) {
+                    booleanScorerSupplierLogger.debug {
+                        "phase=booleanScorerSupplier.requiredBulkScorer elapsedMs=$totalMs " +
+                            "result=blockMaxConjunction"
+                    }
+                }
+                return scorer
+            }
         if (scoreMode !== ScoreMode.TOP_SCORES && requiredScoring.size + requiredNoScoring.size >= 2
             && requiredScoring.map(Scorer::twoPhaseIterator).all { obj: Any? -> obj == null }
             && requiredNoScoring.map(Scorer::twoPhaseIterator).all { obj: Any? -> obj == null }
         ) {
-            return if (requiredScoring.isEmpty()
+            val scorer = if (requiredScoring.isEmpty()
                 && maxDoc >= DenseConjunctionBulkScorer.WINDOW_SIZE && leadCost >= maxDoc / DenseConjunctionBulkScorer.DENSITY_THRESHOLD_INVERSE
             ) {
                 DenseConjunctionBulkScorer(
@@ -342,6 +447,14 @@ internal class BooleanScorerSupplier(
             } else {
                 ConjunctionBulkScorer(requiredScoring, requiredNoScoring)
             }
+            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+            if (totalMs >= 40) {
+                booleanScorerSupplierLogger.debug {
+                    "phase=booleanScorerSupplier.requiredBulkScorer elapsedMs=$totalMs " +
+                        "result=${scorer::class.simpleName}"
+                }
+            }
+            return scorer
         }
         if (scoreMode === ScoreMode.TOP_SCORES && requiredScoring.size > 1) {
             requiredScoring = mutableListOf(BlockMaxConjunctionScorer(requiredScoring))
@@ -374,7 +487,15 @@ internal class BooleanScorerSupplier(
             required.addAll(requiredNoScoring)
             conjunctionScorer = ConjunctionScorer(required, requiredScoring)
         }
-        return DefaultBulkScorer(conjunctionScorer)
+        val scorer = DefaultBulkScorer(conjunctionScorer)
+        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
+        if (totalMs >= 40) {
+            booleanScorerSupplierLogger.debug {
+                "phase=booleanScorerSupplier.requiredBulkScorer elapsedMs=$totalMs " +
+                    "result=DefaultBulkScorer"
+            }
+        }
+        return scorer
     }
 
     /**
