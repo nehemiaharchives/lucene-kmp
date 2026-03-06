@@ -413,7 +413,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.cranky.CrankyCodec → org.gnit.lucenekmp.tests.codecs.cranky.CrankyCodec
 - org.apache.lucene.tests.codecs.vector.ConfigurableMCodec → org.gnit.lucenekmp.tests.codecs.vector.ConfigurableMCodec
 - org.apache.lucene.tests.geo.EarthDebugger → org.gnit.lucenekmp.tests.geo.EarthDebugger
-- org.apache.lucene.tests.index.AllDeletedFilterReader → org.gnit.lucenekmp.tests.index.AllDeletedFilterReader
 - org.apache.lucene.tests.index.BaseTestCheckIndex → org.gnit.lucenekmp.tests.index.BaseTestCheckIndex
 - org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener
@@ -479,19 +478,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestAddIndexes → org.gnit.lucenekmp.index.TestAddIndexes
-- org.apache.lucene.index.TestAllFilesCheckIndexHeader → org.gnit.lucenekmp.index.TestAllFilesCheckIndexHeader
-- org.apache.lucene.index.TestAllFilesDetectMismatchedChecksum → org.gnit.lucenekmp.index.TestAllFilesDetectMismatchedChecksum
-- org.apache.lucene.index.TestAllFilesDetectTruncation → org.gnit.lucenekmp.index.TestAllFilesDetectTruncation
-- org.apache.lucene.index.TestAllFilesHaveChecksumFooter → org.gnit.lucenekmp.index.TestAllFilesHaveChecksumFooter
-- org.apache.lucene.index.TestBagOfPositions → org.gnit.lucenekmp.index.TestBagOfPositions
-- org.apache.lucene.index.TestBagOfPostings → org.gnit.lucenekmp.index.TestBagOfPostings
-- org.apache.lucene.index.TestBinaryDocValuesUpdates → org.gnit.lucenekmp.index.TestBinaryDocValuesUpdates
-- org.apache.lucene.index.TestBinaryTerms → org.gnit.lucenekmp.index.TestBinaryTerms
-- org.apache.lucene.index.TestBufferedUpdates → org.gnit.lucenekmp.index.TestBufferedUpdates
-- org.apache.lucene.index.TestByteSlicePool → org.gnit.lucenekmp.index.TestByteSlicePool
-- org.apache.lucene.index.TestByteSliceReader → org.gnit.lucenekmp.index.TestByteSliceReader
-- org.apache.lucene.index.TestCachingMergeContext → org.gnit.lucenekmp.index.TestCachingMergeContext
 - org.apache.lucene.index.TestCheckIndex → org.gnit.lucenekmp.index.TestCheckIndex
 - org.apache.lucene.index.TestCodecHoldsOpenFiles → org.gnit.lucenekmp.index.TestCodecHoldsOpenFiles
 - org.apache.lucene.index.TestCodecs → org.gnit.lucenekmp.index.TestCodecs
@@ -820,3 +806,4 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.SorterBenchmark → org.gnit.lucenekmp.util.SorterBenchmark
 - org.apache.lucene.util.hnsw.MockByteVectorValues → org.gnit.lucenekmp.util.hnsw.MockByteVectorValues
 - org.apache.lucene.util.hnsw.MockVectorValues → org.gnit.lucenekmp.util.hnsw.MockVectorValues
+
