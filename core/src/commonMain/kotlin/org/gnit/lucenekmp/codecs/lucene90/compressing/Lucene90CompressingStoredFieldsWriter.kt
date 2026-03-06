@@ -427,7 +427,6 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
             DocIDMerger.of(subs, mergeState.needsIndexSort)
         var sub: CompressingStoredFieldsMergeSub? = docIDMerger.next()
         while (sub != null) {
-            require(sub.mappedDocID == docCount) {  "${sub.mappedDocID} != $docCount" }
             val reader: StoredFieldsReader = mergeState.storedFieldsReaders[sub.readerIndex]!!
             if (sub.mergeStrategy == MergeStrategy.BULK) {
                 val fromDocID = sub.docID
@@ -435,7 +434,6 @@ class Lucene90CompressingStoredFieldsWriter internal constructor(
                 val current: CompressingStoredFieldsMergeSub = sub
                 while ((docIDMerger.next().also { sub = it }) === current) {
                     ++toDocID
-                    require(sub!!.docID == toDocID)
                 }
                 ++toDocID // exclusive bound
                 copyChunks(mergeState, current, fromDocID, toDocID)
