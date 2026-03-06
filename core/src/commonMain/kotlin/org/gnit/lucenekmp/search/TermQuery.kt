@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.search
 
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.IndexReaderContext
 import org.gnit.lucenekmp.index.LeafReader
@@ -16,9 +15,7 @@ import org.gnit.lucenekmp.index.TermsEnum
 import org.gnit.lucenekmp.search.similarities.Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity.SimScorer
 import org.gnit.lucenekmp.util.IOSupplier
-import kotlin.time.TimeSource
 
-private val termQueryLogger = KotlinLogging.logger {}
 
 /**
  * A Query that matches documents containing a term. This may be combined with other terms with a
@@ -36,7 +33,6 @@ class TermQuery : Query {
         private val scoreMode: ScoreMode
 
         init {
-            val totalMark = TimeSource.Monotonic.markNow()
             check(!(scoreMode.needsScores() && termStates == null)) {"termStates are required when scores are needed"}
             this.scoreMode = scoreMode
             this.termStates = termStates
@@ -44,26 +40,19 @@ class TermQuery : Query {
 
             val collectionStats: CollectionStatistics?
             val termStats: TermStatistics?
-            var collectionStatsMs = 0L
-            var termStatsMs = 0L
             if (scoreMode.needsScores()) {
-                val collectionMark = TimeSource.Monotonic.markNow()
                 collectionStats = searcher.collectionStatistics(term.field())
-                collectionStatsMs = collectionMark.elapsedNow().inWholeMilliseconds
-                val termStatsMark = TimeSource.Monotonic.markNow()
                 termStats =
                     if (termStates!!.docFreq() > 0)
                         searcher.termStatistics(term, termStates.docFreq(), termStates.totalTermFreq())
                     else
                         null
-                termStatsMs = termStatsMark.elapsedNow().inWholeMilliseconds
             } else {
                 // we do not need the actual stats, use fake stats with docFreq=maxDoc=ttf=1
                 collectionStats = CollectionStatistics(term.field(), 1, 1, 1, 1)
                 termStats = TermStatistics(term.bytes(), 1, 1)
             }
 
-            var simScorerMs = 0L
             if (termStats == null) {
                 this.simScorer = null // term doesn't exist in any segment, we won't use similarity at all
             } else {
@@ -74,9 +63,7 @@ class TermQuery : Query {
                     val stats = checkNotNull(collectionStats) {
                         "collectionStatistics is required when scores are needed"
                     }
-                    val simScorerMark = TimeSource.Monotonic.markNow()
                     this.simScorer = similarity.scorer(boost, stats, termStats)
-                    simScorerMs = simScorerMark.elapsedNow().inWholeMilliseconds
                 } else {
                     // Assigning a dummy scorer as this is not expected to be called since scores are not
                     // needed.
@@ -84,19 +71,10 @@ class TermQuery : Query {
                         object : SimScorer() {
                             override fun score(freq: Float, norm: Long): Float {
                                 return 0f
-                    }
+                            }
+                        }
                 }
             }
-
-            val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
-            if (totalElapsedMs >= 50 || collectionStatsMs >= 20 || termStatsMs >= 20 || simScorerMs >= 20) {
-                termQueryLogger.debug {
-                    "phase=termQuery.termWeight.init term=$term scoreMode=$scoreMode " +
-                        "collectionStatsMs=$collectionStatsMs termStatsMs=$termStatsMs " +
-                        "simScorerMs=$simScorerMs totalMs=$totalElapsedMs"
-                }
-            }
-        }
         }
 
         @Throws(IOException::class) override fun matches(context: LeafReaderContext, doc: Int): Matches? {
@@ -288,41 +266,15 @@ class TermQuery : Query {
     }
 
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
-        val totalMark = TimeSource.Monotonic.markNow()
         val context: IndexReaderContext = searcher.topReaderContext
-        val buildMark = TimeSource.Monotonic.markNow()
         val termState: TermStates = if (perReaderTermState == null || !perReaderTermState.wasBuiltFor(context)) {
-            val built = TermStates.build(searcher, term, scoreMode.needsScores())
-            val buildElapsedMs = buildMark.elapsedNow().inWholeMilliseconds
-            if (buildElapsedMs >= 100) {
-                termQueryLogger.debug {
-                    "phase=termQuery.createWeight.termStates term=$term scoreMode=$scoreMode source=built " +
-                        "elapsedMs=$buildElapsedMs"
-                }
-            }
-            built
+            TermStates.build(searcher, term, scoreMode.needsScores())
         } else {
             // PRTS was pre-build for this IS
-            val buildElapsedMs = buildMark.elapsedNow().inWholeMilliseconds
-            if (buildElapsedMs >= 100) {
-                termQueryLogger.debug {
-                    "phase=termQuery.createWeight.termStates term=$term scoreMode=$scoreMode source=reused " +
-                        "elapsedMs=$buildElapsedMs"
-                }
-            }
             this.perReaderTermState
         }
-        val weightMark = TimeSource.Monotonic.markNow()
-        val weight = this.TermWeight(searcher, scoreMode, boost, termState)
-        val weightElapsedMs = weightMark.elapsedNow().inWholeMilliseconds
-        val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
-        if (totalElapsedMs >= 100 || weightElapsedMs >= 25) {
-            termQueryLogger.debug {
-                "phase=termQuery.createWeight term=$term scoreMode=$scoreMode weightMs=$weightElapsedMs " +
-                    "totalMs=$totalElapsedMs"
-            }
-        }
-        return weight
+
+        return this.TermWeight(searcher, scoreMode, boost, termState)
     }
 
     override fun visit(visitor: QueryVisitor) {

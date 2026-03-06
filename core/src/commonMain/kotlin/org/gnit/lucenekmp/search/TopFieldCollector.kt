@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.search
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.index.ReaderUtil
@@ -9,9 +8,6 @@ import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.FieldValueHitQueue.Entry
 import org.gnit.lucenekmp.search.TotalHits.Relation
 import kotlin.math.max
-import kotlin.time.TimeSource
-
-private val topFieldCollectorLogger = KotlinLogging.logger {}
 
 /**
  * A [Collector] that sorts by [SortField] using [FieldComparator]s.
@@ -155,7 +151,6 @@ abstract class TopFieldCollector private constructor(
 
         @Throws(IOException::class)
         override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
-            // topFieldCollectorLogger.debug { "[TopFieldCollector.SimpleFieldCollector] getLeafCollector enter ord=${context.ord}" }
             // reset the minimum competitive score
             minCompetitiveScore = 0f
             docBase = context.docBase
@@ -173,7 +168,6 @@ abstract class TopFieldCollector private constructor(
                         } else {
                             collectAnyHit(doc, totalHits)
                         }
-                        // topFieldCollectorLogger.debug { "[TopFieldCollector.SimpleFieldCollector.collect] doc=$doc queueFull=$queueFull totalHits=$totalHits" }
                     }
                 }
 
@@ -183,7 +177,6 @@ abstract class TopFieldCollector private constructor(
                 collector = ScoreCachingWrappingScorer.wrap(collector)
             }
 
-            // topFieldCollectorLogger.debug { "[TopFieldCollector.SimpleFieldCollector] getLeafCollector exit ord=${context.ord}" }
             return collector
         }
     }
@@ -216,7 +209,6 @@ abstract class TopFieldCollector private constructor(
 
         @Throws(IOException::class)
         override fun getLeafCollector(context: LeafReaderContext): LeafCollector {
-            // topFieldCollectorLogger.debug { "[TopFieldCollector.PagingFieldCollector] getLeafCollector enter ord=${context.ord}" }
             // reset the minimum competitive score
             minCompetitiveScore = 0f
             docBase = context.docBase
@@ -257,7 +249,6 @@ abstract class TopFieldCollector private constructor(
                 collector = ScoreCachingWrappingScorer.wrap(collector)
             }
 
-            // topFieldCollectorLogger.debug { "[TopFieldCollector.PagingFieldCollector] getLeafCollector exit ord=${context.ord}" }
             return collector
         }
     }
@@ -286,7 +277,6 @@ abstract class TopFieldCollector private constructor(
     // visibility, then anyone will be able to extend the class, which is not what
     // we want.
     init {
-        val initMark = TimeSource.Monotonic.markNow()
         this.numComparators = pq.comparators.size
         this.firstComparator = pq.comparators[0]
         val reverseMul: Int = pq.reverseMul[0]
@@ -306,12 +296,6 @@ abstract class TopFieldCollector private constructor(
             }
         }
         this.minScoreAcc = minScoreAcc
-        val totalMs = initMark.elapsedNow().inWholeMilliseconds
-        if (totalMs >= 20L) {
-            topFieldCollectorLogger.debug {
-                "phase=topFieldCollector.init numComparators=$numComparators numHits=$numHits needsScores=$needsScores totalHitsThreshold=${this.totalHitsThreshold} totalMs=$totalMs"
-            }
-        }
     }
 
     override fun scoreMode(): ScoreMode {

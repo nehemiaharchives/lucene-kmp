@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.search.similarities
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.jdkport.isFinite
 import org.gnit.lucenekmp.jdkport.isNaN
 import org.gnit.lucenekmp.search.CollectionStatistics
@@ -8,9 +7,6 @@ import org.gnit.lucenekmp.search.Explanation
 import org.gnit.lucenekmp.search.TermStatistics
 import org.gnit.lucenekmp.util.SmallFloat
 import kotlin.math.ln
-import kotlin.time.TimeSource
-
-private val bm25PerfLogger = KotlinLogging.logger {}
 
 /**
  * BM25 Similarity. Introduced in Stephen E. Robertson, Steve Walker, Susan Jones, Micheline
@@ -155,30 +151,16 @@ class BM25Similarity(k1: Float = 1.2f, b: Float = 0.75f, discountOverlaps: Boole
         collectionStats: CollectionStatistics,
         vararg termStats: TermStatistics
     ): SimScorer {
-        val totalMark = TimeSource.Monotonic.markNow()
-        val idfMark = TimeSource.Monotonic.markNow()
         val idf: Explanation =
             if (termStats.size == 1)
                 idfExplain(collectionStats, termStats[0])
             else
                 idfExplain(collectionStats, termStats)
-        val idfMs = idfMark.elapsedNow().inWholeMilliseconds
-        val avgdlMark = TimeSource.Monotonic.markNow()
         val avgdl = avgFieldLength(collectionStats)
-        val avgdlMs = avgdlMark.elapsedNow().inWholeMilliseconds
 
-        val cacheMark = TimeSource.Monotonic.markNow()
         val cache = FloatArray(256)
         for (i in cache.indices) {
             cache[i] = 1f / (k1 * ((1 - b) + b * LENGTH_TABLE[i] / avgdl))
-        }
-        val cacheMs = cacheMark.elapsedNow().inWholeMilliseconds
-        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-        if (totalMs >= 20 || cacheMs >= 10 || idfMs >= 10) {
-            bm25PerfLogger.debug {
-                "phase=bm25Similarity.scorer termStats=${termStats.size} idfMs=$idfMs avgdlMs=$avgdlMs " +
-                    "cacheMs=$cacheMs totalMs=$totalMs"
-            }
         }
         return BM25Scorer(boost, k1, b, idf, avgdl, cache)
     }

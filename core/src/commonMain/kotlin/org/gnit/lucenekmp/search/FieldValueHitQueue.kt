@@ -1,13 +1,9 @@
 package org.gnit.lucenekmp.search
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.util.PriorityQueue
-import kotlin.time.TimeSource
-
-private val fieldValueHitQueueLogger = KotlinLogging.logger {}
 
 /**
  * Expert: A hit queue for sorting by hits by terms in more than one field.
@@ -102,9 +98,7 @@ private constructor(
         val comparators: Array<LeafFieldComparator> =
             kotlin.arrayOfNulls<LeafFieldComparator>(this.comparators.size) as Array<LeafFieldComparator>
         for (i in comparators.indices) {
-            // fieldValueHitQueueLogger.debug { "[FieldValueHitQueue.getComparators] enter i=$i field=${fields[i].field} type=${fields[i].type}" }
             comparators[i] = this.comparators[i].getLeafComparator(context)
-            // fieldValueHitQueueLogger.debug { "[FieldValueHitQueue.getComparators] exit i=$i field=${fields[i].field} type=${fields[i].type}" }
         }
         return comparators
     }
@@ -114,13 +108,10 @@ private constructor(
 
     // prevent instantiation and extension.
     init {
-        val initMark = TimeSource.Monotonic.markNow()
         val numComparators = fields.size
         comparators = kotlin.arrayOfNulls<FieldComparator<*>>(numComparators) as Array<FieldComparator<*>>
         reverseMul = IntArray(numComparators)
-        var comparatorMs = 0L
         for (i in 0..<numComparators) {
-            val comparatorMark = TimeSource.Monotonic.markNow()
             val field: SortField = fields[i]
             reverseMul[i] = if (field.reverse) -1 else 1
             comparators[i] =
@@ -131,13 +122,6 @@ private constructor(
                     else
                         Pruning.NONE
                 )
-            comparatorMs += comparatorMark.elapsedNow().inWholeMilliseconds
-        }
-        val totalMs = initMark.elapsedNow().inWholeMilliseconds
-        if (totalMs >= 20L || comparatorMs >= 20L) {
-            fieldValueHitQueueLogger.debug {
-                "phase=fieldValueHitQueue.init numComparators=$numComparators size=$size comparatorMs=$comparatorMs totalMs=$totalMs"
-            }
         }
     }
 

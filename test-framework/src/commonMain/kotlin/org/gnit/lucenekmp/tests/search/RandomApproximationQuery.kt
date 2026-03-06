@@ -1,16 +1,10 @@
 package org.gnit.lucenekmp.tests.search
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.search.*
 import org.gnit.lucenekmp.tests.util.RandomNumbers
 import kotlin.random.Random
-import kotlin.time.TimeSource
-
-private val randomApproximationQueryLogger = KotlinLogging.logger {}
-private val randomApproximationWeightLogger = KotlinLogging.logger {}
-private val randomApproximationLogger = KotlinLogging.logger {}
 
 /** A [Query] that adds random approximations to its scorers. */
 class RandomApproximationQuery(private val query: Query, private val random: Random) : Query() {
@@ -41,34 +35,17 @@ class RandomApproximationQuery(private val query: Query, private val random: Ran
     }
 
     override fun createWeight(searcher: IndexSearcher, scoreMode: ScoreMode, boost: Float): Weight {
-        val totalMark = TimeSource.Monotonic.markNow()
-        val innerMark = TimeSource.Monotonic.markNow()
         val weight = query.createWeight(searcher, scoreMode, boost)
-        val innerMs = innerMark.elapsedNow().inWholeMilliseconds
-        val splitMark = TimeSource.Monotonic.markNow()
-        val splitRandom = Random(random.nextLong())
-        val splitMs = splitMark.elapsedNow().inWholeMilliseconds
-        val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
-        // randomApproximationQueryLogger.debug { "phase=randomApproximationQuery.createWeight query=${query::class.simpleName} scoreMode=$scoreMode innerMs=$innerMs splitMs=$splitMs totalMs=$totalElapsedMs" }
-        return RandomApproximationWeight(weight, splitRandom)
+        return RandomApproximationWeight(weight, Random(random.nextLong()))
     }
 
     private class RandomApproximationWeight(weight: Weight, private val random: Random) :
         FilterWeight(weight) {
         @Throws(IOException::class)
         override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier? {
-            val totalMark = TimeSource.Monotonic.markNow()
             val scorerSupplier = `in`.scorerSupplier(context) ?: return null
-            val innerMs = totalMark.elapsedNow().inWholeMilliseconds
-            val getMark = TimeSource.Monotonic.markNow()
             val subScorer = scorerSupplier.get(Long.MAX_VALUE)
-            val getMs = getMark.elapsedNow().inWholeMilliseconds
-            val splitMark = TimeSource.Monotonic.markNow()
-            val splitRandom = Random(random.nextLong())
-            val splitMs = splitMark.elapsedNow().inWholeMilliseconds
-            val scorer = RandomApproximationScorer(subScorer!!, splitRandom)
-            val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-            // randomApproximationWeightLogger.debug { "phase=randomApproximationWeight.scorerSupplier innerMs=$innerMs getMs=$getMs splitMs=$splitMs totalMs=$totalMs" }
+            val scorer = RandomApproximationScorer(subScorer!!, Random(random.nextLong()))
             return DefaultScorerSupplier(scorer)
         }
     }
@@ -144,13 +121,6 @@ class RandomApproximationQuery(private val query: Query, private val random: Ran
         private val disi: DocIdSetIterator
     ) : DocIdSetIterator() {
         private var doc = -1
-        private var advanceCalls = 0
-        private var disiAdvanceCalls = 0
-        private var randomCalls = 0
-        private var disiAdvanceMs = 0L
-        private var randomMs = 0L
-        private var totalAdvanceMs = 0L
-        private var summaryLogged = false
 
         override fun docID(): Int {
             return doc
@@ -163,27 +133,13 @@ class RandomApproximationQuery(private val query: Query, private val random: Ran
 
         @Throws(IOException::class)
         override fun advance(target: Int): Int {
-            advanceCalls++
-            val totalMark = TimeSource.Monotonic.markNow()
             if (disi.docID() < target) {
-                disiAdvanceCalls++
-                val disiMark = TimeSource.Monotonic.markNow()
                 disi.advance(target)
-                disiAdvanceMs += disiMark.elapsedNow().inWholeMilliseconds
             }
             doc = if (disi.docID() == NO_MORE_DOCS) {
                 NO_MORE_DOCS
             } else {
-                randomCalls++
-                val randomMark = TimeSource.Monotonic.markNow()
-                val nextDoc = RandomNumbers.randomIntBetween(random, target, disi.docID())
-                randomMs += randomMark.elapsedNow().inWholeMilliseconds
-                nextDoc
-            }
-            totalAdvanceMs += totalMark.elapsedNow().inWholeMilliseconds
-            if (doc == NO_MORE_DOCS && summaryLogged == false) {
-                summaryLogged = true
-                // randomApproximationLogger.debug { "phase=randomApproximation.advanceSummary advanceCalls=$advanceCalls disiAdvanceCalls=$disiAdvanceCalls randomCalls=$randomCalls disiAdvanceMs=$disiAdvanceMs randomMs=$randomMs totalAdvanceMs=$totalAdvanceMs" }
+                RandomNumbers.randomIntBetween(random, target, disi.docID())
             }
             return doc
         }
@@ -193,3 +149,4 @@ class RandomApproximationQuery(private val query: Query, private val random: Ran
         }
     }
 }
+

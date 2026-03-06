@@ -1,10 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
-import kotlin.time.TimeSource
-
-private val topFieldCollectorManagerLogger = KotlinLogging.logger {}
 
 /**
  * Create a TopFieldCollectorManager which uses a shared hit counter to maintain number of hits and
@@ -125,13 +121,9 @@ class TopFieldCollectorManager(
     )
 
     override fun newCollector(): TopFieldCollector {
-        val totalMark = TimeSource.Monotonic.markNow()
-        val queueMark = TimeSource.Monotonic.markNow()
         val queue: FieldValueHitQueue<FieldValueHitQueue.Entry> = FieldValueHitQueue.create(sort.sort, numHits)
-        val queueMs = queueMark.elapsedNow().inWholeMilliseconds
 
         val collector: TopFieldCollector
-        val collectorMark = TimeSource.Monotonic.markNow()
         if (after == null) {
             // inform a comparator that sort is based on this single field
             // to enable some optimizations for skipping over non-competitive documents
@@ -158,40 +150,20 @@ class TopFieldCollectorManager(
                     sort, queue, after, numHits, totalHitsThreshold, minScoreAcc
                 )
         }
-        val collectorMs = collectorMark.elapsedNow().inWholeMilliseconds
 
         collectors.add(collector)
-        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-        if (totalMs >= 20L || queueMs >= 20L || collectorMs >= 20L) {
-            topFieldCollectorManagerLogger.debug {
-                "phase=topFieldCollectorManager.newCollector numHits=$numHits afterPresent=${after != null} queueMs=$queueMs collectorMs=$collectorMs totalMs=$totalMs sortFields=${sort.sort.size}"
-            }
-        }
         return collector
     }
 
     @Throws(IOException::class)
     override fun reduce(collectors: MutableCollection<TopFieldCollector>): TopFieldDocs {
-        val totalMark = TimeSource.Monotonic.markNow()
         val topDocs: Array<TopFieldDocs> =
             kotlin.arrayOfNulls<TopFieldDocs>(collectors.size) as Array<TopFieldDocs>
         var i = 0
-        var topDocsMs = 0L
         for (collector in collectors) {
-            val topDocsMark = TimeSource.Monotonic.markNow()
             topDocs[i++] = collector.topDocs()
-            topDocsMs += topDocsMark.elapsedNow().inWholeMilliseconds
         }
-        val mergeMark = TimeSource.Monotonic.markNow()
-        val merged = TopDocs.merge(sort, 0, numHits, topDocs)
-        val mergeMs = mergeMark.elapsedNow().inWholeMilliseconds
-        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-        if (totalMs >= 20L || topDocsMs >= 20L || mergeMs >= 20L) {
-            topFieldCollectorManagerLogger.debug {
-                "phase=topFieldCollectorManager.reduce collectors=${collectors.size} topDocsMs=$topDocsMs mergeMs=$mergeMs totalMs=$totalMs numHits=$numHits"
-            }
-        }
-        return merged
+        return TopDocs.merge(sort, 0, numHits, topDocs)
     }
 
     /*fun getCollectors(): MutableList<TopFieldCollector> {

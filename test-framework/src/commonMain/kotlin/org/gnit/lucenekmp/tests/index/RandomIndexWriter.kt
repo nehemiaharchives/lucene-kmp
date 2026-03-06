@@ -30,12 +30,10 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
 import kotlin.math.min
 import kotlin.random.Random
-import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-private val randomIndexWriterLogger = KotlinLogging.logger {}
 
 /**
  * Silly class that randomizes the indexing experience. EG it may swap in a different merge
@@ -49,6 +47,7 @@ class RandomIndexWriter private constructor(
     closeAnalyzer: Boolean,
     useSoftDeletes: Boolean
 ) : AutoCloseable {
+    private val logger = KotlinLogging.logger {}
     val w: IndexWriter
     private val r: Random
     var docCount: Int = 0
@@ -377,25 +376,17 @@ class RandomIndexWriter private constructor(
     private var doRandomForceMergeAssert = false
 
     init {
-        val totalMark = TimeSource.Monotonic.markNow()
         // TODO: this should be solved in a different way; Random should not be shared (!).
-        val randomMark = TimeSource.Monotonic.markNow()
         this.r = Random(r.nextLong())
-        val randomMs = randomMark.elapsedNow().inWholeMilliseconds
-        val softDeletesMark = TimeSource.Monotonic.markNow()
         if (useSoftDeletes) {
             c.setSoftDeletesField("___soft_deletes")
             softDeletesRatio = 1.0 / 1.0 + r.nextInt(10)
         } else {
             softDeletesRatio = 0.0
         }
-        val softDeletesMs = softDeletesMark.elapsedNow().inWholeMilliseconds
 
-        val writerMark = TimeSource.Monotonic.markNow()
         w = mockIndexWriter(dir, c, r)
-        val writerMs = writerMark.elapsedNow().inWholeMilliseconds
         config = w.config
-        val setupMark = TimeSource.Monotonic.markNow()
         flushAt = TestUtil.nextInt(r, 10, 1000)
         if (closeAnalyzer) {
             analyzer = w.getAnalyzer()
@@ -409,13 +400,6 @@ class RandomIndexWriter private constructor(
         // Make sure we sometimes test indices that don't get
         // any forced merges:
         doRandomForceMerge = c.mergePolicy !is NoMergePolicy && r.nextBoolean()
-        val setupMs = setupMark.elapsedNow().inWholeMilliseconds
-        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-        if (totalMs >= 20L || writerMs >= 20L) {
-            randomIndexWriterLogger.debug {
-                "phase=randomIndexWriter.init randomMs=$randomMs softDeletesMs=$softDeletesMs writerMs=$writerMs setupMs=$setupMs totalMs=$totalMs useSoftDeletes=$useSoftDeletes"
-            }
-        }
     }
 
     @Throws(IOException::class)
@@ -471,24 +455,13 @@ class RandomIndexWriter private constructor(
 
     @Throws(IOException::class)
     fun getReader(applyDeletions: Boolean, writeAllDeletes: Boolean): DirectoryReader {
-        val totalMark = TimeSource.Monotonic.markNow()
         var phase = "start"
-        var maybeChangeMs = 0L
-        var forceMergeMs = 0L
-        var commitMs = 0L
-        var getReaderMs = 0L
-        var directoryOpenMs = 0L
-        var softDeletesWrapMs = 0L
         try {
-            val maybeChangeMark = TimeSource.Monotonic.markNow()
             LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
-            maybeChangeMs = maybeChangeMark.elapsedNow().inWholeMilliseconds
             getReaderCalled = true
             if (r.nextInt(20) == 2) {
                 phase = "doRandomForceMerge"
-                val forceMergeMark = TimeSource.Monotonic.markNow()
                 doRandomForceMerge()
-                forceMergeMs = forceMergeMark.elapsedNow().inWholeMilliseconds
             }
             if (!applyDeletions || r.nextBoolean()) {
                 // if we have soft deletes we can't open from a directory
@@ -497,72 +470,34 @@ class RandomIndexWriter private constructor(
                 }
                 if (r.nextInt(5) == 1) {
                     phase = "nrt.commit"
-                    val commitMark = TimeSource.Monotonic.markNow()
                     w.commit()
-                    commitMs += commitMark.elapsedNow().inWholeMilliseconds
                 }
                 phase = "nrt.getReader"
-                val getReaderMark = TimeSource.Monotonic.markNow()
-                val reader = INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
-                getReaderMs += getReaderMark.elapsedNow().inWholeMilliseconds
-                val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-                if (totalMs >= 20L || getReaderMs >= 20L || commitMs >= 20L || forceMergeMs >= 20L) {
-                    randomIndexWriterLogger.debug {
-                        "phase=randomIndexWriter.getReader branch=nrt applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes maybeChangeMs=$maybeChangeMs forceMergeMs=$forceMergeMs commitMs=$commitMs getReaderMs=$getReaderMs totalMs=$totalMs"
-                    }
-                }
-                return reader
+                return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
             } else {
                 if (LuceneTestCase.VERBOSE) {
                     println("RIW.getReader: open new reader")
                 }
                 phase = "dir.commit"
-                val commitMark = TimeSource.Monotonic.markNow()
                 w.commit()
-                commitMs += commitMark.elapsedNow().inWholeMilliseconds
                 if (r.nextBoolean()) {
                     phase = "dir.open"
-                    val directoryOpenMark = TimeSource.Monotonic.markNow()
-                    val reader: DirectoryReader = DirectoryReader.open(w.getDirectory())
-                    directoryOpenMs = directoryOpenMark.elapsedNow().inWholeMilliseconds
+                    val reader: DirectoryReader =
+                        DirectoryReader.open(w.getDirectory())
                     if (config.softDeletesField != null) {
                         phase = "dir.wrapSoftDeletes"
-                        val wrapMark = TimeSource.Monotonic.markNow()
-                        val wrapped = SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
-                        softDeletesWrapMs = wrapMark.elapsedNow().inWholeMilliseconds
-                        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-                        if (totalMs >= 20L || commitMs >= 20L || directoryOpenMs >= 20L || softDeletesWrapMs >= 20L || forceMergeMs >= 20L) {
-                            randomIndexWriterLogger.debug {
-                                "phase=randomIndexWriter.getReader branch=dirOpenSoftDeletes applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes maybeChangeMs=$maybeChangeMs forceMergeMs=$forceMergeMs commitMs=$commitMs directoryOpenMs=$directoryOpenMs softDeletesWrapMs=$softDeletesWrapMs totalMs=$totalMs"
-                            }
-                        }
-                        return wrapped
+                        return SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
                     } else {
-                        val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-                        if (totalMs >= 20L || commitMs >= 20L || directoryOpenMs >= 20L || forceMergeMs >= 20L) {
-                            randomIndexWriterLogger.debug {
-                                "phase=randomIndexWriter.getReader branch=dirOpen applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes maybeChangeMs=$maybeChangeMs forceMergeMs=$forceMergeMs commitMs=$commitMs directoryOpenMs=$directoryOpenMs totalMs=$totalMs"
-                            }
-                        }
                         return reader
                     }
                 } else {
                     phase = "dir.nrt.getReader"
-                    val getReaderMark = TimeSource.Monotonic.markNow()
-                    val reader = INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
-                    getReaderMs += getReaderMark.elapsedNow().inWholeMilliseconds
-                    val totalMs = totalMark.elapsedNow().inWholeMilliseconds
-                    if (totalMs >= 20L || commitMs >= 20L || getReaderMs >= 20L || forceMergeMs >= 20L) {
-                        randomIndexWriterLogger.debug {
-                            "phase=randomIndexWriter.getReader branch=dirNrt applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes maybeChangeMs=$maybeChangeMs forceMergeMs=$forceMergeMs commitMs=$commitMs getReaderMs=$getReaderMs totalMs=$totalMs"
-                        }
-                    }
-                    return reader
+                    return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
                 }
             }
         } catch (t: Throwable) {
             val fake = isLikelyFakeException(t)
-            randomIndexWriterLogger.error(t) { "RandomIndexWriter.getReader throwable phase=$phase applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes fake=$fake" }
+            logger.error(t) { "RandomIndexWriter.getReader throwable phase=$phase applyDeletions=$applyDeletions writeAllDeletes=$writeAllDeletes fake=$fake" }
             throw t
         }
     }

@@ -1,14 +1,10 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.search.IndexSearcher
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.IOBooleanSupplier
 import org.gnit.lucenekmp.util.IOSupplier
-import kotlin.time.TimeSource
-
-private val termStatesPerfLogger = KotlinLogging.logger {}
 
 
 /**
@@ -208,70 +204,27 @@ class TermStates private constructor(term: Term?, context: IndexReaderContext?) 
          */
         @Throws(IOException::class)
         fun build(indexSearcher: IndexSearcher, term: Term, needsStats: Boolean): TermStates {
-            val totalMark = TimeSource.Monotonic.markNow()
             val context: IndexReaderContext = checkNotNull(indexSearcher.topReaderContext)
             val perReaderTermState = TermStates(if (needsStats) null else term, context)
             if (needsStats) {
                 var pendingTermLookups = kotlin.arrayOfNulls<PendingTermLookup>(0)
-                var prepareLookups = 0
-                var prepareTermsMs = 0L
-                var prepareSeekMs = 0L
-                var growMs = 0L
                 for (ctx in context.leaves()) {
-                    val termsMark = TimeSource.Monotonic.markNow()
                     val terms = Terms.getTerms(ctx.reader(), term.field())
-                    prepareTermsMs += termsMark.elapsedNow().inWholeMilliseconds
-                    val iteratorMark = TimeSource.Monotonic.markNow()
                     val termsEnum = terms.iterator()
-                    prepareTermsMs += iteratorMark.elapsedNow().inWholeMilliseconds
                     // Schedule the I/O in the terms dictionary in the background.
-                    val seekMark = TimeSource.Monotonic.markNow()
                     val termExistsSupplier: IOBooleanSupplier? = termsEnum.prepareSeekExact(term.bytes())
-                    prepareSeekMs += seekMark.elapsedNow().inWholeMilliseconds
                     if (termExistsSupplier != null) {
-                        prepareLookups++
-                        val growMark = TimeSource.Monotonic.markNow()
                         pendingTermLookups = ArrayUtil.grow(pendingTermLookups, ctx.ord + 1)
-                        growMs += growMark.elapsedNow().inWholeMilliseconds
                         pendingTermLookups[ctx.ord] = PendingTermLookup(termsEnum, termExistsSupplier)
                     }
                 }
-                var resolveLookups = 0
-                var resolveSupplierMs = 0L
-                var registerMs = 0L
                 for (ord in pendingTermLookups.indices) {
                     val pendingTermLookup = pendingTermLookups[ord]
-                    if (pendingTermLookup != null) {
-                        resolveLookups++
-                    }
-                    val supplierMark = TimeSource.Monotonic.markNow()
                     if (pendingTermLookup != null && pendingTermLookup.supplier.get()) {
-                        resolveSupplierMs += supplierMark.elapsedNow().inWholeMilliseconds
                         val termsEnum = pendingTermLookup.termsEnum
-                        val registerMark = TimeSource.Monotonic.markNow()
                         perReaderTermState.register(
                             termsEnum.termState(), ord, termsEnum.docFreq(), termsEnum.totalTermFreq()
                         )
-                        registerMs += registerMark.elapsedNow().inWholeMilliseconds
-                    } else {
-                        resolveSupplierMs += supplierMark.elapsedNow().inWholeMilliseconds
-                    }
-                }
-                val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
-                if (totalElapsedMs >= 25) {
-                    termStatesPerfLogger.debug {
-                        "phase=termStates.build term=$term needsStats=$needsStats leaves=${context.leaves().size} " +
-                            "prepareLookups=$prepareLookups resolveLookups=$resolveLookups prepareTermsMs=$prepareTermsMs " +
-                            "prepareSeekMs=$prepareSeekMs growMs=$growMs resolveSupplierMs=$resolveSupplierMs " +
-                            "registerMs=$registerMs totalMs=$totalElapsedMs"
-                    }
-                }
-            } else {
-                val totalElapsedMs = totalMark.elapsedNow().inWholeMilliseconds
-                if (totalElapsedMs >= 25) {
-                    termStatesPerfLogger.debug {
-                        "phase=termStates.build term=$term needsStats=$needsStats leaves=${context.leaves().size} " +
-                            "totalMs=$totalElapsedMs"
                     }
                 }
             }
