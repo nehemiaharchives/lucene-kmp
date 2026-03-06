@@ -20,6 +20,7 @@ import org.gnit.lucenekmp.tests.util.RandomStrings
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.jdkport.Executor
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.Version
 import kotlinx.coroutines.currentCoroutineContext
@@ -47,7 +48,7 @@ import kotlin.time.TimeSource
 Problems found:
 
 1. [FIXED] `testMergeThreadMessages` now matches upstream by using `TextField("foo", CannedTokenStream())`, removing the seed-dependent no-merge path under random `LogByteSizeMergePolicy`.
-2. [TODO] `testMergeThreadMessages` records merge-thread messages into a plain `mutableListOf`, unlike upstream's synchronized list, so background merge-thread logging can race with the test harness.
+2. [FIXED] `testMergeThreadMessages` now guards merge-thread message collection with a lock and asserts against a stable snapshot, removing the concurrent append race in the test harness.
 3. [TODO] `ConcurrentMergeScheduler` no longer increments merge-thread naming state, so multiple merge jobs can report the same logical thread name and blur per-thread message assertions.
 
 
@@ -846,13 +847,19 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             }
         iwc.setMergeScheduler(cms)
         val messages = mutableListOf<String>()
+        val messagesLock = ReentrantLock()
         iwc.setInfoStream(
             object : org.gnit.lucenekmp.util.InfoStream() {
                 override fun close() {}
 
                 override fun message(component: String, message: String) {
                     if (component == "MS") {
-                        messages.add(message)
+                        messagesLock.lock()
+                        try {
+                            messages.add(message)
+                        } finally {
+                            messagesLock.unlock()
+                        }
                     }
                 }
 
@@ -884,9 +891,18 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
                 t.awaitCompletion()
             }
         }
+        val messagesSnapshot =
+            run {
+                messagesLock.lock()
+                try {
+                    messages.toList()
+                } finally {
+                    messagesLock.unlock()
+                }
+            }
         for (t in mergeThreadSet) {
             val name = t.getName()
-            val threadMsgs = messages.filter { line -> line.startsWith("merge thread $name") }
+            val threadMsgs = messagesSnapshot.filter { line -> line.startsWith("merge thread $name") }
             assertTrue(threadMsgs.size >= 3, "Expected >= 3 messages for $name, got ${threadMsgs.size}, threadMsgs=$threadMsgs")
             assertTrue(threadMsgs.first().startsWith("merge thread $name start"))
             assertTrue(threadMsgs.any { line -> line.startsWith("merge thread $name merge segment") })
