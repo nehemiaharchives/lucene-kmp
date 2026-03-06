@@ -6,11 +6,13 @@ import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.KnnFloatVectorField
 import org.gnit.lucenekmp.document.StringField
+import org.gnit.lucenekmp.document.TextField
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.tests.analysis.CannedTokenStream
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.index.SuppressingConcurrentMergeScheduler
@@ -40,6 +42,17 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
+
+/*
+Problems found:
+
+1. [FIXED] `testMergeThreadMessages` now matches upstream by using `TextField("foo", CannedTokenStream())`, removing the seed-dependent no-merge path under random `LogByteSizeMergePolicy`.
+2. [TODO] `testMergeThreadMessages` records merge-thread messages into a plain `mutableListOf`, unlike upstream's synchronized list, so background merge-thread logging can race with the test harness.
+3. [TODO] `ConcurrentMergeScheduler` no longer increments merge-thread naming state, so multiple merge jobs can report the same logical thread name and blur per-thread message assertions.
+
+
+*/
+
 
 @OptIn(ExperimentalAtomicApi::class)
 class TestConcurrentMergeScheduler : LuceneTestCase() {
@@ -855,7 +868,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
         iwc.setMergePolicy(lmp)
         val w = IndexWriter(dir, iwc)
         val doc = Document()
-        doc.add(newTextField("foo", "bar", Field.Store.NO))
+        doc.add(TextField("foo", CannedTokenStream()))
         w.addDocument(doc)
         w.addDocument(Document())
         // flush
