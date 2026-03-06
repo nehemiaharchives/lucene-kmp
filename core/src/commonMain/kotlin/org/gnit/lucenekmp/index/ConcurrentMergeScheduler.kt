@@ -756,7 +756,6 @@ open class ConcurrentMergeScheduler
     ): MergeThread {
         val thread = MergeThread(mergeSource, merge)
         /*thread.setDaemon(true)*/ // no setDaemon in coroutine Job
-        /*thread.setName("Lucene Merge Thread #" + mergeThreadCount++)*/ // no setName in coroutine Job
         return thread
     }
 
@@ -808,6 +807,13 @@ open class ConcurrentMergeScheduler
                 "CMS.mergeThread uncaught coroutine exception merge=${merge.segString()} suppressExceptions=$suppressExceptions"
             }
         }
+        private val threadName: String =
+            withSchedulerStateLock {
+                val name =
+                    "Lucene Merge Thread #${this@ConcurrentMergeScheduler.mergeThreadCount}"
+                this@ConcurrentMergeScheduler.mergeThreadCount++
+                name
+            }
 
         // create a Job that will execute your merge logic when started
         val job: Job = scope.launch(context = uncaughtHandler, start = CoroutineStart.LAZY) {
@@ -815,7 +821,7 @@ open class ConcurrentMergeScheduler
         }
 
         /** Mirrors Thread.getName() */
-        fun getName(): String = "Lucene Merge Thread #${mergeThreadCount}"
+        fun getName(): String = threadName
 
         /** Mirrors Thread.isAlive() */
         fun isAlive(): Boolean = job.isActive

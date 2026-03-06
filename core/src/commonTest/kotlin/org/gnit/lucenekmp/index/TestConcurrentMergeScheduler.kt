@@ -49,7 +49,7 @@ Problems found:
 
 1. [FIXED] `testMergeThreadMessages` now matches upstream by using `TextField("foo", CannedTokenStream())`, removing the seed-dependent no-merge path under random `LogByteSizeMergePolicy`.
 2. [FIXED] `testMergeThreadMessages` now guards merge-thread message collection with a lock and asserts against a stable snapshot, removing the concurrent append race in the test harness.
-3. [TODO] `ConcurrentMergeScheduler` no longer increments merge-thread naming state, so multiple merge jobs can report the same logical thread name and blur per-thread message assertions.
+3. [FIXED] `ConcurrentMergeScheduler` now allocates a stable unique name per `MergeThread`, so per-thread merge logs no longer collapse onto the same logical thread id.
 
 
 */
