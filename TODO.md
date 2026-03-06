@@ -312,7 +312,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.PersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy
 - org.apache.lucene.index.QueryTimeoutImpl → org.gnit.lucenekmp.index.QueryTimeoutImpl
 - org.apache.lucene.index.ReaderManager → org.gnit.lucenekmp.index.ReaderManager
-- org.apache.lucene.index.TestAtomicUpdate → org.gnit.lucenekmp.index.TestAtomicUpdate
 - org.apache.lucene.index.TestCrashCausesCorruptIndex → org.gnit.lucenekmp.index.TestCrashCausesCorruptIndex
 - org.apache.lucene.index.TestDemoParallelLeafReader → org.gnit.lucenekmp.index.TestDemoParallelLeafReader
 - org.apache.lucene.index.TestDirectoryReaderReopen → org.gnit.lucenekmp.index.TestDirectoryReaderReopen
