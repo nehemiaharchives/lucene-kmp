@@ -27,8 +27,8 @@ abstract class FilterScorer(protected open val `in`: Scorer) : Scorer(), Unwrapp
         return `in`.iterator()
     }
 
-    override fun twoPhaseIterator(): TwoPhaseIterator {
-        return `in`.twoPhaseIterator()!!
+    override fun twoPhaseIterator(): TwoPhaseIterator? {
+        return `in`.twoPhaseIterator()
     }
 
     override fun unwrap(): Scorer {

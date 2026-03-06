@@ -433,7 +433,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.search.BaseExplanationTestCase → org.gnit.lucenekmp.tests.search.BaseExplanationTestCase
 - org.apache.lucene.tests.search.BaseRangeFieldQueryTestCase → org.gnit.lucenekmp.tests.search.BaseRangeFieldQueryTestCase
 - org.apache.lucene.tests.search.MatchesTestBase → org.gnit.lucenekmp.tests.search.MatchesTestBase
-- org.apache.lucene.tests.search.SearchEquivalenceTestBase → org.gnit.lucenekmp.tests.search.SearchEquivalenceTestBase
 - org.apache.lucene.tests.util.FailOnNonBulkMergesInfoStream → org.gnit.lucenekmp.tests.util.FailOnNonBulkMergesInfoStream
 - org.apache.lucene.tests.util.SorePoint → org.gnit.lucenekmp.tests.util.SorePoint
 - org.apache.lucene.tests.util.SoreType → org.gnit.lucenekmp.tests.util.SoreType
@@ -672,7 +671,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.ElevationComparatorSource → org.gnit.lucenekmp.search.ElevationComparatorSource
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
-- org.apache.lucene.search.TestApproximationSearchEquivalence → org.gnit.lucenekmp.search.TestApproximationSearchEquivalence
 - org.apache.lucene.search.TestAutomatonQuery → org.gnit.lucenekmp.search.TestAutomatonQuery
 - org.apache.lucene.search.TestAutomatonQueryUnicode → org.gnit.lucenekmp.search.TestAutomatonQueryUnicode
 - org.apache.lucene.search.TestBaseRangeFilter → org.gnit.lucenekmp.search.TestBaseRangeFilter
@@ -827,4 +825,3 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.util.SorterBenchmark → org.gnit.lucenekmp.util.SorterBenchmark
 - org.apache.lucene.util.hnsw.MockByteVectorValues → org.gnit.lucenekmp.util.hnsw.MockByteVectorValues
 - org.apache.lucene.util.hnsw.MockVectorValues → org.gnit.lucenekmp.util.hnsw.MockVectorValues
-
