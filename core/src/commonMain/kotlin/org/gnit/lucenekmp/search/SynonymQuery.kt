@@ -287,9 +287,9 @@ class SynonymQuery private constructor(
             }
 
             return object : ScorerSupplier() {
-                lateinit var iterators: MutableList<PostingsEnum>
-                lateinit var impacts: MutableList<ImpactsEnum>
-                lateinit var termBoosts: MutableList<Float>
+                var iterators: MutableList<PostingsEnum>? = null
+                var impacts: MutableList<ImpactsEnum>? = null
+                var termBoosts: MutableList<Float>? = null
                 var cost: Long = 0
 
                 @Throws(IOException::class)
@@ -297,9 +297,9 @@ class SynonymQuery private constructor(
                     if (iterators != null) {
                         return
                     }
-                    iterators = ArrayList()
-                    impacts = ArrayList()
-                    termBoosts = ArrayList()
+                    val iterators = ArrayList<PostingsEnum>()
+                    val impacts = ArrayList<ImpactsEnum>()
+                    val termBoosts = ArrayList<Float>()
                     cost = 0L
 
                     for (i in terms.indices) {
@@ -326,11 +326,17 @@ class SynonymQuery private constructor(
                     for (iterator in iterators) {
                         cost += iterator.cost()
                     }
+                    this.iterators = iterators
+                    this.impacts = impacts
+                    this.termBoosts = termBoosts
                 }
 
                 @Throws(IOException::class)
                 override fun get(leadCost: Long): Scorer {
                     init()
+                    val iterators = iterators!!
+                    val impacts = impacts!!
+                    val termBoosts = termBoosts!!
 
                     if (iterators.isEmpty()) {
                         return ConstantScoreScorer(
@@ -423,10 +429,12 @@ class SynonymQuery private constructor(
         fun freq(): Float {
             var w = disjunctionDisi.topList() as DisiWrapperFreq
             var freq = w.freq()
-            w = w.next as DisiWrapperFreq
+            var next: DisiWrapperFreq? = w.next as DisiWrapperFreq?
+            w = next ?: return freq
             while (w != null) {
                 freq += w.freq()
-                w = w.next as DisiWrapperFreq
+                next = w.next as DisiWrapperFreq?
+                w = next ?: break
             }
             return freq
         }
