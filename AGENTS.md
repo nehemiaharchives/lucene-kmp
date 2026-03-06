@@ -98,6 +98,36 @@ Under this directory you find two sub directories:
 6. lucene is very complex software. if you are not sure where is the bug, use `val logger = KotlinLogging.logger{}` if not found, add it, and `logger.debug { "things you want to see: $xxxx" }` to output debug log in the
    suspicious lines of code and make sure. then run the tests to see the debug log. then rethink the next suspicious code to track down the root cause of the bug.
 
+## Current Multithreading Port Status
+
+- Threading/synchronization porting is still partial. Many Java `synchronized` methods/blocks in `IndexWriter`, `DocumentsWriter`, flush-control/pool classes, reader/update classes, and merge classes are still commented out as placeholders.
+- Current rule: if a multithreaded test fails, first compare the failing Kotlin code to upstream Java and restore the exact missing synchronization boundary before trying broader redesigns.
+- Proven example: `TestBinaryDocValuesUpdates.testStressMultiThreading` failed because Java monitor boundaries had been lost around delete-queue mutation and queue replacement during concurrent update/full-flush/commit.
+- The successful fix restored explicit `ReentrantLock`-backed synchronization in:
+- `core/src/commonMain/kotlin/org/gnit/lucenekmp/index/DocumentsWriterDeleteQueue.kt`
+- `add`
+- `updateSlice`
+- `advanceQueue`
+- `close`
+- `core/src/commonMain/kotlin/org/gnit/lucenekmp/index/DocumentsWriter.kt`
+- `applyDeleteOrUpdate`
+- `abort`
+- `nextSequenceNumber`
+- `resetDeleteQueue`
+- After restoring those boundaries, the original multithreaded shape of `TestBinaryDocValuesUpdates.testStressMultiThreading` passed again, the full `TestBinaryDocValuesUpdates` JVM class passed, and `compileKotlinMacosX64` stayed green.
+- Failure signatures that should make you suspect a missing `synchronized` port first:
+- delete-queue slice invariant errors such as `slice property violated between the head on the tail must not be a null node`
+- sequence-number assertions involving `maxSeqNo`, `nextSeqNo`, or queue advancement/close
+- `AlreadyClosedException` during concurrent update/commit/full-flush
+- intermittent failures that disappear when thread count is reduced
+- Practical fix workflow:
+1. Read the upstream Java method/block around the failing line and identify the exact `synchronized` boundary.
+2. Find the matching Kotlin placeholder `/*@Synchronized*/` or commented `//synchronized(...) {`.
+3. Restore the same critical section with a dedicated `org.gnit.lucenekmp.jdkport.ReentrantLock` or an existing nearby lock, keeping scope as close to Java as possible.
+4. Re-run the narrow failing run configuration first.
+5. Then re-run the broader test class and native compile checks.
+- Do not assume the current coroutine/Job/Mutex-based emulation is complete. Remaining commented-out synchronization sites are still likely sources of real multithreading bugs.
+
 ## Tool Use Priority
 
 ### Priority 1, jetbrains MCP Server (always)

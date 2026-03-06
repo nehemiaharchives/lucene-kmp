@@ -12,6 +12,7 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.AtomicInteger
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.get
 import kotlin.concurrent.Volatile
@@ -83,6 +84,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     globalFieldNumberMap: FieldInfos.FieldNumbers
 ) : AutoCloseable, Accountable {
     private val logger = KotlinLogging.logger {}
+    private val syncLock = ReentrantLock()
     @OptIn(ExperimentalAtomicApi::class)
     private val pendingNumDocs: AtomicLong
 
@@ -140,20 +142,23 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         }
     }
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     @Throws(IOException::class)
     private fun applyDeleteOrUpdate(function: (DocumentsWriterDeleteQueue) -> Long): Long {
-        // This method is synchronized to make sure we don't replace the deleteQueue while applying this
-        // update / delete
-        // otherwise we might lose an update / delete if this happens concurrently to a full flush.
-        val deleteQueue: DocumentsWriterDeleteQueue = this.deleteQueue
-        var seqNo: Long = function(deleteQueue)
-        flushControl.doOnDelete()
-        if (applyAllDeletes()) {
-            seqNo = -seqNo
+        syncLock.lock()
+        try {
+            // This method is synchronized to make sure we don't replace the deleteQueue while applying this
+            // update / delete otherwise we might lose an update / delete if this happens concurrently
+            // to a full flush.
+            val deleteQueue: DocumentsWriterDeleteQueue = this.deleteQueue
+            var seqNo: Long = function(deleteQueue)
+            flushControl.doOnDelete()
+            if (applyAllDeletes()) {
+                seqNo = -seqNo
+            }
+            return seqNo
+        } finally {
+            syncLock.unlock()
         }
-        return seqNo
     }
 
     /** If buffered deletes are using too much heap, resolve them and write disk and return true.  */
@@ -201,40 +206,43 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
      * Called if we hit an exception at a bad time (when updating the index files) and must discard
      * all currently buffered docs. This resets our state, discarding any docs added since last flush.
      */
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     suspend fun abort() {
-        var success = false
+        syncLock.lock()
         try {
-            deleteQueue.clear()
-            if (infoStream.isEnabled("DW")) {
-                infoStream.message("DW", "abort")
-            }
-            for (perThread in perThreadPool.filterAndLock { `_`: DocumentsWriterPerThread -> true }) {
-                try {
-                    abortDocumentsWriterPerThread(perThread)
-                } finally {
-                    perThread.unlock()
+            var success = false
+            try {
+                deleteQueue.clear()
+                if (infoStream.isEnabled("DW")) {
+                    infoStream.message("DW", "abort")
+                }
+                for (perThread in perThreadPool.filterAndLock { `_`: DocumentsWriterPerThread -> true }) {
+                    try {
+                        abortDocumentsWriterPerThread(perThread)
+                    } finally {
+                        perThread.unlock()
+                    }
+                }
+                flushControl.abortPendingFlushes()
+                flushControl.waitForFlush()
+                assert(
+                    perThreadPool.size() == 0
+                ) { "There are still active DWPT in the pool: " + perThreadPool.size() }
+                success = true
+            } finally {
+                if (success) {
+                    assert(
+                        flushControl.flushingBytes == 0L
+                    ) { "flushingBytes has unexpected value 0 != " + flushControl.flushingBytes }
+                    assert(
+                        flushControl.netBytes() == 0L
+                    ) { "netBytes has unexpected value 0 != " + flushControl.netBytes() }
+                }
+                if (infoStream.isEnabled("DW")) {
+                    infoStream.message("DW", "done abort success=$success")
                 }
             }
-            flushControl.abortPendingFlushes()
-            flushControl.waitForFlush()
-            assert(
-                perThreadPool.size() == 0
-            ) { "There are still active DWPT in the pool: " + perThreadPool.size() }
-            success = true
         } finally {
-            if (success) {
-                assert(
-                    flushControl.flushingBytes == 0L
-                ) { "flushingBytes has unexpected value 0 != " + flushControl.flushingBytes }
-                assert(
-                    flushControl.netBytes() == 0L
-                ) { "netBytes has unexpected value 0 != " + flushControl.netBytes() }
-            }
-            if (infoStream.isEnabled("DW")) {
-                infoStream.message("DW", "done abort success=$success")
-            }
+            syncLock.unlock()
         }
     }
 
@@ -574,25 +582,33 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         // logger.debug { "DW.doFlush() end" }
     }
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@get:Synchronized*/
     val nextSequenceNumber: Long
-        get() =// this must be synced otherwise the delete queue might change concurrently
-            deleteQueue.nextSequenceNumber
+        get() {
+            syncLock.lock()
+            try {
+                // this must be synced otherwise the delete queue might change concurrently
+                return deleteQueue.nextSequenceNumber
+            } finally {
+                syncLock.unlock()
+            }
+        }
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     fun resetDeleteQueue(maxNumPendingOps: Int): Long {
-        val newQueue: DocumentsWriterDeleteQueue = deleteQueue.advanceQueue(maxNumPendingOps)
-        assert(deleteQueue.isAdvanced)
-        assert(!newQueue.isAdvanced)
-        assert(deleteQueue.lastSequenceNumber <= newQueue.lastSequenceNumber)
-        assert(
-            deleteQueue.maxSeqNo <= newQueue.lastSequenceNumber
-        ) { "maxSeqNo: " + deleteQueue.maxSeqNo + " vs. " + newQueue.lastSequenceNumber }
-        val oldMaxSeqNo: Long = deleteQueue.maxSeqNo
-        deleteQueue = newQueue
-        return oldMaxSeqNo
+        syncLock.lock()
+        try {
+            val newQueue: DocumentsWriterDeleteQueue = deleteQueue.advanceQueue(maxNumPendingOps)
+            assert(deleteQueue.isAdvanced)
+            assert(!newQueue.isAdvanced)
+            assert(deleteQueue.lastSequenceNumber <= newQueue.lastSequenceNumber)
+            assert(
+                deleteQueue.maxSeqNo <= newQueue.lastSequenceNumber
+            ) { "maxSeqNo: " + deleteQueue.maxSeqNo + " vs. " + newQueue.lastSequenceNumber }
+            val oldMaxSeqNo: Long = deleteQueue.maxSeqNo
+            deleteQueue = newQueue
+            return oldMaxSeqNo
+        } finally {
+            syncLock.unlock()
+        }
     }
 
     interface FlushNotifications {

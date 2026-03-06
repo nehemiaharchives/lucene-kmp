@@ -1062,7 +1062,7 @@ class TestBinaryDocValuesUpdates : LuceneTestCase() {
             writer.addDocument(doc)
         }
 
-        val numThreads = /*if (TEST_NIGHTLY) TestUtil.nextInt(random(), 3, 6) else*/ 2
+        val numThreads = if (TEST_NIGHTLY) TestUtil.nextInt(random(), 3, 6) else 2
 
         val done = CountDownLatch(numThreads)
         val numUpdates = AtomicInt(atLeast(100))

@@ -53,6 +53,8 @@ class DocumentsWriterDeleteQueue private constructor(
     private val startSeqNo: Long,
     /*LongSupplier*/private val previousMaxSeqId: () -> Long
 ) : Accountable, AutoCloseable {
+    private val syncLock: ReentrantLock = ReentrantLock()
+
     // the current end (latest delete operation) in the delete queue:
     @Volatile
     private var tail: Node<*>
@@ -88,8 +90,6 @@ class DocumentsWriterDeleteQueue private constructor(
         private set
 
     /** Returns `true` if it was advanced.  */
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@get:Synchronized*/
     var isAdvanced: Boolean = false
         private set
 
@@ -145,13 +145,16 @@ class DocumentsWriterDeleteQueue private constructor(
         return seqNo
     }
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     fun add(newNode: Node<*>): Long {
-        ensureOpen()
-        tail.next = newNode
-        this.tail = newNode
-        return this.nextSequenceNumber
+        syncLock.lock()
+        try {
+            ensureOpen()
+            tail.next = newNode
+            this.tail = newNode
+            return this.nextSequenceNumber
+        } finally {
+            syncLock.unlock()
+        }
     }
 
     fun anyChanges(): Boolean {
@@ -255,17 +258,20 @@ class DocumentsWriterDeleteQueue private constructor(
 
 
     /** Negative result means there were new deletes since we last applied  */
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     fun updateSlice(slice: DeleteSlice): Long {
-        ensureOpen()
-        var seqNo = this.nextSequenceNumber
-        if (slice.sliceTail !== tail) {
-            // new deletes arrived since we last checked
-            slice.sliceTail = tail
-            seqNo = -seqNo
+        syncLock.lock()
+        try {
+            ensureOpen()
+            var seqNo = this.nextSequenceNumber
+            if (slice.sliceTail !== tail) {
+                // new deletes arrived since we last checked
+                slice.sliceTail = tail
+                seqNo = -seqNo
+            }
+            return seqNo
+        } finally {
+            syncLock.unlock()
         }
-        return seqNo
     }
 
     /** Just like updateSlice, but does not assign a sequence number  */
@@ -289,26 +295,28 @@ class DocumentsWriterDeleteQueue private constructor(
     val isOpen: Boolean
         get() = !closed
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     override fun close() {
-        globalBufferLock.lock()
+        syncLock.lock()
         try {
-            // Avoid nested locking: inline the anyChanges() logic under the held lock
-            val hasChanges =
-                globalBufferedUpdates.any() ||
-                    !globalSlice.isEmpty ||
-                    globalSlice.sliceTail !== tail ||
-                    tail.next != null
-            check(!hasChanges) { "Can't close queue unless all changes are applied" }
-            this.closed = true
-            val seqNo: Long = nextSeqNo.load()
-            assert(
-                seqNo <= maxSeqNo
-            ) { "maxSeqNo must be greater or equal to $seqNo but was $maxSeqNo" }
-            nextSeqNo.store(maxSeqNo + 1)
+            globalBufferLock.lock()
+            try {
+                val hasChanges =
+                    globalBufferedUpdates.any() ||
+                        !globalSlice.isEmpty ||
+                        globalSlice.sliceTail !== tail ||
+                        tail.next != null
+                check(!hasChanges) { "Can't close queue unless all changes are applied" }
+                this.closed = true
+                val seqNo: Long = nextSeqNo.load()
+                assert(
+                    seqNo <= maxSeqNo
+                ) { "maxSeqNo must be greater or equal to $seqNo but was $maxSeqNo" }
+                nextSeqNo.store(maxSeqNo + 1)
+            } finally {
+                globalBufferLock.unlock()
+            }
         } finally {
-            globalBufferLock.unlock()
+            syncLock.unlock()
         }
     }
 
@@ -557,20 +565,23 @@ class DocumentsWriterDeleteQueue private constructor(
      * increment the seqId after we advanced it.
      * @return a new queue as a successor of this queue.
      */
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     fun advanceQueue(maxNumPendingOps: Int): DocumentsWriterDeleteQueue {
-        check(!this.isAdvanced) { "queue was already advanced" }
-        this.isAdvanced = true
-        val seqNo = this.lastSequenceNumber + maxNumPendingOps + 1
-        maxSeqNo = seqNo
-        return DocumentsWriterDeleteQueue(
-            infoStream,
-            generation + 1,
-            seqNo + 1,  // don't pass ::getMaxCompletedSeqNo here b/c otherwise we keep an reference to this queue
-            // and this will be a memory leak since the queues can't be GCed
-            getPrevMaxSeqIdSupplier(nextSeqNo)
-        )
+        syncLock.lock()
+        try {
+            check(!this.isAdvanced) { "queue was already advanced" }
+            this.isAdvanced = true
+            val seqNo = this.lastSequenceNumber + maxNumPendingOps + 1
+            maxSeqNo = seqNo
+            return DocumentsWriterDeleteQueue(
+                infoStream,
+                generation + 1,
+                seqNo + 1,  // don't pass ::getMaxCompletedSeqNo here b/c otherwise we keep an reference to this queue
+                // and this will be a memory leak since the queues can't be GCed
+                getPrevMaxSeqIdSupplier(nextSeqNo)
+            )
+        } finally {
+            syncLock.unlock()
+        }
     }
 
     companion object {
