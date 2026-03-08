@@ -456,7 +456,9 @@ class StandardDirectoryReader internal constructor(
                 // Make a best effort to detect when the app illegally "rm -rf" their
                 // index while a reader was open, and then called openIfChanged:
                 check(
-                    !(oldReader != null && !commitInfo.info.getId().contentEquals(oldReader.segmentInfo.info.getId()))
+                    !(oldReader != null
+                        && (!commitInfo.info.getId().contentEquals(oldReader.segmentInfo.info.getId())
+                        || commitInfo.info.maxDoc() != oldReader.segmentInfo.info.maxDoc()))
                 ) {
                     ("same segment "
                             + commitInfo.info.name

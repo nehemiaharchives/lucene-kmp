@@ -4,6 +4,7 @@ import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
 import dev.scottpierce.envvar.EnvVar
 import org.gnit.lucenekmp.jdkport.*
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import kotlin.time.Clock.System
 import kotlin.time.ExperimentalTime
 
@@ -584,7 +585,7 @@ object StringHelper {
     private var nextId: BigInteger? = null
 
     private var mask128: BigInteger? = null
-    private val idLock = Any()
+    private val idLock = ReentrantLock()
 
     init {
         // 128 bit unsigned mask
@@ -690,7 +691,14 @@ object StringHelper {
         //     what impact that has on the period, whereas the simple ++ (mod 2^128)
         //     we use here is guaranteed to have the full period.
 
-        val bits = nextId?.toByteArray() ?: ByteArray(0)
+        val bits: ByteArray
+        idLock.lock()
+        try {
+            bits = nextId?.toByteArray() ?: ByteArray(0)
+            nextId = (nextId!! + BigInteger.ONE).and(mask128!!)
+        } finally {
+            idLock.unlock()
+        }
 
         // toByteArray() always returns a sign bit, so it may require an extra byte (always zero)
         if (bits.size > ID_LENGTH) {
@@ -746,7 +754,6 @@ object StringHelper {
         return BytesRef(bytes)
     }
 }
-
 
 
 
