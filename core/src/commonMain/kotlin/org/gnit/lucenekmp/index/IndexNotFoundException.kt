@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.index
 
+import okio.IOException
+
 // could not be ported as a subclass of FileNotFoundException because it is final
 // import okio.FileNotFoundException
 
@@ -9,4 +11,4 @@ package org.gnit.lucenekmp.index
  */
 class IndexNotFoundException
 /** Creates IndexFileNotFoundException with the description message.  */
-    (msg: String?) : /*FileNotFound*/Exception(msg)
+    (msg: String?) : /*FileNotFound*/IOException(msg)
