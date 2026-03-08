@@ -41,7 +41,7 @@ class WildcardQuery
  */
 /** Constructs a query for terms matching `term`.  */
 (
-    override val term: Term,
+    term: Term,
     determinizeWorkLimit: Int = Operations.DEFAULT_DETERMINIZE_WORK_LIMIT,
     rewriteMethod: RewriteMethod = CONSTANT_SCORE_BLENDED_REWRITE
 ) : AutomatonQuery(term, toAutomaton(term, determinizeWorkLimit), false, rewriteMethod) {

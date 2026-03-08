@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.util.automaton
 
-import okio.IOException
 import org.gnit.lucenekmp.index.SingleTermsEnum
 import org.gnit.lucenekmp.index.Term
 import org.gnit.lucenekmp.index.Terms
@@ -461,7 +460,7 @@ class CompiledAutomaton(automaton: Automaton, finite: Boolean, simplify: Boolean
     }
 
     override fun equals(obj: Any?): Boolean {
-        if (this == obj) return true
+        if (this === obj) return true
         if (obj == null) return false
         if (this::class != obj::class) return false
         val other: CompiledAutomaton = obj as CompiledAutomaton
