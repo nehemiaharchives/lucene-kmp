@@ -262,13 +262,27 @@ object IOUtils {
         if (locations != null) {
             for (location in locations) {
                 if (location != null) {
-                    try {
-                        fs().delete(location, mustExist = false)
-                    } catch (e: IOException) {
-                        // If directory not empty or other issue, record it
-                        unremoved[location] = e
-                    } catch (t: Throwable) {
-                        unremoved[location] = t
+                    val fileSystem = fs()
+                    if (fileSystem.exists(location)) {
+                        if (fileSystem.metadataOrNull(location)?.isDirectory == true) {
+                            for (subPath in fileSystem.listRecursively(location).toList().sortedByDescending { it.toString().length }) {
+                                try {
+                                    fileSystem.delete(subPath, mustExist = false)
+                                } catch (e: IOException) {
+                                    unremoved[subPath] = e
+                                } catch (t: Throwable) {
+                                    unremoved[subPath] = t
+                                }
+                            }
+                        }
+                        try {
+                            fileSystem.delete(location, mustExist = false)
+                        } catch (e: IOException) {
+                            // If directory not empty or other issue, record it
+                            unremoved[location] = e
+                        } catch (t: Throwable) {
+                            unremoved[location] = t
+                        }
                     }
                 }
             }

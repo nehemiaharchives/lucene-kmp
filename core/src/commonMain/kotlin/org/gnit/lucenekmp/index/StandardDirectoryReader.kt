@@ -125,7 +125,17 @@ class StandardDirectoryReader internal constructor(
             }
         }
 
-        return doOpenFromCommit(commit!!)
+        return if (commit == null) {
+            object : SegmentInfos.FindSegmentsFile<DirectoryReader>(directory) {
+                @Throws(IOException::class)
+                override fun doBody(segmentFileName: String): DirectoryReader {
+                    val infos = SegmentInfos.readCommit(directory, segmentFileName)
+                    return doOpenIfChanged(infos)
+                }
+            }.run()
+        } else {
+            doOpenFromCommit(commit)
+        }
     }
 
     @Throws(IOException::class)
