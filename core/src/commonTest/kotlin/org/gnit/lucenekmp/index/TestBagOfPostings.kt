@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
  */
 //@SuppressCodecs("Direct") // at night this makes like 200k/300k docs and will make Direct's heart beat!
 class TestBagOfPostings : LuceneTestCase() {
-    
+
     @Test
     @Throws(Exception::class)
     fun test() {

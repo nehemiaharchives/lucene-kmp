@@ -8,7 +8,7 @@ import okio.IOException
  *
  * @lucene.experimental
  */
-class OneMergeWrappingMergePolicy(
+open class OneMergeWrappingMergePolicy(
     `in`: MergePolicy,
     private val wrapOneMerge: (OneMerge) -> OneMerge
 ) : FilterMergePolicy(`in`) {

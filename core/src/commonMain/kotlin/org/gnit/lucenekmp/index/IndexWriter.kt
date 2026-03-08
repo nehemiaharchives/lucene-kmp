@@ -7532,7 +7532,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             diagnostics["os"] = Constants.OS_NAME
             diagnostics["os.arch"] = Constants.OS_ARCH
             diagnostics["os.version"] = Constants.OS_VERSION
-            //diagnostics.put("java.runtime.version", java.lang.Runtime.version().toString()) //TODO should we put kotlin version?
+            diagnostics["java.runtime.version"] = Constants.JAVA_RUNTIME_VERSION
             diagnostics["java.vendor"] = Constants.JAVA_VENDOR
             diagnostics["timestamp"] = System.currentTimeMillis() /*java.time.Instant.now().toEpochMilli()*/.toString()
             if (details != null) {

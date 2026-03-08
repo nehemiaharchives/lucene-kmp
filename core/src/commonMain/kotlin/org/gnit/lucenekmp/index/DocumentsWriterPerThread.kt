@@ -389,7 +389,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
             } else {
                 phase = "countSoftDeletes"
                 flushState.softDelCountOnFlush =
-                    PendingSoftDeletes.countSoftDeletes(softDeletedDocs, flushState.liveDocs!!)
+                    PendingSoftDeletes.countSoftDeletes(softDeletedDocs, flushState.liveDocs)
                 assert(
                     flushState.segmentInfo.maxDoc()
                             >= flushState.softDelCountOnFlush + flushState.delCountOnFlush

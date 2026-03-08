@@ -489,7 +489,7 @@ class CheckIndex(
     fun checkIndex(onlySegments: MutableList<String>? = null): Status {
         // ExecutorService-based parallel checking is currently disabled for common code.
         // Keep single-threaded behavior: forward to the overloaded checkIndex with no executor.
-        msg(infoStream!!, "Checking index with threadCount: $threadCount")
+        infoStream?.let { msg(it, "Checking index with threadCount: $threadCount") }
         return checkIndex(onlySegments, null)
     }
 
@@ -509,6 +509,7 @@ class CheckIndex(
         executorService: ExecutorService?
     ): Status {
         ensureOpen()
+        val infoStream: PrintStream = this.infoStream ?: PrintStream(out = ByteArrayOutputStream())
         val startNS: Long = System.nanoTime()
 
         val result = Status()
@@ -658,18 +659,20 @@ class CheckIndex(
                     ("versions=[$oldest .. $newest]")
         }
 
-        msg(
-            infoStream!!,
-            ("Segments file="
-                    + segmentsFileName
-                    + " numSegments="
-                    + numSegments
-                    + " "
-                    + versionString
-                    + " id="
-                    + StringHelper.idToString(lastCommit.getId())
-                    + userDataString)
-        )
+        infoStream?.let {
+            msg(
+                it,
+                ("Segments file="
+                        + segmentsFileName
+                        + " numSegments="
+                        + numSegments
+                        + " "
+                        + versionString
+                        + " id="
+                        + StringHelper.idToString(lastCommit.getId())
+                        + userDataString)
+            )
+        }
 
         if (onlySegments != null) {
             result.partial = true
@@ -4938,8 +4941,8 @@ class CheckIndex(
                         FieldExistsQuery.getDocValuesDocIdSetIterator(
                             softDeletesField,
                             reader
-                        )!!,
-                        reader.liveDocs!!
+                        ),
+                        reader.liveDocs
                     )
                 if (softDeletes != info.getSoftDelCount()) {
                     throw CheckIndexException(

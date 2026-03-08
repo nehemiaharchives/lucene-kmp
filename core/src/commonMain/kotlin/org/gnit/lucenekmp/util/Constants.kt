@@ -42,6 +42,9 @@ object Constants {
     /** The value of `System.getProperty("java.vendor")`.  */
     val JAVA_VENDOR: String = getSysProp("java.vendor", UNKNOWN)
 
+    /** The value of `System.getProperty("java.runtime.version")`.  */
+    val JAVA_RUNTIME_VERSION: String = getSysProp("java.runtime.version", UNKNOWN)
+
     /** True iff the Java runtime is a client runtime and C2 compiler is not enabled.  */
     val IS_CLIENT_VM: Boolean =
         getSysProp("java.vm.info", "").contains("emulated-client")

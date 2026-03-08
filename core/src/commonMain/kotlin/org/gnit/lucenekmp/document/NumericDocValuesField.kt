@@ -25,7 +25,7 @@ open class NumericDocValuesField(name: String, value: Long, fieldType: FieldType
      * @param value 64-bit long value
      * @throws IllegalArgumentException if the field name is null
      */
-    constructor(name: String, value: Long) : this(name, value, INDEXED_TYPE)
+    constructor(name: String, value: Long) : this(name, value, TYPE)
 
     /**
      * Creates a new DocValues field with the specified 64-bit long value
