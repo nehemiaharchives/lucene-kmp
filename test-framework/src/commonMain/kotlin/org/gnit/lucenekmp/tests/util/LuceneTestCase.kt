@@ -31,6 +31,7 @@ import org.gnit.lucenekmp.index.ParallelLeafReader
 import org.gnit.lucenekmp.index.TieredMergePolicy
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
 import org.gnit.lucenekmp.jdkport.TimeUnit
@@ -331,6 +332,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
 
         // line 674
         private val fieldToType: MutableMap<String, FieldType> = HashMap<String, FieldType>()
+        private val fieldToTypeLock = ReentrantLock()
 
 
         // line 725
@@ -1081,61 +1083,65 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         // write-once schema sort of helper class then we can
         // remove the sync here.  We can also fold the random
         // "enable norms" (now commented out, below) into that:
-        /*@Synchronized*/
         fun newField(random: Random, name: String, value: Any?, type: FieldType): Field {
-            // Defeat any consumers that illegally rely on intern'd
-            // strings (we removed this from Lucene a while back):
+            fieldToTypeLock.lock()
+            try {
+                // Defeat any consumers that illegally rely on intern'd
+                // strings (we removed this from Lucene a while back):
 
-            val name = name
-            /*name = java.lang.String(name) as String*/
+                val name = name
+                /*name = java.lang.String(name) as String*/
 
-            val prevType: FieldType? = fieldToType[name]
+                val prevType: FieldType? = fieldToType[name]
 
-            if (prevType != null) {
-                // always use the same fieldType for the same field name
-                return createField(name, value, prevType)
-            }
+                if (prevType != null) {
+                    // always use the same fieldType for the same field name
+                    return createField(name, value, prevType)
+                }
 
-            // TODO: once all core & test codecs can index
-            // offsets, sometimes randomly turn on offsets if we are
-            // already indexing positions...
-            val newType = FieldType(type)
-            if (!newType.stored() && random.nextBoolean()) {
-                newType.setStored(true) // randomly store it
-            }
-            if (newType.indexOptions() != IndexOptions.NONE) {
-                if (!newType.storeTermVectors() && random.nextBoolean()) {
-                    newType.setStoreTermVectors(true)
-                    if (!newType.storeTermVectorPositions()) {
-                        newType.setStoreTermVectorPositions(random.nextBoolean())
-                        if (newType.storeTermVectorPositions()) {
-                            if (!newType.storeTermVectorPayloads()) {
-                                newType.setStoreTermVectorPayloads(random.nextBoolean())
+                // TODO: once all core & test codecs can index
+                // offsets, sometimes randomly turn on offsets if we are
+                // already indexing positions...
+                val newType = FieldType(type)
+                if (!newType.stored() && random.nextBoolean()) {
+                    newType.setStored(true) // randomly store it
+                }
+                if (newType.indexOptions() != IndexOptions.NONE) {
+                    if (!newType.storeTermVectors() && random.nextBoolean()) {
+                        newType.setStoreTermVectors(true)
+                        if (!newType.storeTermVectorPositions()) {
+                            newType.setStoreTermVectorPositions(random.nextBoolean())
+                            if (newType.storeTermVectorPositions()) {
+                                if (!newType.storeTermVectorPayloads()) {
+                                    newType.setStoreTermVectorPayloads(random.nextBoolean())
+                                }
                             }
                         }
-                    }
-                    // Check for strings as offsets are disallowed on binary fields
-                    if (value is String && !newType.storeTermVectorOffsets()) {
-                        newType.setStoreTermVectorOffsets(random.nextBoolean())
-                    }
+                        // Check for strings as offsets are disallowed on binary fields
+                        if (value is String && !newType.storeTermVectorOffsets()) {
+                            newType.setStoreTermVectorOffsets(random.nextBoolean())
+                        }
 
-                    if (VERBOSE) {
-                        println("NOTE: LuceneTestCase: upgrade name=$name type=$newType")
+                        if (VERBOSE) {
+                            println("NOTE: LuceneTestCase: upgrade name=$name type=$newType")
+                        }
                     }
                 }
-            }
-            newType.freeze()
-            fieldToType[name] = newType
+                newType.freeze()
+                fieldToType[name] = newType
 
-            // TODO: we need to do this, but smarter, ie, most of
-            // the time we set the same value for a given field but
-            // sometimes (rarely) we change it up:
-            /*
-            if (newType.omitNorms()) {
-              newType.setOmitNorms(random.nextBoolean());
+                // TODO: we need to do this, but smarter, ie, most of
+                // the time we set the same value for a given field but
+                // sometimes (rarely) we change it up:
+                /*
+                if (newType.omitNorms()) {
+                  newType.setOmitNorms(random.nextBoolean());
+                }
+                */
+                return createField(name, value, newType)
+            } finally {
+                fieldToTypeLock.unlock()
             }
-            */
-            return createField(name, value, newType)
         }
 
         private fun createField(name: String, value: Any?, fieldType: FieldType): Field {

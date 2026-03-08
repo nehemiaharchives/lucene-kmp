@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.jdkport.CountDownLatch
-import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.index.MockRandomMergePolicy
@@ -22,6 +22,7 @@ import kotlin.test.assertEquals
  */
 //@SuppressCodecs("Direct") // at night this makes like 200k/300k docs and will make Direct's heart beat!
 class TestBagOfPostings : LuceneTestCase() {
+    
     @Test
     @Throws(Exception::class)
     fun test() {
@@ -53,7 +54,7 @@ class TestBagOfPostings : LuceneTestCase() {
         }
         postingsList.shuffle(random())
 
-        val postings = LinkedBlockingQueue(postingsList)
+        val postings = ConcurrentLinkedQueue(postingsList)
 
         val dir: Directory = newFSDirectory(createTempDir("bagofpostings"))
         val iw = RandomIndexWriter(random(), dir, iwc)
@@ -126,5 +127,37 @@ class TestBagOfPostings : LuceneTestCase() {
         ir.close()
         iw.close()
         dir.close()
+    }
+
+    private class ConcurrentLinkedQueue<E>(elements: Collection<E>) {
+        private val lock = ReentrantLock()
+        private val deque = ArrayDeque<E>(elements)
+
+        fun add(element: E) {
+            lock.lock()
+            try {
+                deque.addLast(element)
+            } finally {
+                lock.unlock()
+            }
+        }
+
+        fun poll(): E? {
+            lock.lock()
+            try {
+                return if (deque.isEmpty()) null else deque.removeFirst()
+            } finally {
+                lock.unlock()
+            }
+        }
+
+        fun isEmpty(): Boolean {
+            lock.lock()
+            try {
+                return deque.isEmpty()
+            } finally {
+                lock.unlock()
+            }
+        }
     }
 }
