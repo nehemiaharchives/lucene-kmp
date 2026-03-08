@@ -126,7 +126,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.ExitableDirectoryReader → org.gnit.lucenekmp.index.ExitableDirectoryReader
 - org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
 - org.apache.lucene.index.SnapshotDeletionPolicy → org.gnit.lucenekmp.index.SnapshotDeletionPolicy
-- org.apache.lucene.index.SoftDeletesRetentionMergePolicy → org.gnit.lucenekmp.index.SoftDeletesRetentionMergePolicy
 - org.apache.lucene.index.TwoPhaseCommitTool → org.gnit.lucenekmp.index.TwoPhaseCommitTool
 - org.apache.lucene.queryparser.complexPhrase.ComplexPhraseQueryParser → org.gnit.lucenekmp.queryparser.complexPhrase.ComplexPhraseQueryParser
 - org.apache.lucene.queryparser.ext.Extensions → org.gnit.lucenekmp.queryparser.ext.Extensions
@@ -413,7 +412,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.cranky.CrankyCodec → org.gnit.lucenekmp.tests.codecs.cranky.CrankyCodec
 - org.apache.lucene.tests.codecs.vector.ConfigurableMCodec → org.gnit.lucenekmp.tests.codecs.vector.ConfigurableMCodec
 - org.apache.lucene.tests.geo.EarthDebugger → org.gnit.lucenekmp.tests.geo.EarthDebugger
-- org.apache.lucene.tests.index.BaseTestCheckIndex → org.gnit.lucenekmp.tests.index.BaseTestCheckIndex
 - org.apache.lucene.tests.index.DocHelper → org.gnit.lucenekmp.tests.index.DocHelper
 - org.apache.lucene.tests.index.MockIndexWriterEventListener → org.gnit.lucenekmp.tests.index.MockIndexWriterEventListener
 - org.apache.lucene.tests.index.PerThreadPKLookup → org.gnit.lucenekmp.tests.index.PerThreadPKLookup
@@ -430,7 +428,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.search.BaseExplanationTestCase → org.gnit.lucenekmp.tests.search.BaseExplanationTestCase
 - org.apache.lucene.tests.search.BaseRangeFieldQueryTestCase → org.gnit.lucenekmp.tests.search.BaseRangeFieldQueryTestCase
 - org.apache.lucene.tests.search.MatchesTestBase → org.gnit.lucenekmp.tests.search.MatchesTestBase
-- org.apache.lucene.tests.util.FailOnNonBulkMergesInfoStream → org.gnit.lucenekmp.tests.util.FailOnNonBulkMergesInfoStream
 - org.apache.lucene.tests.util.SorePoint → org.gnit.lucenekmp.tests.util.SorePoint
 - org.apache.lucene.tests.util.SoreType → org.gnit.lucenekmp.tests.util.SoreType
 - org.apache.lucene.tests.util.TestBeforeAfterOverrides → org.gnit.lucenekmp.tests.util.TestBeforeAfterOverrides
@@ -478,10 +475,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestCheckIndex → org.gnit.lucenekmp.index.TestCheckIndex
-- org.apache.lucene.index.TestCodecHoldsOpenFiles → org.gnit.lucenekmp.index.TestCodecHoldsOpenFiles
-- org.apache.lucene.index.TestCodecs → org.gnit.lucenekmp.index.TestCodecs
-- org.apache.lucene.index.TestConsistentFieldNumbers → org.gnit.lucenekmp.index.TestConsistentFieldNumbers
 - org.apache.lucene.index.TestCrash → org.gnit.lucenekmp.index.TestCrash
 - org.apache.lucene.index.TestCustomNorms → org.gnit.lucenekmp.index.TestCustomNorms
 - org.apache.lucene.index.TestCustomTermFreq → org.gnit.lucenekmp.index.TestCustomTermFreq
