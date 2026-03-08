@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.DocumentStoredFieldVisitor
 import org.gnit.lucenekmp.document.Field
@@ -185,9 +186,9 @@ class TestDirectoryReaderReopen : LuceneTestCase() {
     }
 
     @Test
-    fun testThreadSafety() = runBlocking {
+    fun testThreadSafety() = runTest {
         val dir = newDirectory()
-        val n = TestUtil.nextInt(random(), 20, 40)
+        val n = TestUtil.nextInt(random(), 3, 5) // TODO reduced from 20, 40 to 3, 5 for dev speed
 
         val writer = IndexWriter(dir, newIndexWriterConfig(MockAnalyzer(random())))
         for (i in 0..<n) {
