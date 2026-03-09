@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 
 
 /** Delegates all methods to a wrapped [SortedSetDocValues].  */
-class FilterSortedSetDocValues(
+open class FilterSortedSetDocValues(
     /** Wrapped values  */
     protected val `in`: SortedSetDocValues
 ) :

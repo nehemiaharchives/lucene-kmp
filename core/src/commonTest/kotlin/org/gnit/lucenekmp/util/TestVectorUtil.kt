@@ -28,6 +28,25 @@ class TestVectorUtil : LuceneTestCase() {
 
     companion object {
         const val DELTA: Double = 1e-4
+
+        fun randomVector(dim: Int): FloatArray {
+            val v = FloatArray(dim)
+            val r: Random = random()
+            for (i in 0 until dim) {
+                v[i] = r.nextFloat()
+            }
+            return v
+        }
+
+        fun randomVectorBytes(dim: Int): ByteArray {
+            val v = TestUtil.randomBinaryTerm(random(), dim)
+            for (i in v.offset until v.offset + v.length) {
+                if (v.bytes[i] == (-128).toByte()) {
+                    v.bytes[i] = (-127).toByte()
+                }
+            }
+            return v.bytes
+        }
     }
 
     @Test
@@ -391,21 +410,11 @@ class TestVectorUtil : LuceneTestCase() {
     }
 
     private fun randomVector(dim: Int = random().nextInt(100) + 1): FloatArray {
-        val v = FloatArray(dim)
-        val r: Random = random()
-        for (i in 0 until dim) {
-            v[i] = r.nextFloat()
-        }
-        return v
+        return Companion.randomVector(dim)
     }
 
     private fun randomVectorBytes(dim: Int = TestUtil.nextInt(random(), 1, 100)): ByteArray {
-        val bytes = ByteArray(dim)
-        random().nextBytes(bytes)
-        for (i in bytes.indices) {
-            if (bytes[i] == (-128).toByte()) bytes[i] = (-127).toByte()
-        }
-        return bytes
+        return Companion.randomVectorBytes(dim)
     }
 
     private fun negative(v: FloatArray): FloatArray {
@@ -424,4 +433,3 @@ class TestVectorUtil : LuceneTestCase() {
         return u
     }
 }
-
