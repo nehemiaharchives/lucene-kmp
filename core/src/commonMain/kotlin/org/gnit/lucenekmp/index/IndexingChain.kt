@@ -729,7 +729,7 @@ class IndexingChain(
                     s.docValuesType,
                     s.docValuesSkipIndex,
                     -1,
-                    s.attributes,
+                    s.attributes.toMutableMap(),
                     s.pointDimensionCount,
                     s.pointIndexDimensionCount,
                     s.pointNumBytes,
@@ -1502,10 +1502,12 @@ class IndexingChain(
 
         fun reset(doc: Int) {
             docID = doc
+            attributes.clear()
             omitNorms = false
             storeTermVector = false
             indexOptions = IndexOptions.NONE
             docValuesType = DocValuesType.NONE
+            docValuesSkipIndex = DocValuesSkipIndexType.NONE
             pointDimensionCount = 0
             pointIndexDimensionCount = 0
             pointNumBytes = 0

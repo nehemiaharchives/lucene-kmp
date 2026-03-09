@@ -50,7 +50,7 @@ class FieldType : IndexableFieldType {
         this.vectorEncoding = ref.vectorEncoding()
         this.vectorSimilarityFunction = ref.vectorSimilarityFunction()
         if (ref.attributes != null) {
-            this.attributes = ref.attributes
+            this.attributes = ref.attributes!!.toMutableMap()
         }
         // Do not copy frozen!
     }
