@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.util.Collections.UnmodifiableIterator")
 class UnmodifiableMutableIterator<T>(private val delegate: MutableIterator<T>) : MutableIterator<T> {
     override fun hasNext(): Boolean = delegate.hasNext()
 
@@ -10,6 +11,7 @@ class UnmodifiableMutableIterator<T>(private val delegate: MutableIterator<T>) :
     }
 }
 
+@Ported(from = "java.util.Collections.UnmodifiableCollection")
 class UnmodifiableMutableCollection<T>(private val delegate: MutableCollection<T>) : MutableCollection<T> {
     override val size: Int
         get() = delegate.size
@@ -53,6 +55,7 @@ class UnmodifiableMutableCollection<T>(private val delegate: MutableCollection<T
     override fun toString(): String = delegate.toString()
 }
 
+@Ported(from = "java.util.Collections.UnmodifiableSet")
 class UnmodifiableMutableSet<T>(private val delegate: MutableSet<T>) : MutableSet<T> {
     override val size: Int
         get() = delegate.size
@@ -96,6 +99,107 @@ class UnmodifiableMutableSet<T>(private val delegate: MutableSet<T>) : MutableSe
     override fun toString(): String = delegate.toString()
 }
 
+@Ported(from = "java.util.Collections.UnmodifiableListIterator")
+class UnmodifiableMutableListIterator<T>(private val delegate: MutableListIterator<T>) : MutableListIterator<T> {
+    override fun hasNext(): Boolean = delegate.hasNext()
+
+    override fun hasPrevious(): Boolean = delegate.hasPrevious()
+
+    override fun next(): T = delegate.next()
+
+    override fun nextIndex(): Int = delegate.nextIndex()
+
+    override fun previous(): T = delegate.previous()
+
+    override fun previousIndex(): Int = delegate.previousIndex()
+
+    override fun add(element: T) {
+        throw UnsupportedOperationException()
+    }
+
+    override fun remove() {
+        throw UnsupportedOperationException()
+    }
+
+    override fun set(element: T) {
+        throw UnsupportedOperationException()
+    }
+}
+
+@Ported(from = "java.util.Collections.UnmodifiableList")
+class UnmodifiableMutableList<T>(private val delegate: MutableList<T>) : MutableList<T> {
+    override val size: Int
+        get() = delegate.size
+
+    override fun contains(element: T): Boolean = delegate.contains(element)
+
+    override fun containsAll(elements: Collection<T>): Boolean = delegate.containsAll(elements)
+
+    override fun get(index: Int): T = delegate[index]
+
+    override fun indexOf(element: T): Int = delegate.indexOf(element)
+
+    override fun isEmpty(): Boolean = delegate.isEmpty()
+
+    override fun iterator(): MutableIterator<T> = UnmodifiableMutableIterator(delegate.iterator())
+
+    override fun lastIndexOf(element: T): Int = delegate.lastIndexOf(element)
+
+    override fun add(element: T): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun add(index: Int, element: T) {
+        throw UnsupportedOperationException()
+    }
+
+    override fun addAll(index: Int, elements: Collection<T>): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun addAll(elements: Collection<T>): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun clear() {
+        throw UnsupportedOperationException()
+    }
+
+    override fun listIterator(): MutableListIterator<T> = UnmodifiableMutableListIterator(delegate.listIterator())
+
+    override fun listIterator(index: Int): MutableListIterator<T> = UnmodifiableMutableListIterator(delegate.listIterator(index))
+
+    override fun remove(element: T): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun removeAll(elements: Collection<T>): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun removeAt(index: Int): T {
+        throw UnsupportedOperationException()
+    }
+
+    override fun retainAll(elements: Collection<T>): Boolean {
+        throw UnsupportedOperationException()
+    }
+
+    override fun set(index: Int, element: T): T {
+        throw UnsupportedOperationException()
+    }
+
+    override fun subList(fromIndex: Int, toIndex: Int): MutableList<T> =
+        UnmodifiableMutableList(delegate.subList(fromIndex, toIndex))
+
+    override fun equals(other: Any?): Boolean = delegate == other
+
+    override fun hashCode(): Int = delegate.hashCode()
+
+    override fun toString(): String = delegate.toString()
+}
+
+@Ported(from = "java.util.Collections.UnmodifiableMapEntry")
 class UnmodifiableMutableMapEntry<K, V>(private val delegate: MutableMap.MutableEntry<K, V>) :
     MutableMap.MutableEntry<K, V> {
     override val key: K
@@ -115,6 +219,7 @@ class UnmodifiableMutableMapEntry<K, V>(private val delegate: MutableMap.Mutable
     override fun toString(): String = delegate.toString()
 }
 
+@Ported(from = "java.util.Collections.UnmodifiableEntrySet")
 class UnmodifiableMutableMapEntrySet<K, V>(private val delegate: MutableSet<MutableMap.MutableEntry<K, V>>) :
     MutableSet<MutableMap.MutableEntry<K, V>> {
     override val size: Int
@@ -171,6 +276,7 @@ class UnmodifiableMutableMapEntrySet<K, V>(private val delegate: MutableSet<Muta
     override fun toString(): String = delegate.toString()
 }
 
+@Ported(from = "java.util.Collections.UnmodifiableMap")
 class UnmodifiableMutableMap<K, V>(private val delegate: MutableMap<K, V>) : MutableMap<K, V> {
     override val size: Int
         get() = delegate.size

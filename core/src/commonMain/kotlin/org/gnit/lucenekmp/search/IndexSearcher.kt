@@ -280,7 +280,7 @@ open class IndexSearcher(
      * possible.
      */
     @Throws(IOException::class)
-    fun count(query: Query): Int {
+    open fun count(query: Query): Int {
         // Rewrite query before optimization check
         var query: Query = query
         query = rewrite(ConstantScoreQuery(query))

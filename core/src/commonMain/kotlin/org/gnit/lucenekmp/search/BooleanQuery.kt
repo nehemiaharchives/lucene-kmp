@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.search
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.UnmodifiableMutableCollection
+import org.gnit.lucenekmp.jdkport.UnmodifiableMutableList
 import org.gnit.lucenekmp.index.TermStates
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.search.BooleanClause.Occur
@@ -107,14 +109,14 @@ class BooleanQuery private constructor(
 
     /** Return a list of the clauses of this [BooleanQuery].  */
     fun clauses(): MutableList<BooleanClause> {
-        return clauses
+        return UnmodifiableMutableList(clauses)
     }
 
     /** Return the collection of queries for the given [Occur].  */
     fun getClauses(occur: Occur): MutableCollection<Query> {
         // turn this immutable here, because we need to preserve the correct collection types for
         // equals/hashCode!
-        return clauseSets[occur]!!.toMutableSet()
+        return UnmodifiableMutableCollection(clauseSets[occur]!!)
     }
 
     val isPureDisjunction: Boolean
@@ -595,7 +597,7 @@ class BooleanQuery private constructor(
 
     override fun visit(visitor: QueryVisitor) {
         val sub = visitor.getSubVisitor(Occur.MUST, this)
-        for (occur in clauseSets.keys) {
+        for (occur in Occur.entries) {
             if (clauseSets[occur]!!.isNotEmpty()) {
                 if (occur === Occur.MUST) {
                     for (q in clauseSets[occur]!!) {
@@ -706,4 +708,5 @@ class BooleanQuery private constructor(
         require(hashCode == computeHashCode())
         return hashCode
     }
+
 }
