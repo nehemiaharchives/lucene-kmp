@@ -69,13 +69,13 @@ object MatchesUtils {
 
     /** Create a Matches for a single field  */
     @Throws(IOException::class)
-    fun forField(field: String, mis: IOSupplier<MatchesIterator>?): Matches? {
+    fun forField(field: String, mis: IOSupplier<MatchesIterator?>): Matches? {
         // The indirection here, using a Supplier object rather than a MatchesIterator
         // directly, is to allow for multiple calls to Matches.getMatches() to return
         // new iterators.  We still need to call MatchesIteratorSupplier.get() eagerly
         // to work out if we have a hit or not.
 
-        val mi: MatchesIterator? = mis!!.get()
+        val mi: MatchesIterator? = mis.get()
         if (mi == null) {
             return null
         }

@@ -103,11 +103,11 @@ abstract class PhraseWeight protected constructor(
         ) {
             val matcher: PhraseMatcher? = getPhraseMatcher(context, stats, true)
             if (matcher == null || matcher.approximation().advance(doc) != doc) {
-                null
+                return@forField null
             }
-            matcher!!.reset()
+            matcher.reset()
             if (!matcher.nextMatch()) {
-                null
+                return@forField null
             }
             object : MatchesIterator {
                 var started: Boolean = false

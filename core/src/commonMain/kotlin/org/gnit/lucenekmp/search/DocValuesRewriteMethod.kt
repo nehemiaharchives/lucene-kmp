@@ -55,7 +55,7 @@ class DocValuesRewriteMethod : MultiTermQuery.RewriteMethod() {
 
             return object : ConstantScoreWeight(this, boost) {
                 @Throws(IOException::class)
-                override fun matches(context: LeafReaderContext, doc: Int): Matches {
+                override fun matches(context: LeafReaderContext, doc: Int): Matches? {
                     val values: SortedSetDocValues =
                         DocValues.getSortedSet(context.reader(), multiTermQueryDocValuesWrapperQuery.field)
                     return MatchesUtils.forField(
@@ -67,8 +67,8 @@ class DocValuesRewriteMethod : MultiTermQuery.RewriteMethod() {
                             multiTermQueryDocValuesWrapperQuery,
                             multiTermQueryDocValuesWrapperQuery.field,
                             getTermsEnum(values)
-                        )!!
-                    }!!
+                        )
+                    }
                 }
 
                 /**

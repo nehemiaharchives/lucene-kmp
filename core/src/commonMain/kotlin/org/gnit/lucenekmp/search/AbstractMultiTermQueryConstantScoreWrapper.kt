@@ -173,7 +173,7 @@ abstract class AbstractMultiTermQueryConstantScoreWrapper<Q : MultiTermQuery>(
             ) {
                 DisjunctionMatchesIterator.fromTermsEnum(
                     context, doc, q, q.field, q.getTermsEnum(terms)
-                )!!
+                )
             }
         }
 

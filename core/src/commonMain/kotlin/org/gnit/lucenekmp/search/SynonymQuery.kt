@@ -211,10 +211,10 @@ class SynonymQuery private constructor(
         override fun matches(
             context: LeafReaderContext,
             doc: Int
-        ): Matches {
+        ): Matches? {
             val indexTerms: Terms? = context.reader().terms(field)
             if (indexTerms == null) {
-                return super.matches(context, doc)!!
+                return super.matches(context, doc)
             }
             val termList: MutableList<Term> = terms.map { t -> Term(field, t.term) }.toMutableList()
             return MatchesUtils.forField(
@@ -226,8 +226,8 @@ class SynonymQuery private constructor(
                     query,
                     field,
                     termList
-                )!!
-            }!!
+                )
+            }
         }
 
         @Throws(IOException::class)
