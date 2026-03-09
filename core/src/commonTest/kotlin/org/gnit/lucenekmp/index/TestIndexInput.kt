@@ -15,10 +15,10 @@ import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestIndexInput : LuceneTestCase() {
+open class TestIndexInput : LuceneTestCase() {
 
     companion object {
-        private val READ_TEST_BYTES = byteArrayOf(
+        internal val READ_TEST_BYTES = byteArrayOf(
             0x80.toByte(),
             0x01,
             0xFF.toByte(),
@@ -139,10 +139,10 @@ class TestIndexInput : LuceneTestCase() {
             'e'.code.toByte()
         )
 
-        private val COUNT = RANDOM_MULTIPLIER * 65536
-        private val INTS: IntArray
-        private val LONGS: LongArray
-        private val RANDOM_TEST_BYTES: ByteArray
+        internal val COUNT = RANDOM_MULTIPLIER * 65536
+        internal val INTS: IntArray
+        internal val LONGS: LongArray
+        internal val RANDOM_TEST_BYTES: ByteArray
 
         init {
             val random = LuceneTestCase.random()
@@ -167,11 +167,11 @@ class TestIndexInput : LuceneTestCase() {
         }
     }
 
-    private fun newDirectory(): Directory = ByteBuffersDirectory()
+    protected fun newDirectory(): Directory = ByteBuffersDirectory()
 
-    private fun newIOContext(random: Random): IOContext = IOContext.DEFAULT
+    protected fun newIOContext(random: Random): IOContext = IOContext.DEFAULT
 
-    private fun checkReads(`in`: DataInput, expectedEx: KClass<out Exception>) {
+    protected fun checkReads(`in`: DataInput, expectedEx: KClass<out Exception>) {
         assertEquals(128, `in`.readVInt())
         assertEquals(16383, `in`.readVInt())
         assertEquals(16384, `in`.readVInt())
@@ -196,7 +196,7 @@ class TestIndexInput : LuceneTestCase() {
         assertEquals("Lu\u0000ce\u0000ne", `in`.readString())
     }
 
-    private fun checkRandomReads(`in`: DataInput) {
+    protected fun checkRandomReads(`in`: DataInput) {
         for (i in 0 until COUNT) {
             assertEquals(INTS[i], `in`.readVInt())
             assertEquals(INTS[i], `in`.readInt())
@@ -205,7 +205,7 @@ class TestIndexInput : LuceneTestCase() {
         }
     }
 
-    private fun checkSeeksAndSkips(`in`: IndexInput, random: Random) {
+    protected fun checkSeeksAndSkips(`in`: IndexInput, random: Random) {
         val len = `in`.length()
         val iterations = if (LuceneTestCase.TEST_NIGHTLY) 1_000 else 10
         repeat(iterations) {
@@ -236,7 +236,7 @@ class TestIndexInput : LuceneTestCase() {
     }
 
     @Test
-    fun testRawIndexInputRead() {
+    open fun testRawIndexInputRead() {
         for (i in 0 until 1) { // TODO originally 10 but reduced to 1 for dev speed
             val random = random()
             newDirectory().use { dir ->
@@ -259,7 +259,7 @@ class TestIndexInput : LuceneTestCase() {
     }
 
     @Test
-    fun testByteArrayDataInput() {
+    open fun testByteArrayDataInput() {
         var input = ByteArrayDataInput(READ_TEST_BYTES)
         checkReads(input, RuntimeException::class)
         input = ByteArrayDataInput(RANDOM_TEST_BYTES)
@@ -267,7 +267,7 @@ class TestIndexInput : LuceneTestCase() {
     }
 
     @Test
-    fun testNoReadOnSkipBytes() {
+    open fun testNoReadOnSkipBytes() {
         val len = if (LuceneTestCase.TEST_NIGHTLY) Long.MAX_VALUE else 1_000_000L
         val maxSeekPos = len - 1
         val input = getIndexInput(len)
@@ -279,11 +279,11 @@ class TestIndexInput : LuceneTestCase() {
         }
     }
 
-    private fun getIndexInput(len: Long): IndexInput {
+    open fun getIndexInput(len: Long): IndexInput {
         return InterceptingIndexInput("foo", len)
     }
 
-    private class InterceptingIndexInput(resourceDescription: String, private val len: Long) :
+    protected class InterceptingIndexInput(resourceDescription: String, private val len: Long) :
         IndexInput(resourceDescription) {
         private var pos: Long = 0
 
@@ -311,4 +311,3 @@ class TestIndexInput : LuceneTestCase() {
         }
     }
 }
-
