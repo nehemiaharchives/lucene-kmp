@@ -993,23 +993,35 @@ class IndexingChain(
                     .addValue(docID, field.numericValue()!!.toLong())
             }
 
-            DocValuesType.BINARY -> (fp.docValuesWriter as BinaryDocValuesWriter).addValue(
-                docID,
-                field.binaryValue()!!
-            )
+            DocValuesType.BINARY -> {
+                requireNotNull(field.binaryValue()) { "field=\"" + fp.fieldInfo!!.name + "\": null value not allowed" }
+                (fp.docValuesWriter as BinaryDocValuesWriter).addValue(
+                    docID,
+                    field.binaryValue()!!
+                )
+            }
 
-            DocValuesType.SORTED -> (fp.docValuesWriter as SortedDocValuesWriter).addValue(
-                docID,
-                field.binaryValue()!!
-            )
+            DocValuesType.SORTED -> {
+                requireNotNull(field.binaryValue()) { "field=\"" + fp.fieldInfo!!.name + "\": null value not allowed" }
+                (fp.docValuesWriter as SortedDocValuesWriter).addValue(
+                    docID,
+                    field.binaryValue()!!
+                )
+            }
 
-            DocValuesType.SORTED_NUMERIC -> (fp.docValuesWriter as SortedNumericDocValuesWriter)
-                .addValue(docID, field.numericValue()!!.toLong())
+            DocValuesType.SORTED_NUMERIC -> {
+                requireNotNull(field.numericValue()) { "field=\"" + fp.fieldInfo!!.name + "\": null value not allowed" }
+                (fp.docValuesWriter as SortedNumericDocValuesWriter)
+                    .addValue(docID, field.numericValue()!!.toLong())
+            }
 
-            DocValuesType.SORTED_SET -> (fp.docValuesWriter as SortedSetDocValuesWriter).addValue(
-                docID,
-                field.binaryValue()!!
-            )
+            DocValuesType.SORTED_SET -> {
+                requireNotNull(field.binaryValue()) { "field=\"" + fp.fieldInfo!!.name + "\": null value not allowed" }
+                (fp.docValuesWriter as SortedSetDocValuesWriter).addValue(
+                    docID,
+                    field.binaryValue()!!
+                )
+            }
 
             DocValuesType.NONE -> throw AssertionError("unrecognized DocValues.Type: $dvType")
             else -> throw AssertionError("unrecognized DocValues.Type: $dvType")

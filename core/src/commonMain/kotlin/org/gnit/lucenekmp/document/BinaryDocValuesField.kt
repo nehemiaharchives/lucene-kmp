@@ -22,7 +22,7 @@ import org.gnit.lucenekmp.util.BytesRef
  *
  * @see BinaryDocValues
  */
-class BinaryDocValuesField(name: String, value: BytesRef) :
+class BinaryDocValuesField(name: String, value: BytesRef?) :
     Field(name, TYPE) {
     /**
      * Create a new binary DocValues field.
@@ -32,10 +32,12 @@ class BinaryDocValuesField(name: String, value: BytesRef) :
      * @throws IllegalArgumentException if the field name is null
      */
     init {
-        fieldsData = value
+        fieldsData = value ?: NULL_VALUE
     }
 
     companion object {
+        private val NULL_VALUE = Any()
+
         /** Type for straight bytes DocValues.  */
         val TYPE: FieldType = FieldType()
 
