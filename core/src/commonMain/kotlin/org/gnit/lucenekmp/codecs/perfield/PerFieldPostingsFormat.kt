@@ -13,6 +13,7 @@ import org.gnit.lucenekmp.index.MergeState
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.index.Terms
+import org.gnit.lucenekmp.jdkport.TreeMap
 import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.MergedIterator
@@ -197,7 +198,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
 
     private class FieldsReader : FieldsProducer {
         private val fields: MutableMap<String, FieldsProducer> =
-            HashMap()
+            TreeMap()
         private val formats: MutableMap<String, FieldsProducer> =
             HashMap()
         private val segment: String
@@ -259,7 +260,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
         }
 
         override fun iterator(): MutableIterator<String> {
-            return asUnmodifiableIterator(fields.keys.sorted().iterator())
+            return asUnmodifiableIterator(fields.keys.iterator())
         }
 
         @Throws(IOException::class)

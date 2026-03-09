@@ -105,16 +105,7 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
      * @throws NullPointerException if the specified map is null.
      */
     constructor(m: TreeMap<K, out V>) : this(m.comparator) {
-        // Optimized buildFromSorted if comparators match
-        // Note: The original Java code checks `SortedMap`, which doesn't have a direct
-        // equivalent interface in Kotlin common stdlib covering sorting behavior AND comparator access.
-        // We check specifically for TreeMap here for the optimization.
-        if (this.comparator == m.comparator) {
-            buildFromSorted(m.size, m.entries.iterator())
-        } else {
-            // Fallback if comparators don't match or it's not a compatible TreeMap
-            putAll(m)
-        }
+        putAll(m)
     }
 
     // --- Query Operations ---
@@ -266,22 +257,6 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
      * does not permit null keys (either natural ordering or comparator restriction)
      */
     override fun putAll(from: Map<out K, V>) {
-        val mapSize = from.size
-        // Optimization check similar to Java's SortedMap check
-        if (isEmpty() && mapSize != 0 && from is TreeMap<*, *> && this.comparator == from.comparator) {
-            modCount++
-            try {
-                // Need to cast carefully here
-                val entriesIterator = (from.entries as Set<Map.Entry<K, V>>).iterator()
-                buildFromSorted(mapSize, entriesIterator)
-            } catch (e: Exception) {
-                // Should not happen with type checks, but catch potential issues
-                // Fallback to default implementation if buildFromSorted fails unexpectedly
-                super.putAll(from)
-            }
-            return
-        }
-        // Default implementation if optimization doesn't apply
         super.putAll(from)
     }
 
@@ -1233,10 +1208,17 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
             val m: TreeMap<K, V>
 
             override fun clear() {
-                m.clear()
+                val iterator = entrySet.iterator()
+                while (iterator.hasNext()) {
+                    iterator.next()
+                    iterator.remove()
+                }
             }
 
             override fun putAll(toPut: Map<out K, V>) {
+                for (key in toPut.keys) {
+                    require(inRange(key)) { "key out of range" }
+                }
                 m.putAll(toPut)
             }
 
@@ -1528,7 +1510,7 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
             }
 
             // View classes
-            abstract inner class EntrySetView : AbstractSet<MutableMap.MutableEntry<K, V>>() {
+            abstract inner class EntrySetView : AbstractMutableSet<MutableMap.MutableEntry<K, V>>() {
                 @Transient
                 var sizeTransient = -1
 
@@ -1564,7 +1546,8 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
                             valEquals(node.value, o.value)
                 }
 
-                fun remove(o: MutableMap.MutableEntry<K, V>?): Boolean {
+                override fun remove(element: MutableMap.MutableEntry<K, V>): Boolean {
+                    val o: MutableMap.MutableEntry<K, V>? = element
                     if (o !is MutableMap.MutableEntry<K, V>) return false
                     val key: K = o.key!!
                     if (!inRange(key)) return false
@@ -1578,6 +1561,10 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
                         return true
                     }
                     return false
+                }
+
+                override fun add(element: MutableMap.MutableEntry<K, V>): Boolean {
+                    throw UnsupportedOperationException("add is not supported by TreeMap or its submaps")
                 }
             }
 
@@ -1866,7 +1853,7 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
                         entrySetView = it
                     }
 
-                    return es.toMutableSet()
+                    return es
                 }
 
             override fun subLowest(): Entry<K, V>? {
@@ -2030,7 +2017,7 @@ class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
                     val es = entrySetView
                     return (es ?: DescendingEntrySetView().also {
                         entrySetView = it
-                    }) as MutableSet<MutableMap.MutableEntry<K, V>>
+                    })
                 }
 
             override fun subLowest(): Entry<K, V>? {
