@@ -90,7 +90,7 @@ abstract class FilterCodecReader(
         /** Returns a filtered codec reader with the given live docs and numDocs.  */
         fun wrapLiveDocs(
             reader: CodecReader,
-            liveDocs: Bits,
+            liveDocs: Bits?,
             numDocs: Int
         ): FilterCodecReader {
             return object : FilterCodecReader(reader) {
@@ -101,7 +101,7 @@ abstract class FilterCodecReader(
                     get() = null // we are altering live docs
 
                 override val liveDocs
-                    get(): Bits {
+                    get(): Bits? {
                         return liveDocs
                     }
 

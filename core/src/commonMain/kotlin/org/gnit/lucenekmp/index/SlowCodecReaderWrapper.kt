@@ -101,18 +101,6 @@ object SlowCodecReaderWrapper {
 
                 override val metaData: LeafMetaData
                     get() = reader.metaData
-
-                override fun terms(field: String?): Terms? {
-                    TODO("Not yet implemented")
-                }
-
-                override fun searchNearestVectors(field: String, target: FloatArray, knnCollector: KnnCollector, acceptDocs: Bits?){
-                    TODO("Not yet implemented")
-                }
-
-                override fun searchNearestVectors(field: String, target: ByteArray, knnCollector: KnnCollector, acceptDocs: Bits?){
-                    TODO("Not yet implemented")
-                }
             }
         }
     }
