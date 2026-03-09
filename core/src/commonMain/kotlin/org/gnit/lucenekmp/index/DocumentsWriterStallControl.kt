@@ -1,7 +1,11 @@
 package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.currentThreadId
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.Volatile
 
@@ -22,54 +26,55 @@ class DocumentsWriterStallControl {
     private var stalled = false
 
     // for tests
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@get:Synchronized*/
     var numWaiting: Int = 0 // only with assert
         private set
     private var wasStalled = false // only with assert
-    /*private val waiting: MutableMap<java.lang.Thread, Boolean> =
-        java.util.IdentityHashMap<java.lang.Thread, Boolean>()*/ // only with assert
+    private val waiting: MutableSet<Long> = mutableSetOf() // only with assert
+    private val lock = ReentrantLock()
+    private val condition = lock.newCondition()
 
     /**
      * Update the stalled flag status. This method will set the stalled flag to `true` iff
      * the number of flushing [DocumentsWriterPerThread] is greater than the number of active
      * [DocumentsWriterPerThread]. Otherwise it will reset the [ ] to healthy and release all threads waiting on [ ][.waitIfStalled]
-
-    // TODO Synchronized is not supported in KMP, need to think what to do here  */
-    /*@Synchronized*/
+     */
     fun updateStalled(stalled: Boolean) {
-        if (this.stalled != stalled) {
-            this.stalled = stalled
-            if (stalled) {
-                wasStalled = true
+        lock.lock()
+        try {
+            if (this.stalled != stalled) {
+                this.stalled = stalled
+                if (stalled) {
+                    wasStalled = true
+                }
+                runBlocking { condition.signalAll() }
             }
-
-            // TODO need to implement something here
-            /*(this as java.lang.Object).notifyAll()*/
+        } finally {
+            lock.unlock()
         }
     }
 
     /** Blocks if documents writing is currently in a stalled state.  */
     fun waitIfStalled() {
         if (stalled) {
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
+            lock.lock()
+            try {
                 if (stalled) { // react on the first wakeup call!
                     // don't loop here, higher level logic will re-stall!
+                    val threadId = currentThreadId()
                     try {
-                        incWaiters()
+                        incWaiters(threadId)
                         // Defensive, in case we have a concurrency bug that fails to .notify/All our thread:
                         // just wait for up to 1 second here, and let caller re-stall if it's still needed:
-
-                        // TODO need to implement something here
-                        /*(this as java.lang.Object).wait(1000)*/
-
-                        decrWaiters()
+                        runBlocking { condition.await(1000, TimeUnit.MILLISECONDS) }
                     } catch (e: CancellationException) {
                         throw ThreadInterruptedException(e)
+                    } finally {
+                        decrWaiters(threadId)
                     }
                 }
-            //}
+            } finally {
+                lock.unlock()
+            }
         }
     }
 
@@ -77,40 +82,45 @@ class DocumentsWriterStallControl {
         return stalled
     }
 
-    private fun incWaiters() {
+    private fun incWaiters(threadId: Long) {
         numWaiting++
-        // TODO Thread is not supported in KMP, need to think what to do here
-        //assert(waiting.put(java.lang.Thread.currentThread(), java.lang.Boolean.TRUE) == null)
+        assert(waiting.add(threadId))
         assert(numWaiting > 0)
     }
 
-    private fun decrWaiters() {
+    private fun decrWaiters(threadId: Long) {
         numWaiting--
-
-        // TODO Thread is not supported in KMP, need to think what to do here
-        //checkNotNull(waiting.remove(java.lang.Thread.currentThread()))
+        assert(waiting.remove(threadId))
         assert(numWaiting >= 0)
     }
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     fun hasBlocked(): Boolean { // for tests
-        return numWaiting > 0
+        lock.lock()
+        try {
+            return numWaiting > 0
+        } finally {
+            lock.unlock()
+        }
     }
 
     val isHealthy: Boolean
-        get() =// for tests
-            !stalled // volatile read!
+        get() = !stalled // volatile read!
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
-    /*fun isThreadQueued(t: java.lang.Thread): Boolean { // for tests
-        return waiting.containsKey(t)
-    }*/
+    fun isThreadQueued(threadId: Long): Boolean { // for tests
+        lock.lock()
+        try {
+            return waiting.contains(threadId)
+        } finally {
+            lock.unlock()
+        }
+    }
 
-    // TODO Synchronized is not supported in KMP, need to think what to do here
-    /*@Synchronized*/
     fun wasStalled(): Boolean { // for tests
-        return wasStalled
+        lock.lock()
+        try {
+            return wasStalled
+        } finally {
+            lock.unlock()
+        }
     }
 }

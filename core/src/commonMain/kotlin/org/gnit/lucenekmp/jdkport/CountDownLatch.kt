@@ -8,6 +8,7 @@ package org.gnit.lucenekmp.jdkport
  */
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -47,6 +48,14 @@ class CountDownLatch(count: Int) {
     fun await(){
         runBlocking {
             completed.join()
+        }
+    }
+
+    fun await(timeout: Long, unit: TimeUnit): Boolean {
+        return runBlocking {
+            withTimeoutOrNull(unit.toMillis(timeout)) {
+                completed.join()
+            } != null
         }
     }
 }
