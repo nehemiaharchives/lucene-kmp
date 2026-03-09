@@ -57,114 +57,124 @@ class TestBoolean2 : LuceneTestCase() {
                 println("TEST: NUM_FILLER_DOCS=$NUM_FILLER_DOCS PRE_FILLER_DOCS=$PRE_FILLER_DOCS")
             }
 
-            directory = if (NUM_FILLER_DOCS * PRE_FILLER_DOCS > 100000) {
-                newFSDirectory(createTempDir())
-            } else {
-                newDirectory()
-            }
-
-            var iwc: IndexWriterConfig = newIndexWriterConfig(random(), MockAnalyzer(random()))
-            // randomized codecs are sometimes too costly for this test:
-            iwc.setCodec(TestUtil.getDefaultCodec())
-            iwc.setMergePolicy(newLogMergePolicy())
-            val writer = RandomIndexWriter(random(), directory!!, iwc)
-            // we'll make a ton of docs, disable store/norms/vectors
+            var iwc: IndexWriterConfig
             val ft = FieldType(TextField.TYPE_NOT_STORED)
             ft.setOmitNorms(true)
-
             var doc = Document()
-            repeat(PRE_FILLER_DOCS) {
-                writer.addDocument(doc)
-            }
-            for (i in docFields.indices) {
-                doc.add(Field(field, docFields[i], ft))
-                writer.addDocument(doc)
 
-                doc = Document()
-                repeat(NUM_FILLER_DOCS) {
+            run {
+                directory = if (NUM_FILLER_DOCS * PRE_FILLER_DOCS > 100000) {
+                    newFSDirectory(createTempDir())
+                } else {
+                    newDirectory()
+                }
+
+                iwc = newIndexWriterConfig(random(), MockAnalyzer(random()))
+                // randomized codecs are sometimes too costly for this test:
+                iwc.setCodec(TestUtil.getDefaultCodec())
+                iwc.setMergePolicy(newLogMergePolicy())
+                val writer = RandomIndexWriter(random(), directory!!, iwc)
+                // we'll make a ton of docs, disable store/norms/vectors
+
+                repeat(PRE_FILLER_DOCS) {
                     writer.addDocument(doc)
                 }
+                for (i in docFields.indices) {
+                    doc.add(Field(field, docFields[i], ft))
+                    writer.addDocument(doc)
+
+                    doc = Document()
+                    repeat(NUM_FILLER_DOCS) {
+                        writer.addDocument(doc)
+                    }
+                }
+                writer.close()
+                littleReader = DirectoryReader.open(directory!!)
+                searcher = newSearcher(littleReader!!)
+                // this is intentionally using the baseline sim, because it compares against bigSearcher
+                // (which uses a random one)
+                searcher!!.similarity = ClassicSimilarity()
             }
-            writer.close()
-            littleReader = DirectoryReader.open(directory!!)
-            searcher = newSearcher(littleReader!!)
-            // this is intentionally using the baseline sim, because it compares against bigSearcher
-            // (which uses a random one)
-            searcher!!.similarity = ClassicSimilarity()
 
             // make a copy of our index using a single segment
-            singleSegmentDirectory = if (NUM_FILLER_DOCS * PRE_FILLER_DOCS > 100000) {
-                newFSDirectory(createTempDir())
-            } else {
-                newDirectory()
-            }
-
-            // TODO: this test does not need to be doing this crazy stuff. please improve it!
-            for (fileName in directory!!.listAll()) {
-                if (fileName.startsWith("extra")) {
-                    continue
+            run {
+                singleSegmentDirectory = if (NUM_FILLER_DOCS * PRE_FILLER_DOCS > 100000) {
+                    newFSDirectory(createTempDir())
+                } else {
+                    newDirectory()
                 }
-                singleSegmentDirectory!!.copyFrom(directory!!, fileName, fileName, IOContext.DEFAULT)
-                singleSegmentDirectory!!.sync(mutableSetOf(fileName))
-            }
 
-            iwc = newIndexWriterConfig(random(), MockAnalyzer(random()))
-            // we need docID order to be preserved:
-            // randomized codecs are sometimes too costly for this test:
-            iwc.setCodec(TestUtil.getDefaultCodec())
-            iwc.setMergePolicy(newLogMergePolicy())
-            IndexWriter(singleSegmentDirectory!!, iwc).use { w ->
-                w.forceMerge(1, true)
+                // TODO: this test does not need to be doing this crazy stuff. please improve it!
+                for (fileName in directory!!.listAll()) {
+                    if (fileName.startsWith("extra")) {
+                        continue
+                    }
+                    singleSegmentDirectory!!.copyFrom(directory!!, fileName, fileName, IOContext.DEFAULT)
+                    singleSegmentDirectory!!.sync(mutableSetOf(fileName))
+                }
+
+                iwc = newIndexWriterConfig(random(), MockAnalyzer(random()))
+                // we need docID order to be preserved:
+                // randomized codecs are sometimes too costly for this test:
+                iwc.setCodec(TestUtil.getDefaultCodec())
+                iwc.setMergePolicy(newLogMergePolicy())
+                IndexWriter(singleSegmentDirectory!!, iwc).use { w ->
+                    w.forceMerge(1, true)
+                }
+                singleSegmentReader = DirectoryReader.open(singleSegmentDirectory!!)
+                singleSegmentSearcher = newSearcher(singleSegmentReader!!)
+                singleSegmentSearcher!!.similarity = searcher!!.similarity
             }
-            singleSegmentReader = DirectoryReader.open(singleSegmentDirectory!!)
-            singleSegmentSearcher = newSearcher(singleSegmentReader!!)
-            singleSegmentSearcher!!.similarity = searcher!!.similarity
 
             // Make big index
             dir2 = copyOf(directory!!)
 
             // First multiply small test index:
-            mulFactor = 1
-            var docCount: Int
-            if (VERBOSE) {
-                println("\nTEST: now copy index...")
-            }
-            do {
+            run {
+                mulFactor = 1
+                var docCount: Int
                 if (VERBOSE) {
-                    println("\nTEST: cycle...")
+                    println("\nTEST: now copy index...")
                 }
-                val copy = copyOf(dir2!!)
+                do {
+                    if (VERBOSE) {
+                        println("\nTEST: cycle...")
+                    }
+                    val copy = copyOf(dir2!!)
 
+                    iwc = newIndexWriterConfig(random(), MockAnalyzer(random()))
+                    // randomized codecs are sometimes too costly for this test:
+                    iwc.setCodec(TestUtil.getDefaultCodec())
+                    val w = RandomIndexWriter(random(), dir2!!, iwc)
+                    w.addIndexes(copy)
+                    copy.close()
+                    docCount = w.docStats.maxDoc
+                    w.close()
+                    mulFactor *= 2
+                } while (docCount < 3000 * NUM_FILLER_DOCS)
+            }
+
+            run {
                 iwc = newIndexWriterConfig(random(), MockAnalyzer(random()))
+                iwc.setMaxBufferedDocs(TestUtil.nextInt(random(), 50, 1000))
                 // randomized codecs are sometimes too costly for this test:
                 iwc.setCodec(TestUtil.getDefaultCodec())
                 val w = RandomIndexWriter(random(), dir2!!, iwc)
-                w.addIndexes(copy)
-                copy.close()
-                docCount = w.docStats.maxDoc
+
+                doc = Document()
+                doc.add(Field("field2", "xxx", ft))
+                repeat(NUM_EXTRA_DOCS / 2) {
+                    w.addDocument(doc)
+                }
+                doc = Document()
+                doc.add(Field("field2", "big bad bug", ft))
+                repeat(NUM_EXTRA_DOCS / 2) {
+                    w.addDocument(doc)
+                }
+                reader = w.getReader(true, false)
+                bigSearcher = newSearcher(reader!!)
                 w.close()
-                mulFactor *= 2
-            } while (docCount < 3000 * NUM_FILLER_DOCS)
-
-            iwc = newIndexWriterConfig(random(), MockAnalyzer(random()))
-            iwc.setMaxBufferedDocs(TestUtil.nextInt(random(), 50, 1000))
-            // randomized codecs are sometimes too costly for this test:
-            iwc.setCodec(TestUtil.getDefaultCodec())
-            val w = RandomIndexWriter(random(), dir2!!, iwc)
-
-            doc = Document()
-            doc.add(Field("field2", "xxx", ft))
-            repeat(NUM_EXTRA_DOCS / 2) {
-                w.addDocument(doc)
             }
-            doc = Document()
-            doc.add(Field("field2", "big bad bug", ft))
-            repeat(NUM_EXTRA_DOCS / 2) {
-                w.addDocument(doc)
-            }
-            reader = w.getReader(true, false)
-            bigSearcher = newSearcher(reader!!)
-            w.close()
         } catch (t: Throwable) {
             afterClass()
             throw t

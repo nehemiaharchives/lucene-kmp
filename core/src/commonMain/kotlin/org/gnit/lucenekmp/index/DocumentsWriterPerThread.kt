@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Runnable
 import okio.IOException
 import org.gnit.lucenekmp.index.DocumentsWriter.FlushNotifications
@@ -47,7 +46,6 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     @property:OptIn(ExperimentalAtomicApi::class) private val pendingNumDocs: AtomicLong,
     enableTestPoints: Boolean
 ) : Accountable, Lock {  // TODO Lock is not ported from JDK, need to think what to do here
-    private val logger = KotlinLogging.logger {}
     private var abortingException: Throwable? = null
 
     private fun onAbortingException(throwable: Throwable) {
@@ -487,29 +485,12 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
             }
             return fs
         } catch (t: Throwable) {
-            if (!isLikelyFakeIOException(t)) {
-                logger.error(t) {
-                    "DWPT.flush exception segment=${flushState.segmentInfo.name} phase=$phase numDocsInRAM=$numDocsInRAM softDeletesField=${indexWriterConfig.softDeletesField} liveDocsNull=${flushState.liveDocs == null}"
-                }
-            }
             onAbortingException(t)
             throw t
         } finally {
             maybeAbort("flush", flushNotifications)
             hasFlushed.set(true)
         }
-    }
-
-    private fun isLikelyFakeIOException(t: Throwable): Boolean {
-        var cur: Throwable? = t
-        while (cur != null) {
-            val message = cur.message
-            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
-                return true
-            }
-            cur = cur.cause
-        }
-        return false
     }
 
     @Throws(IOException::class)

@@ -37,7 +37,6 @@ import org.gnit.lucenekmp.util.InfoStream
 import org.gnit.lucenekmp.util.IntBlockPool
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.Version
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.time.Clock
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -52,7 +51,6 @@ class IndexingChain(
     indexWriterConfig: LiveIndexWriterConfig,
     abortingExceptionConsumer: (Throwable) -> Unit,
 ) : Accountable {
-    private val logger = KotlinLogging.logger {}
     val bytesUsed: Counter = Counter.newCounter()
     val fieldInfosBuilder: FieldInfos.Builder
 
@@ -383,23 +381,8 @@ class IndexingChain(
 
             return sortMap
         } catch (t: Throwable) {
-            if (!isLikelyFakeIOException(t)) {
-                logger.error(t) { "IndexingChain.flush exception segment=${state.segmentInfo.name} phase=$phase" }
-            }
             throw t
         }
-    }
-
-    private fun isLikelyFakeIOException(t: Throwable): Boolean {
-        var cur: Throwable? = t
-        while (cur != null) {
-            val message = cur.message
-            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
-                return true
-            }
-            cur = cur.cause
-        }
-        return false
     }
 
     /** Writes all buffered points.  */

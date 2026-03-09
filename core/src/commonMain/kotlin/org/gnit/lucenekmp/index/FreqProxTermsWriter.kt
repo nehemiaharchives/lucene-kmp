@@ -21,7 +21,6 @@ import org.gnit.lucenekmp.util.LongsRef
 import org.gnit.lucenekmp.util.TimSorter
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 import org.gnit.lucenekmp.util.packed.PackedInts
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.max
 
 
@@ -31,7 +30,6 @@ class FreqProxTermsWriter(
     bytesUsed: Counter,
     termVectors: TermsHash
 ) : TermsHash(intBlockAllocator, byteBlockAllocator, bytesUsed, termVectors) {
-    private val logger = KotlinLogging.logger {}
     @Throws(IOException::class)
     private fun applyDeletes(state: SegmentWriteState, fields: Fields) {
         // Process any pending Term deletes for this newly
@@ -120,23 +118,8 @@ class FreqProxTermsWriter(
                 consumer.write(fields, norms)
             }
         } catch (t: Throwable) {
-            if (!isLikelyFakeIOException(t)) {
-                logger.error(t) { "FreqProxTermsWriter.flush exception segment=${state.segmentInfo.name} phase=$phase" }
-            }
             throw t
         }
-    }
-
-    private fun isLikelyFakeIOException(t: Throwable): Boolean {
-        var cur: Throwable? = t
-        while (cur != null) {
-            val message = cur.message
-            if (message != null && (message.contains("a random IOException") || message.contains("background merge hit exception"))) {
-                return true
-            }
-            cur = cur.cause
-        }
-        return false
     }
 
     override fun addField(
