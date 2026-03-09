@@ -11,7 +11,6 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
     Weight(
         query
     ) {
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     /** The Similarity implementation.  */
     val similarity: Similarity = searcher.similarity
 

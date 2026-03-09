@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.util.Bits
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.assert
 
 /**
  * BulkScorer implementation of [ConjunctionScorer]. For simplicity, it focuses on scorers
@@ -55,7 +56,18 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
 
     @Throws(IOException::class)
     override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
-        require(lead1.docID() >= lead2.docID())
+        if (lead1.docID() == DocIdSetIterator.NO_MORE_DOCS || lead2.docID() == DocIdSetIterator.NO_MORE_DOCS) {
+            return DocIdSetIterator.NO_MORE_DOCS
+        }
+        for (it in others) {
+            if (it.docID() == DocIdSetIterator.NO_MORE_DOCS) {
+                return DocIdSetIterator.NO_MORE_DOCS
+            }
+        }
+
+        assert(lead1.docID() >= lead2.docID()) {
+            "lead1=${lead1.docID()} lead2=${lead2.docID()} min=$min max=$max"
+        }
 
         if (lead1.docID() < min) {
             lead1.advance(min)
@@ -93,7 +105,9 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
                             break
                         }
                     }
-                    require(it.docID() == doc)
+                    assert(it.docID() == doc) {
+                        "initial others mismatch: doc=$doc other=${it.docID()} class=${it::class}"
+                    }
                 }
 
                 if (match) {
@@ -107,7 +121,9 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
 
         var doc = lead1.docID()
         advanceHead@ while (doc < max) {
-            require(lead2.docID() < doc)
+            assert(lead2.docID() < doc) {
+                "lead2 invariant violated: lead2=${lead2.docID()} doc=$doc max=$max"
+            }
 
             if (acceptDocs != null && !acceptDocs.get(doc)) {
                 doc = lead1.nextDoc()
@@ -128,7 +144,9 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
                     continue
                 }
             }
-            require(lead2.docID() == doc)
+            assert(lead2.docID() == doc) {
+                "lead2 advance mismatch: lead2=${lead2.docID()} doc=$doc next2=$next2"
+            }
 
             for (it in others) {
                 if (it.docID() < doc) {
@@ -138,7 +156,9 @@ internal class ConjunctionBulkScorer(requiredScoring: MutableList<Scorer>, requi
                         continue@advanceHead
                     }
                 }
-                require(it.docID() == doc)
+                assert(it.docID() == doc) {
+                    "others mismatch: doc=$doc other=${it.docID()} class=${it::class}"
+                }
             }
 
             collector.collect(doc)

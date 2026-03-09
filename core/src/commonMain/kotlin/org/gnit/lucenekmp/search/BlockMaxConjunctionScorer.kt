@@ -13,6 +13,8 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
     val approximations: Array<DocIdSetIterator?>
     val twoPhases: Array<TwoPhaseIterator>
     var minScore: Float = 0f
+    private val exhausted: Boolean
+    private val exhaustedIterator: DocIdSetIterator = DocIdSetIterator.empty()
 
     /** Create a new [BlockMaxConjunctionScorer] from scoring clauses.  */
     init {
@@ -33,7 +35,13 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
                 approximations[i] = scorer.iterator()
             }
             approximations[i] = ScorerUtil.likelyImpactsEnum(approximations[i]!!)
-            scorer.advanceShallow(0)
+        }
+        this.exhausted =
+            approximations.any { it!!.docID() == DocIdSetIterator.NO_MORE_DOCS }
+        if (!exhausted) {
+            for (scorer in scorers) {
+                scorer.advanceShallow(0)
+            }
         }
         this.twoPhases = twoPhaseList.toTypedArray<TwoPhaseIterator>()
         Arrays.sort<TwoPhaseIterator>(
@@ -44,6 +52,9 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
     }
 
     override fun twoPhaseIterator(): TwoPhaseIterator? {
+        if (exhausted) {
+            return null
+        }
         if (twoPhases.isEmpty()) {
             return null
         }
@@ -68,6 +79,9 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
     }
 
     override fun iterator(): DocIdSetIterator {
+        if (exhausted) {
+            return exhaustedIterator
+        }
         return if (twoPhases.isEmpty())
             approximation()
         else
@@ -185,6 +199,9 @@ internal class BlockMaxConjunctionScorer(scorersList: MutableCollection<Scorer>)
     }
 
     override fun docID(): Int {
+        if (exhausted) {
+            return exhaustedIterator.docID()
+        }
         return scorers[0].docID()
     }
 

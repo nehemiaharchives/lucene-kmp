@@ -297,6 +297,17 @@ internal class ConjunctionDISI private constructor(iterators: MutableList<out Do
         ): DocIdSetIterator {
             // check that all sub-iterators are on the same doc ID
 
+            for (allIterator in allIterators) {
+                if (allIterator.docID() == NO_MORE_DOCS) {
+                    return DocIdSetIterator.empty()
+                }
+            }
+            for (it in twoPhaseIterators) {
+                if (it.approximation().docID() == NO_MORE_DOCS) {
+                    return DocIdSetIterator.empty()
+                }
+            }
+
             val curDoc =
                 if (allIterators.isNotEmpty())
                     allIterators[0].docID()

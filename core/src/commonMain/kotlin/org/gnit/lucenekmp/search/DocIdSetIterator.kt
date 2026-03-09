@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.search
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.util.FixedBitSet
 import kotlin.math.min
 
@@ -127,8 +128,8 @@ abstract class DocIdSetIterator {
                 var exhausted: Boolean = false
 
                 override fun advance(target: Int): Int {
-                    require(!exhausted)
-                    require(target >= 0)
+                    assert(!exhausted)
+                    assert(target >= 0)
                     exhausted = true
                     return NO_MORE_DOCS
                 }
@@ -138,7 +139,7 @@ abstract class DocIdSetIterator {
                 }
 
                 override fun nextDoc(): Int {
-                    require(!exhausted)
+                    assert(!exhausted)
                     exhausted = true
                     return NO_MORE_DOCS
                 }

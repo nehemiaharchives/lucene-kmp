@@ -63,6 +63,14 @@ internal class BlockMaxConjunctionBulkScorer(maxDoc: Int, scorers: MutableList<S
 
     @Throws(IOException::class)
     override fun score(collector: LeafCollector, acceptDocs: Bits?, min: Int, max: Int): Int {
+        if (lead1.docID() == DocIdSetIterator.NO_MORE_DOCS || lead2.docID() == DocIdSetIterator.NO_MORE_DOCS) {
+            return DocIdSetIterator.NO_MORE_DOCS
+        }
+        for (iterator in iterators) {
+            if (iterator.docID() == DocIdSetIterator.NO_MORE_DOCS) {
+                return DocIdSetIterator.NO_MORE_DOCS
+            }
+        }
         collector.scorer = scorable
 
         var windowMin: Int = max(lead1.docID(), min)
@@ -135,6 +143,9 @@ internal class BlockMaxConjunctionBulkScorer(maxDoc: Int, scorers: MutableList<S
                     continue@advanceHead
                 }
             }
+            if (lead2.docID() == DocIdSetIterator.NO_MORE_DOCS) {
+                return
+            }
             require(lead2.docID() == doc)
             if (hasMinCompetitiveScore) {
                 currentScore += scorer2.score()
@@ -158,6 +169,9 @@ internal class BlockMaxConjunctionBulkScorer(maxDoc: Int, scorers: MutableList<S
                         doc = lead1.advance(next)
                         continue@advanceHead
                     }
+                }
+                if (iterators[i].docID() == DocIdSetIterator.NO_MORE_DOCS) {
+                    return
                 }
                 require(iterators[i].docID() == doc)
                 if (hasMinCompetitiveScore) {
