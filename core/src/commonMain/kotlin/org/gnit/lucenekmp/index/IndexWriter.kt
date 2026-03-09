@@ -2627,52 +2627,51 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // TODO Synchronized is not supported in KMP, need to think what to do here
             //synchronized(fullFlushLock) {
 
-            val finalizer: AutoCloseable = runBlocking { docWriter.lockAndAbortAll() }
+            runBlocking { docWriter.lockAndAbortAll() }.use {
+                processEvents(false)
 
-
-            processEvents(false)
-
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            try {
-
-                // Abort any running merges
+                // TODO Synchronized is not supported in KMP, need to think what to do here
+                //synchronized(this) {
                 try {
-                    abortMerges()
-                    assert(!merges.areEnabled()) { "merges should be disabled - who enabled them" }
-                    assert(mergingSegments.isEmpty()) { "found merging segments but merges are disabled: $mergingSegments" }
-                } finally {
-                    // abortMerges disables all merges and we need to re-enable them here to make sure
-                    // IW can function properly. An exception in abortMerges() might be fatal for IW but
-                    // just to be sure
-                    // lets re-enable merges anyway.
-                    merges.enable()
-                }
-                adjustPendingNumDocs(-segmentInfos.totalMaxDoc().toLong())
-                // Remove all segments
-                segmentInfos.clear()
-                // Ask deleter to locate unreferenced files & remove them:
-                deleter.checkpoint(segmentInfos, false)
 
-                /* don't refresh the deleter here since there might
-                 * be concurrent indexing requests coming in opening
-                 * files on the directory after we called DW#abort()
-                 * if we do so these indexing requests might hit FNF exceptions.
-                 * We will remove the files incrementally as we go...
-                 */
-                // Don't bother saving any changes in our segmentInfos
-                runBlocking { readerPool.dropAll() }
-                // Mark that the index has changed
-                changeCount.incrementAndFetch()
-                segmentInfos.changed()
-                globalFieldNumberMap.clear()
-                success = true
-                val seqNo: Long = docWriter.nextSequenceNumber
-                return seqNo
-            } finally {
-                if (!success) {
-                    if (infoStream.isEnabled("IW")) {
-                        infoStream.message("IW", "hit exception during deleteAll")
+                    // Abort any running merges
+                    try {
+                        abortMerges()
+                        assert(!merges.areEnabled()) { "merges should be disabled - who enabled them" }
+                        assert(mergingSegments.isEmpty()) { "found merging segments but merges are disabled: $mergingSegments" }
+                    } finally {
+                        // abortMerges disables all merges and we need to re-enable them here to make sure
+                        // IW can function properly. An exception in abortMerges() might be fatal for IW but
+                        // just to be sure
+                        // lets re-enable merges anyway.
+                        merges.enable()
+                    }
+                    adjustPendingNumDocs(-segmentInfos.totalMaxDoc().toLong())
+                    // Remove all segments
+                    segmentInfos.clear()
+                    // Ask deleter to locate unreferenced files & remove them:
+                    deleter.checkpoint(segmentInfos, false)
+
+                    /* don't refresh the deleter here since there might
+                     * be concurrent indexing requests coming in opening
+                     * files on the directory after we called DW#abort()
+                     * if we do so these indexing requests might hit FNF exceptions.
+                     * We will remove the files incrementally as we go...
+                     */
+                    // Don't bother saving any changes in our segmentInfos
+                    runBlocking { readerPool.dropAll() }
+                    // Mark that the index has changed
+                    changeCount.incrementAndFetch()
+                    segmentInfos.changed()
+                    globalFieldNumberMap.clear()
+                    success = true
+                    val seqNo: Long = docWriter.nextSequenceNumber
+                    return seqNo
+                } finally {
+                    if (!success) {
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "hit exception during deleteAll")
+                        }
                     }
                 }
             }
