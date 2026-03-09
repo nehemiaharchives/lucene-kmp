@@ -145,12 +145,12 @@ class DocumentsWriterDeleteQueue private constructor(
         return seqNo
     }
 
-    fun add(newNode: Node<*>): Long {
+    fun add(newNode: Node<*>?): Long {
         syncLock.lock()
         try {
             ensureOpen()
             tail.next = newNode
-            this.tail = newNode
+            this.tail = newNode!!
             return this.nextSequenceNumber
         } finally {
             syncLock.unlock()
