@@ -89,6 +89,11 @@ abstract class FilterLeafReader protected constructor(inReader: LeafReader) : Le
             return `in`.size()
         }
 
+        override val sumTotalTermFreq: Long
+            get() {
+                return `in`.sumTotalTermFreq
+            }
+
         override val sumDocFreq: Long
             get() {
                 return `in`.sumDocFreq
