@@ -196,13 +196,10 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
     }
 
     private class FieldsReader : FieldsProducer {
-        // Use LinkedHashMap to preserve insertion order (which follows FieldInfos order) so
-        // iteration returns a stable, deterministic ordering. This avoids unordered
-        // iteration from HashMap that caused CheckIndex to detect "fields out of order".
         private val fields: MutableMap<String, FieldsProducer> =
-            LinkedHashMap() // TreeMap not available in kotlin common as it is jvm only.
+            HashMap()
         private val formats: MutableMap<String, FieldsProducer> =
-            HashMap() //	Efficient for quick lookups without ordering requirements
+            HashMap()
         private val segment: String
 
         // clone for merge
@@ -262,7 +259,7 @@ protected constructor() : PostingsFormat(PER_FIELD_NAME) {
         }
 
         override fun iterator(): MutableIterator<String> {
-            return asUnmodifiableIterator(fields.keys.iterator())
+            return asUnmodifiableIterator(fields.keys.sorted().iterator())
         }
 
         @Throws(IOException::class)
