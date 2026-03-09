@@ -86,7 +86,7 @@ abstract class DocValuesUpdate protected constructor(
         docIDUpTo: Int
     ) : DocValuesUpdate(DocValuesType.BINARY, term, field, docIDUpTo, value != null) {
 
-        constructor(term: Term?, field: String, value: BytesRef) : this(term, field, value, BufferedUpdates.MAX_INT)
+        constructor(term: Term?, field: String, value: BytesRef?) : this(term, field, value, BufferedUpdates.MAX_INT)
 
         fun prepareForApply(docIDUpTo: Int): BinaryDocValuesUpdate {
             if (docIDUpTo == this.docIDUpTo) {
@@ -138,7 +138,7 @@ abstract class DocValuesUpdate protected constructor(
         field: String,
         private val value: Long? = -1,
         docIDUpTo: Int = BufferedUpdates.MAX_INT,
-        hasValue: Boolean = true
+        hasValue: Boolean = value != null
     ) : DocValuesUpdate(DocValuesType.NUMERIC, term, field, docIDUpTo, hasValue) {
         /*constructor(term: Term?, field: String, value: Long) : this(term, field, value, BufferedUpdates.MAX_INT, true)*/
 
