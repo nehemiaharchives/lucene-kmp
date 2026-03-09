@@ -15,9 +15,12 @@ import org.gnit.lucenekmp.document.TextField
 import org.gnit.lucenekmp.index.CodecReader
 import org.gnit.lucenekmp.index.CompositeReader
 import org.gnit.lucenekmp.index.DirectoryReader
+import org.gnit.lucenekmp.index.DocValuesType
+import org.gnit.lucenekmp.index.FieldInfos
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.index.IndexOptions
 import org.gnit.lucenekmp.index.IndexReader
+import org.gnit.lucenekmp.index.IndexableField
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.LeafReader
 import org.gnit.lucenekmp.index.LeafReaderContext
@@ -26,8 +29,13 @@ import org.gnit.lucenekmp.index.LogByteSizeMergePolicy
 import org.gnit.lucenekmp.index.LogDocMergePolicy
 import org.gnit.lucenekmp.index.LogMergePolicy
 import org.gnit.lucenekmp.index.MergePolicy
+import org.gnit.lucenekmp.index.MultiBits
+import org.gnit.lucenekmp.index.MultiDocValues
+import org.gnit.lucenekmp.index.MultiTerms
 import org.gnit.lucenekmp.index.ParallelCompositeReader
 import org.gnit.lucenekmp.index.ParallelLeafReader
+import org.gnit.lucenekmp.index.PointValues
+import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TieredMergePolicy
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
@@ -35,10 +43,12 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
 import org.gnit.lucenekmp.jdkport.TimeUnit
+import org.gnit.lucenekmp.jdkport.TreeSet
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.IndexSearcher
 import org.gnit.lucenekmp.search.Query
 import org.gnit.lucenekmp.search.QueryCachingPolicy
+import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FSDirectory
@@ -67,7 +77,6 @@ import org.gnit.lucenekmp.tests.search.similarities.RandomSimilarity
 import org.gnit.lucenekmp.tests.store.BaseDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
 import org.gnit.lucenekmp.tests.store.RawDirectoryWrapper
-import org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion.newDirectory
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsBoolean
 import org.gnit.lucenekmp.tests.util.RandomizedTest.Companion.systemPropertyAsInt
 import org.gnit.lucenekmp.util.BytesRef
@@ -1701,6 +1710,389 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             )
         }
         // line 2069
+
+        fun assertReaderEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            assertReaderStatisticsEquals(info, leftReader, rightReader)
+            assertTermsEquals(info, leftReader, rightReader, true)
+            assertNormsEquals(info, leftReader, rightReader)
+            assertStoredFieldsEquals(info, leftReader, rightReader)
+            assertTermVectorsEquals(info, leftReader, rightReader)
+            assertDocValuesEquals(info, leftReader, rightReader)
+            assertDeletedDocsEquals(info, leftReader, rightReader)
+            assertFieldInfosEquals(info, leftReader, rightReader)
+            assertPointsEquals(info, leftReader, rightReader)
+        }
+
+        // line 2100
+
+        /** checks that reader-level statistics are the same */
+        fun assertReaderStatisticsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            assertEquals(leftReader.maxDoc(), rightReader.maxDoc(), info)
+            assertEquals(leftReader.numDocs(), rightReader.numDocs(), info)
+            assertEquals(leftReader.numDeletedDocs(), rightReader.numDeletedDocs(), info)
+            assertEquals(leftReader.hasDeletions(), rightReader.hasDeletions(), info)
+        }
+
+        /** Fields api equivalency */
+        fun assertTermsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader, deep: Boolean) {
+            val leftFields = FieldInfos.getIndexedFields(leftReader).toSet()
+            val rightFields = FieldInfos.getIndexedFields(rightReader).toSet()
+            assertEquals(leftFields, rightFields, info)
+            for (field in leftFields) {
+                assertTermsEquals(
+                    "$info field=$field",
+                    leftReader,
+                    MultiTerms.getTerms(leftReader, field),
+                    MultiTerms.getTerms(rightReader, field),
+                    deep
+                )
+            }
+        }
+
+
+        // line 2456
+        /** checks that norms are the same across all fields */
+        fun assertNormsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val leftFields = FieldInfos.getIndexedFields(leftReader).toSet()
+            val rightFields = FieldInfos.getIndexedFields(rightReader).toSet()
+            assertEquals(leftFields, rightFields, info)
+
+            for (field in leftFields) {
+                val leftNorms = MultiDocValues.getNormValues(leftReader, field)
+                val rightNorms = MultiDocValues.getNormValues(rightReader, field)
+                if (leftNorms != null && rightNorms != null) {
+                    assertDocValuesEquals(info, leftReader.maxDoc(), leftNorms, rightNorms)
+                } else {
+                    assertNull(leftNorms, info)
+                    assertNull(rightNorms, info)
+                }
+            }
+        }
+
+        /** checks that stored fields of all documents are the same */
+        fun assertStoredFieldsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val leftStoredFields = leftReader.storedFields()
+            val rightStoredFields = rightReader.storedFields()
+            for (docID in 0..<leftReader.maxDoc()) {
+                val leftDoc = leftStoredFields.document(docID)
+                val rightDoc = rightStoredFields.document(docID)
+
+                // TODO: I think this is bogus because we don't document what the order should be
+                // from these iterators, etc. I think the codec/IndexReader should be free to order this stuff
+                // in whatever way it wants (e.g. maybe it packs related fields together or something)
+                // To fix this, we sort the fields in both documents by name, but
+                // we still assume that all instances with same name are in order:
+                val leftFields = leftDoc.getFields().toMutableList()
+                val rightFields = rightDoc.getFields().toMutableList()
+                leftFields.sortBy { it.name() }
+                rightFields.sortBy { it.name() }
+                val leftIterator = leftFields.iterator()
+                val rightIterator = rightFields.iterator()
+                while (leftIterator.hasNext()) {
+                    assertTrue(rightIterator.hasNext(), info)
+                    assertStoredFieldEquals(info, leftIterator.next(), rightIterator.next())
+                }
+                assertFalse(rightIterator.hasNext(), info)
+            }
+        }
+
+        /** checks that two stored fields are equivalent */
+        fun assertStoredFieldEquals(info: String, leftField: IndexableField, rightField: IndexableField) {
+            assertEquals(leftField.name(), rightField.name(), info)
+            assertEquals(leftField.binaryValue(), rightField.binaryValue(), info)
+            assertEquals(leftField.stringValue(), rightField.stringValue(), info)
+            assertEquals(leftField.numericValue(), rightField.numericValue(), info)
+            // TODO: should we check the FT at all?
+        }
+
+        /** checks that term vectors across all fields are equivalent */
+        fun assertTermVectorsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val leftVectors = leftReader.termVectors()
+            val rightVectors = rightReader.termVectors()
+            for (docID in 0..<leftReader.maxDoc()) {
+                val leftFields = leftVectors.get(docID)
+                val rightFields = rightVectors.get(docID)
+                if (leftFields == null || rightFields == null) {
+                    assertNull(leftFields, info)
+                    assertNull(rightFields, info)
+                    continue
+                }
+                if (leftFields.size() != -1 && rightFields.size() != -1) {
+                    assertEquals(leftFields.size(), rightFields.size(), info)
+                }
+                val leftEnum = leftFields.iterator()
+                val rightEnum = rightFields.iterator()
+                while (leftEnum.hasNext()) {
+                    val field = leftEnum.next()
+                    assertEquals(field, rightEnum.next(), info)
+                    assertTermsEquals(
+                        info,
+                        leftReader,
+                        leftFields.terms(field),
+                        rightFields.terms(field),
+                        RandomizedTest.rarely()
+                    )
+                }
+                assertFalse(rightEnum.hasNext(), info)
+            }
+        }
+
+        // line 2561
+        /** checks that docvalues across all fields are equivalent */
+        fun assertDocValuesEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val leftFields = getDVFields(leftReader)
+            val rightFields = getDVFields(rightReader)
+            assertEquals(leftFields, rightFields, info)
+
+            for (field in leftFields) {
+                val leftNumericValues = MultiDocValues.getNumericValues(leftReader, field)
+                val rightNumericValues = MultiDocValues.getNumericValues(rightReader, field)
+                if (leftNumericValues != null && rightNumericValues != null) {
+                    assertDocValuesEquals(info, leftReader.maxDoc(), leftNumericValues, rightNumericValues)
+                } else {
+                    assertTrue(
+                        leftNumericValues == null || leftNumericValues.nextDoc() == NO_MORE_DOCS,
+                        "$info: left numeric doc values for field=\"$field\" are not null"
+                    )
+                    assertTrue(
+                        rightNumericValues == null || rightNumericValues.nextDoc() == NO_MORE_DOCS,
+                        "$info: right numeric doc values for field=\"$field\" are not null"
+                    )
+                }
+
+                val leftBinaryValues = MultiDocValues.getBinaryValues(leftReader, field)
+                val rightBinaryValues = MultiDocValues.getBinaryValues(rightReader, field)
+                if (leftBinaryValues != null && rightBinaryValues != null) {
+                    while (true) {
+                        val docID = leftBinaryValues.nextDoc()
+                        assertEquals(docID, rightBinaryValues.nextDoc())
+                        if (docID == NO_MORE_DOCS) {
+                            break
+                        }
+                        assertEquals(leftBinaryValues.binaryValue(), rightBinaryValues.binaryValue())
+                    }
+                } else {
+                    assertTrue(leftBinaryValues == null || leftBinaryValues.nextDoc() == NO_MORE_DOCS, info)
+                    assertTrue(rightBinaryValues == null || rightBinaryValues.nextDoc() == NO_MORE_DOCS, info)
+                }
+
+                val leftSortedValues = MultiDocValues.getSortedValues(leftReader, field)
+                val rightSortedValues = MultiDocValues.getSortedValues(rightReader, field)
+                if (leftSortedValues != null && rightSortedValues != null) {
+                    assertEquals(leftSortedValues.valueCount, rightSortedValues.valueCount, info)
+                    for (i in 0..<leftSortedValues.valueCount) {
+                        val left = BytesRef.deepCopyOf(leftSortedValues.lookupOrd(i)!!)
+                        val right = rightSortedValues.lookupOrd(i)
+                        assertEquals(left, right, info)
+                    }
+                    for (docID in 0..<leftReader.maxDoc()) {
+                        assertEquals(docID, leftSortedValues.nextDoc())
+                        assertEquals(docID, rightSortedValues.nextDoc())
+                        val left = BytesRef.deepCopyOf(leftSortedValues.lookupOrd(leftSortedValues.ordValue())!!)
+                        val right = rightSortedValues.lookupOrd(rightSortedValues.ordValue())
+                        assertEquals(left, right, info)
+                    }
+                } else {
+                    assertNull(leftSortedValues, info)
+                    assertNull(rightSortedValues, info)
+                }
+
+                val leftSortedSetValues = MultiDocValues.getSortedSetValues(leftReader, field)
+                val rightSortedSetValues = MultiDocValues.getSortedSetValues(rightReader, field)
+                if (leftSortedSetValues != null && rightSortedSetValues != null) {
+                    assertEquals(leftSortedSetValues.valueCount, rightSortedSetValues.valueCount, info)
+                    for (i in 0 until leftSortedSetValues.valueCount.toInt()) {
+                        val left = BytesRef.deepCopyOf(leftSortedSetValues.lookupOrd(i.toLong())!!)
+                        val right = rightSortedSetValues.lookupOrd(i.toLong())
+                        assertEquals(left, right, info)
+                    }
+                    while (true) {
+                        val docID = leftSortedSetValues.nextDoc()
+                        assertEquals(docID, rightSortedSetValues.nextDoc())
+                        if (docID == NO_MORE_DOCS) {
+                            break
+                        }
+                        assertEquals(leftSortedSetValues.docValueCount(), rightSortedSetValues.docValueCount(), info)
+                        for (i in 0..<leftSortedSetValues.docValueCount()) {
+                            assertEquals(leftSortedSetValues.nextOrd(), rightSortedSetValues.nextOrd(), info)
+                        }
+                    }
+                } else {
+                    assertNull(leftSortedSetValues, info)
+                    assertNull(rightSortedSetValues, info)
+                }
+
+                val leftSortedNumericValues = MultiDocValues.getSortedNumericValues(leftReader, field)
+                val rightSortedNumericValues = MultiDocValues.getSortedNumericValues(rightReader, field)
+                if (leftSortedNumericValues != null && rightSortedNumericValues != null) {
+                    while (true) {
+                        val docID = leftSortedNumericValues.nextDoc()
+                        assertEquals(docID, rightSortedNumericValues.nextDoc())
+                        if (docID == NO_MORE_DOCS) {
+                            break
+                        }
+                        assertEquals(leftSortedNumericValues.docValueCount(), rightSortedNumericValues.docValueCount(), info)
+                        for (j in 0..<leftSortedNumericValues.docValueCount()) {
+                            assertEquals(leftSortedNumericValues.nextValue(), rightSortedNumericValues.nextValue(), info)
+                        }
+                    }
+                } else {
+                    assertNull(leftSortedNumericValues, info)
+                    assertNull(rightSortedNumericValues, info)
+                }
+            }
+        }
+
+
+        // line 2700
+        // TODO: this is kinda stupid, we don't delete documents in the test.
+        fun assertDeletedDocsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val leftBits = MultiBits.getLiveDocs(leftReader)
+            val rightBits = MultiBits.getLiveDocs(rightReader)
+
+            if (leftBits == null || rightBits == null) {
+                assertNull(leftBits, info)
+                assertNull(rightBits, info)
+                return
+            }
+
+            assertEquals(leftBits.length(), rightBits.length(), info)
+            for (docID in 0..<leftReader.maxDoc()) {
+                assertEquals(leftBits.get(docID), rightBits.get(docID), info)
+            }
+        }
+
+        fun assertFieldInfosEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val leftFields = TreeSet<String>()
+            val rightFields = TreeSet<String>()
+            for (fi in FieldInfos.getMergedFieldInfos(leftReader)) {
+                leftFields.add(fi.name)
+            }
+            for (fi in FieldInfos.getMergedFieldInfos(rightReader)) {
+                rightFields.add(fi.name)
+            }
+            assertEquals(leftFields, rightFields, info)
+        }
+
+
+        private fun uninvert(fieldName: String, reader: IndexReader): Map<Int, Set<BytesRef>> {
+            val docValues: MutableMap<Int, MutableSet<BytesRef>> = mutableMapOf()
+            for (ctx in reader.leaves()) {
+                val points = ctx.reader().getPointValues(fieldName) ?: continue
+                points.intersect(object : PointValues.IntersectVisitor {
+                    override fun visit(docID: Int) {
+                        throw UnsupportedOperationException()
+                    }
+
+                    override fun visit(docID: Int, packedValue: ByteArray) {
+                        val topDocID = ctx.docBase + docID
+                        if (docValues.containsKey(topDocID) == false) {
+                            docValues[topDocID] = mutableSetOf()
+                        }
+                        docValues[topDocID]!!.add(BytesRef(packedValue.copyOf()))
+                    }
+
+                    override fun compare(minPackedValue: ByteArray, maxPackedValue: ByteArray): PointValues.Relation {
+                        return PointValues.Relation.CELL_CROSSES_QUERY
+                    }
+                })
+            }
+            return docValues
+        }
+
+        fun assertPointsEquals(info: String, leftReader: IndexReader, rightReader: IndexReader) {
+            val fieldInfos1 = FieldInfos.getMergedFieldInfos(leftReader)
+            val fieldInfos2 = FieldInfos.getMergedFieldInfos(rightReader)
+            for (fieldInfo1 in fieldInfos1) {
+                if (fieldInfo1.pointDimensionCount != 0) {
+                    val fieldInfo2 = fieldInfos2.fieldInfo(fieldInfo1.name)
+                    assertNotNull(fieldInfo2, info)
+                    assertEquals(fieldInfo2.pointDimensionCount, fieldInfo1.pointDimensionCount, info)
+                    assertEquals(fieldInfo2.pointIndexDimensionCount, fieldInfo1.pointIndexDimensionCount, info)
+                    assertEquals(fieldInfo2.pointNumBytes, fieldInfo1.pointNumBytes, info)
+                    assertEquals(
+                        uninvert(fieldInfo1.name, leftReader),
+                        uninvert(fieldInfo1.name, rightReader),
+                        "$info field=${fieldInfo1.name}"
+                    )
+                }
+            }
+
+            for (fieldInfo2 in fieldInfos2) {
+                if (fieldInfo2.pointDimensionCount != 0) {
+                    val fieldInfo1 = fieldInfos1.fieldInfo(fieldInfo2.name)
+                    assertNotNull(fieldInfo1, info)
+                    assertEquals(fieldInfo2.pointDimensionCount, fieldInfo1.pointDimensionCount, info)
+                    assertEquals(fieldInfo2.pointIndexDimensionCount, fieldInfo1.pointIndexDimensionCount, info)
+                    assertEquals(fieldInfo2.pointNumBytes, fieldInfo1.pointNumBytes, info)
+                }
+            }
+        }
+
+
+
+
+        private fun assertTermsEquals(
+            info: String,
+            leftReader: IndexReader,
+            leftTerms: Terms?,
+            rightTerms: Terms?,
+            deep: Boolean
+        ) {
+            if (leftTerms == null || rightTerms == null) {
+                assertEquals(leftTerms, rightTerms, info)
+                return
+            }
+            assertEquals(leftTerms.docCount, rightTerms.docCount, "$info docCount")
+            assertEquals(leftTerms.sumDocFreq, rightTerms.sumDocFreq, "$info sumDocFreq")
+            assertEquals(leftTerms.sumTotalTermFreq, rightTerms.sumTotalTermFreq, "$info sumTotalTermFreq")
+            if (leftTerms.size() != -1L && rightTerms.size() != -1L) {
+                assertEquals(leftTerms.size(), rightTerms.size(), "$info size")
+            }
+
+            val leftTermsEnum = leftTerms.iterator()
+            val rightTermsEnum = rightTerms.iterator()
+            while (true) {
+                val leftTerm = leftTermsEnum.next()
+                val rightTerm = rightTermsEnum.next()
+                assertEquals(leftTerm, rightTerm, "$info term")
+                if (leftTerm == null) {
+                    break
+                }
+                assertEquals(leftTermsEnum.docFreq(), rightTermsEnum.docFreq(), "$info docFreq")
+                assertEquals(leftTermsEnum.totalTermFreq(), rightTermsEnum.totalTermFreq(), "$info totalTermFreq")
+            }
+        }
+
+        private fun getDVFields(reader: IndexReader): Set<String> {
+            val fields = mutableSetOf<String>()
+            for (fi in FieldInfos.getMergedFieldInfos(reader)) {
+                if (fi.docValuesType != DocValuesType.NONE) {
+                    fields.add(fi.name)
+                }
+            }
+            return fields
+        }
+
+        fun assertDocValuesEquals(
+            info: String,
+            num: Int,
+            leftDocValues: org.gnit.lucenekmp.index.NumericDocValues,
+            rightDocValues: org.gnit.lucenekmp.index.NumericDocValues
+        ) {
+            assertNotNull(leftDocValues, info)
+            assertNotNull(rightDocValues, info)
+            while (true) {
+                val leftDocID = leftDocValues.nextDoc()
+                val rightDocID = rightDocValues.nextDoc()
+                assertEquals(leftDocID, rightDocID)
+                if (leftDocID == NO_MORE_DOCS) {
+                    return
+                }
+                assertEquals(leftDocValues.longValue(), rightDocValues.longValue())
+            }
+        }
+
 
 
         //↓ line 2824 of LuceneTestCase.java
