@@ -425,7 +425,7 @@ class TestExitableDirectoryReader : LuceneTestCase() {
                     "vector",
                     TestVectorUtil.randomVectorBytes(dimension),
                     5,
-                    leaf.liveDocs!!,
+                    leaf.liveDocs,
                     Int.MAX_VALUE
                 )
             }
