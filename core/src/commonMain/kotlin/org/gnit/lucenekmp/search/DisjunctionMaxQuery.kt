@@ -92,7 +92,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
         }
 
         @Throws(IOException::class)
-        override fun matches(context: LeafReaderContext, doc: Int): Matches {
+        override fun matches(context: LeafReaderContext, doc: Int): Matches? {
             val mis: MutableList<Matches> = ArrayList()
             for (weight in weights) {
                 val mi: Matches? = weight.matches(context, doc)
@@ -100,7 +100,7 @@ open class DisjunctionMaxQuery(disjuncts: MutableCollection<out Query>, tieBreak
                     mis.add(mi)
                 }
             }
-            return MatchesUtils.fromSubMatches(mis)!!
+            return MatchesUtils.fromSubMatches(mis)
         }
 
         @Throws(IOException::class)
