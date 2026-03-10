@@ -518,11 +518,11 @@ internal class MaxScoreBulkScorer(private val maxDoc: Int, scorers: MutableList<
             return score
         }
 
-        @JvmName("setMinCompetitiveScoreKt")
-        @Throws(IOException::class)
-        fun setMinCompetitiveScore(minScore: Float) {
-            this@MaxScoreBulkScorer.minCompetitiveScore = minScore
-        }
+        override var minCompetitiveScore: Float
+            get() = this@MaxScoreBulkScorer.minCompetitiveScore
+            set(minScore) {
+                this@MaxScoreBulkScorer.minCompetitiveScore = minScore
+            }
     }
 
     companion object {

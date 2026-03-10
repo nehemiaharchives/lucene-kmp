@@ -260,24 +260,24 @@ internal class ReqOptSumScorer(reqScorer: Scorer, optScorer: Scorer, scoreMode: 
         return maxScore
     }
 
-    @JvmName("setMinCompetitiveScoreKt")
-    @Throws(IOException::class)
-    fun setMinCompetitiveScore(minScore: Float) {
-        this.minScore = minScore
-        // Potentially move to a conjunction
-        if (reqMaxScore < minScore) {
-            optIsRequired = true
-            if (reqMaxScore == 0f) {
-                // If the required clause doesn't contribute scores, we can propagate the minimum
-                // competitive score to the optional clause. This happens when the required clause is a
-                // FILTER clause.
-                // In theory we could generalize this and set minScore - reqMaxScore as a minimum
-                // competitive score, but it's unlikely to help in practice unless reqMaxScore is much
-                // smaller than typical scores of the optional clause.
-                optScorer.minCompetitiveScore = minScore
+    override var minCompetitiveScore: Float
+        get() = minScore
+        set(minScore) {
+            this.minScore = minScore
+            // Potentially move to a conjunction
+            if (reqMaxScore < minScore) {
+                optIsRequired = true
+                if (reqMaxScore == 0f) {
+                    // If the required clause doesn't contribute scores, we can propagate the minimum
+                    // competitive score to the optional clause. This happens when the required clause is a
+                    // FILTER clause.
+                    // In theory we could generalize this and set minScore - reqMaxScore as a minimum
+                    // competitive score, but it's unlikely to help in practice unless reqMaxScore is much
+                    // smaller than typical scores of the optional clause.
+                    optScorer.minCompetitiveScore = minScore
+                }
             }
         }
-    }
 
     override val children: MutableCollection<ChildScorable>
         get() {

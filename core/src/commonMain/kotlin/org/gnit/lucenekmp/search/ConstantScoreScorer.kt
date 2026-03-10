@@ -104,10 +104,10 @@ class ConstantScoreScorer : Scorer {
             }
         }
         set(minScore: Float) {
-        if (scoreMode === ScoreMode.TOP_SCORES && minScore > score) {
-            (approximation as DocIdSetIteratorWrapper).delegate = DocIdSetIterator.empty()
+            if (scoreMode === ScoreMode.TOP_SCORES && minScore > score) {
+                (approximation as DocIdSetIteratorWrapper).delegate = DocIdSetIterator.empty()
+            }
         }
-    }
 
     override fun iterator(): DocIdSetIterator {
         return disi

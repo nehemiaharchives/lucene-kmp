@@ -12,7 +12,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 class MaxScoreAccumulator {
     // scores are always positive
     @OptIn(ExperimentalAtomicApi::class)
-    val acc: AtomicLong = AtomicLong(Long.MAX_VALUE) /*LongAccumulator =
+    val acc: AtomicLong = AtomicLong(Long.MIN_VALUE) /*LongAccumulator =
         LongAccumulator(LongBinaryOperator { v1: Long, v2: Long -> maxEncode(v1, v2) }, Long.MIN_VALUE)*/
 
     // non-final and visible for tests
