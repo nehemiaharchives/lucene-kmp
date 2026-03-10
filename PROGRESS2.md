@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 2413
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 1075
+### Total KMP classes: 1079
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1748
+### Total KMP Unit Test classes: 1760
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -12706,9 +12706,9 @@
 | [org.apache.lucene.search.AbstractKnnCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractKnnCollector.java) | org.gnit.lucenekmp.search.AbstractKnnCollector | Depth 2 | [x] | 8 | 8 | 88% |
 | [org.apache.lucene.search.AbstractKnnVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractKnnVectorQuery.java) | org.gnit.lucenekmp.search.AbstractKnnVectorQuery | Depth 3 | [x] | 8 | 3 | 0% |
 | [org.apache.lucene.search.AbstractMultiTermQueryConstantScoreWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractMultiTermQueryConstantScoreWrapper.java) | org.gnit.lucenekmp.search.AbstractMultiTermQueryConstantScoreWrapper | Depth 3 | [x] | 12 | 0 | 0% |
-| [org.apache.lucene.search.AbstractVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.AbstractVectorSimilarityQuery | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.search.AbstractVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.AbstractVectorSimilarityQuery | Depth 3 | [x] | 7 | 1 | 0% |
 | [org.apache.lucene.search.BaseKnnVectorQueryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/BaseKnnVectorQueryTestCase.java) | org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase | Depth 1 | [] | 189 | 0 | 0% |
-| [org.apache.lucene.search.BaseVectorSimilarityQueryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/BaseVectorSimilarityQueryTestCase.java) | org.gnit.lucenekmp.search.BaseVectorSimilarityQueryTestCase | Depth 1 | [] | 165 | 0 | 0% |
+| [org.apache.lucene.search.BaseVectorSimilarityQueryTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/BaseVectorSimilarityQueryTestCase.java) | org.gnit.lucenekmp.search.BaseVectorSimilarityQueryTestCase | Depth 1 | [x] | 165 | 1 | 0% |
 | [org.apache.lucene.search.BlockMaxConjunctionBulkScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BlockMaxConjunctionBulkScorer.java) | org.gnit.lucenekmp.search.BlockMaxConjunctionBulkScorer | Depth 4 | [x] | 1 | 1 | 0% |
 | [org.apache.lucene.search.BooleanClause](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanClause.java) | org.gnit.lucenekmp.search.BooleanClause | Depth 3 | [x] | 1 | 1 | 76% |
 | [org.apache.lucene.search.BooleanQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanQuery.java) | org.gnit.lucenekmp.search.BooleanQuery | Depth 3 | [x] | 0 | 0 | 0% |
@@ -12716,7 +12716,7 @@
 | [org.apache.lucene.search.BooleanScorerSupplier](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanScorerSupplier.java) | org.gnit.lucenekmp.search.BooleanScorerSupplier | Depth 3 | [x] | 1 | 5 | 0% |
 | [org.apache.lucene.search.BooleanWeight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BooleanWeight.java) | org.gnit.lucenekmp.search.BooleanWeight | Depth 2 | [x] | 9 | 0 | 0% |
 | [org.apache.lucene.search.BoostAttribute](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/BoostAttribute.java) | org.gnit.lucenekmp.search.BoostAttribute | Depth 2 | [x] | 0 | 0 | 0% |
-| [org.apache.lucene.search.ByteVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/ByteVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.ByteVectorSimilarityQuery | Depth 2 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.search.ByteVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/ByteVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.ByteVectorSimilarityQuery | Depth 2 | [x] | 5 | 7 | 58% |
 | [org.apache.lucene.search.ByteVectorSimilarityValuesSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/ByteVectorSimilarityValuesSource.java) | org.gnit.lucenekmp.search.ByteVectorSimilarityValuesSource | Depth 3 | [x] | 20 | 9 | 92% |
 | [org.apache.lucene.search.CachingCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/CachingCollector.java) | org.gnit.lucenekmp.search.CachingCollector | Depth 3 | [] | 7 | 0 | 0% |
 | [org.apache.lucene.search.CollectionStatistics](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/CollectionStatistics.java) | org.gnit.lucenekmp.search.CollectionStatistics | Depth 2 | [x] | 4 | 0 | 24% |
@@ -12755,7 +12755,7 @@
 | [org.apache.lucene.search.FilterScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterScorer.java) | org.gnit.lucenekmp.search.FilterScorer | Depth 2 | [x] | 6 | 5 | 87% |
 | [org.apache.lucene.search.FilterWeight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterWeight.java) | org.gnit.lucenekmp.search.FilterWeight | Depth 2 | [x] | 7 | 7 | 92% |
 | [org.apache.lucene.search.FilteredDocIdSetIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilteredDocIdSetIterator.java) | org.gnit.lucenekmp.search.FilteredDocIdSetIterator | Depth 2 | [x] | 8 | 6 | 92% |
-| [org.apache.lucene.search.FloatVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FloatVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.FloatVectorSimilarityQuery | Depth 2 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.search.FloatVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FloatVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.FloatVectorSimilarityQuery | Depth 2 | [x] | 5 | 7 | 58% |
 | [org.apache.lucene.search.FloatVectorSimilarityValuesSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FloatVectorSimilarityValuesSource.java) | org.gnit.lucenekmp.search.FloatVectorSimilarityValuesSource | Depth 3 | [x] | 20 | 9 | 92% |
 | [org.apache.lucene.search.FuzzyAutomatonBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FuzzyAutomatonBuilder.java) | org.gnit.lucenekmp.search.FuzzyAutomatonBuilder | Depth 3 | [x] | 3 | 1 | 83% |
 | [org.apache.lucene.search.FuzzyTermsEnum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FuzzyTermsEnum.java) | org.gnit.lucenekmp.search.FuzzyTermsEnum | Depth 4 | [x] | 0 | 0 | 0% |
@@ -12845,11 +12845,11 @@
 | [org.apache.lucene.search.TestBooleanMinShouldMatch](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanMinShouldMatch.java) | org.gnit.lucenekmp.search.TestBooleanMinShouldMatch | Depth 1 | [x] | 162 | 1 | 0% |
 | [org.apache.lucene.search.TestBooleanOr](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanOr.java) | org.gnit.lucenekmp.search.TestBooleanOr | Depth 1 | [x] | 148 | 1 | 0% |
 | [org.apache.lucene.search.TestBooleanQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanQuery.java) | org.gnit.lucenekmp.search.TestBooleanQuery | Depth 1 | [x] | 171 | 25 | 0% |
-| [org.apache.lucene.search.TestBooleanQueryVisitSubscorers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanQueryVisitSubscorers.java) | org.gnit.lucenekmp.search.TestBooleanQueryVisitSubscorers | Depth 2 | [] | 0 | 0 | 0% |
-| [org.apache.lucene.search.TestBooleanRewrites](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanRewrites.java) | org.gnit.lucenekmp.search.TestBooleanRewrites | Depth 1 | [] | 170 | 0 | 0% |
-| [org.apache.lucene.search.TestBooleanScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanScorer.java) | org.gnit.lucenekmp.search.TestBooleanScorer | Depth 1 | [] | 145 | 0 | 0% |
-| [org.apache.lucene.search.TestBoostQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBoostQuery.java) | org.gnit.lucenekmp.search.TestBoostQuery | Depth 1 | [] | 144 | 0 | 0% |
-| [org.apache.lucene.search.TestByteVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestByteVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.TestByteVectorSimilarityQuery | Depth 1 | [] | 153 | 0 | 0% |
+| [org.apache.lucene.search.TestBooleanQueryVisitSubscorers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanQueryVisitSubscorers.java) | org.gnit.lucenekmp.search.TestBooleanQueryVisitSubscorers | Depth 2 | [x] | 0 | 2 | 0% |
+| [org.apache.lucene.search.TestBooleanRewrites](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanRewrites.java) | org.gnit.lucenekmp.search.TestBooleanRewrites | Depth 1 | [x] | 170 | 25 | 0% |
+| [org.apache.lucene.search.TestBooleanScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBooleanScorer.java) | org.gnit.lucenekmp.search.TestBooleanScorer | Depth 1 | [x] | 145 | 1 | 0% |
+| [org.apache.lucene.search.TestBoostQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestBoostQuery.java) | org.gnit.lucenekmp.search.TestBoostQuery | Depth 1 | [x] | 144 | 10 | 33% |
+| [org.apache.lucene.search.TestByteVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestByteVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.TestByteVectorSimilarityQuery | Depth 1 | [x] | 153 | 7 | 0% |
 | [org.apache.lucene.search.TestCachingCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestCachingCollector.java) | org.gnit.lucenekmp.search.TestCachingCollector | Depth 1 | [] | 143 | 0 | 0% |
 | [org.apache.lucene.search.TestCollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestCollectorManager.java) | org.gnit.lucenekmp.search.TestCollectorManager | Depth 1 | [] | 144 | 0 | 0% |
 | [org.apache.lucene.search.TestCombinedFieldQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestCombinedFieldQuery.java) | org.gnit.lucenekmp.search.TestCombinedFieldQuery | Depth 1 | [] | 154 | 0 | 0% |
@@ -12878,7 +12878,7 @@
 | [org.apache.lucene.search.TestFieldExistsQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFieldExistsQuery.java) | org.gnit.lucenekmp.search.TestFieldExistsQuery | Depth 1 | [] | 170 | 0 | 0% |
 | [org.apache.lucene.search.TestFilterWeight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFilterWeight.java) | org.gnit.lucenekmp.search.TestFilterWeight | Depth 1 | [] | 141 | 0 | 0% |
 | [org.apache.lucene.search.TestFloatRangeFieldQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFloatRangeFieldQueries.java) | org.gnit.lucenekmp.search.TestFloatRangeFieldQueries | Depth 2 | [] | 10 | 0 | 0% |
-| [org.apache.lucene.search.TestFloatVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFloatVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.TestFloatVectorSimilarityQuery | Depth 1 | [] | 153 | 0 | 0% |
+| [org.apache.lucene.search.TestFloatVectorSimilarityQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFloatVectorSimilarityQuery.java) | org.gnit.lucenekmp.search.TestFloatVectorSimilarityQuery | Depth 1 | [x] | 153 | 7 | 0% |
 | [org.apache.lucene.search.TestFuzzyQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFuzzyQuery.java) | org.gnit.lucenekmp.search.TestFuzzyQuery | Depth 2 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.search.TestFuzzyTermOnShortTerms](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFuzzyTermOnShortTerms.java) | org.gnit.lucenekmp.search.TestFuzzyTermOnShortTerms | Depth 1 | [] | 142 | 0 | 0% |
 | [org.apache.lucene.search.TestIndexOrDocValuesQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestIndexOrDocValuesQuery.java) | org.gnit.lucenekmp.search.TestIndexOrDocValuesQuery | Depth 1 | [] | 142 | 0 | 0% |
@@ -12997,7 +12997,7 @@
 | [org.apache.lucene.search.TwoPhaseIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/TwoPhaseIterator.java) | org.gnit.lucenekmp.search.TwoPhaseIterator | Depth 3 | [x] | 8 | 6 | 84% |
 | [org.apache.lucene.search.UsageTrackingQueryCachingPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/UsageTrackingQueryCachingPolicy.java) | org.gnit.lucenekmp.search.UsageTrackingQueryCachingPolicy | Depth 2 | [x] | 7 | 3 | 93% |
 | [org.apache.lucene.search.VectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/VectorScorer.java) | org.gnit.lucenekmp.search.VectorScorer | Depth 2 | [x] | 0 | 0 | 0% |
-| [org.apache.lucene.search.VectorSimilarityCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/VectorSimilarityCollector.java) | org.gnit.lucenekmp.search.VectorSimilarityCollector | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.search.VectorSimilarityCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/VectorSimilarityCollector.java) | org.gnit.lucenekmp.search.VectorSimilarityCollector | Depth 2 | [x] | 8 | 8 | 88% |
 | [org.apache.lucene.search.VectorSimilarityValuesSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/VectorSimilarityValuesSource.java) | org.gnit.lucenekmp.search.VectorSimilarityValuesSource | Depth 5 | [x] | 3 | 2 | 90% |
 | [org.apache.lucene.search.Weight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Weight.java) | org.gnit.lucenekmp.search.Weight | Depth 2 | [x] | 7 | 3 | 0% |
 | [org.apache.lucene.search.comparators.DocComparator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/comparators/DocComparator.java) | org.gnit.lucenekmp.search.comparators.DocComparator | Depth 4 | [x] | 5 | 5 | 0% |
@@ -13265,7 +13265,7 @@
 | [org.apache.lucene.tests.search.MatchesTestBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/MatchesTestBase.java) | org.gnit.lucenekmp.tests.search.MatchesTestBase | Depth 2 | [] | 147 | 0 | 0% |
 | [org.apache.lucene.tests.search.QueryUtils](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/QueryUtils.java) | org.gnit.lucenekmp.tests.search.QueryUtils | Depth 3 | [x] | 5 | 4 | 0% |
 | [org.apache.lucene.tests.search.RandomApproximationQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/RandomApproximationQuery.java) | org.gnit.lucenekmp.tests.search.RandomApproximationQuery | Depth 3 | [x] | 7 | 1 | 0% |
-| [org.apache.lucene.tests.search.ScorerIndexSearcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/ScorerIndexSearcher.java) | org.gnit.lucenekmp.tests.search.ScorerIndexSearcher | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.tests.search.ScorerIndexSearcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/ScorerIndexSearcher.java) | org.gnit.lucenekmp.tests.search.ScorerIndexSearcher | Depth 3 | [x] | 7 | 3 | 0% |
 | [org.apache.lucene.tests.search.ShardSearchingTestBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/ShardSearchingTestBase.java) | org.gnit.lucenekmp.tests.search.ShardSearchingTestBase | Depth 3 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.tests.search.TestBaseExplanationTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/search/TestBaseExplanationTestCase.java) | org.gnit.lucenekmp.tests.search.TestBaseExplanationTestCase | Depth 1 | [] | 152 | 0 | 0% |
 | [org.apache.lucene.tests.search.TestPerThreadPKLookup](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/search/TestPerThreadPKLookup.java) | org.gnit.lucenekmp.tests.search.TestPerThreadPKLookup | Depth 1 | [] | 141 | 0 | 0% |
@@ -13626,7 +13626,7 @@
 | [org.apache.lucene.util.quantization.TestScalarQuantizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/quantization/TestScalarQuantizer.java) | org.gnit.lucenekmp.util.quantization.TestScalarQuantizer | Depth 1 | [x] | 151 | 5 | 0% |
 
 
-TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
+TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ## Summary
 
@@ -13640,16 +13640,16 @@ TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Lucene Classes (Semantic Analysis)
 - Total Classes: 3554
-- Ported Classes: 1050
+- Ported Classes: 1054
 - Class Porting Progress: 29%
 - **Semantic Completion Progress: 9%**
 - Total Core Methods Needed: 32846
-- Core Methods Implemented: 3208
+- Core Methods Implemented: 3226
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1679
-- Unit Test Porting Progress: 69%
+- Ported Unit Test Classes: 1691
+- Unit Test Porting Progress: 70%
 - **Unit Test Semantic Completion: 6%**
 - Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 8507
+- Test Core Methods Implemented: 8530

@@ -228,7 +228,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.builders.TermQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.TermQueryBuilder
 - org.apache.lucene.queryparser.xml.builders.TermsQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.TermsQueryBuilder
 - org.apache.lucene.queryparser.xml.builders.UserInputQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.UserInputQueryBuilder
-- org.apache.lucene.search.AbstractVectorSimilarityQuery → org.gnit.lucenekmp.search.AbstractVectorSimilarityQuery
 - org.apache.lucene.search.CachingCollector → org.gnit.lucenekmp.search.CachingCollector
 - org.apache.lucene.search.CombinedFieldQuery → org.gnit.lucenekmp.search.CombinedFieldQuery
 - org.apache.lucene.search.ControlledRealTimeReopenThread → org.gnit.lucenekmp.search.ControlledRealTimeReopenThread
@@ -259,7 +258,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.mockfile.HandleTrackingFS → org.gnit.lucenekmp.tests.mockfile.HandleTrackingFS
 - org.apache.lucene.tests.mockfile.ShuffleFS → org.gnit.lucenekmp.tests.mockfile.ShuffleFS
 - org.apache.lucene.tests.search.BulkScorerWrapperScorer → org.gnit.lucenekmp.tests.search.BulkScorerWrapperScorer
-- org.apache.lucene.tests.search.ScorerIndexSearcher → org.gnit.lucenekmp.tests.search.ScorerIndexSearcher
 - org.apache.lucene.tests.search.ShardSearchingTestBase → org.gnit.lucenekmp.tests.search.ShardSearchingTestBase
 - org.apache.lucene.tests.util.FailureMarker → org.gnit.lucenekmp.tests.util.FailureMarker
 - org.apache.lucene.tests.util.LuceneJUnit3MethodProvider → org.gnit.lucenekmp.tests.util.LuceneJUnit3MethodProvider
@@ -362,8 +360,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.CorePlusExtensionsParser → org.gnit.lucenekmp.queryparser.xml.CorePlusExtensionsParser
 - org.apache.lucene.queryparser.xml.CorePlusQueriesParser → org.gnit.lucenekmp.queryparser.xml.CorePlusQueriesParser
 - org.apache.lucene.queryparser.xml.ParserException → org.gnit.lucenekmp.queryparser.xml.ParserException
-- org.apache.lucene.search.ByteVectorSimilarityQuery → org.gnit.lucenekmp.search.ByteVectorSimilarityQuery
-- org.apache.lucene.search.FloatVectorSimilarityQuery → org.gnit.lucenekmp.search.FloatVectorSimilarityQuery
 - org.apache.lucene.search.IndriAndQuery → org.gnit.lucenekmp.search.IndriAndQuery
 - org.apache.lucene.search.JustCompileSearch → org.gnit.lucenekmp.search.JustCompileSearch
 - org.apache.lucene.search.LiveFieldValues → org.gnit.lucenekmp.search.LiveFieldValues
@@ -386,7 +382,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.TestSloppyPhraseQuery → org.gnit.lucenekmp.search.TestSloppyPhraseQuery
 - org.apache.lucene.search.TestTermScorer → org.gnit.lucenekmp.search.TestTermScorer
 - org.apache.lucene.search.TestXYPointDistanceSort → org.gnit.lucenekmp.search.TestXYPointDistanceSort
-- org.apache.lucene.search.VectorSimilarityCollector → org.gnit.lucenekmp.search.VectorSimilarityCollector
 - org.apache.lucene.store.LockStressTest → org.gnit.lucenekmp.store.LockStressTest
 - org.apache.lucene.tests.analysis.CannedBinaryTokenStream → org.gnit.lucenekmp.tests.analysis.CannedBinaryTokenStream
 - org.apache.lucene.tests.analysis.CrankyTokenFilter → org.gnit.lucenekmp.tests.analysis.CrankyTokenFilter
@@ -599,14 +594,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser
 - org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser
 - org.apache.lucene.search.BaseKnnVectorQueryTestCase → org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase
-- org.apache.lucene.search.BaseVectorSimilarityQueryTestCase → org.gnit.lucenekmp.search.BaseVectorSimilarityQueryTestCase
 - org.apache.lucene.search.ElevationComparatorSource → org.gnit.lucenekmp.search.ElevationComparatorSource
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
-- org.apache.lucene.search.TestBooleanRewrites → org.gnit.lucenekmp.search.TestBooleanRewrites
-- org.apache.lucene.search.TestBooleanScorer → org.gnit.lucenekmp.search.TestBooleanScorer
-- org.apache.lucene.search.TestBoostQuery → org.gnit.lucenekmp.search.TestBoostQuery
-- org.apache.lucene.search.TestByteVectorSimilarityQuery → org.gnit.lucenekmp.search.TestByteVectorSimilarityQuery
 - org.apache.lucene.search.TestCachingCollector → org.gnit.lucenekmp.search.TestCachingCollector
 - org.apache.lucene.search.TestCollectorManager → org.gnit.lucenekmp.search.TestCollectorManager
 - org.apache.lucene.search.TestCombinedFieldQuery → org.gnit.lucenekmp.search.TestCombinedFieldQuery
@@ -630,7 +620,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.TestFieldCacheRewriteMethod → org.gnit.lucenekmp.search.TestFieldCacheRewriteMethod
 - org.apache.lucene.search.TestFieldExistsQuery → org.gnit.lucenekmp.search.TestFieldExistsQuery
 - org.apache.lucene.search.TestFilterWeight → org.gnit.lucenekmp.search.TestFilterWeight
-- org.apache.lucene.search.TestFloatVectorSimilarityQuery → org.gnit.lucenekmp.search.TestFloatVectorSimilarityQuery
 - org.apache.lucene.search.TestFuzzyTermOnShortTerms → org.gnit.lucenekmp.search.TestFuzzyTermOnShortTerms
 - org.apache.lucene.search.TestIndexOrDocValuesQuery → org.gnit.lucenekmp.search.TestIndexOrDocValuesQuery
 - org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
