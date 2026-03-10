@@ -106,7 +106,7 @@ internal class SortedNumericDocValuesWriter(
                 finalValues = pending.build()
                 finalValuesCount = if (pendingCounts == null) null else pendingCounts!!.build()
             }
-            return getValues(finalValues!!, finalValuesCount!!, docsWithField)
+            return getValues(finalValues!!, finalValuesCount, docsWithField)
         }
 
     internal class LongValues(
@@ -141,7 +141,7 @@ internal class SortedNumericDocValuesWriter(
 
     private fun getValues(
         values: PackedLongValues,
-        valueCounts: PackedLongValues,
+        valueCounts: PackedLongValues?,
         docsWithField: DocsWithFieldSet
     ): SortedNumericDocValues {
         return if (valueCounts == null) {
