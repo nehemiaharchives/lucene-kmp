@@ -20,7 +20,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.surround.query.SimpleTerm → org.gnit.lucenekmp.queryparser.surround.query.SimpleTerm
 - org.apache.lucene.search.IndriDisjunctionScorer → org.gnit.lucenekmp.search.IndriDisjunctionScorer
 - org.apache.lucene.search.IndriScorer → org.gnit.lucenekmp.search.IndriScorer
-- org.apache.lucene.search.MultiNormsLeafSimScorer → org.gnit.lucenekmp.search.MultiNormsLeafSimScorer
 - org.apache.lucene.tests.mockfile.FilterFileStore → org.gnit.lucenekmp.tests.mockfile.FilterFileStore
 
 ## Depth 4
@@ -228,12 +227,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.builders.TermQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.TermQueryBuilder
 - org.apache.lucene.queryparser.xml.builders.TermsQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.TermsQueryBuilder
 - org.apache.lucene.queryparser.xml.builders.UserInputQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.UserInputQueryBuilder
-- org.apache.lucene.search.CachingCollector → org.gnit.lucenekmp.search.CachingCollector
-- org.apache.lucene.search.CombinedFieldQuery → org.gnit.lucenekmp.search.CombinedFieldQuery
 - org.apache.lucene.search.ControlledRealTimeReopenThread → org.gnit.lucenekmp.search.ControlledRealTimeReopenThread
 - org.apache.lucene.search.IndriAndWeight → org.gnit.lucenekmp.search.IndriAndWeight
 - org.apache.lucene.search.IndriQuery → org.gnit.lucenekmp.search.IndriQuery
-- org.apache.lucene.search.MultiCollector → org.gnit.lucenekmp.search.MultiCollector
 - org.apache.lucene.search.NamedMatches → org.gnit.lucenekmp.search.NamedMatches
 - org.apache.lucene.search.PositiveScoresOnlyCollector → org.gnit.lucenekmp.search.PositiveScoresOnlyCollector
 - org.apache.lucene.search.QueryRescorer → org.gnit.lucenekmp.search.QueryRescorer
@@ -455,10 +451,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestFilterLeafReader → org.gnit.lucenekmp.index.TestFilterLeafReader
-- org.apache.lucene.index.TestFilterMergePolicy → org.gnit.lucenekmp.index.TestFilterMergePolicy
-- org.apache.lucene.index.TestFlex → org.gnit.lucenekmp.index.TestFlex
-- org.apache.lucene.index.TestFlushByRamOrCountsPolicy → org.gnit.lucenekmp.index.TestFlushByRamOrCountsPolicy
 - org.apache.lucene.index.TestForTooMuchCloning → org.gnit.lucenekmp.index.TestForTooMuchCloning
 - org.apache.lucene.index.TestForceMergeForever → org.gnit.lucenekmp.index.TestForceMergeForever
 - org.apache.lucene.index.TestFrozenBufferedUpdates → org.gnit.lucenekmp.index.TestFrozenBufferedUpdates
@@ -597,9 +589,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.ElevationComparatorSource → org.gnit.lucenekmp.search.ElevationComparatorSource
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
-- org.apache.lucene.search.TestCachingCollector → org.gnit.lucenekmp.search.TestCachingCollector
-- org.apache.lucene.search.TestCollectorManager → org.gnit.lucenekmp.search.TestCollectorManager
-- org.apache.lucene.search.TestCombinedFieldQuery → org.gnit.lucenekmp.search.TestCombinedFieldQuery
 - org.apache.lucene.search.TestComplexExplanations → org.gnit.lucenekmp.search.TestComplexExplanations
 - org.apache.lucene.search.TestComplexExplanationsOfNonMatches → org.gnit.lucenekmp.search.TestComplexExplanationsOfNonMatches
 - org.apache.lucene.search.TestConjunctionDISI → org.gnit.lucenekmp.search.TestConjunctionDISI

@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1166 | 85% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1170 | 85% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 25 | 96% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -85,7 +85,7 @@
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 26 | 25 | 96% | [ ] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 3 | 2 | 66% | [ ] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 6 | 5 | 83% | [ ] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 197 | 171 | 86% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 197 | 175 | 88% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 9 | 8 | 88% | [ ] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 47 | 97% | [ ] |
@@ -147,11 +147,11 @@
 |     org.apache.lucene.codecs.perfield | 4 | 4 | 100% |
 |   org.apache.lucene.document | 50 | 49 | 98% |
 |   org.apache.lucene.geo | 17 | 17 | 100% |
-|   org.apache.lucene.index | 197 | 81 | 41% |
+|   org.apache.lucene.index | 197 | 84 | 42% |
 |     org.apache.lucene.internal.hppc | 15 | 15 | 100% |
 |     org.apache.lucene.internal.tests | 1 | 1 | 100% |
 |     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
-|   org.apache.lucene.search | 149 | 29 | 19% |
+|   org.apache.lucene.search | 149 | 32 | 21% |
 |     org.apache.lucene.search.knn | 1 | 1 | 100% |
 |     org.apache.lucene.search.similarities | 25 | 25 | 100% |
 |   org.apache.lucene.store | 27 | 27 | 100% |
@@ -165,7 +165,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 673 | 429 | 63% |
+| Total | 673 | 435 | 64% |
 
 
 ## Tests To Port
@@ -178,9 +178,6 @@
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
 | [org.apache.lucene.codecs.TestCodecLoadingDeadlock](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/codecs/TestCodecLoadingDeadlock.java) | org.gnit.lucenekmp.codecs.TestCodecLoadingDeadlock |
 | [org.apache.lucene.index.Test4GBStoredFields](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test4GBStoredFields.java) | org.gnit.lucenekmp.index.Test4GBStoredFields |
-| [org.apache.lucene.index.TestForTooMuchCloning](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestForTooMuchCloning.java) | org.gnit.lucenekmp.index.TestForTooMuchCloning |
-| [org.apache.lucene.index.TestForceMergeForever](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestForceMergeForever.java) | org.gnit.lucenekmp.index.TestForceMergeForever |
-| [org.apache.lucene.index.TestFrozenBufferedUpdates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestFrozenBufferedUpdates.java) | org.gnit.lucenekmp.index.TestFrozenBufferedUpdates |
 | [org.apache.lucene.index.TestIndexCommit](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexCommit.java) | org.gnit.lucenekmp.index.TestIndexCommit |
 | [org.apache.lucene.index.TestIndexFileDeleter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexFileDeleter.java) | org.gnit.lucenekmp.index.TestIndexFileDeleter |
 | [org.apache.lucene.index.TestIndexManyDocuments](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexManyDocuments.java) | org.gnit.lucenekmp.index.TestIndexManyDocuments |
@@ -291,9 +288,6 @@
 | [org.apache.lucene.index.TestTryDelete](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestTryDelete.java) | org.gnit.lucenekmp.index.TestTryDelete |
 | [org.apache.lucene.index.TestTwoPhaseCommitTool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestTwoPhaseCommitTool.java) | org.gnit.lucenekmp.index.TestTwoPhaseCommitTool |
 | [org.apache.lucene.index.TestUniqueTermCount](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestUniqueTermCount.java) | org.gnit.lucenekmp.index.TestUniqueTermCount |
-| [org.apache.lucene.search.TestCachingCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestCachingCollector.java) | org.gnit.lucenekmp.search.TestCachingCollector |
-| [org.apache.lucene.search.TestCollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestCollectorManager.java) | org.gnit.lucenekmp.search.TestCollectorManager |
-| [org.apache.lucene.search.TestCombinedFieldQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestCombinedFieldQuery.java) | org.gnit.lucenekmp.search.TestCombinedFieldQuery |
 | [org.apache.lucene.search.TestComplexExplanations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestComplexExplanations.java) | org.gnit.lucenekmp.search.TestComplexExplanations |
 | [org.apache.lucene.search.TestComplexExplanationsOfNonMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestComplexExplanationsOfNonMatches.java) | org.gnit.lucenekmp.search.TestComplexExplanationsOfNonMatches |
 | [org.apache.lucene.search.TestConjunctionDISI](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestConjunctionDISI.java) | org.gnit.lucenekmp.search.TestConjunctionDISI |
