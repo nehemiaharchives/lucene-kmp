@@ -5011,7 +5011,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    protected fun merge(merge: MergePolicy.OneMerge) {
+    protected open fun merge(merge: MergePolicy.OneMerge) {
         var success = false
 
         merge.markDebugPhase("iw.merge.start")
