@@ -21,7 +21,7 @@ import org.gnit.lucenekmp.util.IOSupplier
  * A Query that matches documents containing a term. This may be combined with other terms with a
  * [BooleanQuery].
  */
-class TermQuery : Query {
+open class TermQuery : Query {
 
     private val term: Term
     private val perReaderTermState: TermStates?
