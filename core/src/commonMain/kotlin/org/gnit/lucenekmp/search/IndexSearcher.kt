@@ -933,7 +933,7 @@ open class IndexSearcher(
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    fun collectionStatistics(field: String): CollectionStatistics? {
+    open fun collectionStatistics(field: String): CollectionStatistics? {
         //checkNotNull(field)
         var docCount: Long = 0
         var sumTotalTermFreq: Long = 0
