@@ -148,6 +148,15 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         annotation class Nightly
         // ↑ line 294 of LuceneTestCase.java
 
+        @MustBeDocumented
+        @Retention(AnnotationRetention.RUNTIME)
+        annotation class AwaitsFix(val bugUrl: String = "")
+
+        @MustBeDocumented
+        @Retention(AnnotationRetention.RUNTIME)
+        @Target(AnnotationTarget.CLASS)
+        annotation class SuppressCodecs(vararg val value: String)
+
 
 
         // ↓ line 408

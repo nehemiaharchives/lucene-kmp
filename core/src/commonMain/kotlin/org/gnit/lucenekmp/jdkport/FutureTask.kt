@@ -542,4 +542,15 @@ object Executors {
             threadFactory
         )
     }
+
+    fun newCachedThreadPool(threadFactory: ThreadFactory = defaultThreadFactory()): ExecutorService {
+        return ThreadPoolExecutor(
+            0,
+            Int.MAX_VALUE,
+            60L,
+            TimeUnit.SECONDS,
+            LinkedBlockingQueue(),
+            threadFactory
+        )
+    }
 }

@@ -1625,7 +1625,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      * @throws IOException if there is a low-level IO error
      */
     @Throws(IOException::class)
-    fun updateDocument(
+    open fun updateDocument(
         term: Term?,
         doc: Iterable<IndexableField>
     ): Long {

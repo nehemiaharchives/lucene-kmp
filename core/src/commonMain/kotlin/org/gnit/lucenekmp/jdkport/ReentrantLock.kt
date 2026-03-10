@@ -172,3 +172,12 @@ class ReentrantLock: Lock {
         private const val NO_OWNER: Long = -1L
     }
 }
+
+inline fun <T> ReentrantLock.withLock(action: () -> T): T {
+    lock()
+    try {
+        return action()
+    } finally {
+        unlock()
+    }
+}
