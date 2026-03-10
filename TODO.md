@@ -373,7 +373,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.SearcherFactory → org.gnit.lucenekmp.search.SearcherFactory
 - org.apache.lucene.search.SearcherManager → org.gnit.lucenekmp.search.SearcherManager
 - org.apache.lucene.search.SortRescorer → org.gnit.lucenekmp.search.SortRescorer
-- org.apache.lucene.search.TestBooleanQueryVisitSubscorers → org.gnit.lucenekmp.search.TestBooleanQueryVisitSubscorers
 - org.apache.lucene.search.TestControlledRealTimeReopenThread → org.gnit.lucenekmp.search.TestControlledRealTimeReopenThread
 - org.apache.lucene.search.TestDoubleRangeFieldQueries → org.gnit.lucenekmp.search.TestDoubleRangeFieldQueries
 - org.apache.lucene.search.TestFloatRangeFieldQueries → org.gnit.lucenekmp.search.TestFloatRangeFieldQueries

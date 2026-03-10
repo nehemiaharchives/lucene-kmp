@@ -654,7 +654,7 @@ open class IndexSearcher(
      * clauses.
      */
     @Throws(IOException::class)
-    protected fun searchLeaf(
+    protected open fun searchLeaf(
         ctx: LeafReaderContext,
         minDocId: Int,
         maxDocId: Int,
