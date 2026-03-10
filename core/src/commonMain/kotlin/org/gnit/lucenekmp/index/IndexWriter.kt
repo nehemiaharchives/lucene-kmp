@@ -597,86 +597,83 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     applyAllDeletesAndUpdates()
                 }
 
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                // NOTE: we cannot carry doc values updates in memory yet, so we always must write them
-                // through to disk and re-open each
-                // SegmentReader:
+                withIndexWriterLock {
+                    // NOTE: we cannot carry doc values updates in memory yet, so we always must write them
+                    // through to disk and re-open each
+                    // SegmentReader:
 
-                // TODO: we could instead just clone SIS and pull/incref readers in sync'd block, and
-                // then do this w/o IW's lock
-                // Must do this sync'd on IW to prevent a merge from completing at the last second and
-                // failing to write its DV updates:
-                writeReaderPool(writeAllDeletes)
+                    // TODO: we could instead just clone SIS and pull/incref readers in sync'd block, and
+                    // then do this w/o IW's lock
+                    // Must do this sync'd on IW to prevent a merge from completing at the last second and
+                    // failing to write its DV updates:
+                    writeReaderPool(writeAllDeletes)
 
-                // Prevent segmentInfos from changing while opening the
-                // reader; in theory we could instead do similar retry logic,
-                // just like we do when loading segments_N
-                r =
-                    StandardDirectoryReader.open(
-                        this, readerFactory, segmentInfos, applyAllDeletes, writeAllDeletes
-                    )
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "return reader version=" + r.version + " reader=" + r)
-                }
-                if (maxFullFlushMergeWaitMillis > 0) {
-                    // we take the SIS from the reader which has already pruned away fully deleted readers
-                    // this makes pulling the readers below after the merge simpler since we can be safe
-                    // that
-                    // they are not closed. Every segment has a corresponding SR in the SDR we opened if
-                    // we use
-                    // this SIS
-                    // we need to do this rather complicated management of SRs and infos since we can't
-                    // wait for merges
-                    // while we hold the fullFlushLock since the merge might hit a tragic event and that
-                    // must not be reported
-                    // while holding that lock. Merging outside of the lock ie. after calling
-                    // docWriter.finishFullFlush(boolean) would
-                    // yield wrong results because deletes might sneak in during the merge
-                    openingSegmentInfos = r.segmentInfos.clone()
-                    onGetReaderMerges =
-                        preparePointInTimeMerge(
-                            openingSegmentInfos,
-                            { stopCollectingMergedReaders.load() },
-                            MergeTrigger.GET_READER,
-                            { sci: SegmentCommitInfo ->
-                                assert(
-                                    !stopCollectingMergedReaders.load()
-                                ) { "illegal state  merge reader must be not pulled since we already stopped waiting for merges" }
-                                val apply: SegmentReader = readerFactory.apply(sci)
-                                mergedReaders[sci.info.name] = apply
-                                // we need to incRef the files of the opened SR otherwise it's possible that
-                                // another merge
-                                // removes the segment before we pass it on to the SDR
-                                deleter.incRef(sci.files())
-                            })
-                    onGetReaderMergeResources =
-                        AutoCloseable {
-                            // this needs to be closed once after we are done. In the case of an exception
-                            // it releases
-                            // all resources, closes the merged readers and decrements the files references.
-                            // this only happens for readers that haven't been removed from the
-                            // mergedReaders and release elsewhere
-
-                            // TODO synchronized is not supported in KMP, need to think what to do here
-                            //synchronized(this) {
-                            stopCollectingMergedReaders.store(true)
-                            IOUtils.close(
-                                mergedReaders.values
-                                    .map { sr: SegmentReader ->
-                                        AutoCloseable {
-                                            try {
-                                                deleter.decRef(sr.segmentInfo.files())
-                                            } finally {
-                                                sr.close()
+                    // Prevent segmentInfos from changing while opening the
+                    // reader; in theory we could instead do similar retry logic,
+                    // just like we do when loading segments_N
+                    r =
+                        StandardDirectoryReader.open(
+                            this, readerFactory, segmentInfos, applyAllDeletes, writeAllDeletes
+                        )
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "return reader version=" + r.version + " reader=" + r)
+                    }
+                    if (maxFullFlushMergeWaitMillis > 0) {
+                        // we take the SIS from the reader which has already pruned away fully deleted readers
+                        // this makes pulling the readers below after the merge simpler since we can be safe
+                        // that
+                        // they are not closed. Every segment has a corresponding SR in the SDR we opened if
+                        // we use
+                        // this SIS
+                        // we need to do this rather complicated management of SRs and infos since we can't
+                        // wait for merges
+                        // while we hold the fullFlushLock since the merge might hit a tragic event and that
+                        // must not be reported
+                        // while holding that lock. Merging outside of the lock ie. after calling
+                        // docWriter.finishFullFlush(boolean) would
+                        // yield wrong results because deletes might sneak in during the merge
+                        openingSegmentInfos = r.segmentInfos.clone()
+                        onGetReaderMerges =
+                            preparePointInTimeMerge(
+                                openingSegmentInfos,
+                                { stopCollectingMergedReaders.load() },
+                                MergeTrigger.GET_READER,
+                                { sci: SegmentCommitInfo ->
+                                    assert(
+                                        !stopCollectingMergedReaders.load()
+                                    ) { "illegal state  merge reader must be not pulled since we already stopped waiting for merges" }
+                                    val apply: SegmentReader = readerFactory.apply(sci)
+                                    mergedReaders[sci.info.name] = apply
+                                    // we need to incRef the files of the opened SR otherwise it's possible that
+                                    // another merge
+                                    // removes the segment before we pass it on to the SDR
+                                    deleter.incRef(sci.files())
+                                })
+                        onGetReaderMergeResources =
+                            AutoCloseable {
+                                // this needs to be closed once after we are done. In the case of an exception
+                                // it releases
+                                // all resources, closes the merged readers and decrements the files references.
+                                // this only happens for readers that haven't been removed from the
+                                // mergedReaders and release elsewhere
+                                withIndexWriterLock {
+                                    stopCollectingMergedReaders.store(true)
+                                    IOUtils.close(
+                                        mergedReaders.values
+                                            .map { sr: SegmentReader ->
+                                                AutoCloseable {
+                                                    try {
+                                                        deleter.decRef(sr.segmentInfo.files())
+                                                    } finally {
+                                                        sr.close()
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }
-                                    .toList())
-                            //}
-                        }
+                                            .toList())
+                                }
+                            }
+                    }
                 }
-                //} // synchronized(this)
                     success = true
                 } finally {
                 // Done: finish the full flush!
@@ -759,21 +756,20 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         runBlocking { mergeScheduler.merge(mergeSource, MergeTrigger.GET_READER) }
         pointInTimeMerges.await(maxCommitMergeWaitMillis, TimeUnit.MILLISECONDS)
 
-        // TODO synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-        stopCollectingMergedReaders.store(true)
-        val reader: StandardDirectoryReader? =
-            maybeReopenMergedNRTReader(
-                mergedReaders,
-                openedReadOnlyClones,
-                openingSegmentInfos,
-                applyAllDeletes,
-                writeAllDeletes
-            )
-        IOUtils.close(mergedReaders.values)
-        mergedReaders.clear()
-        return reader
-        //}
+        return withIndexWriterLock {
+            stopCollectingMergedReaders.store(true)
+            val reader: StandardDirectoryReader? =
+                maybeReopenMergedNRTReader(
+                    mergedReaders,
+                    openedReadOnlyClones,
+                    openingSegmentInfos,
+                    applyAllDeletes,
+                    writeAllDeletes
+                )
+            IOUtils.close(mergedReaders.values)
+            mergedReaders.clear()
+            reader
+        }
     }
 
     @Throws(IOException::class)
