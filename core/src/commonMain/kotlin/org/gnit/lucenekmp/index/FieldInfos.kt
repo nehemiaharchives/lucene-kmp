@@ -9,6 +9,7 @@ import org.gnit.lucenekmp.index.FieldInfo.Companion.verifySameStoreTermVectors
 import org.gnit.lucenekmp.index.FieldInfo.Companion.verifySameVectorOptions
 import org.gnit.lucenekmp.internal.hppc.IntObjectHashMap
 import org.gnit.lucenekmp.jdkport.Arrays
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.util.CollectionUtil
 
@@ -271,6 +272,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
     class FieldNumbers(softDeletesFieldName: String?, parentFieldName: String?) {
         private val numberToName: IntObjectHashMap<String> = IntObjectHashMap()
         private val fieldProperties: MutableMap<String, FieldProperties>
+        private val lock = ReentrantLock()
 
         // TODO: we should similarly catch an attempt to turn
         // norms back on after they were already committed; today
@@ -295,11 +297,16 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         }
 
         fun verifyFieldInfo(fi: FieldInfo) {
-            val fieldName: String = fi.name
-            verifySoftDeletedFieldName(fieldName, fi.isSoftDeletesField)
-            verifyParentFieldName(fieldName, fi.isParentField)
-            if (fieldProperties.containsKey(fieldName)) {
-                verifySameSchema(fi)
+            lock.lock()
+            try {
+                val fieldName: String = fi.name
+                verifySoftDeletedFieldName(fieldName, fi.isSoftDeletesField)
+                verifyParentFieldName(fieldName, fi.isParentField)
+                if (fieldProperties.containsKey(fieldName)) {
+                    verifySameSchema(fi)
+                }
+            } finally {
+                lock.unlock()
             }
         }
 
@@ -309,51 +316,56 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
          * first unassigned field number is used as the field number.
          */
         fun addOrGet(fi: FieldInfo): Int {
-            val fieldName: String = fi.name
-            verifySoftDeletedFieldName(fieldName, fi.isSoftDeletesField)
-            verifyParentFieldName(fieldName, fi.isParentField)
-            var fieldProperties = this.fieldProperties[fieldName]
+            lock.lock()
+            try {
+                val fieldName: String = fi.name
+                verifySoftDeletedFieldName(fieldName, fi.isSoftDeletesField)
+                verifyParentFieldName(fieldName, fi.isParentField)
+                var fieldProperties = this.fieldProperties[fieldName]
 
-            if (fieldProperties != null) {
-                verifySameSchema(fi)
-            } else { // first time we see this field in this index
-                val fieldNumber: Int
-                if (fi.number != -1 && numberToName.containsKey(fi.number) == false) {
-                    // cool - we can use this number globally
-                    fieldNumber = fi.number
-                } else {
-                    // find a new FieldNumber
-                    while (numberToName.containsKey(++lowestUnassignedFieldNumber)) {
-                        // might not be up to date - lets do the work once needed
+                if (fieldProperties != null) {
+                    verifySameSchema(fi)
+                } else { // first time we see this field in this index
+                    val fieldNumber: Int
+                    if (fi.number != -1 && numberToName.containsKey(fi.number) == false) {
+                        // cool - we can use this number globally
+                        fieldNumber = fi.number
+                    } else {
+                        // find a new FieldNumber
+                        while (numberToName.containsKey(++lowestUnassignedFieldNumber)) {
+                            // might not be up to date - lets do the work once needed
+                        }
+                        fieldNumber = lowestUnassignedFieldNumber
                     }
-                    fieldNumber = lowestUnassignedFieldNumber
-                }
-                require(fieldNumber >= 0)
-                numberToName.put(fieldNumber, fieldName)
-                fieldProperties =
-                    FieldProperties(
-                        fieldNumber,
-                        fi.indexOptions,
-                        if (fi.indexOptions != IndexOptions.NONE)
-                            IndexOptionsProperties(fi.hasTermVectors(), fi.omitsNorms())
-                        else
-                            null,
-                        fi.docValuesType,
-                        fi.docValuesSkipIndexType(),
-                        FieldDimensions(
-                            fi.pointDimensionCount,
-                            fi.pointIndexDimensionCount,
-                            fi.pointNumBytes
-                        ),
-                        FieldVectorProperties(
-                            fi.vectorDimension,
-                            fi.vectorEncoding,
-                            fi.vectorSimilarityFunction
+                    require(fieldNumber >= 0)
+                    numberToName.put(fieldNumber, fieldName)
+                    fieldProperties =
+                        FieldProperties(
+                            fieldNumber,
+                            fi.indexOptions,
+                            if (fi.indexOptions != IndexOptions.NONE)
+                                IndexOptionsProperties(fi.hasTermVectors(), fi.omitsNorms())
+                            else
+                                null,
+                            fi.docValuesType,
+                            fi.docValuesSkipIndexType(),
+                            FieldDimensions(
+                                fi.pointDimensionCount,
+                                fi.pointIndexDimensionCount,
+                                fi.pointNumBytes
+                            ),
+                            FieldVectorProperties(
+                                fi.vectorDimension,
+                                fi.vectorEncoding,
+                                fi.vectorSimilarityFunction
+                            )
                         )
-                    )
-                this.fieldProperties.put(fieldName, fieldProperties)
+                    this.fieldProperties.put(fieldName, fieldProperties)
+                }
+                return fieldProperties.number
+            } finally {
+                lock.unlock()
             }
-            return fieldProperties.number
         }
 
         private fun verifySoftDeletedFieldName(fieldName: String, isSoftDeletesField: Boolean) {
@@ -460,83 +472,88 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         fun verifyOrCreateDvOnlyField(
             fieldName: String, dvType: DocValuesType, fieldMustExist: Boolean
         ) {
-            if (fieldProperties.containsKey(fieldName) == false) {
-                require(!fieldMustExist) {
-                    ("Can't update ["
-                            + dvType
-                            + "] doc values; the field ["
-                            + fieldName
-                            + "] doesn't exist.")
-                }
+            lock.lock()
+            try {
+                if (fieldProperties.containsKey(fieldName) == false) {
+                    require(!fieldMustExist) {
+                        ("Can't update ["
+                                + dvType
+                                + "] doc values; the field ["
+                                + fieldName
+                                + "] doesn't exist.")
+                    }
 
-                // create dv only field
-                val fi =
-                    FieldInfo(
-                        fieldName,
-                        -1,
-                        false,
-                        false,
-                        false,
-                        IndexOptions.NONE,
-                        dvType,
-                        DocValuesSkipIndexType.NONE,
-                        -1,
-                        mutableMapOf(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        VectorEncoding.FLOAT32,
-                        VectorSimilarityFunction.EUCLIDEAN,
-                        (softDeletesFieldName != null && softDeletesFieldName == fieldName),
-                        (parentFieldName != null && parentFieldName == fieldName)
-                    )
-                addOrGet(fi)
-            } else {
-                // verify that field is doc values only field with the give doc values type
-                val fieldProperties: FieldProperties = this.fieldProperties[fieldName]!!
-                val fieldDvType = fieldProperties.docValuesType
-                require(dvType === fieldDvType) {
-                    ("Can't update ["
-                            + dvType
-                            + "] doc values; the field ["
-                            + fieldName
-                            + "] has inconsistent doc values' type of ["
-                            + fieldDvType
-                            + "].")
+                    // create dv only field
+                    val fi =
+                        FieldInfo(
+                            fieldName,
+                            -1,
+                            false,
+                            false,
+                            false,
+                            IndexOptions.NONE,
+                            dvType,
+                            DocValuesSkipIndexType.NONE,
+                            -1,
+                            mutableMapOf(),
+                            0,
+                            0,
+                            0,
+                            0,
+                            VectorEncoding.FLOAT32,
+                            VectorSimilarityFunction.EUCLIDEAN,
+                            (softDeletesFieldName != null && softDeletesFieldName == fieldName),
+                            (parentFieldName != null && parentFieldName == fieldName)
+                        )
+                    addOrGet(fi)
+                } else {
+                    // verify that field is doc values only field with the give doc values type
+                    val fieldProperties: FieldProperties = this.fieldProperties[fieldName]!!
+                    val fieldDvType = fieldProperties.docValuesType
+                    require(dvType === fieldDvType) {
+                        ("Can't update ["
+                                + dvType
+                                + "] doc values; the field ["
+                                + fieldName
+                                + "] has inconsistent doc values' type of ["
+                                + fieldDvType
+                                + "].")
+                    }
+                    val hasDocValuesSkipIndex = fieldProperties.docValuesSkipIndex
+                    require(hasDocValuesSkipIndex === DocValuesSkipIndexType.NONE) {
+                        ("Can't update ["
+                                + dvType
+                                + "] doc values; the field ["
+                                + fieldName
+                                + "] must be doc values only field, bit it has doc values skip index")
+                    }
+                    val fdimensions: FieldDimensions = fieldProperties.fieldDimensions
+                    require(!(fdimensions != null && fdimensions.dimensionCount != 0)) {
+                        ("Can't update ["
+                                + dvType
+                                + "] doc values; the field ["
+                                + fieldName
+                                + "] must be doc values only field, but is also indexed with points.")
+                    }
+                    val ioptions = fieldProperties.indexOptions
+                    require(!(ioptions != null && ioptions !== IndexOptions.NONE)) {
+                        ("Can't update ["
+                                + dvType
+                                + "] doc values; the field ["
+                                + fieldName
+                                + "] must be doc values only field, but is also indexed with postings.")
+                    }
+                    val fvp: FieldVectorProperties = fieldProperties.fieldVectorProperties
+                    require(!(fvp != null && fvp.numDimensions != 0)) {
+                        ("Can't update ["
+                                + dvType
+                                + "] doc values; the field ["
+                                + fieldName
+                                + "] must be doc values only field, but is also indexed with vectors.")
+                    }
                 }
-                val hasDocValuesSkipIndex = fieldProperties.docValuesSkipIndex
-                require(hasDocValuesSkipIndex === DocValuesSkipIndexType.NONE) {
-                    ("Can't update ["
-                            + dvType
-                            + "] doc values; the field ["
-                            + fieldName
-                            + "] must be doc values only field, bit it has doc values skip index")
-                }
-                val fdimensions: FieldDimensions = fieldProperties.fieldDimensions
-                require(!(fdimensions != null && fdimensions.dimensionCount != 0)) {
-                    ("Can't update ["
-                            + dvType
-                            + "] doc values; the field ["
-                            + fieldName
-                            + "] must be doc values only field, but is also indexed with points.")
-                }
-                val ioptions = fieldProperties.indexOptions
-                require(!(ioptions != null && ioptions !== IndexOptions.NONE)) {
-                    ("Can't update ["
-                            + dvType
-                            + "] doc values; the field ["
-                            + fieldName
-                            + "] must be doc values only field, but is also indexed with postings.")
-                }
-                val fvp: FieldVectorProperties = fieldProperties.fieldVectorProperties
-                require(!(fvp != null && fvp.numDimensions != 0)) {
-                    ("Can't update ["
-                            + dvType
-                            + "] doc values; the field ["
-                            + fieldName
-                            + "] must be doc values only field, but is also indexed with vectors.")
-                }
+            } finally {
+                lock.unlock()
             }
         }
 
@@ -551,8 +568,12 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
          * `dvType` returns a new FieldInfo based based on the options in global field numbers
          */
         fun constructFieldInfo(fieldName: String, dvType: DocValuesType, newFieldNumber: Int): FieldInfo? {
-
-            val fieldProperties = this.fieldProperties[fieldName]
+            lock.lock()
+            val fieldProperties = try {
+                this.fieldProperties[fieldName]
+            } finally {
+                lock.unlock()
+            }
 
             if (fieldProperties == null) return null
             val dvType0 = fieldProperties.docValuesType
@@ -582,12 +603,24 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
         }
 
         val fieldNames: MutableSet<String>
-            get() = fieldProperties.keys
+            get() {
+                lock.lock()
+                return try {
+                    fieldProperties.keys.toMutableSet()
+                } finally {
+                    lock.unlock()
+                }
+            }
 
         fun clear() {
-            numberToName.clear()
-            fieldProperties.clear()
-            lowestUnassignedFieldNumber = -1
+            lock.lock()
+            try {
+                numberToName.clear()
+                fieldProperties.clear()
+                lowestUnassignedFieldNumber = -1
+            } finally {
+                lock.unlock()
+            }
         }
     }
 

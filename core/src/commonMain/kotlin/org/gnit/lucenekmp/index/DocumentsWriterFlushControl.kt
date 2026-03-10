@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
@@ -39,8 +38,6 @@ class DocumentsWriterFlushControl(
     private val documentsWriter: DocumentsWriter,
     private val config: LiveIndexWriterConfig
 ) : Accountable, AutoCloseable {
-
-    private val logger = KotlinLogging.logger {}
     private val syncLock = ReentrantLock()
 
     private val hardMaxBytesPerDWPT: Long = config.rAMPerThreadHardLimitMB * 1024L * 1024L
@@ -319,16 +316,12 @@ class DocumentsWriterFlushControl(
     fun doAfterFlush(dwpt: DocumentsWriterPerThread) {
         syncLock.lock()
         try {
-            val removed = flushingWriters.remove(dwpt)
-            if (!removed) {
-                // logger.debug { "DWFC.doAfterFlush(): DWPT was not present in flushingWriters seg=${dwpt.getSegmentInfo().name}" }
-            }
+            flushingWriters.remove(dwpt)
             try {
                 val count = flushingWritersCount.decrementAndFetch()
                 if (count < 0) {
                     // Keep count monotonic to avoid indefinite waitForFlush spin if accounting gets imbalanced.
                     flushingWritersCount.set(0)
-                    // logger.debug { "DWFC.doAfterFlush(): flushingWritersCount went negative, clamped to zero" }
                 }
                 this.flushingBytes -= dwpt.lastCommittedBytesUsed
                 assert(assertMemory())
@@ -387,28 +380,14 @@ class DocumentsWriterFlushControl(
     // TODO Syncronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun waitForFlush() {
-        val start = Clock.System.now()
-        var spins = 0
-        // logger.debug {
-        //     "DWFC.waitForFlush() enter: flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush"
-        // }
         while (flushingWritersCount.load() > 0) {
             try {
-                spins++
-                // if (spins % 1024 == 0) {
-                //     logger.debug {
-                //         "DWFC.waitForFlush() loop: spins=$spins flushingWritersCount=${flushingWritersCount.load()} flushingWritersList=${flushingWriters.size} queued=${flushQueue.size} blocked=${blockedFlushes.size} fullFlush=$isFullFlush elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
-                //     }
-                // }
                 // No monitor wait/notify in KMP; yield cooperatively so in-flight flush work can complete.
                 runBlocking { yield() }
             } catch (e: CancellationException) {
                 throw ThreadInterruptedException(e)
             }
         }
-        // logger.debug {
-        //     "DWFC.waitForFlush() exit: spins=$spins elapsedMs=${(Clock.System.now() - start).toString(unit = DurationUnit.MILLISECONDS)}"
-        // }
     }
 
     /**
@@ -503,10 +482,20 @@ class DocumentsWriterFlushControl(
     private fun addFlushingDWPT(perThread: DocumentsWriterPerThread) {
         assert(!flushingWriters.contains(perThread)) { "DWPT is already flushing" }
         flushingWriters.add(perThread)
-        val count = flushingWritersCount.incrementAndFetch()
-        // logger.debug {
-        //     "DWFC.addFlushingDWPT() seg=${perThread.getSegmentInfo().name} flushingWritersCount=$count flushingWritersList=${flushingWriters.size}"
-        // }
+        flushingWritersCount.incrementAndFetch()
+    }
+
+    suspend fun releaseAfterDocument(dwpt: DocumentsWriterPerThread) {
+        syncLock.lock()
+        try {
+            if (dwpt.isFlushPending() || dwpt.isAborted || dwpt.isQueueAdvanced) {
+                dwpt.unlock()
+            } else {
+                perThreadPool.marksAsFreeAndUnlock(dwpt)
+            }
+        } finally {
+            syncLock.unlock()
+        }
     }
 
     /**
@@ -786,6 +775,10 @@ class DocumentsWriterFlushControl(
         return stallControl.anyStalledThreads()
     }
 
+    fun allActiveWriters(): MutableIterator<DocumentsWriterPerThread> {
+        return perThreadPool.iterator()
+    }
+
     /** Returns the [IndexWriter] [InfoStream]  */
     fun getInfoStream(): InfoStream {
         return infoStream
@@ -832,8 +825,8 @@ class DocumentsWriterFlushControl(
             largestNonPendingWriter.lock()
             try {
                 if (perThreadPool.isRegistered(largestNonPendingWriter)) {
-                    // TODO Syncronized is not supported in KMP, need to think what to do here
-                    //synchronized(this) {
+                    syncLock.lock()
+                    try {
                         try {
                             return checkout(
                                 largestNonPendingWriter, largestNonPendingWriter.isFlushPending() == false
@@ -841,7 +834,9 @@ class DocumentsWriterFlushControl(
                         } finally {
                             updateStallState()
                         }
-                    //}
+                    } finally {
+                        syncLock.unlock()
+                    }
                 }
             } finally {
                 largestNonPendingWriter.unlock()
@@ -878,17 +873,36 @@ class DocumentsWriterFlushControl(
 
     /** Retrieve next pending DWPT to flush, if any (typically during full flush). */
     fun nextPendingFlush(): DocumentsWriterPerThread? {
+        val numPending: Int
+        val fullFlush: Boolean
         syncLock.lock()
-        val next = try {
-            flushQueue.poll()
+        try {
+            val next = flushQueue.poll()
+            if (next != null) {
+                updateStallState()
+                return next
+            }
+            fullFlush = this.isFullFlush
+            numPending = this.numPending
         } finally {
             syncLock.unlock()
         }
-        if (next == null) {
-            return null
+        if (numPending > 0 && !fullFlush) {
+            for (next in perThreadPool) {
+                if (next.isFlushPending()) {
+                    if (next.tryLock()) {
+                        try {
+                            if (perThreadPool.isRegistered(next)) {
+                                return checkOutForFlush(next)
+                            }
+                        } finally {
+                            next.unlock()
+                        }
+                    }
+                }
+            }
         }
-        //logger.debug { "DWFC.nextPendingFlush() -> seg=${next.getSegmentInfo().name} docsInRAM=${next.numDocsInRAM}" }
-        return next
+        return null
     }
 
     override fun ramBytesUsed(): Long {

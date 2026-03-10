@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.index
 
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
@@ -26,6 +27,7 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     private val freeList: LockableConcurrentApproximatePriorityQueue<DocumentsWriterPerThread> =
         LockableConcurrentApproximatePriorityQueue()
     private var takenWriterPermits = 0
+    private val dwptsLock = ReentrantLock()
 
     @Volatile
     private var closed = false
@@ -90,7 +92,12 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
         ensureOpen()
         val dwpt: DocumentsWriterPerThread = dwptFactory()
         dwpt.lock() // lock so nobody else will get this DWPT
-        dwpts.add(dwpt)
+        dwptsLock.lock()
+        try {
+            dwpts.add(dwpt)
+        } finally {
+            dwptsLock.unlock()
+        }
         return dwpt
     }
 
@@ -119,7 +126,12 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun contains(state: DocumentsWriterPerThread): Boolean {
-        return dwpts.contains(state)
+        dwptsLock.lock()
+        return try {
+            dwpts.contains(state)
+        } finally {
+            dwptsLock.unlock()
+        }
     }
 
     suspend fun marksAsFreeAndUnlock(state: DocumentsWriterPerThread) {
@@ -144,7 +156,12 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     /*@Synchronized*/
     override fun iterator(): MutableIterator<DocumentsWriterPerThread> {
         // copy on read - this is a quick op since num states is low
-        return dwpts.toMutableSet().iterator()
+        dwptsLock.lock()
+        return try {
+            dwpts.toMutableList().iterator()
+        } finally {
+            dwptsLock.unlock()
+        }
     }
 
     /**
@@ -182,20 +199,30 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
         // #getAndLock cannot pull this DWPT out of the pool since #getAndLock does a DWPT#tryLock to
         // check if the DWPT is available.
         assert(perThread.isHeldByCurrentThread)
-        if (dwpts.remove(perThread)) {
-            freeList.remove(perThread)
-        } else {
-            assert(!freeList.contains(perThread))
-            return false
+        dwptsLock.lock()
+        try {
+            if (dwpts.remove(perThread)) {
+                freeList.remove(perThread)
+            } else {
+                assert(!freeList.contains(perThread))
+                return false
+            }
+            return true
+        } finally {
+            dwptsLock.unlock()
         }
-        return true
     }
 
     /** Returns `true` if this DWPT is still part of the pool  */
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun isRegistered(perThread: DocumentsWriterPerThread): Boolean {
-        return dwpts.contains(perThread)
+        dwptsLock.lock()
+        return try {
+            dwpts.contains(perThread)
+        } finally {
+            dwptsLock.unlock()
+        }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here

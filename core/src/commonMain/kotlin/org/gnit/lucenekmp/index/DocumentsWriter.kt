@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import org.gnit.lucenekmp.index.DocumentsWriterFlushQueue.FlushTicket
 import org.gnit.lucenekmp.index.DocumentsWriterPerThread.FlushedSegment
@@ -20,7 +21,6 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
-import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
  * This class accepts multiple added documents and directly writes segment files.
@@ -454,14 +454,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             // If the deleteQueue is advanced, this means the maximum seqNo has been set and it cannot be
             // reused
 
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(flushControl) {
-            if (dwpt.isFlushPending() || dwpt.isAborted || dwpt.isQueueAdvanced) {
-                dwpt.unlock()
-            } else {
-                perThreadPool.marksAsFreeAndUnlock(dwpt)
-            }
-            //}
+            flushControl.releaseAfterDocument(dwpt)
             assert(!dwpt.isHeldByCurrentThread) { "we didn't release the dwpt even on abort" }
         }
 
@@ -491,6 +484,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             assert(!flushingDWPT.hasFlushed())
             var success = false
             var ticket: FlushTicket? = null
+            var flushFailure: Throwable? = null
             try {
                 assert(
                     currentFullFlushDelQueue == null
@@ -544,8 +538,16 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     // flush was successful once we reached this point - new seg. has been assigned to the
                     // ticket!
                     success = true
+                } catch (t: Throwable) {
+                    flushFailure = t
+                    throw t
                 } finally {
                     if (!success && ticket != null) {
+                        logger.debug(flushFailure) {
+                            "DW.doFlush markTicketFailed seg=${flushingDWPT.getSegmentInfo().name} " +
+                                "ticketHasSegment=${ticket.hasSegment} flushedSegment=${ticket.flushedSegment != null} " +
+                                "flushingDocsInRam=${flushingDWPT.numDocsInRAM}"
+                        }
                         // In the case of a failure make sure we are making progress and
                         // apply all the deletes since the segment flush failed since the flush
                         // ticket could hold global deletes see FlushTicket#canPublish()

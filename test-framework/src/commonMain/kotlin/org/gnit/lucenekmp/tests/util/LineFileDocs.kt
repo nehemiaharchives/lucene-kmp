@@ -1,6 +1,7 @@
 package org.gnit.lucenekmp.tests.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Job
 import okio.FileSystem
 import okio.BufferedSource
 import okio.Buffer
@@ -25,10 +26,10 @@ import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.BufferedReader
 import org.gnit.lucenekmp.jdkport.CharsetDecoder
 import org.gnit.lucenekmp.jdkport.CodingErrorAction
-import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.InputStream
 import org.gnit.lucenekmp.jdkport.InputStreamReader
 import org.gnit.lucenekmp.jdkport.OkioSourceInputStream
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.set
 import org.gnit.lucenekmp.jdkport.toRealPath
@@ -53,11 +54,19 @@ class LineFileDocs(
     private var reader: BufferedReader? = null
     private val id: AtomicInteger = AtomicInteger(0)
     private val random: Random
+    private val lock = ReentrantLock()
+    private val jobDocs = mutableMapOf<Job, DocState>()
 
     /*@Synchronized*/
     override fun close() {
-        IOUtils.close(reader, threadDocs)
-        reader = null
+        lock.lock()
+        try {
+            IOUtils.close(reader, threadDocs)
+            reader = null
+            jobDocs.clear()
+        } finally {
+            lock.unlock()
+        }
     }
 
     private fun randomSeekPos(random: Random?, size: Long): Long {
@@ -71,102 +80,107 @@ class LineFileDocs(
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun open() {
-        var `is`: InputStream? = /*javaClass.getResourceAsStream(path)*/ null
+        lock.lock()
+        try {
+            var `is`: InputStream? = /*javaClass.getResourceAsStream(path)*/ null
 
-        // true if the InputStream is not already randomly seek'd after the if/else block below:
-        var needSkip: Boolean = false
+            // true if the InputStream is not already randomly seek'd after the if/else block below:
+            var needSkip: Boolean = false
 
-        var size = 0L
-        var seekTo = 0L
-        val isGzip = path.endsWith(".gz")
-        var file: Path? = null
-        if (`is` == null) {
-            // if it's not in classpath, we load it as absolute filesystem path (e.g. Jenkins' home dir)
+            var size = 0L
+            var seekTo = 0L
+            val isGzip = path.endsWith(".gz")
+            var file: Path? = null
+            if (`is` == null) {
+                // if it's not in classpath, we load it as absolute filesystem path (e.g. Jenkins' home dir)
 
-            if(path == "europarl.lines.txt.gz"){
-                val simplePath =
-                    "../test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
-                logger.debug { "LineFileDocs.open() path: $simplePath" }
-                file = simplePath.toPath()
-            }else{
-                file = path.toPath()
-            }
+                if(path == "europarl.lines.txt.gz"){
+                    val simplePath =
+                        "../test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
+                    logger.debug { "LineFileDocs.open() path: $simplePath" }
+                    file = simplePath.toPath()
+                }else{
+                    file = path.toPath()
+                }
 
-            logger.debug { "LineFileDocs.open() file: $file" }
+                logger.debug { "LineFileDocs.open() file: $file" }
 
-            size = FileSystem.SYSTEM.metadata(file).size ?: throw IOException("File does not exist or size is not available")
-            if (isGzip) {
-                // For now, always start at the beginning of the gzip stream.
-                // Okio's GzipSource does not allow arbitrary mid-stream starts.
-                `is` = openInputStream(file, 0L, true)
-                needSkip = false
+                size = FileSystem.SYSTEM.metadata(file).size ?: throw IOException("File does not exist or size is not available")
+                if (isGzip) {
+                    // For now, always start at the beginning of the gzip stream.
+                    // Okio's GzipSource does not allow arbitrary mid-stream starts.
+                    `is` = openInputStream(file, 0L, true)
+                    needSkip = false
+                } else {
+                    // file is not compressed: just open from the start
+                    `is` = OkioSourceInputStream(FileSystem.SYSTEM.source(file).buffer())
+                    needSkip = false
+                }
             } else {
-                // file is not compressed: just open from the start
-                `is` = OkioSourceInputStream(FileSystem.SYSTEM.source(file).buffer())
+                // if the file comes from Classpath:
+                size = `is`.available().toLong()
                 needSkip = false
             }
-        } else {
-            // if the file comes from Classpath:
-            size = `is`.available().toLong()
-            needSkip = false
-        }
 
-        if (needSkip) {
-            // LUCENE-9191: use the optimized (pre-computed, using
-            // dev-tools/scripts/create_line_file_docs.py)
-            // seek file, so we can seek in a gzip'd file
+            if (needSkip) {
+                // LUCENE-9191: use the optimized (pre-computed, using
+                // dev-tools/scripts/create_line_file_docs.py)
+                // seek file, so we can seek in a gzip'd file
 
-            val index = path.lastIndexOf('.')
-            require(index != -1) { "could not determine extension for path \"$path\"" }
+                val index = path.lastIndexOf('.')
+                require(index != -1) { "could not determine extension for path \"$path\"" }
 
-            // e.g. foo.txt --> foo.seek, foo.txt.gz --> foo.txt.seek
-            val seekFilePath: String = path.take(index) + ".seek"
-            var seekIS: InputStream? = /*javaClass.getResourceAsStream(seekFilePath)*/ null
-            if (seekIS == null) {
-                seekIS = OkioSourceInputStream(FileSystem.SYSTEM.source(seekFilePath.toPath()).buffer())
-            }
+                // e.g. foo.txt --> foo.seek, foo.txt.gz --> foo.txt.seek
+                val seekFilePath: String = path.take(index) + ".seek"
+                var seekIS: InputStream? = /*javaClass.getResourceAsStream(seekFilePath)*/ null
+                if (seekIS == null) {
+                    seekIS = OkioSourceInputStream(FileSystem.SYSTEM.source(seekFilePath.toPath()).buffer())
+                }
 
-            BufferedReader(
-                InputStreamReader(
-                    seekIS,
-                    StandardCharsets.UTF_8
-                )
-            ).use { reader ->
-                val skipPoints: MutableList<Long> = mutableListOf()
-                // explicitly insert implicit 0 as the first skip point:
-                skipPoints.add(0L)
+                BufferedReader(
+                    InputStreamReader(
+                        seekIS,
+                        StandardCharsets.UTF_8
+                    )
+                ).use { reader ->
+                    val skipPoints: MutableList<Long> = mutableListOf()
+                    // explicitly insert implicit 0 as the first skip point:
+                    skipPoints.add(0L)
 
-                while (true) {
-                    val line: String? = reader.readLine()
-                    if (line == null) {
-                        break
+                    while (true) {
+                        val line: String? = reader.readLine()
+                        if (line == null) {
+                            break
+                        }
+                        skipPoints.add(line.trim { it <= ' ' }.toLong())
                     }
-                    skipPoints.add(line.trim { it <= ' ' }.toLong())
-                }
 
-                seekTo = skipPoints.get(random.nextInt(skipPoints.size))
+                    seekTo = skipPoints.get(random.nextInt(skipPoints.size))
 
-                // dev-tools/scripts/create_line_file_docs.py ensures this is a "safe" skip point, and we
-                // can begin gunziping from here:
-                if (`is` == null && file != null) {
-                    `is` = openInputStream(file, seekTo, isGzip)
-                }
-                if (LuceneTestCase.VERBOSE) {
-                    println("TEST: LineFileDocs: stream skip to fp=$seekTo on open")
+                    // dev-tools/scripts/create_line_file_docs.py ensures this is a "safe" skip point, and we
+                    // can begin gunziping from here:
+                    if (`is` == null && file != null) {
+                        `is` = openInputStream(file, seekTo, isGzip)
+                    }
+                    if (LuceneTestCase.VERBOSE) {
+                        println("TEST: LineFileDocs: stream skip to fp=$seekTo on open")
+                    }
                 }
             }
-        }
 
-        if (`is` == null && file != null) {
-            `is` = openInputStream(file, seekTo, isGzip)
-        }
+            if (`is` == null && file != null) {
+                `is` = openInputStream(file, seekTo, isGzip)
+            }
 
-        val decoder: CharsetDecoder =
-            StandardCharsets.UTF_8
-                .newDecoder()
-                .onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT)
-        reader = BufferedReader(InputStreamReader(`is`!!, decoder), BUFFER_SIZE)
+            val decoder: CharsetDecoder =
+                StandardCharsets.UTF_8
+                    .newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+            reader = BufferedReader(InputStreamReader(`is`!!, decoder), BUFFER_SIZE)
+        } finally {
+            lock.unlock()
+        }
     }
 
     private fun openInputStream(file: Path, seekTo: Long, gzip: Boolean): InputStream {
@@ -246,10 +260,15 @@ class LineFileDocs(
     /*@Synchronized*/
     @Throws(IOException::class)
     fun reset() {
-        reader!!.close()
-        reader = null
-        open()
-        id.set(0)
+        lock.lock()
+        try {
+            reader!!.close()
+            reader = null
+            open()
+            id.set(0)
+        } finally {
+            lock.unlock()
+        }
     }
 
     private class DocState {
@@ -320,7 +339,8 @@ class LineFileDocs(
     @Throws(IOException::class)
     fun nextDoc(): Document {
         var line: String?
-        //synchronized(this) {
+        lock.lock()
+        try {
             line = reader!!.readLine()
             if (line == null) {
                 // Always rewind at end:
@@ -332,13 +352,11 @@ class LineFileDocs(
                 open()
                 line = reader!!.readLine()
             }
-        //}
-
-        var docState: DocState? = threadDocs.get()
-        if (docState == null) {
-            docState = DocState()
-            threadDocs.set(docState)
+        } finally {
+            lock.unlock()
         }
+
+        val docState = getOrCreateDocState()
 
         val spot = line!!.indexOf(SEP)
         if (spot == -1) {
@@ -393,6 +411,18 @@ class LineFileDocs(
     }
 
     companion object {
+        private val currentJobLocal = CloseableThreadLocal<Job?>()
+
+        fun <T> withCurrentJob(job: Job?, block: () -> T): T {
+            val previous = currentJobLocal.get()
+            currentJobLocal.set(job)
+            try {
+                return block()
+            } finally {
+                currentJobLocal.set(previous)
+            }
+        }
+
         /**
          * Converts date formats for europarl ("2023-02-23") and enwiki ("12-JAN-2010 12:32:45.000") into
          * [LocalDateTime].
@@ -433,5 +463,24 @@ class LineFileDocs(
 
         private const val BUFFER_SIZE = 1 shl 16 // 64K
         private const val SEP = '\t'
+    }
+
+    private fun getOrCreateDocState(): DocState {
+        val currentJob = currentJobLocal.get()
+        if (currentJob != null) {
+            lock.lock()
+            try {
+                return jobDocs.getOrPut(currentJob) { DocState() }
+            } finally {
+                lock.unlock()
+            }
+        }
+
+        var docState: DocState? = threadDocs.get()
+        if (docState == null) {
+            docState = DocState()
+            threadDocs.set(docState)
+        }
+        return docState
     }
 }

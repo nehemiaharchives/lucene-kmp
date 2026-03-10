@@ -238,6 +238,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // for a certain thread are processed once the thread returns from IW
         private val permits: Semaphore = Semaphore(Int.MAX_VALUE)
         private val queue: ArrayDeque<Event> = ArrayDeque()
+        private val queueLock = ReentrantLock()
 
         private fun acquire() {
             if (!permits.tryAcquire()) {
@@ -252,7 +253,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         fun add(event: Event): Boolean {
             acquire()
             try {
-                return queue.add(event)
+                queueLock.lock()
+                return try {
+                    queue.add(event)
+                } finally {
+                    queueLock.unlock()
+                }
             } finally {
                 permits.release()
             }
@@ -280,7 +286,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             var event: Event?
             while (true) {
                 val pollMark = TimeSource.Monotonic.markNow()
-                event = queue.poll()
+                queueLock.lock()
+                event = try {
+                    queue.poll()
+                } finally {
+                    queueLock.unlock()
+                }
                 pollNs += pollMark.elapsedNow().inWholeNanoseconds
                 if (event == null) {
                     break
@@ -303,19 +314,24 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // it's possible that we close this queue while we are in a processEvents call
             if (writer.getTragicException() != null) {
                 // we are already handling a tragic exception let's drop it all on the floor and return
-                queue.clear()
+                queueLock.lock()
+                try {
+                    queue.clear()
+                } finally {
+                    queueLock.unlock()
+                }
             } else {
                 // now we acquire all the permits to ensure we are the only one processing the queue
                 runBlocking {
                     try {
-                        permits.acquire(/*Int.MAX_VALUE*/)
+                        permits.acquire()
                     } catch (e: CancellationException) {
                         throw ThreadInterruptedException(e)
                     }
                     try {
                         processEventsInternal()
                     } finally {
-                        permits.release(/*Int.MAX_VALUE*/)
+                        permits.release()
                     }
                 }
             }
@@ -6985,7 +7001,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun cloneSegmentInfos(): SegmentInfos {
-        return segmentInfos.clone()
+        return withIndexWriterLock {
+            segmentInfos.clone()
+        }
     }
 
     /**
@@ -6996,15 +7014,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun getDocStats(): DocStats {
-        ensureOpen()
-        var numDocs: Int = docWriter.numDocs
-        var maxDoc = numDocs
-        for (info in segmentInfos) {
-            maxDoc += info.info.maxDoc()
-            numDocs += info.info.maxDoc() - numDeletedDocs(info)
+        return withIndexWriterLock {
+            ensureOpen()
+            var numDocs: Int = docWriter.numDocs
+            var maxDoc = numDocs
+            for (info in segmentInfos) {
+                maxDoc += info.info.maxDoc()
+                numDocs += info.info.maxDoc() - numDeletedDocs(info)
+            }
+            assert(maxDoc >= numDocs) { "maxDoc is less than numDocs: $maxDoc < $numDocs" }
+            DocStats(maxDoc, numDocs)
         }
-        assert(maxDoc >= numDocs) { "maxDoc is less than numDocs: $maxDoc < $numDocs" }
-        return DocStats(maxDoc, numDocs)
     }
 
     /** DocStats for this index  */

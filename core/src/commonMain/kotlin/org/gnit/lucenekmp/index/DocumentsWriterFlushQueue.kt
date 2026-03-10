@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.index.DocumentsWriterPerThread.FlushedSegment
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.ReentrantLock
@@ -12,6 +13,8 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
+private val dwfqLogger = KotlinLogging.logger {}
+
 /**
  * @lucene.internal
  */
@@ -23,6 +26,7 @@ class DocumentsWriterFlushQueue {
     @OptIn(ExperimentalAtomicApi::class)
     private val ticketCount: AtomicInteger = AtomicInteger(0)
     private val purgeLock: ReentrantLock = ReentrantLock()
+    private val queueLock: ReentrantLock = ReentrantLock()
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
@@ -34,9 +38,14 @@ class DocumentsWriterFlushQueue {
         try {
             val ticket: FlushTicket = ticketSupplier()
             if (ticket != null) {
-                // no need to publish anything if we don't have any frozen updates
-                queue.add(ticket)
-                success = true
+                queueLock.lock()
+                try {
+                    // no need to publish anything if we don't have any frozen updates
+                    queue.add(ticket)
+                    success = true
+                } finally {
+                    queueLock.unlock()
+                }
             }
             return ticket
         } finally {
@@ -64,7 +73,12 @@ class DocumentsWriterFlushQueue {
         assert(ticket.hasSegment)
         // the actual flush is done asynchronously and once done the FlushedSegment
         // is passed to the flush ticket
-        ticket.setSegment(segment)
+        queueLock.lock()
+        try {
+            ticket.setSegment(segment)
+        } finally {
+            queueLock.unlock()
+        }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
@@ -72,7 +86,12 @@ class DocumentsWriterFlushQueue {
     fun markTicketFailed(ticket: FlushTicket) {
         assert(ticket.hasSegment)
         // to free the queue we mark tickets as failed just to clean up the queue.
-        ticket.setFailed()
+        queueLock.lock()
+        try {
+            ticket.setFailed()
+        } finally {
+            queueLock.unlock()
+        }
     }
 
     @OptIn(ExperimentalAtomicApi::class)
@@ -85,8 +104,15 @@ class DocumentsWriterFlushQueue {
     private fun innerPurge(consumer: IOConsumer<FlushTicket>) {
         assert(purgeLock.isHeldByCurrentThread())
         while (true) {
-            val head = queue.peek()
-            val canPublish: Boolean = head?.canPublish() == true // do this synced
+            val head: FlushTicket?
+            val canPublish: Boolean
+            queueLock.lock()
+            try {
+                head = queue.peek()
+                canPublish = head?.canPublish() == true // do this synced
+            } finally {
+                queueLock.unlock()
+            }
             if (canPublish) {
                 try {
                     /*
@@ -98,10 +124,15 @@ class DocumentsWriterFlushQueue {
                     consumer.accept(head!!) // head is non-null here
                 } finally {
                     // finally remove the published ticket from the queue
-                    val poll: FlushTicket? = queue.poll()
-                    decTickets()
-                    // we hold the purgeLock so no other thread should have polled:
-                    assert(poll == head)
+                    queueLock.lock()
+                    try {
+                        val poll: FlushTicket? = queue.poll()
+                        decTickets()
+                        // we hold the purgeLock so no other thread should have polled:
+                        assert(poll == head)
+                    } finally {
+                        queueLock.unlock()
+                    }
                 }
             } else {
                 break
@@ -161,6 +192,11 @@ class DocumentsWriterFlushQueue {
         }
 
         fun setFailed() {
+            if (segment != null) {
+                dwfqLogger.debug {
+                    "dwfq setFailed after segment assigned hasSegment=$hasSegment failed=$failed published=$published"
+                }
+            }
             assert(segment == null)
             failed = true
         }
