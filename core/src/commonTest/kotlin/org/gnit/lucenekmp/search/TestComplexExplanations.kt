@@ -12,7 +12,7 @@ import kotlin.test.Test
  * TestExplanations subclass that builds up super crazy complex queries on the assumption that if
  * the explanations work out right for them, they should work for anything.
  */
-class TestComplexExplanations : BaseExplanationTestCase() {
+open class TestComplexExplanations : BaseExplanationTestCase() {
     @BeforeTest
     @Throws(Exception::class)
     fun setUp() {
@@ -36,21 +36,21 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testT3() {
+    open fun testT3() {
         val query = TermQuery(Term(FIELD, "w1"))
         bqtest(BoostQuery(query, 0f), intArrayOf(0, 1, 2, 3))
     }
 
     @Test
     @Throws(Exception::class)
-    fun testMA3() {
+    open fun testMA3() {
         val q: Query = MatchAllDocsQuery()
         bqtest(BoostQuery(q, 0f), intArrayOf(0, 1, 2, 3))
     }
 
     @Test
     @Throws(Exception::class)
-    fun testFQ5() {
+    open fun testFQ5() {
         val query = TermQuery(Term(FIELD, "xx"))
         val filtered =
             BooleanQuery.Builder()
@@ -62,14 +62,14 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testCSQ4() {
+    open fun testCSQ4() {
         val q: Query = ConstantScoreQuery(matchTheseItems(intArrayOf(3)))
         bqtest(BoostQuery(q, 0f), intArrayOf(3))
     }
 
     @Test
     @Throws(Exception::class)
-    fun testDMQ10() {
+    open fun testDMQ10() {
         val query = BooleanQuery.Builder()
         query.add(TermQuery(Term(FIELD, "yy")), Occur.SHOULD)
         val boostedQuery = TermQuery(Term(FIELD, "w5"))
@@ -87,7 +87,7 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testMPQ7() {
+    open fun testMPQ7() {
         val qb = MultiPhraseQuery.Builder()
         qb.add(ta(arrayOf("w1")))
         qb.add(ta(arrayOf("w2")))
@@ -97,7 +97,7 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testBQ12() {
+    open fun testBQ12() {
         // NOTE: using qtest not bqtest
         val query = BooleanQuery.Builder()
         query.add(TermQuery(Term(FIELD, "w1")), Occur.SHOULD)
@@ -109,7 +109,7 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testBQ13() {
+    open fun testBQ13() {
         // NOTE: using qtest not bqtest
         val query = BooleanQuery.Builder()
         query.add(TermQuery(Term(FIELD, "w1")), Occur.SHOULD)
@@ -121,7 +121,7 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testBQ18() {
+    open fun testBQ18() {
         // NOTE: using qtest not bqtest
         val query = BooleanQuery.Builder()
         val boostedQuery = TermQuery(Term(FIELD, "w1"))
@@ -133,7 +133,7 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testBQ21() {
+    open fun testBQ21() {
         val builder = BooleanQuery.Builder()
         builder.add(TermQuery(Term(FIELD, "w1")), Occur.MUST)
         builder.add(TermQuery(Term(FIELD, "w2")), Occur.SHOULD)
@@ -145,7 +145,7 @@ class TestComplexExplanations : BaseExplanationTestCase() {
 
     @Test
     @Throws(Exception::class)
-    fun testBQ22() {
+    open fun testBQ22() {
         val builder = BooleanQuery.Builder()
         val boostedQuery = TermQuery(Term(FIELD, "w1"))
         builder.add(BoostQuery(boostedQuery, 0f), Occur.MUST)
