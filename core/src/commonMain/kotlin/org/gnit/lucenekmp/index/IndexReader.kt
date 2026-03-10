@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.index
 import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.store.AlreadyClosedException
+import org.gnit.lucenekmp.util.IOUtils
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -241,9 +242,25 @@ abstract class IndexReader internal constructor() : AutoCloseable {
         val rc: Int = refCount.addAndFetch(-1)
         if (rc == 0) {
             closed = true
-            this.reportCloseToParentReaders()
-            this.notifyReaderClosedListeners()
-            doClose()
+            var throwable: Throwable? = null
+            try {
+                doClose()
+            } catch (t: Throwable) {
+                throwable = IOUtils.useOrSuppress(throwable, t)
+            }
+            try {
+                this.notifyReaderClosedListeners()
+            } catch (t: Throwable) {
+                throwable = IOUtils.useOrSuppress(throwable, t)
+            }
+            try {
+                this.reportCloseToParentReaders()
+            } catch (t: Throwable) {
+                throwable = IOUtils.useOrSuppress(throwable, t)
+            }
+            if (throwable != null) {
+                IOUtils.rethrowAlways(throwable)
+            }
         } else check(rc >= 0) { "too many decRef calls: refCount is $rc after decrement" }
     }
 
