@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.search
 
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BitSet
@@ -71,9 +72,7 @@ internal class ConjunctionDISI private constructor(iterators: MutableList<out Do
 
     @Throws(IOException::class)
     override fun advance(target: Int): Int {
-        require(
-            assertItersOnSameDoc()
-        ) { "Sub-iterators of ConjunctionDISI are not one the same document!" }
+        assert(assertItersOnSameDoc()) { "Sub-iterators of ConjunctionDISI are not one the same document!" }
         return doNext(lead1.advance(target))
     }
 
@@ -83,9 +82,7 @@ internal class ConjunctionDISI private constructor(iterators: MutableList<out Do
 
     @Throws(IOException::class)
     override fun nextDoc(): Int {
-        require(
-            assertItersOnSameDoc()
-        ) { "Sub-iterators of ConjunctionDISI are not on the same document!" }
+        assert(assertItersOnSameDoc()) { "Sub-iterators of ConjunctionDISI are not on the same document!" }
         return doNext(lead1.nextDoc())
     }
 
@@ -136,17 +133,13 @@ internal class ConjunctionDISI private constructor(iterators: MutableList<out Do
 
         @Throws(IOException::class)
         override fun nextDoc(): Int {
-            require(
-                assertItersOnSameDoc()
-            ) { "Sub-iterators of ConjunctionDISI are not on the same document!" }
+            assert(assertItersOnSameDoc()) { "Sub-iterators of ConjunctionDISI are not on the same document!" }
             return doNext(lead.nextDoc())
         }
 
         @Throws(IOException::class)
         override fun advance(target: Int): Int {
-            require(
-                assertItersOnSameDoc()
-            ) { "Sub-iterators of ConjunctionDISI are not on the same document!" }
+            assert(assertItersOnSameDoc()) { "Sub-iterators of ConjunctionDISI are not on the same document!" }
             return doNext(lead.advance(target))
         }
 
