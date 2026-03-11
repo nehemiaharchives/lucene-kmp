@@ -5,11 +5,12 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.document.KeywordField
 //import org.gnit.lucenekmp.document.SortedDocValuesField
 //import org.gnit.lucenekmp.index.CheckIndex
-//import org.gnit.lucenekmp.index.ConcurrentMergeScheduler
-//import org.gnit.lucenekmp.index.LogMergePolicy
+import org.gnit.lucenekmp.index.ConcurrentMergeScheduler
+import org.gnit.lucenekmp.index.LogMergePolicy
+import org.gnit.lucenekmp.index.MergePolicy
 //import org.gnit.lucenekmp.index.MergeScheduler
 //import org.gnit.lucenekmp.index.SlowCodecReaderWrapper
-//import org.gnit.lucenekmp.index.TieredMergePolicy
+import org.gnit.lucenekmp.index.TieredMergePolicy
 //import org.gnit.lucenekmp.store.ByteBuffersDirectory
 //import org.gnit.lucenekmp.store.NoLockFactory
 //import org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
@@ -1426,21 +1427,21 @@ class TestUtil {
         }
 
         /** just tries to configure things to keep the open file count lowish  */
-        /*fun reduceOpenFiles(w: IndexWriter) {
+        fun reduceOpenFiles(w: IndexWriter) {
             // keep number of open files lowish
-            val mp: MergePolicy = w.getConfig().getMergePolicy()
+            val mp: MergePolicy = w.config.mergePolicy
             mp.noCFSRatio = 1.0
             if (mp is LogMergePolicy) {
-                mp.setMergeFactor(min(5, mp.getMergeFactor()))
+                mp.mergeFactor = min(5, mp.mergeFactor)
             } else if (mp is TieredMergePolicy) {
-                mp.setSegmentsPerTier(min(5.0, mp.getSegmentsPerTier()))
+                mp.setSegmentsPerTier(min(5.0, mp.segmentsPerTier))
             }
-            val ms: MergeScheduler = w.getConfig().getMergeScheduler()
+            val ms = w.config.mergeScheduler
             if (ms is ConcurrentMergeScheduler) {
                 // wtf... shouldn't it be even lower since it's 1 by default!!
-                (ms as ConcurrentMergeScheduler).setMaxMergesAndThreads(3, 2)
+                ms.setMaxMergesAndThreads(3, 2)
             }
-        }*/
+        }
 
         /**
          * Checks some basic behaviour of an AttributeImpl
