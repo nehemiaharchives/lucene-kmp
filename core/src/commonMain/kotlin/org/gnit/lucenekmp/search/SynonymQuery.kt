@@ -282,8 +282,8 @@ class SynonymQuery private constructor(
         @Throws(IOException::class)
         override fun scorerSupplier(context: LeafReaderContext): ScorerSupplier {
 
-            val termStateSuppliers: Array<IOSupplier<TermState>> = Array(terms.size) {
-                termStates[it].get(context) as IOSupplier<TermState>
+            val termStateSuppliers: Array<IOSupplier<TermState?>?> = Array(terms.size) {
+                termStates[it].get(context)
             }
 
             return object : ScorerSupplier() {
@@ -303,7 +303,7 @@ class SynonymQuery private constructor(
                     cost = 0L
 
                     for (i in terms.indices) {
-                        val supplier: IOSupplier<TermState> = termStateSuppliers[i]
+                        val supplier: IOSupplier<TermState?>? = termStateSuppliers[i]
                         val state: TermState? = if (supplier == null) null else supplier.get()
                         if (state != null) {
                             val termsEnum: TermsEnum = context.reader().terms(field)!!.iterator()
