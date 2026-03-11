@@ -39,6 +39,7 @@ import org.gnit.lucenekmp.search.Sort
 import org.gnit.lucenekmp.search.SortField
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.Lock
@@ -2425,17 +2426,26 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     private fun rollbackInternal() {
         // Make sure no commit is running, else e.g. we can close while another thread is still
         // fsync'ing:
-
-        withCommitLock {
-            rollbackInternalNoCommit()
-            assert(
-                pendingNumDocs.load() == segmentInfos.totalMaxDoc().toLong()
-            ) {
-                ("pendingNumDocs "
-                        + pendingNumDocs.load()
-                        + " != "
-                        + segmentInfos.totalMaxDoc()
-                        + " totalMaxDoc")
+        val failurePathProbe = FailurePathProbe.find(directory)
+        if (failurePathProbe != null) {
+            failurePathProbe.rollbackStage = "rollbackInternal"
+        }
+        try {
+            withCommitLock {
+                rollbackInternalNoCommit()
+                assert(
+                    pendingNumDocs.load() == segmentInfos.totalMaxDoc().toLong()
+                ) {
+                    ("pendingNumDocs "
+                            + pendingNumDocs.load()
+                            + " != "
+                            + segmentInfos.totalMaxDoc()
+                            + " totalMaxDoc")
+                }
+            }
+        } finally {
+            if (failurePathProbe != null) {
+                failurePathProbe.rollbackStage = null
             }
         }
     }
@@ -5009,89 +5019,99 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @Throws(IOException::class)
     protected open fun merge(merge: MergePolicy.OneMerge) {
         var success = false
-
-        merge.markDebugPhase("iw.merge.start")
-        val t0: Long = System.currentTimeMillis()
-
-        val mergePolicy: MergePolicy = config.mergePolicy
-        try {
-            try {
-                try {
-//                     logger.debug { "merge: start ${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
-                    merge.markDebugPhase("iw.merge.mergeInit")
-                    mergeInit(merge)
-                    merge.markDebugPhase("iw.merge.afterMergeInit")
-                    if (infoStream.isEnabled("IW")) {
-                        infoStream.message(
-                            "IW",
-                            "now merge\n  merge=" + segString(merge.segments) + "\n  index=" + segString()
-                        )
-                    }
-                    merge.markDebugPhase("iw.merge.mergeMiddle")
-                    mergeMiddle(merge, mergePolicy)
-                    merge.markDebugPhase("iw.merge.afterMergeMiddle")
-                    mergeSuccess(merge)
-                    success = true
-                } catch (t: Throwable) {
-                    merge.markDebugPhase("iw.merge.exception")
-                    handleMergeException(t, merge)
-                }
-            } finally {
-                // Keep merge finish bookkeeping and MERGE_FINISHED scheduling in one critical section.
-                // This matches Java's synchronized behavior and avoids a race where forceMerge
-                // observes no pending/running maxNumSegments merges just before MERGE_FINISHED
-                // re-enqueues one.
-                merge.markDebugPhase("iw.merge.finally.beforeLock")
-                withIndexWriterLock {
-                    merge.markDebugPhase("iw.merge.finally.locked")
-                    // Readers are already closed in commitMerge if we didn't hit an exception.
-                    if (!success) {
-                        if (!isLikelyFakeIOException(merge.exception)) {
-                            logger.debug {
-                                "merge: unsuccessful merge details merge=${merge.segString()} aborted=${merge.isAborted} exception=${merge.exception}"
-                            }
-                        }
-                        merge.markDebugPhase("iw.merge.finally.closeMergeReaders")
-                        closeMergeReaders(merge, suppressExceptions = true, droppedSegment = false)
-                    }
-                    merge.markDebugPhase("iw.merge.finally.mergeFinish")
-                    mergeFinish(merge)
-//                     logger.debug { "merge: finish ${merge.segString()} success=$success" }
-                    if (!success) {
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "hit exception during merge")
-                        }
-                    } else if (!merge.isAborted
-                        && (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS || (!closed && !closing))
-                    ) {
-                        merge.markDebugPhase("iw.merge.finally.updatePendingMerges")
-                        // This merge (and, generally, any change to the segments) may now enable
-                        // new merges, so call merge policy and update pending merges.
-                        updatePendingMerges(
-                            mergePolicy,
-                            MergeTrigger.MERGE_FINISHED,
-                            merge.maxNumSegments
-                        )
-                    }
-                }
-            }
-        } catch (t: Throwable) {
-            // Important that tragicEvent is called after mergeFinish, else we hang
-            // waiting for our merge thread to be removed from runningMerges:
-            tragicEvent(t, "merge")
-            throw t
+        val failurePathProbe = FailurePathProbe.find(directory)
+        if (failurePathProbe != null) {
+            failurePathProbe.mergeStage = "merge"
         }
 
-        if (merge.info != null && !merge.isAborted) {
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message(
-                    "IW",
-                    ("merge time "
-                            + (System.currentTimeMillis() - t0)
-                            + " ms for "
-                            + merge.info!!.info.maxDoc()
-                            + " docs")
-                )
+        try {
+            merge.markDebugPhase("iw.merge.start")
+            val t0: Long = System.currentTimeMillis()
+
+            val mergePolicy: MergePolicy = config.mergePolicy
+            try {
+                try {
+                    try {
+//                     logger.debug { "merge: start ${merge.segString()} maxNumSegments=${merge.maxNumSegments}" }
+                        merge.markDebugPhase("iw.merge.mergeInit")
+                        mergeInit(merge)
+                        merge.markDebugPhase("iw.merge.afterMergeInit")
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message(
+                                "IW",
+                                "now merge\n  merge=" + segString(merge.segments) + "\n  index=" + segString()
+                            )
+                        }
+                        merge.markDebugPhase("iw.merge.mergeMiddle")
+                        mergeMiddle(merge, mergePolicy)
+                        merge.markDebugPhase("iw.merge.afterMergeMiddle")
+                        mergeSuccess(merge)
+                        success = true
+                    } catch (t: Throwable) {
+                        merge.markDebugPhase("iw.merge.exception")
+                        handleMergeException(t, merge)
+                    }
+                } finally {
+                    // Keep merge finish bookkeeping and MERGE_FINISHED scheduling in one critical section.
+                    // This matches Java's synchronized behavior and avoids a race where forceMerge
+                    // observes no pending/running maxNumSegments merges just before MERGE_FINISHED
+                    // re-enqueues one.
+                    merge.markDebugPhase("iw.merge.finally.beforeLock")
+                    withIndexWriterLock {
+                        merge.markDebugPhase("iw.merge.finally.locked")
+                        // Readers are already closed in commitMerge if we didn't hit an exception.
+                        if (!success) {
+                            if (!isLikelyFakeIOException(merge.exception)) {
+                                logger.debug {
+                                    "merge: unsuccessful merge details merge=${merge.segString()} aborted=${merge.isAborted} exception=${merge.exception}"
+                                }
+                            }
+                            merge.markDebugPhase("iw.merge.finally.closeMergeReaders")
+                            closeMergeReaders(merge, suppressExceptions = true, droppedSegment = false)
+                        }
+                        merge.markDebugPhase("iw.merge.finally.mergeFinish")
+                        mergeFinish(merge)
+//                     logger.debug { "merge: finish ${merge.segString()} success=$success" }
+                        if (!success) {
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message("IW", "hit exception during merge")
+                            }
+                        } else if (!merge.isAborted
+                            && (merge.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS || (!closed && !closing))
+                        ) {
+                            merge.markDebugPhase("iw.merge.finally.updatePendingMerges")
+                            // This merge (and, generally, any change to the segments) may now enable
+                            // new merges, so call merge policy and update pending merges.
+                            updatePendingMerges(
+                                mergePolicy,
+                                MergeTrigger.MERGE_FINISHED,
+                                merge.maxNumSegments
+                            )
+                        }
+                    }
+                }
+            } catch (t: Throwable) {
+                // Important that tragicEvent is called after mergeFinish, else we hang
+                // waiting for our merge thread to be removed from runningMerges:
+                tragicEvent(t, "merge")
+                throw t
+            }
+
+            if (merge.info != null && !merge.isAborted) {
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message(
+                        "IW",
+                        ("merge time "
+                                + (System.currentTimeMillis() - t0)
+                                + " ms for "
+                                + merge.info!!.info.maxDoc()
+                                + " docs")
+                    )
+                }
+            }
+        } finally {
+            if (failurePathProbe != null) {
+                failurePathProbe.mergeStage = null
             }
         }
     }

@@ -141,7 +141,7 @@ class ReadersAndUpdates(
 
     /*@get:Synchronized*/
     val delCount: Int
-        get() = pendingDeletes.delCount
+        get() = withRldLock { pendingDeletes.delCount }
 
     /*@Synchronized*/
     private fun assertNoDupGen(
@@ -166,33 +166,35 @@ class ReadersAndUpdates(
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
     fun addDVUpdate(update: DocValuesFieldUpdates) {
-        require(update.finished) { "call finish first" }
-        var fieldUpdates: MutableList<DocValuesFieldUpdates>? =
-            pendingDVUpdates.computeIfAbsent(update.field) { `_`: String -> ArrayList() }
-        assert(assertNoDupGen(fieldUpdates!!, update))
+        withRldLock {
+            require(update.finished) { "call finish first" }
+            var fieldUpdates: MutableList<DocValuesFieldUpdates>? =
+                pendingDVUpdates.computeIfAbsent(update.field) { `_`: String -> ArrayList() }
+            assert(assertNoDupGen(fieldUpdates!!, update))
 
-        ramBytesUsed.addAndFetch(update.ramBytesUsed())
+            ramBytesUsed.addAndFetch(update.ramBytesUsed())
 
-        fieldUpdates.add(update)
-
-        if (isMerging) {
-            fieldUpdates = mergingDVUpdates[update.field]
-            if (fieldUpdates == null) {
-                fieldUpdates = ArrayList()
-                mergingDVUpdates.put(update.field, fieldUpdates)
-            }
             fieldUpdates.add(update)
+
+            if (isMerging) {
+                fieldUpdates = mergingDVUpdates[update.field]
+                if (fieldUpdates == null) {
+                    fieldUpdates = ArrayList()
+                    mergingDVUpdates.put(update.field, fieldUpdates)
+                }
+                fieldUpdates.add(update)
+            }
         }
     }
 
     /*@get:Synchronized*/
     val numDVUpdates: Long
-        get() {
+        get() = withRldLock {
             var count: Long = 0
             for (updates in pendingDVUpdates.values) {
                 count += updates.size.toLong()
             }
-            return count
+            count
         }
 
     /** Returns a [SegmentReader].  */
@@ -269,12 +271,12 @@ class ReadersAndUpdates(
     /*@Synchronized*/
     @Throws(IOException::class)
     fun numDeletesToMerge(policy: MergePolicy): Int {
-        return pendingDeletes.numDeletesToMerge(policy) { this.latestReader }
+        return withRldLock { pendingDeletes.numDeletesToMerge(policy) { this.latestReader } }
     }
 
     /*@get:Synchronized*/
     private val latestReader: CodecReader
-        get() {
+        get() = withRldLock {
             if (this.reader == null) {
                 // get a reader and dec the ref right away we just make sure we have a reader
                 runBlocking { getReader(IOContext.DEFAULT).decRef() }
@@ -284,30 +286,32 @@ class ReadersAndUpdates(
                 // never share
                 runBlocking { swapNewReaderWithLatestLiveDocs() }
             }
-            return reader!!
+            reader!!
         }
 
     /*@get:Synchronized*/
     val liveDocs: Bits?
         /** Returns a snapshot of the live docs.  */
-        get() = pendingDeletes.liveDocs
+        get() = withRldLock { pendingDeletes.liveDocs }
 
     /*@get:Synchronized*/
     val hardLiveDocs: Bits?
         /** Returns the live-docs bits excluding documents that are not live due to soft-deletes  */
-        get() = pendingDeletes.hardLiveDocs
+        get() = withRldLock { pendingDeletes.hardLiveDocs }
 
     /*@Synchronized*/
     fun dropChanges() {
-        // Discard (don't save) changes when we are dropping
-        // the reader; this is used only on the sub-readers
-        // after a successful merge.  If deletes had
-        // accumulated on those sub-readers while the merge
-        // is running, by now we have carried forward those
-        // deletes onto the newly merged segment, so we can
-        // discard them on the sub-readers:
-        pendingDeletes.dropChanges()
-        dropMergingUpdates()
+        withRldLock {
+            // Discard (don't save) changes when we are dropping
+            // the reader; this is used only on the sub-readers
+            // after a successful merge.  If deletes had
+            // accumulated on those sub-readers while the merge
+            // is running, by now we have carried forward those
+            // deletes onto the newly merged segment, so we can
+            // discard them on the sub-readers:
+            pendingDeletes.dropChanges()
+            dropMergingUpdates()
+        }
     }
 
     // Commit live docs (writes new _X_N.del files) and field updates (writes new
@@ -316,7 +320,7 @@ class ReadersAndUpdates(
     /*@Synchronized*/
     @Throws(IOException::class)
     fun writeLiveDocs(dir: Directory): Boolean {
-        return pendingDeletes.writeLiveDocs(dir)
+        return withRldLock { pendingDeletes.writeLiveDocs(dir) }
     }
 
     /*@Synchronized*/
@@ -577,168 +581,170 @@ class ReadersAndUpdates(
         maxDelGen: Long,
         infoStream: InfoStream
     ): Boolean {
-        val startTimeNS: Long = System.nanoTime()
-        val newDVFiles: MutableMap<Int, MutableSet<String>> = HashMap()
-        var fieldInfosFiles: MutableSet<String>?
-        var fieldInfos: FieldInfos?
-        var any = false
-        for (updates in pendingDVUpdates.values) {
-            for (update in updates) {
-                if (update.delGen <= maxDelGen && update.any()) {
-                    any = true
-                    break
-                }
-            }
-        }
-
-        if (any == false) {
-            // no updates
-            return false
-        }
-
-        // Do this so we can delete any created files on
-        // exception; this saves all codecs from having to do it:
-        val trackingDir = TrackingDirectoryWrapper(dir)
-
-        var success = false
-        try {
-            val codec: Codec = info.info.codec
-
-            // reader could be null e.g. for a just merged segment (from
-            // IndexWriter.commitMergedDeletes).
-            val reader: SegmentReader?
-            if (this.reader == null) {
-                reader = SegmentReader(
-                    info,
-                    indexCreatedVersionMajor,
-                    IOContext.READONCE
-                )
-                pendingDeletes.onNewReader(reader, info)
-            } else {
-                reader = this.reader
-            }
-
-            try {
-                // clone FieldInfos so that we can update their dvGen separately from
-                // the reader's infos and write them to a new fieldInfos_gen file.
-                var maxFieldNumber = -1
-                val byName: MutableMap<String, FieldInfo> = HashMap()
-                for (fi in reader!!.fieldInfos) {
-                    // cannot use builder.add(fi) because it does not preserve
-                    // the local field number. Field numbers can be different from
-                    // the global ones if the segment was created externally (and added to
-                    // this index with IndexWriter#addIndexes(Directory)).
-                    byName.put(fi.name, cloneFieldInfo(fi, fi.number))
-                    maxFieldNumber = max(fi.number, maxFieldNumber)
-                }
-
-                // create new fields with the right DV type
-                for (updates in pendingDVUpdates.values) {
-                    val update: DocValuesFieldUpdates = updates[0]
-                    if (byName.containsKey(update.field)) {
-                        // the field already exists in this segment
-                        val fi: FieldInfo = byName[update.field]!!
-                        assert(fi.docValuesType == update.type)
-                    } else {
-                        // the field is not present in this segment so we clone the global field
-                        // (which is guaranteed to exist) and remaps its field number locally.
-                        val fi: FieldInfo = checkNotNull(
-                            fieldNumbers.constructFieldInfo(update.field, update.type, maxFieldNumber + 1)
-                        )
-                        maxFieldNumber++
-                        byName.put(fi.name, fi)
+        return withRldLockSuspend {
+            val startTimeNS: Long = System.nanoTime()
+            val newDVFiles: MutableMap<Int, MutableSet<String>> = HashMap()
+            var fieldInfosFiles: MutableSet<String>?
+            var fieldInfos: FieldInfos?
+            var any = false
+            for (updates in pendingDVUpdates.values) {
+                for (update in updates) {
+                    if (update.delGen <= maxDelGen && update.any()) {
+                        any = true
+                        break
                     }
                 }
-                fieldInfos =
-                    FieldInfos(byName.values.toTypedArray<FieldInfo>())
-                val docValuesFormat: DocValuesFormat = codec.docValuesFormat()
-
-                handleDVUpdates(
-                    fieldInfos, trackingDir, docValuesFormat, reader, newDVFiles, maxDelGen, infoStream
-                )
-
-                fieldInfosFiles = writeFieldInfosGen(fieldInfos, trackingDir, codec.fieldInfosFormat())
-            } finally {
-                if (reader !== this.reader) {
-                    reader!!.close()
-                }
             }
 
-            success = true
-        } finally {
-            if (success == false) {
-                // Advance only the nextWriteFieldInfosGen and nextWriteDocValuesGen, so
-                // that a 2nd attempt to write will write to a new file
-                info.advanceNextWriteFieldInfosGen()
-                info.advanceNextWriteDocValuesGen()
-
-                // Delete any partially created file(s):
-                for (fileName in trackingDir.createdFiles) {
-                    IOUtils.deleteFilesIgnoringExceptions(dir, fileName)
-                }
+            if (any == false) {
+                // no updates
+                return@withRldLockSuspend false
             }
-        }
 
-        // Prune the now-written DV updates:
-        var bytesFreed: Long = 0
-        val it: MutableIterator<MutableMap.MutableEntry<String, MutableList<DocValuesFieldUpdates>>> =
-            pendingDVUpdates.entries.iterator()
-        while (it.hasNext()) {
-            val ent: MutableMap.MutableEntry<String, MutableList<DocValuesFieldUpdates>> =
-                it.next()
-            var upto = 0
-            val updates: MutableList<DocValuesFieldUpdates> = ent.value
-            for (update in updates) {
-                if (update.delGen > maxDelGen) {
-                    // not yet applied
-                    updates[upto] = update
-                    upto++
+            // Do this so we can delete any created files on
+            // exception; this saves all codecs from having to do it:
+            val trackingDir = TrackingDirectoryWrapper(dir)
+
+            var success = false
+            try {
+                val codec: Codec = info.info.codec
+
+                // reader could be null e.g. for a just merged segment (from
+                // IndexWriter.commitMergedDeletes).
+                val reader: SegmentReader?
+                if (this.reader == null) {
+                    reader = SegmentReader(
+                        info,
+                        indexCreatedVersionMajor,
+                        IOContext.READONCE
+                    )
+                    pendingDeletes.onNewReader(reader, info)
                 } else {
-                    bytesFreed += update.ramBytesUsed()
+                    reader = this.reader
+                }
+
+                try {
+                    // clone FieldInfos so that we can update their dvGen separately from
+                    // the reader's infos and write them to a new fieldInfos_gen file.
+                    var maxFieldNumber = -1
+                    val byName: MutableMap<String, FieldInfo> = HashMap()
+                    for (fi in reader!!.fieldInfos) {
+                        // cannot use builder.add(fi) because it does not preserve
+                        // the local field number. Field numbers can be different from
+                        // the global ones if the segment was created externally (and added to
+                        // this index with IndexWriter#addIndexes(Directory)).
+                        byName.put(fi.name, cloneFieldInfo(fi, fi.number))
+                        maxFieldNumber = max(fi.number, maxFieldNumber)
+                    }
+
+                    // create new fields with the right DV type
+                    for (updates in pendingDVUpdates.values) {
+                        val update: DocValuesFieldUpdates = updates[0]
+                        if (byName.containsKey(update.field)) {
+                            // the field already exists in this segment
+                            val fi: FieldInfo = byName[update.field]!!
+                            assert(fi.docValuesType == update.type)
+                        } else {
+                            // the field is not present in this segment so we clone the global field
+                            // (which is guaranteed to exist) and remaps its field number locally.
+                            val fi: FieldInfo = checkNotNull(
+                                fieldNumbers.constructFieldInfo(update.field, update.type, maxFieldNumber + 1)
+                            )
+                            maxFieldNumber++
+                            byName.put(fi.name, fi)
+                        }
+                    }
+                    fieldInfos =
+                        FieldInfos(byName.values.toTypedArray<FieldInfo>())
+                    val docValuesFormat: DocValuesFormat = codec.docValuesFormat()
+
+                    handleDVUpdates(
+                        fieldInfos, trackingDir, docValuesFormat, reader, newDVFiles, maxDelGen, infoStream
+                    )
+
+                    fieldInfosFiles = writeFieldInfosGen(fieldInfos, trackingDir, codec.fieldInfosFormat())
+                } finally {
+                    if (reader !== this.reader) {
+                        reader!!.close()
+                    }
+                }
+
+                success = true
+            } finally {
+                if (success == false) {
+                    // Advance only the nextWriteFieldInfosGen and nextWriteDocValuesGen, so
+                    // that a 2nd attempt to write will write to a new file
+                    info.advanceNextWriteFieldInfosGen()
+                    info.advanceNextWriteDocValuesGen()
+
+                    // Delete any partially created file(s):
+                    for (fileName in trackingDir.createdFiles) {
+                        IOUtils.deleteFilesIgnoringExceptions(dir, fileName)
+                    }
                 }
             }
-            if (upto == 0) {
-                it.remove()
-            } else {
-                updates.subList(upto, updates.size).clear()
+
+            // Prune the now-written DV updates:
+            var bytesFreed: Long = 0
+            val it: MutableIterator<MutableMap.MutableEntry<String, MutableList<DocValuesFieldUpdates>>> =
+                pendingDVUpdates.entries.iterator()
+            while (it.hasNext()) {
+                val ent: MutableMap.MutableEntry<String, MutableList<DocValuesFieldUpdates>> =
+                    it.next()
+                var upto = 0
+                val updates: MutableList<DocValuesFieldUpdates> = ent.value
+                for (update in updates) {
+                    if (update.delGen > maxDelGen) {
+                        // not yet applied
+                        updates[upto] = update
+                        upto++
+                    } else {
+                        bytesFreed += update.ramBytesUsed()
+                    }
+                }
+                if (upto == 0) {
+                    it.remove()
+                } else {
+                    updates.subList(upto, updates.size).clear()
+                }
             }
-        }
 
-        val bytes: Long = ramBytesUsed.addAndFetch(-bytesFreed)
-        assert(bytes >= 0)
+            val bytes: Long = ramBytesUsed.addAndFetch(-bytesFreed)
+            assert(bytes >= 0)
 
-        // writing field updates succeeded
-        checkNotNull(fieldInfosFiles)
-        info.setFieldInfosFiles(fieldInfosFiles)
+            // writing field updates succeeded
+            checkNotNull(fieldInfosFiles)
+            info.setFieldInfosFiles(fieldInfosFiles)
 
-        // update the doc-values updates files. the files map each field to its set
-        // of files, hence we copy from the existing map all fields w/ updates that
-        // were not updated in this session, and add new mappings for fields that
-        // were updated now.
-        assert(newDVFiles.isEmpty() == false)
-        for (e in info.docValuesUpdatesFiles.entries) {
-            if (newDVFiles.containsKey(e.key) == false) {
-                newDVFiles.put(e.key, e.value)
+            // update the doc-values updates files. the files map each field to its set
+            // of files, hence we copy from the existing map all fields w/ updates that
+            // were not updated in this session, and add new mappings for fields that
+            // were updated now.
+            assert(newDVFiles.isEmpty() == false)
+            for (e in info.docValuesUpdatesFiles.entries) {
+                if (newDVFiles.containsKey(e.key) == false) {
+                    newDVFiles.put(e.key, e.value)
+                }
             }
-        }
-        info.docValuesUpdatesFiles = newDVFiles
+            info.docValuesUpdatesFiles = newDVFiles
 
-        // if there is a reader open, reopen it to reflect the updates
-        if (reader != null) {
-            swapNewReaderWithLatestLiveDocs()
-        }
+            // if there is a reader open, reopen it to reflect the updates
+            if (reader != null) {
+                swapNewReaderWithLatestLiveDocs()
+            }
 
-        if (infoStream.isEnabled("BD")) {
-            infoStream.message(
-                "BD",
-                "done write field updates for seg=info; took ${
-                    (System.nanoTime() - startTimeNS) / TimeUnit.SECONDS.toNanos(
-                        1
-                    ).toDouble()
-                }s; new files: $newDVFiles"
-            )
+            if (infoStream.isEnabled("BD")) {
+                infoStream.message(
+                    "BD",
+                    "done write field updates for seg=info; took ${
+                        (System.nanoTime() - startTimeNS) / TimeUnit.SECONDS.toNanos(
+                            1
+                        ).toDouble()
+                    }s; new files: $newDVFiles"
+                )
+            }
+            true
         }
-        return true
     }
 
     private fun cloneFieldInfo(
@@ -797,11 +803,13 @@ class ReadersAndUpdates(
 
     /*@Synchronized*/
     fun setIsMerging() {
-        // This ensures any newly resolved doc value updates while we are merging are
-        // saved for re-applying after this segment is done merging:
-        if (isMerging == false) {
-            isMerging = true
-            assert(mergingDVUpdates.isEmpty())
+        withRldLock {
+            // This ensures any newly resolved doc value updates while we are merging are
+            // saved for re-applying after this segment is done merging:
+            if (isMerging == false) {
+                isMerging = true
+                assert(mergingDVUpdates.isEmpty())
+            }
         }
     }
 
@@ -855,16 +863,20 @@ class ReadersAndUpdates(
      */
     /*@Synchronized*/
     fun dropMergingUpdates() {
-        mergingDVUpdates.clear()
-        isMerging = false
+        withRldLock {
+            mergingDVUpdates.clear()
+            isMerging = false
+        }
     }
 
     /*@Synchronized*/
     fun getMergingDVUpdates(): MutableMap<String, MutableList<DocValuesFieldUpdates>> {
-        // We must atomically (in single sync'd block) clear isMerging when we return the DV updates
-        // otherwise we can lose updates:
-        isMerging = false
-        return mergingDVUpdates
+        return withRldLock {
+            // We must atomically (in single sync'd block) clear isMerging when we return the DV updates
+            // otherwise we can lose updates:
+            isMerging = false
+            mergingDVUpdates
+        }
     }
 
     override fun toString(): String {
@@ -876,10 +888,10 @@ class ReadersAndUpdates(
 
     /*@get:Synchronized*/
     val isFullyDeleted: Boolean
-        get() = pendingDeletes.isFullyDeleted { this.latestReader }
+        get() = withRldLock { pendingDeletes.isFullyDeleted { this.latestReader } }
 
     @Throws(IOException::class)
     fun keepFullyDeletedSegment(mergePolicy: MergePolicy): Boolean {
-        return mergePolicy.keepFullyDeletedSegment { this.latestReader }
+        return withRldLock { mergePolicy.keepFullyDeletedSegment { this.latestReader } }
     }
 }

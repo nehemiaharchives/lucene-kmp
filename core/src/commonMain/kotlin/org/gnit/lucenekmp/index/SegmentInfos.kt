@@ -16,6 +16,7 @@ import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.ChecksumIndexInput
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.util.CollectionUtil
@@ -513,8 +514,18 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     @Throws(IOException::class)
     fun prepareCommit(dir: Directory) {
         check(!pendingCommit) { "prepareCommit was already called" }
-        dir.syncMetaData()
-        write(dir)
+        val failurePathProbe = FailurePathProbe.find(dir)
+        if (failurePathProbe != null) {
+            failurePathProbe.commitStage = "prepareCommit"
+        }
+        try {
+            dir.syncMetaData()
+            write(dir)
+        } finally {
+            if (failurePathProbe != null) {
+                failurePathProbe.commitStage = null
+            }
+        }
     }
 
     /**
@@ -541,6 +552,10 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     @Throws(IOException::class)
     fun finishCommit(dir: Directory): String {
         check(pendingCommit) { "prepareCommit was not called" }
+        val failurePathProbe = FailurePathProbe.find(dir)
+        if (failurePathProbe != null) {
+            failurePathProbe.commitStage = "finishCommit"
+        }
         var successRenameAndSync = false
         val dest: String?
         try {
@@ -571,6 +586,9 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
             if (!successRenameAndSync) {
                 // deletes pending_segments_N:
                 rollbackCommit(dir)
+            }
+            if (failurePathProbe != null) {
+                failurePathProbe.commitStage = null
             }
         }
 

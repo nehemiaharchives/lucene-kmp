@@ -2103,13 +2103,18 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             val pattern = Regex("""\s*at\s+([^\s(]+)""")
             for (line in trace.lineSequence().drop(1)) { // skip header line
                 val match = pattern.find(line) ?: continue
-                val fqMethod = match.groupValues[1]
-                val lastDot = fqMethod.lastIndexOf('.')
-                if (lastDot <= 0 || lastDot == fqMethod.length - 1) {
+                var fqMethod = match.groupValues[1]
+                if (fqMethod.endsWith("#internal")) {
+                    fqMethod = fqMethod.removeSuffix("#internal")
+                } else if (fqMethod.endsWith("#external")) {
+                    fqMethod = fqMethod.removeSuffix("#external")
+                }
+                val separator = maxOf(fqMethod.lastIndexOf('.'), fqMethod.lastIndexOf('#'))
+                if (separator <= 0 || separator == fqMethod.length - 1) {
                     continue
                 }
-                val className = fqMethod.substring(0, lastDot)
-                val methodName = fqMethod.substring(lastDot + 1)
+                val className = fqMethod.substring(0, separator)
+                val methodName = fqMethod.substring(separator + 1)
                 frames.add(StackFrame(className, methodName))
             }
             return if (frames.size > 1) frames.drop(1) else emptyList() // drop this helper frame

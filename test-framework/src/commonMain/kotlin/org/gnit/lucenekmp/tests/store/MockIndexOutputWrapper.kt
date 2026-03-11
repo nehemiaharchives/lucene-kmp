@@ -24,6 +24,7 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.DataInput
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.FilterIndexOutput
 import org.gnit.lucenekmp.store.IndexOutput
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -33,7 +34,67 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
  * space actually used, and maybe throw random IOExceptions.
  */
 class MockIndexOutputWrapper(private val dir: MockDirectoryWrapper, out: IndexOutput, override var name: String?) :
-    FilterIndexOutput("MockIndexOutputWrapper($out)", out!!.name, out) {
+    FilterIndexOutput("MockIndexOutputWrapper($out)", out!!.name, out), FailurePathProbe {
+
+    override var commitStage: String?
+        get() = dir.commitStage
+        set(value) {
+            dir.commitStage = value
+        }
+
+    override var rollbackStage: String?
+        get() = dir.rollbackStage
+        set(value) {
+            dir.rollbackStage = value
+        }
+
+    override var mergeStage: String?
+        get() = dir.mergeStage
+        set(value) {
+            dir.mergeStage = value
+        }
+
+    override var deleteStage: String?
+        get() = dir.deleteStage
+        set(value) {
+            dir.deleteStage = value
+        }
+
+    override var flushStage: String?
+        get() = dir.flushStage
+        set(value) {
+            dir.flushStage = value
+        }
+
+    override var termVectorsStage: String?
+        get() = dir.termVectorsStage
+        set(value) {
+            dir.termVectorsStage = value
+        }
+
+    override var isInTermVectorsFinishDocument: Boolean
+        get() = dir.isInTermVectorsFinishDocument
+        set(value) {
+            dir.isInTermVectorsFinishDocument = value
+        }
+
+    override var isDeletingFile: Boolean
+        get() = dir.isDeletingFile
+        set(value) {
+            dir.isDeletingFile = value
+        }
+
+    override var isSyncingMetaData: Boolean
+        get() = dir.isSyncingMetaData
+        set(value) {
+            dir.isSyncingMetaData = value
+        }
+
+    override var isWritingGlobalFieldMap: Boolean
+        get() = dir.isWritingGlobalFieldMap
+        set(value) {
+            dir.isWritingGlobalFieldMap = value
+        }
 
     private var first: Boolean = true
     private val singleByte = ByteArray(1)

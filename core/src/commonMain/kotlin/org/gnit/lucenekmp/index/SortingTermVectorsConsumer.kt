@@ -10,6 +10,7 @@ import org.gnit.lucenekmp.codecs.lucene90.compressing.Lucene90CompressingTermVec
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.DocIdSetIterator
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.ByteBlockPool
@@ -66,11 +67,22 @@ internal class SortingTermVectorsConsumer(
     @Throws(IOException::class)
     override fun initTermVectorsWriter() {
         if (writer == null) {
-            val context =
-                IOContext(FlushInfo(lastDocID, bytesUsed.get()))
-            tmpDirectory = TrackingTmpOutputDirectoryWrapper(directory)
-            writer = TEMP_TERM_VECTORS_FORMAT.vectorsWriter(tmpDirectory!!, info, context)
-            lastDocID = 0
+            val failurePathProbe = FailurePathProbe.find(directory)
+            val previousTermVectorsStage = failurePathProbe?.termVectorsStage
+            if (failurePathProbe != null) {
+                failurePathProbe.termVectorsStage = "initTermVectorsWriter"
+            }
+            try {
+                val context =
+                    IOContext(FlushInfo(lastDocID, bytesUsed.get()))
+                tmpDirectory = TrackingTmpOutputDirectoryWrapper(directory)
+                writer = TEMP_TERM_VECTORS_FORMAT.vectorsWriter(tmpDirectory!!, info, context)
+                lastDocID = 0
+            } finally {
+                if (failurePathProbe != null) {
+                    failurePathProbe.termVectorsStage = previousTermVectorsStage
+                }
+            }
         }
     }
 

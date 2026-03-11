@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.index
 import kotlinx.coroutines.runBlocking
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.internal.hppc.LongHashSet
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.Accountable
 import org.gnit.lucenekmp.util.BytesRef
@@ -32,6 +33,7 @@ import kotlin.math.max
 class BufferedUpdatesStream(private val infoStream: InfoStream) :
     Accountable {
     private val logger = KotlinLogging.logger {}
+    private val updatesLock = ReentrantLock()
     private val updates: MutableSet<FrozenBufferedUpdates> = HashSet()
 
     // Starts at 1 so that SegmentInfos that have never had
@@ -55,35 +57,52 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
      * updates. If the pushed packets get our of order would loose documents
      * since deletes are applied to the wrong segments.
      */
-        packet.setDelGen(nextGen++)
-        assert(packet.any())
-        assert(checkDeleteStats())
+        updatesLock.lock()
+        try {
+            packet.setDelGen(nextGen++)
+            assert(packet.any())
+            assert(checkDeleteStats())
 
-        updates.add(packet)
-        bytesUsed.addAndFetch(packet.bytesUsed.toLong())
-        if (infoStream.isEnabled("BD")) {
-            infoStream.message(
-                "BD",
-                "push new packet ($packet), packetCount=${updates.size}, bytesUsed=${bytesUsed.load() / 1024.0 / 1024.0} MB"
-            )
+            updates.add(packet)
+            bytesUsed.addAndFetch(packet.bytesUsed.toLong())
+            if (infoStream.isEnabled("BD")) {
+                infoStream.message(
+                    "BD",
+                    "push new packet ($packet), packetCount=${updates.size}, bytesUsed=${bytesUsed.load() / 1024.0 / 1024.0} MB"
+                )
+            }
+            assert(checkDeleteStats())
+
+            return packet.delGen()
+        } finally {
+            updatesLock.unlock()
         }
-        assert(checkDeleteStats())
-
-        return packet.delGen()
     }
 
     /*@get:Synchronized*/
     val pendingUpdatesCount: Int
-        get() = updates.size
+        get() {
+            updatesLock.lock()
+            try {
+                return updates.size
+            } finally {
+                updatesLock.unlock()
+            }
+        }
 
     /** Only used by IW.rollback  */
     /*@Synchronized*/
     @OptIn(ExperimentalAtomicApi::class)
     fun clear() {
-        updates.clear()
-        nextGen = 1
-        finishedSegments.clear()
-        bytesUsed.store(0)
+        updatesLock.lock()
+        try {
+            updates.clear()
+            nextGen = 1
+            finishedSegments.clear()
+            bytesUsed.store(0)
+        } finally {
+            updatesLock.unlock()
+        }
     }
 
     @OptIn(ExperimentalAtomicApi::class)
@@ -116,9 +135,15 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
         // TODO implement synchronized in kotlin common
         //synchronized(this) {
         /*assert(java.lang.Thread.holdsLock(writer) == false)*/ // jvm specific operation, need to do something for kotlin common
-        val waitFor = HashSet(updates)
-        // logger.debug { "waitApplyAll: packets=${waitFor.size}" }
-        //}
+        val waitFor: MutableSet<FrozenBufferedUpdates>
+        updatesLock.lock()
+        try {
+            waitFor = HashSet(updates)
+            // logger.debug { "waitApplyAll: packets=${waitFor.size}" }
+            //}
+        } finally {
+            updatesLock.unlock()
+        }
 
         waitApply(waitFor, writer)
     }
@@ -147,13 +172,18 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
         // practice
         assert(packet.applied.getCount() == 1L) { "packet=$packet" }
 
-        packet.applied.countDown()
+        updatesLock.lock()
+        try {
+            packet.applied.countDown()
 
-        updates.remove(packet)
+            updates.remove(packet)
 
-        bytesUsed.addAndFetch(-packet.bytesUsed.toLong())
+            bytesUsed.addAndFetch(-packet.bytesUsed.toLong())
 
-        finishedSegment(packet.delGen())
+            finishedSegment(packet.delGen())
+        } finally {
+            updatesLock.unlock()
+        }
     }
 
     val completedDelGen: Long
@@ -176,8 +206,8 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
 
         val waitFor: MutableSet<FrozenBufferedUpdates> = HashSet()
 
-        // TODO implement synchronized in kotlin common
-        //synchronized(this) {
+        updatesLock.lock()
+        try {
             for (packet in updates) {
                 if (packet.delGen() <= maxDelGen) {
                     // We must wait for this packet before finishing the merge because its
@@ -185,7 +215,9 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
                     waitFor.add(packet)
                 }
             }
-        //}
+        } finally {
+            updatesLock.unlock()
+        }
 
         if (infoStream.isEnabled("BD")) {
             infoStream.message(
@@ -253,7 +285,12 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
 
     /*@Synchronized*/
     fun getNextGen(): Long {
-        return nextGen++
+        updatesLock.lock()
+        try {
+            return nextGen++
+        } finally {
+            updatesLock.unlock()
+        }
     }
 
     /** Holds all per-segment internal state used while resolving deletions.  */
@@ -284,12 +321,17 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
     // only for assert
     @OptIn(ExperimentalAtomicApi::class)
     private fun checkDeleteStats(): Boolean {
-        var bytesUsed2: Long = 0
-        for (packet in updates) {
-            bytesUsed2 += packet.bytesUsed.toLong()
+        updatesLock.lock()
+        try {
+            var bytesUsed2: Long = 0
+            for (packet in updates) {
+                bytesUsed2 += packet.bytesUsed.toLong()
+            }
+            assert(bytesUsed2 == bytesUsed.load()) { "bytesUsed2=$bytesUsed2 vs $bytesUsed" }
+            return true
+        } finally {
+            updatesLock.unlock()
         }
-        assert(bytesUsed2 == bytesUsed.load()) { "bytesUsed2=$bytesUsed2 vs $bytesUsed" }
-        return true
     }
 
     /**
@@ -298,6 +340,7 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
      * packets.
      */
     private class FinishedSegments(private val infoStream: InfoStream) {
+        private val finishedSegmentsLock = ReentrantLock()
         /** Largest del gen, inclusive, for which all prior packets have finished applying.  */
         /*@get:Synchronized*/
         var completedDelGen: Long = 0
@@ -312,31 +355,46 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
 
         /*@Synchronized*/
         fun clear() {
-            finishedDelGens.clear()
-            completedDelGen = 0
+            finishedSegmentsLock.lock()
+            try {
+                finishedDelGens.clear()
+                completedDelGen = 0
+            } finally {
+                finishedSegmentsLock.unlock()
+            }
         }
 
         /*@Synchronized*/
         fun stillRunning(delGen: Long): Boolean {
-            return delGen > completedDelGen && !finishedDelGens.contains(delGen)
+            finishedSegmentsLock.lock()
+            try {
+                return delGen > completedDelGen && !finishedDelGens.contains(delGen)
+            } finally {
+                finishedSegmentsLock.unlock()
+            }
         }
 
         /*@Synchronized*/
         fun finishedSegment(delGen: Long) {
-            finishedDelGens.add(delGen)
-            while (true) {
-                if (finishedDelGens.contains(completedDelGen + 1)) {
-                    finishedDelGens.remove(completedDelGen + 1)
-                    completedDelGen++
-                } else {
-                    break
+            finishedSegmentsLock.lock()
+            try {
+                finishedDelGens.add(delGen)
+                while (true) {
+                    if (finishedDelGens.contains(completedDelGen + 1)) {
+                        finishedDelGens.remove(completedDelGen + 1)
+                        completedDelGen++
+                    } else {
+                        break
+                    }
                 }
-            }
 
-            if (infoStream.isEnabled("BD")) {
-                infoStream.message(
-                    "BD", "finished packet delGen=$delGen now completedDelGen=$completedDelGen"
-                )
+                if (infoStream.isEnabled("BD")) {
+                    infoStream.message(
+                        "BD", "finished packet delGen=$delGen now completedDelGen=$completedDelGen"
+                    )
+                }
+            } finally {
+                finishedSegmentsLock.unlock()
             }
         }
     }

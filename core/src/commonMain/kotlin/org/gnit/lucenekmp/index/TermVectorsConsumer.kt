@@ -4,6 +4,7 @@ import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.NormsProducer
 import org.gnit.lucenekmp.codecs.TermVectorsWriter
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.Accountable
@@ -86,10 +87,21 @@ open class TermVectorsConsumer(
     @Throws(IOException::class)
     open fun initTermVectorsWriter() {
         if (writer == null) {
-            val context = IOContext(FlushInfo(lastDocID, bytesUsed.get()))
-            writer = codec.termVectorsFormat().vectorsWriter(directory, info, context)
-            lastDocID = 0
-            accountable = writer!!
+            val failurePathProbe = FailurePathProbe.find(directory)
+            val previousTermVectorsStage = failurePathProbe?.termVectorsStage
+            if (failurePathProbe != null) {
+                failurePathProbe.termVectorsStage = "initTermVectorsWriter"
+            }
+            try {
+                val context = IOContext(FlushInfo(lastDocID, bytesUsed.get()))
+                writer = codec.termVectorsFormat().vectorsWriter(directory, info, context)
+                lastDocID = 0
+                accountable = writer!!
+            } finally {
+                if (failurePathProbe != null) {
+                    failurePathProbe.termVectorsStage = previousTermVectorsStage
+                }
+            }
         }
     }
 
@@ -102,31 +114,46 @@ open class TermVectorsConsumer(
         if (!hasVectors) {
             return
         }
-
-        // Fields in term vectors are UTF16 sorted:
-        ArrayUtil.introSort(
-            perFields as Array<TermVectorsConsumerPerField>,
-            0,
-            numVectorFields
-        )
-
-        initTermVectorsWriter()
-
-        fill(docID)
-
-        // Append term vectors to the real outputs:
-        writer!!.startDocument(numVectorFields)
-        for (i in 0..<numVectorFields) {
-            perFields[i]!!.finishDocument()
+        val failurePathProbe = FailurePathProbe.find(directory)
+        val previousTermVectorsStage = failurePathProbe?.termVectorsStage
+        val previousIsInTermVectorsFinishDocument = failurePathProbe?.isInTermVectorsFinishDocument
+        if (failurePathProbe != null) {
+            failurePathProbe.termVectorsStage = "finishDocument"
+            failurePathProbe.isInTermVectorsFinishDocument = true
         }
-        writer!!.finishDocument()
+        try {
 
-        assert(lastDocID == docID) { "lastDocID=$lastDocID docID=$docID" }
+            // Fields in term vectors are UTF16 sorted:
+            ArrayUtil.introSort(
+                perFields as Array<TermVectorsConsumerPerField>,
+                0,
+                numVectorFields
+            )
 
-        lastDocID++
+            initTermVectorsWriter()
 
-        super.reset()
-        resetFields()
+            fill(docID)
+
+            // Append term vectors to the real outputs:
+            writer!!.startDocument(numVectorFields)
+            for (i in 0..<numVectorFields) {
+                perFields[i]!!.finishDocument()
+            }
+            writer!!.finishDocument()
+
+            assert(lastDocID == docID) { "lastDocID=$lastDocID docID=$docID" }
+
+            lastDocID++
+
+            super.reset()
+            resetFields()
+        } finally {
+            if (failurePathProbe != null) {
+                failurePathProbe.termVectorsStage = previousTermVectorsStage
+                failurePathProbe.isInTermVectorsFinishDocument =
+                    previousIsInTermVectorsFinishDocument ?: false
+            }
+        }
     }
 
     override fun abort() {

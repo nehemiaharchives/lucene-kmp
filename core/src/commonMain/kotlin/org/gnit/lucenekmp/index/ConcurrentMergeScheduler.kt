@@ -52,6 +52,8 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
+private val concurrentMergeSchedulerLogger = KotlinLogging.logger {}
+
 /**
  * A [MergeScheduler] that runs each merge using a separate thread.
  *
@@ -74,7 +76,6 @@ import kotlin.time.TimeSource
 open class ConcurrentMergeScheduler
 /** Sole constructor, with all settings set to default values.  */
     : MergeScheduler() {
-    private val logger = KotlinLogging.logger {}
     /** List of currently active [MergeThread]s.  */
     protected val mergeThreads: MutableList<MergeThread> = mutableListOf()
 
@@ -552,7 +553,7 @@ open class ConcurrentMergeScheduler
             if (!loggedSlowWait && waitingStartedAt.elapsedNow() > 5.seconds) {
                 loggedSlowWait = true
                 val elapsed = waitingStartedAt.elapsedNow()
-                logger.error {
+                concurrentMergeSchedulerLogger.error {
                     "CMS.sync slow wait elapsed=$elapsed waitIters=$waitingIters mergeThread=${toSync.getName()} mergeSegment=${getSegmentName(toSync.merge)} mergeThreadPhase=${toSync.debugPhase()} phaseElapsedMs=${toSync.debugPhaseElapsedMs()} mergePhase=${toSync.merge.debugPhase} mergePhaseElapsedMs=${toSync.merge.debugPhaseElapsedMs()} mergeAborted=${toSync.merge.isAborted} mergeException=${toSync.merge.exception?.let { it::class.simpleName }} active=${debugActiveMergeThreads()} started=${debugStartedMergeThreads()} finished=${debugFinishedMergeThreads()} suppressExceptions=$suppressExceptions"
                 }
                 NativeCrashProbe.requestNativeProbeDump(times = 1)
@@ -803,7 +804,7 @@ open class ConcurrentMergeScheduler
         @Volatile
         private var debugThreadId: Long = -1L
         private val uncaughtHandler = CoroutineExceptionHandler { _, throwable ->
-            logger.error(throwable) {
+            concurrentMergeSchedulerLogger.error(throwable) {
                 "CMS.mergeThread uncaught coroutine exception merge=${merge.segString()} suppressExceptions=$suppressExceptions"
             }
         }
@@ -881,12 +882,12 @@ open class ConcurrentMergeScheduler
                 when {
                     exc is MergePolicy.MergeAbortedException -> { /* ignore */ }
                     !suppressExceptions               -> {
-                        logger.error(exc) { "CMS.runMerge unsuppressed exception merge=${merge.segString()} suppressExceptions=$suppressExceptions" }
+                        concurrentMergeSchedulerLogger.error(exc) { "CMS.runMerge unsuppressed exception merge=${merge.segString()} suppressExceptions=$suppressExceptions" }
                         handleMergeException(exc)
                     }
                     else -> {
                         if (!isLikelyFakeIOException(exc)) {
-                            logger.error(exc) {
+                            concurrentMergeSchedulerLogger.error(exc) {
                                 "CMS.runMerge suppressed non-fake exception merge=${merge.segString()} suppressExceptions=$suppressExceptions"
                             }
                         }
@@ -1115,7 +1116,7 @@ open class ConcurrentMergeScheduler
                             // testing.
                             handleMergeException(exc)
                         } else if (!isLikelyFakeIOException(exc)) {
-                            logger.error(exc) {
+                            concurrentMergeSchedulerLogger.error(exc) {
                                 "CMS.cachedExecutor suppressed non-fake exception suppressExceptions=$suppressExceptions"
                             }
                         }

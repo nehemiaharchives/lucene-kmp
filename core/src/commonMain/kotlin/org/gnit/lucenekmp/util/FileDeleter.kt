@@ -11,6 +11,7 @@ import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.computeIfAbsent
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 
 /**
  * This class provides ability to track the reference counts of a set of index files and delete them
@@ -218,24 +219,35 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
 
     @Throws(IOException::class)
     private fun delete(toDelete: MutableCollection<String>) {
-        messenger(MsgType.FILE, "now delete " + toDelete.size + " files: " + toDelete)
-
-        // First pass: delete any segments_N files.  We do these first to be certain stale commit points
-        // are removed
-        // before we remove any files they reference, in case we crash right now:
-        for (fileName in toDelete) {
-            assert(existsUnsafe(fileName) == false)
-            if (fileName.startsWith(IndexFileNames.SEGMENTS)) {
-                delete(fileName)
-            }
+        val failurePathProbe = FailurePathProbe.find(directory)
+        val previousDeleteStage = failurePathProbe?.deleteStage
+        if (failurePathProbe != null) {
+            failurePathProbe.deleteStage = "deleteFiles"
         }
+        try {
+            messenger(MsgType.FILE, "now delete " + toDelete.size + " files: " + toDelete)
 
-        // Only delete other files if we were able to remove the segments_N files; this way we never
-        // leave a corrupt commit in the index even in the presense of virus checkers:
-        for (fileName in toDelete) {
-            assert(existsUnsafe(fileName) == false)
-            if (fileName.startsWith(IndexFileNames.SEGMENTS) == false) {
-                delete(fileName)
+            // First pass: delete any segments_N files.  We do these first to be certain stale commit points
+            // are removed
+            // before we remove any files they reference, in case we crash right now:
+            for (fileName in toDelete) {
+                assert(existsUnsafe(fileName) == false)
+                if (fileName.startsWith(IndexFileNames.SEGMENTS)) {
+                    delete(fileName)
+                }
+            }
+
+            // Only delete other files if we were able to remove the segments_N files; this way we never
+            // leave a corrupt commit in the index even in the presense of virus checkers:
+            for (fileName in toDelete) {
+                assert(existsUnsafe(fileName) == false)
+                if (fileName.startsWith(IndexFileNames.SEGMENTS) == false) {
+                    delete(fileName)
+                }
+            }
+        } finally {
+            if (failurePathProbe != null) {
+                failurePathProbe.deleteStage = previousDeleteStage
             }
         }
     }

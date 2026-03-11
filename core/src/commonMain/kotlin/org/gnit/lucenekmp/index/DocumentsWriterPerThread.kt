@@ -14,6 +14,7 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.TrackingDirectoryWrapper
@@ -364,6 +365,11 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         }
 
         val t0: Instant = Clock.System.now()
+        val failurePathProbe = FailurePathProbe.find(directory)
+        val previousFlushStage = failurePathProbe?.flushStage
+        if (failurePathProbe != null) {
+            failurePathProbe.flushStage = "flush"
+        }
 
         if (infoStream.isEnabled("DWPT")) {
             infoStream.message(
@@ -488,6 +494,9 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
             onAbortingException(t)
             throw t
         } finally {
+            if (failurePathProbe != null) {
+                failurePathProbe.flushStage = previousFlushStage
+            }
             maybeAbort("flush", flushNotifications)
             hasFlushed.set(true)
         }

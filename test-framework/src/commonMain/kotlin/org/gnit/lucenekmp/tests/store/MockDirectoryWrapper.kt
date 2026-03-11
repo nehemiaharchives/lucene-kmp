@@ -25,6 +25,7 @@ import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.ChecksumIndexInput
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.store.FailurePathProbe
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.store.IndexInput
 import org.gnit.lucenekmp.store.IndexOutput
@@ -39,6 +40,8 @@ import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
 import kotlin.random.Random
+
+private val mockDirectoryWrapperLogger = KotlinLogging.logger {}
 
 /**
  * This is a Directory Wrapper that adds methods intended to be used only by unit tests. It also
@@ -55,8 +58,7 @@ import kotlin.random.Random
  * to open files.
  *
  */
-class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryWrapper(delegate) {
-    private val logger = KotlinLogging.logger {}
+class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryWrapper(delegate), FailurePathProbe {
     var maxSizeInBytes: Long = 0
 
     /** Returns the peek actual storage used (bytes) in this directory.  */
@@ -93,6 +95,37 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     @Volatile
     var crashed: Boolean = false
+
+    @Volatile
+    override var commitStage: String? = null
+
+    @Volatile
+    override var rollbackStage: String? = null
+
+    @Volatile
+    override var mergeStage: String? = null
+
+    @Volatile
+    override var deleteStage: String? = null
+
+    @Volatile
+    override var flushStage: String? = null
+
+    @Volatile
+    override var termVectorsStage: String? = null
+
+    @Volatile
+    override var isInTermVectorsFinishDocument: Boolean = false
+
+    @Volatile
+    override var isDeletingFile: Boolean = false
+
+    @Volatile
+    override var isSyncingMetaData: Boolean = false
+
+    @Volatile
+    override var isWritingGlobalFieldMap: Boolean = false
+
     private val throttledOutput: ThrottledIndexOutput
     private var throttling: Throttling =
         if (LuceneTestCase.TEST_NIGHTLY) Throttling.SOMETIMES else Throttling.NEVER
@@ -210,18 +243,23 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     @Throws(IOException::class)
     override fun sync(names: MutableCollection<String>) {
         withStateLock {
-            maybeYield()
-            maybeThrowDeterministicException()
-            if (crashed) {
-                throw IOException("cannot sync after crash")
-            }
-            // always pass thru fsync, directories rely on this.
-            // 90% of time, we use DisableFsyncFS which omits the real calls.
-            for (name in names) {
-                // randomly fail with IOE on any file
-                maybeThrowIOException(name)
-                `in`.sync(mutableSetOf(name))
-                unSyncedFiles!!.remove(name)
+            isSyncing = true
+            try {
+                maybeYield()
+                maybeThrowDeterministicException()
+                if (crashed) {
+                    throw IOException("cannot sync after crash")
+                }
+                // always pass thru fsync, directories rely on this.
+                // 90% of time, we use DisableFsyncFS which omits the real calls.
+                for (name in names) {
+                    // randomly fail with IOE on any file
+                    maybeThrowIOException(name)
+                    `in`.sync(mutableSetOf(name))
+                    unSyncedFiles!!.remove(name)
+                }
+            } finally {
+                isSyncing = false
             }
         }
     }
@@ -281,12 +319,19 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun syncMetaData() {
-        maybeYield()
-        maybeThrowDeterministicException()
-        if (crashed) {
-            throw IOException("cannot sync metadata after crash")
+        isSyncing = true
+        isSyncingMetaData = true
+        try {
+            maybeYield()
+            maybeThrowDeterministicException()
+            if (crashed) {
+                throw IOException("cannot sync metadata after crash")
+            }
+            `in`.syncMetaData()
+        } finally {
+            isSyncing = false
+            isSyncingMetaData = false
         }
-        `in`.syncMetaData()
     }
 
     /*@Synchronized*/
@@ -683,34 +728,39 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     @Throws(IOException::class)
     override fun deleteFile(name: String) {
         withStateLock {
-            maybeYield()
+            isDeletingFile = true
+            try {
+                maybeYield()
 
-            maybeThrowDeterministicException()
+                maybeThrowDeterministicException()
 
-            if (crashed) {
-                throw IOException("cannot delete after crash")
-            }
-
-            withOpenFilesLock {
-                if (openFiles!!.containsKey(name)) {
-                    openFilesDeleted!!.add(name)
-                    if (assertNoDeleteOpenFile) {
-                        throw fillOpenTrace(
-                            IOException(
-                                "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
-                            ),
-                            name,
-                            true
-                        )
-                    }
-                } else {
-                    openFilesDeleted!!.remove(name)
+                if (crashed) {
+                    throw IOException("cannot delete after crash")
                 }
-            }
 
-            unSyncedFiles!!.remove(name)
-            `in`.deleteFile(name)
-            createdFiles!!.remove(name)
+                withOpenFilesLock {
+                    if (openFiles!!.containsKey(name)) {
+                        openFilesDeleted!!.add(name)
+                        if (assertNoDeleteOpenFile) {
+                            throw fillOpenTrace(
+                                IOException(
+                                    "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
+                                ),
+                                name,
+                                true
+                            )
+                        }
+                    } else {
+                        openFilesDeleted!!.remove(name)
+                    }
+                }
+
+                unSyncedFiles!!.remove(name)
+                `in`.deleteFile(name)
+                createdFiles!!.remove(name)
+            } finally {
+                isDeletingFile = false
+            }
         }
     }
 
@@ -1060,7 +1110,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                             null
                         )
                     } catch (t: Throwable) {
-                        logger.error(t) {
+                        mockDirectoryWrapperLogger.error(t) {
                             "MockDirectoryWrapper.close checkIndexOnClose failed checkLevel=$checkLevel"
                         }
                         throw t
@@ -1246,6 +1296,8 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     }
 
     var failures: ArrayList<Failure>? = null
+    var isSyncing: Boolean = false
+        private set
 
     init {
         // must make a private random since our methods are
