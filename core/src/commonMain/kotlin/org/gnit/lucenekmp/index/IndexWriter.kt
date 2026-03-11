@@ -3720,7 +3720,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      * written).
      */
     @Throws(IOException::class)
-    protected fun doAfterFlush() {
+    protected open fun doAfterFlush() {
     }
 
     /**

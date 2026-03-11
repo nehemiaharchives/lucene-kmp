@@ -1230,7 +1230,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
          * A typical example of use is Failure failure = new Failure() { ... }; ...
          * mock.failOn(failure.reset())
          */
-        fun reset(): Failure {
+        open fun reset(): Failure {
             return this
         }
 

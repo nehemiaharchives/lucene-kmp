@@ -11,7 +11,7 @@ import org.gnit.lucenekmp.index.MergePolicy
 //import org.gnit.lucenekmp.index.MergeScheduler
 //import org.gnit.lucenekmp.index.SlowCodecReaderWrapper
 import org.gnit.lucenekmp.index.TieredMergePolicy
-//import org.gnit.lucenekmp.store.ByteBuffersDirectory
+import org.gnit.lucenekmp.store.ByteBuffersDirectory
 //import org.gnit.lucenekmp.store.NoLockFactory
 //import org.gnit.lucenekmp.tests.codecs.asserting.AssertingCodec
 //import org.gnit.lucenekmp.tests.codecs.blockterms.LuceneFixedGap
@@ -49,6 +49,8 @@ import org.gnit.lucenekmp.index.PostingsEnum
 import org.gnit.lucenekmp.index.SlowCodecReaderWrapper
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TermsEnum
+import org.gnit.lucenekmp.index.IndexFileNames
+import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
 import org.gnit.lucenekmp.jdkport.CharBuffer
 import org.gnit.lucenekmp.jdkport.Character
@@ -1869,18 +1871,18 @@ class TestUtil {
         }
 
         /** Returns a copy of the source directory, with file contents stored in RAM.  */
-        /*@Throws(IOException::class)
+        @Throws(IOException::class)
         fun ramCopyOf(dir: Directory): Directory {
             val ram: Directory = ByteBuffersDirectory()
             for (file in dir.listAll()) {
                 if (file.startsWith(IndexFileNames.SEGMENTS)
-                    || IndexFileNames.CODEC_FILE_PATTERN.matcher(file).matches()
+                    || IndexFileNames.CODEC_FILE_PATTERN.matches(file)
                 ) {
                     ram.copyFrom(dir, file, file, IOContext.DEFAULT)
                 }
             }
             return ram
-        }*/
+        }
 
         /*fun hasWindowsFS(dir: Directory): Boolean {
             var dir: Directory = dir
