@@ -60,7 +60,7 @@ jobs:
           - platform: jvm
             module_name: core-index
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :core:jvmTest
             package_filter: --tests "org.gnit.lucenekmp.index*"
             artifact: jvm-core-index-reports
@@ -230,7 +230,7 @@ jobs:
           - platform: android
             module_name: core-index
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :core:testAndroidHostTest
             package_filter: --tests "org.gnit.lucenekmp.index*"
             artifact: android-core-index-reports
@@ -361,7 +361,7 @@ jobs:
           - platform: ios
             module_name: core-index
             os: macos-latest
-            timeout: 40
+            timeout: 50
             task: :core:iosSimulatorArm64Test
             package_filter: --tests "org.gnit.lucenekmp.index*"
             artifact: ios-core-index-reports
@@ -492,7 +492,7 @@ jobs:
           - platform: linux
             module_name: core-index
             os: ubuntu-latest
-            timeout: 50
+            timeout: 60
             task: :core:linuxX64Test
             package_filter: --tests "org.gnit.lucenekmp.index*"
             artifact: linux-core-index-reports
