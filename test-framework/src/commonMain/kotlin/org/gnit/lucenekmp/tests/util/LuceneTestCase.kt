@@ -5,6 +5,7 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.util.configureTestLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.TimeZone
+import okio.FileNotFoundException
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.analysis.Analyzer
@@ -39,6 +40,7 @@ import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TieredMergePolicy
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
+import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.ThreadPoolExecutor
@@ -2394,11 +2396,19 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         }
 
         /**
-         * Returns true if the file exists in the directory (slow for some Directory impls).
+         * Returns true if the file exists (can be opened), false if it cannot be opened, and throws
+         * [IOException] if there's some unexpected error.
          */
         @Throws(IOException::class)
         fun slowFileExists(dir: Directory, fileName: String): Boolean {
-            return dir.listAll().contains(fileName)
+            return try {
+                dir.openInput(fileName, IOContext.READONCE).close()
+                true
+            } catch (_: NoSuchFileException) {
+                false
+            } catch (_: FileNotFoundException) {
+                false
+            }
         }
 
         /**

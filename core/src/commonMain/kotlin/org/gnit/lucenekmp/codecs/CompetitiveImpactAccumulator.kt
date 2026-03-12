@@ -4,6 +4,7 @@ import org.gnit.lucenekmp.index.Impact
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TreeSet
+import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.compare
 import org.gnit.lucenekmp.jdkport.compareUnsigned
 import org.gnit.lucenekmp.jdkport.toUnsignedInt
@@ -33,7 +34,7 @@ class CompetitiveImpactAccumulator {
     fun clear() {
         Arrays.fill(maxFreqs, 0)
         otherFreqNormPairs.clear()
-        require(assertConsistent())
+        assert(assertConsistent())
     }
 
     /**
@@ -47,7 +48,7 @@ class CompetitiveImpactAccumulator {
         } else {
             add(Impact(freq, norm), otherFreqNormPairs)
         }
-        require(assertConsistent())
+        assert(assertConsistent())
     }
 
     /** Merge `acc` into this.  */
@@ -62,7 +63,7 @@ class CompetitiveImpactAccumulator {
             add(entry, otherFreqNormPairs)
         }
 
-        require(assertConsistent())
+        assert(assertConsistent())
     }
 
     /** Replace the content of this `acc` with the provided `acc`.  */
@@ -74,7 +75,7 @@ class CompetitiveImpactAccumulator {
         otherFreqNormPairs.clear()
         otherFreqNormPairs.addAll(acc.otherFreqNormPairs)
 
-        require(assertConsistent())
+        assert(assertConsistent())
     }
 
     /** Get the set of competitive freq and norm pairs, ordered by increasing freq and norm.  */
@@ -137,9 +138,9 @@ class CompetitiveImpactAccumulator {
         var previousFreq = 0
         var previousNorm: Long = 0
         for (impact in otherFreqNormPairs) {
-            require(impact.norm < Byte.Companion.MIN_VALUE || impact.norm > Byte.Companion.MAX_VALUE)
-            require(previousFreq < impact.freq)
-            require(Long.compareUnsigned(previousNorm, impact.norm) < 0)
+            assert(impact.norm < Byte.Companion.MIN_VALUE || impact.norm > Byte.Companion.MAX_VALUE)
+            assert(previousFreq < impact.freq)
+            assert(Long.compareUnsigned(previousNorm, impact.norm) < 0)
             previousFreq = impact.freq
             previousNorm = impact.norm
         }

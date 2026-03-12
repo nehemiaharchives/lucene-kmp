@@ -6270,23 +6270,28 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun nrtIsCurrent(infos: SegmentInfos): Boolean {
-        ensureOpen()
-        val isCurrent =
-            infos.version == segmentInfos.version && !docWriter.anyChanges() && !bufferedUpdatesStream.any() && !readerPool.anyDocValuesChanges()
-        if (infoStream.isEnabled("IW")) {
-            if (!isCurrent) {
-                infoStream.message(
-                    "IW",
-                    ("nrtIsCurrent: infoVersion matches: "
-                            + (infos.version == segmentInfos.version)
-                            + "; DW changes: "
-                            + docWriter.anyChanges()
-                            + "; BD changes: "
-                            + bufferedUpdatesStream.any())
-                )
+        return withIndexWriterLock {
+            ensureOpen()
+            val isCurrent =
+                infos.version == segmentInfos.version &&
+                    !docWriter.anyChanges() &&
+                    !bufferedUpdatesStream.any() &&
+                    !readerPool.anyDocValuesChanges()
+            if (infoStream.isEnabled("IW")) {
+                if (!isCurrent) {
+                    infoStream.message(
+                        "IW",
+                        ("nrtIsCurrent: infoVersion matches: "
+                                + (infos.version == segmentInfos.version)
+                                + "; DW changes: "
+                                + docWriter.anyChanges()
+                                + "; BD changes: "
+                                + bufferedUpdatesStream.any())
+                    )
+                }
             }
+            isCurrent
         }
-        return isCurrent
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here

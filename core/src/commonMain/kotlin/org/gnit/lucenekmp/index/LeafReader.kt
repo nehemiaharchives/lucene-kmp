@@ -33,7 +33,6 @@ import org.gnit.lucenekmp.util.Bits
 abstract class LeafReader
 /** Sole constructor. (For invocation by subclass constructors, typically implicit.)  */
 protected constructor() : IndexReader() {
-    private val logger = KotlinLogging.logger {}
     private val readerContext: LeafReaderContext = LeafReaderContext(this)
 
     override val context: LeafReaderContext
@@ -429,4 +428,8 @@ protected constructor() : IndexReader() {
      * @lucene.experimental
      */
     abstract val metaData: LeafMetaData
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 }

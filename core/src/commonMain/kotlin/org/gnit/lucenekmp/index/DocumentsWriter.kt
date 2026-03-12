@@ -269,62 +269,67 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     suspend fun lockAndAbortAll(): AutoCloseable {
-        if (infoStream.isEnabled("DW")) {
-            infoStream.message("DW", "lockAndAbortAll")
-        }
-        // Make sure we move all pending tickets into the flush queue:
-        ticketQueue.forcePurge { ticket: FlushTicket ->
-            if (ticket.flushedSegment != null) {
-                pendingNumDocs.addAndFetch(-ticket.flushedSegment!!.segmentInfo.info.maxDoc().toLong())
+        syncLock.lock()
+        try {
+            if (infoStream.isEnabled("DW")) {
+                infoStream.message("DW", "lockAndAbortAll")
             }
-        }
-        val writers: MutableList<DocumentsWriterPerThread> = mutableListOf()
-        val released = AtomicBoolean(false)
-        val release =
-            AutoCloseable {
-                // we return this closure to unlock all writers once done
-                // or if hit an exception below in the try block.
-                // we can't assign this later otherwise the ref can't be final
-                if (released.compareAndSet(false, newValue = true)) { // only once
-                    if (infoStream.isEnabled("DW")) {
-                        infoStream.message("DW", "unlockAllAbortedThread")
-                    }
-                    runBlocking{ perThreadPool.unlockNewWriters() }
-                    for (writer in writers) {
-                        writer.unlock()
-                    }
+            // Make sure we move all pending tickets into the flush queue:
+            ticketQueue.forcePurge { ticket: FlushTicket ->
+                if (ticket.flushedSegment != null) {
+                    pendingNumDocs.addAndFetch(-ticket.flushedSegment!!.segmentInfo.info.maxDoc().toLong())
                 }
             }
-        try {
-            deleteQueue.clear()
-            perThreadPool.lockNewWriters()
-            writers.addAll(perThreadPool.filterAndLock { `_`: DocumentsWriterPerThread -> true })
-            for (perThread in writers) {
-                assert(perThread.isHeldByCurrentThread)
-                abortDocumentsWriterPerThread(perThread)
-            }
-            deleteQueue.clear()
-
-            // jump over any possible in flight ops:
-            deleteQueue.skipSequenceNumbers((perThreadPool.size() + 1).toLong())
-
-            flushControl.abortPendingFlushes()
-            flushControl.waitForFlush()
-            if (infoStream.isEnabled("DW")) {
-                infoStream.message("DW", "finished lockAndAbortAll success=true")
-            }
-            return release
-        } catch (t: Throwable) {
-            if (infoStream.isEnabled("DW")) {
-                infoStream.message("DW", "finished lockAndAbortAll success=false")
-            }
+            val writers: MutableList<DocumentsWriterPerThread> = mutableListOf()
+            val released = AtomicBoolean(false)
+            val release =
+                AutoCloseable {
+                    // we return this closure to unlock all writers once done
+                    // or if hit an exception below in the try block.
+                    // we can't assign this later otherwise the ref can't be final
+                    if (released.compareAndSet(false, newValue = true)) { // only once
+                        if (infoStream.isEnabled("DW")) {
+                            infoStream.message("DW", "unlockAllAbortedThread")
+                        }
+                        runBlocking { perThreadPool.unlockNewWriters() }
+                        for (writer in writers) {
+                            writer.unlock()
+                        }
+                    }
+                }
             try {
-                // if something happens here we unlock all states again
-                release.close()
-            } catch (t1: Throwable) {
-                t.addSuppressed(t1)
+                deleteQueue.clear()
+                perThreadPool.lockNewWriters()
+                writers.addAll(perThreadPool.filterAndLock { _: DocumentsWriterPerThread -> true })
+                for (perThread in writers) {
+                    assert(perThread.isHeldByCurrentThread)
+                    abortDocumentsWriterPerThread(perThread)
+                }
+                deleteQueue.clear()
+
+                // jump over any possible in flight ops:
+                deleteQueue.skipSequenceNumbers((perThreadPool.size() + 1).toLong())
+
+                flushControl.abortPendingFlushes()
+                flushControl.waitForFlush()
+                if (infoStream.isEnabled("DW")) {
+                    infoStream.message("DW", "finished lockAndAbortAll success=true")
+                }
+                return release
+            } catch (t: Throwable) {
+                if (infoStream.isEnabled("DW")) {
+                    infoStream.message("DW", "finished lockAndAbortAll success=false")
+                }
+                try {
+                    // if something happens here we unlock all states again
+                    release.close()
+                } catch (t1: Throwable) {
+                    t.addSuppressed(t1)
+                }
+                throw t
             }
-            throw t
+        } finally {
+            syncLock.unlock()
         }
     }
 
@@ -689,11 +694,16 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun setFlushingDeleteQueue(session: DocumentsWriterDeleteQueue?): Boolean {
-        assert(
-            currentFullFlushDelQueue == null || !currentFullFlushDelQueue!!.isOpen
-        ) { "Can not replace a full flush queue if the queue is not closed" }
-        currentFullFlushDelQueue = session
-        return true
+        syncLock.lock()
+        try {
+            assert(
+                currentFullFlushDelQueue == null || !currentFullFlushDelQueue!!.isOpen
+            ) { "Can not replace a full flush queue if the queue is not closed" }
+            currentFullFlushDelQueue = session
+            return true
+        } finally {
+            syncLock.unlock()
+        }
     }
 
     private fun assertTicketQueueModification(deleteQueue: DocumentsWriterDeleteQueue): Boolean {
@@ -720,13 +730,20 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
 
         // TODO synchronized is not supported in KMP, need to think what to do here
         //synchronized(this) {
-        pendingChangesInCurrentFullFlush = anyChanges()
-        val flushingDeleteQueue: DocumentsWriterDeleteQueue = deleteQueue
+        val flushingDeleteQueue: DocumentsWriterDeleteQueue
         /* Cutover to a new delete queue.  This must be synced on the flush control
          * otherwise a new DWPT could sneak into the loop with an already flushing
          * delete queue */
-        val seqNo: Long = flushControl.markForFullFlush() // swaps this.deleteQueue synced on FlushControl
-        assert(setFlushingDeleteQueue(flushingDeleteQueue))
+        val seqNo: Long
+        syncLock.lock()
+        try {
+            pendingChangesInCurrentFullFlush = anyChanges()
+            flushingDeleteQueue = deleteQueue
+            seqNo = flushControl.markForFullFlush() // swaps this.deleteQueue synced on FlushControl
+            assert(setFlushingDeleteQueue(flushingDeleteQueue))
+        } finally {
+            syncLock.unlock()
+        }
         //}
         checkNotNull(currentFullFlushDelQueue)
         assert(currentFullFlushDelQueue != deleteQueue)

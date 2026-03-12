@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs.lucene90.compressing
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.StoredFieldsReader
 import org.gnit.lucenekmp.codecs.compressing.CompressionMode
@@ -57,7 +56,6 @@ import org.gnit.lucenekmp.jdkport.longBitsToDouble
 import org.gnit.lucenekmp.jdkport.toHexString
 import kotlin.experimental.and
 import kotlin.math.min
-import kotlin.time.TimeSource
 
 /**
  * [StoredFieldsReader] impl for [Lucene90CompressingStoredFieldsFormat].
@@ -520,62 +518,27 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
 
     @Throws(IOException::class)
     override fun document(docID: Int, visitor: StoredFieldVisitor) {
-        val serializedMark = TimeSource.Monotonic.markNow()
         val doc = serializedDocument(docID)
-        logSlowStep(
-            step = "storedFields.document.serializedDocument",
-            elapsedNs = serializedMark.elapsedNow().inWholeNanoseconds,
-            detail = "docID=$docID numStoredFields=${doc.numStoredFields}"
-        )
 
         for (fieldIDX in 0..<doc.numStoredFields) {
-            val infoMark = TimeSource.Monotonic.markNow()
             val infoAndBits: Long = doc.`in`.readVLong()
             val fieldNumber = (infoAndBits ushr TYPE_BITS).toInt()
             val fieldInfo: FieldInfo = fieldInfos!!.fieldInfo(fieldNumber)!!
 
             val bits = (infoAndBits and TYPE_MASK.toLong()).toInt()
             require(bits <= NUMERIC_DOUBLE) { "bits=" + Int.toHexString(bits) }
-            logSlowStep(
-                step = "storedFields.document.readInfoAndBits",
-                elapsedNs = infoMark.elapsedNow().inWholeNanoseconds,
-                detail = "docID=$docID fieldIdx=$fieldIDX bits=$bits field=${fieldInfo.name}"
-            )
 
-            val needsFieldMark = TimeSource.Monotonic.markNow()
             when (visitor.needsField(fieldInfo)) {
                 Status.YES -> {
-                    logSlowStep(
-                        step = "storedFields.document.needsField",
-                        elapsedNs = needsFieldMark.elapsedNow().inWholeNanoseconds,
-                        detail = "docID=$docID fieldIdx=$fieldIDX decision=YES field=${fieldInfo.name}"
-                    )
-                    val readMark = TimeSource.Monotonic.markNow()
                     readField(doc.`in`, visitor, fieldInfo, bits)
-                    logSlowStep(
-                        step = "storedFields.document.readField",
-                        elapsedNs = readMark.elapsedNow().inWholeNanoseconds,
-                        detail = "docID=$docID fieldIdx=$fieldIDX bits=$bits field=${fieldInfo.name}"
-                    )
                 }
                 Status.NO -> {
-                    logSlowStep(
-                        step = "storedFields.document.needsField",
-                        elapsedNs = needsFieldMark.elapsedNow().inWholeNanoseconds,
-                        detail = "docID=$docID fieldIdx=$fieldIDX decision=NO field=${fieldInfo.name}"
-                    )
                     if (fieldIDX
                         == doc.numStoredFields - 1
                     ) { // don't skipField on last field value; treat like STOP
                         return
                     }
-                    val skipMark = TimeSource.Monotonic.markNow()
                     skipField(doc.`in`, bits)
-                    logSlowStep(
-                        step = "storedFields.document.skipField",
-                        elapsedNs = skipMark.elapsedNow().inWholeNanoseconds,
-                        detail = "docID=$docID fieldIdx=$fieldIDX bits=$bits field=${fieldInfo.name}"
-                    )
                 }
 
                 Status.STOP -> return
@@ -643,14 +606,12 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
     }
 
     companion object {
-        private val logger = KotlinLogging.logger {}
 
         private const val PREFETCH_CACHE_SIZE = 1 shl 4
         private const val PREFETCH_CACHE_MASK = PREFETCH_CACHE_SIZE - 1
 
         @Throws(IOException::class)
         private fun readField(`in`: DataInput, visitor: StoredFieldVisitor, info: FieldInfo, bits: Int) {
-            val mark = TimeSource.Monotonic.markNow()
             when (bits and TYPE_MASK) {
                 BYTE_ARR -> {
                     val length: Int = `in`.readVInt()
@@ -664,16 +625,10 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 NUMERIC_DOUBLE -> visitor.doubleField(info, readZDouble(`in`))
                 else -> throw AssertionError("Unknown type flag: " + Int.toHexString(bits))
             }
-            logSlowStep(
-                step = "storedFields.readField.lowLevel",
-                elapsedNs = mark.elapsedNow().inWholeNanoseconds,
-                detail = "field=${info.name} bits=$bits"
-            )
         }
 
         @Throws(IOException::class)
         private fun skipField(`in`: DataInput, bits: Int) {
-            val mark = TimeSource.Monotonic.markNow()
             when (bits and TYPE_MASK) {
                 BYTE_ARR, STRING -> {
                     val length: Int = `in`.readVInt()
@@ -686,11 +641,6 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 NUMERIC_DOUBLE -> readZDouble(`in`)
                 else -> throw AssertionError("Unknown type flag: " + Int.toHexString(bits))
             }
-            logSlowStep(
-                step = "storedFields.skipField.lowLevel",
-                elapsedNs = mark.elapsedNow().inWholeNanoseconds,
-                detail = "bits=$bits"
-            )
         }
 
         /**
@@ -699,9 +649,8 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
          */
         @Throws(IOException::class)
         fun readZFloat(`in`: DataInput): Float {
-            val mark = TimeSource.Monotonic.markNow()
             val b: Int = `in`.readByte().toInt() and 0xFF
-            val result = if (b == 0xFF) {
+            return if (b == 0xFF) {
                 // negative value
                 Float.intBitsToFloat(`in`.readInt())
             } else if ((b and 0x80) != 0) {
@@ -712,12 +661,6 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 val bits = b shl 24 or ((`in`.readShort().toInt() and 0xFFFF) shl 8) or (`in`.readByte().toInt() and 0xFF)
                 Float.intBitsToFloat(bits)
             }
-            logSlowStep(
-                step = "storedFields.readZFloat",
-                elapsedNs = mark.elapsedNow().inWholeNanoseconds,
-                detail = "leadByte=$b"
-            )
-            return result
         }
 
         /**
@@ -726,9 +669,8 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
          */
         @Throws(IOException::class)
         fun readZDouble(`in`: DataInput): Double {
-            val mark = TimeSource.Monotonic.markNow()
             val b: Int = `in`.readByte().toInt() and 0xFF
-            val result = if (b == 0xFF) {
+            return if (b == 0xFF) {
                 // negative value
                 Double.longBitsToDouble(`in`.readLong())
             } else if (b == 0xFE) {
@@ -746,12 +688,6 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                             (`in`.readByte().toLong() and 0xFFL)
                 Double.longBitsToDouble(bits)
             }
-            logSlowStep(
-                step = "storedFields.readZDouble",
-                elapsedNs = mark.elapsedNow().inWholeNanoseconds,
-                detail = "leadByte=$b"
-            )
-            return result
         }
 
         /**
@@ -760,7 +696,6 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
          */
         @Throws(IOException::class)
         fun readTLong(`in`: DataInput): Long {
-            val mark = TimeSource.Monotonic.markNow()
             val header: Int = `in`.readByte().toInt() and 0xFF
 
             var bits = (header and 0x1F).toLong()
@@ -779,18 +714,8 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 else -> throw AssertionError()
             }
 
-            logSlowStep(
-                step = "storedFields.readTLong",
-                elapsedNs = mark.elapsedNow().inWholeNanoseconds,
-                detail = "header=$header"
-            )
             return l
         }
 
-        private fun logSlowStep(step: String, elapsedNs: Long, detail: String) {
-            if (elapsedNs >= 200_000) {
-                logger.debug { "perf:storedFields step=$step elapsedNs=$elapsedNs $detail" }
-            }
-        }
     }
 }
