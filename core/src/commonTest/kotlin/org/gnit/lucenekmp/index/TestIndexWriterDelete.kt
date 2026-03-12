@@ -26,6 +26,7 @@ import org.gnit.lucenekmp.document.StringField
 import org.gnit.lucenekmp.jdkport.ByteArrayOutputStream
 import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.jdkport.PrintStream
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.search.ScoreDoc
 import org.gnit.lucenekmp.search.TermQuery
@@ -339,7 +340,7 @@ class TestIndexWriterDelete : LuceneTestCase() {
         val doneLatch = CountDownLatch(numThreads)
         val threads = Array(numThreads) { i ->
             val offset = i
-            PlatformTestThread {
+            Thread {
                 var id = offset * 1000
                 val value = 100
                 try {

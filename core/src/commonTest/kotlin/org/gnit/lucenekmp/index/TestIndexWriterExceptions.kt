@@ -59,6 +59,7 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.CloseableThreadLocal
 import org.gnit.lucenekmp.util.IOSupplier
 import org.gnit.lucenekmp.util.InfoStream
+import org.gnit.lucenekmp.jdkport.Thread
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicReference
@@ -336,7 +337,7 @@ class TestIndexWriterExceptions : LuceneTestCase() {
         val NUM_THREADS = 4
 
         val threads = Array(NUM_THREADS) { i -> IndexerThread(i, writer) }
-        val platformThreads = Array(NUM_THREADS) { i -> PlatformTestThread { threads[i].run() } }
+        val platformThreads = Array(NUM_THREADS) { i -> Thread { threads[i].run() } }
         for (i in 0 until NUM_THREADS) {
             platformThreads[i].start()
         }
@@ -809,7 +810,7 @@ class TestIndexWriterExceptions : LuceneTestCase() {
 
                 val threadFailure = AtomicReference<Throwable?>(null)
                 val threads = Array(NUM_THREAD) { _ ->
-                    PlatformTestThread {
+                    Thread {
                         try {
                             for (iter in 0 until NUM_ITER) {
                                 val doc = Document()

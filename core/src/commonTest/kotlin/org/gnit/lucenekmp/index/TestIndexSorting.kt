@@ -44,6 +44,7 @@ import org.gnit.lucenekmp.document.TextField
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.search.CollectionStatistics
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import org.gnit.lucenekmp.search.FieldDoc
@@ -1920,11 +1921,11 @@ class TestIndexSorting : LuceneTestCase() {
         val numDocs = atLeast(10) // TODO reduced from 100 to 10 for dev speed
         val updateCount = AtomicInteger(atLeast(100)) // TODO reduced from 1000 to 100 for dev speed
         val latch = CountDownLatch(1)
-        val threads = Array(2) { PlatformTestThread {} }
+        val threads = Array(2) { Thread {} }
         for (i in threads.indices) {
             val r = Random(random().nextLong())
             threads[i] =
-                PlatformTestThread(UpdateRunnable(numDocs, r, latch, updateCount, w, values, lock)::run)
+                Thread(UpdateRunnable(numDocs, r, latch, updateCount, w, values, lock)::run)
         }
         for (thread in threads) {
             thread.start()
@@ -2039,13 +2040,13 @@ class TestIndexSorting : LuceneTestCase() {
             w.addDocument(doc)
             values[i] = -1L
         }
-        val threads = Array(2) { PlatformTestThread {} }
+        val threads = Array(2) { Thread {} }
         val updateCount = AtomicInteger(atLeast(100)) // TODO reduced from 1000 to 100 for dev speed
         val latch = CountDownLatch(1)
         for (i in threads.indices) {
             val r = Random(random().nextLong())
             threads[i] =
-                PlatformTestThread(DVUpdateRunnable(numDocs, r, latch, updateCount, w, values, lock)::run)
+                Thread(DVUpdateRunnable(numDocs, r, latch, updateCount, w, values, lock)::run)
         }
         for (thread in threads) {
             thread.start()

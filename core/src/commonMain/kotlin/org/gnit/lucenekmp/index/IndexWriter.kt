@@ -6629,18 +6629,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
     @Throws(IOException::class)
     private fun release(readersAndUpdates: ReadersAndUpdates, assertLiveInfo: Boolean) {
+        withIndexWriterLock {
+            val released: Boolean = runBlocking { readerPool.release(readersAndUpdates, assertLiveInfo) }
 
-        val released: Boolean = runBlocking { readerPool.release(readersAndUpdates, assertLiveInfo) }
-
-        // TODO Thread is not supported in KMP, need to think what to do here
-        //assert(java.lang.Thread.holdsLock(this))
-        if (released) {
             // if we write anything here we have to hold the lock otherwise IDF will delete files
             // underneath us
-
-            // TODO Thread is not supported in KMP, need to think what to do here
-            //assert(java.lang.Thread.holdsLock(this))
-            checkpointNoSIS()
+            if (released) {
+                checkpointNoSIS()
+            }
         }
     }
 
@@ -6972,20 +6968,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         var pooledInstanceNs = 0L
         var segmentStateBuildNs = 0L
         var openedSegments = 0
-        var skippedRefCountOne = 0
         try {
             for (info in infos) {
                 if (info.bufferedDeletesGen <= delGen && !alreadySeenSegments.contains(info)) {
                     val pooledMark = TimeSource.Monotonic.markNow()
                     val readersAndUpdates = getPooledInstance(info, true)!!
                     pooledInstanceNs += pooledMark.elapsedNow().inWholeNanoseconds
-                    if (readersAndUpdates.refCount() == 1) {
-                        // This segment has effectively been merged away for update application.
-                        // Downstream apply* paths would skip it anyway, so avoid opening a reader.
-                        release(readersAndUpdates, assertLiveInfo = false)
-                        skippedRefCountOne++
-                        continue
-                    }
                     val stateBuildMark = TimeSource.Monotonic.markNow()
                     segStates.add(
                         BufferedUpdatesStream.SegmentState(

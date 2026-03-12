@@ -18,6 +18,7 @@ package org.gnit.lucenekmp.index
 
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.jdkport.AtomicInteger
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.store.MockDirectoryWrapper
@@ -307,12 +308,12 @@ class TestFlushByRamOrCountsPolicy : LuceneTestCase() {
         private val doRandomCommit: Boolean,
         private val random: Random,
     ) {
-        private var thread: PlatformTestThread? = null
+        private var thread: Thread? = null
         private var failure: Throwable? = null
 
         fun start() {
             thread =
-                PlatformTestThread {
+                Thread {
                     try {
                         run()
                     } catch (t: Throwable) {

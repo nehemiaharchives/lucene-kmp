@@ -20,6 +20,7 @@ package org.gnit.lucenekmp.index
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.jdkport.AtomicInteger
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.IOUtils
@@ -42,7 +43,7 @@ class TestIndexManyDocuments : LuceneTestCase() {
         val w = IndexWriter(dir, iwc)
         val count = AtomicInteger(0)
         val threads = Array(2) {
-            PlatformTestThread {
+            Thread {
                 while (count.fetchAndIncrement() < numDocs) {
                     val doc = Document()
                     doc.add(newTextField("field", "text", Field.Store.NO))

@@ -1,6 +1,15 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.Runnable
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -137,5 +146,72 @@ class ThreadTest {
         current.interrupt()
         assertTrue(Thread.interrupted())
         assertFalse(Thread.interrupted())
+    }
+
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalAtomicApi::class)
+    @Test
+    fun testStartIsIsolatedFromDefaultDispatcherLoad() {
+        val blockerRelease = CountDownLatch(1)
+        val blockerStarted = AtomicInteger(0)
+        val blockers = mutableListOf<Job>()
+        try {
+            repeat(256) {
+                blockers +=
+                    GlobalScope.launch(Dispatchers.Default) {
+                        blockerStarted.accumulateAndGet(1) { current, delta -> current + delta }
+                        blockerRelease.await()
+                    }
+            }
+
+            waitForBlockersToStall(blockerStarted)
+
+            val started = CountDownLatch(1)
+            val finished = CountDownLatch(1)
+            val thread =
+                Thread(
+                    Runnable {
+                        started.countDown()
+                        finished.countDown()
+                    }
+                )
+
+            thread.start()
+
+            assertTrue(
+                started.await(250, TimeUnit.MILLISECONDS),
+                "Thread.start() should not be starved by unrelated Dispatchers.Default work"
+            )
+
+            thread.join()
+            assertEquals(0L, finished.getCount())
+        } finally {
+            blockerRelease.countDown()
+            runBlocking {
+                blockers.joinAll()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalAtomicApi::class)
+    private fun waitForBlockersToStall(blockerStarted: AtomicInteger) {
+        val waitStart = TimeSource.Monotonic.markNow()
+        var lastStarted = blockerStarted.get()
+        var stableRounds = 0
+        while (waitStart.elapsedNow() < 2.seconds) {
+            runBlocking {
+                delay(10)
+            }
+            val currentStarted = blockerStarted.get()
+            if (currentStarted == lastStarted) {
+                stableRounds++
+                if (currentStarted > 0 && stableRounds >= 10) {
+                    return
+                }
+            } else {
+                lastStarted = currentStarted
+                stableRounds = 0
+            }
+        }
+        assertTrue(blockerStarted.get() > 0, "Expected at least one blocker coroutine to start")
     }
 }

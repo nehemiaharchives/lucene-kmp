@@ -1,14 +1,16 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.gnit.lucenekmp.util.CloseableThreadLocal
@@ -21,11 +23,12 @@ import kotlin.time.TimeSource
 /**
  * port of java.lang.Thread
  */
-@OptIn(ExperimentalAtomicApi::class)
+@OptIn(ExperimentalAtomicApi::class, ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 @Ported(from = "java.lang.Thread")
 open class Thread : Runnable {
     private val target: Runnable?
     private var job: Job? = null
+    private var dispatcher: CloseableCoroutineDispatcher? = null
     private var interrupted = false
     private var started = false
     private var name: String = "Thread-${threadInitNumber.fetchAndIncrement()}"
@@ -40,12 +43,15 @@ open class Thread : Runnable {
         this.target = target
     }
 
+    constructor(target: () -> Unit) : this(Runnable { target() })
+
     open fun start() {
         check(!started) { "Thread already started" }
         started = true
-        @OptIn(DelicateCoroutinesApi::class)
+        val threadDispatcher = newSingleThreadContext(name)
+        dispatcher = threadDispatcher
         val launched =
-            GlobalScope.launch(Dispatchers.Default + CoroutineName(name)) {
+            CoroutineScope(threadDispatcher + CoroutineName(name)).launch {
                 val previous = currentThreadLocal.get()
                 currentThreadLocal.set(this@Thread)
                 try {
@@ -65,6 +71,7 @@ open class Thread : Runnable {
         runBlocking {
             job?.join()
         }
+        closeDispatcherIfFinished()
     }
 
     fun join(millis: Long) {
@@ -79,6 +86,7 @@ open class Thread : Runnable {
                 }
             }
         }
+        closeDispatcherIfFinished()
     }
 
     fun interrupt() {
@@ -112,6 +120,17 @@ open class Thread : Runnable {
 
     fun isDaemon(): Boolean {
         return daemon
+    }
+
+    private fun closeDispatcherIfFinished() {
+        val localJob = job
+        val localDispatcher = dispatcher
+        if (localDispatcher != null && (localJob == null || localJob.isCompleted)) {
+            localDispatcher.close()
+            if (dispatcher === localDispatcher) {
+                dispatcher = null
+            }
+        }
     }
 
     companion object {

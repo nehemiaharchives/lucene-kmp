@@ -17,11 +17,13 @@
 
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.StringField
 import org.gnit.lucenekmp.jdkport.CountDownLatch
 import org.gnit.lucenekmp.jdkport.InterruptedException
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.search.TermQuery
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -52,14 +54,14 @@ class TestIndexTooManyDocs : LuceneTestCase() {
         try {
             IndexWriter.setMaxDocs(numMaxDoc)
             val numThreads = 5 + random().nextInt(5)
-            val threads = arrayOfNulls<PlatformTestThread>(numThreads)
+            val threads = arrayOfNulls<Thread>(numThreads)
             val latch = CountDownLatch(numThreads)
             val indexingDone = CountDownLatch(numThreads - 2)
             val done = AtomicBoolean(false)
             for (i in 0..<numThreads) {
                 if (i >= 2) {
                     threads[i] =
-                        PlatformTestThread {
+                        Thread {
                             latch.countDown()
                             try {
                                 try {
@@ -92,7 +94,7 @@ class TestIndexTooManyDocs : LuceneTestCase() {
                         }
                 } else {
                     threads[i] =
-                        PlatformTestThread {
+                        Thread {
                             try {
                                 latch.countDown()
                                 latch.await()

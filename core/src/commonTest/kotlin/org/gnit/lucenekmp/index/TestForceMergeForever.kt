@@ -18,6 +18,7 @@ package org.gnit.lucenekmp.index
 
 import okio.IOException
 import org.gnit.lucenekmp.store.Directory
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.util.LineFileDocs
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -85,7 +86,7 @@ class TestForceMergeForever : LuceneTestCase() {
             val doStop = AtomicBoolean(false)
             w.config.setMaxBufferedDocs(2)
             var failure: Throwable? = null
-            val t = PlatformTestThread {
+            val t = Thread {
                 try {
                     while (!doStop.load()) {
                         w.updateDocument(Term("docid", "${random().nextInt(numStartDocs)}"), docs.nextDoc())

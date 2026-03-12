@@ -19,6 +19,7 @@ package org.gnit.lucenekmp.index
 import okio.IOException
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.index.IndexWriterConfig.OpenMode
 import org.gnit.lucenekmp.search.IndexSearcher
 import org.gnit.lucenekmp.search.TermQuery
@@ -362,7 +363,7 @@ class TestIndexWriterCommit : LuceneTestCase() {
         w.commit()
         val failed = AtomicBoolean(false)
         val threads = Array(NUM_THREADS) { i ->
-            PlatformTestThread {
+            Thread {
                 try {
                     val doc = Document()
                     var r: DirectoryReader = DirectoryReader.open(dir)
