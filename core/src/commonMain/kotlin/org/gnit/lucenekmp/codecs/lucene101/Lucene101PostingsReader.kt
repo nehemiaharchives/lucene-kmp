@@ -1056,18 +1056,14 @@ class Lucene101PostingsReader(state: SegmentReadState) : PostingsReaderBase() {
                     if ((code and 1) != 0) {
                         payloadLength = posIn!!.readVInt()
                     }
-                    if (needsPayloads) {
-                        payloadLengthBuffer[i] = payloadLength
-                        posDeltaBuffer[i] = code ushr 1
-                        if (payloadLength != 0) {
-                            if (payloadByteUpto + payloadLength > payloadBytes.size) {
-                                payloadBytes = ArrayUtil.grow(payloadBytes, payloadByteUpto + payloadLength)
-                            }
-                            posIn!!.readBytes(payloadBytes, payloadByteUpto, payloadLength)
-                            payloadByteUpto += payloadLength
+                    payloadLengthBuffer[i] = payloadLength
+                    posDeltaBuffer[i] = code ushr 1
+                    if (payloadLength != 0) {
+                        if (payloadByteUpto + payloadLength > payloadBytes.size) {
+                            payloadBytes = ArrayUtil.grow(payloadBytes, payloadByteUpto + payloadLength)
                         }
-                    } else {
-                        posIn!!.skipBytes(payloadLength.toLong())
+                        posIn!!.readBytes(payloadBytes, payloadByteUpto, payloadLength)
+                        payloadByteUpto += payloadLength
                     }
                 } else {
                     posDeltaBuffer[i] = code
