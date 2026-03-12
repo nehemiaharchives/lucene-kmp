@@ -31,12 +31,12 @@ class DocumentsWriterFlushQueue {
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     @Throws(IOException::class)
-    fun addTicket(ticketSupplier: () -> FlushTicket): FlushTicket {
+    fun addTicket(ticketSupplier: () -> FlushTicket?): FlushTicket? {
         // first inc the ticket count - freeze opens a window for #anyChanges to fail
         incTickets()
         var success = false
         try {
-            val ticket: FlushTicket = ticketSupplier()
+            val ticket: FlushTicket? = ticketSupplier()
             if (ticket != null) {
                 queueLock.lock()
                 try {

@@ -6346,7 +6346,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun deleteNewFiles(files: MutableCollection<String>) {
-        deleter.deleteNewFiles(files)
+        withIndexWriterLock {
+            deleter.deleteNewFiles(files)
+        }
     }
 
     /** Cleans up residuals from a segment that could not be entirely flushed due to an error  */
@@ -6354,15 +6356,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun flushFailed(info: SegmentInfo) {
-        // TODO: this really should be a tragic
-        var files = try {
-            info.files()
-        } catch (ise: IllegalStateException) {
-            // OK
-            null
-        }
-        if (files != null) {
-            deleter.deleteNewFiles(files)
+        withIndexWriterLock {
+            // TODO: this really should be a tragic
+            val files = try {
+                info.files()
+            } catch (ise: IllegalStateException) {
+                // OK
+                null
+            }
+            if (files != null) {
+                deleter.deleteNewFiles(files)
+            }
         }
     }
 

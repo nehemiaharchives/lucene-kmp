@@ -174,7 +174,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             && deleteQueue.isOpen // if it's closed then it's already fully applied and we have a new delete queue
             && flushControl.getAndResetApplyAllDeletes()
         ) {
-            if (ticketQueue.addTicket { maybeFreezeGlobalBuffer(deleteQueue)!! } != null) {
+            if (ticketQueue.addTicket { maybeFreezeGlobalBuffer(deleteQueue) } != null) {
                 flushNotifications.onDeletesApplied() // apply deletes event forces a purge
                 return true
             }
@@ -520,14 +520,15 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     assert(assertTicketQueueModification(flushingDWPT.deleteQueue))
                     val dwpt: DocumentsWriterPerThread = flushingDWPT
                     // Each flush is assigned a ticket in the order they acquire the ticketQueue lock
-                    ticket =
-                        ticketQueue.addTicket { FlushTicket(dwpt.prepareFlush(), true) }
+                    val flushTicket =
+                        checkNotNull(ticketQueue.addTicket { FlushTicket(dwpt.prepareFlush(), true) })
+                    ticket = flushTicket
                     val flushingDocsInRam: Int = flushingDWPT.numDocsInRAM
                     var dwptSuccess = false
                     try {
                         // flush concurrently without locking
                         val newSegment: FlushedSegment = flushingDWPT.flush(flushNotifications)!!
-                        ticketQueue.addSegment(ticket, newSegment)
+                        ticketQueue.addSegment(flushTicket, newSegment)
                         dwptSuccess = true
                         //logger.debug { "DW.doFlush() flushed seg=${newSegment.segmentInfo.info.name} delCount=${newSegment.delCount}" }
                     } finally {
@@ -780,7 +781,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 }
                 // logger.debug { "DW.flushAllThreads() adding ticket to freeze global deletes" }
                 assert(assertTicketQueueModification(flushingDeleteQueue))
-                ticketQueue.addTicket { maybeFreezeGlobalBuffer(flushingDeleteQueue)!! }
+                ticketQueue.addTicket { maybeFreezeGlobalBuffer(flushingDeleteQueue) }
             }
             // we can't assert that we don't have any tickets in the queue since we might add a
             // DocumentsWriterDeleteQueue
