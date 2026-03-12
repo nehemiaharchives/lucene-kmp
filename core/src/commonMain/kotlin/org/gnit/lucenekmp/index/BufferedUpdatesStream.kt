@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.runBlocking
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.internal.hppc.LongHashSet
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.store.IOContext
@@ -32,7 +31,6 @@ import kotlin.math.max
  */
 class BufferedUpdatesStream(private val infoStream: InfoStream) :
     Accountable {
-    private val logger = KotlinLogging.logger {}
     private val updatesLock = ReentrantLock()
     private val updates: MutableSet<FrozenBufferedUpdates> = HashSet()
 
@@ -121,7 +119,7 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
      */
     internal class ApplyDeletesResult(
         val anyDeletes: Boolean,
-        val allDeleted: MutableList<SegmentCommitInfo>
+        val allDeleted: MutableList<SegmentCommitInfo>?
     )
 
     /**
@@ -270,9 +268,7 @@ class BufferedUpdatesStream(private val infoStream: InfoStream) :
         for (packet in pendingPackets) {
             // now block on all the packets that were concurrently applied to ensure they are due before
             // we continue.
-            logger.debug { "waitApply: forceApply start delGen=${packet.delGen()}" }
             writer.forceApply(packet)
-            logger.debug { "waitApply: forceApply done delGen=${packet.delGen()}" }
         }
 
         if (infoStream.isEnabled("BD")) {

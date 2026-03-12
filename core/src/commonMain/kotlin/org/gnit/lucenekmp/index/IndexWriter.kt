@@ -6957,7 +6957,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         return BufferedUpdatesStream.ApplyDeletesResult(
             totDelCount > 0,
-            allDeleted ?: mutableListOf()
+            allDeleted
         )
     }
 
