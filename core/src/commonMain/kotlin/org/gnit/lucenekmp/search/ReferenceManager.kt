@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.search
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.store.AlreadyClosedException
+import kotlin.concurrent.Volatile
 
 /**
  * Utility class to safely share instances of a certain type across multiple threads, while
@@ -15,6 +16,7 @@ import org.gnit.lucenekmp.store.AlreadyClosedException
  * @lucene.experimental
  */
 abstract class ReferenceManager<G> : AutoCloseable {
+    @Volatile
     protected var current: G? = null
 
     private val refreshLock = ReentrantLock()
