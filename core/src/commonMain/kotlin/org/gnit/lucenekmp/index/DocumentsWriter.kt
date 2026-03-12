@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.index
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.runBlocking
 import org.gnit.lucenekmp.index.DocumentsWriterFlushQueue.FlushTicket
 import org.gnit.lucenekmp.index.DocumentsWriterPerThread.FlushedSegment
 import org.gnit.lucenekmp.search.Query
@@ -291,7 +290,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                         if (infoStream.isEnabled("DW")) {
                             infoStream.message("DW", "unlockAllAbortedThread")
                         }
-                        runBlocking { perThreadPool.unlockNewWriters() }
+                        perThreadPool.unlockNewWriters()
                         for (writer in writers) {
                             writer.unlock()
                         }

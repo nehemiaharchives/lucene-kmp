@@ -90,8 +90,17 @@ class DocumentsWriterDeleteQueue private constructor(
         private set
 
     /** Returns `true` if it was advanced.  */
-    var isAdvanced: Boolean = false
-        private set
+    private var advanced: Boolean = false
+
+    val isAdvanced: Boolean
+        get() {
+            syncLock.lock()
+            try {
+                return advanced
+            } finally {
+                syncLock.unlock()
+            }
+        }
 
     constructor(infoStream: InfoStream) : this(infoStream, 0, 1, { 0 })
 
@@ -568,8 +577,8 @@ class DocumentsWriterDeleteQueue private constructor(
     fun advanceQueue(maxNumPendingOps: Int): DocumentsWriterDeleteQueue {
         syncLock.lock()
         try {
-            check(!this.isAdvanced) { "queue was already advanced" }
-            this.isAdvanced = true
+            check(!advanced) { "queue was already advanced" }
+            advanced = true
             val seqNo = this.lastSequenceNumber + maxNumPendingOps + 1
             maxSeqNo = seqNo
             return DocumentsWriterDeleteQueue(

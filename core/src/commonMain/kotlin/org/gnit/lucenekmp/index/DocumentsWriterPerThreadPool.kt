@@ -38,31 +38,37 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     /** Returns the active number of [DocumentsWriterPerThread] instances.  */
     // Synchronized is not supported in KMP, so we use a mutex here
     /*@Synchronized*/
-    suspend fun size(): Int = mutex.withLock { dwpts.size }
+    fun size(): Int = runBlocking { mutex.withLock { dwpts.size } }
 
     // Synchronized is not supported in KMP, so we use a mutex here
     /*@Synchronized*/
-    suspend fun lockNewWriters() = mutex.withLock {
-        // this is similar to a semaphore - we need to acquire all permits ie. takenWriterPermits must
-        // be == 0
-        // any call to lockNewWriters() must be followed by unlockNewWriters() otherwise we will
-        // deadlock at some
-        // point
-        assert(takenWriterPermits >= 0)
-        takenWriterPermits++
-    }
-
-    // Synchronized is not supported in KMP, so we use a mutex here
-    /*@Synchronized*/
-    suspend fun unlockNewWriters() = mutex.withLock {
-        assert(takenWriterPermits > 0)
-        takenWriterPermits--
-        if (takenWriterPermits == 0) {
-            // Wake up all waiting coroutines
-            waiters.forEach { it.complete(Unit) }
-            waiters.clear()
+    fun lockNewWriters() =
+        runBlocking {
+            mutex.withLock {
+                // this is similar to a semaphore - we need to acquire all permits ie. takenWriterPermits must
+                // be == 0
+                // any call to lockNewWriters() must be followed by unlockNewWriters() otherwise we will
+                // deadlock at some
+                // point
+                assert(takenWriterPermits >= 0)
+                takenWriterPermits++
+            }
         }
-    }
+
+    // Synchronized is not supported in KMP, so we use a mutex here
+    /*@Synchronized*/
+    fun unlockNewWriters() =
+        runBlocking {
+            mutex.withLock {
+                assert(takenWriterPermits > 0)
+                takenWriterPermits--
+                if (takenWriterPermits == 0) {
+                    // Wake up all waiting coroutines
+                    waiters.forEach { it.complete(Unit) }
+                    waiters.clear()
+                }
+            }
+        }
 
     /**
      * Returns a new already locked [DocumentsWriterPerThread]

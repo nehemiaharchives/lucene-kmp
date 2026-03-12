@@ -547,9 +547,9 @@ class DocumentsWriterFlushControl(
     }
 
     suspend fun markForFullFlush(): Long {
-        var seqNo: Long
-        syncLock.lock()
         val flushingQueue: DocumentsWriterDeleteQueue
+        val seqNo: Long
+        syncLock.lock()
         try {
             assert(
                 !this.isFullFlush
@@ -557,24 +557,23 @@ class DocumentsWriterFlushControl(
             assert(!fullFlushMarkDone) { "full flush collection marker is still set to true" }
             this.isFullFlush = true
             flushingQueue = documentsWriter.deleteQueue
+            //logger.debug { "DWFC.markForFullFlush() enter: activeBytes=$activeBytes flushingBytes=$flushingBytes numPending=$numPending" }
+            // Set a new delete queue - all subsequent DWPT will use this queue until
+            // we do another full flush
+            perThreadPool
+                .lockNewWriters() // no new thread-states while we do a flush otherwise the seqNo
+            // accounting might be off
+            try {
+                // Insert a gap in seqNo of current active thread count, in the worst case each of those
+                // threads now have one operation in flight.  It's fine
+                // if we have some sequence numbers that were never assigned:
+                seqNo = documentsWriter.resetDeleteQueue(perThreadPool.size())
+            } finally {
+                perThreadPool.unlockNewWriters()
+            }
         } finally {
             syncLock.unlock()
         }
-        //logger.debug { "DWFC.markForFullFlush() enter: activeBytes=$activeBytes flushingBytes=$flushingBytes numPending=$numPending" }
-        // Set a new delete queue - all subsequent DWPT will use this queue until
-        // we do another full flush
-        perThreadPool
-            .lockNewWriters() // no new thread-states while we do a flush otherwise the seqNo
-        // accounting might be off
-        try {
-            // Insert a gap in seqNo of current active thread count, in the worst case each of those
-            // threads now have one operation in flight.  It's fine
-            // if we have some sequence numbers that were never assigned:
-            seqNo = documentsWriter.resetDeleteQueue(perThreadPool.size())
-        } finally {
-            perThreadPool.unlockNewWriters()
-        }
-        //}
         val fullFlushBuffer: MutableList<DocumentsWriterPerThread> = mutableListOf()
         for (next in perThreadPool.filterAndLock { dwpt: DocumentsWriterPerThread -> dwpt.deleteQueue == flushingQueue }) {
             try {
