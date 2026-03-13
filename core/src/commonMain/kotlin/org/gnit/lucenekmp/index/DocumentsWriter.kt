@@ -548,11 +548,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     throw t
                 } finally {
                     if (!success && ticket != null) {
-                        logger.debug(flushFailure) {
-                            "DW.doFlush markTicketFailed seg=${flushingDWPT.getSegmentInfo().name} " +
-                                "ticketHasSegment=${ticket.hasSegment} flushedSegment=${ticket.flushedSegment != null} " +
-                                "flushingDocsInRam=${flushingDWPT.numDocsInRAM}"
-                        }
+                        // logger.debug(flushFailure) { "DW.doFlush markTicketFailed seg=${flushingDWPT.getSegmentInfo().name} ticketHasSegment=${ticket.hasSegment} flushedSegment=${ticket.flushedSegment != null} flushingDocsInRam=${flushingDWPT.numDocsInRAM}" }
                         // In the case of a failure make sure we are making progress and
                         // apply all the deletes since the segment flush failed since the flush
                         // ticket could hold global deletes see FlushTicket#canPublish()

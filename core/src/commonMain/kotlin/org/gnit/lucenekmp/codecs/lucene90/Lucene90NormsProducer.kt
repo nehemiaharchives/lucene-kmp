@@ -26,72 +26,75 @@ internal class Lucene90NormsProducer(
     private val dataCodec: String,
     private val dataExtension: String,
     private val metaCodec: String,
-    private val metaExtension: String
+    private val metaExtension: String,
+    private val initializeFromDirectory: Boolean = true
 ) : NormsProducer(), Cloneable<Lucene90NormsProducer> {
     // metadata maps (just file pointers and minimal stuff)
     private val norms: IntObjectHashMap<NormsEntry> = IntObjectHashMap()
     private val maxDoc: Int = state.segmentInfo.maxDoc()
-    private var data: IndexInput
+    private lateinit var data: IndexInput
     private var merging = false
     private var disiInputs: IntObjectHashMap<IndexInput>? = null
     private var disiJumpTables: IntObjectHashMap<RandomAccessInput>? = null
     private var dataInputs: IntObjectHashMap<RandomAccessInput>? = null
 
     init {
-        val metaName: String =
-            IndexFileNames.segmentFileName(state.segmentInfo.name, state.segmentSuffix, metaExtension)
-        var version = -1
+        if (initializeFromDirectory) {
+            val metaName: String =
+                IndexFileNames.segmentFileName(state.segmentInfo.name, state.segmentSuffix, metaExtension)
+            var version = -1
 
-        state.directory.openChecksumInput(metaName).use { `in` ->
-            var priorE: Throwable? = null
+            state.directory.openChecksumInput(metaName).use { `in` ->
+                var priorE: Throwable? = null
+                try {
+                    version =
+                        CodecUtil.checkIndexHeader(
+                            `in`,
+                            metaCodec,
+                            VERSION_START,
+                            VERSION_CURRENT,
+                            state.segmentInfo.getId(),
+                            state.segmentSuffix
+                        )
+                    readFields(`in`, state.fieldInfos)
+                } catch (exception: Throwable) {
+                    priorE = exception
+                } finally {
+                    CodecUtil.checkFooter(`in`, priorE)
+                }
+            }
+            val dataName: String =
+                IndexFileNames.segmentFileName(state.segmentInfo.name, state.segmentSuffix, dataExtension)
+            // Norms have a forward-only access pattern, so pass ReadAdvice.NORMAL to perform readahead.
+            data = state.directory.openInput(dataName, state.context.withReadAdvice(ReadAdvice.NORMAL))
+            var success = false
             try {
-                version =
+                val version2: Int =
                     CodecUtil.checkIndexHeader(
-                        `in`,
-                        metaCodec,
+                        data,
+                        dataCodec,
                         VERSION_START,
                         VERSION_CURRENT,
                         state.segmentInfo.getId(),
                         state.segmentSuffix
                     )
-                readFields(`in`, state.fieldInfos)
-            } catch (exception: Throwable) {
-                priorE = exception
+                if (version != version2) {
+                    throw CorruptIndexException(
+                        "Format versions mismatch: meta=$version,data=$version2", data
+                    )
+                }
+
+                // NOTE: data file is too costly to verify checksum against all the bytes on open,
+                // but for now we at least verify proper structure of the checksum footer: which looks
+                // for FOOTER_MAGIC + algorithmID. This is cheap and can detect some forms of corruption
+                // such as file truncation.
+                CodecUtil.retrieveChecksum(data)
+
+                success = true
             } finally {
-                CodecUtil.checkFooter(`in`, priorE)
-            }
-        }
-        val dataName: String =
-            IndexFileNames.segmentFileName(state.segmentInfo.name, state.segmentSuffix, dataExtension)
-        // Norms have a forward-only access pattern, so pass ReadAdvice.NORMAL to perform readahead.
-        data = state.directory.openInput(dataName, state.context.withReadAdvice(ReadAdvice.NORMAL))
-        var success = false
-        try {
-            val version2: Int =
-                CodecUtil.checkIndexHeader(
-                    data,
-                    dataCodec,
-                    VERSION_START,
-                    VERSION_CURRENT,
-                    state.segmentInfo.getId(),
-                    state.segmentSuffix
-                )
-            if (version != version2) {
-                throw CorruptIndexException(
-                    "Format versions mismatch: meta=$version,data=$version2", data
-                )
-            }
-
-            // NOTE: data file is too costly to verify checksum against all the bytes on open,
-            // but for now we at least verify proper structure of the checksum footer: which looks
-            // for FOOTER_MAGIC + algorithmID. This is cheap and can detect some forms of corruption
-            // such as file truncation.
-            CodecUtil.retrieveChecksum(data)
-
-            success = true
-        } finally {
-            if (!success) {
-                IOUtils.closeWhileHandlingException(this.data)
+                if (!success) {
+                    IOUtils.closeWhileHandlingException(this.data)
+                }
             }
         }
     }
@@ -465,18 +468,16 @@ internal class Lucene90NormsProducer(
             dataCodec,
             dataExtension,
             metaCodec,
-            metaExtension
+            metaExtension,
+            initializeFromDirectory = false
         )
-
-        // Close the data opened by the constructor to avoid leaking file handles.
-        IOUtils.closeWhileHandlingException(clone.data)
 
         // Copy the norms map
         norms.forEach { entry ->
             clone.norms.put(entry.key, entry.value)
         }
 
-        // Shallow copy, getMergeInstance will replace with a cloned input.
+        // Match Java's super.clone() behavior: cloning must not reopen the norms files.
         clone.data = data
         clone.merging = merging
 
