@@ -132,13 +132,13 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
 
     override val termVectorsReader: TermVectorsReader
         get() {
-            val readers: Array<TermVectorsReader> =
-                codecReaders.map { it.termVectorsReader!! }.toTypedArray()
+            val readers: Array<TermVectorsReader?> =
+                codecReaders.map { it.termVectorsReader }.toTypedArray()
             return SlowCompositeTermVectorsReaderWrapper(readers, docStarts)
         }
 
     private inner class SlowCompositeTermVectorsReaderWrapper(
-        private val readers: Array<TermVectorsReader>,
+        private val readers: Array<TermVectorsReader?>,
         private val docStarts: IntArray
     ) : TermVectorsReader() {
 
@@ -149,7 +149,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
 
         override fun clone(): TermVectorsReader {
             return SlowCompositeTermVectorsReaderWrapper(
-                readers.map { it.clone() }.toTypedArray(),
+                readers.map { it?.clone() }.toTypedArray(),
                 docStarts
             )
         }
@@ -166,7 +166,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
         @Throws(IOException::class)
         override fun prefetch(doc: Int) {
             val readerId = docIdToReaderId(doc)
-            val reader: TermVectorsReader = readers[readerId]
+            val reader: TermVectorsReader? = readers[readerId]
             if (reader != null) {
                 reader.prefetch(doc - docStarts[readerId])
             }
@@ -175,7 +175,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
         @Throws(IOException::class)
         override fun get(doc: Int): Fields? {
             val readerId = docIdToReaderId(doc)
-            val reader: TermVectorsReader = readers[readerId]
+            val reader: TermVectorsReader? = readers[readerId]
             if (reader == null) {
                 return null
             }
@@ -188,7 +188,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
 
     private class SlowCompositeNormsProducer(private val codecReaders: Array<CodecReader>) :
         NormsProducer() {
-        private val producers: Array<NormsProducer> = codecReaders.map { it.normsReader!! }.toTypedArray()
+        private val producers: Array<NormsProducer?> = codecReaders.map { it.normsReader }.toTypedArray()
 
         @Throws(IOException::class)
         override fun close() {
@@ -290,7 +290,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
         private val codecReaders: Array<CodecReader>,
         private val docStarts: IntArray
     ) : DocValuesProducer() {
-        private val producers: Array<DocValuesProducer> = codecReaders.map { it.docValuesReader!! }.toTypedArray()
+        private val producers: Array<DocValuesProducer?> = codecReaders.map { it.docValuesReader }.toTypedArray()
         private val cachedOrdMaps: MutableMap<String, OrdinalMap> = mutableMapOf()
 
         @Throws(IOException::class)
@@ -479,7 +479,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
         private val codecReaders: Array<CodecReader>,
         private val docStarts: IntArray
     ) : PointsReader() {
-        private val readers: Array<PointsReader> = codecReaders.map { it.pointsReader!! }.toTypedArray()
+        private val readers: Array<PointsReader?> = codecReaders.map { it.pointsReader }.toTypedArray()
 
         @Throws(IOException::class)
         override fun close() {
@@ -501,7 +501,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
             for (i in readers.indices) {
                 val fi: FieldInfo? = codecReaders[i].fieldInfos.fieldInfo(field)
                 if (fi != null && fi.pointDimensionCount > 0) {
-                    val v: PointValues? = readers[i].getValues(field)
+                    val v: PointValues? = readers[i]!!.getValues(field)
                     if (v != null) {
                         // Apparently FieldInfo can claim a field has points, yet the returned
                         // PointValues is null
@@ -705,7 +705,7 @@ internal class SlowCompositeCodecReaderWrapper private constructor(codecReaders:
         private val codecReaders: Array<CodecReader>,
         private val docStarts: IntArray
     ) : KnnVectorsReader() {
-        private val readers: Array<KnnVectorsReader> = codecReaders.map { it.vectorReader!! }.toTypedArray()
+        private val readers: Array<KnnVectorsReader?> = codecReaders.map { it.vectorReader }.toTypedArray()
 
         @Throws(IOException::class)
         override fun close() {

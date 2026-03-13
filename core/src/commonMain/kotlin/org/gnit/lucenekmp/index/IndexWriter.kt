@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.index
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import okio.IOException
@@ -219,6 +218,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
     private val writeDocValuesLock: ReentrantLock = ReentrantLock()
     private val indexWriterLock: ReentrantLock = ReentrantLock()
+    private val indexWriterCondition = indexWriterLock.newCondition()
     private val segmentInfosCounterLock: ReentrantLock = ReentrantLock()
 
     private inline fun <T> withIndexWriterLock(action: () -> T): T {
@@ -1102,40 +1102,45 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         val waitStartedAt = TimeSource.Monotonic.markNow()
         var waitIters = 0
         var loggedSlowWait = false
-        while (true) {
-            if (!closed) {
-                if (!closing) {
-                    // We get to close
-                    closing = true
-                    closeOwnerSeq = closeOwnerSeqGenerator.incrementAndFetch()
-                    closeOwnerStartedAtNanos = System.nanoTime()
-                    closeOwnerPhase = NativeCrashProbe.PHASE_IW_SHUTDOWN_BEFORE_SHOULD_CLOSE
-                    return true
-                } else if (!waitForClose) {
-                    return false
-                } else {
-                    // Another thread is presently trying to close;
-                    // wait until it finishes one way (closes
-                    // successfully) or another (fails to close)
-                    NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_IW_SHUTDOWN_SHOULD_CLOSE_WAIT)
-                    waitIters++
-                    if (!loggedSlowWait && waitStartedAt.elapsedNow() > 5.seconds) {
-                        loggedSlowWait = true
-                        val elapsed = waitStartedAt.elapsedNow()
-                        val ownerSeq = closeOwnerSeq
-                        val ownerPhase = closeOwnerPhase
-                        val ownerElapsedMs = closeOwnerElapsedMs()
-                        logger.error {
-                            "shouldClose: slow wait elapsed=$elapsed waitForClose=$waitForClose closed=$closed closing=$closing waitIters=$waitIters ownerSeq=$ownerSeq ownerPhase=$ownerPhase ownerElapsedMs=$ownerElapsedMs probeRun=${NativeCrashProbe.run()} probeAttempt=${NativeCrashProbe.attempt()} probePhase=${NativeCrashProbe.phase()} probeUpdates=${NativeCrashProbe.updates()} cmsActive=${ConcurrentMergeScheduler.debugActiveMergeThreads()} cmsStarted=${ConcurrentMergeScheduler.debugStartedMergeThreads()} cmsFinished=${ConcurrentMergeScheduler.debugFinishedMergeThreads()} chkActive=${CheckIndex.debugActiveIntegrityChecks()} chkStarted=${CheckIndex.debugStartedIntegrityChecks()} chkFinished=${CheckIndex.debugFinishedIntegrityChecks()}"
+        var shouldClose = false
+        withIndexWriterLock {
+            while (true) {
+                if (!closed) {
+                    if (!closing) {
+                        // We get to close
+                        closing = true
+                        closeOwnerSeq = closeOwnerSeqGenerator.incrementAndFetch()
+                        closeOwnerStartedAtNanos = System.nanoTime()
+                        closeOwnerPhase = NativeCrashProbe.PHASE_IW_SHUTDOWN_BEFORE_SHOULD_CLOSE
+                        shouldClose = true
+                        break
+                    } else if (!waitForClose) {
+                        break
+                    } else {
+                        // Another thread is presently trying to close;
+                        // wait until it finishes one way (closes
+                        // successfully) or another (fails to close)
+                        NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_IW_SHUTDOWN_SHOULD_CLOSE_WAIT)
+                        waitIters++
+                        if (!loggedSlowWait && waitStartedAt.elapsedNow() > 5.seconds) {
+                            loggedSlowWait = true
+                            val elapsed = waitStartedAt.elapsedNow()
+                            val ownerSeq = closeOwnerSeq
+                            val ownerPhase = closeOwnerPhase
+                            val ownerElapsedMs = closeOwnerElapsedMs()
+                            logger.error {
+                                "shouldClose: slow wait elapsed=$elapsed waitForClose=$waitForClose closed=$closed closing=$closing waitIters=$waitIters ownerSeq=$ownerSeq ownerPhase=$ownerPhase ownerElapsedMs=$ownerElapsedMs probeRun=${NativeCrashProbe.run()} probeAttempt=${NativeCrashProbe.attempt()} probePhase=${NativeCrashProbe.phase()} probeUpdates=${NativeCrashProbe.updates()} cmsActive=${ConcurrentMergeScheduler.debugActiveMergeThreads()} cmsStarted=${ConcurrentMergeScheduler.debugStartedMergeThreads()} cmsFinished=${ConcurrentMergeScheduler.debugFinishedMergeThreads()} chkActive=${CheckIndex.debugActiveIntegrityChecks()} chkStarted=${CheckIndex.debugStartedIntegrityChecks()} chkFinished=${CheckIndex.debugFinishedIntegrityChecks()}"
+                            }
+                            NativeCrashProbe.requestNativeProbeDump(times = 1)
                         }
-                        NativeCrashProbe.requestNativeProbeDump(times = 1)
+                        doWait()
                     }
-                    doWait()
+                } else {
+                    break
                 }
-            } else {
-                return false
             }
         }
+        return shouldClose
     }
 
     /** Returns the Directory used by this index.  */
@@ -1992,14 +1997,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         if (doWait) {
             var waitIters = 0
-            var stableNoPendingChecks = 0
             val forceMergeWaitTotalMark = TimeSource.Monotonic.markNow()
             var forceMergeDoWaitNs = 0L
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            while (true) {
-                val hasPendingMaxNumSegmentMerges = withIndexWriterLock {
+            withIndexWriterLock {
+                while (true) {
                     if (tragedy.load() != null) {
                         throw IllegalStateException(
                             "this writer hit an unrecoverable error; cannot complete forceMerge",
@@ -2019,55 +2021,40 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             }
                         }
                     }
-                    maxNumSegmentsMergesPendingUnlocked()
-                }
+                    val hasPendingMaxNumSegmentMerges = maxNumSegmentsMergesPendingUnlocked()
 
-                if (hasPendingMaxNumSegmentMerges) {
-                    stableNoPendingChecks = 0
-                    waitIters++
-                    if (mergeScheduler is ConcurrentMergeScheduler &&
-                        mergeScheduler.mergeThreadCount() == 0
-                    ) {
-                        logger.error {
-                            "forceMerge: detected pending forced merges with no CMS threads; " +
-                                    "re-triggering executeMerge with MERGE_FINISHED"
+                    if (hasPendingMaxNumSegmentMerges) {
+                        waitIters++
+                        if (mergeScheduler is ConcurrentMergeScheduler &&
+                            mergeScheduler.mergeThreadCount() == 0
+                        ) {
+                            logger.error {
+                                "forceMerge: detected pending forced merges with no CMS threads; " +
+                                        "re-triggering executeMerge with MERGE_FINISHED"
+                            }
+                            executeMerge(MergeTrigger.MERGE_FINISHED)
                         }
-                        executeMerge(MergeTrigger.MERGE_FINISHED)
-                    }
-                    if (waitIters % 10 == 0) {
-                        val mergeState = withIndexWriterLock {
+                        if (waitIters % 10 == 0) {
                             val pendingForced = pendingMerges.filter { it.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS }
                             val runningForced = runningMerges.filter { it.maxNumSegments != UNBOUNDED_MAX_MERGE_SEGMENTS }
                             val mergeExceptionState =
                                 mergeExceptions.joinToString { "${it.segString()} exception=${it.exception}" }
-                            "pending=${pendingMerges.size} running=${runningMerges.size} forcedPending=${pendingForced.size} forcedRunning=${runningForced.size} mergeExceptions=${mergeExceptions.size} segmentsToMerge=${segmentsToMerge.size} pendingForcedDetail=${pendingForced.joinToString { it.segString() }} runningForcedDetail=${runningForced.joinToString { it.segString() }} mergeExceptionDetail=$mergeExceptionState"
+                            logger.debug {
+                                "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments pending=${pendingMerges.size} running=${runningMerges.size} forcedPending=${pendingForced.size} forcedRunning=${runningForced.size} mergeExceptions=${mergeExceptions.size} segmentsToMerge=${segmentsToMerge.size} pendingForcedDetail=${pendingForced.joinToString { it.segString() }} runningForcedDetail=${runningForced.joinToString { it.segString() }} mergeExceptionDetail=$mergeExceptionState"
+                            }
                         }
-                        logger.debug {
-                            "forceMerge: waiting iter=$waitIters maxNumSegments=$maxNumSegments $mergeState"
+                        if (logger.isDebugEnabled()) {
+                            // logMerges("forceMerge", pendingMerges, runningMerges)
                         }
-                    }
-                    if (logger.isDebugEnabled()) {
-                        // logMerges("forceMerge", pendingMerges, runningMerges)
-                    }
-                    testPoint("forceMergeBeforeWait")
-                    val doWaitMark = TimeSource.Monotonic.markNow()
-                    doWait()
-                    forceMergeDoWaitNs += doWaitMark.elapsedNow().inWholeNanoseconds
-                } else {
-                    // Java relies on monitor wait/notify to avoid racing with merge-finished callbacks.
-                    // In KMP we don't have equivalent monitor semantics here, so require a second
-                    // no-pending observation before exiting forceMerge wait.
-                    if (stableNoPendingChecks == 0) {
-                        stableNoPendingChecks = 1
+                        testPoint("forceMergeBeforeWait")
                         val doWaitMark = TimeSource.Monotonic.markNow()
                         doWait()
                         forceMergeDoWaitNs += doWaitMark.elapsedNow().inWholeNanoseconds
-                        continue
+                    } else {
+                        break
                     }
-                    break
                 }
             }
-            //} // end synchronized(this)
 
             // If close is called while we are still
             // running, throw an exception so the calling
@@ -2178,36 +2165,35 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         if (spec != null && doWait) {
             val numMerges: Int = spec.merges.size
 
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            var running = true
-            while (running) {
-                if (tragedy.load() != null) {
-                    throw IllegalStateException(
-                        "this writer hit an unrecoverable error; cannot complete forceMergeDeletes",
-                        tragedy.load()
-                    )
-                }
-
-                // Check each merge that MergePolicy asked us to
-                // do, to see if any of them are still running and
-                // if any of them have hit an exception.
-                running = false
-                for (i in 0..<numMerges) {
-                    val merge: MergePolicy.OneMerge = spec.merges[i]
-                    if (pendingMerges.contains(merge) || runningMerges.contains(merge)) {
-                        running = true
+            withIndexWriterLock {
+                var running = true
+                while (running) {
+                    if (tragedy.load() != null) {
+                        throw IllegalStateException(
+                            "this writer hit an unrecoverable error; cannot complete forceMergeDeletes",
+                            tragedy.load()
+                        )
                     }
-                    val t: Throwable? = merge.exception
-                    if (t != null) {
-                        throw IOException("background merge hit exception: " + merge.segString(), t)
-                    }
-                }
 
-                // If any of our merges are still running, wait:
-                if (running) doWait()
+                    // Check each merge that MergePolicy asked us to
+                    // do, to see if any of them are still running and
+                    // if any of them have hit an exception.
+                    running = false
+                    for (i in 0..<numMerges) {
+                        val merge: MergePolicy.OneMerge = spec.merges[i]
+                        if (pendingMerges.contains(merge) || runningMerges.contains(merge)) {
+                            running = true
+                        }
+                        val t: Throwable? = merge.exception
+                        if (t != null) {
+                            throw IOException("background merge hit exception: " + merge.segString(), t)
+                        }
+                    }
+
+                    // If any of our merges are still running, wait:
+                    if (running) doWait()
+                }
             }
-            //}
         }
 
         // NOTE: in the ConcurrentMergeScheduler case, when
@@ -2641,63 +2627,57 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      * abort all in memory structures
      * We also drop global field numbering before during abort to make
      * sure it's just like a fresh index.
-     */
+        */
         try {
+            return withFullFlushLock {
+                runBlocking { docWriter.lockAndAbortAll() }.use {
+                    processEvents(false)
 
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(fullFlushLock) {
+                    withIndexWriterLock {
+                        try {
 
-            runBlocking { docWriter.lockAndAbortAll() }.use {
-                processEvents(false)
+                            // Abort any running merges
+                            try {
+                                abortMerges()
+                                assert(!merges.areEnabled()) { "merges should be disabled - who enabled them" }
+                                assert(mergingSegments.isEmpty()) { "found merging segments but merges are disabled: $mergingSegments" }
+                            } finally {
+                                // abortMerges disables all merges and we need to re-enable them here to make sure
+                                // IW can function properly. An exception in abortMerges() might be fatal for IW but
+                                // just to be sure
+                                // lets re-enable merges anyway.
+                                merges.enable()
+                            }
+                            adjustPendingNumDocs(-segmentInfos.totalMaxDoc().toLong())
+                            // Remove all segments
+                            segmentInfos.clear()
+                            // Ask deleter to locate unreferenced files & remove them:
+                            deleter.checkpoint(segmentInfos, false)
 
-                // TODO Synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                try {
-
-                    // Abort any running merges
-                    try {
-                        abortMerges()
-                        assert(!merges.areEnabled()) { "merges should be disabled - who enabled them" }
-                        assert(mergingSegments.isEmpty()) { "found merging segments but merges are disabled: $mergingSegments" }
-                    } finally {
-                        // abortMerges disables all merges and we need to re-enable them here to make sure
-                        // IW can function properly. An exception in abortMerges() might be fatal for IW but
-                        // just to be sure
-                        // lets re-enable merges anyway.
-                        merges.enable()
-                    }
-                    adjustPendingNumDocs(-segmentInfos.totalMaxDoc().toLong())
-                    // Remove all segments
-                    segmentInfos.clear()
-                    // Ask deleter to locate unreferenced files & remove them:
-                    deleter.checkpoint(segmentInfos, false)
-
-                    /* don't refresh the deleter here since there might
-                     * be concurrent indexing requests coming in opening
-                     * files on the directory after we called DW#abort()
-                     * if we do so these indexing requests might hit FNF exceptions.
-                     * We will remove the files incrementally as we go...
-                     */
-                    // Don't bother saving any changes in our segmentInfos
-                    readerPool.dropAll()
-                    // Mark that the index has changed
-                    changeCount.incrementAndFetch()
-                    segmentInfos.changed()
-                    globalFieldNumberMap.clear()
-                    success = true
-                    val seqNo: Long = docWriter.nextSequenceNumber
-                    return seqNo
-                } finally {
-                    if (!success) {
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "hit exception during deleteAll")
+                            /* don't refresh the deleter here since there might
+                             * be concurrent indexing requests coming in opening
+                             * files on the directory after we called DW#abort()
+                             * if we do so these indexing requests might hit FNF exceptions.
+                             * We will remove the files incrementally as we go...
+                             */
+                            // Don't bother saving any changes in our segmentInfos
+                            readerPool.dropAll()
+                            // Mark that the index has changed
+                            changeCount.incrementAndFetch()
+                            segmentInfos.changed()
+                            globalFieldNumberMap.clear()
+                            success = true
+                            docWriter.nextSequenceNumber
+                        } finally {
+                            if (!success) {
+                                if (infoStream.isEnabled("IW")) {
+                                    infoStream.message("IW", "hit exception during deleteAll")
+                                }
+                            }
                         }
                     }
                 }
             }
-            // end synchronized(this)}
-
-            //} // end synchronized(fullFlushLock)
         } catch (tragedy: Error) {
             tragicEvent(tragedy, "deleteAll")
             throw tragedy
@@ -2712,8 +2692,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun abortMerges() {
-        merges.disable()
         withIndexWriterLock {
+            merges.disable()
             // Abort all pending & running merges:
             IOUtils.applyToAll(
                 pendingMerges
@@ -2737,52 +2717,47 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     merge.setAborted()
                 }
             }
-        }
+            // We wait here to make all merges stop.  It should not
+            // take very long because they periodically check if
+            // they are aborted.
+            val abortWaitStartedAt = TimeSource.Monotonic.markNow()
+            var loggedSlowAbortWait = false
+            var abortWaitIters = 0
+            while (runningMerges.size + runningAddIndexesMerges.size != 0) {
+                val runningMergeCount = runningMerges.size
+                val runningAddIndexesMergeCount = runningAddIndexesMerges.size
+                val pendingMergeCount = pendingMerges.size
+                markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_ABORT_MERGES_WAIT)
+                abortWaitIters++
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message(
+                        "IW",
+                        ("now wait for "
+                                + runningMergeCount
+                                + " running merge/s to abort; currently running addIndexes: "
+                                + runningAddIndexesMergeCount)
+                    )
+                }
+                if (abortWaitIters % 10 == 0) {
+                    logger.debug {
+                        "abortMerges: waiting iter=$abortWaitIters runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
+                    }
+                }
+                if (!loggedSlowAbortWait && abortWaitStartedAt.elapsedNow() > 5.seconds) {
+                    loggedSlowAbortWait = true
+                    logger.error {
+                        "abortMerges: slow wait elapsed=${abortWaitStartedAt.elapsedNow()} runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
+                    }
+                    NativeCrashProbe.requestNativeProbeDump(times = 1)
+                }
 
-        // We wait here to make all merges stop.  It should not
-        // take very long because they periodically check if
-        // they are aborted.
-        val abortWaitStartedAt = TimeSource.Monotonic.markNow()
-        var loggedSlowAbortWait = false
-        var abortWaitIters = 0
-        while (true) {
-            val (runningMergeCount, runningAddIndexesMergeCount, pendingMergeCount) = withIndexWriterLock {
-                Triple(runningMerges.size, runningAddIndexesMerges.size, pendingMerges.size)
+                doWait()
             }
-            if (runningMergeCount + runningAddIndexesMergeCount == 0) {
-                break
-            }
-            markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_ABORT_MERGES_WAIT)
-            abortWaitIters++
+
+            doNotifyAll()
             if (infoStream.isEnabled("IW")) {
-                infoStream.message(
-                    "IW",
-                    ("now wait for "
-                            + runningMergeCount
-                            + " running merge/s to abort; currently running addIndexes: "
-                            + runningAddIndexesMergeCount)
-                )
+                infoStream.message("IW", "all running merges have aborted")
             }
-            if (abortWaitIters % 10 == 0) {
-                logger.debug {
-                    "abortMerges: waiting iter=$abortWaitIters runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
-                }
-            }
-            if (!loggedSlowAbortWait && abortWaitStartedAt.elapsedNow() > 5.seconds) {
-                loggedSlowAbortWait = true
-                logger.error {
-                    "abortMerges: slow wait elapsed=${abortWaitStartedAt.elapsedNow()} runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
-                }
-                NativeCrashProbe.requestNativeProbeDump(times = 1)
-            }
-
-            doWait()
-        }
-
-        // TODO notifyAll() is not supported in KMP, need to think what to do here
-        //(this as java.lang.Object).notifyAll()
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message("IW", "all running merges have aborted")
         }
     }
 
@@ -2802,48 +2777,47 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_SHUTDOWN_WAIT_FOR_MERGES)
         runBlocking { mergeScheduler.merge(mergeSource, MergeTrigger.CLOSING) }
 
-        // TODO Synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-        ensureOpen(false)
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message("IW", "waitForMerges")
-        }
-
-        val waitStartedAt = TimeSource.Monotonic.markNow()
-        var loggedSlowWait = false
-        var waitForMergesIters = 0
-        while (pendingMerges.isNotEmpty() || runningMerges.isNotEmpty()) {
-            markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_LOOP)
-            waitForMergesIters++
-            if (waitForMergesIters % 10 == 0) {
-                logger.debug {
-                    "waitForMerges: waiting iter=$waitForMergesIters pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size}"
-                }
+        withIndexWriterLock {
+            ensureOpen(false)
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message("IW", "waitForMerges")
             }
-            if (!loggedSlowWait && waitStartedAt.elapsedNow() > 5.seconds) {
-                loggedSlowWait = true
-                val runningMergeSummary = runningMerges.joinToString(
-                    separator = ", ",
-                    limit = 3,
-                    truncated = "..."
-                ) { merge -> merge.segString() }
-                val elapsed = waitStartedAt.elapsedNow()
-                logger.error {
-                    "waitForMerges: slow wait elapsed=$elapsed pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size} runningMerges=$runningMergeSummary"
-                }
-                NativeCrashProbe.requestNativeProbeDump(times = 1)
-            }
-            markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_DO_WAIT)
-            doWait()
-        }
-        markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_DONE)
 
-        // sanity check
-        assert(mergingSegments.isEmpty())
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message("IW", "waitForMerges done")
+            val waitStartedAt = TimeSource.Monotonic.markNow()
+            var loggedSlowWait = false
+            var waitForMergesIters = 0
+            while (pendingMerges.isNotEmpty() || runningMerges.isNotEmpty()) {
+                markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_LOOP)
+                waitForMergesIters++
+                if (waitForMergesIters % 10 == 0) {
+                    logger.debug {
+                        "waitForMerges: waiting iter=$waitForMergesIters pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size}"
+                    }
+                }
+                if (!loggedSlowWait && waitStartedAt.elapsedNow() > 5.seconds) {
+                    loggedSlowWait = true
+                    val runningMergeSummary = runningMerges.joinToString(
+                        separator = ", ",
+                        limit = 3,
+                        truncated = "..."
+                    ) { merge -> merge.segString() }
+                    val elapsed = waitStartedAt.elapsedNow()
+                    logger.error {
+                        "waitForMerges: slow wait elapsed=$elapsed pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size} runningMerges=$runningMergeSummary"
+                    }
+                    NativeCrashProbe.requestNativeProbeDump(times = 1)
+                }
+                markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_DO_WAIT)
+                doWait()
+            }
+            markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_DONE)
+
+            // sanity check
+            assert(mergingSegments.isEmpty())
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message("IW", "waitForMerges done")
+            }
         }
-        //}
     }
 
     /**
@@ -3586,22 +3560,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         merge.checkAborted()
 
-        // TODO Synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-        runningAddIndexesMerges.add(merger)
-        //}
+        withIndexWriterLock {
+            runningAddIndexesMerges.add(merger)
+        }
         merge.mergeStartNS = System.nanoTime()
         try {
             merger.merge() // merge 'em
         } finally {
-
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            runningAddIndexesMerges.remove(merger)
-
-            // TODO notifyAll is not supported in KMP, need to think what to do here
-            //(this as java.lang.Object).notifyAll()
-            //}
+            withIndexWriterLock {
+                runningAddIndexesMerges.remove(merger)
+                doNotifyAll()
+            }
         }
 
         merge.setMergeInfo(
@@ -5363,8 +5332,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // forceMerge, addIndexes or waitForMerges may be waiting
             // on merges to finish.
 
-            // TODO notifyAll is not supported in KMP, need to think what to do here
-            //(this as java.lang.Object).notifyAll()
+            doNotifyAll()
 
             // It's possible we are called twice, eg if there was an
             // exception inside mergeInit
@@ -5910,6 +5878,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun doWait() {
+        check(indexWriterLock.isHeldByCurrentThread()) { "IndexWriter lock must be held before waiting" }
         // NOTE: the callers of this method should in theory
         // be able to do simply wait(), but, as a defense
         // against thread timing hazards where notifyAll()
@@ -5917,12 +5886,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // and then return so caller can check if wait
         // conditions are satisfied:
         try {
-            /*(this as java.lang.Object).wait(1000)*/
             runBlocking {
-                delay(1.seconds)
+                indexWriterCondition.await(1, TimeUnit.SECONDS)
             }
         } catch (ie: CancellationException) {
             throw ThreadInterruptedException(ie)
+        }
+    }
+
+    private fun doNotifyAll() {
+        check(indexWriterLock.isHeldByCurrentThread()) { "IndexWriter lock must be held before notifying" }
+        runBlocking {
+            indexWriterCondition.signalAll()
         }
     }
 
