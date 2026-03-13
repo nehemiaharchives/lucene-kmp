@@ -1,9 +1,6 @@
 package org.gnit.lucenekmp.index
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.CompoundDirectory
 import org.gnit.lucenekmp.codecs.FieldsProducer
@@ -23,6 +20,8 @@ import org.gnit.lucenekmp.jdkport.AtomicInteger
 import okio.EOFException
 import okio.FileNotFoundException
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 
@@ -61,7 +60,7 @@ class SegmentCoreReaders(
 
     private val coreClosedListeners: MutableSet<ClosedListener> =
         /*java.util.Collections.synchronizedSet*/mutableSetOf() // TODO implement if needed
-    private val coreListenersMutex = Mutex()
+    private val coreListenersLock = ReentrantLock()
 
     @OptIn(ExperimentalAtomicApi::class)
     val refCount: Int
@@ -79,7 +78,7 @@ class SegmentCoreReaders(
     }
 
     @OptIn(ExperimentalAtomicApi::class)
-    suspend fun decRef() {
+    fun decRef() {
         val newRef = ref.decrementAndFetch()
         val segName = runCatching { segment }.getOrElse { "<init>" }
         if (newRef == 0) {
@@ -111,7 +110,7 @@ class SegmentCoreReaders(
                 get() = cacheKey
 
             override suspend fun addClosedListener(listener: ClosedListener) {
-                coreListenersMutex.withLock {
+                coreListenersLock.withLock {
                     coreClosedListeners.add(listener)
                 }
             }
@@ -193,9 +192,7 @@ class SegmentCoreReaders(
             throw CorruptIndexException("Problem reading index.", e.file, e)
         } finally {
             if (!success) {
-                runBlocking { //for now I will put decRec in runBlocking but if there is problem such as deadlock, we will refactor.
-                    decRef()
-                }
+                decRef()
             }
         }
     }
@@ -204,8 +201,8 @@ class SegmentCoreReaders(
         return cacheHelper
     }
 
-    private suspend fun notifyCoreClosedListeners() {
-        coreListenersMutex.withLock {
+    private fun notifyCoreClosedListeners() {
+        coreListenersLock.withLock {
             IOUtils.applyToAll(
                 coreClosedListeners
             ) { listener: ClosedListener ->

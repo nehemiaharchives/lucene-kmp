@@ -1,8 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesProducer
 import org.gnit.lucenekmp.codecs.FieldInfosFormat
@@ -22,6 +19,8 @@ import org.gnit.lucenekmp.util.IOUtils
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 /*import java.util.concurrent.CopyOnWriteArraySet*/
 
 /**
@@ -208,9 +207,7 @@ class SegmentReader : CodecReader {
     override fun doClose() {
         // System.out.println("SR.close seg=" + si);
         try {
-            runBlocking{
-                core.decRef()
-            }
+            core.decRef()
         } finally {
             if (docValuesProducer is SegmentDocValuesProducer) {
                 segDocValues.decRef(docValuesProducer.dvGens)
@@ -293,9 +290,9 @@ class SegmentReader : CodecReader {
 
     private val readerClosedListeners: MutableSet<ClosedListener> = mutableSetOf()
         /*CopyOnWriteArraySet<ClosedListener>()*/
-    private val readerClosedListenersLock = Mutex()
+    private val readerClosedListenersLock = ReentrantLock()
 
-    override suspend fun notifyReaderClosedListeners() {
+    override fun notifyReaderClosedListeners() {
         readerClosedListenersLock.withLock {
             IOUtils.applyToAll(
                 readerClosedListeners

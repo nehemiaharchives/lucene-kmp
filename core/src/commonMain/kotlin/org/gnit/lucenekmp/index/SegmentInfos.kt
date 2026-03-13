@@ -722,7 +722,9 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
 
     /** Returns all contained segments as an **unmodifiable** [List] view.  */
     fun asList(): MutableList<SegmentCommitInfo> {
-        return /*java.util.Collections.unmodifiableList<SegmentCommitInfo>(segments)*/ segments.toMutableList()
+        // Kotlin common doesn't offer a Java-style unmodifiable live view, so we return the live
+        // backing list to preserve Lucene's view semantics and avoid stale detached copies.
+        return segments
     }
 
     /** Returns number of [SegmentCommitInfo]s.  */

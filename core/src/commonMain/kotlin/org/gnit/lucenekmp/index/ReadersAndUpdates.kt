@@ -21,7 +21,6 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.computeIfAbsent
 import org.gnit.lucenekmp.jdkport.get
-import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
@@ -207,16 +206,16 @@ class ReadersAndUpdates(
     }
 
     /*@Synchronized*/
-    suspend fun release(sr: SegmentReader) {
-        withRldLockSuspend {
+    fun release(sr: SegmentReader) {
+        withRldLock {
             assert(info === sr.originalSegmentInfo)
             sr.decRef()
         }
     }
 
     /*@Synchronized*/
-    suspend fun delete(docID: Int): Boolean {
-        return withRldLockSuspend {
+    fun delete(docID: Int): Boolean {
+        return withRldLock {
             if (reader == null && pendingDeletes.mustInitOnDelete()) {
                 getReaderNoLock(IOContext.DEFAULT).decRef() // pass a reader to initialize pending deletes
             }
@@ -226,8 +225,8 @@ class ReadersAndUpdates(
 
     // NOTE: removes callers ref
     /*@Synchronized*/
-    suspend fun dropReaders() {
-        withRldLockSuspend {
+    fun dropReaders() {
+        withRldLock {
             // TODO: can we somehow use IOUtils here...  problem is
             // we are calling .decRef not .close)...
             if (reader != null) {
@@ -247,8 +246,8 @@ class ReadersAndUpdates(
      * close()).
      */
     /*@Synchronized*/
-    suspend fun getReadOnlyClone(context: IOContext): SegmentReader {
-        return withRldLockSuspend {
+    fun getReadOnlyClone(context: IOContext): SegmentReader {
+        return withRldLock {
             if (reader == null) {
                 getReaderNoLock(context).decRef()
                 checkNotNull(reader)
@@ -279,12 +278,12 @@ class ReadersAndUpdates(
         get() = withRldLock {
             if (this.reader == null) {
                 // get a reader and dec the ref right away we just make sure we have a reader
-                runBlocking { getReader(IOContext.DEFAULT).decRef() }
+                getReader(IOContext.DEFAULT).decRef()
             }
             if (pendingDeletes.needsRefresh(reader!!)) {
                 // we have a reader but its live-docs are out of sync. let's create a temporary one that we
                 // never share
-                runBlocking { swapNewReaderWithLatestLiveDocs() }
+                swapNewReaderWithLatestLiveDocs()
             }
             reader!!
         }
@@ -575,13 +574,13 @@ class ReadersAndUpdates(
 
     /*@Synchronized*/
     @OptIn(ExperimentalAtomicApi::class)
-    suspend fun writeFieldUpdates(
+    fun writeFieldUpdates(
         dir: Directory,
         fieldNumbers: FieldInfos.FieldNumbers,
         maxDelGen: Long,
         infoStream: InfoStream
     ): Boolean {
-        return withRldLockSuspend {
+        return withRldLock {
             val startTimeNS: Long = System.nanoTime()
             val newDVFiles: MutableMap<Int, MutableSet<String>> = HashMap()
             var fieldInfosFiles: MutableSet<String>?
@@ -598,7 +597,7 @@ class ReadersAndUpdates(
 
             if (any == false) {
                 // no updates
-                return@withRldLockSuspend false
+                return@withRldLock false
             }
 
             // Do this so we can delete any created files on
@@ -773,7 +772,7 @@ class ReadersAndUpdates(
         )
     }
 
-    private suspend fun createNewReaderWithLatestLiveDocs(reader: SegmentReader): SegmentReader {
+    private fun createNewReaderWithLatestLiveDocs(reader: SegmentReader): SegmentReader {
         checkNotNull(reader)
         /*assert(java.lang.Thread.holdsLock(this)) { java.lang.Thread.currentThread().getName() }*/ // this operation is jvm specific, not possible in kotlin common
         val newReader = SegmentReader(
@@ -797,7 +796,7 @@ class ReadersAndUpdates(
         return newReader
     }
 
-    private suspend fun swapNewReaderWithLatestLiveDocs() {
+    private fun swapNewReaderWithLatestLiveDocs() {
         reader = createNewReaderWithLatestLiveDocs(reader!!)
     }
 
@@ -815,11 +814,11 @@ class ReadersAndUpdates(
 
     /** Returns a reader for merge, with the latest doc values updates and deletions.  */
     /*@Synchronized*/
-    suspend fun getReaderForMerge(
+    fun getReaderForMerge(
         context: IOContext,
         readerConsumer: IOConsumer<MergePolicy.MergeReader>
     ): MergePolicy.MergeReader {
-        return withRldLockSuspend {
+        return withRldLock {
             // We must carry over any still-pending DV updates because they were not
             // successfully written, e.g. because there was a hole in the delGens,
             // or they arrived after we wrote all DVs for merge but before we set

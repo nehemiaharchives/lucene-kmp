@@ -550,7 +550,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // TODO Thread is not supported in KMP, need to think what to do here
                     //assert(java.lang.Thread.holdsLock(this@IndexWriter))
                     val segmentReader: SegmentReader =
-                        runBlocking { rld.getReadOnlyClone(IOContext.DEFAULT) }
+                        rld.getReadOnlyClone(IOContext.DEFAULT)
                     // only track this if we actually do fullFlush merges
                     if (maxFullFlushMergeWaitMillis > 0) {
                         openedReadOnlyClones[sci.info.name] = segmentReader
@@ -875,14 +875,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             if (readerPool.get(rld.info, false) == null) {
                                 continue
                             }
-                            if (runBlocking {
-                                    rld.writeFieldUpdates(
-                                        directory,
-                                        globalFieldNumberMap,
-                                        bufferedUpdatesStream.completedDelGen,
-                                        infoStream
-                                    )
-                                }
+                            if (rld.writeFieldUpdates(
+                                    directory,
+                                    globalFieldNumberMap,
+                                    bufferedUpdatesStream.completedDelGen,
+                                    infoStream
+                                )
                             ) {
                                 checkpointNoSIS()
                             }
@@ -1385,7 +1383,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             readerIn,
             docID
         ) { leafDocId: Int, rld: ReadersAndUpdates ->
-            if (runBlocking { rld.delete(leafDocId) }) {
+            if (rld.delete(leafDocId)) {
                 if (isFullyDeleted(rld)) {
                     dropDeletedSegment(rld.info)
                     checkpoint()
@@ -1555,7 +1553,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // already
                     // removed the segment for the segmentInfo and we lost the pendingDocs update due to that.
                     // therefore we execute the adjustPendingNumDocs in a finally block to account for that.
-                    dropPendingDocs = dropPendingDocs or runBlocking { readerPool.drop(info) }
+                    dropPendingDocs = dropPendingDocs or readerPool.drop(info)
                 } finally {
                     if (dropPendingDocs) {
                         adjustPendingNumDocs(-info.info.maxDoc().toLong())
@@ -2681,7 +2679,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                      * We will remove the files incrementally as we go...
                      */
                     // Don't bother saving any changes in our segmentInfos
-                    runBlocking { readerPool.dropAll() }
+                    readerPool.dropAll()
                     // Mark that the index has changed
                     changeCount.incrementAndFetch()
                     segmentInfos.changed()
@@ -4187,10 +4185,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         // updates
                         // in a separate map in order to be applied to the merged segment after it's done
                         rld.setIsMerging()
-                        runBlocking {
-                            rld.getReaderForMerge(context) { mr: MergePolicy.MergeReader ->
-                                deleter.incRef(mr.reader!!.segmentInfo.files())
-                            }
+                        rld.getReaderForMerge(context) { mr: MergePolicy.MergeReader ->
+                            deleter.incRef(mr.reader!!.segmentInfo.files())
                         }
                     }
                 }
@@ -4226,15 +4222,13 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         // TODO Thread is not supported in KMP, need to think what to do here
         //assert(java.lang.Thread.holdsLock(this))
-        runBlocking {
-            if (writeDeletes) {
-                if (readerPool.commit(segmentInfos)) {
-                    checkpointNoSIS()
-                }
-            } else { // only write the docValues
-                if (readerPool.writeAllDocValuesUpdates()) {
-                    checkpoint()
-                }
+        if (writeDeletes) {
+            if (readerPool.commit(segmentInfos)) {
+                checkpointNoSIS()
+            }
+        } else { // only write the docValues
+            if (readerPool.writeAllDocValuesUpdates()) {
+                checkpoint()
             }
         }
         // now do some best effort to check if a segment is fully deleted
@@ -4613,19 +4607,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
             anyChanges = anyChanges or maybeMerge.getAndSet(false)
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
+            return withIndexWriterLock {
 //             logger.debug { "doFlush: writeReaderPool start" }
-            val writeReaderPoolMark = TimeSource.Monotonic.markNow()
-            writeReaderPool(applyAllDeletes)
+                val writeReaderPoolMark = TimeSource.Monotonic.markNow()
+                writeReaderPool(applyAllDeletes)
 //             logger.debug { "doFlush: writeReaderPool done" }
-            val doAfterFlushMark = TimeSource.Monotonic.markNow()
-            doAfterFlush()
+                val doAfterFlushMark = TimeSource.Monotonic.markNow()
+                doAfterFlush()
 //             logger.debug { "doFlush: doAfterFlush done" }
-            success = true
+                success = true
 //             logger.debug { "doFlush: exit anyChanges=$anyChanges" }
-            return anyChanges
-            //}
+                anyChanges
+            }
         } catch (tragedy: Error) {
             tragicEvent(tragedy, "doFlush")
             throw tragedy
@@ -4866,7 +4859,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // so it will be dropped shortly anyway, but not
             // doing this  makes  MockDirWrapper angry in
             // TestNRTThreads (LUCENE-5434):
-            runBlocking { readerPool.drop(merge.info!!) }
+            readerPool.drop(merge.info!!)
             // Safe: these files must exist:
             deleteNewFiles(merge.info!!.files())
             return@withIndexWriterLock false
@@ -4916,7 +4909,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             } finally {
                 if (!success) {
                     mergedUpdates.dropChanges()
-                    runBlocking { readerPool.drop(merge.info!!) }
+                    readerPool.drop(merge.info!!)
                 }
             }
         }
@@ -4942,7 +4935,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         if (dropSegment) {
             assert(!segmentInfos.contains(merge.info))
-            runBlocking { readerPool.drop(merge.info!!) }
+            readerPool.drop(merge.info!!)
             // Safe: these files must exist
             deleteNewFiles(merge.info!!.files())
         }
@@ -5410,14 +5403,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         } else {
                             rld.dropMergingUpdates()
                         }
-                        runBlocking {
-                            rld.release(sr)
-                            release(rld)
-                            // In KMP, lock-less races can leave pooled readers for merged-away
-                            // source segments. Ensure they are dropped once they are no longer live.
-                            if (drop || !segmentInfos.contains(rld.info)) {
-                                readerPool.drop(rld.info)
-                            }
+                        rld.release(sr)
+                        release(rld)
+                        if (drop) {
+                            readerPool.drop(rld.info)
                         }
                     }
                     deleter.decRef(mr.reader!!.segmentInfo.files())
@@ -5504,16 +5493,13 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 val rld: ReadersAndUpdates = getPooledInstance(sci, true)!!
                 rld.setIsMerging()
 
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                return@initMergeReaders runBlocking {
+                return@initMergeReaders withIndexWriterLock {
                     rld.getReaderForMerge(context) { mr: MergePolicy.MergeReader ->
                         deleter.incRef(
                             mr.reader!!.segmentInfo.files()
                         )
                     }
-                    }
-                //}
+                }
             }
             merge.markDebugPhase("iw.mergeMiddle.afterInitMergeReaders")
             // Let the merge wrap readers
@@ -5841,12 +5827,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 try {
                     mergedSegmentWarmer.warm(sr)
                 } finally {
-
-                    // TODO synchronized is not supported in KMP, need to think what to do here
-                    //synchronized(this) {
-                    runBlocking { rld.release(sr) }
-                    release(rld)
-                    //}
+                    withIndexWriterLock {
+                        rld.release(sr)
+                        release(rld)
+                    }
                 }
             }
 
@@ -6630,7 +6614,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @Throws(IOException::class)
     private fun release(readersAndUpdates: ReadersAndUpdates, assertLiveInfo: Boolean) {
         withIndexWriterLock {
-            val released: Boolean = runBlocking { readerPool.release(readersAndUpdates, assertLiveInfo) }
+            val released: Boolean = readerPool.release(readersAndUpdates, assertLiveInfo)
 
             // if we write anything here we have to hold the lock otherwise IDF will delete files
             // underneath us
@@ -7533,7 +7517,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             assert(!currentHardLiveDocs.get(j))
                         } else if (carryOverDelete(j)) {
                             // the document was deleted while we were merging:
-                            runBlocking { mergedReadersAndUpdates.delete(segDocMap.get(j)) }
+                            mergedReadersAndUpdates.delete(segDocMap.get(j))
                         }
                     }
                 }
@@ -7543,7 +7527,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // does:
                 for (j in 0..<maxDoc) {
                     if (carryOverDelete(j)) {
-                        runBlocking { mergedReadersAndUpdates.delete(segDocMap.get(j)) }
+                        mergedReadersAndUpdates.delete(segDocMap.get(j))
                     }
                 }
             }

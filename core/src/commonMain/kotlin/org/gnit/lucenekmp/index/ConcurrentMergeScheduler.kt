@@ -2,15 +2,18 @@ package org.gnit.lucenekmp.index
 
 import dev.scottpierce.envvar.EnvVar
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.sync.Mutex
@@ -789,11 +792,10 @@ open class ConcurrentMergeScheduler
     }
 
     /** Runs a merge thread to execute a single merge, then exits.  */
+    @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
     open inner class MergeThread(
         private val mergeSource: MergeSource,
         val merge: OneMerge,
-        // you can inject a scope or create one here:
-        scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     ) : Comparable<MergeThread> {
 
         val rateLimiter: MergeRateLimiter = MergeRateLimiter(merge.mergeProgress)
@@ -815,6 +817,8 @@ open class ConcurrentMergeScheduler
                 this@ConcurrentMergeScheduler.mergeThreadCount++
                 name
             }
+        private val threadDispatcher: CloseableCoroutineDispatcher = newSingleThreadContext(threadName)
+        private val scope = CoroutineScope(threadDispatcher + SupervisorJob())
 
         // create a Job that will execute your merge logic when started
         val job: Job = scope.launch(context = uncaughtHandler, start = CoroutineStart.LAZY) {
@@ -825,7 +829,13 @@ open class ConcurrentMergeScheduler
         fun getName(): String = threadName
 
         /** Mirrors Thread.isAlive() */
-        fun isAlive(): Boolean = job.isActive
+        fun isAlive(): Boolean {
+            val alive = job.isActive
+            if (!alive) {
+                closeDispatcherIfFinished()
+            }
+            return alive
+        }
 
         /** Mirrors Thread.start() */
         fun start() {
@@ -839,6 +849,7 @@ open class ConcurrentMergeScheduler
                 return
             }
             job.join()
+            closeDispatcherIfFinished()
         }
 
         fun debugPhase(): String = debugPhaseLabel
@@ -853,6 +864,12 @@ open class ConcurrentMergeScheduler
             debugPhaseLabel = phase
             debugPhaseStartedAtNanos = System.nanoTime()
             debugThreadId = currentThreadId()
+        }
+
+        private fun closeDispatcherIfFinished() {
+            if (job.isCompleted) {
+                threadDispatcher.close()
+            }
         }
 
         override fun compareTo(other: MergeThread): Int =

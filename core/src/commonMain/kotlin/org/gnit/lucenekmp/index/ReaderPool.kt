@@ -1,11 +1,10 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.compare
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.util.CollectionUtil
@@ -32,7 +31,7 @@ internal class ReaderPool(
     reader: StandardDirectoryReader?
 ) : AutoCloseable {
     private val readerMap: MutableMap<SegmentCommitInfo, ReadersAndUpdates> = mutableMapOf()
-    private val readerMapMutex = Mutex()
+    private val readerMapLock = ReentrantLock()
 
     // This is a "write once" variable (like the organic dye
     // on a DVD-R that may or may not be heated by a laser and
@@ -95,14 +94,14 @@ internal class ReaderPool(
      */
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
-    suspend fun drop(info: SegmentCommitInfo): Boolean {
-        return withReaderMapLockSuspend {
+    fun drop(info: SegmentCommitInfo): Boolean {
+        return withReaderMapLock {
             val rld: ReadersAndUpdates? = readerMap[info]
             if (rld != null) {
                 assert(info === rld.info)
                 readerMap.remove(info)
                 rld.dropReaders()
-                return@withReaderMapLockSuspend true
+                return@withReaderMapLock true
             }
             false
         }
@@ -155,8 +154,8 @@ internal class ReaderPool(
      */
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
-    suspend fun release(rld: ReadersAndUpdates, assertInfoLive: Boolean): Boolean {
-        return withReaderMapLockSuspend {
+    fun release(rld: ReadersAndUpdates, assertInfoLive: Boolean): Boolean {
+        return withReaderMapLock {
             var changed = false
             // Matches incRef in get:
             rld.decRef()
@@ -210,8 +209,7 @@ internal class ReaderPool(
     @OptIn(ExperimentalAtomicApi::class)
     override fun close() {
         if (closed.compareAndSet(false, newValue = true)) {
-            // TODO not sure if runBlocking is the right way to do this in kmp, need to think what to do
-            runBlocking{ dropAll() }
+            dropAll()
         }
     }
 
@@ -220,7 +218,7 @@ internal class ReaderPool(
      *
      * @return `true` iff any files where written
      */
-    suspend fun writeAllDocValuesUpdates(): Boolean {
+    fun writeAllDocValuesUpdates(): Boolean {
         // this needs to be protected by the reader pool lock otherwise we hit ConcurrentModificationException
         val copy = withReaderMapLock { HashSet(readerMap.values) }
         var any = false
@@ -296,8 +294,8 @@ internal class ReaderPool(
     /** Remove all ou
      * // TODO Synchronized is not possible in kmp, need to think what to dor references to readers, and commits any pending changes.  */
     /*@Synchronized*/
-    suspend fun dropAll() {
-        withReaderMapLockSuspend {
+    fun dropAll() {
+        withReaderMapLock {
             var priorE: Throwable? = null
             val it: MutableIterator<MutableMap.MutableEntry<SegmentCommitInfo, ReadersAndUpdates>> =
                 readerMap.entries.iterator()
@@ -334,8 +332,8 @@ internal class ReaderPool(
      */
     // TODO Synchronized is not possible in kmp, need to think what to do
     /*@Synchronized*/
-    suspend fun commit(infos: SegmentInfos): Boolean {
-        return withReaderMapLockSuspend {
+    fun commit(infos: SegmentInfos): Boolean {
+        return withReaderMapLock {
             var atLeastOneChange = false
             for (info in infos) {
                 val rld: ReadersAndUpdates? = readerMap[info]
@@ -479,8 +477,5 @@ internal class ReaderPool(
     }
 
     private fun <T> withReaderMapLock(action: () -> T): T =
-        runBlocking { readerMapMutex.withLock { action() } }
-
-    private suspend fun <T> withReaderMapLockSuspend(action: suspend () -> T): T =
-        readerMapMutex.withLock { action() }
+        readerMapLock.withLock { action() }
 }

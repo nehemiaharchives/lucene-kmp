@@ -2,10 +2,10 @@ package org.gnit.lucenekmp.index
 
 
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
@@ -244,7 +244,7 @@ class StandardDirectoryReader internal constructor(
     private val readerClosedListeners: MutableSet<ClosedListener> = mutableSetOf()
 
     /*java.util.concurrent.CopyOnWriteArraySet<ClosedListener>()*/
-    private val readerClosedListenerLock = Mutex()
+    private val readerClosedListenerLock = ReentrantLock()
 
     private val cacheHelper: CacheHelper =
         object : CacheHelper {
@@ -260,7 +260,7 @@ class StandardDirectoryReader internal constructor(
             }
         }
 
-    override suspend fun notifyReaderClosedListeners() {
+    override fun notifyReaderClosedListeners() {
         readerClosedListenerLock.withLock {
             IOUtils.applyToAll(
                 readerClosedListeners

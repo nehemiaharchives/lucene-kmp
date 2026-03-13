@@ -1,5 +1,4 @@
 package org.gnit.lucenekmp.index
-
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.assert
@@ -419,7 +418,6 @@ internal class IndexFileDeleter(
 
         // Incref the files:
         incRef(segmentInfos, isCommit)
-
         if (isCommit) {
             // Append to our commits list:
             commits.add(CommitPoint(commitsToDelete, directoryOrig, segmentInfos))
@@ -431,6 +429,7 @@ internal class IndexFileDeleter(
             // Decref files for commits that were deleted by the policy:
             deleteCommits()
         } else {
+            val newFiles = segmentInfos.files(false)
             // DecRef old files from the last checkpoint, if any:
             try {
                 decRef(lastFiles)
@@ -439,7 +438,7 @@ internal class IndexFileDeleter(
             }
 
             // Save files so we can decr on next checkpoint/commit:
-            lastFiles.addAll(segmentInfos.files(false))
+            lastFiles.addAll(newFiles)
         }
 
         if (infoStream.isEnabled("IFD")) {

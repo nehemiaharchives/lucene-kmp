@@ -1,15 +1,12 @@
 package org.gnit.lucenekmp.util
-
-import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import okio.FileNotFoundException
 import okio.IOException
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.computeIfAbsent
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FailurePathProbe
 
@@ -23,9 +20,8 @@ import org.gnit.lucenekmp.store.FailurePathProbe
  * @lucene.internal
  */
 class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
-    private val logger = KotlinLogging.logger {}
     private val refCounts: MutableMap<String, RefCount> = HashMap<String, RefCount>()
-    private val refCountsMutex = Mutex()
+    private val refCountsLock = ReentrantLock()
 
     private val directory: Directory
 
@@ -258,10 +254,8 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
             directory.deleteFile(fileName)
         } catch (e: NoSuchFileException) {
             if (!existsUnsafe(fileName)) {
-                //logger.debug { "phase=fileDeleter.delete.alreadyMissing file=$fileName reason=NoSuchFileException" }
                 return
             }
-            //logger.error(e) { "phase=fileDeleter.delete.noSuchFile file=$fileName tracked=${refCounts.containsKey(fileName)} refCount=${refCounts[fileName]?.count ?: 0} pendingDeletion=${directory.pendingDeletions.contains(fileName)}" }
             if (Constants.WINDOWS) {
                 // TODO: can we remove this OS-specific hacky logic?  If windows deleteFile is buggy, we
                 // should instead contain this workaround in
@@ -275,10 +269,8 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
             }
         } catch (e: FileNotFoundException) {
             if (!existsUnsafe(fileName)) {
-                //logger.debug { "phase=fileDeleter.delete.alreadyMissing file=$fileName reason=FileNotFoundException" }
                 return
             }
-            //logger.error(e) { "phase=fileDeleter.delete.fileNotFound file=$fileName tracked=${refCounts.containsKey(fileName)} refCount=${refCounts[fileName]?.count ?: 0} pendingDeletion=${directory.pendingDeletions.contains(fileName)}" }
             if (Constants.WINDOWS) {
             } else {
                 throw e
@@ -287,7 +279,7 @@ class FileDeleter(directory: Directory, messenger: (MsgType, String) -> Unit) {
     }
 
     private fun <T> withRefCountsLock(action: () -> T): T =
-        runBlocking { refCountsMutex.withLock { action() } }
+        refCountsLock.withLock { action() }
 
     /** Tracks the reference count for a single index file:  */
     class RefCount internal constructor(// fileName used only for better assert error messages

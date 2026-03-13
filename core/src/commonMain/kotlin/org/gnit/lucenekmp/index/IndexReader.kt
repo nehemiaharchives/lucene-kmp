@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.store.AlreadyClosedException
 import org.gnit.lucenekmp.util.IOUtils
@@ -153,7 +152,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      *
      * @lucene.internal
      */
-    protected open suspend fun notifyReaderClosedListeners() {
+    protected open fun notifyReaderClosedListeners() {
         // nothing to notify in the base impl
     }
 
@@ -232,7 +231,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      * @see .incRef
      */
     @OptIn(ExperimentalAtomicApi::class)
-    suspend fun decRef() {
+    fun decRef() {
         // only check refcount here (don't call ensureOpen()), so we can
         // still close the reader if it was made invalid by a child:
         if (refCount.load() <= 0) {
@@ -393,9 +392,7 @@ abstract class IndexReader internal constructor() : AutoCloseable {
      */
     override fun close() {
         if (!closed) {
-            runBlocking {
-                decRef()
-            }
+            decRef()
             closed = true
         }
     }
