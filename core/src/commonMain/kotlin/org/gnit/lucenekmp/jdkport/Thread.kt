@@ -31,6 +31,7 @@ open class Thread : Runnable {
     private var dispatcher: CloseableCoroutineDispatcher? = null
     private var interrupted = false
     private var started = false
+    internal val threadId: Long = threadIdNumber.fetchAndIncrement().toLong()
     private var name: String = "Thread-${threadInitNumber.fetchAndIncrement()}"
     private var priority: Int = NORM_PRIORITY
     private var daemon: Boolean = false
@@ -140,10 +141,15 @@ open class Thread : Runnable {
 
         private val currentThreadLocal = CloseableThreadLocal<Thread>()
         private val threadInitNumber = AtomicInt(0)
+        private val threadIdNumber = AtomicInt(1)
         private val mainThread = Thread().apply { setName("main") }
 
         fun currentThread(): Thread {
-            return currentThreadLocal.get() ?: mainThread
+            return currentThreadOrNull() ?: mainThread
+        }
+
+        internal fun currentThreadOrNull(): Thread? {
+            return currentThreadLocal.get()
         }
 
         fun interrupted(): Boolean {

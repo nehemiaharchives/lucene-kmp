@@ -302,8 +302,9 @@ class FrozenBufferedUpdates(
             var delTerm: BytesRef?
             val termDocsIterator = TermDocsIterator(segState.reader, true)
             while ((iter.next().also { delTerm = it }) != null) {
+                val field = iter.field()!!
                 val iterator: DocIdSetIterator? =
-                    termDocsIterator.nextTerm(iter.field()!!, delTerm!!)
+                    termDocsIterator.nextTerm(field, delTerm!!)
                 if (iterator != null) {
                     var docID: Int
                     while ((iterator.nextDoc()

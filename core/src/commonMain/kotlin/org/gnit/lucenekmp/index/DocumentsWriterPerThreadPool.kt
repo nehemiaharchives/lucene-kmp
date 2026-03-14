@@ -3,10 +3,7 @@ package org.gnit.lucenekmp.index
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.store.AlreadyClosedException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.concurrent.Volatile
 
 /**
@@ -27,84 +24,81 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     private val freeList: LockableConcurrentApproximatePriorityQueue<DocumentsWriterPerThread> =
         LockableConcurrentApproximatePriorityQueue()
     private var takenWriterPermits = 0
-    private val dwptsLock = ReentrantLock()
+    private val stateLock = ReentrantLock()
+    private val writersUnlocked = stateLock.newCondition()
 
     @Volatile
     private var closed = false
 
-    private val mutex = Mutex()
-    private val waiters = mutableListOf<CompletableDeferred<Unit>>()
-
     /** Returns the active number of [DocumentsWriterPerThread] instances.  */
-    // Synchronized is not supported in KMP, so we use a mutex here
     /*@Synchronized*/
-    fun size(): Int = runBlocking { mutex.withLock { dwpts.size } }
-
-    // Synchronized is not supported in KMP, so we use a mutex here
-    /*@Synchronized*/
-    fun lockNewWriters() =
-        runBlocking {
-            mutex.withLock {
-                // this is similar to a semaphore - we need to acquire all permits ie. takenWriterPermits must
-                // be == 0
-                // any call to lockNewWriters() must be followed by unlockNewWriters() otherwise we will
-                // deadlock at some
-                // point
-                assert(takenWriterPermits >= 0)
-                takenWriterPermits++
-            }
+    fun size(): Int {
+        stateLock.lock()
+        return try {
+            dwpts.size
+        } finally {
+            stateLock.unlock()
         }
+    }
 
-    // Synchronized is not supported in KMP, so we use a mutex here
     /*@Synchronized*/
-    fun unlockNewWriters() =
-        runBlocking {
-            mutex.withLock {
-                assert(takenWriterPermits > 0)
-                takenWriterPermits--
-                if (takenWriterPermits == 0) {
-                    // Wake up all waiting coroutines
-                    waiters.forEach { it.complete(Unit) }
-                    waiters.clear()
-                }
-            }
+    fun lockNewWriters() {
+        stateLock.lock()
+        try {
+            // this is similar to a semaphore - we need to acquire all permits ie. takenWriterPermits must
+            // be == 0
+            // any call to lockNewWriters() must be followed by unlockNewWriters() otherwise we will
+            // deadlock at some
+            // point
+            assert(takenWriterPermits >= 0)
+            takenWriterPermits++
+        } finally {
+            stateLock.unlock()
         }
+    }
+
+    /*@Synchronized*/
+    fun unlockNewWriters() {
+        stateLock.lock()
+        try {
+            assert(takenWriterPermits > 0)
+            takenWriterPermits--
+            if (takenWriterPermits == 0) {
+                runBlocking { writersUnlocked.signalAll() }
+            }
+        } finally {
+            stateLock.unlock()
+        }
+    }
 
     /**
      * Returns a new already locked [DocumentsWriterPerThread]
      *
      * @return a new [DocumentsWriterPerThread]
      */
-    // Synchronized is not supported in KMP, so we use a mutex here
     /*@Synchronized*/
-    private suspend fun newWriter(): DocumentsWriterPerThread = mutex.withLock {
-        assert(takenWriterPermits >= 0)
-        while (takenWriterPermits > 0) {
-            val waiter = CompletableDeferred<Unit>()
-            waiters.add(waiter)
-            mutex.unlock() // Release lock before suspending
-            try {
-                waiter.await()
-            } finally {
-                mutex.lock() // Re-acquire lock after waking
-            }
-        }
-        // we must check if we are closed since this might happen while we are waiting for the writer
-        // permit
-        // and if we miss that we might release a new DWPT even though the pool is closed. Yet, that
-        // wouldn't be the
-        // end of the world it's violating the contract that we don't release any new DWPT after this
-        // pool is closed
-        ensureOpen()
-        val dwpt: DocumentsWriterPerThread = dwptFactory()
-        dwpt.lock() // lock so nobody else will get this DWPT
-        dwptsLock.lock()
+    private suspend fun newWriter(): DocumentsWriterPerThread {
+        stateLock.lock()
         try {
+            assert(takenWriterPermits >= 0)
+            while (takenWriterPermits > 0) {
+                // we can't create new DWPTs while not all permits are available
+                writersUnlocked.await()
+            }
+            // we must check if we are closed since this might happen while we are waiting for the writer
+            // permit
+            // and if we miss that we might release a new DWPT even though the pool is closed. Yet, that
+            // wouldn't be the
+            // end of the world it's violating the contract that we don't release any new DWPT after this
+            // pool is closed
+            ensureOpen()
+            val dwpt: DocumentsWriterPerThread = dwptFactory()
+            dwpt.lock() // lock so nobody else will get this DWPT
             dwpts.add(dwpt)
+            return dwpt
         } finally {
-            dwptsLock.unlock()
+            stateLock.unlock()
         }
-        return dwpt
     }
 
     /**
@@ -113,15 +107,14 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
      */
     // TODO: maybe we should try to do load leveling here: we want roughly even numbers
     // of items (docs, deletes, DV updates) to most take advantage of concurrency while flushing
-    fun getAndLock(): DocumentsWriterPerThread
-         = runBlocking {
-            ensureOpen()
-            val dwpt: DocumentsWriterPerThread? = freeList.lockAndPoll()
-            if (dwpt != null) {
-                return@runBlocking dwpt
-            }
-            return@runBlocking newWriter()
+    fun getAndLock(): DocumentsWriterPerThread = runBlocking {
+        ensureOpen()
+        val dwpt: DocumentsWriterPerThread? = freeList.lockAndPoll()
+        if (dwpt != null) {
+            return@runBlocking dwpt
         }
+        return@runBlocking newWriter()
+    }
 
     private fun ensureOpen() {
         if (closed) {
@@ -132,11 +125,11 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun contains(state: DocumentsWriterPerThread): Boolean {
-        dwptsLock.lock()
+        stateLock.lock()
         return try {
             dwpts.contains(state)
         } finally {
-            dwptsLock.unlock()
+            stateLock.unlock()
         }
     }
 
@@ -162,11 +155,11 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     /*@Synchronized*/
     override fun iterator(): MutableIterator<DocumentsWriterPerThread> {
         // copy on read - this is a quick op since num states is low
-        dwptsLock.lock()
+        stateLock.lock()
         return try {
             dwpts.toMutableList().iterator()
         } finally {
-            dwptsLock.unlock()
+            stateLock.unlock()
         }
     }
 
@@ -205,7 +198,7 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
         // #getAndLock cannot pull this DWPT out of the pool since #getAndLock does a DWPT#tryLock to
         // check if the DWPT is available.
         assert(perThread.isHeldByCurrentThread)
-        dwptsLock.lock()
+        stateLock.lock()
         try {
             if (dwpts.remove(perThread)) {
                 freeList.remove(perThread)
@@ -215,7 +208,7 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
             }
             return true
         } finally {
-            dwptsLock.unlock()
+            stateLock.unlock()
         }
     }
 
@@ -223,17 +216,22 @@ class DocumentsWriterPerThreadPool(private val dwptFactory: () -> DocumentsWrite
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun isRegistered(perThread: DocumentsWriterPerThread): Boolean {
-        dwptsLock.lock()
+        stateLock.lock()
         return try {
             dwpts.contains(perThread)
         } finally {
-            dwptsLock.unlock()
+            stateLock.unlock()
         }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     override fun close() {
-        this.closed = true
+        stateLock.lock()
+        try {
+            this.closed = true
+        } finally {
+            stateLock.unlock()
+        }
     }
 }

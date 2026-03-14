@@ -2861,27 +2861,29 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun publishFrozenUpdates(packet: FrozenBufferedUpdates): Long {
-        assert(packet != null && packet.any())
-        val nextGen: Long = bufferedUpdatesStream.push(packet)
-        // Do this as an event so it applies higher in the stack when we are not holding
-        // DocumentsWriterFlushQueue.purgeLock:
-        eventQueue.add { w: IndexWriter ->
-            try {
-                // we call tryApply here since we don't want to block if a refresh or a flush is already
-                // applying the
-                // packet. The flush will retry this packet anyway to ensure all of them are applied
-                tryApply(packet)
-            } catch (t: Throwable) {
+        return withIndexWriterLock {
+            assert(packet != null && packet.any())
+            val nextGen: Long = bufferedUpdatesStream.push(packet)
+            // Do this as an event so it applies higher in the stack when we are not holding
+            // DocumentsWriterFlushQueue.purgeLock:
+            eventQueue.add { w: IndexWriter ->
                 try {
-                    w.onTragicEvent(t, "applyUpdatesPacket")
-                } catch (t1: Throwable) {
-                    t.addSuppressed(t1)
+                    // we call tryApply here since we don't want to block if a refresh or a flush is already
+                    // applying the
+                    // packet. The flush will retry this packet anyway to ensure all of them are applied
+                    tryApply(packet)
+                } catch (t: Throwable) {
+                    try {
+                        w.onTragicEvent(t, "applyUpdatesPacket")
+                    } catch (t1: Throwable) {
+                        t.addSuppressed(t1)
+                    }
+                    throw t
                 }
-                throw t
+                w.flushDeletesCount.incrementAndFetch()
             }
-            w.flushDeletesCount.incrementAndFetch()
+            nextGen
         }
-        return nextGen
     }
 
     /**
@@ -5855,13 +5857,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun segString(): String {
-        return segString(segmentInfos)
+        return withIndexWriterLock {
+            segStringLocked(segmentInfos)
+        }
     }
 
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     fun segString(infos: Iterable<SegmentCommitInfo>): String {
-        return infos.joinToString(" ") { segString(it) }
+        return withIndexWriterLock {
+            segStringLocked(infos)
+        }
     }
 
     /**
@@ -5872,6 +5878,16 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     // TODO Synchronized is not supported in KMP, need to think what to do here
     /*@Synchronized*/
     private fun segString(info: SegmentCommitInfo): String {
+        return withIndexWriterLock {
+            segStringLocked(info)
+        }
+    }
+
+    private fun segStringLocked(infos: Iterable<SegmentCommitInfo>): String {
+        return infos.joinToString(" ") { segStringLocked(it) }
+    }
+
+    private fun segStringLocked(info: SegmentCommitInfo): String {
         return info.toString(numDeletedDocs(info) - info.getDelCount(softDeletesEnabled))
     }
 

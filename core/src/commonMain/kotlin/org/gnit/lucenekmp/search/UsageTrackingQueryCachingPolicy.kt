@@ -2,6 +2,8 @@ package org.gnit.lucenekmp.search
 
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.document.SpatialQuery
 import org.gnit.lucenekmp.util.FrequencyTrackingRingBuffer
 
@@ -13,8 +15,8 @@ import org.gnit.lucenekmp.util.FrequencyTrackingRingBuffer
  */
 open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
     QueryCachingPolicy {
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
     private val recentlyUsedFilters: FrequencyTrackingRingBuffer = FrequencyTrackingRingBuffer(historySize, SENTINEL)
+    private val lock = ReentrantLock()
 
     /**
      * Expert: Create a new instance with a configurable history size. Beware of passing too large
@@ -67,12 +69,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
         // large queries; this may cause rare false positives, but at worse
         // this just means we cache a query that was not in fact used enough:
 
-        // TODO synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-        //logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add start" }
-        recentlyUsedFilters.add(hashCode)
-        //logger.debug { "[UsageTrackingQueryCachingPolicy.onUse] add done" }
-        //}
+        lock.withLock {
+            recentlyUsedFilters.add(hashCode)
+        }
     }
 
     fun frequency(query: Query): Int {
@@ -83,10 +82,9 @@ open class UsageTrackingQueryCachingPolicy(historySize: Int = 256) :
         // in case it's somewhat expensive:
         val hashCode = query.hashCode()
 
-        // TODO synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-            return recentlyUsedFilters.frequency(hashCode)
-        //}
+        return lock.withLock {
+            recentlyUsedFilters.frequency(hashCode)
+        }
     }
 
     @Throws(IOException::class)

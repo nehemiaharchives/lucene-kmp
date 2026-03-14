@@ -32,26 +32,27 @@ class DocumentsWriterFlushQueue {
     /*@Synchronized*/
     @Throws(IOException::class)
     fun addTicket(ticketSupplier: () -> FlushTicket?): FlushTicket? {
-        // first inc the ticket count - freeze opens a window for #anyChanges to fail
-        incTickets()
-        var success = false
+        queueLock.lock()
         try {
-            val ticket: FlushTicket? = ticketSupplier()
-            if (ticket != null) {
-                queueLock.lock()
-                try {
+            // Keep ticket assignment ordered with the flush/global-delete freeze that happens inside
+            // ticketSupplier(), matching Java's synchronized implementation.
+            incTickets()
+            var success = false
+            try {
+                val ticket: FlushTicket? = ticketSupplier()
+                if (ticket != null) {
                     // no need to publish anything if we don't have any frozen updates
                     queue.add(ticket)
                     success = true
-                } finally {
-                    queueLock.unlock()
+                }
+                return ticket
+            } finally {
+                if (!success) {
+                    decTickets()
                 }
             }
-            return ticket
         } finally {
-            if (!success) {
-                decTickets()
-            }
+            queueLock.unlock()
         }
     }
 

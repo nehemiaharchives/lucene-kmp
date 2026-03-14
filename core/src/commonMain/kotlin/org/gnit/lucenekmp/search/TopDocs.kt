@@ -101,8 +101,8 @@ open class TopDocs(
                 val cmp: Int =
                     (reverseMul[compIDX]
                             * comp.compareValues(
-                        firstFD.fields!![compIDX] as FieldComparator<Any?>,
-                        secondFD.fields!![compIDX] as FieldComparator<Any?>
+                        firstFD.fields!![compIDX],
+                        secondFD.fields!![compIDX]
                     ))
 
                 if (cmp != 0) {

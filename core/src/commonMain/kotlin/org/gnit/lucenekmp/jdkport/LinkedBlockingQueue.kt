@@ -114,10 +114,10 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         return mutex.withLock {
             // assert head.item == null;
             val h = head
-            val first = h!!.next
+            val first = h!!.next ?: return@withLock null
             h.next = h // help GC
             head = first
-            val x = first!!.item
+            val x = first.item
             first.item = null
             x
         }
@@ -292,10 +292,13 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         while (true) {
             if (count.get() > 0) {
                 val x = dequeue()
+                if (x == null) {
+                    continue
+                }
                 val c = count.fetchAndDecrement()
                 if (c > 1) notEmptyCh.trySend(Unit)
                 if (c == capacity) notFullCh.trySend(Unit)
-                return x!!
+                return x
             } else {
                 notEmptyCh.receive()
             }
@@ -308,6 +311,9 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         while (true) {
             if (count.get() > 0) {
                 val x = dequeue()
+                if (x == null) {
+                    continue
+                }
                 val c = count.fetchAndDecrement()
                 if (c > 1) notEmptyCh.trySend(Unit)
                 if (c == capacity) notFullCh.trySend(Unit)

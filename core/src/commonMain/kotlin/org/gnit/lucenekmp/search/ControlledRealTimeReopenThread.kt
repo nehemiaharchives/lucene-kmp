@@ -9,7 +9,6 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.jdkport.TimeUnit
-import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.Volatile
 import kotlin.math.max
 
