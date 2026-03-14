@@ -3798,7 +3798,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 //         logger.debug { "prepareCommit: doBeforeFlush" }
         doBeforeFlush()
         testPoint("startDoFlush")
-        var toCommit: SegmentInfos = segmentInfos.clone()
+        var toCommit: SegmentInfos? = null
         var anyChanges = false
         var seqNo: Long = -1L
         var pointInTimeMerges: MergePolicy.MergeSpecification? = null
@@ -3964,7 +3964,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // merges
         // did complete
         withIndexWriterLock {
-            filesToCommit = toCommit.files(false)
+            filesToCommit = checkNotNull(toCommit).files(false)
         }
         try {
             if (anyChanges) {
@@ -3974,7 +3974,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 infoStream.message("IW", "prepareCommit: startCommit begin")
             }
 //             logger.debug { "prepareCommit: startCommit begin" }
-            startCommit(toCommit)
+            startCommit(checkNotNull(toCommit))
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "prepareCommit: startCommit end")
             }
