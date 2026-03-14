@@ -373,7 +373,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.analysis.CrankyTokenFilter → org.gnit.lucenekmp.tests.analysis.CrankyTokenFilter
 - org.apache.lucene.tests.analysis.MockPayloadAnalyzer → org.gnit.lucenekmp.tests.analysis.MockPayloadAnalyzer
 - org.apache.lucene.tests.analysis.MockRandomLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.MockRandomLookaheadTokenFilter
-- org.apache.lucene.tests.analysis.MockSynonymAnalyzer → org.gnit.lucenekmp.tests.analysis.MockSynonymAnalyzer
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapDocFreqInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapDocFreqInterval
 - org.apache.lucene.tests.codecs.blockterms.LuceneVarGapFixedInterval → org.gnit.lucenekmp.tests.codecs.blockterms.LuceneVarGapFixedInterval
 - org.apache.lucene.tests.codecs.cranky.CrankyCodec → org.gnit.lucenekmp.tests.codecs.cranky.CrankyCodec
@@ -533,7 +532,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestUniqueTermCount → org.gnit.lucenekmp.index.TestUniqueTermCount
 - org.apache.lucene.queryparser.classic.TestMultiAnalyzer → org.gnit.lucenekmp.queryparser.classic.TestMultiAnalyzer
 - org.apache.lucene.queryparser.classic.TestMultiFieldQueryParser → org.gnit.lucenekmp.queryparser.classic.TestMultiFieldQueryParser
-- org.apache.lucene.queryparser.classic.TestQueryParser → org.gnit.lucenekmp.queryparser.classic.TestQueryParser
 - org.apache.lucene.queryparser.ext.ExtensionStub → org.gnit.lucenekmp.queryparser.ext.ExtensionStub
 - org.apache.lucene.queryparser.ext.TestExtendableQueryParser → org.gnit.lucenekmp.queryparser.ext.TestExtendableQueryParser
 - org.apache.lucene.queryparser.ext.TestExtensions → org.gnit.lucenekmp.queryparser.ext.TestExtensions
@@ -560,7 +558,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.surround.query.Test02Boolean → org.gnit.lucenekmp.queryparser.surround.query.Test02Boolean
 - org.apache.lucene.queryparser.surround.query.Test03Distance → org.gnit.lucenekmp.queryparser.surround.query.Test03Distance
 - org.apache.lucene.queryparser.surround.query.TestSrndQuery → org.gnit.lucenekmp.queryparser.surround.query.TestSrndQuery
-- org.apache.lucene.queryparser.util.QueryParserTestBase → org.gnit.lucenekmp.queryparser.util.QueryParserTestBase
 - org.apache.lucene.queryparser.xml.CoreParserTestIndexData → org.gnit.lucenekmp.queryparser.xml.CoreParserTestIndexData
 - org.apache.lucene.queryparser.xml.TestCoreParser → org.gnit.lucenekmp.queryparser.xml.TestCoreParser
 - org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser

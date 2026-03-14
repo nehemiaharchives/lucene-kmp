@@ -62,7 +62,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1175 | 85% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 1369 | 1176 | 85% | [ ] |
 | org.apache.lucene |     org.gnit.lucenekmp | 1 | 0 | 0% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 26 | 25 | 96% | [ ] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 5 | 4 | 80% | [ ] |
@@ -90,7 +90,7 @@
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 48 | 47 | 97% | [ ] |
 |   org.apache.lucene.store |       org.gnit.lucenekmp.store | 51 | 48 | 94% | [ ] |
-|     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 19 | 65% | [ ] |
+|     org.apache.lucene.tests.analysis |         org.gnit.lucenekmp.tests.analysis | 29 | 20 | 68% | [ ] |
 |       org.apache.lucene.tests.analysis.standard |           org.gnit.lucenekmp.tests.analysis.standard | 3 | 2 | 66% | [ ] |
 |     org.apache.lucene.tests.codecs |         org.gnit.lucenekmp.tests.codecs | 1 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.asserting |           org.gnit.lucenekmp.tests.codecs.asserting | 10 | 9 | 90% | [ ] |
