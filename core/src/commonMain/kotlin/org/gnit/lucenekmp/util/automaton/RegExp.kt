@@ -1074,16 +1074,8 @@ class RegExp {
             // look for escape
             if (match('\\'.code)) {
                 if (peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
-                    if (peek("u")) {
-                        // rewind one char to let parseCharExp handle unicode escape
-                        pos--
-                        val c = parseCharExp()
-                        starts.add(c)
-                        ends.add(c)
-                    } else {
-                        // special "escape" or invalid escape
-                        expandPreDefined(starts, ends)
-                    }
+                    // special "escape" or invalid escape
+                    expandPreDefined(starts, ends)
                 } else {
                     // escaped character
                     pos--
@@ -1197,12 +1189,6 @@ class RegExp {
 
     fun matchPredefinedCharacterClass(): RegExp? {
         // See https://docs.oracle.com/javase/tutorial/essential/regex/pre_char_classes.html
-        if (pos < originalString!!.length - 1 &&
-            originalString[pos] == '\\' && originalString[pos + 1] == 'u'
-        ) {
-            // Unicode escape; let caller handle via parseCharExp
-            return null
-        }
         if (match('\\'.code) && peek("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")) {
             val starts: MutableList<Int> = mutableListOf()
             val ends: MutableList<Int> = mutableListOf()

@@ -8,14 +8,13 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class TestRegExp : LuceneTestCase() {
 
     @Test
     fun testSmoke() {
         val r = RegExp("a(b+|c+)d")
-        val a = r.toAutomaton()!!
+        val a = r.toAutomaton()
         assertTrue(a.isDeterministic)
         val run = CharacterRunAutomaton(a)
         assertTrue(run.run("abbbbbd"))

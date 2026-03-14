@@ -1,3 +1,8 @@
 package org.gnit.lucenekmp.util
 
-expect fun configureTestLogging()
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.github.oshai.kotlinlogging.Level
+
+fun configureTestLogging() {
+    KotlinLoggingConfiguration.direct.logLevel = Level.DEBUG
+}
