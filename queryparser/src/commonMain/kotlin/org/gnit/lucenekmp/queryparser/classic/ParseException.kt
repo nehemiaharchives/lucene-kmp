@@ -106,8 +106,11 @@ open class ParseException : Exception {
                 expected.append(EOL).append("    ")
             }
             var retval = "Encountered \""
-            var tok: Token = currentToken.next!!
+            var tok: Token? = currentToken.next
             for (i in 0..<maxSize) {
+                if (tok == null) {
+                    break
+                }
                 if (i != 0) retval += " "
                 if (tok.kind == 0) {
                     retval += tokenImage[0]
@@ -117,7 +120,7 @@ open class ParseException : Exception {
                 retval += " \""
                 retval += add_escapes(tok.image!!)
                 retval += " \""
-                tok = tok.next!!
+                tok = tok.next
             }
             if (currentToken.next != null) {
                 retval += "\" at line " + currentToken.next!!.beginLine + ", column " + currentToken.next!!.beginColumn
@@ -192,7 +195,7 @@ open class ParseException : Exception {
 
                     else -> {
                         if ((str[i].also { ch = it }).code < 0x20 || ch.code > 0x7e) {
-                            val s = "0000" + Int.toStringWithRadix(i = ch.digitToInt(16), radix = 16) /*ch.toString(16)*/
+                            val s = "0000" + Int.toStringWithRadix(i = ch.code, radix = 16) /*ch.toString(16)*/
                             retval.append("\\u" + s.substring(s.length - 4, s.length))
                         } else {
                             retval.append(ch)

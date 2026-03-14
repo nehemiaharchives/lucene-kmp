@@ -79,7 +79,7 @@ import org.gnit.lucenekmp.search.TermRangeQuery
  * the same syntax as this class, but is more modular,
  * enabling substantial customization to how a query is created.
  */
-class QueryParser : QueryParserBase,
+open class QueryParser : QueryParserBase,
     QueryParserConstants {
     /** The default operator for parsing queries.
      * Use [QueryParserBase.setDefaultOperator] to change it.
@@ -214,7 +214,7 @@ class QueryParser : QueryParserBase,
 
     // This makes sure that there is no garbage after the query string
     @Throws(ParseException::class)
-    override fun TopLevelQuery(field: String): Query {
+    override fun TopLevelQuery(field: String): Query? {
         val q: Query?
         q = Query(field)
         jj_consume_token(0)
@@ -223,9 +223,9 @@ class QueryParser : QueryParserBase,
     }
 
     @Throws(ParseException::class)
-    fun Query(field: String): Query {
+    fun Query(field: String): Query? {
         val clauses: MutableList<BooleanClause> = mutableListOf()
-        var q: Query
+        var q: Query?
         var firstQuery: Query? = null
         var conj: Int
         var mods: Int
@@ -281,13 +281,13 @@ class QueryParser : QueryParserBase,
         if (clauses.size == 1 && firstQuery != null) {
             run { if ("" != null) return firstQuery }
         } else {
-            run { if ("" != null) return getBooleanQuery(clauses)!! }
+            run { if ("" != null) return getBooleanQuery(clauses) }
         }
         throw Error("Missing return statement in function")
     }
 
     @Throws(ParseException::class)
-    fun Clause(field: String): Query {
+    fun Clause(field: String): Query? {
         var field = field
         val q: Query?
         var fieldToken: Token? = null
@@ -346,7 +346,7 @@ class QueryParser : QueryParserBase,
     }
 
     @Throws(ParseException::class)
-    fun Term(field: String): Query {
+    fun Term(field: String): Query? {
         val term: Token
         var boost: Token? = null
         var fuzzySlop: Token? = null

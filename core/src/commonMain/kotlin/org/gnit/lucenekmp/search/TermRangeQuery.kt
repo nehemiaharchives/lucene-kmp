@@ -22,13 +22,13 @@ import org.gnit.lucenekmp.util.automaton.Automaton
  */
 class TermRangeQuery(
     field: String,
-    lowerTerm: BytesRef,
+    lowerTerm: BytesRef?,
     upperTerm: BytesRef?,
     includeLower: Boolean,
     includeUpper: Boolean,
     rewriteMethod: RewriteMethod = CONSTANT_SCORE_BLENDED_REWRITE
 ) : AutomatonQuery(
-    Term(field, lowerTerm),
+    Term(field, lowerTerm ?: BytesRef()),
     toAutomaton(lowerTerm, upperTerm, includeLower, includeUpper),
     true,
     rewriteMethod
@@ -192,7 +192,7 @@ class TermRangeQuery(
                 if (lowerTerm == null) null else BytesRef(lowerTerm)
             val upper: BytesRef? =
                 if (upperTerm == null) null else BytesRef(upperTerm)
-            return TermRangeQuery(field, lower!!, upper, includeLower, includeUpper, rewriteMethod)
+            return TermRangeQuery(field, lower, upper, includeLower, includeUpper, rewriteMethod)
         }
     }
 }

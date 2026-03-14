@@ -20,7 +20,7 @@ import org.gnit.lucenekmp.search.SynonymQuery
 import org.gnit.lucenekmp.search.TermQuery
 import org.gnit.lucenekmp.tests.analysis.CannedTokenStream
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
-import org.gnit.lucenekmp.tests.analysis.MockSynonymFilter
+import org.gnit.lucenekmp.tests.analysis.MockSynonymAnalyzer
 import org.gnit.lucenekmp.tests.analysis.MockTokenizer
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.util.automaton.CharacterRunAutomaton
@@ -121,16 +121,6 @@ class TestQueryBuilder : LuceneTestCase() {
     fun testEmpty() {
         val builder = QueryBuilder(MockAnalyzer(random()))
         assertNull(builder.createBooleanQuery("field", ""))
-    }
-
-    /** adds synonym of "dog" for "dogs", and synonym of "cavy" for "guinea pig". */
-    companion object {
-        class MockSynonymAnalyzer : Analyzer() {
-            override fun createComponents(fieldName: String): TokenStreamComponents {
-                val tokenizer = MockTokenizer()
-                return TokenStreamComponents(tokenizer, MockSynonymFilter(tokenizer))
-            }
-        }
     }
 
     /** simple synonyms test */

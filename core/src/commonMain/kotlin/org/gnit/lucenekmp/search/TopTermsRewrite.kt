@@ -135,7 +135,7 @@ abstract class TopTermsRewrite<B>
             })
 
         val b: B = topLevelBuilder
-        val scoreTerms: Array<ScoreTerm> = stQueue.toTypedArray()
+        val scoreTerms: Array<ScoreTerm> = Array(stQueue.size()) { stQueue.poll()!! }
         ArrayUtil.timSort(scoreTerms) { st1, st2 -> st1.bytes.get().compareTo(st2.bytes.get()) }
 
         for (st in scoreTerms) {

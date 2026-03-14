@@ -63,13 +63,14 @@ open class QueryParserTokenManager : QueryParserConstants {
                 do {
                     when (jjstateSet[--i]) {
                         49, 33 -> {
-                            if ((-0x400830700002601L and l) == 0L) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if ((0xfbff7cf8ffffd9ffuL.toLong() and l) != 0L) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         0 -> {
-                            if ((-0x400ab0700002601L and l) != 0L) {
+                            if ((0xfbff54f8ffffd9ffuL.toLong() and l) != 0L) {
                                 if (kind > 23) kind = 23
                                 run { jjCheckNAddTwoStates(33, 34) }
                             } else if ((0x100002600L and l) != 0L) {
@@ -100,7 +101,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                             jjCheckNAddStates(3, 5)
                         }
 
-                        17 -> if ((-0x400000001L and l) != 0L) {
+                        17 -> if ((0xfffffffbffffffffuL.toLong() and l) != 0L) {
                             jjCheckNAddStates(3, 5)
                         }
 
@@ -110,9 +111,10 @@ open class QueryParserTokenManager : QueryParserConstants {
 
                         20 -> if (curChar == 34 && kind > 19) kind = 19
                         22 -> {
-                            if ((0x3ff000000000000L and l) == 0L) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddStates(11, 14) }
+                            if ((0x3ff000000000000L and l) != 0L) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddStates(11, 14) }
+                            }
                         }
 
                         23 -> if (curChar == 46) {
@@ -120,15 +122,17 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         24 -> {
-                            if ((0x3ff000000000000L and l) == 0L) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddStates(15, 17) }
+                            if ((0x3ff000000000000L and l) != 0L) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddStates(15, 17) }
+                            }
                         }
 
                         25 -> {
-                            if ((0x7bff78f8ffffd9ffL and l) == 0L) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(25, 26) }
+                            if ((0x7bff78f8ffffd9ffL and l) != 0L) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(25, 26) }
+                            }
                         }
 
                         27 -> {
@@ -137,9 +141,10 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         28 -> {
-                            if ((0x7bff78f8ffffd9ffL and l) == 0L) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(28, 29) }
+                            if ((0x7bff78f8ffffd9ffL and l) != 0L) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(28, 29) }
+                            }
                         }
 
                         30 -> {
@@ -149,9 +154,10 @@ open class QueryParserTokenManager : QueryParserConstants {
 
                         31 -> if (curChar == 42 && kind > 22) kind = 22
                         32 -> {
-                            if ((-0x400ab0700002601L and l) == 0L) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if ((0xfbff54f8ffffd9ffuL.toLong() and l) != 0L) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         35 -> {
@@ -163,21 +169,23 @@ open class QueryParserTokenManager : QueryParserConstants {
                             jjCheckNAddStates(0, 2)
                         }
 
-                        37 -> if ((-0x800000000001L and l) != 0L) {
+                        37 -> if ((0xffff7fffffffffffuL.toLong() and l) != 0L) {
                             jjCheckNAddStates(0, 2)
                         }
 
                         40 -> if (curChar == 47 && kind > 24) kind = 24
                         41 -> {
-                            if ((0x7bff50f8ffffd9ffL and l) == 0L) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddStates(6, 10) }
+                            if ((0x7bff50f8ffffd9ffL and l) != 0L) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddStates(6, 10) }
+                            }
                         }
 
                         42 -> {
-                            if ((0x7bff78f8ffffd9ffL and l) == 0L) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddTwoStates(42, 43) }
+                            if ((0x7bff78f8ffffd9ffL and l) != 0L) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddTwoStates(42, 43) }
+                            }
                         }
 
                         44 -> {
@@ -200,7 +208,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                 val l = 1L shl (curChar and 63)
                 do {
                     when (jjstateSet[--i]) {
-                        49 -> if ((-0x6800000078000001L and l) != 0L) {
+                        49 -> if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
                             if (kind > 23) kind = 23
                             run { jjCheckNAddTwoStates(33, 34) }
                         } else if (curChar == 92) {
@@ -208,7 +216,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         0 -> {
-                            if ((-0x6800000078000001L and l) != 0L) {
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
                                 if (kind > 20) kind = 20
                                 run { jjCheckNAddStates(6, 10) }
                             } else if (curChar == 92) {
@@ -217,7 +225,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                                 if (kind > 21) kind = 21
                                 run { jjCheckNAddStates(24, 26) }
                             }
-                            if ((-0x6800000078000001L and l) != 0L) {
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
                                 if (kind > 23) kind = 23
                                 run { jjCheckNAddTwoStates(33, 34) }
                             }
@@ -237,7 +245,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                         10 -> if (curChar == 84 && kind > 10) kind = 10
                         11 -> if (curChar == 79) jjstateSet[jjnewStateCnt++] = 10
                         12 -> if (curChar == 78) jjstateSet[jjnewStateCnt++] = 11
-                        17 -> if ((-0x10000001L and l) != 0L) {
+                        17 -> if ((0xffffffffefffffffuL.toLong() and l) != 0L) {
                             jjCheckNAddStates(3, 5)
                         }
 
@@ -247,15 +255,17 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         21 -> {
-                            if (curChar != 126) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddStates(24, 26) }
+                            if (curChar == 126) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddStates(24, 26) }
+                            }
                         }
 
                         25 -> {
-                            if ((-0x6800000078000001L and l) == 0L) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(25, 26) }
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(25, 26) }
+                            }
                         }
 
                         26 -> if (curChar == 92) jjstateSet[jjnewStateCnt++] = 27
@@ -265,9 +275,10 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         28 -> {
-                            if ((-0x6800000078000001L and l) == 0L) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(28, 29) }
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(28, 29) }
+                            }
                         }
 
                         29 -> if (curChar == 92) jjstateSet[jjnewStateCnt++] = 30
@@ -277,15 +288,17 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         32 -> {
-                            if ((-0x6800000078000001L and l) == 0L) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         33 -> {
-                            if ((-0x6800000078000001L and l) == 0L) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         34 -> if (curChar == 92) {
@@ -303,15 +316,17 @@ open class QueryParserTokenManager : QueryParserConstants {
 
                         39 -> if (curChar == 92) jjstateSet[jjnewStateCnt++] = 38
                         41 -> {
-                            if ((-0x6800000078000001L and l) == 0L) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddStates(6, 10) }
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddStates(6, 10) }
+                            }
                         }
 
                         42 -> {
-                            if ((-0x6800000078000001L and l) == 0L) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddTwoStates(42, 43) }
+                            if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddTwoStates(42, 43) }
+                            }
                         }
 
                         43 -> if (curChar == 92) {
@@ -323,7 +338,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                             run { jjCheckNAddTwoStates(42, 43) }
                         }
 
-                        45 -> if ((-0x6800000078000001L and l) != 0L) {
+                        45 -> if ((0x97ffffff87ffffffuL.toLong() and l) != 0L) {
                             jjCheckNAddStates(18, 20)
                         }
 
@@ -351,9 +366,10 @@ open class QueryParserTokenManager : QueryParserConstants {
                 do {
                     when (jjstateSet[--i]) {
                         49, 33 -> {
-                            if (!jjCanMove_2(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         0 -> {
@@ -376,39 +392,45 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         25 -> {
-                            if (!jjCanMove_2(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(25, 26) }
+                            if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(25, 26) }
+                            }
                         }
 
                         27 -> {
-                            if (!jjCanMove_1(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(25, 26) }
+                            if (jjCanMove_1(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(25, 26) }
+                            }
                         }
 
                         28 -> {
-                            if (!jjCanMove_2(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(28, 29) }
+                            if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(28, 29) }
+                            }
                         }
 
                         30 -> {
-                            if (!jjCanMove_1(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 21) kind = 21
-                            run { jjCheckNAddTwoStates(28, 29) }
+                            if (jjCanMove_1(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 21) kind = 21
+                                run { jjCheckNAddTwoStates(28, 29) }
+                            }
                         }
 
                         32 -> {
-                            if (!jjCanMove_2(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         35 -> {
-                            if (!jjCanMove_1(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 23) kind = 23
-                            run { jjCheckNAddTwoStates(33, 34) }
+                            if (jjCanMove_1(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 23) kind = 23
+                                run { jjCheckNAddTwoStates(33, 34) }
+                            }
                         }
 
                         37 -> if (jjCanMove_1(hiByte, i1, i2, l1, l2)) {
@@ -416,21 +438,24 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         41 -> {
-                            if (!jjCanMove_2(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddStates(6, 10) }
+                            if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddStates(6, 10) }
+                            }
                         }
 
                         42 -> {
-                            if (!jjCanMove_2(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddTwoStates(42, 43) }
+                            if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddTwoStates(42, 43) }
+                            }
                         }
 
                         44 -> {
-                            if (!jjCanMove_1(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 20) kind = 20
-                            run { jjCheckNAddTwoStates(42, 43) }
+                            if (jjCanMove_1(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 20) kind = 20
+                                run { jjCheckNAddTwoStates(42, 43) }
+                            }
                         }
 
                         45 -> if (jjCanMove_2(hiByte, i1, i2, l1, l2)) {
@@ -441,7 +466,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                             jjCheckNAddStates(18, 20)
                         }
 
-                        else -> if (i1 == 0 || l1 == 0L || i2 == 0 || l2 == 0L) break else break
+                        else -> {}
                     }
                 } while (i != startsAt)
             }
@@ -480,9 +505,10 @@ open class QueryParserTokenManager : QueryParserConstants {
                 do {
                     when (jjstateSet[--i]) {
                         0 -> {
-                            if ((0x3ff000000000000L and l) == 0L) break
-                            if (kind > 27) kind = 27
-                            run { jjAddStates(27, 28) }
+                            if ((0x3ff000000000000L and l) != 0L) {
+                                if (kind > 27) kind = 27
+                                run { jjAddStates(27, 28) }
+                            }
                         }
 
                         1 -> if (curChar == 46) {
@@ -490,9 +516,10 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         2 -> {
-                            if ((0x3ff000000000000L and l) == 0L) break
-                            if (kind > 27) kind = 27
-                            run { jjCheckNAdd(2) }
+                            if ((0x3ff000000000000L and l) != 0L) {
+                                if (kind > 27) kind = 27
+                                run { jjCheckNAdd(2) }
+                            }
                         }
 
                         else -> {}
@@ -513,7 +540,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                 val l2 = 1L shl (curChar and 63)
                 do {
                     when (jjstateSet[--i]) {
-                        else -> if (i1 == 0 || l1 == 0L || i2 == 0 || l2 == 0L) break else break
+                        else -> {}
                     }
                 } while (i != startsAt)
             }
@@ -600,7 +627,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                 do {
                     when (jjstateSet[--i]) {
                         0 -> {
-                            if ((-0x100000001L and l) != 0L) {
+                            if ((0xfffffffeffffffffuL.toLong() and l) != 0L) {
                                 if (kind > 32) kind = 32
                                 run { jjCheckNAdd(6) }
                             }
@@ -615,7 +642,7 @@ open class QueryParserTokenManager : QueryParserConstants {
                             jjCheckNAddTwoStates(2, 4)
                         }
 
-                        2 -> if ((-0x400000001L and l) != 0L) {
+                        2 -> if ((0xfffffffbffffffffuL.toLong() and l) != 0L) {
                             jjCheckNAddStates(29, 31)
                         }
 
@@ -625,9 +652,10 @@ open class QueryParserTokenManager : QueryParserConstants {
 
                         5 -> if (curChar == 34 && kind > 31) kind = 31
                         6 -> {
-                            if ((-0x100000001L and l) == 0L) break
-                            if (kind > 32) kind = 32
-                            run { jjCheckNAdd(6) }
+                            if ((0xfffffffeffffffffuL.toLong() and l) != 0L) {
+                                if (kind > 32) kind = 32
+                                run { jjCheckNAdd(6) }
+                            }
                         }
 
                         else -> {}
@@ -638,9 +666,10 @@ open class QueryParserTokenManager : QueryParserConstants {
                 do {
                     when (jjstateSet[--i]) {
                         0, 6 -> {
-                            if ((-0x2000000020000001L and l) == 0L) break
-                            if (kind > 32) kind = 32
-                            run { jjCheckNAdd(6) }
+                            if ((0xdfffffffdfffffffuL.toLong() and l) != 0L) {
+                                if (kind > 32) kind = 32
+                                run { jjCheckNAdd(6) }
+                            }
                         }
 
                         2 -> {
@@ -674,12 +703,13 @@ open class QueryParserTokenManager : QueryParserConstants {
                         }
 
                         6 -> {
-                            if (!jjCanMove_1(hiByte, i1, i2, l1, l2)) break
-                            if (kind > 32) kind = 32
-                            run { jjCheckNAdd(6) }
+                            if (jjCanMove_1(hiByte, i1, i2, l1, l2)) {
+                                if (kind > 32) kind = 32
+                                run { jjCheckNAdd(6) }
+                            }
                         }
 
-                        else -> if (i1 == 0 || l1 == 0L || i2 == 0 || l2 == 0L) break else break
+                        else -> {}
                     }
                 } while (i != startsAt)
             }

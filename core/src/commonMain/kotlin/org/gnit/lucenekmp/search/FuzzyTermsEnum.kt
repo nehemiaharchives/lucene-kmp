@@ -133,9 +133,8 @@ class FuzzyTermsEnum private constructor(
         })
 
     init {
-
-        atts.addAttributeImpl(AutomatonAttributeImpl())
-        val aa: AutomatonAttribute = atts.addAttribute<AutomatonAttribute>(AutomatonAttribute::class)
+        val aa = AutomatonAttributeImpl()
+        atts.addAttributeImpl(aa)
         aa.init(automatonBuilder)
 
         this.automata = aa.automata!!

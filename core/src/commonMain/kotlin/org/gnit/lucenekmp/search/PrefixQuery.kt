@@ -28,8 +28,8 @@ class PrefixQuery
     /** Prints a user-readable version of this query.  */
     override fun toString(field: String?): String {
         val buffer = StringBuilder()
-        if (field != field) {
-            buffer.append(field)
+        if (term.field() != field) {
+            buffer.append(term.field())
             buffer.append(':')
         }
         buffer.append(term.text())

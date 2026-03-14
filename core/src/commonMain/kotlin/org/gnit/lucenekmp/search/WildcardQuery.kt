@@ -93,10 +93,10 @@ class WildcardQuery
                             val nextChar: Int = wildcardText.codePointAt(i + length)
                             length += Character.charCount(nextChar)
                             automata.add(Automata.makeChar(nextChar))
-                            break
-                        } // else fallthru, lenient parsing with a trailing \
-
-                        automata.add(Automata.makeChar(c))
+                        } else {
+                            // else fallthru, lenient parsing with a trailing \
+                            automata.add(Automata.makeChar(c))
+                        }
                     }
 
                     else -> automata.add(Automata.makeChar(c))

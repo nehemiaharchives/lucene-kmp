@@ -1,10 +1,8 @@
-package org.gnit.lucenekmp.util
+package org.gnit.lucenekmp.tests.analysis
 
 import org.gnit.lucenekmp.analysis.Analyzer
-import org.gnit.lucenekmp.tests.analysis.MockSynonymFilter
-import org.gnit.lucenekmp.tests.analysis.MockTokenizer
 
-/** Simple analyzer used by TestQueryBuilder that injects MockSynonymFilter. */
+/** adds synonym of "dog" for "dogs", and synonym of "cavy" for "guinea pig". */
 class MockSynonymAnalyzer : Analyzer() {
     override fun createComponents(fieldName: String): TokenStreamComponents {
         val tokenizer = MockTokenizer()

@@ -483,7 +483,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
             }
             val s = pieces[i]
             if (s == null) {
-                buffer.append("")
+                buffer.append('?')
             } else {
                 buffer.append(s)
             }

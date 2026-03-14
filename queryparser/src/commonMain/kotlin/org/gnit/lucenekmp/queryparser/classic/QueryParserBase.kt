@@ -4,6 +4,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.document.DateTools
@@ -95,10 +96,15 @@ protected constructor() : QueryBuilder(/*null*/),
      */
     override var fuzzyPrefixLength: Int = FuzzyQuery.defaultPrefixLength
     override var locale: Locale = Locale() /*Locale.getDefault()*/
-    override var timeZone: TimeZone = TimeZone.currentSystemDefault()
+    override var timeZone: TimeZone = TimeZone.UTC
 
     // the default date resolution
-    override lateinit var dateResolution: Resolution
+    private var nullableDateResolution: Resolution? = null
+    override var dateResolution: Resolution
+        get() = requireNotNull(nullableDateResolution)
+        set(value) {
+            nullableDateResolution = value
+        }
 
     // maps field names to date resolutions
     var fieldToDateResolution: MutableMap<String, Resolution>? = null
@@ -141,7 +147,7 @@ protected constructor() : QueryBuilder(/*null*/),
     abstract fun ReInit(stream: CharStream)
 
     @Throws(ParseException::class)
-    abstract fun TopLevelQuery(field: String): Query
+    abstract fun TopLevelQuery(field: String): Query?
 
     /**
      * Parses a query string, returning a [Query].
@@ -244,18 +250,18 @@ protected constructor() : QueryBuilder(/*null*/),
      * Returns the date resolution that is used by RangeQueries for the given field. Returns null, if
      * no default or field specific date resolution has been set for the given field.
      */
-    fun getDateResolution(fieldName: String): Resolution {
+    fun getDateResolution(fieldName: String): Resolution? {
         //requireNotNull(fieldName) { "Field must not be null." }
 
         if (fieldToDateResolution == null) {
             // no field specific date resolutions set; return default date resolution instead
-            return this.dateResolution
+            return nullableDateResolution
         }
 
         var resolution: Resolution? = fieldToDateResolution!![fieldName]
         if (resolution == null) {
             // no date resolutions set for the given field; return default date resolution instead
-            resolution = this.dateResolution
+            resolution = nullableDateResolution
         }
 
         return resolution
@@ -369,7 +375,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getFieldQuery(field: String, queryText: String, quoted: Boolean): Query? {
+    protected open fun getFieldQuery(field: String, queryText: String, quoted: Boolean): Query? {
         return newFieldQuery(analyzer, field, queryText, quoted)
     }
 
@@ -378,7 +384,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun newFieldQuery(
+    protected open fun newFieldQuery(
         analyzer: Analyzer,
         field: String,
         queryText: String,
@@ -440,18 +446,18 @@ protected constructor() : QueryBuilder(/*null*/),
     ): Query {
         var part1 = part1
         var part2 = part2
-        val resolution: Resolution = getDateResolution(field)
+        val resolution: Resolution? = getDateResolution(field)
 
-        if(part1 != null){
+        if (resolution != null && part1 != null) {
             try {
-                part1 = DateTools.dateToString(Instant.parse(part1), resolution)
+                part1 = DateTools.dateToString(parseDate(part1), resolution)
             } catch (e: Exception) {
             }
         }
 
-        if(part2 != null) {
+        if (resolution != null && part2 != null) {
             try {
-                var d2: Instant = Instant.parse(part2)
+                var d2 = parseDate(part2)
                 if (endInclusive) {
                     // The user can only specify the date, not the time, so make sure
                     // the time is set to the latest possible time of that date to really
@@ -555,7 +561,7 @@ protected constructor() : QueryBuilder(/*null*/),
         }
 
         return TermRangeQuery(
-            field, start!!, end, startInclusive, endInclusive, multiTermRewriteMethod
+            field, start, end, startInclusive, endInclusive, multiTermRewriteMethod
         )
     }
 
@@ -627,7 +633,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getWildcardQuery(field: String, termStr: String): Query {
+    protected open fun getWildcardQuery(field: String, termStr: String): Query {
         if ("*" == field) {
             if ("*" == termStr) return newMatchAllDocsQuery()
         }
@@ -716,7 +722,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getPrefixQuery(field: String, termStr: String): Query {
+    protected open fun getPrefixQuery(field: String, termStr: String): Query {
         if (!allowLeadingWildcard && termStr.startsWith("*")) throw ParseException(
             "'*' not allowed as first character in PrefixQuery"
         )
@@ -736,7 +742,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getFuzzyQuery(
+    protected open fun getFuzzyQuery(
         field: String,
         termStr: String,
         minSimilarity: Float
@@ -789,7 +795,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * @param termStr The Term string
      * @return The similarity distance
      */
-    protected fun getFuzzyDistance(fuzzyToken: Token, termStr: String?): Float {
+    protected open fun getFuzzyDistance(fuzzyToken: Token, termStr: String?): Float {
         try {
             return fuzzyToken.image!!.substring(1).toFloat()
         } catch (ignored: Exception) {
@@ -798,7 +804,7 @@ protected constructor() : QueryBuilder(/*null*/),
     }
 
     @Throws(ParseException::class)
-    fun handleBareFuzzy(
+    open fun handleBareFuzzy(
         qfield: String,
         fuzzySlop: Token,
         termImage: String
@@ -837,7 +843,7 @@ protected constructor() : QueryBuilder(/*null*/),
     fun handleBoost(
         q: Query?,
         boost: Token?
-    ): Query {
+    ): Query? {
         var q: Query? = q
         if (boost != null) {
             var f = 1.0.toFloat()
@@ -854,7 +860,7 @@ protected constructor() : QueryBuilder(/*null*/),
                 q = BoostQuery(q, f)
             }
         }
-        return q!!
+        return q
     }
 
     /**
@@ -925,6 +931,18 @@ protected constructor() : QueryBuilder(/*null*/),
         return String.fromCharArray(output, 0, length)
     }
 
+    private fun parseDate(value: String): kotlinx.datetime.Instant {
+        val parts = value.split('/')
+        require(parts.size == 3) { "Unsupported date format: $value" }
+        val month = parts[0].toInt()
+        val day = parts[1].toInt()
+        var year = parts[2].toInt()
+        if (year in 0..99) {
+            year = if (year >= 70) 1900 + year else 2000 + year
+        }
+        return LocalDateTime(year, month, day, 0, 0, 0, 0).toInstant(timeZone)
+    }
+
     companion object {
         const val CONJ_NONE: Int = 0
         const val CONJ_AND: Int = 1
@@ -942,7 +960,7 @@ protected constructor() : QueryBuilder(/*null*/),
         /** Alternative form of QueryParser.Operator.OR  */
         val OR_OPERATOR: Operator = Operator.OR
 
-        private val WILDCARD_PATTERN: Regex = Regex("""(\\\.)|([?*]+)""")
+        private val WILDCARD_PATTERN: Regex = Regex("""(\\.)|([?*]+)""")
 
         /** Returns the numeric value of the hexadecimal character  */
         @Throws(ParseException::class)
