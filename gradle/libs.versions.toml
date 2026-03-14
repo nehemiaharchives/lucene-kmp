@@ -1,15 +1,14 @@
 [versions]
-androidGradlePlugin = "9.0.0"
-kotlin = "2.3.10"
-okio = "3.16.4"
+androidGradlePlugin = "9.0.1"
+kotlin = "2.3.20-RC3"
+okio = "3.17.0"
 android-minSdk = "26"
 android-compileSdk = "36"
 android-targetSdk = "36"
 kotlin-coroutines = "1.10.2"
-logback = "1.5.29"
+logback = "1.5.32"
 slf4j = "2.0.17"
-kotlin-logging = "7.0.14"
-kotlin-logging-android = "7.0.14"
+kotlin-logging = "8.0.01"
 kotlinx-datetime = "0.7.1"
 kotlinbignum = "0.3.10"
 kotlinenvvar = "1.0.6"
@@ -31,7 +30,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
 kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
 kotlin-logging-linuxx64 = { module = "io.github.oshai:kotlin-logging-linuxx64", version.ref = "kotlin-logging" }
-kotlin-logging-android = { module = "io.github.oshai:kotlin-logging-android", version.ref = "kotlin-logging-android" }
+kotlin-logging-android = { module = "io.github.oshai:kotlin-logging-android", version.ref = "kotlin-logging" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
