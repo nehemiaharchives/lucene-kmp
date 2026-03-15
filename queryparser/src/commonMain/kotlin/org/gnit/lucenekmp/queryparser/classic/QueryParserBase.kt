@@ -405,7 +405,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getFieldQuery(field: String, queryText: String, slop: Int): Query? {
+    protected open fun getFieldQuery(field: String, queryText: String, slop: Int): Query? {
         var query: Query? = getFieldQuery(field, queryText, true)
 
         if (query == null) {
@@ -441,7 +441,7 @@ protected constructor() : QueryBuilder(/*null*/),
 
     @OptIn(ExperimentalTime::class)
     @Throws(ParseException::class)
-    protected fun getRangeQuery(
+    protected open fun getRangeQuery(
         field: String, part1: String?, part2: String?, startInclusive: Boolean, endInclusive: Boolean
     ): Query {
         var part1 = part1
@@ -689,7 +689,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * disallow
      */
     @Throws(ParseException::class)
-    protected fun getRegexpQuery(field: String, termStr: String): Query {
+    protected open fun getRegexpQuery(field: String, termStr: String): Query {
         // We need to pass the whole string to #normalize, which will not work with
         // custom attribute factories for the binary term impl, and may not work
         // with some analyzers
