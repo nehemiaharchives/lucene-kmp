@@ -26,7 +26,7 @@
 ### Total KMP classes: 1090
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1808
+### Total KMP Unit Test classes: 1809
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -12473,7 +12473,7 @@
 | [org.apache.lucene.queryparser.classic.QueryParserBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserBase.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserBase | Depth 2 | [x] | 55 | 2 | 62% |
 | [org.apache.lucene.queryparser.classic.QueryParserConstants](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserConstants.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserConstants | Depth 3 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.queryparser.classic.QueryParserTokenManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserTokenManager.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserTokenManager | Depth 2 | [x] | 29 | 3 | 27% |
-| [org.apache.lucene.queryparser.classic.TestMultiAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiAnalyzer.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiAnalyzer | Depth 1 | [] | 200 | 0 | 0% |
+| [org.apache.lucene.queryparser.classic.TestMultiAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiAnalyzer.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiAnalyzer | Depth 1 | [x] | 200 | 19 | 0% |
 | [org.apache.lucene.queryparser.classic.TestMultiFieldQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiFieldQueryParser.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiFieldQueryParser | Depth 1 | [] | 152 | 0 | 0% |
 | [org.apache.lucene.queryparser.classic.TestMultiPhraseQueryParsing](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiPhraseQueryParsing.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiPhraseQueryParsing | Depth 2 | [] | 0 | 0 | 0% |
 | [org.apache.lucene.queryparser.classic.TestQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestQueryParser.java) | org.gnit.lucenekmp.queryparser.classic.TestQueryParser | Depth 1 | [x] | 241 | 83 | 0% |
@@ -13641,7 +13641,7 @@
 | [org.apache.lucene.util.quantization.TestScalarQuantizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/quantization/TestScalarQuantizer.java) | org.gnit.lucenekmp.util.quantization.TestScalarQuantizer | Depth 1 | [x] | 151 | 5 | 0% |
 
 
-TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
+TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ## Summary
 
@@ -13663,7 +13663,7 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1734
+- Ported Unit Test Classes: 1735
 - Unit Test Porting Progress: 71%
 - **Unit Test Semantic Completion: 7%**
 - Total Test Core Methods Needed: 124609

@@ -530,7 +530,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.TestTryDelete → org.gnit.lucenekmp.index.TestTryDelete
 - org.apache.lucene.index.TestTwoPhaseCommitTool → org.gnit.lucenekmp.index.TestTwoPhaseCommitTool
 - org.apache.lucene.index.TestUniqueTermCount → org.gnit.lucenekmp.index.TestUniqueTermCount
-- org.apache.lucene.queryparser.classic.TestMultiAnalyzer → org.gnit.lucenekmp.queryparser.classic.TestMultiAnalyzer
 - org.apache.lucene.queryparser.classic.TestMultiFieldQueryParser → org.gnit.lucenekmp.queryparser.classic.TestMultiFieldQueryParser
 - org.apache.lucene.queryparser.ext.ExtensionStub → org.gnit.lucenekmp.queryparser.ext.ExtensionStub
 - org.apache.lucene.queryparser.ext.TestExtendableQueryParser → org.gnit.lucenekmp.queryparser.ext.TestExtendableQueryParser

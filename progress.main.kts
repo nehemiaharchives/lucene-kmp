@@ -44,8 +44,9 @@ fun markdownLinkForJavaFQN(javaFqn: String): String {
     return "[$javaFqn](${createGitHubLink(javaFqn)})"
 }
 
-fun markdownLinkForTestFQN(javaFqn: String): String {
-    return "[$javaFqn](${createGitHubLink(javaFqn, "core", "test")})"
+fun markdownLinkForTestSource(javaSource: Source, javaRoot: File): String {
+    val relativePath = javaSource.file.relativeTo(javaRoot).invariantSeparatorsPath
+    return "[${javaSource.fqn}](https://github.com/apache/lucene/blob/$javaLuceneCommitId/$relativePath)"
 }
 
 fun mapToKmp(fqn: String): String = when {
@@ -111,6 +112,43 @@ class Progress : CliktCommand() {
     private val kmpIndex  = mutableMapOf<String, Source>()
 
     private val markDown = StringBuilder()
+
+    private fun javaTestRoots(javaRoot: File): List<File> = buildList {
+        add(File(javaRoot, "lucene/core/src/test/org/apache/lucene"))
+        add(File(javaRoot, "lucene/codecs/src/test/org/apache/lucene"))
+        add(File(javaRoot, "lucene/queryparser/src/test/org/apache/lucene"))
+        addAll(
+            File(javaRoot, "lucene/analysis")
+                .listFiles()
+                ?.map { File(it, "src/test/org/apache/lucene") }
+                .orEmpty()
+        )
+    }.filter { it.isDirectory }
+
+    private fun javaSourceRoots(javaRoot: File): List<File> = buildList {
+        add(File(javaRoot, "lucene/core/src/java"))
+        add(File(javaRoot, "lucene/test-framework/src/java"))
+        add(File(javaRoot, "lucene/codecs/src/java"))
+        add(File(javaRoot, "lucene/queryparser/src/java"))
+        addAll(
+            File(javaRoot, "lucene/analysis")
+                .listFiles()
+                ?.map { File(it, "src/java") }
+                .orEmpty()
+        )
+    }.filter { it.isDirectory }
+
+    private fun kmpTestRoots(kmpRoot: File): List<File> = buildList {
+        add(File(kmpRoot, "core/src/commonTest/kotlin/org/gnit/lucenekmp"))
+        add(File(kmpRoot, "codecs/src/commonTest/kotlin/org/gnit/lucenekmp"))
+        add(File(kmpRoot, "queryparser/src/commonTest/kotlin/org/gnit/lucenekmp"))
+        addAll(
+            File(kmpRoot, "analysis")
+                .listFiles()
+                ?.map { File(it, "src/commonTest/kotlin/org/gnit/lucenekmp") }
+                .orEmpty()
+        )
+    }.filter { it.isDirectory }
 
     fun mdTableBuilder(header: List<String>, rows: List<List<Any?>>): String {
         val sb = StringBuilder()
@@ -189,17 +227,27 @@ class Progress : CliktCommand() {
     private fun indent(pkg: String) =
         if (pkg == "org.apache.lucene") pkg else "  ".repeat(pkg.removePrefix("org.apache.lucene").count { it == '.' }) + pkg
     
-    private fun renderTestClassesTable() {
-        val javaTestDir = File(javaDir, "lucene/core/src/test/org/apache/lucene")
-        val ktTestDir = File(kmpDir, "core/src/commonTest/kotlin/org/gnit/lucenekmp")
-        
-        if (!javaTestDir.exists()) {
-            term.println("Java test directory not found: $javaTestDir")
+    private fun renderTestClassesTable(javaRoot: File, kmpRoot: File) {
+        val javaTestDirs = javaTestRoots(javaRoot)
+        val ktTestDirs = kmpTestRoots(kmpRoot)
+
+        if (javaTestDirs.isEmpty()) {
+            term.println("No Java test directories found under requested modules")
             return
         }
-        
-        val javaCounts = countTestClasses(javaTestDir)
-        val ktCounts = countKotlinTestClasses(ktTestDir)
+
+        val javaCounts = mutableMapOf<String, Int>()
+        javaTestDirs.forEach { dir ->
+            countTestClasses(dir).forEach { (pkg, count) ->
+                javaCounts[pkg] = javaCounts.getOrDefault(pkg, 0) + count
+            }
+        }
+        val ktCounts = mutableMapOf<String, Int>()
+        ktTestDirs.forEach { dir ->
+            countKotlinTestClasses(dir).forEach { (pkg, count) ->
+                ktCounts[pkg] = ktCounts.getOrDefault(pkg, 0) + count
+            }
+        }
         
         // Calculate totals
         val javaTotal = javaCounts.values.sum()
@@ -246,38 +294,41 @@ class Progress : CliktCommand() {
         markDown.appendLine(mdTable)
     }
 
-    private fun renderTestsToPort() {
-        val javaTestDir = File(javaDir, "lucene/core/src/test/org/apache/lucene")
-        val ktTestDir = File(kmpDir, "core/src/commonTest/kotlin/org/gnit/lucenekmp")
-        
-        if (!javaTestDir.exists()) {
-            term.println("Java test directory not found: $javaTestDir")
+    private fun renderTestsToPort(javaRoot: File, kmpRoot: File) {
+        val javaTestDirs = javaTestRoots(javaRoot)
+        val ktTestDirs = kmpTestRoots(kmpRoot)
+
+        if (javaTestDirs.isEmpty()) {
+            term.println("No Java test directories found under requested modules")
             return
         }
-        
+
         // Collect all Java test files
         val javaTests = mutableListOf<Source>()
-        javaTestDir.walkTopDown()
-            .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
-            .forEach { file ->
-                // Read package from file content
-                val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
-                val pkg = pkgLine?.let(::parsePackageLine) ?: ""
-                val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
-                javaTests.add(Source(fqn, file))
-            }
-        
+        javaTestDirs.forEach { javaTestDir ->
+            javaTestDir.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
+                .forEach { file ->
+                    val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
+                    val pkg = pkgLine?.let(::parsePackageLine) ?: ""
+                    val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
+                    javaTests.add(Source(fqn, file))
+                }
+        }
+
         // Create mapping of existing Kotlin test files
         val ktTestMap = mutableMapOf<String, Source>()
-        ktTestDir.walkTopDown()
-            .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
-            .forEach { file ->
-                val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
-                val pkg = pkgLine?.let(::parsePackageLine) ?: ""
-                val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
-                ktTestMap[fqn] = Source(fqn, file)
-            }
-        
+        ktTestDirs.forEach { ktTestDir ->
+            ktTestDir.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
+                .forEach { file ->
+                    val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
+                    val pkg = pkgLine?.let(::parsePackageLine) ?: ""
+                    val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
+                    ktTestMap[fqn] = Source(fqn, file)
+                }
+        }
+
         val section = "## Tests To Port"
         term.println()
         term.println(bold(section))
@@ -289,24 +340,23 @@ class Progress : CliktCommand() {
             .map { javaTest ->
                 val javaFqn = javaTest.fqn
                 val expectedKtFqn = mapToKmp(javaFqn)
-                Pair(javaFqn, expectedKtFqn)
+                Triple(javaTest, javaFqn, expectedKtFqn)
             }
-            .filter { (_, ktFqn) -> ktFqn !in ktTestMap } // Only include tests that haven't been ported
-            .map { (javaFqn, ktFqn) -> listOf(javaFqn, ktFqn) }
-            .sortedBy { it[0] }
+            .filter { (_, _, ktFqn) -> ktFqn !in ktTestMap } // Only include tests that haven't been ported
+            .sortedBy { (_, javaFqn, _) -> javaFqn }
         
         val tbl = table {
             header { row("Java Test FQN", "Kotlin Test FQN") }
             body {
-                rows.forEach { row(it[0], it[1]) }
+                rows.forEach { (_, javaFqn, ktFqn) -> row(javaFqn, ktFqn) }
             }
         }
         
         term.println(tbl)
         
         // Markdown table with links for test classes
-        val mdRows = rows.map { row -> 
-            listOf(markdownLinkForTestFQN(row[0]), row[1])
+        val mdRows = rows.map { (javaTest, _, ktFqn) ->
+            listOf(markdownLinkForTestSource(javaTest, javaRoot), ktFqn)
         }
         
         val mdTable = mdTableBuilder(
@@ -537,13 +587,10 @@ class Progress : CliktCommand() {
             "Invalid roots. javaRoot=$javaRoot (exists=${javaRoot.exists()}), kmpRoot=$kmpRoot (exists=${kmpRoot.exists()})"
         }
 
-        val coreDirs = listOf(
-            File(javaRoot, "lucene/core/src/java"),
-            File(javaRoot, "lucene/test-framework/src/java")
-        ).filter { it.exists() }
-        require(coreDirs.isNotEmpty())
+        val javaSrcDirs = javaSourceRoots(javaRoot)
+        require(javaSrcDirs.isNotEmpty())
 
-        val javaSrc = coreDirs.flatMap { it.collectSources("java") }
+        val javaSrc = javaSrcDirs.flatMap { it.collectSources("java") }
         val kmpSrc  = kmpRoot.collectSources("kt")
         index(javaSrc, javaIndex)
         index(kmpSrc, kmpIndex)
@@ -573,10 +620,10 @@ class Progress : CliktCommand() {
         renderMissing(missingDeps)
         
         // Add the table with Test classes count
-        renderTestClassesTable()
+        renderTestClassesTable(javaRoot, kmpRoot)
         
         // Add the new Tests To Port table
-        renderTestsToPort()
+        renderTestsToPort(javaRoot, kmpRoot)
 
         File(kmpRoot, "PROGRESS.md").writeText(markDown.toString())
     }
