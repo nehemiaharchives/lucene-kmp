@@ -139,7 +139,7 @@ class TestUTF32ToUTF8 : LuceneTestCase() {
 
     @Test
     fun testSpecialCase3() {
-        val re = RegExp("(\\u9bfa)*(.)*\\u04d4")
+        val re = RegExp("(\\鯺)*(.)*\\Ӕ")
         val input = "\u5cfd\ufffd\ub2f7\u0033\ue304\u51d7\u3692\udb50\udfb3\u0576\udae2\udc62\u0053\u0449\u04d4"
         var automaton = re.toAutomaton()!!
         automaton = Operations.determinize(automaton, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT)
