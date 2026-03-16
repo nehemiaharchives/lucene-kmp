@@ -466,7 +466,12 @@ class RandomIndexWriter private constructor(
             if (r.nextInt(5) == 1) {
                 w.commit()
             }
-            return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
+            val reader = INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
+            return if (config.softDeletesField != null) {
+                SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
+            } else {
+                reader
+            }
         } else {
             if (LuceneTestCase.VERBOSE) {
                 println("RIW.getReader: open new reader")
@@ -481,7 +486,12 @@ class RandomIndexWriter private constructor(
                     return reader
                 }
             } else {
-                return INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
+                val reader = INDEX_WRITER_ACCESS.getReader(w, applyDeletions, writeAllDeletes)
+                return if (config.softDeletesField != null) {
+                    SoftDeletesDirectoryReaderWrapper(reader, config.softDeletesField!!)
+                } else {
+                    reader
+                }
             }
         }
     }

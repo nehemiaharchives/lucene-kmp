@@ -129,6 +129,9 @@ class SoftDeletesDirectoryReaderWrapper @Throws(IOException::class) private cons
         private val readerCacheHelperField: CacheHelper? =
             reader.readerCacheHelper?.let { DelegatingCacheHelper(it) }
 
+        override val liveDocs: Bits
+            get() = bits
+
         override fun numDocs(): Int {
             return numDocsVal
         }
@@ -148,6 +151,9 @@ class SoftDeletesDirectoryReaderWrapper @Throws(IOException::class) private cons
 
         private val readerCacheHelperField: CacheHelper? =
             reader.readerCacheHelper?.let { DelegatingCacheHelper(it) }
+
+        override val liveDocs: Bits
+            get() = bits
 
         override fun numDocs(): Int {
             return numDocsVal
