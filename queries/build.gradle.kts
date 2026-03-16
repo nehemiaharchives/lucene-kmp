@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    //alias(libs.plugins.androidLibrary)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.vanniktech.mavenPublish)
     alias(libs.plugins.kover)
@@ -11,17 +10,8 @@ plugins {
 
 kotlin {
     jvm()
-    //jvmToolchain(23) // we run build on jdk 24, so getting INFO saying "Kotlin does not yet support 24 JDK target, falling back to Kotlin JVM_23 JVM target"
-    /*androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }*/
 
     androidLibrary {
-        //withJava() // enable java compilation support
         withHostTestBuilder {}.configure {}
         withDeviceTestBuilder {
             sourceSetTreeName = "test"
@@ -32,15 +22,14 @@ kotlin {
     iosX64()
     iosSimulatorArm64()
 
-    macosX64() // intel mac
-    macosArm64() // m1/2/3/4 mac
-    linuxX64() // when you are in linux X64 machine, run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios, macos and linux for developer convenience.
+    macosX64()
+    macosArm64()
+    linuxX64()
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(project(":core"))
-                implementation(project(":queries"))
 
                 implementation(libs.okio)
                 implementation(libs.kotlinenvvar)
@@ -52,18 +41,13 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(project(":core"))
-                implementation(project(":queries"))
                 implementation(project(":test-framework"))
                 implementation(libs.kotlin.test)
             }
         }
 
-        // below is additional source set configurations other than default hierarchy
-
-        // shared source for jvm and android
         val jvmAndroidMain by creating {
             dependsOn(commonMain)
-            // dependencies which are used both by jvm and android will be here
         }
         jvmMain.get().dependsOn(jvmAndroidMain)
         jvmMain.get().dependencies {
@@ -73,18 +57,13 @@ kotlin {
 
         val jvmAndroidTest by creating {
             dependsOn(commonTest)
-            // test dependencies which are used both by jvm and android will be here
         }
         jvmTest.get().dependsOn(jvmAndroidTest)
         getByName("androidHostTest").dependsOn(jvmAndroidTest)
 
-        // shared source for ios and linux
         val nativeMain by creating {
-
             compilerOptions.suppressWarnings = true
-
             dependsOn(commonMain)
-            // dependencies which are used both by ios and linux will be here
         }
         iosArm64Main.get().dependsOn(nativeMain)
         iosX64Main.get().dependsOn(nativeMain)
@@ -96,7 +75,6 @@ kotlin {
 
         val nativeTest by creating {
             dependsOn(commonTest)
-            // test dependencies which are used both by ios and linux will be here
         }
         iosArm64Test.get().dependsOn(nativeTest)
         iosX64Test.get().dependsOn(nativeTest)
@@ -113,7 +91,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
         optIn.addAll(
             "kotlin.ExperimentalStdlibApi",
         )
-        //suppressWarnings = true
         freeCompilerArgs.addAll(
             "-Xexpect-actual-classes",
         )

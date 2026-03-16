@@ -40,7 +40,6 @@ import org.gnit.lucenekmp.util.automaton.Operations
 import org.gnit.lucenekmp.util.automaton.RegExp
 import org.gnit.lucenekmp.util.codePointCount
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 /**
  * This class is overridden by QueryParser in QueryParser.jj and acts to separate the majority of
@@ -156,7 +155,7 @@ protected constructor() : QueryBuilder(/*null*/),
      * @throws ParseException if the parsing fails
      */
     @Throws(ParseException::class)
-    fun parse(query: String): Query? {
+    open fun parse(query: String): Query? {
         ReInit(FastCharStream(StringReader(query)))
         try {
             // TopLevelQuery is a Query followed by the end-of-input (EOF)

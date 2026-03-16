@@ -674,7 +674,7 @@ open class QueryBuilder(var analyzer: Analyzer = StandardAnalyzer()) {
      * @param term term
      * @return new TermQuery instance
      */
-    protected fun newTermQuery(term: Term, boost: Float): Query {
+    protected open fun newTermQuery(term: Term, boost: Float): Query {
         val q: Query = TermQuery(term)
         if (boost == BoostAttribute.DEFAULT_BOOST) {
             return q
