@@ -281,8 +281,25 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             if (rule.similarity == null) {
                 rule.similarity = AssertingSimilarity(RandomSimilarity(random()))
             }
+            if (rule.timeZone == null) {
+                val testTimeZone = System.getProperty("tests.timezone", "random")!!
+                rule.timeZone =
+                    if (testTimeZone == "random") {
+                        RANDOM_TIME_ZONES[random().nextInt(RANDOM_TIME_ZONES.size)]
+                    } else {
+                        TimeZone.of(testTimeZone)
+                    }
+            }
             return rule
         }
+
+        private val RANDOM_TIME_ZONES: List<TimeZone> = listOf(
+            TimeZone.UTC,
+            TimeZone.of("America/New_York"),
+            TimeZone.of("Europe/Berlin"),
+            TimeZone.of("Asia/Tokyo"),
+            TimeZone.of("Australia/Sydney")
+        )
 
 
         /** A [QueryCachingPolicy] that randomly caches.  */
@@ -612,7 +629,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             } else if (rarely(r)) {
                 return newAlcoholicMergePolicy(
                     r,
-                    classEnvRule!!.timeZone!!
+                    getClassEnvRule().timeZone!!
                 )
             }
             return newLogMergePolicy(r)
@@ -633,7 +650,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         fun newAlcoholicMergePolicy(): AlcoholicMergePolicy {
             return newAlcoholicMergePolicy(
                 random(),
-                classEnvRule!!.timeZone!!
+                getClassEnvRule().timeZone!!
             )
         }
 
