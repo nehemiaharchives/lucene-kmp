@@ -53,6 +53,7 @@ val modulesToPort = listOf(
     "core",
     "test-framework",
     "queryparser",
+    "queries",
     "analysis",
     "codecs",
 )
@@ -617,11 +618,14 @@ class Progress : CliktCommand() {
         ps.println("## Priority 1 Dependencies (KMP)")
 
         // operation on KMP classes
+        val kmpMainPaths: List<String> = modulesToPort.map { luceneModule ->
+            "$kmpDir/$luceneModule/build/classes/kotlin/jvm/main"
+        }
+
         val kmpSR: ScanResult = ClassGraph().enableAllInfo()
             //.acceptPackages()
             .overrideClasspath(
-                "$kmpDir/core/build/classes/kotlin/jvm/main",
-                //"$kmpDir/core/build/classes/kotlin/jvm/test",
+                kmpMainPaths
             ).scan()
 
         // Build indexes for faster lookup - filter out inner classes and get unique top-level classes

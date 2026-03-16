@@ -194,6 +194,20 @@ jobs:
               -x :codecs:compileAndroidMain
               -x :codecs:koverGenerateArtifactAndroid
           - platform: jvm
+            module_name: queries
+            os: ubuntu-latest
+            timeout: 60
+            task: :queries:jvmTest
+            artifact: jvm-queries-reports
+            coverage_enabled: true
+            coverage_task: :queries:koverXmlReport
+            coverage_report_path: queries/build/reports/kover/report.xml
+            coverage_extra_args: >-
+              -x :queries:compileAndroidDeviceTest
+              -x :queries:compileAndroidHostTest
+              -x :queries:compileAndroidMain
+              -x :queries:koverGenerateArtifactAndroid
+          - platform: jvm
             module_name: queryparser
             os: ubuntu-latest
             timeout: 60
@@ -339,6 +353,13 @@ jobs:
             artifact: android-codecs-reports
             needs_android: true
           - platform: android
+            module_name: queries
+            os: ubuntu-latest
+            timeout: 60
+            task: :queries:testAndroidHostTest
+            artifact: android-queries-reports
+            needs_android: true
+          - platform: android
             module_name: queryparser
             os: ubuntu-latest
             timeout: 60
@@ -477,6 +498,13 @@ jobs:
             artifact: ios-codecs-reports
             needs_konan_cache: true
           - platform: ios
+            module_name: queries
+            os: macos-latest
+            timeout: 60
+            task: :queries:iosSimulatorArm64Test
+            artifact: ios-queries-reports
+            needs_konan_cache: true
+          - platform: ios
             module_name: queryparser
             os: macos-latest
             timeout: 60
@@ -613,6 +641,13 @@ jobs:
             timeout: 50
             task: :codecs:linuxX64Test
             artifact: linux-codecs-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: queries
+            os: ubuntu-latest
+            timeout: 50
+            task: :queries:linuxX64Test
+            artifact: linux-queries-reports
             needs_konan_cache: true
           - platform: linux
             module_name: queryparser
@@ -760,6 +795,15 @@ jobs:
               -x :codecs:compileAndroidHostTest
               -x :codecs:compileAndroidMain
               -x :codecs:koverGenerateArtifactAndroid
+          - module_name: queries
+            task: :queries:koverXmlReport
+            report_path: queries/build/reports/kover/report.xml
+            extra_args: >-
+              -x :queries:testAndroidHostTest
+              -x :queries:compileAndroidDeviceTest
+              -x :queries:compileAndroidHostTest
+              -x :queries:compileAndroidMain
+              -x :queries:koverGenerateArtifactAndroid
           - module_name: queryparser
             task: :queryparser:koverXmlReport
             report_path: queryparser/build/reports/kover/report.xml
@@ -829,5 +873,6 @@ jobs:
             analysis/kuromoji/build/reports/kover/
             analysis/extra/build/reports/kover/
             codecs/build/reports/kover/
+            queries/build/reports/kover/
             queryparser/build/reports/kover/
             build/reports/

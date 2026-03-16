@@ -12,21 +12,21 @@
 ### Total priority-1 classes and their dependencies: 707
 
 ## Unit Test Dependencies (Java)
-### total unit test classes: 5603
-* Unit Test Dependencies: 1860 at Depth 1
-* Unit Test Dependencies: 1502 at Depth 2
-* Unit Test Dependencies: 1520 at Depth 3
-* Unit Test Dependencies: 528 at Depth 4
-* Unit Test Dependencies: 106 at Depth 5
-* Unit Test Dependencies: 22 at Depth 6
+### total unit test classes: 6077
+* Unit Test Dependencies: 1964 at Depth 1
+* Unit Test Dependencies: 1602 at Depth 2
+* Unit Test Dependencies: 1675 at Depth 3
+* Unit Test Dependencies: 594 at Depth 4
+* Unit Test Dependencies: 139 at Depth 5
+* Unit Test Dependencies: 23 at Depth 6
 * Unit Test Dependencies: 2 at Depth 7
-### Total Unit Test and their Dependencies: 2413
+### Total Unit Test and their Dependencies: 2622
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 1090
+### Total KMP classes: 1327
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 1809
+### Total KMP Unit Test classes: 1842
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -274,16 +274,14 @@
 | [org.apache.lucene.internal.vectorization.DefaultVectorizationProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/internal/vectorization/DefaultVectorizationProvider.java) | org.gnit.lucenekmp.internal.vectorization.DefaultVectorizationProvider | Depth 5 | [x] | 4 | 1 | 91% | 3 |
 | [org.apache.lucene.internal.vectorization.PostingDecodingUtil](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/internal/vectorization/PostingDecodingUtil.java) | org.gnit.lucenekmp.internal.vectorization.PostingDecodingUtil | Depth 4 | [x] | 1 | 1 | 62% | 0 |
 | [org.apache.lucene.internal.vectorization.VectorizationProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/internal/vectorization/VectorizationProvider.java) | org.gnit.lucenekmp.internal.vectorization.VectorizationProvider | Depth 5 | [x] | 0 | 1 | 0% | 0 |
-| [org.apache.lucene.queryparser.charstream.CharStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/charstream/CharStream.java) | org.gnit.lucenekmp.queryparser.charstream.CharStream | Depth 1 | [] | 6 | 0 | 0% | 6 |
-| [org.apache.lucene.queryparser.charstream.FastCharStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/charstream/FastCharStream.java) | org.gnit.lucenekmp.queryparser.charstream.FastCharStream | Depth 1 | [] | 7 | 0 | 0% | 7 |
-| [org.apache.lucene.queryparser.classic.ParseException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/ParseException.java) | org.gnit.lucenekmp.queryparser.classic.ParseException | Depth 1 | [] | 2 | 0 | 0% | 2 |
-| [org.apache.lucene.queryparser.classic.QueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParser.java) | org.gnit.lucenekmp.queryparser.classic.QueryParser | Depth 1 | [] | 0 | 0 | 0% | 0 |
-| [org.apache.lucene.queryparser.classic.QueryParserBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserBase.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserBase | Depth 1 | [] | 55 | 0 | 0% | 55 |
-| [org.apache.lucene.queryparser.classic.QueryParserConstants](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserConstants.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserConstants | Depth 1 | [] | 0 | 0 | 0% | 0 |
-| [org.apache.lucene.queryparser.classic.QueryParserTokenManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserTokenManager.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserTokenManager | Depth 1 | [] | 29 | 0 | 0% | 29 |
-| [org.apache.lucene.queryparser.classic.Token](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/Token.java) | org.gnit.lucenekmp.queryparser.classic.Token | Depth 1 | [] | 2 | 0 | 0% | 2 |
-| [org.apache.lucene.queryparser.classic.TokenMgrError](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/TokenMgrError.java) | org.gnit.lucenekmp.queryparser.classic.TokenMgrError | Depth 2 | [] | 2 | 0 | 0% | 2 |
-| [org.apache.lucene.queryparser.flexible.standard.CommonQueryParserConfiguration](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/flexible/standard/CommonQueryParserConfiguration.java) | org.gnit.lucenekmp.queryparser.flexible.standard.CommonQueryParserConfiguration | Depth 2 | [] | 0 | 0 | 0% | 0 |
+| [org.apache.lucene.queryparser.charstream.FastCharStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/charstream/FastCharStream.java) | org.gnit.lucenekmp.queryparser.charstream.FastCharStream | Depth 1 | [x] | 7 | 0 | 100% | 7 |
+| [org.apache.lucene.queryparser.classic.ParseException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/ParseException.java) | org.gnit.lucenekmp.queryparser.classic.ParseException | Depth 1 | [x] | 2 | 2 | 58% | 0 |
+| [org.apache.lucene.queryparser.classic.QueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParser.java) | org.gnit.lucenekmp.queryparser.classic.QueryParser | Depth 1 | [x] | 0 | 1 | 0% | 0 |
+| [org.apache.lucene.queryparser.classic.QueryParserBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserBase.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserBase | Depth 1 | [x] | 55 | 2 | 62% | 53 |
+| [org.apache.lucene.queryparser.classic.QueryParserConstants](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserConstants.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserConstants | Depth 1 | [x] | 0 | 0 | 0% | 0 |
+| [org.apache.lucene.queryparser.classic.QueryParserTokenManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserTokenManager.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserTokenManager | Depth 1 | [x] | 29 | 3 | 27% | 26 |
+| [org.apache.lucene.queryparser.classic.Token](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/Token.java) | org.gnit.lucenekmp.queryparser.classic.Token | Depth 1 | [x] | 2 | 2 | 90% | 0 |
+| [org.apache.lucene.queryparser.flexible.standard.CommonQueryParserConfiguration](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/flexible/standard/CommonQueryParserConfiguration.java) | org.gnit.lucenekmp.queryparser.flexible.standard.CommonQueryParserConfiguration | Depth 2 | [x] | 0 | 0 | 0% | 0 |
 | [org.apache.lucene.search.AbstractKnnCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractKnnCollector.java) | org.gnit.lucenekmp.search.AbstractKnnCollector | Depth 3 | [x] | 8 | 8 | 88% | 0 |
 | [org.apache.lucene.search.AbstractKnnVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractKnnVectorQuery.java) | org.gnit.lucenekmp.search.AbstractKnnVectorQuery | Depth 6 | [x] | 8 | 3 | 0% | 8 |
 | [org.apache.lucene.search.AbstractMultiTermQueryConstantScoreWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/AbstractMultiTermQueryConstantScoreWrapper.java) | org.gnit.lucenekmp.search.AbstractMultiTermQueryConstantScoreWrapper | Depth 3 | [x] | 12 | 0 | 0% | 12 |
@@ -5259,6 +5257,210 @@
 - **KMP Auto-Generated**: 0
 - **KMP Synthetic**: 0
 - **Semantic Completion**: 0%
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.charstream.FastCharStream -> org.gnit.lucenekmp.queryparser.charstream.FastCharStream
+
+### Method Categories:
+- **Java Core Business Logic**: 7
+- **Java Property Accessors**: 4
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 0
+- **KMP Property Accessors**: 0
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 0
+- **Semantic Completion**: 100%
+
+### Missing Core Methods:
+- `public char readChar()`
+- `private void refill()`
+- `public char BeginToken()`
+- `public void backup(int)`
+- `public java.lang.String GetImage()`
+- `public char[] GetSuffix(int)`
+- `public void Done()`
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.classic.ParseException -> org.gnit.lucenekmp.queryparser.classic.ParseException
+
+### Method Categories:
+- **Java Core Business Logic**: 2
+- **Java Property Accessors**: 0
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 2
+- **KMP Property Accessors**: 2
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 1
+- **Semantic Completion**: 58%
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.classic.QueryParser -> org.gnit.lucenekmp.queryparser.classic.QueryParser
+
+### Method Categories:
+- **Java Core Business Logic**: 0
+- **Java Property Accessors**: 0
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 1
+- **KMP Property Accessors**: 2
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 1
+- **Semantic Completion**: 0%
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.classic.QueryParserBase -> org.gnit.lucenekmp.queryparser.classic.QueryParserBase
+
+### Method Categories:
+- **Java Core Business Logic**: 55
+- **Java Property Accessors**: 30
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 4
+- **KMP Core Business Logic**: 2
+- **KMP Property Accessors**: 2
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 0
+- **Semantic Completion**: 62%
+
+### Missing Core Methods:
+- `public void init(java.lang.String, org.apache.lucene.analysis.Analyzer)`
+- `public void ReInit(org.apache.lucene.queryparser.charstream.CharStream)`
+- `public org.apache.lucene.search.Query TopLevelQuery(java.lang.String)`
+- `public org.apache.lucene.search.Query parse(java.lang.String)`
+- `public void setDateResolution(java.lang.String, org.apache.lucene.document.DateTools$Resolution)`
+- `public org.apache.lucene.document.DateTools$Resolution getDateResolution(java.lang.String)`
+- `protected void addClause(java.util.List<org.apache.lucene.search.BooleanClause>, int, int, org.apache.lucene.search.Query)`
+- `protected void addMultiTermClauses(java.util.List<org.apache.lucene.search.BooleanClause>, org.apache.lucene.search.Query)`
+- `protected org.apache.lucene.search.Query getFieldQuery(java.lang.String, java.lang.String, boolean)`
+- `protected org.apache.lucene.search.Query newFieldQuery(org.apache.lucene.analysis.Analyzer, java.lang.String, java.lang.String, boolean)`
+- `protected org.apache.lucene.search.Query getFieldQuery(java.lang.String, java.lang.String, int)`
+- `private org.apache.lucene.search.PhraseQuery addSlopToPhrase(org.apache.lucene.search.PhraseQuery, int)`
+- `protected org.apache.lucene.search.Query getRangeQuery(java.lang.String, java.lang.String, java.lang.String, boolean, boolean)`
+- `protected org.apache.lucene.search.BooleanClause newBooleanClause(org.apache.lucene.search.Query, org.apache.lucene.search.BooleanClause$Occur)`
+- `protected org.apache.lucene.search.Query newPrefixQuery(org.apache.lucene.index.Term)`
+- `protected org.apache.lucene.search.Query newRegexpQuery(org.apache.lucene.index.Term)`
+- `protected org.apache.lucene.search.Query newFuzzyQuery(org.apache.lucene.index.Term, float, int)`
+- `protected org.apache.lucene.search.Query newRangeQuery(java.lang.String, java.lang.String, java.lang.String, boolean, boolean)`
+- `protected org.apache.lucene.search.Query newMatchAllDocsQuery()`
+- `protected org.apache.lucene.search.Query newWildcardQuery(org.apache.lucene.index.Term)`
+- `protected org.apache.lucene.search.Query getBooleanQuery(java.util.List<org.apache.lucene.search.BooleanClause>)`
+- `protected org.apache.lucene.search.Query getWildcardQuery(java.lang.String, java.lang.String)`
+- `private org.apache.lucene.util.BytesRef analyzeWildcard(java.lang.String, java.lang.String)`
+- `protected org.apache.lucene.search.Query getRegexpQuery(java.lang.String, java.lang.String)`
+- `protected org.apache.lucene.search.Query getPrefixQuery(java.lang.String, java.lang.String)`
+- `protected org.apache.lucene.search.Query getFuzzyQuery(java.lang.String, java.lang.String, float)`
+- `package-private org.apache.lucene.search.Query handleBareTokenQuery(java.lang.String, org.apache.lucene.queryparser.classic.Token, org.apache.lucene.queryparser.classic.Token, boolean, boolean, boolean, boolean)`
+- `protected float getFuzzyDistance(org.apache.lucene.queryparser.classic.Token, java.lang.String)`
+- `package-private org.apache.lucene.search.Query handleBareFuzzy(java.lang.String, org.apache.lucene.queryparser.classic.Token, java.lang.String)`
+- `package-private org.apache.lucene.search.Query handleQuotedTerm(java.lang.String, org.apache.lucene.queryparser.classic.Token, org.apache.lucene.queryparser.classic.Token)`
+- `package-private org.apache.lucene.search.Query handleBoost(org.apache.lucene.search.Query, org.apache.lucene.queryparser.classic.Token)`
+- `package-private java.lang.String discardEscapeChar(java.lang.String)`
+- `public org.apache.lucene.search.Query createBooleanQuery(java.lang.String, java.lang.String)`
+- `public org.apache.lucene.search.Query createBooleanQuery(java.lang.String, java.lang.String, org.apache.lucene.search.BooleanClause$Occur)`
+- `public org.apache.lucene.search.Query createPhraseQuery(java.lang.String, java.lang.String)`
+- `public org.apache.lucene.search.Query createPhraseQuery(java.lang.String, java.lang.String, int)`
+- `public org.apache.lucene.search.Query createMinShouldMatchQuery(java.lang.String, java.lang.String, float)`
+- `private org.apache.lucene.search.BooleanQuery addMinShouldMatchToBoolean(org.apache.lucene.search.BooleanQuery, float)`
+- `protected org.apache.lucene.search.Query createFieldQuery(org.apache.lucene.analysis.Analyzer, org.apache.lucene.search.BooleanClause$Occur, java.lang.String, java.lang.String, boolean, int)`
+- `protected org.apache.lucene.search.Query createFieldQuery(org.apache.lucene.analysis.TokenStream, org.apache.lucene.search.BooleanClause$Occur, java.lang.String, boolean, int)`
+- `protected org.apache.lucene.search.Query analyzeTerm(java.lang.String, org.apache.lucene.analysis.TokenStream)`
+- `protected org.apache.lucene.search.Query analyzeBoolean(java.lang.String, org.apache.lucene.analysis.TokenStream)`
+- `protected void add(java.lang.String, org.apache.lucene.search.BooleanQuery$Builder, java.util.List<org.apache.lucene.util.QueryBuilder$TermAndBoost>, org.apache.lucene.search.BooleanClause$Occur)`
+- `protected org.apache.lucene.search.Query analyzeMultiBoolean(java.lang.String, org.apache.lucene.analysis.TokenStream, org.apache.lucene.search.BooleanClause$Occur)`
+- `protected org.apache.lucene.search.Query analyzePhrase(java.lang.String, org.apache.lucene.analysis.TokenStream, int)`
+- `protected org.apache.lucene.search.Query analyzeMultiPhrase(java.lang.String, org.apache.lucene.analysis.TokenStream, int)`
+- `protected org.apache.lucene.search.Query analyzeGraphBoolean(java.lang.String, org.apache.lucene.analysis.TokenStream, org.apache.lucene.search.BooleanClause$Occur)`
+- `protected org.apache.lucene.search.Query analyzeGraphPhrase(org.apache.lucene.analysis.TokenStream, java.lang.String, int)`
+- `protected org.apache.lucene.search.BooleanQuery$Builder newBooleanQuery()`
+- `protected org.apache.lucene.search.Query newSynonymQuery(java.lang.String, org.apache.lucene.util.QueryBuilder$TermAndBoost[])`
+- `protected org.apache.lucene.search.Query newGraphSynonymQuery(java.util.Iterator<org.apache.lucene.search.Query>)`
+- `protected org.apache.lucene.search.Query newTermQuery(org.apache.lucene.index.Term, float)`
+- `protected org.apache.lucene.search.MultiPhraseQuery$Builder newMultiPhraseQueryBuilder()`
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.classic.QueryParserConstants -> org.gnit.lucenekmp.queryparser.classic.QueryParserConstants
+
+### Method Categories:
+- **Java Core Business Logic**: 0
+- **Java Property Accessors**: 0
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 0
+- **KMP Property Accessors**: 1
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 0
+- **Semantic Completion**: 0%
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.classic.QueryParserTokenManager -> org.gnit.lucenekmp.queryparser.classic.QueryParserTokenManager
+
+### Method Categories:
+- **Java Core Business Logic**: 29
+- **Java Property Accessors**: 1
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 3
+- **KMP Property Accessors**: 12
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 3
+- **Semantic Completion**: 27%
+
+### Missing Core Methods:
+- `private int jjStopStringLiteralDfa_2(int, long)`
+- `private int jjStartNfa_2(int, long)`
+- `private int jjStopAtPos(int, int)`
+- `private int jjMoveStringLiteralDfa0_2()`
+- `private int jjStartNfaWithStates_2(int, int, int)`
+- `private int jjMoveNfa_2(int, int)`
+- `private int jjMoveStringLiteralDfa0_0()`
+- `private int jjMoveNfa_0(int, int)`
+- `private int jjStopStringLiteralDfa_1(int, long)`
+- `private int jjStartNfa_1(int, long)`
+- `private int jjMoveStringLiteralDfa0_1()`
+- `private int jjMoveStringLiteralDfa1_1(long)`
+- `private int jjStartNfaWithStates_1(int, int, int)`
+- `private int jjMoveNfa_1(int, int)`
+- `protected org.apache.lucene.queryparser.classic.Token jjFillToken()`
+- `package-private void SkipLexicalActions(org.apache.lucene.queryparser.classic.Token)`
+- `package-private void MoreLexicalActions()`
+- `package-private void TokenLexicalActions(org.apache.lucene.queryparser.classic.Token)`
+- `private void jjCheckNAdd(int)`
+- `private void jjAddStates(int, int)`
+- `private void jjCheckNAddTwoStates(int, int)`
+- `private void jjCheckNAddStates(int, int)`
+- `public void ReInit(org.apache.lucene.queryparser.charstream.CharStream)`
+- `private void ReInitRounds()`
+- `public void ReInit(org.apache.lucene.queryparser.charstream.CharStream, int)`
+- `public void SwitchTo(int)`
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.classic.Token -> org.gnit.lucenekmp.queryparser.classic.Token
+
+### Method Categories:
+- **Java Core Business Logic**: 2
+- **Java Property Accessors**: 1
+- **Java Auto-Generated**: 1
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 2
+- **KMP Property Accessors**: 0
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 1
+- **Semantic Completion**: 90%
+
+
+## Detailed Analysis: org.apache.lucene.queryparser.flexible.standard.CommonQueryParserConfiguration -> org.gnit.lucenekmp.queryparser.flexible.standard.CommonQueryParserConfiguration
+
+### Method Categories:
+- **Java Core Business Logic**: 0
+- **Java Property Accessors**: 18
+- **Java Auto-Generated**: 0
+- **Java Synthetic**: 0
+- **KMP Core Business Logic**: 0
+- **KMP Property Accessors**: 19
+- **KMP Auto-Generated**: 0
+- **KMP Synthetic**: 0
+- **Semantic Completion**: 94%
 
 
 ## Detailed Analysis: org.apache.lucene.search.AbstractKnnCollector -> org.gnit.lucenekmp.search.AbstractKnnCollector
@@ -12467,19 +12669,216 @@
 | [org.apache.lucene.internal.vectorization.TestVectorScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorScorer.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorScorer | Depth 1 | [x] | 162 | 3 | 0% |
 | [org.apache.lucene.internal.vectorization.TestVectorizationProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/internal/vectorization/TestVectorizationProvider.java) | org.gnit.lucenekmp.internal.vectorization.TestVectorizationProvider | Depth 1 | [x] | 141 | 2 | 41% |
 | [org.apache.lucene.internal.vectorization.VectorizationProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/internal/vectorization/VectorizationProvider.java) | org.gnit.lucenekmp.internal.vectorization.VectorizationProvider | Depth 3 | [x] | 0 | 1 | 0% |
-| [org.apache.lucene.queryparser.classic.MultiFieldQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/MultiFieldQueryParser.java) | org.gnit.lucenekmp.queryparser.classic.MultiFieldQueryParser | Depth 2 | [] | 93 | 0 | 0% |
+| [org.apache.lucene.queries.CommonTermsQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/CommonTermsQuery.java) | org.gnit.lucenekmp.queries.CommonTermsQuery | Depth 2 | [] | 13 | 0 | 0% |
+| [org.apache.lucene.queries.TestCommonTermsQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/TestCommonTermsQuery.java) | org.gnit.lucenekmp.queries.TestCommonTermsQuery | Depth 1 | [] | 149 | 0 | 0% |
+| [org.apache.lucene.queries.function.FunctionMatchQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/FunctionMatchQuery.java) | org.gnit.lucenekmp.queries.function.FunctionMatchQuery | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.FunctionQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/FunctionQuery.java) | org.gnit.lucenekmp.queries.function.FunctionQuery | Depth 3 | [] | 6 | 0 | 0% |
+| [org.apache.lucene.queries.function.FunctionRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/FunctionRangeQuery.java) | org.gnit.lucenekmp.queries.function.FunctionRangeQuery | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.FunctionScoreQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/FunctionScoreQuery.java) | org.gnit.lucenekmp.queries.function.FunctionScoreQuery | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.FunctionTestSetup](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/FunctionTestSetup.java) | org.gnit.lucenekmp.queries.function.FunctionTestSetup | Depth 1 | [] | 146 | 0 | 0% |
+| [org.apache.lucene.queries.function.FunctionValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/FunctionValues.java) | org.gnit.lucenekmp.queries.function.FunctionValues | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.function.IndexReaderFunctions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/IndexReaderFunctions.java) | org.gnit.lucenekmp.queries.function.IndexReaderFunctions | Depth 3 | [] | 19 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestDocValuesFieldSources](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestDocValuesFieldSources.java) | org.gnit.lucenekmp.queries.function.TestDocValuesFieldSources | Depth 1 | [] | 141 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFieldScoreQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFieldScoreQuery.java) | org.gnit.lucenekmp.queries.function.TestFieldScoreQuery | Depth 1 | [] | 158 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFunctionMatchQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFunctionMatchQuery.java) | org.gnit.lucenekmp.queries.function.TestFunctionMatchQuery | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFunctionQueryExplanations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFunctionQueryExplanations.java) | org.gnit.lucenekmp.queries.function.TestFunctionQueryExplanations | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFunctionQuerySort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFunctionQuerySort.java) | org.gnit.lucenekmp.queries.function.TestFunctionQuerySort | Depth 1 | [] | 141 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFunctionRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFunctionRangeQuery.java) | org.gnit.lucenekmp.queries.function.TestFunctionRangeQuery | Depth 1 | [] | 161 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFunctionScoreExplanations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFunctionScoreExplanations.java) | org.gnit.lucenekmp.queries.function.TestFunctionScoreExplanations | Depth 1 | [] | 153 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestFunctionScoreQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestFunctionScoreQuery.java) | org.gnit.lucenekmp.queries.function.TestFunctionScoreQuery | Depth 1 | [] | 160 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestIndexReaderFunctions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestIndexReaderFunctions.java) | org.gnit.lucenekmp.queries.function.TestIndexReaderFunctions | Depth 1 | [] | 154 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestKnnVectorSimilarityFunctions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestKnnVectorSimilarityFunctions.java) | org.gnit.lucenekmp.queries.function.TestKnnVectorSimilarityFunctions | Depth 1 | [] | 153 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestLongNormValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestLongNormValueSource.java) | org.gnit.lucenekmp.queries.function.TestLongNormValueSource | Depth 1 | [] | 143 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestSortedSetFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestSortedSetFieldSource.java) | org.gnit.lucenekmp.queries.function.TestSortedSetFieldSource | Depth 1 | [] | 140 | 0 | 0% |
+| [org.apache.lucene.queries.function.TestValueSources](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/TestValueSources.java) | org.gnit.lucenekmp.queries.function.TestValueSources | Depth 1 | [] | 183 | 0 | 0% |
+| [org.apache.lucene.queries.function.ValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/ValueSource.java) | org.gnit.lucenekmp.queries.function.ValueSource | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.ValueSourceScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/ValueSourceScorer.java) | org.gnit.lucenekmp.queries.function.ValueSourceScorer | Depth 3 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.BoolDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/BoolDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.BoolDocValues | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.DocTermsIndexDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/DocTermsIndexDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.DocTermsIndexDocValues | Depth 5 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.DoubleDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/DoubleDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.DoubleDocValues | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.FloatDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/FloatDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.FloatDocValues | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.IntDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/IntDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.IntDocValues | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.LongDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/LongDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.LongDocValues | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.StrDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/docvalues/StrDocValues.java) | org.gnit.lucenekmp.queries.function.docvalues.StrDocValues | Depth 5 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.function.docvalues.TestBoolValOfNumericDVs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/function/docvalues/TestBoolValOfNumericDVs.java) | org.gnit.lucenekmp.queries.function.docvalues.TestBoolValOfNumericDVs | Depth 1 | [] | 141 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.BoolFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/BoolFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.BoolFunction | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ByteKnnVectorFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ByteKnnVectorFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.ByteKnnVectorFieldSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ByteVectorSimilarityFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ByteVectorSimilarityFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.ByteVectorSimilarityFunction | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.BytesRefFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/BytesRefFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.BytesRefFieldSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ConstKnnByteVectorValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ConstKnnByteVectorValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.ConstKnnByteVectorValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ConstKnnFloatValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ConstKnnFloatValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.ConstKnnFloatValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ConstNumberSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ConstNumberSource.java) | org.gnit.lucenekmp.queries.function.valuesource.ConstNumberSource | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ConstValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ConstValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.ConstValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.DivFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/DivFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.DivFloatFunction | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.DocFreqValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/DocFreqValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.DocFreqValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.DoubleConstValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/DoubleConstValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.DoubleConstValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.DoubleFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/DoubleFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.DoubleFieldSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.DualFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/DualFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.DualFloatFunction | Depth 4 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.FieldCacheSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/FieldCacheSource.java) | org.gnit.lucenekmp.queries.function.valuesource.FieldCacheSource | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.FloatFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/FloatFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.FloatFieldSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.FloatKnnVectorFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/FloatKnnVectorFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.FloatKnnVectorFieldSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.FloatVectorSimilarityFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/FloatVectorSimilarityFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.FloatVectorSimilarityFunction | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.IDFValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/IDFValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.IDFValueSource | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.IfFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/IfFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.IfFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.IntFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/IntFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.IntFieldSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.JoinDocFreqValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/JoinDocFreqValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.JoinDocFreqValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.LinearFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/LinearFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.LinearFloatFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.LiteralValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/LiteralValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.LiteralValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.LongFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/LongFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.LongFieldSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MaxDocValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MaxDocValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.MaxDocValueSource | Depth 2 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MaxFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MaxFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.MaxFloatFunction | Depth 2 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MinFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MinFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.MinFloatFunction | Depth 2 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiBoolFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiBoolFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiBoolFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiFloatFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiValuedDoubleFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiValuedDoubleFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiValuedDoubleFieldSource | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiValuedFloatFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiValuedFloatFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiValuedFloatFieldSource | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiValuedIntFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiValuedIntFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiValuedIntFieldSource | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.MultiValuedLongFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/MultiValuedLongFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.MultiValuedLongFieldSource | Depth 2 | [] | 11 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.NormValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/NormValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.NormValueSource | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.NumDocsValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/NumDocsValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.NumDocsValueSource | Depth 2 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.PowFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/PowFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.PowFloatFunction | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ProductFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ProductFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.ProductFloatFunction | Depth 2 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.QueryDocValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/QueryDocValues.java) | org.gnit.lucenekmp.queries.function.valuesource.QueryDocValues | Depth 4 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.QueryValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/QueryValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.QueryValueSource | Depth 2 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.RangeMapFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/RangeMapFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.RangeMapFloatFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ReciprocalFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ReciprocalFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.ReciprocalFloatFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.ScaleFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/ScaleFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.ScaleFloatFunction | Depth 3 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.SortedSetFieldSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/SortedSetFieldSource.java) | org.gnit.lucenekmp.queries.function.valuesource.SortedSetFieldSource | Depth 3 | [] | 28 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.SumFloatFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/SumFloatFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.SumFloatFunction | Depth 2 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.SumTotalTermFreqValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/SumTotalTermFreqValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.SumTotalTermFreqValueSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.TFValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/TFValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.TFValueSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.TermFreqValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/TermFreqValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.TermFreqValueSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.TotalTermFreqValueSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/TotalTermFreqValueSource.java) | org.gnit.lucenekmp.queries.function.valuesource.TotalTermFreqValueSource | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.VectorFieldFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/VectorFieldFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.VectorFieldFunction | Depth 3 | [] | 26 | 0 | 0% |
+| [org.apache.lucene.queries.function.valuesource.VectorSimilarityFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/function/valuesource/VectorSimilarityFunction.java) | org.gnit.lucenekmp.queries.function.valuesource.VectorSimilarityFunction | Depth 4 | [] | 25 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.BlockIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/BlockIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.BlockIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.CachingMatchesIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/CachingMatchesIterator.java) | org.gnit.lucenekmp.queries.intervals.CachingMatchesIterator | Depth 5 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ConjunctionIntervalIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ConjunctionIntervalIterator.java) | org.gnit.lucenekmp.queries.intervals.ConjunctionIntervalIterator | Depth 5 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ConjunctionIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ConjunctionIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.ConjunctionIntervalsSource | Depth 4 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ConjunctionMatchesIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ConjunctionMatchesIterator.java) | org.gnit.lucenekmp.queries.intervals.ConjunctionMatchesIterator | Depth 5 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ContainedByIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ContainedByIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.ContainedByIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ContainingIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ContainingIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.ContainingIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.DifferenceIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/DifferenceIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.DifferenceIntervalsSource | Depth 4 | [] | 6 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.DisiPriorityQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/DisiPriorityQueue.java) | org.gnit.lucenekmp.queries.intervals.DisiPriorityQueue | Depth 5 | [] | 11 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.DisiWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/DisiWrapper.java) | org.gnit.lucenekmp.queries.intervals.DisiWrapper | Depth 5 | [] | 0 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.DisjunctionDISIApproximation](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/DisjunctionDISIApproximation.java) | org.gnit.lucenekmp.queries.intervals.DisjunctionDISIApproximation | Depth 5 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.DisjunctionIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/DisjunctionIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.DisjunctionIntervalsSource | Depth 4 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.Disjunctions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/Disjunctions.java) | org.gnit.lucenekmp.queries.intervals.Disjunctions | Depth 4 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ExtendedIntervalIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ExtendedIntervalIterator.java) | org.gnit.lucenekmp.queries.intervals.ExtendedIntervalIterator | Depth 4 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.ExtendedIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/ExtendedIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.ExtendedIntervalsSource | Depth 4 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.FilteredIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/FilteredIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.FilteredIntervalsSource | Depth 4 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.FilteringIntervalIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/FilteringIntervalIterator.java) | org.gnit.lucenekmp.queries.intervals.FilteringIntervalIterator | Depth 5 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.FixedFieldIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/FixedFieldIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.FixedFieldIntervalsSource | Depth 3 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalBuilder.java) | org.gnit.lucenekmp.queries.intervals.IntervalBuilder | Depth 2 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalFilter.java) | org.gnit.lucenekmp.queries.intervals.IntervalFilter | Depth 5 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalIterator.java) | org.gnit.lucenekmp.queries.intervals.IntervalIterator | Depth 2 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalMatches.java) | org.gnit.lucenekmp.queries.intervals.IntervalMatches | Depth 4 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalMatchesIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalMatchesIterator.java) | org.gnit.lucenekmp.queries.intervals.IntervalMatchesIterator | Depth 2 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalQuery.java) | org.gnit.lucenekmp.queries.intervals.IntervalQuery | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalScoreFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalScoreFunction.java) | org.gnit.lucenekmp.queries.intervals.IntervalScoreFunction | Depth 4 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalScorer.java) | org.gnit.lucenekmp.queries.intervals.IntervalScorer | Depth 5 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.Intervals](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/Intervals.java) | org.gnit.lucenekmp.queries.intervals.Intervals | Depth 2 | [] | 43 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.IntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/IntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.IntervalsSource | Depth 2 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.MinimizingConjunctionIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/MinimizingConjunctionIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.MinimizingConjunctionIntervalsSource | Depth 4 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.MinimumShouldMatchIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/MinimumShouldMatchIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.MinimumShouldMatchIntervalsSource | Depth 4 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.MultiTermIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/MultiTermIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.MultiTermIntervalsSource | Depth 4 | [] | 4 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.NoMatchIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/NoMatchIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.NoMatchIntervalsSource | Depth 3 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.NonOverlappingIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/NonOverlappingIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.NonOverlappingIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.NotContainedByIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/NotContainedByIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.NotContainedByIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.NotContainingIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/NotContainingIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.NotContainingIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.OffsetIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/OffsetIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.OffsetIntervalsSource | Depth 3 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.OneTimeIntervalSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/OneTimeIntervalSource.java) | org.gnit.lucenekmp.queries.intervals.OneTimeIntervalSource | Depth 1 | [] | 5 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.OrderedIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/OrderedIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.OrderedIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.OverlappingIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/OverlappingIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.OverlappingIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.PayloadFilteredTermIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/PayloadFilteredTermIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.PayloadFilteredTermIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.RelativeIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/RelativeIterator.java) | org.gnit.lucenekmp.queries.intervals.RelativeIterator | Depth 5 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.RepeatingIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/RepeatingIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.RepeatingIntervalsSource | Depth 5 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TermIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/TermIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.TermIntervalsSource | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestComplexMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestComplexMatches.java) | org.gnit.lucenekmp.queries.intervals.TestComplexMatches | Depth 1 | [] | 149 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestDisjunctionRewrites](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestDisjunctionRewrites.java) | org.gnit.lucenekmp.queries.intervals.TestDisjunctionRewrites | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestIntervalBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestIntervalBuilder.java) | org.gnit.lucenekmp.queries.intervals.TestIntervalBuilder | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestIntervalQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestIntervalQuery.java) | org.gnit.lucenekmp.queries.intervals.TestIntervalQuery | Depth 1 | [] | 174 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestIntervals](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestIntervals.java) | org.gnit.lucenekmp.queries.intervals.TestIntervals | Depth 1 | [] | 189 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestPayloadFilteredInterval](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestPayloadFilteredInterval.java) | org.gnit.lucenekmp.queries.intervals.TestPayloadFilteredInterval | Depth 1 | [] | 141 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.TestSimplifications](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/intervals/TestSimplifications.java) | org.gnit.lucenekmp.queries.intervals.TestSimplifications | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.queries.intervals.UnorderedIntervalsSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/intervals/UnorderedIntervalsSource.java) | org.gnit.lucenekmp.queries.intervals.UnorderedIntervalsSource | Depth 4 | [] | 11 | 0 | 0% |
+| [org.apache.lucene.queries.mlt.MoreLikeThis](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/mlt/MoreLikeThis.java) | org.gnit.lucenekmp.queries.mlt.MoreLikeThis | Depth 3 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.mlt.MoreLikeThisQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/mlt/MoreLikeThisQuery.java) | org.gnit.lucenekmp.queries.mlt.MoreLikeThisQuery | Depth 2 | [] | 6 | 0 | 0% |
+| [org.apache.lucene.queries.mlt.TestMoreLikeThis](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/mlt/TestMoreLikeThis.java) | org.gnit.lucenekmp.queries.mlt.TestMoreLikeThis | Depth 1 | [] | 155 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.AveragePayloadFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/AveragePayloadFunction.java) | org.gnit.lucenekmp.queries.payloads.AveragePayloadFunction | Depth 2 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.MaxPayloadFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/MaxPayloadFunction.java) | org.gnit.lucenekmp.queries.payloads.MaxPayloadFunction | Depth 2 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.MinPayloadFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/MinPayloadFunction.java) | org.gnit.lucenekmp.queries.payloads.MinPayloadFunction | Depth 2 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.PayloadDecoder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/PayloadDecoder.java) | org.gnit.lucenekmp.queries.payloads.PayloadDecoder | Depth 2 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.PayloadFunction](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/PayloadFunction.java) | org.gnit.lucenekmp.queries.payloads.PayloadFunction | Depth 2 | [] | 3 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.PayloadHelper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/PayloadHelper.java) | org.gnit.lucenekmp.queries.payloads.PayloadHelper | Depth 1 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.PayloadMatcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/PayloadMatcher.java) | org.gnit.lucenekmp.queries.payloads.PayloadMatcher | Depth 4 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.PayloadMatcherFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/PayloadMatcherFactory.java) | org.gnit.lucenekmp.queries.payloads.PayloadMatcherFactory | Depth 5 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.PayloadScoreQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/PayloadScoreQuery.java) | org.gnit.lucenekmp.queries.payloads.PayloadScoreQuery | Depth 3 | [] | 9 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.SpanPayloadCheckQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/payloads/SpanPayloadCheckQuery.java) | org.gnit.lucenekmp.queries.payloads.SpanPayloadCheckQuery | Depth 3 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.TestPayloadCheckQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadCheckQuery.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadCheckQuery | Depth 1 | [] | 149 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.TestPayloadExplanations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadExplanations.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadExplanations | Depth 1 | [] | 156 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.TestPayloadScoreQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadScoreQuery.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadScoreQuery | Depth 1 | [] | 150 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.TestPayloadSpanPositions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadSpanPositions.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadSpanPositions | Depth 1 | [] | 140 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.TestPayloadSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadSpans.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadSpans | Depth 1 | [] | 150 | 0 | 0% |
+| [org.apache.lucene.queries.payloads.TestPayloadTermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadTermQuery.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadTermQuery | Depth 1 | [] | 146 | 0 | 0% |
+| [org.apache.lucene.queries.spans.AssertingSpanWeight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/AssertingSpanWeight.java) | org.gnit.lucenekmp.queries.spans.AssertingSpanWeight | Depth 1 | [x] | 10 | 11 | 80% |
+| [org.apache.lucene.queries.spans.AssertingSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/AssertingSpans.java) | org.gnit.lucenekmp.queries.spans.AssertingSpans | Depth 2 | [x] | 1 | 1 | 75% |
+| [org.apache.lucene.queries.spans.BaseSpanExplanationTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/BaseSpanExplanationTestCase.java) | org.gnit.lucenekmp.queries.spans.BaseSpanExplanationTestCase | Depth 1 | [] | 159 | 0 | 0% |
+| [org.apache.lucene.queries.spans.ContainSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/ContainSpans.java) | org.gnit.lucenekmp.queries.spans.ContainSpans | Depth 4 | [] | 19 | 0 | 0% |
+| [org.apache.lucene.queries.spans.FieldMaskingSpanQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/FieldMaskingSpanQuery.java) | org.gnit.lucenekmp.queries.spans.FieldMaskingSpanQuery | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.spans.FilterSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/FilterSpans.java) | org.gnit.lucenekmp.queries.spans.FilterSpans | Depth 3 | [x] | 1 | 1 | 0% |
+| [org.apache.lucene.queries.spans.JustCompileSearchSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/JustCompileSearchSpans.java) | org.gnit.lucenekmp.queries.spans.JustCompileSearchSpans | Depth 2 | [] | 0 | 0 | 0% |
+| [org.apache.lucene.queries.spans.NearSpansOrdered](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/NearSpansOrdered.java) | org.gnit.lucenekmp.queries.spans.NearSpansOrdered | Depth 4 | [x] | 16 | 1 | 83% |
+| [org.apache.lucene.queries.spans.NearSpansUnordered](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/NearSpansUnordered.java) | org.gnit.lucenekmp.queries.spans.NearSpansUnordered | Depth 5 | [x] | 13 | 18 | 67% |
+| [org.apache.lucene.queries.spans.SpanContainQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanContainQuery.java) | org.gnit.lucenekmp.queries.spans.SpanContainQuery | Depth 4 | [] | 11 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanContainingQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanContainingQuery.java) | org.gnit.lucenekmp.queries.spans.SpanContainingQuery | Depth 3 | [] | 11 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanDisiWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanDisiWrapper.java) | org.gnit.lucenekmp.queries.spans.SpanDisiWrapper | Depth 4 | [x] | 0 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanDisjunctionDISIApproximation](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanDisjunctionDISIApproximation.java) | org.gnit.lucenekmp.queries.spans.SpanDisjunctionDISIApproximation | Depth 4 | [x] | 7 | 5 | 91% |
+| [org.apache.lucene.queries.spans.SpanFirstQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanFirstQuery.java) | org.gnit.lucenekmp.queries.spans.SpanFirstQuery | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanMultiTermQueryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanMultiTermQueryWrapper.java) | org.gnit.lucenekmp.queries.spans.SpanMultiTermQueryWrapper | Depth 3 | [] | 2 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanNearQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanNearQuery.java) | org.gnit.lucenekmp.queries.spans.SpanNearQuery | Depth 3 | [x] | 16 | 3 | 15% |
+| [org.apache.lucene.queries.spans.SpanNotQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanNotQuery.java) | org.gnit.lucenekmp.queries.spans.SpanNotQuery | Depth 3 | [x] | 10 | 15 | 0% |
+| [org.apache.lucene.queries.spans.SpanOrQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanOrQuery.java) | org.gnit.lucenekmp.queries.spans.SpanOrQuery | Depth 3 | [x] | 10 | 1 | 0% |
+| [org.apache.lucene.queries.spans.SpanPositionCheckQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanPositionCheckQuery.java) | org.gnit.lucenekmp.queries.spans.SpanPositionCheckQuery | Depth 4 | [] | 10 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanPositionQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanPositionQueue.java) | org.gnit.lucenekmp.queries.spans.SpanPositionQueue | Depth 4 | [x] | 10 | 15 | 70% |
+| [org.apache.lucene.queries.spans.SpanPositionRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanPositionRangeQuery.java) | org.gnit.lucenekmp.queries.spans.SpanPositionRangeQuery | Depth 2 | [] | 8 | 0 | 0% |
+| [org.apache.lucene.queries.spans.SpanScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanScorer.java) | org.gnit.lucenekmp.queries.spans.SpanScorer | Depth 3 | [x] | 9 | 9 | 83% |
+| [org.apache.lucene.queries.spans.SpanTermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanTermQuery.java) | org.gnit.lucenekmp.queries.spans.SpanTermQuery | Depth 3 | [x] | 10 | 11 | 80% |
+| [org.apache.lucene.queries.spans.SpanWithinQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/SpanWithinQuery.java) | org.gnit.lucenekmp.queries.spans.SpanWithinQuery | Depth 3 | [] | 11 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TermSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/java/org/apache/lucene/queries/spans/TermSpans.java) | org.gnit.lucenekmp.queries.spans.TermSpans | Depth 4 | [x] | 15 | 13 | 58% |
+| [org.apache.lucene.queries.spans.TestBasics](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestBasics.java) | org.gnit.lucenekmp.queries.spans.TestBasics | Depth 1 | [] | 171 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestFieldMaskingSpanQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestFieldMaskingSpanQuery.java) | org.gnit.lucenekmp.queries.spans.TestFieldMaskingSpanQuery | Depth 1 | [] | 156 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestFilterSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestFilterSpans.java) | org.gnit.lucenekmp.queries.spans.TestFilterSpans | Depth 1 | [x] | 140 | 2 | 0% |
+| [org.apache.lucene.queries.spans.TestQueryRescorerWithSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestQueryRescorerWithSpans.java) | org.gnit.lucenekmp.queries.spans.TestQueryRescorerWithSpans | Depth 1 | [] | 142 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanCollection](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanCollection.java) | org.gnit.lucenekmp.queries.spans.TestSpanCollection | Depth 1 | [] | 143 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanContainQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanContainQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanContainQuery | Depth 1 | [] | 147 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanExplanations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanExplanations.java) | org.gnit.lucenekmp.queries.spans.TestSpanExplanations | Depth 1 | [] | 192 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanExplanationsOfNonMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanExplanationsOfNonMatches.java) | org.gnit.lucenekmp.queries.spans.TestSpanExplanationsOfNonMatches | Depth 1 | [] | 192 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanFirstQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanFirstQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanFirstQuery | Depth 1 | [] | 140 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanMatches.java) | org.gnit.lucenekmp.queries.spans.TestSpanMatches | Depth 1 | [] | 148 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanMultiTermQueryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanMultiTermQueryWrapper.java) | org.gnit.lucenekmp.queries.spans.TestSpanMultiTermQueryWrapper | Depth 1 | [] | 148 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanNearQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanNearQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanNearQuery | Depth 1 | [x] | 143 | 10 | 27% |
+| [org.apache.lucene.queries.spans.TestSpanNotQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanNotQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanNotQuery | Depth 1 | [x] | 142 | 7 | 25% |
+| [org.apache.lucene.queries.spans.TestSpanOrQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanOrQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanOrQuery | Depth 1 | [x] | 142 | 6 | 27% |
+| [org.apache.lucene.queries.spans.TestSpanQueryVisitor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanQueryVisitor.java) | org.gnit.lucenekmp.queries.spans.TestSpanQueryVisitor | Depth 1 | [] | 140 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanSearchEquivalence](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanSearchEquivalence.java) | org.gnit.lucenekmp.queries.spans.TestSpanSearchEquivalence | Depth 1 | [] | 183 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanSimilarity.java) | org.gnit.lucenekmp.queries.spans.TestSpanSimilarity | Depth 1 | [] | 140 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpanTermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanTermQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanTermQuery | Depth 1 | [x] | 141 | 5 | 20% |
+| [org.apache.lucene.queries.spans.TestSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpans.java) | org.gnit.lucenekmp.queries.spans.TestSpans | Depth 1 | [] | 176 | 0 | 0% |
+| [org.apache.lucene.queries.spans.TestSpansEnum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpansEnum.java) | org.gnit.lucenekmp.queries.spans.TestSpansEnum | Depth 1 | [] | 150 | 0 | 0% |
 | [org.apache.lucene.queryparser.classic.ParseException](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/ParseException.java) | org.gnit.lucenekmp.queryparser.classic.ParseException | Depth 2 | [x] | 2 | 2 | 58% |
 | [org.apache.lucene.queryparser.classic.QueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParser.java) | org.gnit.lucenekmp.queryparser.classic.QueryParser | Depth 2 | [x] | 87 | 1 | 0% |
 | [org.apache.lucene.queryparser.classic.QueryParserBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserBase.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserBase | Depth 2 | [x] | 55 | 2 | 62% |
 | [org.apache.lucene.queryparser.classic.QueryParserConstants](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserConstants.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserConstants | Depth 3 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.queryparser.classic.QueryParserTokenManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/QueryParserTokenManager.java) | org.gnit.lucenekmp.queryparser.classic.QueryParserTokenManager | Depth 2 | [x] | 29 | 3 | 27% |
 | [org.apache.lucene.queryparser.classic.TestMultiAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiAnalyzer.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiAnalyzer | Depth 1 | [x] | 200 | 19 | 0% |
-| [org.apache.lucene.queryparser.classic.TestMultiFieldQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiFieldQueryParser.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiFieldQueryParser | Depth 1 | [] | 152 | 0 | 0% |
-| [org.apache.lucene.queryparser.classic.TestMultiPhraseQueryParsing](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiPhraseQueryParsing.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiPhraseQueryParsing | Depth 2 | [] | 0 | 0 | 0% |
+| [org.apache.lucene.queryparser.classic.TestMultiFieldQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiFieldQueryParser.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiFieldQueryParser | Depth 1 | [x] | 152 | 16 | 0% |
+| [org.apache.lucene.queryparser.classic.TestMultiPhraseQueryParsing](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestMultiPhraseQueryParsing.java) | org.gnit.lucenekmp.queryparser.classic.TestMultiPhraseQueryParsing | Depth 2 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.queryparser.classic.TestQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/classic/TestQueryParser.java) | org.gnit.lucenekmp.queryparser.classic.TestQueryParser | Depth 1 | [x] | 241 | 83 | 0% |
 | [org.apache.lucene.queryparser.classic.Token](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/classic/Token.java) | org.gnit.lucenekmp.queryparser.classic.Token | Depth 2 | [x] | 2 | 2 | 90% |
-| [org.apache.lucene.queryparser.complexPhrase.ComplexPhraseQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/complexPhrase/ComplexPhraseQueryParser.java) | org.gnit.lucenekmp.queryparser.complexPhrase.ComplexPhraseQueryParser | Depth 3 | [] | 9 | 0 | 0% |
-| [org.apache.lucene.queryparser.complexPhrase.TestComplexPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/complexPhrase/TestComplexPhraseQuery.java) | org.gnit.lucenekmp.queryparser.complexPhrase.TestComplexPhraseQuery | Depth 2 | [] | 0 | 0 | 0% |
+| [org.apache.lucene.queryparser.complexPhrase.ComplexPhraseQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/complexPhrase/ComplexPhraseQueryParser.java) | org.gnit.lucenekmp.queryparser.complexPhrase.ComplexPhraseQueryParser | Depth 3 | [x] | 9 | 8 | 83% |
+| [org.apache.lucene.queryparser.complexPhrase.TestComplexPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/complexPhrase/TestComplexPhraseQuery.java) | org.gnit.lucenekmp.queryparser.complexPhrase.TestComplexPhraseQuery | Depth 2 | [x] | 0 | 0 | 0% |
 | [org.apache.lucene.queryparser.ext.ExtendableQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/ext/ExtendableQueryParser.java) | org.gnit.lucenekmp.queryparser.ext.ExtendableQueryParser | Depth 2 | [] | 87 | 0 | 0% |
 | [org.apache.lucene.queryparser.ext.ExtensionQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/ext/ExtensionQuery.java) | org.gnit.lucenekmp.queryparser.ext.ExtensionQuery | Depth 2 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.queryparser.ext.ExtensionStub](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/ext/ExtensionStub.java) | org.gnit.lucenekmp.queryparser.ext.ExtensionStub | Depth 1 | [] | 1 | 0 | 0% |
@@ -12768,6 +13167,7 @@
 | [org.apache.lucene.search.FilterCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterCollector.java) | org.gnit.lucenekmp.search.FilterCollector | Depth 2 | [x] | 2 | 3 | 56% |
 | [org.apache.lucene.search.FilterDocIdSetIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterDocIdSetIterator.java) | org.gnit.lucenekmp.search.FilterDocIdSetIterator | Depth 2 | [x] | 7 | 5 | 90% |
 | [org.apache.lucene.search.FilterLeafCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterLeafCollector.java) | org.gnit.lucenekmp.search.FilterLeafCollector | Depth 2 | [x] | 4 | 2 | 56% |
+| [org.apache.lucene.search.FilterMatchesIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterMatchesIterator.java) | org.gnit.lucenekmp.search.FilterMatchesIterator | Depth 4 | [] | 4 | 0 | 0% |
 | [org.apache.lucene.search.FilterScorable](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterScorable.java) | org.gnit.lucenekmp.search.FilterScorable | Depth 2 | [x] | 1 | 1 | 70% |
 | [org.apache.lucene.search.FilterScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterScorer.java) | org.gnit.lucenekmp.search.FilterScorer | Depth 2 | [x] | 6 | 5 | 87% |
 | [org.apache.lucene.search.FilterWeight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterWeight.java) | org.gnit.lucenekmp.search.FilterWeight | Depth 2 | [x] | 7 | 7 | 92% |
@@ -12834,7 +13234,7 @@
 | [org.apache.lucene.search.SearcherManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SearcherManager.java) | org.gnit.lucenekmp.search.SearcherManager | Depth 2 | [x] | 18 | 3 | 0% |
 | [org.apache.lucene.search.SeededKnnVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SeededKnnVectorQuery.java) | org.gnit.lucenekmp.search.SeededKnnVectorQuery | Depth 3 | [] | 7 | 0 | 0% |
 | [org.apache.lucene.search.SimpleCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SimpleCollector.java) | org.gnit.lucenekmp.search.SimpleCollector | Depth 2 | [x] | 7 | 4 | 68% |
-| [org.apache.lucene.search.SimpleFieldComparator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SimpleFieldComparator.java) | org.gnit.lucenekmp.search.SimpleFieldComparator | Depth 5 | [x] | 11 | 9 | 93% |
+| [org.apache.lucene.search.SimpleFieldComparator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SimpleFieldComparator.java) | org.gnit.lucenekmp.search.SimpleFieldComparator | Depth 4 | [x] | 11 | 9 | 93% |
 | [org.apache.lucene.search.SimpleScorable](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SimpleScorable.java) | org.gnit.lucenekmp.search.SimpleScorable | Depth 3 | [x] | 2 | 2 | 89% |
 | [org.apache.lucene.search.SloppyPhraseMatcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SloppyPhraseMatcher.java) | org.gnit.lucenekmp.search.SloppyPhraseMatcher | Depth 5 | [x] | 1 | 1 | 0% |
 | [org.apache.lucene.search.Sort](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Sort.java) | org.gnit.lucenekmp.search.Sort | Depth 2 | [x] | 2 | 0 | 0% |
@@ -13150,6 +13550,7 @@
 | [org.apache.lucene.tests.analysis.MockTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/MockTokenFilter.java) | org.gnit.lucenekmp.tests.analysis.MockTokenFilter | Depth 2 | [x] | 21 | 0 | 0% |
 | [org.apache.lucene.tests.analysis.MockTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/MockTokenizer.java) | org.gnit.lucenekmp.tests.analysis.MockTokenizer | Depth 3 | [x] | 1 | 1 | 75% |
 | [org.apache.lucene.tests.analysis.MockUTF16TermAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/MockUTF16TermAttributeImpl.java) | org.gnit.lucenekmp.tests.analysis.MockUTF16TermAttributeImpl | Depth 3 | [x] | 19 | 2 | 13% |
+| [org.apache.lucene.tests.analysis.SimplePayloadFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/analysis/SimplePayloadFilter.java) | org.gnit.lucenekmp.tests.analysis.SimplePayloadFilter | Depth 2 | [] | 21 | 0 | 0% |
 | [org.apache.lucene.tests.analysis.TestLookaheadTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/analysis/TestLookaheadTokenFilter.java) | org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter | Depth 1 | [x] | 200 | 5 | 30% |
 | [org.apache.lucene.tests.analysis.TestMockAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/analysis/TestMockAnalyzer.java) | org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer | Depth 1 | [] | 214 | 0 | 0% |
 | [org.apache.lucene.tests.analysis.TestMockCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/analysis/TestMockCharFilter.java) | org.gnit.lucenekmp.tests.analysis.TestMockCharFilter | Depth 1 | [x] | 198 | 16 | 0% |
@@ -13647,24 +14048,24 @@ TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Lucene Priority-1 Classes (Semantic Analysis)
 - Total Priority-1 Classes: 707
-- Ported Priority-1 Classes: 694
-- Priority-1 Class Porting Progress: 98%
+- Ported Priority-1 Classes: 704
+- Priority-1 Class Porting Progress: 99%
 - **Semantic Completion Progress: 53%**
 - Total Core Methods Needed: 5259
-- Core Methods Implemented: 2803
+- Core Methods Implemented: 2820
 
 ### Lucene Classes (Semantic Analysis)
-- Total Classes: 3554
-- Ported Classes: 1061
-- Class Porting Progress: 29%
-- **Semantic Completion Progress: 9%**
-- Total Core Methods Needed: 32846
-- Core Methods Implemented: 3197
+- Total Classes: 3922
+- Ported Classes: 1262
+- Class Porting Progress: 32%
+- **Semantic Completion Progress: 10%**
+- Total Core Methods Needed: 36423
+- Core Methods Implemented: 3991
 
 ### Unit Test Classes (Semantic Analysis)
-- Total Unit Test Classes: 2413
-- Ported Unit Test Classes: 1735
-- Unit Test Porting Progress: 71%
-- **Unit Test Semantic Completion: 7%**
-- Total Test Core Methods Needed: 124609
-- Test Core Methods Implemented: 8742
+- Total Unit Test Classes: 2622
+- Ported Unit Test Classes: 1768
+- Unit Test Porting Progress: 67%
+- **Unit Test Semantic Completion: 6%**
+- Total Test Core Methods Needed: 134333
+- Test Core Methods Implemented: 8863

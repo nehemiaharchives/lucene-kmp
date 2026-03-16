@@ -119,6 +119,7 @@ class Progress : CliktCommand() {
     private fun javaTestRoots(javaRoot: File): List<File> = buildList {
         add(File(javaRoot, "lucene/core/src/test/org/apache/lucene"))
         add(File(javaRoot, "lucene/codecs/src/test/org/apache/lucene"))
+        add(File(javaRoot, "lucene/queries/src/test/org/apache/lucene"))
         add(File(javaRoot, "lucene/queryparser/src/test/org/apache/lucene"))
         addAll(
             File(javaRoot, "lucene/analysis")
@@ -132,6 +133,7 @@ class Progress : CliktCommand() {
         add(File(javaRoot, "lucene/core/src/java"))
         add(File(javaRoot, "lucene/test-framework/src/java"))
         add(File(javaRoot, "lucene/codecs/src/java"))
+        add(File(javaRoot, "lucene/queries/src/java"))
         add(File(javaRoot, "lucene/queryparser/src/java"))
         addAll(
             File(javaRoot, "lucene/analysis")
@@ -144,6 +146,7 @@ class Progress : CliktCommand() {
     private fun kmpTestRoots(kmpRoot: File): List<File> = buildList {
         add(File(kmpRoot, "core/src/commonTest/kotlin/org/gnit/lucenekmp"))
         add(File(kmpRoot, "codecs/src/commonTest/kotlin/org/gnit/lucenekmp"))
+        add(File(kmpRoot, "queries/src/commonTest/kotlin/org/gnit/lucenekmp"))
         add(File(kmpRoot, "queryparser/src/commonTest/kotlin/org/gnit/lucenekmp"))
         addAll(
             File(kmpRoot, "analysis")
