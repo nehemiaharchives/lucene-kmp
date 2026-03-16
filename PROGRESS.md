@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1541 | 64% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1542 | 64% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
@@ -239,7 +239,7 @@
 |         org.apache.lucene.tests.codecs.uniformsplit.sharedterms |             org.gnit.lucenekmp.tests.codecs.uniformsplit.sharedterms | 1 | 0 | 0% | [ ] |
 |       org.apache.lucene.tests.codecs.vector |           org.gnit.lucenekmp.tests.codecs.vector | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 5 | 4 | 80% | [ ] |
-|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 39 | 34 | 87% | [ ] |
+|     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 39 | 35 | 89% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 21 | 3 | 14% | [ ] |
 |     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 24 | 20 | 83% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 3 | 3 | 100% | [x] |
@@ -1037,7 +1037,7 @@
 |   org.apache.lucene.collation | 2 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 49 | 98% |
 |   org.apache.lucene.geo | 17 | 17 | 100% |
-|   org.apache.lucene.index | 197 | 97 | 49% |
+|   org.apache.lucene.index | 197 | 101 | 51% |
 |     org.apache.lucene.internal.hppc | 15 | 15 | 100% |
 |     org.apache.lucene.internal.tests | 1 | 1 | 100% |
 |     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
@@ -1075,7 +1075,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 636 | 53% |
+| Total | 1186 | 640 | 53% |
 
 
 ## Tests To Port
@@ -1397,10 +1397,6 @@
 | [org.apache.lucene.collation.TestCollationDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/collation/TestCollationDocValuesField.java) | org.gnit.lucenekmp.collation.TestCollationDocValuesField |
 | [org.apache.lucene.collation.TestCollationKeyAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/collation/TestCollationKeyAnalyzer.java) | org.gnit.lucenekmp.collation.TestCollationKeyAnalyzer |
 | [org.apache.lucene.index.Test4GBStoredFields](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test4GBStoredFields.java) | org.gnit.lucenekmp.index.Test4GBStoredFields |
-| [org.apache.lucene.index.TestIndexWriterFromReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterFromReader.java) | org.gnit.lucenekmp.index.TestIndexWriterFromReader |
-| [org.apache.lucene.index.TestIndexWriterLockRelease](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterLockRelease.java) | org.gnit.lucenekmp.index.TestIndexWriterLockRelease |
-| [org.apache.lucene.index.TestIndexWriterMaxDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterMaxDocs.java) | org.gnit.lucenekmp.index.TestIndexWriterMaxDocs |
-| [org.apache.lucene.index.TestIndexWriterMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterMergePolicy.java) | org.gnit.lucenekmp.index.TestIndexWriterMergePolicy |
 | [org.apache.lucene.index.TestIndexWriterMerging](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterMerging.java) | org.gnit.lucenekmp.index.TestIndexWriterMerging |
 | [org.apache.lucene.index.TestIndexWriterNRTIsCurrent](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterNRTIsCurrent.java) | org.gnit.lucenekmp.index.TestIndexWriterNRTIsCurrent |
 | [org.apache.lucene.index.TestIndexWriterOnDiskFull](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterOnDiskFull.java) | org.gnit.lucenekmp.index.TestIndexWriterOnDiskFull |
