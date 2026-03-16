@@ -18,6 +18,8 @@ import java.io.File
 
 data class Source(val fqn: String, val file: File)
 
+private val portingModules = listOf("core", "codecs", "queryparser", "analysis")
+
 // ──────────────────────────────────────────────────────────────
 fun File.collectSources(ext: String): List<Source> =
     walkTopDown()
@@ -419,7 +421,13 @@ class Progress : CliktCommand() {
     }
 
     // ── tables ────────────────────────────────────────────────────────────
-    private fun renderMissing(missing: List<String>) {
+    private fun markdownLinkForJavaSource(fqn: String, javaRoot: File): String {
+        val source = javaIndex[fqn] ?: return markdownLinkForJavaFQN(fqn)
+        val relativePath = source.file.relativeTo(javaRoot).invariantSeparatorsPath
+        return "[$fqn](https://github.com/apache/lucene/blob/$javaLuceneCommitId/$relativePath)"
+    }
+
+    private fun renderMissing(javaRoot: File, missing: List<String>) {
         if (missing.isEmpty()) return
         term.println()
         val section = "## KMP Deps To Port"
@@ -436,9 +444,8 @@ class Progress : CliktCommand() {
         }
         term.println(tbl)
 
-
         // Markdown table with links for Java FQNs
-        val mdRows = missing.map { listOf(markdownLinkForJavaFQN(it), mapToKmp(it)) }
+        val mdRows = missing.map { listOf(markdownLinkForJavaSource(it, javaRoot), mapToKmp(it)) }
         val mdTable = mdTableBuilder(
             listOf("Java FQN", "Expected KMP FQN"),
             mdRows
@@ -504,7 +511,7 @@ class Progress : CliktCommand() {
         markDown.appendLine(mdTable)
     }
 
-    private fun renderPriorityStats(kmpSet: Set<String>) {
+    private fun renderPriorityStats(javaRoot: File, kmpSet: Set<String>) {
         val pri1 = coreWrite + coreSearch
         val pri1Set = pri1.toSet()
         data class Row(val java: String, val kmp: String, val total: Int, val ported: Int, val remain: Int, val done: Boolean)
@@ -562,7 +569,7 @@ class Progress : CliktCommand() {
         // Markdown table generation
         val mdRows = rows.map { r ->
             val pct = if (r.total == 0) 100 else r.ported * 100 / r.total
-            listOf(markdownLinkForJavaFQN(r.java), r.kmp, r.total, r.ported, r.remain, "$pct%", checkbox(r.done))
+            listOf(markdownLinkForJavaSource(r.java, javaRoot), r.kmp, r.total, r.ported, r.remain, "$pct%", checkbox(r.done))
         } + listOf(
             // Footer row doesn't need a link
             run {
@@ -577,6 +584,13 @@ class Progress : CliktCommand() {
             mdRows
         )
         markDown.appendLine(mdTable)
+    }
+
+    private fun isInPortingModules(source: Source, javaRoot: File): Boolean {
+        val relativePath = source.file.relativeTo(javaRoot).invariantSeparatorsPath
+        return portingModules.any { module ->
+            relativePath.startsWith("lucene/$module/")
+        }
     }
 
     // ── run ────────────────────────────────────────────────────────────────
@@ -604,12 +618,27 @@ class Progress : CliktCommand() {
         markDown.appendLine(section)
 
         renderPackageStats(deps, kmpSet, "## Package statistics (priority‑1 deps)")
-        renderPriorityStats(kmpSet)
+        renderPriorityStats(javaRoot, kmpSet)
 
         val allDeps = javaIndex.keys
             .filter { it.startsWith("org.apache.lucene.") && it !in notToPort }
             .toSet()
         renderPackageStats(allDeps, kmpSet, "## Package statistics (all deps)")
+        val moduleScopedMissingDeps = javaIndex.values
+            .filter { source ->
+                source.fqn.startsWith("org.apache.lucene.") &&
+                    source.fqn !in notToPort &&
+                    isInPortingModules(source, javaRoot)
+            }
+            .map { it.fqn }
+            .filter { dep ->
+                val outer = dep.substringBefore('$')
+                val mappedDep = mapToKmp(dep)
+                val mappedOuter = mapToKmp(outer)
+                mappedDep !in kmpSet && mappedOuter !in kmpSet
+            }
+            .sorted()
+
         val missingDeps = deps.filter { dep ->
             val outer = dep.substringBefore('$')
             val mappedDep = mapToKmp(dep)
@@ -617,7 +646,7 @@ class Progress : CliktCommand() {
             mappedDep !in kmpSet && mappedOuter !in kmpSet
         }.filter { it !in notToPort } // Exclude notToPort from missing list
          .sorted()
-        renderMissing(missingDeps)
+        renderMissing(javaRoot, moduleScopedMissingDeps.ifEmpty { missingDeps })
         
         // Add the table with Test classes count
         renderTestClassesTable(javaRoot, kmpRoot)
