@@ -337,15 +337,17 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     fun sizeInBytes(): Long {
-        var size: Long = 0
-        for (file in `in`.listAll()) {
-            // hack 2: see TODO in ExtrasFS (ideally it would always return 0 byte
-            // size for extras it creates, even though the size of non-regular files is not defined)
-            if (!file.startsWith("extra")) {
-                size += `in`.fileLength(file)
+        return withStateLock {
+            var size: Long = 0
+            for (file in `in`.listAll()) {
+                // hack 2: see TODO in ExtrasFS (ideally it would always return 0 byte
+                // size for extras it creates, even though the size of non-regular files is not defined)
+                if (!file.startsWith("extra")) {
+                    size += `in`.fileLength(file)
+                }
             }
+            size
         }
-        return size
     }
 
     /*@Synchronized*/
@@ -1352,23 +1354,29 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun listAll(): Array<String> {
-        maybeYield()
-        return `in`.listAll()
+        return withStateLock {
+            maybeYield()
+            `in`.listAll()
+        }
     }
 
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun fileLength(name: String): Long {
-        maybeYield()
-        return `in`.fileLength(name)
+        return withStateLock {
+            maybeYield()
+            `in`.fileLength(name)
+        }
     }
 
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun obtainLock(name: String): Lock {
-        maybeYield()
-        return super.obtainLock(name)
-        // TODO: consider mocking locks, but not all the time, can hide bugs
+        return withStateLock {
+            maybeYield()
+            super.obtainLock(name)
+            // TODO: consider mocking locks, but not all the time, can hide bugs
+        }
     }
 
     /**
