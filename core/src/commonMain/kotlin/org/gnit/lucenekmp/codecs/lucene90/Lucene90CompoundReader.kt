@@ -15,6 +15,8 @@ import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.IOUtils
 
+private val lucene90CompoundReaderLogger = KotlinLogging.logger {}
+
 /**
  * Class for accessing a compound stream. This class implements a directory, but is limited to only
  * read operations. Directory methods that would normally modify data throw an exception.
@@ -22,7 +24,6 @@ import org.gnit.lucenekmp.util.IOUtils
  * @lucene.experimental
  */
 internal class Lucene90CompoundReader(private val directory: Directory, si: SegmentInfo) : CompoundDirectory() {
-    private val logger = KotlinLogging.logger {}
     /** Offset/Length for a slice inside of a compound file  */
     class FileEntry {
         var offset: Long = 0

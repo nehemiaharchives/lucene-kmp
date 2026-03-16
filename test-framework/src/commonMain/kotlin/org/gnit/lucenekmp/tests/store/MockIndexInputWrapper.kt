@@ -38,7 +38,7 @@ open class MockIndexInputWrapper(
     private val parent: MockIndexInputWrapper?,
     private var readAdvice: ReadAdvice,
     private val confined: Boolean
-) : FilterIndexInput("MockIndexInputWrapper(name=$name delegate=$delegate)", delegate) {
+) : FilterIndexInput(mockIndexInputWrapperDescription(name, delegate), delegate) {
 
     @Volatile
     private var closed: Boolean = false

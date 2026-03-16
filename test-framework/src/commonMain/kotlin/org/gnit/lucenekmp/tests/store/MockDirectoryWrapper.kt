@@ -138,7 +138,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     // use this for tracking files for crash.
     // additionally: provides debugging information in case you leave one open
-    private val openFileHandles: MutableMap<AutoCloseable, Exception> = mutableMapOf()
+    private val openFileHandles: MutableMap<AutoCloseable, OpenHandleTrace> = mutableMapOf()
         /*java.util.Collections.synchronizedMap<AutoCloseable, Exception>(java.util.IdentityHashMap<AutoCloseable, Exception>())*/
 
     // NOTE: we cannot initialize the Map here due to the
@@ -649,7 +649,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             openFilesDeleted = mutableSetOf()
             // first force-close all files, so we can corrupt on windows etc.
             // clone the file map, as these guys want to remove themselves on close.
-            val m: MutableMap<AutoCloseable, Exception> = openFileHandles.toMutableMap()
+            val m: MutableMap<AutoCloseable, OpenHandleTrace> = openFileHandles.toMutableMap()
                 /*java.util.IdentityHashMap<AutoCloseable, Exception>(openFileHandles)*/
             for (f in m.keys) {
                 try {
@@ -780,7 +780,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             } else if (!input && ent.key is MockIndexOutputWrapper
                 && (ent.key as MockIndexOutputWrapper).name == name
             ) {
-                thrown = ent.value as T
+                thrown = ent.value.asException() as T
                 break
             }
         }
@@ -924,7 +924,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                 openFiles!![name] = 1
             }
 
-            openFileHandles[c] = RuntimeException("unclosed Index" + handle.name + ": " + name)
+            openFileHandles[c] = createOpenHandleTrace("unclosed Index" + handle.name + ": " + name)
             if (name.endsWith(".cfs")) {
                 //logger.debug { "MDW addFileHandle: name=$name handle=$handle count=${openFiles!![name]}" }
                 if ((openFiles!![name] ?: 0) > 1) {
@@ -953,7 +953,8 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
         if (failOnOpenInput) {
             maybeThrowDeterministicException()
         }
-        if (!LuceneTestCase.slowFileExists(`in`, name)) {
+        val fileExists = LuceneTestCase.slowFileExists(`in`, name)
+        if (!fileExists) {
             throw if (randomState.nextBoolean())
                 FileNotFoundException("$name in dir=$`in`")
             else
@@ -1033,7 +1034,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             //   still open when we tried to delete
             maybeYield()
             var openFilesSnapshot: Map<String, Int> = emptyMap()
-            var openFileHandlesSnapshot: Map<AutoCloseable, Exception> = emptyMap()
+            var openFileHandlesSnapshot: Map<AutoCloseable, OpenHandleTrace> = emptyMap()
             withOpenFilesLock {
                 if (openFiles == null) {
                     openFiles = mutableMapOf()
@@ -1045,10 +1046,10 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             if (openFilesSnapshot.isNotEmpty()) {
                 // print the first one as it's very verbose otherwise
                 var cause: Exception? = null
-                val stacktraces: Iterator<Exception> =
+                val stacktraces: Iterator<OpenHandleTrace> =
                     openFileHandlesSnapshot.values.iterator()
                 if (stacktraces.hasNext()) {
-                    cause = stacktraces.next()
+                    cause = stacktraces.next().asException()
                 }
                 // RuntimeException instead of IOException because
                 // super() does not throw IOException currently:
@@ -1237,8 +1238,8 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             if (remaining > 0) {
                 val traces =
                     openFileHandles.values
-                        .filter { it.message?.contains(name) == true }
-                        .joinToString(separator = "\n\n") { it.stackTraceToString() }
+                        .filter { it.render().contains(name) }
+                        .joinToString(separator = "\n\n") { it.render() }
                 //logger.debug { "MDW removeOpenFile outstanding-handles: name=$name remaining=$remaining\n$traces" }
             }
         }

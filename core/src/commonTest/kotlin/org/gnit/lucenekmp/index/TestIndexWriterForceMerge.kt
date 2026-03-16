@@ -61,9 +61,11 @@ class TestIndexWriterForceMerge : LuceneTestCase() {
                     .setMaxBufferedDocs(2)
                     .setMergePolicy(ldmp)
             )
+
             for (j in 0 until numDocs) {
                 writer.addDocument(doc)
             }
+
             writer.close()
 
             var sis = SegmentInfos.readLatestCommit(dir)
@@ -77,7 +79,9 @@ class TestIndexWriterForceMerge : LuceneTestCase() {
                 newIndexWriterConfig(MockAnalyzer(random()))
                     .setMergePolicy(ldmp)
             )
+
             writer.forceMerge(3)
+
             writer.close()
 
             sis = SegmentInfos.readLatestCommit(dir)

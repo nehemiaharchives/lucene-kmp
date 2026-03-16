@@ -25,6 +25,7 @@ import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 
+private val segmentCoreReadersLogger = KotlinLogging.logger {}
 
 /** Holds core readers that are shared (unchanged) when SegmentReader is cloned or reopened  */
 class SegmentCoreReaders(
@@ -32,7 +33,6 @@ class SegmentCoreReaders(
     si: SegmentCommitInfo,
     context: IOContext
 ) {
-    private val logger = KotlinLogging.logger {}
     // Counts how many other readers share the core objects
     // (freqStream, proxStream, tis, etc.) of this reader;
     // when coreRef drops to 0, these core objects may be

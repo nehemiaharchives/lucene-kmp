@@ -148,7 +148,6 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                 si.getId(),
                 segmentSuffix
             )
-
             chunkSize = metaIn.readVInt()
 
             decompressor = compressionMode.newDecompressor()

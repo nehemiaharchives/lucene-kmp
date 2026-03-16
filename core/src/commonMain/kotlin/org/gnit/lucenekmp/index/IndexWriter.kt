@@ -70,8 +70,6 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.TimeSource
 
 /**
  * An <code>IndexWriter</code> creates and maintains an index.
@@ -280,30 +278,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             assert(
                 Int.MAX_VALUE - permits.availablePermits > 0
             ) { "must acquire a permit before processing events" }
-            val totalMark = TimeSource.Monotonic.markNow()
-            var pollNs = 0L
-            var processNs = 0L
-            var eventCount = 0
             var event: Event?
             while (true) {
-                val pollMark = TimeSource.Monotonic.markNow()
                 queueLock.lock()
                 event = try {
                     queue.poll()
                 } finally {
                     queueLock.unlock()
                 }
-                pollNs += pollMark.elapsedNow().inWholeNanoseconds
                 if (event == null) {
                     break
                 }
-                val processMark = TimeSource.Monotonic.markNow()
                 event!!.process(writer)
-                val eventProcessNs = processMark.elapsedNow().inWholeNanoseconds
-                processNs += eventProcessNs
-                eventCount++
-            }
-            if (eventCount > 0 || totalMark.elapsedNow().inWholeNanoseconds > 1_000_000L) {
             }
         }
 
@@ -1099,9 +1085,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @OptIn(ExperimentalAtomicApi::class)
     private fun shouldClose(waitForClose: Boolean): Boolean {
-        val waitStartedAt = TimeSource.Monotonic.markNow()
-        var waitIters = 0
-        var loggedSlowWait = false
         var shouldClose = false
         withIndexWriterLock {
             while (true) {
@@ -1121,18 +1104,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                         // wait until it finishes one way (closes
                         // successfully) or another (fails to close)
                         NativeCrashProbe.markPhase(NativeCrashProbe.PHASE_IW_SHUTDOWN_SHOULD_CLOSE_WAIT)
-                        waitIters++
-                        if (!loggedSlowWait && waitStartedAt.elapsedNow() > 5.seconds) {
-                            loggedSlowWait = true
-                            val elapsed = waitStartedAt.elapsedNow()
-                            val ownerSeq = closeOwnerSeq
-                            val ownerPhase = closeOwnerPhase
-                            val ownerElapsedMs = closeOwnerElapsedMs()
-                            logger.error {
-                                "shouldClose: slow wait elapsed=$elapsed waitForClose=$waitForClose closed=$closed closing=$closing waitIters=$waitIters ownerSeq=$ownerSeq ownerPhase=$ownerPhase ownerElapsedMs=$ownerElapsedMs probeRun=${NativeCrashProbe.run()} probeAttempt=${NativeCrashProbe.attempt()} probePhase=${NativeCrashProbe.phase()} probeUpdates=${NativeCrashProbe.updates()} cmsActive=${ConcurrentMergeScheduler.debugActiveMergeThreads()} cmsStarted=${ConcurrentMergeScheduler.debugStartedMergeThreads()} cmsFinished=${ConcurrentMergeScheduler.debugFinishedMergeThreads()} chkActive=${CheckIndex.debugActiveIntegrityChecks()} chkStarted=${CheckIndex.debugStartedIntegrityChecks()} chkFinished=${CheckIndex.debugFinishedIntegrityChecks()}"
-                            }
-                            NativeCrashProbe.requestNativeProbeDump(times = 1)
-                        }
                         doWait()
                     }
                 } else {
@@ -1947,7 +1918,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @JvmOverloads
     @Throws(IOException::class)
     fun forceMerge(maxNumSegments: Int, doWait: Boolean = true) {
-        val forceMergeTotalMark = TimeSource.Monotonic.markNow()
         ensureOpen()
 
         require(maxNumSegments >= 1) { "maxNumSegments must be >= 1; got $maxNumSegments" }
@@ -1957,11 +1927,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             infoStream.message("IW", "now flush at forceMerge")
         }
         // logger.debug { "forceMerge: start maxNumSegments=$maxNumSegments doWait=$doWait" }
-        val forceMergeFlushMark = TimeSource.Monotonic.markNow()
         flush(triggerMerge = true, applyAllDeletes = true)
         // logger.debug { "forceMerge: flush done maxNumSegments=$maxNumSegments" }
 
-        val forceMergeSetupMark = TimeSource.Monotonic.markNow()
         withIndexWriterLock {
             resetMergeExceptions()
             segmentsToMerge.clear()
@@ -1991,14 +1959,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         }
 
         // logger.debug { "forceMerge: maybeMerge enter maxNumSegments=$maxNumSegments" }
-        val forceMergeMaybeMergeMark = TimeSource.Monotonic.markNow()
         maybeMerge(config.mergePolicy, MergeTrigger.EXPLICIT, maxNumSegments)
         // logger.debug { "forceMerge: maybeMerge exit maxNumSegments=$maxNumSegments" }
 
         if (doWait) {
             var waitIters = 0
-            val forceMergeWaitTotalMark = TimeSource.Monotonic.markNow()
-            var forceMergeDoWaitNs = 0L
 
             withIndexWriterLock {
                 while (true) {
@@ -2047,9 +2012,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             // logMerges("forceMerge", pendingMerges, runningMerges)
                         }
                         testPoint("forceMergeBeforeWait")
-                        val doWaitMark = TimeSource.Monotonic.markNow()
                         doWait()
-                        forceMergeDoWaitNs += doWaitMark.elapsedNow().inWholeNanoseconds
                     } else {
                         break
                     }
@@ -2720,8 +2683,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // We wait here to make all merges stop.  It should not
             // take very long because they periodically check if
             // they are aborted.
-            val abortWaitStartedAt = TimeSource.Monotonic.markNow()
-            var loggedSlowAbortWait = false
             var abortWaitIters = 0
             while (runningMerges.size + runningAddIndexesMerges.size != 0) {
                 val runningMergeCount = runningMerges.size
@@ -2742,13 +2703,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     logger.debug {
                         "abortMerges: waiting iter=$abortWaitIters runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
                     }
-                }
-                if (!loggedSlowAbortWait && abortWaitStartedAt.elapsedNow() > 5.seconds) {
-                    loggedSlowAbortWait = true
-                    logger.error {
-                        "abortMerges: slow wait elapsed=${abortWaitStartedAt.elapsedNow()} runningMerges=$runningMergeCount runningAddIndexesMerges=$runningAddIndexesMergeCount pendingMerges=$pendingMergeCount"
-                    }
-                    NativeCrashProbe.requestNativeProbeDump(times = 1)
                 }
 
                 doWait()
@@ -2783,8 +2737,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 infoStream.message("IW", "waitForMerges")
             }
 
-            val waitStartedAt = TimeSource.Monotonic.markNow()
-            var loggedSlowWait = false
             var waitForMergesIters = 0
             while (pendingMerges.isNotEmpty() || runningMerges.isNotEmpty()) {
                 markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_LOOP)
@@ -2793,19 +2745,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     logger.debug {
                         "waitForMerges: waiting iter=$waitForMergesIters pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size}"
                     }
-                }
-                if (!loggedSlowWait && waitStartedAt.elapsedNow() > 5.seconds) {
-                    loggedSlowWait = true
-                    val runningMergeSummary = runningMerges.joinToString(
-                        separator = ", ",
-                        limit = 3,
-                        truncated = "..."
-                    ) { merge -> merge.segString() }
-                    val elapsed = waitStartedAt.elapsedNow()
-                    logger.error {
-                        "waitForMerges: slow wait elapsed=$elapsed pending=${pendingMerges.size} running=${runningMerges.size} mergeExceptions=${mergeExceptions.size} runningMerges=$runningMergeSummary"
-                    }
-                    NativeCrashProbe.requestNativeProbeDump(times = 1)
                 }
                 markCloseOwnerAndProbe(NativeCrashProbe.PHASE_IW_WAIT_FOR_MERGES_DO_WAIT)
                 doWait()
@@ -2900,7 +2839,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         globalPacket: FrozenBufferedUpdates?,
         sortMap: DocMap?
     ) {
-        withIndexWriterLock {
+        indexWriterLock.lock()
+        try {
             var published = false
             try {
                 // Lock order IW -> BDS
@@ -2977,6 +2917,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 flushCount.incrementAndFetch()
                 doAfterFlush()
             }
+        } finally {
+            indexWriterLock.unlock()
         }
     }
 
@@ -4521,7 +4463,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /** Returns true a segment was flushed or deletes were applied.  */
     @Throws(IOException::class)
     private fun doFlush(applyAllDeletes: Boolean): Boolean {
-        val doFlushTotalMark = TimeSource.Monotonic.markNow()
         if (tragedy.load() != null) {
             throw IllegalStateException(
                 "this writer hit an unrecoverable error; cannot flush", tragedy.load()
@@ -4539,20 +4480,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             }
             var anyChanges = false
 
-            val fullFlushLockMark = TimeSource.Monotonic.markNow()
             withFullFlushLock {
                 var flushSuccess = false
                 try {
 //                 logger.debug { "doFlush: docWriter.flushAllThreads start" }
-                val flushAllThreadsMark = TimeSource.Monotonic.markNow()
                 anyChanges = (runBlocking { docWriter.flushAllThreads() } < 0)
 //                 logger.debug { "doFlush: docWriter.flushAllThreads done anyChanges=$anyChanges" }
                 if (!anyChanges) {
-                    // flushCount is incremented in flushAllThreads
+                // flushCount is incremented in flushAllThreads
                     flushCount.incrementAndFetch()
                 }
 //                 logger.debug { "doFlush: publishFlushedSegments start" }
-                val publishFlushedMark = TimeSource.Monotonic.markNow()
                 publishFlushedSegments(true)
 //                 logger.debug { "doFlush: publishFlushedSegments done" }
                     flushSuccess = true
@@ -4561,17 +4499,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // TODO Thread is not supported in KMP, need to think what to do here
                 //assert(java.lang.Thread.holdsLock(fullFlushLock))
 //                     logger.debug { "doFlush: finishFullFlush start success=$flushSuccess" }
-                    val finishFullFlushMark = TimeSource.Monotonic.markNow()
                     docWriter.finishFullFlush(flushSuccess)
 //                     logger.debug { "doFlush: finishFullFlush done" }
-                    val processEventsMark = TimeSource.Monotonic.markNow()
                     processEvents(false)
                 }
             }
 
             if (applyAllDeletes) {
 //                 logger.debug { "doFlush: applyAllDeletesAndUpdates start" }
-                val applyDeletesMark = TimeSource.Monotonic.markNow()
                 applyAllDeletesAndUpdates()
 //                 logger.debug { "doFlush: applyAllDeletesAndUpdates done" }
             }
@@ -4580,10 +4515,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
             return withIndexWriterLock {
 //             logger.debug { "doFlush: writeReaderPool start" }
-                val writeReaderPoolMark = TimeSource.Monotonic.markNow()
                 writeReaderPool(applyAllDeletes)
 //             logger.debug { "doFlush: writeReaderPool done" }
-                val doAfterFlushMark = TimeSource.Monotonic.markNow()
                 doAfterFlush()
 //             logger.debug { "doFlush: doAfterFlush done" }
                 success = true
@@ -6633,12 +6566,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      */
     @Throws(IOException::class)
     fun tryApply(updates: FrozenBufferedUpdates): Boolean {
-        val tryApplyTotalMark = TimeSource.Monotonic.markNow()
         // logger.debug { "tryApply: start delGen=${updates.delGen()}" }
         if (updates.tryLock()) {
             try {
                 // logger.debug { "tryApply: locked delGen=${updates.delGen()}" }
-                val forceApplyMark = TimeSource.Monotonic.markNow()
                 forceApply(updates)
                 return true
             } finally {
@@ -6658,7 +6589,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     @OptIn(ExperimentalAtomicApi::class)
     @Throws(IOException::class)
     fun forceApply(updates: FrozenBufferedUpdates) {
-        val forceApplyTotalMark = TimeSource.Monotonic.markNow()
         // logger.debug { "forceApply: lock start delGen=${updates.delGen()}" }
         updates.lock()
         try {
@@ -6702,7 +6632,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // TODO synchronized is not supported in KMP, need to think what to do here
                 //synchronized(this) {
                 val opened = withIndexWriterLock {
-                    val openStatesMark = TimeSource.Monotonic.markNow()
                     val infos: MutableList<SegmentCommitInfo> = getInfosToApply(updates) ?: return@withIndexWriterLock null
                     // logger.debug { "forceApply: infos size=${infos.size} delGen=${updates.delGen()}" }
 
@@ -6742,13 +6671,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // don't hold IW monitor lock here so threads are free concurrently resolve
                     // deletes/updates:
                     // logger.debug { "forceApply: updates.apply start delGen=${updates.delGen()} segStates=${segStates.size}" }
-                    val updatesApplyMark = TimeSource.Monotonic.markNow()
                     delCount = runBlocking { updates.apply(segStates) }
                     // logger.debug { "forceApply: updates.apply done delGen=${updates.delGen()} delCount=$delCount" }
                     success.store(true)
                 }
                 // Since we just resolved some more deletes/updates, now is a good time to write them:
-                val writeDvUpdatesMark = TimeSource.Monotonic.markNow()
                 writeSomeDocValuesUpdates()
 
                 // It's OK to add this here, even if the while loop retries, because delCount only includes
@@ -6782,7 +6709,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 // TODO synchronized is not supported in KMP, need to think what to do here
                 //synchronized(this) {
                 val done = withIndexWriterLock {
-                    val mergeCheckMark = TimeSource.Monotonic.markNow()
                     val mergeGenCur: Long = mergeFinishedGen.load()
                     if (mergeGenCur == mergeGenStart) {
                         // Must do this while still holding IW lock else a merge could finish and skip carrying
@@ -6940,16 +6866,10 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         delGen: Long
     ): Array<BufferedUpdatesStream.SegmentState> {
         val segStates: MutableList<BufferedUpdatesStream.SegmentState> = mutableListOf()
-        var pooledInstanceNs = 0L
-        var segmentStateBuildNs = 0L
-        var openedSegments = 0
         try {
             for (info in infos) {
                 if (info.bufferedDeletesGen <= delGen && !alreadySeenSegments.contains(info)) {
-                    val pooledMark = TimeSource.Monotonic.markNow()
                     val readersAndUpdates = getPooledInstance(info, true)!!
-                    pooledInstanceNs += pooledMark.elapsedNow().inWholeNanoseconds
-                    val stateBuildMark = TimeSource.Monotonic.markNow()
                     segStates.add(
                         BufferedUpdatesStream.SegmentState(
                             readersAndUpdates,
@@ -6959,8 +6879,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             info
                         )
                     )
-                    segmentStateBuildNs += stateBuildMark.elapsedNow().inWholeNanoseconds
-                    openedSegments++
                     alreadySeenSegments.add(info)
                 }
             }

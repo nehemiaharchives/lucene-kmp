@@ -28,6 +28,8 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
 import okio.IOException
 
+private val readersAndUpdatesLogger = KotlinLogging.logger {}
+
 // Used by IndexWriter to hold open SegmentReaders (for
 // searching or merging), plus pending deletes and updates,
 // for a given segment
@@ -41,7 +43,6 @@ class ReadersAndUpdates(
     // liveDocs vs when we loaded it or last wrote it:
     private val pendingDeletes: PendingDeletes
 ) {
-    private val logger = KotlinLogging.logger {}
     private val rldLock: ReentrantLock = ReentrantLock()
 
     private fun <T> withRldLock(action: () -> T): T {

@@ -430,9 +430,8 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         delNode: DocumentsWriterDeleteQueue.Node<*>?
     ): Long {
         val hasEvents = preUpdate()
-
         val dwpt: DocumentsWriterPerThread = flushControl.obtainAndLock()
-        val flushingDWPT: DocumentsWriterPerThread?
+        var flushingDWPT: DocumentsWriterPerThread? = null
         var seqNo: Long
 
         try {
@@ -446,18 +445,17 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                         delNode,
                         flushNotifications
                     ) { numDocsInRAM.incrementAndFetch() }
+                flushingDWPT = flushControl.doAfterDocument(dwpt)
             } finally {
                 if (dwpt.isAborted) {
                     flushControl.doOnAbort(dwpt)
                 }
             }
-            flushingDWPT = flushControl.doAfterDocument(dwpt)
         } finally {
             // If a flush is occurring, we don't want to allow this dwpt to be reused
             // If it is aborted, we shouldn't allow it to be reused
             // If the deleteQueue is advanced, this means the maximum seqNo has been set and it cannot be
             // reused
-
             flushControl.releaseAfterDocument(dwpt)
             assert(!dwpt.isHeldByCurrentThread) { "we didn't release the dwpt even on abort" }
         }
