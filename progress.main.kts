@@ -59,6 +59,7 @@ fun mapToKmp(fqn: String): String = when {
 
 fun linesOf(file: File) = file.useLines { it.count() }
 fun checkbox(ok: Boolean) = if (ok) "[x]" else "[ ]"
+private fun isPackageInfo(fqn: String) = fqn.endsWith(".package-info")
 
 val javaLuceneCommitId = "ec75fcad5a4208c7b9e35e870229d9b703cda8f3"
 
@@ -611,7 +612,10 @@ class Progress : CliktCommand() {
         val kmpSet = kmpSrc.map { it.fqn }.toSet()
 
         // Exclude notToPort from all dependency sets
-        val deps = collectTransitive(pri1.toSet()).filter { it in javaIndex && it !in notToPort }.toSet()
+        val deps = collectTransitive(pri1.toSet())
+            .filter { it in javaIndex && it !in notToPort }
+            .filterNot(::isPackageInfo)
+            .toSet()
 
         val section = "# Lucene KMP Port Progress"
         term.println(bold(section))
@@ -621,7 +625,7 @@ class Progress : CliktCommand() {
         renderPriorityStats(javaRoot, kmpSet)
 
         val allDeps = javaIndex.keys
-            .filter { it.startsWith("org.apache.lucene.") && it !in notToPort }
+            .filter { it.startsWith("org.apache.lucene.") && it !in notToPort && !isPackageInfo(it) }
             .toSet()
         renderPackageStats(allDeps, kmpSet, "## Package statistics (all deps)")
         val moduleScopedMissingDeps = javaIndex.values
@@ -637,6 +641,7 @@ class Progress : CliktCommand() {
                 val mappedOuter = mapToKmp(outer)
                 mappedDep !in kmpSet && mappedOuter !in kmpSet
             }
+            .filterNot(::isPackageInfo)
             .sorted()
 
         val missingDeps = deps.filter { dep ->
@@ -645,6 +650,7 @@ class Progress : CliktCommand() {
             val mappedOuter = mapToKmp(outer)
             mappedDep !in kmpSet && mappedOuter !in kmpSet
         }.filter { it !in notToPort } // Exclude notToPort from missing list
+         .filterNot(::isPackageInfo)
          .sorted()
         renderMissing(javaRoot, moduleScopedMissingDeps.ifEmpty { missingDeps })
         
