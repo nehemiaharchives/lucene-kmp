@@ -323,7 +323,7 @@ class SpanOrQuery : SpanQuery {
                 }
 
                 override fun toString(): String {
-                    return "spanOr($this@SpanOrQuery)@${docID()}: ${startPosition()} - ${endPosition()}"
+                    return "spanOr(${this@SpanOrQuery.toString(null)})@${docID()}: ${startPosition()} - ${endPosition()}"
                 }
 
                 var cost = -1L

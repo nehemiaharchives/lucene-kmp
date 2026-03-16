@@ -296,7 +296,15 @@ abstract class SpanWeight(
                     fun collectInnerTerms() {
                         termCollector.reset()
                         spans.collect(termCollector)
-                        innerTerms.sortBy { it.position }
+                        for (i in 1..<innerTermCount) {
+                            val current = innerTerms[i]
+                            var j = i - 1
+                            while (j >= 0 && innerTerms[j].position > current.position) {
+                                innerTerms[j + 1] = innerTerms[j]
+                                j--
+                            }
+                            innerTerms[j + 1] = current
+                        }
                     }
                 }
             },

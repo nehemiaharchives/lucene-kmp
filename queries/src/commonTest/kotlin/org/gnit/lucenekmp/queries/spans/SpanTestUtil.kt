@@ -43,6 +43,26 @@ object SpanTestUtil {
         return spanQuery(SpanNotQuery(include, exclude, pre, post))
     }
 
+    /** Makes a new SpanFirstQuery (with additional asserts). */
+    fun spanFirstQuery(query: SpanQuery, end: Int): SpanQuery {
+        return spanQuery(SpanFirstQuery(query, end))
+    }
+
+    /** Makes a new SpanPositionRangeQuery (with additional asserts). */
+    fun spanPositionRangeQuery(query: SpanQuery, start: Int, end: Int): SpanQuery {
+        return spanQuery(SpanPositionRangeQuery(query, start, end))
+    }
+
+    /** Makes a new SpanContainingQuery (with additional asserts). */
+    fun spanContainingQuery(big: SpanQuery, little: SpanQuery): SpanQuery {
+        return spanQuery(SpanContainingQuery(big, little))
+    }
+
+    /** Makes a new SpanWithinQuery (with additional asserts). */
+    fun spanWithinQuery(big: SpanQuery, little: SpanQuery): SpanQuery {
+        return spanQuery(SpanWithinQuery(big, little))
+    }
+
     /** Makes a new ordered SpanNearQuery (with additional asserts) from the provided `terms` */
     fun spanNearOrderedQuery(field: String, slop: Int, vararg terms: String): SpanQuery {
         val subqueries = Array(terms.size) { i -> spanTermQuery(field, terms[i]) }
