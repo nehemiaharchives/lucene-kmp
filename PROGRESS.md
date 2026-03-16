@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1528 | 63% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1541 | 64% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
@@ -191,7 +191,7 @@
 |     org.apache.lucene.queries.intervals |         org.gnit.lucenekmp.queries.intervals | 43 | 0 | 0% | [ ] |
 |     org.apache.lucene.queries.mlt |         org.gnit.lucenekmp.queries.mlt | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.queries.payloads |         org.gnit.lucenekmp.queries.payloads | 10 | 0 | 0% | [ ] |
-|     org.apache.lucene.queries.spans |         org.gnit.lucenekmp.queries.spans | 27 | 18 | 66% | [ ] |
+|     org.apache.lucene.queries.spans |         org.gnit.lucenekmp.queries.spans | 27 | 27 | 100% | [x] |
 |     org.apache.lucene.queryparser.charstream |         org.gnit.lucenekmp.queryparser.charstream | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.queryparser.classic |         org.gnit.lucenekmp.queryparser.classic | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.queryparser.complexPhrase |         org.gnit.lucenekmp.queryparser.complexPhrase | 1 | 1 | 100% | [x] |
@@ -219,7 +219,7 @@
 |       org.apache.lucene.queryparser.surround.query |           org.gnit.lucenekmp.queryparser.surround.query | 19 | 0 | 0% | [ ] |
 |     org.apache.lucene.queryparser.xml |         org.gnit.lucenekmp.queryparser.xml | 7 | 0 | 0% | [ ] |
 |       org.apache.lucene.queryparser.xml.builders |           org.gnit.lucenekmp.queryparser.xml.builders | 22 | 0 | 0% | [ ] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 196 | 178 | 90% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 196 | 181 | 92% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 47 | 47 | 100% | [x] |
@@ -241,7 +241,7 @@
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 39 | 34 | 87% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 21 | 3 | 14% | [ ] |
-|     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 24 | 19 | 79% | [ ] |
+|     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 24 | 20 | 83% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 12 | 12 | 100% | [x] |
 |     org.apache.lucene.tests.util |         org.gnit.lucenekmp.tests.util | 35 | 16 | 45% | [ ] |
@@ -910,10 +910,7 @@
 | [org.apache.lucene.search.LiveFieldValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/LiveFieldValues.java) | org.gnit.lucenekmp.search.LiveFieldValues |
 | [org.apache.lucene.search.MultiCollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/MultiCollectorManager.java) | org.gnit.lucenekmp.search.MultiCollectorManager |
 | [org.apache.lucene.search.NGramPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/NGramPhraseQuery.java) | org.gnit.lucenekmp.search.NGramPhraseQuery |
-| [org.apache.lucene.search.NamedMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/NamedMatches.java) | org.gnit.lucenekmp.search.NamedMatches |
 | [org.apache.lucene.search.PositiveScoresOnlyCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/PositiveScoresOnlyCollector.java) | org.gnit.lucenekmp.search.PositiveScoresOnlyCollector |
-| [org.apache.lucene.search.QueryRescorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/QueryRescorer.java) | org.gnit.lucenekmp.search.QueryRescorer |
-| [org.apache.lucene.search.Rescorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/Rescorer.java) | org.gnit.lucenekmp.search.Rescorer |
 | [org.apache.lucene.search.SearcherLifetimeManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SearcherLifetimeManager.java) | org.gnit.lucenekmp.search.SearcherLifetimeManager |
 | [org.apache.lucene.search.SeededKnnVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SeededKnnVectorQuery.java) | org.gnit.lucenekmp.search.SeededKnnVectorQuery |
 | [org.apache.lucene.search.SortRescorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SortRescorer.java) | org.gnit.lucenekmp.search.SortRescorer |
@@ -1050,7 +1047,7 @@
 |     org.apache.lucene.queries.intervals | 7 | 0 | 0% |
 |     org.apache.lucene.queries.mlt | 1 | 0 | 0% |
 |     org.apache.lucene.queries.payloads | 6 | 0 | 0% |
-|     org.apache.lucene.queries.spans | 21 | 6 | 28% |
+|     org.apache.lucene.queries.spans | 21 | 21 | 100% |
 |     org.apache.lucene.queryparser.classic | 4 | 4 | 100% |
 |     org.apache.lucene.queryparser.complexPhrase | 1 | 1 | 100% |
 |     org.apache.lucene.queryparser.ext | 2 | 0 | 0% |
@@ -1078,7 +1075,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 621 | 52% |
+| Total | 1186 | 636 | 53% |
 
 
 ## Tests To Port
@@ -1527,21 +1524,6 @@
 | [org.apache.lucene.queries.payloads.TestPayloadSpanPositions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadSpanPositions.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadSpanPositions |
 | [org.apache.lucene.queries.payloads.TestPayloadSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadSpans.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadSpans |
 | [org.apache.lucene.queries.payloads.TestPayloadTermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/payloads/TestPayloadTermQuery.java) | org.gnit.lucenekmp.queries.payloads.TestPayloadTermQuery |
-| [org.apache.lucene.queries.spans.TestBasics](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestBasics.java) | org.gnit.lucenekmp.queries.spans.TestBasics |
-| [org.apache.lucene.queries.spans.TestFieldMaskingSpanQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestFieldMaskingSpanQuery.java) | org.gnit.lucenekmp.queries.spans.TestFieldMaskingSpanQuery |
-| [org.apache.lucene.queries.spans.TestQueryRescorerWithSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestQueryRescorerWithSpans.java) | org.gnit.lucenekmp.queries.spans.TestQueryRescorerWithSpans |
-| [org.apache.lucene.queries.spans.TestSpanCollection](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanCollection.java) | org.gnit.lucenekmp.queries.spans.TestSpanCollection |
-| [org.apache.lucene.queries.spans.TestSpanContainQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanContainQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanContainQuery |
-| [org.apache.lucene.queries.spans.TestSpanExplanations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanExplanations.java) | org.gnit.lucenekmp.queries.spans.TestSpanExplanations |
-| [org.apache.lucene.queries.spans.TestSpanExplanationsOfNonMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanExplanationsOfNonMatches.java) | org.gnit.lucenekmp.queries.spans.TestSpanExplanationsOfNonMatches |
-| [org.apache.lucene.queries.spans.TestSpanFirstQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanFirstQuery.java) | org.gnit.lucenekmp.queries.spans.TestSpanFirstQuery |
-| [org.apache.lucene.queries.spans.TestSpanMatches](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanMatches.java) | org.gnit.lucenekmp.queries.spans.TestSpanMatches |
-| [org.apache.lucene.queries.spans.TestSpanMultiTermQueryWrapper](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanMultiTermQueryWrapper.java) | org.gnit.lucenekmp.queries.spans.TestSpanMultiTermQueryWrapper |
-| [org.apache.lucene.queries.spans.TestSpanQueryVisitor](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanQueryVisitor.java) | org.gnit.lucenekmp.queries.spans.TestSpanQueryVisitor |
-| [org.apache.lucene.queries.spans.TestSpanSearchEquivalence](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanSearchEquivalence.java) | org.gnit.lucenekmp.queries.spans.TestSpanSearchEquivalence |
-| [org.apache.lucene.queries.spans.TestSpanSimilarity](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpanSimilarity.java) | org.gnit.lucenekmp.queries.spans.TestSpanSimilarity |
-| [org.apache.lucene.queries.spans.TestSpans](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpans.java) | org.gnit.lucenekmp.queries.spans.TestSpans |
-| [org.apache.lucene.queries.spans.TestSpansEnum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queries/src/test/org/apache/lucene/queries/spans/TestSpansEnum.java) | org.gnit.lucenekmp.queries.spans.TestSpansEnum |
 | [org.apache.lucene.queryparser.ext.TestExtendableQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/ext/TestExtendableQueryParser.java) | org.gnit.lucenekmp.queryparser.ext.TestExtendableQueryParser |
 | [org.apache.lucene.queryparser.ext.TestExtensions](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/ext/TestExtensions.java) | org.gnit.lucenekmp.queryparser.ext.TestExtensions |
 | [org.apache.lucene.queryparser.flexible.core.builders.TestQueryTreeBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/flexible/core/builders/TestQueryTreeBuilder.java) | org.gnit.lucenekmp.queryparser.flexible.core.builders.TestQueryTreeBuilder |
