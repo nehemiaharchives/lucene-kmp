@@ -11,7 +11,7 @@ plugins {
 kotlin {
     jvm()
 
-    androidLibrary {
+    android {
         withHostTestBuilder {}.configure {}
         withDeviceTestBuilder {
             sourceSetTreeName = "test"
@@ -22,6 +22,7 @@ kotlin {
     iosX64()
     iosSimulatorArm64()
 
+    @Suppress("DEPRECATION")
     macosX64()
     macosArm64()
     linuxX64()

@@ -21,7 +21,7 @@ kotlin {
         }
     }*/
 
-    androidLibrary {
+    android {
         //withJava() // enable java compilation support
         withHostTestBuilder {}.configure {}
         withDeviceTestBuilder {
@@ -33,6 +33,7 @@ kotlin {
     iosX64()
     iosSimulatorArm64()
 
+    @Suppress("DEPRECATION")
     macosX64() // intel mac
     macosArm64() // m1/2/3/4 mac
     linuxX64() // when you are in linux X64 machine, run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios, macos and linux for developer convenience.
