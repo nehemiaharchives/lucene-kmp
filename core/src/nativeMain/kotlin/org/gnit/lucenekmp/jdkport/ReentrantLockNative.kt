@@ -1,14 +1,16 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.Volatile
+import platform.posix.sched_yield
 
+@OptIn(ExperimentalAtomicApi::class)
 @Ported(from = "java.util.concurrent.locks.ReentrantLock")
 actual class ReentrantLock actual constructor() : Lock {
-    private val mutex = Mutex()
+    private val state = AtomicInt(0)
 
     @Volatile
     private var ownerThreadId: Long = NO_OWNER
@@ -26,7 +28,7 @@ actual class ReentrantLock actual constructor() : Lock {
             holdCount = next
             return true
         }
-        val locked = mutex.tryLock()
+        val locked = state.compareAndSet(0, 1)
         if (locked) {
             ownerThreadId = current
             holdCount = 1
@@ -48,7 +50,9 @@ actual class ReentrantLock actual constructor() : Lock {
             holdCount = next
             return
         }
-        runBlocking { mutex.lock() }
+        while (!state.compareAndSet(0, 1)) {
+            sched_yield()
+        }
         ownerThreadId = current
         holdCount = 1
     }
@@ -62,7 +66,7 @@ actual class ReentrantLock actual constructor() : Lock {
         if (next == 0) {
             holdCount = 0
             ownerThreadId = NO_OWNER
-            mutex.unlock()
+            state.store(0)
         } else {
             holdCount = next
         }
@@ -86,7 +90,7 @@ actual class ReentrantLock actual constructor() : Lock {
                 val saved = lock.holdCount
                 lock.holdCount = 0
                 lock.ownerThreadId = NO_OWNER
-                lock.mutex.unlock()
+                lock.state.store(0)
                 return saved
             }
 

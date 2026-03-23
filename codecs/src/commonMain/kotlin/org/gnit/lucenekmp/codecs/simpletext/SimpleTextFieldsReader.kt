@@ -51,7 +51,6 @@ import org.gnit.lucenekmp.util.fst.FSTCompiler
 import org.gnit.lucenekmp.util.fst.PairOutputs
 import org.gnit.lucenekmp.util.fst.PositiveIntOutputs
 import org.gnit.lucenekmp.util.fst.Util
-import io.github.oshai.kotlinlogging.KotlinLogging
 
 internal class SimpleTextFieldsReader(state: SegmentReadState) : FieldsProducer() {
 
@@ -68,8 +67,6 @@ internal class SimpleTextFieldsReader(state: SegmentReadState) : FieldsProducer(
     )
     private val fieldInfos: FieldInfos = state.fieldInfos
     private val maxDoc: Int = state.segmentInfo.maxDoc()
-
-    private val logger = KotlinLogging.logger {}
 
     init {
         var success = false
@@ -94,21 +91,6 @@ internal class SimpleTextFieldsReader(state: SegmentReadState) : FieldsProducer(
             if (scratch.get() == SimpleTextFieldsWriter.END) {
                 SimpleTextUtil.checkFooter(input)
 
-                // DEBUG: dump keys order vs sorted order to help diagnose out-of-order fields
-                try {
-                    val keysList = ArrayList<String>()
-                    val it = fields.keys.iterator()
-                    while (it.hasNext()) {
-                        keysList.add(it.next())
-                    }
-                    // Use Kotlin's natural sorting for comparison
-                    val sorted = keysList.sorted()
-                    // Lightweight logger to avoid importing extra symbols
-                    logger.debug { "SimpleTextFieldsReader.readFields: keysOrder=${keysList} sortedOrder=${sorted} fieldsSize=${fields.size}" }
-                } catch (_: Exception) {
-                    // swallow logging error to not break reading
-                }
-
                 // Ensure we return a map whose iteration order is lexicographically sorted by key.
                 val sortedKeys = ArrayList<String>()
                 val it2 = fields.keys.iterator()
@@ -126,20 +108,6 @@ internal class SimpleTextFieldsReader(state: SegmentReadState) : FieldsProducer(
                 val bytes = scratch.bytes().copyOfRange(start, start + len)
                 val fieldName = String.fromByteArray(bytes, StandardCharsets.UTF_8)
                 fields[fieldName] = input.filePointer
-
-                // Per-field diagnostic logging: record when each field is added, its file pointer,
-                // and the current keys order so we can reproduce insertion order at runtime.
-                try {
-                    val currentKeys = ArrayList<String>()
-                    val it3 = fields.keys.iterator()
-                    while (it3.hasNext()) currentKeys.add(it3.next())
-                    val sortedNow = currentKeys.sorted()
-                    logger.debug {
-                        "SimpleTextFieldsReader.addField: added=$fieldName fp=${input.filePointer} currentOrder=${currentKeys} sortedNow=${sortedNow}"
-                    }
-                } catch (_: Exception) {
-                    // ignore logging errors
-                }
             }
         }
     }

@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.Runnable
 import org.gnit.lucenekmp.util.NamedThreadFactory
 import kotlin.time.Duration.Companion.seconds
@@ -159,6 +161,24 @@ class ReentrantLockTest {
             assertFailsWith<IllegalStateException> { condition.signal() }
             assertFailsWith<IllegalStateException> { condition.signalAll() }
             assertFailsWith<IllegalStateException> { condition.awaitNanos(1_000_000) }
+        }
+    }
+
+    @Test
+    fun testLockFromCoroutineLaunch() {
+        runBlocking {
+            val lock = ReentrantLock()
+            withTimeout(2_000) {
+                val job = launch {
+                    lock.lock()
+                    try {
+                        assertTrue(lock.isHeldByCurrentThread())
+                    } finally {
+                        lock.unlock()
+                    }
+                }
+                job.join()
+            }
         }
     }
 
