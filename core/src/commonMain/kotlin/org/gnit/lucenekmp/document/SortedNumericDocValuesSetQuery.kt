@@ -22,10 +22,11 @@ import org.gnit.lucenekmp.util.RamUsageEstimator
 
 /** Similar to SortedNumericDocValuesRangeQuery but for a set  */
 internal class SortedNumericDocValuesSetQuery(private val field: String, numbers: LongArray) : Query(), Accountable {
-    private val numbers: DocValuesLongHashSet = DocValuesLongHashSet(numbers)
+    private val numbers: DocValuesLongHashSet
 
     init {
         Arrays.sort(numbers)
+        this.numbers = DocValuesLongHashSet(numbers)
     }
 
     override fun equals(other: Any?): Boolean {

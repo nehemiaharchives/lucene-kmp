@@ -87,8 +87,8 @@ class SortedSetDocValuesField private constructor(
          */
         fun newSlowRangeQuery(
             field: String,
-            lowerValue: BytesRef,
-            upperValue: BytesRef,
+            lowerValue: BytesRef?,
+            upperValue: BytesRef?,
             lowerInclusive: Boolean,
             upperInclusive: Boolean
         ): Query {

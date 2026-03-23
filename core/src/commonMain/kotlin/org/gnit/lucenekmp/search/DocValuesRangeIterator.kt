@@ -40,10 +40,10 @@ class DocValuesRangeIterator(
         YES
     }
 
-    override val approximation: Approximation
+    private val rangeApproximation: Approximation
 
     init {
-        this.approximation = approximation() as Approximation
+        this.rangeApproximation = super.approximation() as Approximation
     }
 
     abstract class Approximation(
@@ -172,7 +172,7 @@ class DocValuesRangeIterator(
 
     @Throws(IOException::class)
     override fun matches(): Boolean {
-        return when (approximation.match) {
+        return when (rangeApproximation.match) {
             Match.YES -> true
             Match.IF_DOC_HAS_VALUE -> true
             Match.MAYBE -> innerTwoPhase.matches()
