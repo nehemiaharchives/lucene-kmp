@@ -493,7 +493,7 @@ jobs:
           - platform: ios
             module_name: codecs
             os: macos-latest
-            timeout: 60
+            timeout: 80
             task: :codecs:iosSimulatorArm64Test
             artifact: ios-codecs-reports
             needs_konan_cache: true
@@ -638,7 +638,7 @@ jobs:
           - platform: linux
             module_name: codecs
             os: ubuntu-latest
-            timeout: 50
+            timeout: 70
             task: :codecs:linuxX64Test
             artifact: linux-codecs-reports
             needs_konan_cache: true
