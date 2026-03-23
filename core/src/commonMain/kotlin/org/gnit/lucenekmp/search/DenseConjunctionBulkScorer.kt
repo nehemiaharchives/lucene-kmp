@@ -169,6 +169,13 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
         collector.collect(docIdStreamView)
         windowMatches.clear()
 
+        if (iterators.isNotEmpty()) {
+            val lead = iterators[0]
+            if (lead.docID() < windowMax) {
+                lead.advance(windowMax)
+            }
+        }
+
         // If another clause is more advanced than the leading clause then advance the leading clause,
         // it's important to take advantage of large gaps in the postings lists of other clauses.
         if (iterators.size >= 2) {
