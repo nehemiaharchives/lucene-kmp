@@ -461,7 +461,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.MultiCollectorManager → org.gnit.lucenekmp.search.MultiCollectorManager
 - org.apache.lucene.search.NGramPhraseQuery → org.gnit.lucenekmp.search.NGramPhraseQuery
 - org.apache.lucene.search.SortRescorer → org.gnit.lucenekmp.search.SortRescorer
-- org.apache.lucene.search.TestDoubleRangeFieldQueries → org.gnit.lucenekmp.search.TestDoubleRangeFieldQueries
 - org.apache.lucene.search.TestFloatRangeFieldQueries → org.gnit.lucenekmp.search.TestFloatRangeFieldQueries
 - org.apache.lucene.search.TestFuzzyQuery → org.gnit.lucenekmp.search.TestFuzzyQuery
 - org.apache.lucene.search.TestInetAddressRangeQueries → org.gnit.lucenekmp.search.TestInetAddressRangeQueries
@@ -493,7 +492,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.mockfile.VirusCheckingFS → org.gnit.lucenekmp.tests.mockfile.VirusCheckingFS
 - org.apache.lucene.tests.mockfile.WindowsFS → org.gnit.lucenekmp.tests.mockfile.WindowsFS
 - org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
-- org.apache.lucene.tests.search.BaseRangeFieldQueryTestCase → org.gnit.lucenekmp.tests.search.BaseRangeFieldQueryTestCase
 - org.apache.lucene.tests.util.SorePoint → org.gnit.lucenekmp.tests.util.SorePoint
 - org.apache.lucene.tests.util.SoreType → org.gnit.lucenekmp.tests.util.SoreType
 - org.apache.lucene.tests.util.TestBeforeAfterOverrides → org.gnit.lucenekmp.tests.util.TestBeforeAfterOverrides
@@ -541,6 +539,7 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
+- org.apache.lucene.index.TestIndexWriterOnError → org.gnit.lucenekmp.index.TestIndexWriterOnError
 - org.apache.lucene.index.TestIndexWriterOutOfFileDescriptors → org.gnit.lucenekmp.index.TestIndexWriterOutOfFileDescriptors
 - org.apache.lucene.index.TestIndexWriterThreadsToSegments → org.gnit.lucenekmp.index.TestIndexWriterThreadsToSegments
 - org.apache.lucene.index.TestIndexWriterUnicode → org.gnit.lucenekmp.index.TestIndexWriterUnicode
@@ -685,21 +684,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser
 - org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser
 - org.apache.lucene.search.BaseKnnVectorQueryTestCase → org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase
-- org.apache.lucene.search.ElevationComparatorSource → org.gnit.lucenekmp.search.ElevationComparatorSource
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
-- org.apache.lucene.search.TestCustomSearcherSort → org.gnit.lucenekmp.search.TestCustomSearcherSort
-- org.apache.lucene.search.TestDateSort → org.gnit.lucenekmp.search.TestDateSort
-- org.apache.lucene.search.TestDenseConjunctionBulkScorer → org.gnit.lucenekmp.search.TestDenseConjunctionBulkScorer
-- org.apache.lucene.search.TestDisjunctionMaxQuery → org.gnit.lucenekmp.search.TestDisjunctionMaxQuery
 - org.apache.lucene.search.TestDocIdSetIterator → org.gnit.lucenekmp.search.TestDocIdSetIterator
-- org.apache.lucene.search.TestDocValuesQueries → org.gnit.lucenekmp.search.TestDocValuesQueries
-- org.apache.lucene.search.TestDocValuesRangeIterator → org.gnit.lucenekmp.search.TestDocValuesRangeIterator
-- org.apache.lucene.search.TestDocValuesRewriteMethod → org.gnit.lucenekmp.search.TestDocValuesRewriteMethod
-- org.apache.lucene.search.TestDoubleValuesSource → org.gnit.lucenekmp.search.TestDoubleValuesSource
-- org.apache.lucene.search.TestEarlyTermination → org.gnit.lucenekmp.search.TestEarlyTermination
-- org.apache.lucene.search.TestElevationComparator → org.gnit.lucenekmp.search.TestElevationComparator
-- org.apache.lucene.search.TestFieldCacheRewriteMethod → org.gnit.lucenekmp.search.TestFieldCacheRewriteMethod
 - org.apache.lucene.search.TestFieldExistsQuery → org.gnit.lucenekmp.search.TestFieldExistsQuery
 - org.apache.lucene.search.TestFilterWeight → org.gnit.lucenekmp.search.TestFilterWeight
 - org.apache.lucene.search.TestFuzzyTermOnShortTerms → org.gnit.lucenekmp.search.TestFuzzyTermOnShortTerms
@@ -744,7 +731,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.TestRangeFieldsDocValuesQuery → org.gnit.lucenekmp.search.TestRangeFieldsDocValuesQuery
 - org.apache.lucene.search.TestRegexpQuery → org.gnit.lucenekmp.search.TestRegexpQuery
 - org.apache.lucene.search.TestRegexpRandom → org.gnit.lucenekmp.search.TestRegexpRandom
-- org.apache.lucene.search.TestRegexpRandom2 → org.gnit.lucenekmp.search.TestRegexpRandom2
 - org.apache.lucene.search.TestReqOptSumScorer → org.gnit.lucenekmp.search.TestReqOptSumScorer
 - org.apache.lucene.search.TestSameScoresWithThreads → org.gnit.lucenekmp.search.TestSameScoresWithThreads
 - org.apache.lucene.search.TestScoreCachingWrappingScorer → org.gnit.lucenekmp.search.TestScoreCachingWrappingScorer
