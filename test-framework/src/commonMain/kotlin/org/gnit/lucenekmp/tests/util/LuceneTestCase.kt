@@ -38,6 +38,9 @@ import org.gnit.lucenekmp.index.ParallelLeafReader
 import org.gnit.lucenekmp.index.PointValues
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TieredMergePolicy
+import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasAnyMethod
+import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasClass
+import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasClassMethod
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
@@ -2124,39 +2127,10 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
 
 
         //↓ line 2824 of LuceneTestCase.java
-        private data class StackFrame(val className: String, val methodName: String)
-
-        private fun parseStackFrames(trace: String): List<StackFrame> {
-            val frames = mutableListOf<StackFrame>()
-            val pattern = Regex("""\s*at\s+([^\s(]+)""")
-            for (line in trace.lineSequence().drop(1)) { // skip header line
-                val match = pattern.find(line) ?: continue
-                var fqMethod = match.groupValues[1]
-                if (fqMethod.endsWith("#internal")) {
-                    fqMethod = fqMethod.removeSuffix("#internal")
-                } else if (fqMethod.endsWith("#external")) {
-                    fqMethod = fqMethod.removeSuffix("#external")
-                }
-                val separator = maxOf(fqMethod.lastIndexOf('.'), fqMethod.lastIndexOf('#'))
-                if (separator <= 0 || separator == fqMethod.length - 1) {
-                    continue
-                }
-                val className = fqMethod.substring(0, separator)
-                val methodName = fqMethod.substring(separator + 1)
-                frames.add(StackFrame(className, methodName))
-            }
-            return if (frames.size > 1) frames.drop(1) else emptyList() // drop this helper frame
-        }
-
         /** Inspects stack trace to figure out if a method of a specific class called us.  */
         fun callStackContains(clazz: KClass<*>, methodName: String): Boolean {
             val className = clazz.qualifiedName ?: clazz.toString()
-            val trace = Throwable().stackTraceToString()
-            val frames = parseStackFrames(trace)
-            if (frames.isNotEmpty()) {
-                return frames.any { it.className == className && it.methodName == methodName }
-            }
-            return trace.contains(className) && trace.contains(methodName)
+            return currentStackTraceHasClassMethod(className, methodName)
         }
 
         /**
@@ -2164,24 +2138,13 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
          * called us.
          */
         fun callStackContainsAnyOf(vararg methodNames: String): Boolean {
-            val methods = methodNames.toSet()
-            val trace = Throwable().stackTraceToString()
-            val frames = parseStackFrames(trace)
-            if (frames.isNotEmpty()) {
-                return frames.any { it.methodName in methods }
-            }
-            return methods.any { trace.contains(it) }
+            return currentStackTraceHasAnyMethod(methodNames.toSet())
         }
 
         /** Inspects stack trace if the given class called us.  */
         fun callStackContains(clazz: KClass<*>): Boolean {
             val className = clazz.qualifiedName ?: clazz.toString()
-            val trace = Throwable().stackTraceToString()
-            val frames = parseStackFrames(trace)
-            if (frames.isNotEmpty()) {
-                return frames.any { it.className == className }
-            }
-            return trace.contains(className)
+            return currentStackTraceHasClass(className)
         }
 
         /** Checks a specific exception class is thrown by the given runnable, and returns it.  */

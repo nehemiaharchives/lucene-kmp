@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.index
 import kotlinx.coroutines.Job
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.NormsProducer
+import org.gnit.lucenekmp.internal.vectorization.withCurrentCallPathHint
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.InfoStream
@@ -121,21 +122,23 @@ internal class SegmentMerger(
                 segmentWriteState.segmentSuffix
             )
 
-        if (mergeState.mergeFieldInfos!!.hasNorms()) {
+        withCurrentCallPathHint("org.gnit.lucenekmp.index.SegmentMerger", "mergeTerms") {
+            if (mergeState.mergeFieldInfos!!.hasNorms()) {
+                mergeWithLogging({ segmentWriteState: SegmentWriteState, segmentReadState: SegmentReadState ->
+                    this.mergeNorms(
+                        segmentWriteState,
+                        segmentReadState
+                    )
+                }, segmentWriteState, segmentReadState, "norms", numMerged)
+            }
+
             mergeWithLogging({ segmentWriteState: SegmentWriteState, segmentReadState: SegmentReadState ->
-                this.mergeNorms(
+                this.mergeTerms(
                     segmentWriteState,
                     segmentReadState
                 )
-            }, segmentWriteState, segmentReadState, "norms", numMerged)
+            }, segmentWriteState, segmentReadState, "postings", numMerged)
         }
-
-        mergeWithLogging({ segmentWriteState: SegmentWriteState, segmentReadState: SegmentReadState ->
-            this.mergeTerms(
-                segmentWriteState,
-                segmentReadState
-            )
-        }, segmentWriteState, segmentReadState, "postings", numMerged)
 
         if (mergeState.mergeFieldInfos!!.hasDocValues()) {
             mergeWithLogging(
@@ -260,7 +263,6 @@ internal class SegmentMerger(
             normsProducer?.close()
         }
     }
-
     fun mergeFieldInfos() {
         for (readerFieldInfos in mergeState.fieldInfos) {
             if (readerFieldInfos != null) {
