@@ -1,5 +1,14 @@
 package org.gnit.lucenekmp.internal.vectorization
 
+internal actual fun <T> withCheckpointCallPathHint(block: () -> T): T {
+    return block()
+}
+
+internal actual fun currentStackTraceHasClassMethodFastPath(
+    className: String,
+    methodName: String
+): Boolean? = null
+
 internal actual fun currentStackTraceHasClassMethodInternal(className: String, methodName: String): Boolean {
     return Throwable().stackTrace.drop(1).any { frame ->
         frame.className == className && frame.methodName == methodName

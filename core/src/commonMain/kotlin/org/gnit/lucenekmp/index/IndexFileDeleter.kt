@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.FileDeleter
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
+import org.gnit.lucenekmp.internal.vectorization.withCheckpointCallPathHint
 import kotlin.math.max
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -398,55 +399,57 @@ internal class IndexFileDeleter(
     @OptIn(ExperimentalTime::class)
     @Throws(IOException::class)
     fun checkpoint(segmentInfos: SegmentInfos, isCommit: Boolean) {
-        assert(locked())
+        withCheckpointCallPathHint {
+            assert(locked())
 
-        /*assert(java.lang.Thread.holdsLock(writer))*/ // TODO Thread is not available in Kotlin Multiplatform, need to think what to do here
-        val t0: Instant = Clock.System.now() /*nanoTime()*/
-        if (infoStream.isEnabled("IFD")) {
-            infoStream.message(
-                "IFD",
-                ("now checkpoint \""
-                        + writer.segString(writer.toLiveInfos(segmentInfos))
-                        + "\" ["
-                        + segmentInfos.size()
-                        + " segments "
-                        + "; isCommit = "
-                        + isCommit
-                        + "]")
-            )
-        }
-
-        // Incref the files:
-        incRef(segmentInfos, isCommit)
-        if (isCommit) {
-            // Append to our commits list:
-            commits.add(CommitPoint(commitsToDelete, directoryOrig, segmentInfos))
-
-            // Tell policy so it can remove commits:
-            assert(assertCommitsAreNotDeleted(commits))
-            policy.onCommit(commits)
-
-            // Decref files for commits that were deleted by the policy:
-            deleteCommits()
-        } else {
-            val newFiles = segmentInfos.files(false)
-            // DecRef old files from the last checkpoint, if any:
-            try {
-                decRef(lastFiles)
-            } finally {
-                lastFiles.clear()
+            /*assert(java.lang.Thread.holdsLock(writer))*/ // TODO Thread is not available in Kotlin Multiplatform, need to think what to do here
+            val t0: Instant = Clock.System.now() /*nanoTime()*/
+            if (infoStream.isEnabled("IFD")) {
+                infoStream.message(
+                    "IFD",
+                    ("now checkpoint \""
+                            + writer.segString(writer.toLiveInfos(segmentInfos))
+                            + "\" ["
+                            + segmentInfos.size()
+                            + " segments "
+                            + "; isCommit = "
+                            + isCommit
+                            + "]")
+                )
             }
 
-            // Save files so we can decr on next checkpoint/commit:
-            lastFiles.addAll(newFiles)
-        }
+            // Incref the files:
+            incRef(segmentInfos, isCommit)
+            if (isCommit) {
+                // Append to our commits list:
+                commits.add(CommitPoint(commitsToDelete, directoryOrig, segmentInfos))
 
-        if (infoStream.isEnabled("IFD")) {
-            val t1: Instant = Clock.System.now()
-            infoStream.message(
-                "IFD",
-                (t1 - t0).toString() + " ms to checkpoint"
-            )
+                // Tell policy so it can remove commits:
+                assert(assertCommitsAreNotDeleted(commits))
+                policy.onCommit(commits)
+
+                // Decref files for commits that were deleted by the policy:
+                deleteCommits()
+            } else {
+                val newFiles = segmentInfos.files(false)
+                // DecRef old files from the last checkpoint, if any:
+                try {
+                    decRef(lastFiles)
+                } finally {
+                    lastFiles.clear()
+                }
+
+                // Save files so we can decr on next checkpoint/commit:
+                lastFiles.addAll(newFiles)
+            }
+
+            if (infoStream.isEnabled("IFD")) {
+                val t1: Instant = Clock.System.now()
+                infoStream.message(
+                    "IFD",
+                    (t1 - t0).toString() + " ms to checkpoint"
+                )
+            }
         }
     }
 

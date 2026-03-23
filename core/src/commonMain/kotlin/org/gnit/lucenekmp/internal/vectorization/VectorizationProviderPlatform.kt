@@ -7,6 +7,7 @@ private val currentCallPathHintsByThread = mutableMapOf<Long, MutableList<String
 private val currentCallPathHintsLock = ReentrantLock()
 
 fun currentStackTraceHasClassMethod(className: String, methodName: String): Boolean {
+    currentStackTraceHasClassMethodFastPath(className, methodName)?.let { return it }
     if (hasCurrentCallPathHint(className, methodName)) {
         return true
     }
@@ -47,6 +48,10 @@ internal inline fun <T> withCurrentCallPathHint(className: String, methodName: S
         }
     }
 }
+
+internal expect fun <T> withCheckpointCallPathHint(block: () -> T): T
+
+internal expect fun currentStackTraceHasClassMethodFastPath(className: String, methodName: String): Boolean?
 
 internal fun hasCurrentCallPathHint(className: String, methodName: String): Boolean {
     val threadId = currentThreadId()
