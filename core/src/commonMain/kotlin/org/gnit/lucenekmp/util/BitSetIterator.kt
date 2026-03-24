@@ -12,9 +12,11 @@ import kotlin.reflect.cast
  *
  * @lucene.internal
  */
-class BitSetIterator(bits: BitSet, cost: Long) : DocIdSetIterator() {
+open class BitSetIterator(bits: BitSet, cost: Long) : DocIdSetIterator() {
     /** Return the wrapped [BitSet].  */
-    val bitSet: BitSet
+    private val internalBitSet: BitSet
+    open val bitSet: BitSet
+        get() = internalBitSet
     private val length: Int
     private val cost: Long
     private var doc = -1
@@ -22,7 +24,7 @@ class BitSetIterator(bits: BitSet, cost: Long) : DocIdSetIterator() {
     /** Sole constructor.  */
     init {
         require(cost >= 0) { "cost must be >= 0, got $cost" }
-        this.bitSet = bits
+        this.internalBitSet = bits
         this.length = bits.length()
         this.cost = cost
     }
@@ -59,7 +61,8 @@ class BitSetIterator(bits: BitSet, cost: Long) : DocIdSetIterator() {
             // beyond offset + bitSet.length() are clear. If not, the below call to `super.intoBitSet`
             // will throw an exception.
             actualUpto = min(actualUpto, offset + bitSet.length())
-            FixedBitSet.orRange(this.bitSet, doc, bitSet, doc - offset, actualUpto - doc)
+            val currentBitSet = this.bitSet
+            FixedBitSet.orRange(currentBitSet as FixedBitSet, doc, bitSet, doc - offset, actualUpto - doc)
             advance(actualUpto) // set the current doc
         }
         super.intoBitSet(upTo, bitSet, offset)

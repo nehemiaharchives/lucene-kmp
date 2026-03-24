@@ -189,7 +189,7 @@ abstract class AbstractKnnVectorQuery(
 
     // We allow this to be overridden so that tests can check what search strategy is used
     @Throws(IOException::class)
-    protected fun exactSearch(
+    protected open fun exactSearch(
         context: LeafReaderContext, acceptIterator: DocIdSetIterator, queryTimeout: QueryTimeout?
     ): TopDocs {
         val fi: FieldInfo? = context.reader().fieldInfos.fieldInfo(field)
