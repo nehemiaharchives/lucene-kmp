@@ -154,7 +154,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.IntRangeSlowRangeQuery → org.gnit.lucenekmp.document.IntRangeSlowRangeQuery
 - org.apache.lucene.document.LatLonShapeDocValuesQuery → org.gnit.lucenekmp.document.LatLonShapeDocValuesQuery
 - org.apache.lucene.document.LongRangeSlowRangeQuery → org.gnit.lucenekmp.document.LongRangeSlowRangeQuery
-- org.apache.lucene.index.SimpleMergedSegmentWarmer → org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer
 - org.apache.lucene.index.TwoPhaseCommitTool → org.gnit.lucenekmp.index.TwoPhaseCommitTool
 - org.apache.lucene.queries.function.FunctionMatchQuery → org.gnit.lucenekmp.queries.function.FunctionMatchQuery
 - org.apache.lucene.queries.function.FunctionQuery → org.gnit.lucenekmp.queries.function.FunctionQuery
@@ -371,7 +370,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.document.LongRangeDocValuesField → org.gnit.lucenekmp.document.LongRangeDocValuesField
 - org.apache.lucene.index.NoMergeScheduler → org.gnit.lucenekmp.index.NoMergeScheduler
 - org.apache.lucene.index.PersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy
-- org.apache.lucene.index.TestIndexWriterReader → org.gnit.lucenekmp.index.TestIndexWriterReader
 - org.apache.lucene.index.TestIndexWriterWithThreads → org.gnit.lucenekmp.index.TestIndexWriterWithThreads
 - org.apache.lucene.index.TestIndexingSequenceNumbers → org.gnit.lucenekmp.index.TestIndexingSequenceNumbers
 - org.apache.lucene.index.TestNumericDocValuesUpdates → org.gnit.lucenekmp.index.TestNumericDocValuesUpdates
@@ -453,8 +451,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.MultiCollectorManager → org.gnit.lucenekmp.search.MultiCollectorManager
 - org.apache.lucene.search.NGramPhraseQuery → org.gnit.lucenekmp.search.NGramPhraseQuery
 - org.apache.lucene.search.SortRescorer → org.gnit.lucenekmp.search.SortRescorer
-- org.apache.lucene.search.TestIntRangeFieldQueries → org.gnit.lucenekmp.search.TestIntRangeFieldQueries
-- org.apache.lucene.search.TestLRUQueryCache → org.gnit.lucenekmp.search.TestLRUQueryCache
 - org.apache.lucene.search.TestLongRangeFieldQueries → org.gnit.lucenekmp.search.TestLongRangeFieldQueries
 - org.apache.lucene.search.TestMinShouldMatch2 → org.gnit.lucenekmp.search.TestMinShouldMatch2
 - org.apache.lucene.search.TestSearcherManager → org.gnit.lucenekmp.search.TestSearcherManager
@@ -669,13 +665,9 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.TestCoreParser → org.gnit.lucenekmp.queryparser.xml.TestCoreParser
 - org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser
 - org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser
-- org.apache.lucene.search.BaseKnnVectorQueryTestCase → org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
 - org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
-- org.apache.lucene.search.TestKnnByteVectorQuery → org.gnit.lucenekmp.search.TestKnnByteVectorQuery
-- org.apache.lucene.search.TestKnnByteVectorQueryMMap → org.gnit.lucenekmp.search.TestKnnByteVectorQueryMMap
-- org.apache.lucene.search.TestKnnFloatVectorQuery → org.gnit.lucenekmp.search.TestKnnFloatVectorQuery
 - org.apache.lucene.search.TestLiveFieldValues → org.gnit.lucenekmp.search.TestLiveFieldValues
 - org.apache.lucene.search.TestLongValuesSource → org.gnit.lucenekmp.search.TestLongValuesSource
 - org.apache.lucene.search.TestMatchAllDocsQuery → org.gnit.lucenekmp.search.TestMatchAllDocsQuery

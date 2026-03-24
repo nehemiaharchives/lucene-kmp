@@ -1053,7 +1053,7 @@
 |     org.apache.lucene.queryparser.simple | 1 | 0 | 0% |
 |       org.apache.lucene.queryparser.surround.query | 4 | 0 | 0% |
 |     org.apache.lucene.queryparser.xml | 3 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 64 | 42% |
+|   org.apache.lucene.search | 149 | 69 | 46% |
 |     org.apache.lucene.search.knn | 1 | 1 | 100% |
 |     org.apache.lucene.search.similarities | 25 | 25 | 100% |
 |   org.apache.lucene.store | 27 | 27 | 100% |
@@ -1067,7 +1067,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 671 | 56% |
+| Total | 1186 | 676 | 56% |
 
 
 ## Tests To Port
@@ -1527,11 +1527,6 @@
 | [org.apache.lucene.queryparser.xml.TestCoreParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCoreParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCoreParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusExtensionsParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusQueriesParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser |
-| [org.apache.lucene.search.TestIntRangeFieldQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestIntRangeFieldQueries.java) | org.gnit.lucenekmp.search.TestIntRangeFieldQueries |
-| [org.apache.lucene.search.TestKnnByteVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnByteVectorQuery.java) | org.gnit.lucenekmp.search.TestKnnByteVectorQuery |
-| [org.apache.lucene.search.TestKnnByteVectorQueryMMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnByteVectorQueryMMap.java) | org.gnit.lucenekmp.search.TestKnnByteVectorQueryMMap |
-| [org.apache.lucene.search.TestKnnFloatVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnFloatVectorQuery.java) | org.gnit.lucenekmp.search.TestKnnFloatVectorQuery |
-| [org.apache.lucene.search.TestLRUQueryCache](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLRUQueryCache.java) | org.gnit.lucenekmp.search.TestLRUQueryCache |
 | [org.apache.lucene.search.TestLiveFieldValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLiveFieldValues.java) | org.gnit.lucenekmp.search.TestLiveFieldValues |
 | [org.apache.lucene.search.TestLongRangeFieldQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLongRangeFieldQueries.java) | org.gnit.lucenekmp.search.TestLongRangeFieldQueries |
 | [org.apache.lucene.search.TestLongValuesSource](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestLongValuesSource.java) | org.gnit.lucenekmp.search.TestLongValuesSource |
