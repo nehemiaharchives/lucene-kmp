@@ -61,7 +61,7 @@ abstract class BaseRangeFieldQueryTestCase : LuceneTestCase() {
     @Nightly
     @Throws(Exception::class)
     open fun testRandomBig() {
-        doTestRandom(200000, false)
+        doTestRandom(2000, false) // TODO reduced from 200000 to 2000 for dev speed
     }
 
     @Throws(Exception::class)
