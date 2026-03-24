@@ -1,5 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlin.native.concurrent.Worker
+import platform.posix.pthread_self
 
-actual fun currentThreadId(): Long = Thread.currentThreadOrNull()?.threadId ?: Worker.current.id.toLong()
+actual fun currentThreadId(): Long = Thread.currentThreadOrNull()?.threadId ?: pthread_self().hashCode().toLong()

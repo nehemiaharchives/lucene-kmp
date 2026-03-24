@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.FieldInfosFormat
+import org.gnit.lucenekmp.internal.vectorization.withReadOnlyCloneCallPathHint
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext
@@ -248,22 +249,24 @@ class ReadersAndUpdates(
      */
     /*@Synchronized*/
     fun getReadOnlyClone(context: IOContext): SegmentReader {
-        return withRldLock {
-            if (reader == null) {
-                getReaderNoLock(context).decRef()
-                checkNotNull(reader)
-            }
-            // force new liveDocs
-            val liveDocs: Bits? = pendingDeletes.liveDocs
-            if (liveDocs != null) {
-                SegmentReader(
-                    info, reader!!, liveDocs, pendingDeletes.hardLiveDocs, pendingDeletes.numDocs(), true
-                )
-            } else {
-                // liveDocs == null and reader != null. That can only be if there are no deletes
-                assert(reader!!.liveDocs == null)
-                reader!!.incRef()
-                reader!!
+        return withReadOnlyCloneCallPathHint {
+            withRldLock {
+                if (reader == null) {
+                    getReaderNoLock(context).decRef()
+                    checkNotNull(reader)
+                }
+                // force new liveDocs
+                val liveDocs: Bits? = pendingDeletes.liveDocs
+                if (liveDocs != null) {
+                    SegmentReader(
+                        info, reader!!, liveDocs, pendingDeletes.hardLiveDocs, pendingDeletes.numDocs(), true
+                    )
+                } else {
+                    // liveDocs == null and reader != null. That can only be if there are no deletes
+                    assert(reader!!.liveDocs == null)
+                    reader!!.incRef()
+                    reader!!
+                }
             }
         }
     }

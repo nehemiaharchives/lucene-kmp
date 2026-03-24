@@ -1091,7 +1091,8 @@ class TestIndexWriterReader : LuceneTestCase() {
             object : MockDirectoryWrapper.Failure() {
                 override fun eval(dir: MockDirectoryWrapper) {
                     if (shouldFail.load()) {
-                        if (callStackContainsAnyOf("getReadOnlyClone")) {
+                        val isReadOnlyClone = callStackContainsAnyOf("getReadOnlyClone")
+                        if (isReadOnlyClone) {
                             if (VERBOSE) {
                                 println("TEST: now fail; exc:")
                                 Throwable().printStackTrace()

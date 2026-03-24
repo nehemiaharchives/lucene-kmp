@@ -15,6 +15,10 @@ fun currentStackTraceHasClassMethod(className: String, methodName: String): Bool
 }
 
 fun currentStackTraceHasAnyMethod(methodNames: Set<String>): Boolean {
+    currentStackTraceHasAnyMethodFastPath(methodNames)?.let { return it }
+    if (hasCurrentCallPathHintAnyMethod(methodNames)) {
+        return true
+    }
     return currentStackTraceHasAnyMethodInternal(methodNames)
 }
 
@@ -51,7 +55,11 @@ internal inline fun <T> withCurrentCallPathHint(className: String, methodName: S
 
 internal expect fun <T> withCheckpointCallPathHint(block: () -> T): T
 
+internal expect fun <T> withReadOnlyCloneCallPathHint(block: () -> T): T
+
 internal expect fun currentStackTraceHasClassMethodFastPath(className: String, methodName: String): Boolean?
+
+internal expect fun currentStackTraceHasAnyMethodFastPath(methodNames: Set<String>): Boolean?
 
 internal fun hasCurrentCallPathHint(className: String, methodName: String): Boolean {
     val threadId = currentThreadId()
@@ -59,6 +67,20 @@ internal fun hasCurrentCallPathHint(className: String, methodName: String): Bool
     currentCallPathHintsLock.lock()
     return try {
         currentCallPathHintsByThread[threadId]?.contains(hintKey) == true
+    } finally {
+        currentCallPathHintsLock.unlock()
+    }
+}
+
+internal fun hasCurrentCallPathHintAnyMethod(methodNames: Set<String>): Boolean {
+    val threadId = currentThreadId()
+    currentCallPathHintsLock.lock()
+    return try {
+        val hints = currentCallPathHintsByThread[threadId] ?: return false
+        hints.any { hint ->
+            val methodSep = hint.lastIndexOf('#')
+            methodSep != -1 && hint.substring(methodSep + 1) in methodNames
+        }
     } finally {
         currentCallPathHintsLock.unlock()
     }

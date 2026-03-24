@@ -1,19 +1,21 @@
 package org.gnit.lucenekmp.internal.vectorization
 
 import kotlin.experimental.ExperimentalNativeApi
-import kotlin.native.concurrent.Worker
 import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.currentThreadId
 
 private const val CHECKPOINT_CLASS_NAME = "org.gnit.lucenekmp.index.IndexFileDeleter"
 private const val CHECKPOINT_METHOD_NAME = "checkpoint"
+private const val READ_ONLY_CLONE_METHOD_NAME = "getReadOnlyClone"
 private val checkpointHintLock = ReentrantLock()
-private val checkpointHintDepthByWorker = mutableMapOf<Int, Int>()
+private val checkpointHintDepthByThread = mutableMapOf<Long, Int>()
+private val readOnlyCloneHintDepthByThread = mutableMapOf<Long, Int>()
 
 internal actual inline fun <T> withCheckpointCallPathHint(block: () -> T): T {
-    val workerId = Worker.current.id
+    val threadId = currentThreadId()
     checkpointHintLock.lock()
     try {
-        checkpointHintDepthByWorker[workerId] = (checkpointHintDepthByWorker[workerId] ?: 0) + 1
+        checkpointHintDepthByThread[threadId] = (checkpointHintDepthByThread[threadId] ?: 0) + 1
     } finally {
         checkpointHintLock.unlock()
     }
@@ -22,11 +24,36 @@ internal actual inline fun <T> withCheckpointCallPathHint(block: () -> T): T {
     } finally {
         checkpointHintLock.lock()
         try {
-            val nextDepth = (checkpointHintDepthByWorker[workerId] ?: 1) - 1
+            val nextDepth = (checkpointHintDepthByThread[threadId] ?: 1) - 1
             if (nextDepth <= 0) {
-                checkpointHintDepthByWorker.remove(workerId)
+                checkpointHintDepthByThread.remove(threadId)
             } else {
-                checkpointHintDepthByWorker[workerId] = nextDepth
+                checkpointHintDepthByThread[threadId] = nextDepth
+            }
+        } finally {
+            checkpointHintLock.unlock()
+        }
+    }
+}
+
+internal actual inline fun <T> withReadOnlyCloneCallPathHint(block: () -> T): T {
+    val threadId = currentThreadId()
+    checkpointHintLock.lock()
+    try {
+        readOnlyCloneHintDepthByThread[threadId] = (readOnlyCloneHintDepthByThread[threadId] ?: 0) + 1
+    } finally {
+        checkpointHintLock.unlock()
+    }
+    try {
+        return block()
+    } finally {
+        checkpointHintLock.lock()
+        try {
+            val nextDepth = (readOnlyCloneHintDepthByThread[threadId] ?: 1) - 1
+            if (nextDepth <= 0) {
+                readOnlyCloneHintDepthByThread.remove(threadId)
+            } else {
+                readOnlyCloneHintDepthByThread[threadId] = nextDepth
             }
         } finally {
             checkpointHintLock.unlock()
@@ -41,10 +68,23 @@ internal actual fun currentStackTraceHasClassMethodFastPath(
     if (className != CHECKPOINT_CLASS_NAME || methodName != CHECKPOINT_METHOD_NAME) {
         return null
     }
-    val workerId = Worker.current.id
+    val threadId = currentThreadId()
     checkpointHintLock.lock()
     return try {
-        checkpointHintDepthByWorker[workerId]?.let { it > 0 } ?: false
+        checkpointHintDepthByThread[threadId]?.let { it > 0 } ?: false
+    } finally {
+        checkpointHintLock.unlock()
+    }
+}
+
+internal actual fun currentStackTraceHasAnyMethodFastPath(methodNames: Set<String>): Boolean? {
+    if (methodNames.size != 1 || READ_ONLY_CLONE_METHOD_NAME !in methodNames) {
+        return null
+    }
+    val threadId = currentThreadId()
+    checkpointHintLock.lock()
+    return try {
+        readOnlyCloneHintDepthByThread[threadId]?.let { it > 0 } ?: false
     } finally {
         checkpointHintLock.unlock()
     }

@@ -4,10 +4,16 @@ internal actual fun <T> withCheckpointCallPathHint(block: () -> T): T {
     return block()
 }
 
+internal actual fun <T> withReadOnlyCloneCallPathHint(block: () -> T): T {
+    return block()
+}
+
 internal actual fun currentStackTraceHasClassMethodFastPath(
     className: String,
     methodName: String
 ): Boolean? = null
+
+internal actual fun currentStackTraceHasAnyMethodFastPath(methodNames: Set<String>): Boolean? = null
 
 internal actual fun currentStackTraceHasClassMethodInternal(className: String, methodName: String): Boolean {
     return Throwable().stackTrace.drop(1).any { frame ->
