@@ -203,7 +203,7 @@ class IndexSortSortedNumericDocValuesRangeQuery(
     }
 
     private class ValueAndDoc {
-        lateinit var value: ByteArray
+        var value: ByteArray? = null
         var docID: Int = 0
         var done: Boolean = false
     }
@@ -562,7 +562,7 @@ class IndexSortSortedNumericDocValuesRangeQuery(
                                     vd.docID = docID
                                 }
                             } else if (lastDoc && vd.done == false) {
-                                val cmp: Int = comparator.compare(packedValue, 0, vd.value, 0)
+                                val cmp: Int = comparator.compare(packedValue, 0, vd.value!!, 0)
                                 assert(cmp >= 0)
                                 if (cmp > 0) {
                                     vd.done = true
@@ -626,7 +626,7 @@ class IndexSortSortedNumericDocValuesRangeQuery(
             }
 
             // We found the next value, now we need the last doc ID.
-            val doc = lastDoc(pointTree, vd.value, comparator)
+            val doc = lastDoc(pointTree, vd.value!!, comparator)
             if (doc == -1) {
                 // vd.docID was actually the last doc ID
                 return vd.docID
