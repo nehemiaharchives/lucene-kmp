@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1543 | 64% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1551 | 64% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
@@ -178,9 +178,9 @@
 |       org.apache.lucene.codecs.uniformsplit.sharedterms |           org.gnit.lucenekmp.codecs.uniformsplit.sharedterms | 12 | 0 | 0% | [ ] |
 |   org.apache.lucene.collation |       org.gnit.lucenekmp.collation | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.collation.tokenattributes |         org.gnit.lucenekmp.collation.tokenattributes | 1 | 0 | 0% | [ ] |
-|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 88 | 75 | 85% | [ ] |
+|   org.apache.lucene.document |       org.gnit.lucenekmp.document | 88 | 76 | 86% | [ ] |
 |   org.apache.lucene.geo |       org.gnit.lucenekmp.geo | 27 | 27 | 100% | [x] |
-|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 198 | 191 | 96% | [ ] |
+|   org.apache.lucene.index |       org.gnit.lucenekmp.index | 198 | 192 | 96% | [ ] |
 |     org.apache.lucene.internal.hppc |         org.gnit.lucenekmp.internal.hppc | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.internal.tests |         org.gnit.lucenekmp.internal.tests | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.internal.vectorization |         org.gnit.lucenekmp.internal.vectorization | 5 | 5 | 100% | [x] |
@@ -219,7 +219,7 @@
 |       org.apache.lucene.queryparser.surround.query |           org.gnit.lucenekmp.queryparser.surround.query | 19 | 0 | 0% | [ ] |
 |     org.apache.lucene.queryparser.xml |         org.gnit.lucenekmp.queryparser.xml | 7 | 0 | 0% | [ ] |
 |       org.apache.lucene.queryparser.xml.builders |           org.gnit.lucenekmp.queryparser.xml.builders | 22 | 0 | 0% | [ ] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 196 | 181 | 92% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 196 | 187 | 95% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 47 | 47 | 100% | [x] |
@@ -678,7 +678,6 @@
 | [org.apache.lucene.document.DoubleRangeSlowRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/DoubleRangeSlowRangeQuery.java) | org.gnit.lucenekmp.document.DoubleRangeSlowRangeQuery |
 | [org.apache.lucene.document.FloatRangeDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/FloatRangeDocValuesField.java) | org.gnit.lucenekmp.document.FloatRangeDocValuesField |
 | [org.apache.lucene.document.FloatRangeSlowRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/FloatRangeSlowRangeQuery.java) | org.gnit.lucenekmp.document.FloatRangeSlowRangeQuery |
-| [org.apache.lucene.document.InetAddressRange](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/InetAddressRange.java) | org.gnit.lucenekmp.document.InetAddressRange |
 | [org.apache.lucene.document.IntRangeDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/IntRangeDocValuesField.java) | org.gnit.lucenekmp.document.IntRangeDocValuesField |
 | [org.apache.lucene.document.IntRangeSlowRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/IntRangeSlowRangeQuery.java) | org.gnit.lucenekmp.document.IntRangeSlowRangeQuery |
 | [org.apache.lucene.document.LatLonShapeDocValuesQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/document/LatLonShapeDocValuesQuery.java) | org.gnit.lucenekmp.document.LatLonShapeDocValuesQuery |
@@ -689,7 +688,6 @@
 | [org.apache.lucene.index.MultiLeafReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/MultiLeafReader.java) | org.gnit.lucenekmp.index.MultiLeafReader |
 | [org.apache.lucene.index.NoMergeScheduler](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/NoMergeScheduler.java) | org.gnit.lucenekmp.index.NoMergeScheduler |
 | [org.apache.lucene.index.PersistentSnapshotDeletionPolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/PersistentSnapshotDeletionPolicy.java) | org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy |
-| [org.apache.lucene.index.SimpleMergedSegmentWarmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/SimpleMergedSegmentWarmer.java) | org.gnit.lucenekmp.index.SimpleMergedSegmentWarmer |
 | [org.apache.lucene.index.TwoPhaseCommitTool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/index/TwoPhaseCommitTool.java) | org.gnit.lucenekmp.index.TwoPhaseCommitTool |
 | [org.apache.lucene.queryparser.ext.ExtendableQueryParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/ext/ExtendableQueryParser.java) | org.gnit.lucenekmp.queryparser.ext.ExtendableQueryParser |
 | [org.apache.lucene.queryparser.ext.ExtensionQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/ext/ExtensionQuery.java) | org.gnit.lucenekmp.queryparser.ext.ExtensionQuery |
@@ -901,12 +899,6 @@
 | [org.apache.lucene.queryparser.xml.builders.UserInputQueryBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/xml/builders/UserInputQueryBuilder.java) | org.gnit.lucenekmp.queryparser.xml.builders.UserInputQueryBuilder |
 | [org.apache.lucene.search.DocIdSetBulkIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/DocIdSetBulkIterator.java) | org.gnit.lucenekmp.search.DocIdSetBulkIterator |
 | [org.apache.lucene.search.FilterMatchesIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterMatchesIterator.java) | org.gnit.lucenekmp.search.FilterMatchesIterator |
-| [org.apache.lucene.search.IndriAndQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndriAndQuery.java) | org.gnit.lucenekmp.search.IndriAndQuery |
-| [org.apache.lucene.search.IndriAndScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndriAndScorer.java) | org.gnit.lucenekmp.search.IndriAndScorer |
-| [org.apache.lucene.search.IndriAndWeight](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndriAndWeight.java) | org.gnit.lucenekmp.search.IndriAndWeight |
-| [org.apache.lucene.search.IndriDisjunctionScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndriDisjunctionScorer.java) | org.gnit.lucenekmp.search.IndriDisjunctionScorer |
-| [org.apache.lucene.search.IndriQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndriQuery.java) | org.gnit.lucenekmp.search.IndriQuery |
-| [org.apache.lucene.search.IndriScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/IndriScorer.java) | org.gnit.lucenekmp.search.IndriScorer |
 | [org.apache.lucene.search.LiveFieldValues](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/LiveFieldValues.java) | org.gnit.lucenekmp.search.LiveFieldValues |
 | [org.apache.lucene.search.MultiCollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/MultiCollectorManager.java) | org.gnit.lucenekmp.search.MultiCollectorManager |
 | [org.apache.lucene.search.NGramPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/NGramPhraseQuery.java) | org.gnit.lucenekmp.search.NGramPhraseQuery |
@@ -1037,7 +1029,7 @@
 |   org.apache.lucene.collation | 2 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 49 | 98% |
 |   org.apache.lucene.geo | 17 | 17 | 100% |
-|   org.apache.lucene.index | 197 | 108 | 54% |
+|   org.apache.lucene.index | 197 | 109 | 55% |
 |     org.apache.lucene.internal.hppc | 15 | 15 | 100% |
 |     org.apache.lucene.internal.tests | 1 | 1 | 100% |
 |     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
@@ -1061,7 +1053,7 @@
 |     org.apache.lucene.queryparser.simple | 1 | 0 | 0% |
 |       org.apache.lucene.queryparser.surround.query | 4 | 0 | 0% |
 |     org.apache.lucene.queryparser.xml | 3 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 59 | 39% |
+|   org.apache.lucene.search | 149 | 64 | 42% |
 |     org.apache.lucene.search.knn | 1 | 1 | 100% |
 |     org.apache.lucene.search.similarities | 25 | 25 | 100% |
 |   org.apache.lucene.store | 27 | 27 | 100% |
@@ -1075,7 +1067,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 665 | 56% |
+| Total | 1186 | 671 | 56% |
 
 
 ## Tests To Port
@@ -1397,7 +1389,6 @@
 | [org.apache.lucene.collation.TestCollationDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/collation/TestCollationDocValuesField.java) | org.gnit.lucenekmp.collation.TestCollationDocValuesField |
 | [org.apache.lucene.collation.TestCollationKeyAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/collation/TestCollationKeyAnalyzer.java) | org.gnit.lucenekmp.collation.TestCollationKeyAnalyzer |
 | [org.apache.lucene.index.Test4GBStoredFields](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test4GBStoredFields.java) | org.gnit.lucenekmp.index.Test4GBStoredFields |
-| [org.apache.lucene.index.TestIndexWriterReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterReader.java) | org.gnit.lucenekmp.index.TestIndexWriterReader |
 | [org.apache.lucene.index.TestIndexWriterThreadsToSegments](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterThreadsToSegments.java) | org.gnit.lucenekmp.index.TestIndexWriterThreadsToSegments |
 | [org.apache.lucene.index.TestIndexWriterUnicode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterUnicode.java) | org.gnit.lucenekmp.index.TestIndexWriterUnicode |
 | [org.apache.lucene.index.TestIndexWriterWithThreads](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterWithThreads.java) | org.gnit.lucenekmp.index.TestIndexWriterWithThreads |
@@ -1536,11 +1527,6 @@
 | [org.apache.lucene.queryparser.xml.TestCoreParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCoreParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCoreParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusExtensionsParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusQueriesParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser |
-| [org.apache.lucene.search.TestFuzzyTermOnShortTerms](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestFuzzyTermOnShortTerms.java) | org.gnit.lucenekmp.search.TestFuzzyTermOnShortTerms |
-| [org.apache.lucene.search.TestIndexOrDocValuesQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestIndexOrDocValuesQuery.java) | org.gnit.lucenekmp.search.TestIndexOrDocValuesQuery |
-| [org.apache.lucene.search.TestIndexSortSortedNumericDocValuesRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestIndexSortSortedNumericDocValuesRangeQuery.java) | org.gnit.lucenekmp.search.TestIndexSortSortedNumericDocValuesRangeQuery |
-| [org.apache.lucene.search.TestIndriAndQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestIndriAndQuery.java) | org.gnit.lucenekmp.search.TestIndriAndQuery |
-| [org.apache.lucene.search.TestInetAddressRangeQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestInetAddressRangeQueries.java) | org.gnit.lucenekmp.search.TestInetAddressRangeQueries |
 | [org.apache.lucene.search.TestIntRangeFieldQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestIntRangeFieldQueries.java) | org.gnit.lucenekmp.search.TestIntRangeFieldQueries |
 | [org.apache.lucene.search.TestKnnByteVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnByteVectorQuery.java) | org.gnit.lucenekmp.search.TestKnnByteVectorQuery |
 | [org.apache.lucene.search.TestKnnByteVectorQueryMMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestKnnByteVectorQueryMMap.java) | org.gnit.lucenekmp.search.TestKnnByteVectorQueryMMap |
