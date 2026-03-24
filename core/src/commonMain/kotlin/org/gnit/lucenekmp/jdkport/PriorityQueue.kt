@@ -84,17 +84,19 @@ class PriorityQueue<E : Any> {
         val e = heap[parent]
         while (true) {
             val left = 2 * parent + 1
+            if (left >= size) {
+                break
+            }
+            var child = left
             val right = left + 1
-            var candidate = parent
-            if (left < size && comparator.compare(heap[left], heap[candidate]) < 0) {
-                candidate = left
+            if (right < size && comparator.compare(heap[right], heap[left]) < 0) {
+                child = right
             }
-            if (right < size && comparator.compare(heap[right], heap[candidate]) < 0) {
-                candidate = right
+            if (comparator.compare(heap[child], e) >= 0) {
+                break
             }
-            if (candidate == parent) break
-            heap[parent] = heap[candidate]
-            parent = candidate
+            heap[parent] = heap[child]
+            parent = child
         }
         heap[parent] = e
     }
