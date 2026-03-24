@@ -461,8 +461,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.MultiCollectorManager → org.gnit.lucenekmp.search.MultiCollectorManager
 - org.apache.lucene.search.NGramPhraseQuery → org.gnit.lucenekmp.search.NGramPhraseQuery
 - org.apache.lucene.search.SortRescorer → org.gnit.lucenekmp.search.SortRescorer
-- org.apache.lucene.search.TestFloatRangeFieldQueries → org.gnit.lucenekmp.search.TestFloatRangeFieldQueries
-- org.apache.lucene.search.TestFuzzyQuery → org.gnit.lucenekmp.search.TestFuzzyQuery
 - org.apache.lucene.search.TestInetAddressRangeQueries → org.gnit.lucenekmp.search.TestInetAddressRangeQueries
 - org.apache.lucene.search.TestIntRangeFieldQueries → org.gnit.lucenekmp.search.TestIntRangeFieldQueries
 - org.apache.lucene.search.TestLRUQueryCache → org.gnit.lucenekmp.search.TestLRUQueryCache
@@ -539,7 +537,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestIndexWriterOnError → org.gnit.lucenekmp.index.TestIndexWriterOnError
 - org.apache.lucene.index.TestIndexWriterOutOfFileDescriptors → org.gnit.lucenekmp.index.TestIndexWriterOutOfFileDescriptors
 - org.apache.lucene.index.TestIndexWriterThreadsToSegments → org.gnit.lucenekmp.index.TestIndexWriterThreadsToSegments
 - org.apache.lucene.index.TestIndexWriterUnicode → org.gnit.lucenekmp.index.TestIndexWriterUnicode
@@ -686,9 +683,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.BaseKnnVectorQueryTestCase → org.gnit.lucenekmp.search.BaseKnnVectorQueryTestCase
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
-- org.apache.lucene.search.TestDocIdSetIterator → org.gnit.lucenekmp.search.TestDocIdSetIterator
-- org.apache.lucene.search.TestFieldExistsQuery → org.gnit.lucenekmp.search.TestFieldExistsQuery
-- org.apache.lucene.search.TestFilterWeight → org.gnit.lucenekmp.search.TestFilterWeight
 - org.apache.lucene.search.TestFuzzyTermOnShortTerms → org.gnit.lucenekmp.search.TestFuzzyTermOnShortTerms
 - org.apache.lucene.search.TestIndexOrDocValuesQuery → org.gnit.lucenekmp.search.TestIndexOrDocValuesQuery
 - org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
