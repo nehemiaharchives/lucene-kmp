@@ -53,7 +53,7 @@ object JavaLangAccess {
         val max = minOf(len, src.size - srcOff, dst.size - dstOff)
         for (i in 0 until max) {
             val b = src[srcOff + i]
-            dst[dstOff + i] = b.toInt().toChar()
+            dst[dstOff + i] = (b.toInt() and 0xff).toChar()
         }
     }
 

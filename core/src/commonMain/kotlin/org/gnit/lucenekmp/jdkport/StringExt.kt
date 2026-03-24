@@ -327,9 +327,11 @@ private fun fromByteArray0(charset: Charset, bytes: ByteArray, offset: Int, leng
 }
 
 private fun decode2(b1: Int, b2: Int): Char {
-    return (((b1 shl 6) xor b2) xor
-            ((0xC0.toByte().toInt() shl 6) xor
-                    (0x80.toByte().toInt() shl 0))).toChar()
+    val ub1 = b1 and 0xff
+    val ub2 = b2 and 0xff
+    return (((ub1 shl 6) xor ub2) xor
+            ((0xC0 shl 6) xor
+                    (0x80 shl 0))).toChar()
 }
 
 const val REPL: Char = '\ufffd'

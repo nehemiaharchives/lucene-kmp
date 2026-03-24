@@ -17,6 +17,10 @@
 package org.gnit.lucenekmp.index
 
 import okio.IOException
+import org.gnit.lucenekmp.analysis.Analyzer
+import org.gnit.lucenekmp.analysis.Tokenizer
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
+import org.gnit.lucenekmp.jdkport.CharBuffer
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.FieldType
@@ -66,5 +70,45 @@ object TestIndexWriter {
             )
         }
     }
-}
 
+    internal class StringSplitAnalyzer : Analyzer() {
+        override fun createComponents(fieldName: String): TokenStreamComponents {
+            return TokenStreamComponents(StringSplitTokenizer())
+        }
+    }
+
+    private class StringSplitTokenizer : Tokenizer() {
+        private var tokens: Array<String> = emptyArray()
+        private var upto = 0
+        private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
+
+        override fun incrementToken(): Boolean {
+            clearAttributes()
+            return if (upto < tokens.size) {
+                termAtt.setEmpty()
+                termAtt.append(tokens[upto])
+                upto++
+                true
+            } else {
+                false
+            }
+        }
+
+        override fun reset() {
+            super.reset()
+            upto = 0
+            val builder = StringBuilder()
+            val buffer = CharArray(1024)
+            while (true) {
+                val n = input.read(CharBuffer.wrap(buffer))
+                if (n == -1) {
+                    break
+                }
+                for (i in 0 until n) {
+                    builder.append(buffer[i])
+                }
+            }
+            tokens = builder.toString().split(" ").toTypedArray()
+        }
+    }
+}

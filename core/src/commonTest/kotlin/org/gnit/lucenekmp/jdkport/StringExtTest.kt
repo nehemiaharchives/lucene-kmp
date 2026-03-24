@@ -122,6 +122,40 @@ class StringExtTest {
     }
 
     @Test
+    fun testFromByteArrayUtf8TwoByteBoundaryLatin1Range() {
+        val bytes = byteArrayOf(
+            0xC2.toByte(), 0x80.toByte(), // U+0080
+            0xC2.toByte(), 0xA9.toByte(), // U+00A9
+            0xC3.toByte(), 0xBF.toByte()  // U+00FF
+        )
+
+        val str = String.fromByteArray(bytes, Charset.UTF_8)
+        assertEquals("\u0080\u00A9\u00FF", str)
+    }
+
+    @Test
+    fun testFromByteArrayLatin1UnsignedUpperHalf() {
+        val bytes = byteArrayOf(
+            0x7F,
+            0x80.toByte(),
+            0xFF.toByte()
+        )
+
+        val str = String.fromByteArray(bytes, Charset.ISO_8859_1)
+        assertEquals("\u007F\u0080\u00FF", str)
+    }
+
+    @Test
+    fun testFromByteArrayUtf8SupplementaryCodePoint() {
+        val bytes = byteArrayOf(
+            0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte() // U+1F600
+        )
+
+        val str = String.fromByteArray(bytes, Charset.UTF_8)
+        assertEquals("\uD83D\uDE00", str)
+    }
+
+    @Test
     fun testFromByteArrayWithOffsetAndLength() {
         val prefix = byteArrayOf(0x00, 0x00)
         val bytes = byteArrayOf(
