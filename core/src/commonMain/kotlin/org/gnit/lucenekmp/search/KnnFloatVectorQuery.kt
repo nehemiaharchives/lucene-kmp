@@ -30,7 +30,7 @@ import kotlin.math.min
  *  * If the kNN search visits too many vectors without completing, stop and run an exact search
  *
  */
-class KnnFloatVectorQuery(
+open class KnnFloatVectorQuery(
     field: String,
     target: FloatArray,
     k: Int,
