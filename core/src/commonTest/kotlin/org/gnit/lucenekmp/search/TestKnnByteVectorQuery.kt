@@ -31,7 +31,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
 
-class TestKnnByteVectorQuery : BaseKnnVectorQueryTestCase() {
+open class TestKnnByteVectorQuery : BaseKnnVectorQueryTestCase() {
     override fun getKnnVectorQuery(
         field: String,
         query: FloatArray,
@@ -74,7 +74,7 @@ class TestKnnByteVectorQuery : BaseKnnVectorQueryTestCase() {
 
     @Throws(IOException::class)
     @Test
-    fun testToString() {
+    open fun testToString() {
         getIndexStore(
             "field",
             floatArrayOf(0f, 1f),
@@ -96,7 +96,7 @@ class TestKnnByteVectorQuery : BaseKnnVectorQueryTestCase() {
     }
 
     @Test
-    fun testGetTarget() {
+    open fun testGetTarget() {
         val queryVectorBytes = floatToBytes(floatArrayOf(0f, 1f))
         val q1 = KnnByteVectorQuery("f1", queryVectorBytes, 10)
         assertContentEquals(queryVectorBytes, q1.targetCopy)
@@ -105,7 +105,7 @@ class TestKnnByteVectorQuery : BaseKnnVectorQueryTestCase() {
 
     @Throws(IOException::class)
     @Test
-    fun testVectorEncodingMismatch() {
+    open fun testVectorEncodingMismatch() {
         getIndexStore(
             "field",
             floatArrayOf(0f, 1f),
