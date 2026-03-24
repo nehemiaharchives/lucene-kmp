@@ -3009,7 +3009,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         var successTop = false
 
-        var seqNo: Long
+        var seqNo = -1L
 
         try {
             if (infoStream.isEnabled("IW")) {
@@ -3095,29 +3095,28 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 }
             }
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            success = false
-            try {
-                ensureOpen()
+            withIndexWriterLock {
+                success = false
+                try {
+                    ensureOpen()
 
-                // Now reserve the docs, just before we update SIS:
-                reserveDocs(totalMaxDoc)
+                    // Now reserve the docs, just before we update SIS:
+                    reserveDocs(totalMaxDoc)
 
-                seqNo = docWriter.nextSequenceNumber
+                    seqNo = docWriter.nextSequenceNumber
 
-                success = true
-            } finally {
-                if (!success) {
-                    for (sipc in infos) {
-                        // Safe: these files must exist
-                        deleteNewFiles(sipc.files())
+                    success = true
+                } finally {
+                    if (!success) {
+                        for (sipc in infos) {
+                            // Safe: these files must exist
+                            deleteNewFiles(sipc.files())
+                        }
                     }
                 }
+                segmentInfos.addAll(infos)
+                checkpoint()
             }
-            segmentInfos.addAll(infos)
-            checkpoint()
-            //}
 
             successTop = true
         } catch (tragedy: Error) {
@@ -3188,7 +3187,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         // long so we can detect int overflow:
         var numDocs: Long = 0
-        val seqNo: Long
+        var seqNo = -1L
 
         try {
             // Best effort up front validations
@@ -3201,15 +3200,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             }
             testReserveDocs(numDocs)
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            ensureOpen()
-            if (!merges.areEnabled()) {
-                throw AlreadyClosedException(
-                    "this IndexWriter is closed. Cannot execute addIndexes(CodecReaders...) API"
-                )
+            withIndexWriterLock {
+                ensureOpen()
+                if (!merges.areEnabled()) {
+                    throw AlreadyClosedException(
+                        "this IndexWriter is closed. Cannot execute addIndexes(CodecReaders...) API"
+                    )
+                }
             }
-            //}
 
             val mergePolicy: MergePolicy = config.mergePolicy
             val spec: MergePolicy.MergeSpecification = mergePolicy.findMerges(*readers)
@@ -3263,28 +3261,27 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     }
                 }
 
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                if (!infos.isEmpty()) {
-                    var registerSegmentSuccess = false
-                    try {
-                        ensureOpen()
-                        // Reserve the docs, just before we update SIS:
-                        reserveDocs(totalDocs)
-                        registerSegmentSuccess = true
-                    } finally {
-                        if (!registerSegmentSuccess) {
-                            for (sipc in infos) {
-                                // Safe: these files must exist
-                                deleteNewFiles(sipc.files())
+                withIndexWriterLock {
+                    if (!infos.isEmpty()) {
+                        var registerSegmentSuccess = false
+                        try {
+                            ensureOpen()
+                            // Reserve the docs, just before we update SIS:
+                            reserveDocs(totalDocs)
+                            registerSegmentSuccess = true
+                        } finally {
+                            if (!registerSegmentSuccess) {
+                                for (sipc in infos) {
+                                    // Safe: these files must exist
+                                    deleteNewFiles(sipc.files())
+                                }
                             }
                         }
+                        segmentInfos.addAll(infos)
+                        checkpoint()
                     }
-                    segmentInfos.addAll(infos)
-                    checkpoint()
+                    seqNo = docWriter.nextSequenceNumber
                 }
-                seqNo = docWriter.nextSequenceNumber
-                //}
             } else {
                 if (infoStream.isEnabled("IW")) {
                     infoStream.message(
