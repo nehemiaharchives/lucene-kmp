@@ -162,7 +162,7 @@ open class LRUQueryCache(
         require(skipCacheFactor >= 1 != false) { "skipCacheFactor must be no less than 1, get $skipCacheFactor" }
         this.skipCacheFactor = skipCacheFactor
 
-        uniqueQueries = mutableMapOf()
+        uniqueQueries = LinkedHashMap()
             /*java.util.Collections.synchronizedMap<Query, Query>(
                 LinkedHashMap<Query, Query>(16, 0.75f, true)
             )*/
@@ -188,7 +188,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onHit(readerCoreKey: Any, query: Query) {
+    protected open fun onHit(readerCoreKey: Any, query: Query) {
         hitCount.incrementAndFetch()
     }
 
@@ -199,7 +199,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onMiss(readerCoreKey: Any, query: Query) {
+    protected open fun onMiss(readerCoreKey: Any, query: Query) {
         //checkNotNull(query)
         missCount.incrementAndFetch()
     }
@@ -212,7 +212,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onQueryCache(query: Query, ramBytesUsed: Long) {
+    protected open fun onQueryCache(query: Query, ramBytesUsed: Long) {
         //assert(writeLock.isHeldByCurrentThread())
         this.ramBytesUsed += ramBytesUsed
     }
@@ -224,7 +224,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onQueryEviction(query: Query, ramBytesUsed: Long) {
+    protected open fun onQueryEviction(query: Query, ramBytesUsed: Long) {
         //assert(writeLock.isHeldByCurrentThread())
         this.ramBytesUsed -= ramBytesUsed
     }
@@ -237,7 +237,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onDocIdSetCache(readerCoreKey: Any, ramBytesUsed: Long) {
+    protected open fun onDocIdSetCache(readerCoreKey: Any, ramBytesUsed: Long) {
         //assert(writeLock.isHeldByCurrentThread())
         cacheSize += 1
         cacheCount += 1
@@ -251,7 +251,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onDocIdSetEviction(readerCoreKey: Any, numEntries: Int, sumRamBytesUsed: Long) {
+    protected open fun onDocIdSetEviction(readerCoreKey: Any, numEntries: Int, sumRamBytesUsed: Long) {
         //assert(writeLock.isHeldByCurrentThread())
         this.ramBytesUsed -= sumRamBytesUsed
         cacheSize -= numEntries.toLong()
@@ -262,7 +262,7 @@ open class LRUQueryCache(
      *
      * @lucene.experimental
      */
-    protected fun onClear() {
+    protected open fun onClear() {
         //assert(writeLock.isHeldByCurrentThread())
         ramBytesUsed = 0
         cacheSize = 0
@@ -297,6 +297,8 @@ open class LRUQueryCache(
             onMiss(readerKey, key)
             return null
         }
+        uniqueQueries.remove(singleton)
+        uniqueQueries[singleton] = singleton
         val cached = leafCache.get(singleton)
         if (cached == null) {
             onMiss(readerKey, singleton)
@@ -353,6 +355,17 @@ open class LRUQueryCache(
             val iterator: MutableIterator<Query> = mostRecentlyUsedQueries.iterator()
             do {
                 val query: Query = iterator.next()
+                if (!uniqueQueries.containsKey(query)) {
+                    throw ConcurrentModificationException(
+                        ("Removal from the cache failed! This "
+                                + "is probably due to a query which has been modified after having been put into "
+                                + " the cache or a badly implemented clone(). Query class: ["
+                                + query::class
+                                + "], query: ["
+                                + query
+                                + "]")
+                    )
+                }
                 val size = mostRecentlyUsedQueries.size
                 iterator.remove()
                 if (size == mostRecentlyUsedQueries.size) {
