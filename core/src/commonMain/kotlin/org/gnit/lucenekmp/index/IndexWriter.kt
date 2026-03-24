@@ -348,7 +348,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     private val closeOwnerSeqGenerator: AtomicLong = AtomicLong(0L)
 
     @OptIn(ExperimentalAtomicApi::class)
-    private val maybeMerge: AtomicBoolean = AtomicBoolean(true)
+    private val maybeMerge: AtomicBoolean = AtomicBoolean(false)
 
     private var commitUserData: Iterable<MutableMap.MutableEntry<String, String>>? = null
 
@@ -2112,16 +2112,18 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         val mergePolicy: MergePolicy = config.mergePolicy
         val cachingMergeContext = CachingMergeContext(this)
         var newMergesFound: Boolean
-
-        // TODO synchronized is not supported in KMP, need to think what to do here
-        //synchronized(this) {
-        val spec = mergePolicy.findForcedDeletesMerges(segmentInfos, cachingMergeContext)
-        newMergesFound = spec != null
-        if (newMergesFound) {
-            val numMerges: Int = spec!!.merges.size
-            for (i in 0..<numMerges) registerMerge(spec.merges[i])
+        val spec: MergePolicy.MergeSpecification? = withIndexWriterLock {
+            val forcedDeletesSpec = mergePolicy.findForcedDeletesMerges(segmentInfos, cachingMergeContext)
+            newMergesFound = forcedDeletesSpec != null
+            if (newMergesFound) {
+                val numMerges: Int = forcedDeletesSpec!!.merges.size
+                for (i in 0..<numMerges) {
+                    val merge = forcedDeletesSpec.merges[i]
+                    registerMerge(merge)
+                }
+            }
+            forcedDeletesSpec
         }
-        //}
 
         runBlocking { mergeScheduler.merge(mergeSource, MergeTrigger.EXPLICIT) }
 
