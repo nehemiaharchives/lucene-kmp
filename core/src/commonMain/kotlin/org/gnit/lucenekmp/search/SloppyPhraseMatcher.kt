@@ -619,9 +619,10 @@ class SloppyPhraseMatcher(
             ArrayList(rpp.size)
         for (pp in rpp) {
             val b = FixedBitSet(tord.size)
-            var ord: Int
+            var ord: Int?
             for (t in pp.terms!!) {
-                if ((tord[t].also { ord = it!! }) != null) {
+                ord = tord[t]
+                if (ord != null) {
                     b.set(ord)
                 }
             }

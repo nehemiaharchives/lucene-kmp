@@ -29,7 +29,7 @@ import org.gnit.lucenekmp.util.PriorityQueue
  * there is no longer that prefix, and finally use [Builder.add] to add them. [ ][Builder.build] returns the fully constructed (and immutable) MultiPhraseQuery.
  */
 class MultiPhraseQuery private constructor(
-    private val field: String,
+    private val field: String?,
     termArrays: Array<Array<Term>>,
     positions: IntArray,
     slop: Int
@@ -123,7 +123,7 @@ class MultiPhraseQuery private constructor(
         fun build(): MultiPhraseQuery {
             val termArraysArray: Array<Array<Term>> =
                 termArrays.toTypedArray<Array<Term>>()
-            return MultiPhraseQuery(field!!, termArraysArray, positions.toArray(), slop)
+            return MultiPhraseQuery(field, termArraysArray, positions.toArray(), slop)
         }
     }
 
@@ -188,7 +188,7 @@ class MultiPhraseQuery private constructor(
         boost: Float
     ): Weight {
         val termStates: MutableMap<Term, TermStates> = mutableMapOf()
-        return object : PhraseWeight(this, field, searcher, scoreMode) {
+        return object : PhraseWeight(this, requireNotNull(field), searcher, scoreMode) {
             @Throws(IOException::class)
             override fun getStats(searcher: IndexSearcher): SimScorer? {
                 // compute idf
@@ -343,7 +343,7 @@ class MultiPhraseQuery private constructor(
 
     /** Returns true if `o` is equal to this.  */
     override fun equals(other: Any?): Boolean {
-        return sameClassAs(other) /*&& equalsTo(this::class.cast(other))*/
+        return sameClassAs(other) && equalsTo(other as MultiPhraseQuery)
     }
 
     private fun equalsTo(other: MultiPhraseQuery): Boolean {
