@@ -24,6 +24,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 /**
@@ -175,6 +176,35 @@ abstract class MatchesTestBase : LuceneTestCase() {
             pos += 4
         }
         assertEquals(expected.size, pos)
+    }
+
+    /**
+     * Given a query and field, check that matches are returned from expected documents and that they
+     * return -1 for start and end positions
+     *
+     * @param q the query
+     * @param field the field to pull matches from
+     * @param expected an array of booleans indicating if matches are expected from each document
+     */
+    @Throws(IOException::class)
+    protected fun checkNoPositionsMatches(q: Query, field: String, expected: BooleanArray) {
+        val w = searcher!!.createWeight(searcher!!.rewrite(q), ScoreMode.COMPLETE, 1f)
+        for (i in expected.indices) {
+            val leafContexts = searcher!!.leafContexts
+            val ctx = leafContexts[ReaderUtil.subIndex(i, leafContexts)]
+            val doc = i - ctx.docBase
+            val matches = w.matches(ctx, doc)
+            if (expected[i]) {
+                val mi = matches!!.getMatches(field)!!
+                assertTrue(mi.next())
+                assertEquals(-1, mi.startPosition())
+                while (mi.next()) {
+                    assertEquals(-1, mi.startPosition())
+                }
+            } else {
+                assertNull(matches)
+            }
+        }
     }
 
     /**

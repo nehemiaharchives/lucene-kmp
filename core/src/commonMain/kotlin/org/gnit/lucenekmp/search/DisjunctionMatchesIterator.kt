@@ -32,10 +32,7 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
         private val terms: BytesRefIterator
         private val te: TermsEnum
         private val doc: Int
-        override var query: Query
-            get(): Query {
-                return it!!.query
-            }
+        override val query: Query
 
         private var it: MatchesIterator? = null
 

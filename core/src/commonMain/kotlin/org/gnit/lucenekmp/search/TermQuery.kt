@@ -83,14 +83,15 @@ open class TermQuery : Query {
                 return null
             }
 
-            val pe: PostingsEnum = te.postings(null, PostingsEnum.OFFSETS.toInt())!!
-            if (pe.advance(doc) != doc) {
-                return null
-            }
-
             return MatchesUtils.forField(
                 term.field()
-            ) { TermMatchesIterator(query, pe) }
+            ) {
+                val pe: PostingsEnum = te.postings(null, PostingsEnum.OFFSETS.toInt())!!
+                if (pe.advance(doc) != doc) {
+                    return@forField null
+                }
+                TermMatchesIterator(query, pe)
+            }
         }
 
         override fun toString(): String {

@@ -98,9 +98,9 @@ class IndexOrDocValuesQuery
         val dvWeight = randomAccessQuery.createWeight(searcher, scoreMode, boost)
         return object : Weight(this) {
             @Throws(IOException::class)
-            override fun matches(context: LeafReaderContext, doc: Int): Matches {
+            override fun matches(context: LeafReaderContext, doc: Int): Matches? {
                 // We need to check a single doc, so the dv query should perform better
-                return dvWeight.matches(context, doc)!!
+                return dvWeight.matches(context, doc)
             }
 
             @Throws(IOException::class)
