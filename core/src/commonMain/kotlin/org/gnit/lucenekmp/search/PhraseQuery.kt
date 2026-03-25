@@ -11,9 +11,6 @@ import org.gnit.lucenekmp.index.TermStates
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TermsEnum
 import org.gnit.lucenekmp.internal.hppc.IntArrayList
-import org.gnit.lucenekmp.search.ExactPhraseMatcher
-import org.gnit.lucenekmp.search.SloppyPhraseMatcher
-import org.gnit.lucenekmp.search.similarities.Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity.SimScorer
 import org.gnit.lucenekmp.util.ArrayUtil
 import org.gnit.lucenekmp.util.BytesRef
@@ -93,22 +90,22 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
          */
         @JvmOverloads
         fun add(
-            term: Term,
+            term: Term?,
             position: Int = if (positions.isEmpty) 0 else 1 + positions.get(positions.size() - 1)
         ): Builder {
-            requireNotNull<Term>(term) { "Cannot add a null term to PhraseQuery" }
+            val checkedTerm = checkNullTerm(term)
             require(position >= 0) { "Positions must be >= 0, got $position" }
             if (!positions.isEmpty) {
                 val lastPosition: Int = positions.get(positions.size() - 1)
                 require(position >= lastPosition) { "Positions must be added in order, got $position after $lastPosition" }
             }
-            require(!(terms.isEmpty() == false && term.field() == terms.get(0).field() == false)) {
+            require(!(terms.isEmpty() == false && checkedTerm.field() == terms.get(0).field() == false)) {
                 ("All terms must be on the same field, got "
-                        + term.field()
+                        + checkedTerm.field()
                         + " and "
                         + terms[0].field())
             }
-            terms.add(term)
+            terms.add(checkedTerm)
             positions.add(position)
             return this
         }
@@ -154,7 +151,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
      *
      * @see .getSlop
      */
-    constructor(slop: Int, field: String, vararg terms: String) : this(
+    constructor(slop: Int, field: String, vararg terms: String?) : this(
         slop,
         Companion.toTerms(field, *terms),
         incrementalPositions(terms.size)
@@ -164,7 +161,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
      * Create a phrase query which will match documents that contain the given list of terms at
      * consecutive positions in `field`.
      */
-    constructor(field: String, vararg terms: String) : this(0, field, *terms)
+    constructor(field: String, vararg terms: String?) : this(0, field, *terms)
 
     /**
      * Create a phrase query which will match documents that contain the given list of terms at
@@ -173,7 +170,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
      *
      * @see .getSlop
      */
-    constructor(slop: Int, field: String, vararg terms: BytesRef) : this(
+    constructor(slop: Int, field: String, vararg terms: BytesRef?) : this(
         slop,
         toTerms(field, *terms),
         incrementalPositions(terms.size)
@@ -183,7 +180,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
      * Create a phrase query which will match documents that contain the given list of terms at
      * consecutive positions in `field`.
      */
-    constructor(field: String, vararg terms: BytesRef) : this(0, field, *terms)
+    constructor(field: String, vararg terms: BytesRef?) : this(0, field, *terms)
 
     /** Returns the list of terms in this phrase.  */
     /*fun getTerms(): Array<Term> {
@@ -316,7 +313,7 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
         require(terms.size == positions.size) { "Must have as many terms as positions" }
         require(slop >= 0) { "Slop must be >= 0, got $slop" }
         for (term in terms) {
-            requireNotNull<Term>(term) { "Cannot add a null term to PhraseQuery" }
+            checkNullTerm(term)
         }
         for (i in 1..<terms.size) {
             require(terms[i - 1].field() == terms[i].field() != false) { "All terms should have the same field" }
@@ -517,6 +514,13 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
     }
 
     companion object {
+        private fun <T> checkNullTerm(term: T?): T {
+            if (term == null) {
+                throw NullPointerException("Cannot add a null term to PhraseQuery")
+            }
+            return term
+        }
+
         private fun incrementalPositions(length: Int): IntArray {
             val positions = IntArray(length)
             for (i in 0..<length) {
@@ -525,25 +529,25 @@ class PhraseQuery private constructor(slop: Int, terms: Array<Term>, positions: 
             return positions
         }
 
-        private fun toTerms(field: String, vararg termStrings: String): Array<Term> {
+        private fun toTerms(field: String, vararg termStrings: String?): Array<Term> {
             val terms: Array<Term> =
                 kotlin.arrayOfNulls<Term>(termStrings.size) as Array<Term>
             for (i in terms.indices) {
-                requireNotNull<String>(termStrings[i]) { "Cannot add a null term to PhraseQuery" }
-                terms[i] = Term(field, termStrings[i])
+                val termString = checkNullTerm(termStrings[i])
+                terms[i] = Term(field, termString)
             }
             return terms
         }
 
         private fun toTerms(
             field: String,
-            vararg termBytes: BytesRef
+            vararg termBytes: BytesRef?
         ): Array<Term> {
             val terms: Array<Term> =
                 kotlin.arrayOfNulls<Term>(termBytes.size) as Array<Term>
             for (i in terms.indices) {
-                requireNotNull<BytesRef>(termBytes[i]) { "Cannot add a null term to PhraseQuery" }
-                terms[i] = Term(field, termBytes[i])
+                val termByte = checkNullTerm(termBytes[i])
+                terms[i] = Term(field, termByte)
             }
             return terms
         }

@@ -17,7 +17,7 @@ internal class PhraseScorer(
 
     override var minCompetitiveScore = 0f
     set(minScore) {
-        this.minCompetitiveScore = minScore
+        field = minScore
         impactsApproximation.setMinCompetitiveScore(minScore)
     }
 
