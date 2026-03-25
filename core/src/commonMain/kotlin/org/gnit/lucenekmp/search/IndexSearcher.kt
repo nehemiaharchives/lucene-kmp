@@ -14,7 +14,6 @@ import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.jdkport.Callable
 import org.gnit.lucenekmp.jdkport.Executor
 import org.gnit.lucenekmp.jdkport.Math
-import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.search.similarities.BM25Similarity
 import org.gnit.lucenekmp.search.similarities.Similarity
@@ -987,21 +986,23 @@ open class IndexSearcher(
     )
 
     companion object {
-        var maxClauseCount: Int = 1024
-            /**
-             * Return the maximum number of clauses permitted, 1024 by default. Attempts to add more than the
-             * permitted number of clauses cause [TooManyClauses] to be thrown.
-             *
-             * @see .setMaxClauseCount
-             */
-            fun get(): Int {
-                return maxClauseCount
+        private var maxClauseCountValue: Int = 1024
+
+        /**
+         * Return the maximum number of clauses permitted, 1024 by default. Attempts to add more than the
+         * permitted number of clauses cause [TooManyClauses] to be thrown.
+         *
+         * @see .setMaxClauseCount
+         */
+        var maxClauseCount: Int
+            get() {
+                return maxClauseCountValue
             }
 
             /** Set the maximum number of clauses permitted per Query. Default value is 1024.  */
-            fun set(value: Int) {
+            set(value) {
                 require(value >= 1) { "maxClauseCount must be >= 1" }
-                maxClauseCount = value
+                maxClauseCountValue = value
             }
 
         private var DEFAULT_QUERY_CACHE: QueryCache
