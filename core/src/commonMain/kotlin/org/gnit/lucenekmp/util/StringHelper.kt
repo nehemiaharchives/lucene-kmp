@@ -731,7 +731,7 @@ object StringHelper {
             return "(null)"
         } else {
             val sb = StringBuilder()
-            sb.append(sb.append(BigInteger.fromByteArray(id, Sign.POSITIVE).toString()))
+            sb.append(sb.append(unsignedIdToStringPlatform(id)))
             if (id.size != ID_LENGTH) {
                 sb.append(" (INVALID FORMAT)")
             }
@@ -754,6 +754,5 @@ object StringHelper {
         return BytesRef(bytes)
     }
 }
-
 
 
