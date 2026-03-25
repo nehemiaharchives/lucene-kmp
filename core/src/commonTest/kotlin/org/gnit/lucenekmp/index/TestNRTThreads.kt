@@ -16,6 +16,7 @@
  */
 package org.gnit.lucenekmp.index
 
+import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -82,8 +83,9 @@ class TestNRTThreads : ThreadedIndexingAndSearchingTestCase() {
             }
 
             if (r.numDocs() > 0) {
-                fixedSearcher = IndexSearcher(r, es)
-                smokeTestSearcher(fixedSearcher)
+                val searcher = IndexSearcher(r, es)
+                fixedSearcher = searcher
+                smokeTestSearcher(searcher)
                 runSearchThreads(100)
             }
         }
@@ -113,10 +115,11 @@ class TestNRTThreads : ThreadedIndexingAndSearchingTestCase() {
         DirectoryReader.open(writer).close()
     }
 
-    private lateinit var fixedSearcher: IndexSearcher
+    @Volatile
+    private var fixedSearcher: IndexSearcher? = null
 
     override fun getCurrentSearcher(): IndexSearcher {
-        return fixedSearcher
+        return checkNotNull(fixedSearcher)
     }
 
     override fun releaseSearcher(s: IndexSearcher) {
