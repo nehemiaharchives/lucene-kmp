@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1552 | 64% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1555 | 64% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
@@ -219,7 +219,7 @@
 |       org.apache.lucene.queryparser.surround.query |           org.gnit.lucenekmp.queryparser.surround.query | 19 | 0 | 0% | [ ] |
 |     org.apache.lucene.queryparser.xml |         org.gnit.lucenekmp.queryparser.xml | 7 | 0 | 0% | [ ] |
 |       org.apache.lucene.queryparser.xml.builders |           org.gnit.lucenekmp.queryparser.xml.builders | 22 | 0 | 0% | [ ] |
-|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 196 | 188 | 95% | [ ] |
+|   org.apache.lucene.search |       org.gnit.lucenekmp.search | 196 | 190 | 96% | [ ] |
 |     org.apache.lucene.search.comparators |         org.gnit.lucenekmp.search.comparators | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.search.knn |         org.gnit.lucenekmp.search.knn | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.search.similarities |         org.gnit.lucenekmp.search.similarities | 47 | 47 | 100% | [x] |
@@ -241,7 +241,7 @@
 |     org.apache.lucene.tests.geo |         org.gnit.lucenekmp.tests.geo | 5 | 4 | 80% | [ ] |
 |     org.apache.lucene.tests.index |         org.gnit.lucenekmp.tests.index | 39 | 35 | 89% | [ ] |
 |     org.apache.lucene.tests.mockfile |         org.gnit.lucenekmp.tests.mockfile | 21 | 3 | 14% | [ ] |
-|     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 24 | 21 | 87% | [ ] |
+|     org.apache.lucene.tests.search |         org.gnit.lucenekmp.tests.search | 24 | 22 | 91% | [ ] |
 |       org.apache.lucene.tests.search.similarities |           org.gnit.lucenekmp.tests.search.similarities | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.tests.store |         org.gnit.lucenekmp.tests.store | 12 | 12 | 100% | [x] |
 |     org.apache.lucene.tests.util |         org.gnit.lucenekmp.tests.util | 35 | 16 | 45% | [ ] |
@@ -899,8 +899,6 @@
 | [org.apache.lucene.queryparser.xml.builders.UserInputQueryBuilder](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/java/org/apache/lucene/queryparser/xml/builders/UserInputQueryBuilder.java) | org.gnit.lucenekmp.queryparser.xml.builders.UserInputQueryBuilder |
 | [org.apache.lucene.search.DocIdSetBulkIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/DocIdSetBulkIterator.java) | org.gnit.lucenekmp.search.DocIdSetBulkIterator |
 | [org.apache.lucene.search.FilterMatchesIterator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/FilterMatchesIterator.java) | org.gnit.lucenekmp.search.FilterMatchesIterator |
-| [org.apache.lucene.search.MultiCollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/MultiCollectorManager.java) | org.gnit.lucenekmp.search.MultiCollectorManager |
-| [org.apache.lucene.search.NGramPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/NGramPhraseQuery.java) | org.gnit.lucenekmp.search.NGramPhraseQuery |
 | [org.apache.lucene.search.PositiveScoresOnlyCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/PositiveScoresOnlyCollector.java) | org.gnit.lucenekmp.search.PositiveScoresOnlyCollector |
 | [org.apache.lucene.search.SearcherLifetimeManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SearcherLifetimeManager.java) | org.gnit.lucenekmp.search.SearcherLifetimeManager |
 | [org.apache.lucene.search.SeededKnnVectorQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/search/SeededKnnVectorQuery.java) | org.gnit.lucenekmp.search.SeededKnnVectorQuery |
@@ -1052,7 +1050,7 @@
 |     org.apache.lucene.queryparser.simple | 1 | 0 | 0% |
 |       org.apache.lucene.queryparser.surround.query | 4 | 0 | 0% |
 |     org.apache.lucene.queryparser.xml | 3 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 75 | 50% |
+|   org.apache.lucene.search | 149 | 94 | 63% |
 |     org.apache.lucene.search.knn | 1 | 1 | 100% |
 |     org.apache.lucene.search.similarities | 25 | 25 | 100% |
 |   org.apache.lucene.store | 27 | 27 | 100% |
@@ -1066,7 +1064,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 685 | 57% |
+| Total | 1186 | 704 | 59% |
 
 
 ## Tests To Port
@@ -1523,25 +1521,6 @@
 | [org.apache.lucene.queryparser.xml.TestCoreParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCoreParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCoreParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusExtensionsParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusQueriesParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser |
-| [org.apache.lucene.search.TestMaxClauseLimit](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMaxClauseLimit.java) | org.gnit.lucenekmp.search.TestMaxClauseLimit |
-| [org.apache.lucene.search.TestMaxScoreAccumulator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMaxScoreAccumulator.java) | org.gnit.lucenekmp.search.TestMaxScoreAccumulator |
-| [org.apache.lucene.search.TestMaxScoreBulkScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMaxScoreBulkScorer.java) | org.gnit.lucenekmp.search.TestMaxScoreBulkScorer |
-| [org.apache.lucene.search.TestMinShouldMatch2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMinShouldMatch2.java) | org.gnit.lucenekmp.search.TestMinShouldMatch2 |
-| [org.apache.lucene.search.TestMultiCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiCollector.java) | org.gnit.lucenekmp.search.TestMultiCollector |
-| [org.apache.lucene.search.TestMultiCollectorManager](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiCollectorManager.java) | org.gnit.lucenekmp.search.TestMultiCollectorManager |
-| [org.apache.lucene.search.TestMultiPhraseEnum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiPhraseEnum.java) | org.gnit.lucenekmp.search.TestMultiPhraseEnum |
-| [org.apache.lucene.search.TestMultiPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiPhraseQuery.java) | org.gnit.lucenekmp.search.TestMultiPhraseQuery |
-| [org.apache.lucene.search.TestMultiSliceMerge](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiSliceMerge.java) | org.gnit.lucenekmp.search.TestMultiSliceMerge |
-| [org.apache.lucene.search.TestMultiTermConstantScore](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiTermConstantScore.java) | org.gnit.lucenekmp.search.TestMultiTermConstantScore |
-| [org.apache.lucene.search.TestMultiTermQueryRewrites](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiTermQueryRewrites.java) | org.gnit.lucenekmp.search.TestMultiTermQueryRewrites |
-| [org.apache.lucene.search.TestMultiThreadTermVectors](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiThreadTermVectors.java) | org.gnit.lucenekmp.search.TestMultiThreadTermVectors |
-| [org.apache.lucene.search.TestMultiset](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestMultiset.java) | org.gnit.lucenekmp.search.TestMultiset |
-| [org.apache.lucene.search.TestNGramPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestNGramPhraseQuery.java) | org.gnit.lucenekmp.search.TestNGramPhraseQuery |
-| [org.apache.lucene.search.TestNearest](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestNearest.java) | org.gnit.lucenekmp.search.TestNearest |
-| [org.apache.lucene.search.TestNeedsScores](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestNeedsScores.java) | org.gnit.lucenekmp.search.TestNeedsScores |
-| [org.apache.lucene.search.TestNot](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestNot.java) | org.gnit.lucenekmp.search.TestNot |
-| [org.apache.lucene.search.TestPhrasePrefixQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestPhrasePrefixQuery.java) | org.gnit.lucenekmp.search.TestPhrasePrefixQuery |
-| [org.apache.lucene.search.TestPhraseQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestPhraseQuery.java) | org.gnit.lucenekmp.search.TestPhraseQuery |
 | [org.apache.lucene.search.TestPointQueries](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestPointQueries.java) | org.gnit.lucenekmp.search.TestPointQueries |
 | [org.apache.lucene.search.TestPositionIncrement](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestPositionIncrement.java) | org.gnit.lucenekmp.search.TestPositionIncrement |
 | [org.apache.lucene.search.TestPositiveScoresOnlyCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestPositiveScoresOnlyCollector.java) | org.gnit.lucenekmp.search.TestPositiveScoresOnlyCollector |
