@@ -21,7 +21,7 @@ internal object NearestNeighbor {
         pointLat: Double,
         pointLon: Double,
         readers: MutableList<PointValues>,
-        liveDocs: MutableList<Bits>,
+        liveDocs: MutableList<Bits?>,
         docBases: IntArrayList,
         n: Int
     ): Array<NearestHit> {

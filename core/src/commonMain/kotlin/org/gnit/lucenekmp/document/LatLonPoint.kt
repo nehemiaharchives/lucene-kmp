@@ -425,7 +425,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
             val readers: MutableList<PointValues> =
                 ArrayList()
             val docBases = IntArrayList()
-            val liveDocs: MutableList<Bits> =
+            val liveDocs: MutableList<Bits?> =
                 ArrayList()
             var totalHits = 0
             for (leaf in searcher.indexReader.leaves()) {
@@ -434,7 +434,7 @@ class LatLonPoint(name: String, latitude: Double, longitude: Double) : Field(nam
                     totalHits += points.docCount
                     readers.add(points)
                     docBases.add(leaf.docBase)
-                    liveDocs.add(leaf.reader().liveDocs!!)
+                    liveDocs.add(leaf.reader().liveDocs)
                 }
             }
 
