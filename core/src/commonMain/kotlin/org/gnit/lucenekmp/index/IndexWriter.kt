@@ -850,27 +850,26 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                             // way
                             // other threads get a chance to run in between our writes.
 
-                            // TODO synchronized is not supported in KMP, need to think what to do here
-                            //synchronized(this) {
-                            // It's possible that the segment of a reader returned by readerPool#getReadersByRam
-                            // is dropped before being processed here. If it happens, we need to skip that
-                            // reader.
-                            // this is also best effort to free ram, there might be some other thread writing
-                            // this rld concurrently
-                            // which wins and then if readerPooling is off this rld will be dropped.
-                            if (readerPool.get(rld.info, false) == null) {
-                                continue
+                            withIndexWriterLock {
+                                // It's possible that the segment of a reader returned by readerPool#getReadersByRam
+                                // is dropped before being processed here. If it happens, we need to skip that
+                                // reader.
+                                // this is also best effort to free ram, there might be some other thread writing
+                                // this rld concurrently
+                                // which wins and then if readerPooling is off this rld will be dropped.
+                                if (readerPool.get(rld.info, false) == null) {
+                                    return@withIndexWriterLock
+                                }
+                                if (rld.writeFieldUpdates(
+                                        directory,
+                                        globalFieldNumberMap,
+                                        bufferedUpdatesStream.completedDelGen,
+                                        infoStream
+                                    )
+                                ) {
+                                    checkpointNoSIS()
+                                }
                             }
-                            if (rld.writeFieldUpdates(
-                                    directory,
-                                    globalFieldNumberMap,
-                                    bufferedUpdatesStream.completedDelGen,
-                                    infoStream
-                                )
-                            ) {
-                                checkpointNoSIS()
-                            }
-                            //}
                             val bytesUsedAfter: Long = rld.ramBytesUsed.load()
                             ramBytesUsed -= bytesUsedBefore - bytesUsedAfter
                             count++

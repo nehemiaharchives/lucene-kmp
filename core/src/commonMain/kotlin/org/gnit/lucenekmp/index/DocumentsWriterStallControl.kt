@@ -1,10 +1,11 @@
 package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.runBlocking
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.conditionAwaitBlocking
+import org.gnit.lucenekmp.jdkport.conditionSignalAllBlocking
 import org.gnit.lucenekmp.jdkport.currentThreadId
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.Volatile
@@ -46,7 +47,7 @@ class DocumentsWriterStallControl {
                 if (stalled) {
                     wasStalled = true
                 }
-                runBlocking { condition.signalAll() }
+                conditionSignalAllBlocking(condition)
             }
         } finally {
             lock.unlock()
@@ -65,7 +66,7 @@ class DocumentsWriterStallControl {
                         incWaiters(threadId)
                         // Defensive, in case we have a concurrency bug that fails to .notify/All our thread:
                         // just wait for up to 1 second here, and let caller re-stall if it's still needed:
-                        runBlocking { condition.await(1000, TimeUnit.MILLISECONDS) }
+                        conditionAwaitBlocking(condition, 1000, TimeUnit.MILLISECONDS)
                     } catch (e: CancellationException) {
                         throw ThreadInterruptedException(e)
                     } finally {
@@ -123,4 +124,5 @@ class DocumentsWriterStallControl {
             lock.unlock()
         }
     }
+
 }

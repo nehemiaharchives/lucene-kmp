@@ -17,7 +17,6 @@ import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
@@ -34,7 +33,6 @@ class FrozenBufferedUpdates(
     // non-null iff this frozen packet represents
     val privateSegment: SegmentCommitInfo?
 ) {
-    private val logger = KotlinLogging.logger {}
     // Terms, in sorted order:
     val deleteTerms: PrefixCodedTerms
 
@@ -64,9 +62,7 @@ class FrozenBufferedUpdates(
 
         val builder: PrefixCodedTerms.Builder = PrefixCodedTerms.Builder()
         updates.deleteTerms.forEachOrdered<RuntimeException> { term, docId ->
-            builder.add(
-                term
-            )
+            builder.add(term)
         }
         deleteTerms = builder.finish()
 

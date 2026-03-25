@@ -173,7 +173,8 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             && deleteQueue.isOpen // if it's closed then it's already fully applied and we have a new delete queue
             && flushControl.getAndResetApplyAllDeletes()
         ) {
-            if (ticketQueue.addTicket { maybeFreezeGlobalBuffer(deleteQueue) } != null) {
+            val ticket = ticketQueue.addTicket { maybeFreezeGlobalBuffer(deleteQueue) }
+            if (ticket != null) {
                 flushNotifications.onDeletesApplied() // apply deletes event forces a purge
                 return true
             }

@@ -90,6 +90,10 @@ open class Thread : Runnable {
         closeDispatcherIfFinished()
     }
 
+    fun isAlive(): Boolean {
+        return job?.isActive == true
+    }
+
     fun interrupt() {
         interrupted = true
         job?.cancel(CancellationException("Thread interrupted"))

@@ -123,6 +123,9 @@ class BytesRefHash(pool: ByteBlockPool, capacity: Int, bytesStartArray: BytesSta
      */
     fun sort(): IntArray {
         val compact = compact()
+        if (count <= 1) {
+            return compact
+        }
         require(count * 2 <= compact.size) { "We need load factor <= 0.5f to speed up this sort" }
         val tmpOffset = count
         object : StringSorter(BytesRefComparator.NATURAL) {
@@ -293,14 +296,14 @@ class BytesRefHash(pool: ByteBlockPool, capacity: Int, bytesStartArray: BytesSta
         // final position
         var hashPos = code and hashMask
         var e = ids!![hashPos]
-        if (e != -1 && pool.equals(bytesStart!![e], bytes) === false) {
+        if (e != -1 && !pool.equals(bytesStart!![e], bytes)) {
             // Conflict; use linear probe to find an open slot
             // (see LUCENE-5604):
             do {
                 code++
                 hashPos = code and hashMask
                 e = ids!![hashPos]
-            } while (e != -1 && pool.equals(bytesStart!![e], bytes) === false)
+            } while (e != -1 && !pool.equals(bytesStart!![e], bytes))
         }
 
         return hashPos
