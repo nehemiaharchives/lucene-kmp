@@ -50,7 +50,7 @@ constructor(
     path: Path,
     lockFactory: LockFactory = FSLockFactory.default
 ) : FSDirectory(path, lockFactory) {
-    private val fileSystem: FileSystem = Files.getFileSystem()
+    private val fileSystem: FileSystem = Files.getFileSystem(directory)
 
     override fun openInput(
         name: String,

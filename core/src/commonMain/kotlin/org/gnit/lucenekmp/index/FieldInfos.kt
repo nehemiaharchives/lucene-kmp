@@ -393,7 +393,7 @@ open class FieldInfos(infos: Array<FieldInfo>) : Iterable<FieldInfo> {
 
         private fun verifyParentFieldName(fieldName: String, isParentField: Boolean) {
             if (isParentField) {
-                requireNotNull(parentFieldName != null) {
+                require(parentFieldName != null) {
                     ("can't add field ["
                             + fieldName
                             + "] as parent document field; this IndexWriter has no parent document field configured")

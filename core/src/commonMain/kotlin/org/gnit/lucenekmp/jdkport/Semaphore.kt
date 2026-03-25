@@ -22,11 +22,39 @@ class Semaphore(permits: Int) {
     }
 
     @OptIn(ExperimentalAtomicApi::class)
+    fun release(permits: Int) {
+        require(permits >= 0) { "permits must be >= 0; got $permits" }
+        repeat(permits) {
+            release()
+        }
+    }
+
+    @OptIn(ExperimentalAtomicApi::class)
     fun acquire() {
         while (true) {
             val current = permits.load()
             if (current > 0 && permits.compareAndSet(current, current - 1)) {
                 return
+            }
+        }
+    }
+
+    fun acquire(permits: Int) {
+        require(permits >= 0) { "permits must be >= 0; got $permits" }
+        repeat(permits) {
+            acquire()
+        }
+    }
+
+    @OptIn(ExperimentalAtomicApi::class)
+    fun tryAcquire(): Boolean {
+        while (true) {
+            val current = permits.load()
+            if (current == 0) {
+                return false
+            }
+            if (permits.compareAndSet(current, current - 1)) {
+                return true
             }
         }
     }

@@ -491,14 +491,13 @@ class FilesTest {
 
         val expectedPaths = setOf(
             file1, // /testDirStream/file1.txt
-            subDir, // /testDirStream/sub
-            file2  // /testDirStream/sub/file2.txt
+            subDir // /testDirStream/sub
         )
 
         val stream = Files.newDirectoryStream(baseDir)
         val actualPaths = stream.toSet()
 
-        assertEquals(expectedPaths, actualPaths, "Stream should return all nested files and directories.")
+        assertEquals(expectedPaths, actualPaths, "Stream should return direct child files and directories.")
     }
 
     @Test

@@ -1327,11 +1327,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      */
     @Throws(IOException::class)
     fun softUpdateDocuments(
-        term: Term,
+        term: Term?,
         docs: Iterable<Iterable<IndexableField>>,
         vararg softDeletes: Field
     ): Long {
-        //requireNotNull(term) { "term must not be null" }
+        require(term != null) { "term must not be null" }
         require(!(softDeletes == null || softDeletes.isEmpty())) { "at least one soft delete must be present" }
         return updateDocuments(
             DocumentsWriterDeleteQueue.newNode(*buildDocValuesUpdate(term, softDeletes)), docs
@@ -1634,11 +1634,11 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      */
     @Throws(IOException::class)
     fun softUpdateDocument(
-        term: Term,
+        term: Term?,
         doc: Iterable<out IndexableField>,
         vararg softDeletes: Field
     ): Long {
-        //requireNotNull(term) { "term must not be null" }
+        require(term != null) { "term must not be null" }
         require(!(softDeletes == null || softDeletes.isEmpty())) { "at least one soft delete must be present" }
         return updateDocuments(
             DocumentsWriterDeleteQueue.newNode(*buildDocValuesUpdate(term, softDeletes)),
@@ -1803,7 +1803,9 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      */
     fun getFieldNames(): MutableSet<String> {
         // FieldNumbers#getFieldNames() returns an unmodifiableSet
-        return globalFieldNumberMap.fieldNames
+        return org.gnit.lucenekmp.jdkport.Collections.unmodifiableSet(
+            globalFieldNumberMap.fieldNames.toSet()
+        )
     }
 
     // for test purpose
@@ -3647,7 +3649,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
      * are flushed to the Directory.
      */
     @Throws(IOException::class)
-    protected fun doBeforeFlush() {
+    protected open fun doBeforeFlush() {
     }
 
     /**

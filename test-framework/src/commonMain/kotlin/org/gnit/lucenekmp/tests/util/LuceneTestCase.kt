@@ -33,9 +33,11 @@ import org.gnit.lucenekmp.index.MergePolicy
 import org.gnit.lucenekmp.index.MultiBits
 import org.gnit.lucenekmp.index.MultiDocValues
 import org.gnit.lucenekmp.index.MultiTerms
+import org.gnit.lucenekmp.index.NoDeletionPolicy
 import org.gnit.lucenekmp.index.ParallelCompositeReader
 import org.gnit.lucenekmp.index.ParallelLeafReader
 import org.gnit.lucenekmp.index.PointValues
+import org.gnit.lucenekmp.index.SnapshotDeletionPolicy
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TieredMergePolicy
 import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasAnyMethod
@@ -504,6 +506,13 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
 
 
         // line 932 of LuceneTestCase.java
+        /** create a new index writer config with a snapshot deletion policy */
+        fun newSnapshotIndexWriterConfig(analyzer: Analyzer): IndexWriterConfig {
+            val c = newIndexWriterConfig(analyzer)
+            c.setIndexDeletionPolicy(SnapshotDeletionPolicy(NoDeletionPolicy.INSTANCE))
+            return c
+        }
+
         /** create a new index writer config with random defaults  */
         fun newIndexWriterConfig(): IndexWriterConfig {
             return newIndexWriterConfig(MockAnalyzer(random()))

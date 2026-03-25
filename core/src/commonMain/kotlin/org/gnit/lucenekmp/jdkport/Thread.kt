@@ -176,5 +176,11 @@ open class Thread : Runnable {
                 }
             }
         }
+
+        fun yield() {
+            runBlocking {
+                kotlinx.coroutines.yield()
+            }
+        }
     }
 }

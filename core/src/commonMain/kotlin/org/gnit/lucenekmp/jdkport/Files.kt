@@ -15,6 +15,8 @@ import okio.buffer
 object Files {
     // FileSystem to use - defaults to SystemFileSystem but can be overridden for testing
     private var fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystemsByPath: MutableMap<String, FileSystem> = mutableMapOf()
+    private val fileSystemsByPathLock = ReentrantLock()
 
     /**
      * Sets the file system provider to use for file operations.
@@ -28,15 +30,47 @@ object Files {
         return fileSystem
     }
 
+    fun registerFileSystem(path: Path, fileSystem: FileSystem) {
+        try {
+            fileSystemsByPathLock.lock()
+            fileSystemsByPath[path.normalized().toString()] = fileSystem
+        } finally {
+            fileSystemsByPathLock.unlock()
+        }
+    }
+
+    fun getFileSystem(path: Path): FileSystem {
+        try {
+            fileSystemsByPathLock.lock()
+            var current: Path? = path.normalized()
+            while (current != null) {
+                val fileSystem = fileSystemsByPath[current.toString()]
+                if (fileSystem != null) {
+                    return fileSystem
+                }
+                current = current.parent
+            }
+            return fileSystem
+        } finally {
+            fileSystemsByPathLock.unlock()
+        }
+    }
+
     /**
      * Resets the file system provider to the default (SystemFileSystem).
      */
     fun resetFileSystem() {
         fileSystem = FileSystem.SYSTEM
+        try {
+            fileSystemsByPathLock.lock()
+            fileSystemsByPath.clear()
+        } finally {
+            fileSystemsByPathLock.unlock()
+        }
     }
 
     fun newInputStream(path: Path): InputStream {
-        val source = fileSystem.source(path).buffer()
+        val source = getFileSystem(path).source(path).buffer()
         return OkioSourceInputStream(source)
     }
 
@@ -49,6 +83,7 @@ object Files {
         val createNew = opts.contains(StandardOpenOption.CREATE_NEW)
         val create = opts.contains(StandardOpenOption.CREATE) || defaulted
         val truncate = opts.contains(StandardOpenOption.TRUNCATE_EXISTING) || defaulted
+        val fileSystem = getFileSystem(path)
 
         if (append && truncate) {
             throw IllegalArgumentException("APPEND and TRUNCATE_EXISTING cannot be used together")
@@ -114,6 +149,7 @@ object Files {
     }
 
     fun createDirectories(path: Path){
+        val fileSystem = getFileSystem(path)
         // Ensure the parent directories exist
         val parent = path.parent ?: throw IOException("Cannot create directories for root path") as Throwable
         if (!fileSystem.exists(parent)) {
@@ -123,7 +159,17 @@ object Files {
         fileSystem.createDirectories(path)
     }
 
+    fun createDirectory(path: Path) {
+        val fileSystem = getFileSystem(path)
+        val parent = path.parent ?: throw IOException("Cannot create directory for root path") as Throwable
+        if (!fileSystem.exists(parent)) {
+            throw IOException("Parent directory does not exist: $parent")
+        }
+        fileSystem.createDirectory(path, mustCreate = true)
+    }
+
     fun createFile(path: Path) {
+        val fileSystem = getFileSystem(path)
         // Ensure the parent directory exists
         val parent = path.parent ?: throw IOException("Cannot create file for root path") as Throwable
         if (!fileSystem.exists(parent)) {
@@ -136,7 +182,7 @@ object Files {
     }
 
     fun readAttributes(path: Path): FileMetadata{
-        return fileSystem.metadata(path)
+        return getFileSystem(path).metadata(path)
     }
 
     fun creationTime(path: Path) : Long? {
@@ -146,7 +192,7 @@ object Files {
 
     fun isDirectory(path: Path): Boolean {
         return try {
-            fileSystem.metadata(path).isDirectory
+            getFileSystem(path).metadata(path).isDirectory
         } catch (e: Throwable) {
             // Match java.nio.file.Files.isDirectory: return false if the file does not exist
             // or if its attributes cannot be read due to an I/O error.
@@ -155,29 +201,32 @@ object Files {
     }
 
     fun size(path: Path): Long {
-        return fileSystem.metadata(path).size?: throw IOException("File does not exist or size is not available")
+        return getFileSystem(path).metadata(path).size?: throw IOException("File does not exist or size is not available")
     }
 
     fun move(source: Path, target: Path, vararg options: StandardCopyOption) {
-        if (!fileSystem.exists(source)) {
+        val sourceFileSystem = getFileSystem(source)
+        val targetFileSystem = getFileSystem(target)
+        if (!sourceFileSystem.exists(source)) {
             throw IOException("Source file does not exist: $source")
         }
         // Ensure the target directory exists
         val targetParent = target.parent ?: throw IOException("Cannot move to root path") as Throwable
-        if (!fileSystem.exists(targetParent)) {
+        if (!targetFileSystem.exists(targetParent)) {
             createDirectories(targetParent)
         }
         // Move the file by copying and then deleting the source
 
         if(options.contains(StandardCopyOption.ATOMIC_MOVE)){
-            fileSystem.atomicMove(source, target)
+            targetFileSystem.atomicMove(source, target)
         }else{
-            fileSystem.copy(source, target)
-            fileSystem.delete(source)
+            targetFileSystem.copy(source, target)
+            sourceFileSystem.delete(source)
         }
     }
 
     fun delete(path: Path) {
+        val fileSystem = getFileSystem(path)
         if (!fileSystem.exists(path)) {
             throw IOException("File does not exist: $path")
         }
@@ -185,13 +234,33 @@ object Files {
     }
 
     fun newDirectoryStream(path: Path): Sequence<Path> {
+        val fileSystem = getFileSystem(path)
         if (!fileSystem.exists(path)) {
             throw IOException("File does not exist: $path")
         }
         if (!fileSystem.metadata(path).isDirectory) {
             throw IOException("Path is not a directory: $path")
         }
-        return fileSystem.listRecursively(path)
+        return fileSystem.list(path).asSequence()
+    }
+
+    fun newDirectoryStream(path: Path, glob: String): Sequence<Path> {
+        val regex = Regex("^" + globToRegex(glob) + "$")
+        return newDirectoryStream(path).filter { regex.matches(it.name) }
+    }
+
+    private fun globToRegex(glob: String): String {
+        val sb = StringBuilder()
+        for (ch in glob) {
+            when (ch) {
+                '*' -> sb.append(".*")
+                '?' -> sb.append('.')
+                '.', '(', ')', '+', '|', '^', '$', '@', '%' , '{', '}', '[', ']', '\\' ->
+                    sb.append('\\').append(ch)
+                else -> sb.append(ch)
+            }
+        }
+        return sb.toString()
     }
 }
 

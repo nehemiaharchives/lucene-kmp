@@ -3,6 +3,114 @@ package org.gnit.lucenekmp.jdkport
 import kotlin.comparisons.reverseOrder
 
 object Collections {
+    fun <T> unmodifiableSet(set: Set<T>): MutableSet<T> {
+        return UnmodifiableMutableSet(set)
+    }
+
+    fun <T> synchronizedSet(set: MutableSet<T>): MutableSet<T> {
+        return SynchronizedMutableSet(set)
+    }
+
+    private class UnmodifiableMutableSet<T>(
+        private val delegate: Set<T>
+    ) : MutableSet<T> {
+        override val size: Int
+            get() = delegate.size
+
+        override fun contains(element: T): Boolean = delegate.contains(element)
+
+        override fun containsAll(elements: Collection<T>): Boolean = delegate.containsAll(elements)
+
+        override fun isEmpty(): Boolean = delegate.isEmpty()
+
+        override fun iterator(): MutableIterator<T> {
+            val iterator = delegate.iterator()
+            return object : MutableIterator<T> {
+                override fun hasNext(): Boolean = iterator.hasNext()
+
+                override fun next(): T = iterator.next()
+
+                override fun remove() {
+                    throw UnsupportedOperationException()
+                }
+            }
+        }
+
+        override fun add(element: T): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun addAll(elements: Collection<T>): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun clear() {
+            throw UnsupportedOperationException()
+        }
+
+        override fun remove(element: T): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun removeAll(elements: Collection<T>): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun retainAll(elements: Collection<T>): Boolean {
+            throw UnsupportedOperationException()
+        }
+
+        override fun equals(other: Any?): Boolean = delegate == other
+
+        override fun hashCode(): Int = delegate.hashCode()
+
+        override fun toString(): String = delegate.toString()
+    }
+
+    private class SynchronizedMutableSet<T>(
+        private val delegate: MutableSet<T>,
+        private val lock: ReentrantLock = ReentrantLock()
+    ) : MutableSet<T> {
+        override val size: Int
+            get() = lock.withLock { delegate.size }
+
+        override fun contains(element: T): Boolean = lock.withLock { delegate.contains(element) }
+
+        override fun containsAll(elements: Collection<T>): Boolean =
+            lock.withLock { delegate.containsAll(elements) }
+
+        override fun isEmpty(): Boolean = lock.withLock { delegate.isEmpty() }
+
+        override fun add(element: T): Boolean = lock.withLock { delegate.add(element) }
+
+        override fun addAll(elements: Collection<T>): Boolean = lock.withLock { delegate.addAll(elements) }
+
+        override fun clear() {
+            lock.withLock { delegate.clear() }
+        }
+
+        override fun iterator(): MutableIterator<T> = lock.withLock { delegate.toMutableSet().iterator() }
+
+        override fun remove(element: T): Boolean = lock.withLock { delegate.remove(element) }
+
+        override fun removeAll(elements: Collection<T>): Boolean =
+            lock.withLock { delegate.removeAll(elements.toSet()) }
+
+        override fun retainAll(elements: Collection<T>): Boolean =
+            lock.withLock { delegate.retainAll(elements.toSet()) }
+
+        override fun equals(other: Any?): Boolean =
+            lock.withLock {
+                when (other) {
+                    is SynchronizedMutableSet<*> -> delegate == other.lock.withLock { other.delegate }
+                    else -> delegate == other
+                }
+            }
+
+        override fun hashCode(): Int = lock.withLock { delegate.hashCode() }
+
+        override fun toString(): String = lock.withLock { delegate.toString() }
+    }
 
     /**
      * Swaps the elements at the specified positions in the specified list.
