@@ -7,6 +7,7 @@ import org.gnit.lucenekmp.index.DocumentsWriterDeleteQueue.DeleteSlice
 import org.gnit.lucenekmp.index.IndexingChain.ReservedField
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.document.NumericDocValuesField
+import org.gnit.lucenekmp.util.withDocumentsWriterPerThreadFlushCallPathHint
 import org.gnit.lucenekmp.jdkport.Condition
 import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.Lock
@@ -327,59 +328,60 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         assert(flushPending.get() == true)
         assert(numDocsInRAM > 0)
         assert(deleteSlice.isEmpty) { "all deletes must be applied in prepareFlush" }
-        segmentInfo.setMaxDoc(numDocsInRAM)
-        val flushState =
-            SegmentWriteState(
-                infoStream,
-                directory,
-                segmentInfo,
-                fieldInfos.finish(),
-                pendingUpdates,
-                IOContext(
-                    FlushInfo(
-                        numDocsInRAM,
-                        lastCommittedBytesUsed
+        return withDocumentsWriterPerThreadFlushCallPathHint {
+            segmentInfo.setMaxDoc(numDocsInRAM)
+            val flushState =
+                SegmentWriteState(
+                    infoStream,
+                    directory,
+                    segmentInfo,
+                    fieldInfos.finish(),
+                    pendingUpdates,
+                    IOContext(
+                        FlushInfo(
+                            numDocsInRAM,
+                            lastCommittedBytesUsed
+                        )
                     )
                 )
-            )
-        val startMBUsed = lastCommittedBytesUsed / 1024.0 / 1024.0
+            val startMBUsed = lastCommittedBytesUsed / 1024.0 / 1024.0
 
-        // Apply delete-by-docID now (delete-byDocID only
-        // happens when an exception is hit processing that
-        // doc, eg if analyzer has some problem w/ the text):
-        if (numDeletedDocIds > 0) {
-            flushState.liveDocs = FixedBitSet(numDocsInRAM)
-            flushState.liveDocs!!.set(0, numDocsInRAM)
-            for (i in 0..<numDeletedDocIds) {
-                flushState.liveDocs!!.clear(deleteDocIDs[i])
+            // Apply delete-by-docID now (delete-byDocID only
+            // happens when an exception is hit processing that
+            // doc, eg if analyzer has some problem w/ the text):
+            if (numDeletedDocIds > 0) {
+                flushState.liveDocs = FixedBitSet(numDocsInRAM)
+                flushState.liveDocs!!.set(0, numDocsInRAM)
+                for (i in 0..<numDeletedDocIds) {
+                    flushState.liveDocs!!.clear(deleteDocIDs[i])
+                }
+                flushState.delCountOnFlush = numDeletedDocIds
+                deleteDocIDs = IntArray(0)
             }
-            flushState.delCountOnFlush = numDeletedDocIds
-            deleteDocIDs = IntArray(0)
-        }
 
-        if (this.isAborted) {
+            if (this.isAborted) {
+                if (infoStream.isEnabled("DWPT")) {
+                    infoStream.message("DWPT", "flush: skip because aborting is set")
+                }
+                return@withDocumentsWriterPerThreadFlushCallPathHint null
+            }
+
+            val t0: Instant = Clock.System.now()
+            val failurePathProbe = FailurePathProbe.find(directory)
+            val previousFlushStage = failurePathProbe?.flushStage
+            if (failurePathProbe != null) {
+                failurePathProbe.flushStage = "flush"
+            }
+
             if (infoStream.isEnabled("DWPT")) {
-                infoStream.message("DWPT", "flush: skip because aborting is set")
+                infoStream.message(
+                    "DWPT",
+                    "flush postings as segment " + flushState.segmentInfo.name + " numDocs=" + numDocsInRAM
+                )
             }
-            return null
-        }
-
-        val t0: Instant = Clock.System.now()
-        val failurePathProbe = FailurePathProbe.find(directory)
-        val previousFlushStage = failurePathProbe?.flushStage
-        if (failurePathProbe != null) {
-            failurePathProbe.flushStage = "flush"
-        }
-
-        if (infoStream.isEnabled("DWPT")) {
-            infoStream.message(
-                "DWPT",
-                "flush postings as segment " + flushState.segmentInfo.name + " numDocs=" + numDocsInRAM
-            )
-        }
-        val sortMap: Sorter.DocMap?
-        var phase = "start"
-        try {
+            val sortMap: Sorter.DocMap?
+            var phase = "start"
+            try {
             phase = "getHasDocValues"
             val softDeletedDocs = if (indexWriterConfig.softDeletesField != null) {
                 indexingChain.getHasDocValues(indexWriterConfig.softDeletesField!!)
@@ -489,16 +491,17 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                             + " ms")
                 )
             }
-            return fs
-        } catch (t: Throwable) {
-            onAbortingException(t)
-            throw t
-        } finally {
-            if (failurePathProbe != null) {
-                failurePathProbe.flushStage = previousFlushStage
+                return@withDocumentsWriterPerThreadFlushCallPathHint fs
+            } catch (t: Throwable) {
+                onAbortingException(t)
+                throw t
+            } finally {
+                if (failurePathProbe != null) {
+                    failurePathProbe.flushStage = previousFlushStage
+                }
+                maybeAbort("flush", flushNotifications)
+                hasFlushed.set(true)
             }
-            maybeAbort("flush", flushNotifications)
-            hasFlushed.set(true)
         }
     }
 

@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.FieldInfosFormat
-import org.gnit.lucenekmp.internal.vectorization.withReadOnlyCloneCallPathHint
+import org.gnit.lucenekmp.util.withReadOnlyCloneCallPathHint
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.FlushInfo
 import org.gnit.lucenekmp.store.IOContext

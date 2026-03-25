@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.FileDeleter
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
-import org.gnit.lucenekmp.internal.vectorization.withCheckpointCallPathHint
+import org.gnit.lucenekmp.util.withCheckpointCallPathHint
 import kotlin.math.max
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime

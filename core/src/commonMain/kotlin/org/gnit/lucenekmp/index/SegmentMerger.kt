@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.index
 import kotlinx.coroutines.Job
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.NormsProducer
-import org.gnit.lucenekmp.internal.vectorization.withCurrentCallPathHint
+import org.gnit.lucenekmp.util.withCurrentCallPathHint
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.util.InfoStream

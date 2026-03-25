@@ -40,9 +40,9 @@ import org.gnit.lucenekmp.index.PointValues
 import org.gnit.lucenekmp.index.SnapshotDeletionPolicy
 import org.gnit.lucenekmp.index.Terms
 import org.gnit.lucenekmp.index.TieredMergePolicy
-import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasAnyMethod
-import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasClass
-import org.gnit.lucenekmp.internal.vectorization.currentStackTraceHasClassMethod
+import org.gnit.lucenekmp.util.currentStackTraceHasAnyMethod
+import org.gnit.lucenekmp.util.currentStackTraceHasClass
+import org.gnit.lucenekmp.util.currentStackTraceHasClassMethod
 import org.gnit.lucenekmp.jdkport.ExecutorService
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
