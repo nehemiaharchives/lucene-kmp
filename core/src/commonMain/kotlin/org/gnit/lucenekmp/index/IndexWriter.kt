@@ -5166,93 +5166,95 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     private fun _mergeInit(merge: MergePolicy.OneMerge) {
-        testPoint("startMergeInit")
+        withIndexWriterLock {
+            testPoint("startMergeInit")
 
-        assert(merge.registerDone)
-        assert(merge.maxNumSegments == UNBOUNDED_MAX_MERGE_SEGMENTS || merge.maxNumSegments > 0)
+            assert(merge.registerDone)
+            assert(merge.maxNumSegments == UNBOUNDED_MAX_MERGE_SEGMENTS || merge.maxNumSegments > 0)
 
-        if (tragedy.load() != null) {
-            throw IllegalStateException(
-                "this writer hit an unrecoverable error; cannot merge", tragedy.load()
-            )
-        }
-
-        if (merge.info != null) {
-            // mergeInit already done
-            return
-        }
-
-        runBlocking { merge.mergeInit() }
-
-        if (merge.isAborted) {
-            return
-        }
-
-        // TODO: in the non-pool'd case this is somewhat
-        // wasteful, because we open these readers, close them,
-        // and then open them again for merging.  Maybe  we
-        // could pre-pool them somehow in that case...
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW", "now apply deletes for " + merge.segments.size + " merging segments"
-            )
-        }
-
-        // Must move the pending doc values updates to disk now, else the newly merged segment will not
-        // see them:
-        // TODO: we could fix merging to pull the merged DV iterator so we don't have to move these
-        // updates to disk first, i.e. just carry them
-        // in memory:
-        if (runBlocking { readerPool.writeDocValuesUpdatesForMerge(merge.segments) }) {
-            checkpoint()
-        }
-        var hasBlocks = false
-        for (info in merge.segments) {
-            if (info.info.hasBlocks) {
-                hasBlocks = true
-                break
+            if (tragedy.load() != null) {
+                throw IllegalStateException(
+                    "this writer hit an unrecoverable error; cannot merge", tragedy.load()
+                )
             }
-        }
-        // Bind a new segment name here so even with
-        // ConcurrentMergePolicy we keep deterministic segment
-        // names.
-        val mergeSegmentName = newSegmentName()
-        // We set the min version to null for now, it will be set later by SegmentMerger
-        val si =
-            SegmentInfo(
-                directoryOrig,
-                Version.LATEST,
-                null,
-                mergeSegmentName,
-                -1,
-                false,
-                hasBlocks,
-                config.codec,
-                mutableMapOf(),
-                StringHelper.randomId(),
-                mutableMapOf(),
-                config.indexSort
-            )
-        val details: MutableMap<String, String> = HashMap()
-        details["mergeMaxNumSegments"] = "" + merge.maxNumSegments
-        details["mergeFactor"] = merge.segments.size.toString()
-        setDiagnostics(si, SOURCE_MERGE, details)
-        merge.setMergeInfo(
-            SegmentCommitInfo(
-                si,
-                0,
-                0,
-                -1L,
-                -1L,
-                -1L,
-                StringHelper.randomId()
-            )
-        )
 
-        if (infoStream.isEnabled("IW")) {
-            infoStream.message(
-                "IW", "merge seg=" + merge.info!!.info.name + " " + segString(merge.segments)
+            if (merge.info != null) {
+                // mergeInit already done
+                return@withIndexWriterLock
+            }
+
+            runBlocking { merge.mergeInit() }
+
+            if (merge.isAborted) {
+                return@withIndexWriterLock
+            }
+
+            // TODO: in the non-pool'd case this is somewhat
+            // wasteful, because we open these readers, close them,
+            // and then open them again for merging.  Maybe  we
+            // could pre-pool them somehow in that case...
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW", "now apply deletes for " + merge.segments.size + " merging segments"
+                )
+            }
+
+            // Must move the pending doc values updates to disk now, else the newly merged segment will not
+            // see them:
+            // TODO: we could fix merging to pull the merged DV iterator so we don't have to move these
+            // updates to disk first, i.e. just carry them
+            // in memory:
+            if (runBlocking { readerPool.writeDocValuesUpdatesForMerge(merge.segments) }) {
+                checkpoint()
+            }
+            var hasBlocks = false
+            for (info in merge.segments) {
+                if (info.info.hasBlocks) {
+                    hasBlocks = true
+                    break
+                }
+            }
+            // Bind a new segment name here so even with
+            // ConcurrentMergePolicy we keep deterministic segment
+            // names.
+            val mergeSegmentName = newSegmentName()
+            // We set the min version to null for now, it will be set later by SegmentMerger
+            val si =
+                SegmentInfo(
+                    directoryOrig,
+                    Version.LATEST,
+                    null,
+                    mergeSegmentName,
+                    -1,
+                    false,
+                    hasBlocks,
+                    config.codec,
+                    mutableMapOf(),
+                    StringHelper.randomId(),
+                    mutableMapOf(),
+                    config.indexSort
+                )
+            val details: MutableMap<String, String> = HashMap()
+            details["mergeMaxNumSegments"] = "" + merge.maxNumSegments
+            details["mergeFactor"] = merge.segments.size.toString()
+            setDiagnostics(si, SOURCE_MERGE, details)
+            merge.setMergeInfo(
+                SegmentCommitInfo(
+                    si,
+                    0,
+                    0,
+                    -1L,
+                    -1L,
+                    -1L,
+                    StringHelper.randomId()
+                )
             )
+
+            if (infoStream.isEnabled("IW")) {
+                infoStream.message(
+                    "IW", "merge seg=" + merge.info!!.info.name + " " + segString(merge.segments)
+                )
+            }
         }
     }
 
