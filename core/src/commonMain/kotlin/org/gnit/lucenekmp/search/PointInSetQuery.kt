@@ -123,9 +123,9 @@ abstract class PointInSetQuery protected constructor(
                 require(values.numIndexDimensions == numDims) {
                     ("field=\""
                             + field
-                            + "\" was indexed with numIndexDims="
+                            + "\" was indexed with numIndexDimensions="
                             + values.numIndexDimensions
-                            + " but this query has numIndexDims="
+                            + " but this query has numDims="
                             + numDims)
                 }
                 require(values.bytesPerDimension == bytesPerDim) {
