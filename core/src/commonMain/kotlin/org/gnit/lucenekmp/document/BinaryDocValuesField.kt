@@ -22,7 +22,7 @@ import org.gnit.lucenekmp.util.BytesRef
  *
  * @see BinaryDocValues
  */
-class BinaryDocValuesField(name: String, value: BytesRef?) :
+open class BinaryDocValuesField(name: String, value: BytesRef?) :
     Field(name, TYPE) {
     /**
      * Create a new binary DocValues field.
