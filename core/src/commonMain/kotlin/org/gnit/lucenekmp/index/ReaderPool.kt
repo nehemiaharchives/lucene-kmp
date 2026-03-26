@@ -219,16 +219,17 @@ internal class ReaderPool(
      * @return `true` iff any files where written
      */
     fun writeAllDocValuesUpdates(): Boolean {
-        // this needs to be protected by the reader pool lock otherwise we hit ConcurrentModificationException
-        val copy = withReaderMapLock { HashSet(readerMap.values) }
-        var any = false
-        for (rld in copy) {
-            any = any or
-                    rld.writeFieldUpdates(
-                        directory, fieldNumbers, completedDelGenSupplier(), infoStream
-                    )
+        return withReaderMapLock {
+            var any = false
+            for (rld in readerMap.values) {
+                any =
+                    any or
+                        rld.writeFieldUpdates(
+                            directory, fieldNumbers, completedDelGenSupplier(), infoStream
+                        )
+            }
+            any
         }
-        return any
     }
 
     /**
