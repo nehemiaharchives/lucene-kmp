@@ -14,6 +14,8 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.gnit.lucenekmp.util.CloseableThreadLocal
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
@@ -49,7 +51,7 @@ open class Thread : Runnable {
     open fun start() {
         check(!started) { "Thread already started" }
         started = true
-        val threadDispatcher = newSingleThreadContext(name)
+        val threadDispatcher = acquireDispatcher()
         dispatcher = threadDispatcher
         val launched =
             CoroutineScope(threadDispatcher + CoroutineName(name)).launch {
@@ -131,7 +133,7 @@ open class Thread : Runnable {
         val localJob = job
         val localDispatcher = dispatcher
         if (localDispatcher != null && (localJob == null || localJob.isCompleted)) {
-            localDispatcher.close()
+            releaseDispatcher(localDispatcher)
             if (dispatcher === localDispatcher) {
                 dispatcher = null
             }
@@ -146,7 +148,30 @@ open class Thread : Runnable {
         private val currentThreadLocal = CloseableThreadLocal<Thread>()
         private val threadInitNumber = AtomicInt(0)
         private val threadIdNumber = AtomicInt(1)
+        private val dispatcherInitNumber = AtomicInt(0)
+        private val idleDispatchers = ArrayDeque<CloseableCoroutineDispatcher>()
+        private val dispatcherPoolLock = ReentrantLock()
+        private const val MAX_IDLE_DISPATCHERS = 8
         private val mainThread = Thread().apply { setName("main") }
+
+        private fun acquireDispatcher(): CloseableCoroutineDispatcher {
+            return dispatcherPoolLock.withLock {
+                idleDispatchers.removeFirstOrNull()
+                    ?: newSingleThreadContext(
+                        "ThreadDispatcher-${dispatcherInitNumber.fetchAndIncrement()}"
+                    )
+            }
+        }
+
+        private fun releaseDispatcher(dispatcher: CloseableCoroutineDispatcher) {
+            dispatcherPoolLock.withLock {
+                if (idleDispatchers.size < MAX_IDLE_DISPATCHERS) {
+                    idleDispatchers.addLast(dispatcher)
+                } else {
+                    dispatcher.close()
+                }
+            }
+        }
 
         fun currentThread(): Thread {
             return currentThreadOrNull() ?: mainThread
