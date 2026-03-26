@@ -23,10 +23,10 @@
 ### Total Unit Test and their Dependencies: 2622
 
 ## Priority 1 Dependencies (KMP)
-### Total KMP classes: 1386
+### Total KMP classes: 1397
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 2000
+### Total KMP Unit Test classes: 2018
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -12499,7 +12499,7 @@
 | [org.apache.lucene.index.TestIndexReaderClose](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexReaderClose.java) | org.gnit.lucenekmp.index.TestIndexReaderClose | Depth 1 | [x] | 142 | 4 | 0% |
 | [org.apache.lucene.index.TestIndexSorting](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexSorting.java) | org.gnit.lucenekmp.index.TestIndexSorting | Depth 2 | [x] | 0 | 16 | 0% |
 | [org.apache.lucene.index.TestIndexTooManyDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexTooManyDocs.java) | org.gnit.lucenekmp.index.TestIndexTooManyDocs | Depth 1 | [x] | 140 | 5 | 10% |
-| [org.apache.lucene.index.TestIndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriter.java) | org.gnit.lucenekmp.index.TestIndexWriter | Depth 2 | [x] | 0 | 21 | 0% |
+| [org.apache.lucene.index.TestIndexWriter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriter.java) | org.gnit.lucenekmp.index.TestIndexWriter | Depth 2 | [x] | 0 | 16 | 0% |
 | [org.apache.lucene.index.TestIndexWriterCommit](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterCommit.java) | org.gnit.lucenekmp.index.TestIndexWriterCommit | Depth 1 | [x] | 153 | 16 | 0% |
 | [org.apache.lucene.index.TestIndexWriterConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterConfig.java) | org.gnit.lucenekmp.index.TestIndexWriterConfig | Depth 1 | [x] | 147 | 16 | 0% |
 | [org.apache.lucene.index.TestIndexWriterDelete](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterDelete.java) | org.gnit.lucenekmp.index.TestIndexWriterDelete | Depth 2 | [x] | 3 | 16 | 0% |
@@ -12520,11 +12520,11 @@
 | [org.apache.lucene.index.TestIndexWriterThreadsToSegments](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterThreadsToSegments.java) | org.gnit.lucenekmp.index.TestIndexWriterThreadsToSegments | Depth 1 | [x] | 144 | 3 | 0% |
 | [org.apache.lucene.index.TestIndexWriterUnicode](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterUnicode.java) | org.gnit.lucenekmp.index.TestIndexWriterUnicode | Depth 1 | [x] | 151 | 14 | 63% |
 | [org.apache.lucene.index.TestIndexWriterWithThreads](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexWriterWithThreads.java) | org.gnit.lucenekmp.index.TestIndexWriterWithThreads | Depth 2 | [x] | 3 | 7 | 0% |
-| [org.apache.lucene.index.TestIndexableField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexableField.java) | org.gnit.lucenekmp.index.TestIndexableField | Depth 1 | [] | 141 | 0 | 0% |
-| [org.apache.lucene.index.TestIndexingSequenceNumbers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexingSequenceNumbers.java) | org.gnit.lucenekmp.index.TestIndexingSequenceNumbers | Depth 2 | [] | 0 | 0 | 0% |
-| [org.apache.lucene.index.TestInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestInfoStream.java) | org.gnit.lucenekmp.index.TestInfoStream | Depth 1 | [] | 141 | 0 | 0% |
-| [org.apache.lucene.index.TestIntBlockPool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIntBlockPool.java) | org.gnit.lucenekmp.index.TestIntBlockPool | Depth 1 | [] | 141 | 0 | 0% |
-| [org.apache.lucene.index.TestIsCurrent](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIsCurrent.java) | org.gnit.lucenekmp.index.TestIsCurrent | Depth 1 | [] | 141 | 0 | 0% |
+| [org.apache.lucene.index.TestIndexableField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexableField.java) | org.gnit.lucenekmp.index.TestIndexableField | Depth 1 | [x] | 141 | 2 | 0% |
+| [org.apache.lucene.index.TestIndexingSequenceNumbers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIndexingSequenceNumbers.java) | org.gnit.lucenekmp.index.TestIndexingSequenceNumbers | Depth 2 | [x] | 0 | 0 | 0% |
+| [org.apache.lucene.index.TestInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestInfoStream.java) | org.gnit.lucenekmp.index.TestInfoStream | Depth 1 | [x] | 141 | 195 | 0% |
+| [org.apache.lucene.index.TestIntBlockPool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIntBlockPool.java) | org.gnit.lucenekmp.index.TestIntBlockPool | Depth 1 | [x] | 141 | 1 | 0% |
+| [org.apache.lucene.index.TestIsCurrent](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIsCurrent.java) | org.gnit.lucenekmp.index.TestIsCurrent | Depth 1 | [x] | 141 | 6 | 36% |
 | [org.apache.lucene.index.TestKnnGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestKnnGraph.java) | org.gnit.lucenekmp.index.TestKnnGraph | Depth 1 | [] | 160 | 0 | 0% |
 | [org.apache.lucene.index.TestLockableConcurrentApproximatePriorityQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestLockableConcurrentApproximatePriorityQueue.java) | org.gnit.lucenekmp.index.TestLockableConcurrentApproximatePriorityQueue | Depth 2 | [x] | 6 | 3 | 0% |
 | [org.apache.lucene.index.TestLogMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestLogMergePolicy.java) | org.gnit.lucenekmp.index.TestLogMergePolicy | Depth 1 | [x] | 160 | 33 | 47% |
@@ -13614,24 +13614,21 @@
 | [org.apache.lucene.tests.index.TestMockRandomMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/index/TestMockRandomMergePolicy.java) | org.gnit.lucenekmp.tests.index.TestMockRandomMergePolicy | Depth 1 | [] | 140 | 0 | 0% |
 | [org.apache.lucene.tests.index.ThreadedIndexingAndSearchingTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/index/ThreadedIndexingAndSearchingTestCase.java) | org.gnit.lucenekmp.tests.index.ThreadedIndexingAndSearchingTestCase | Depth 3 | [x] | 1 | 3 | 0% |
 | [org.apache.lucene.tests.mockfile.DisableFsyncFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/DisableFsyncFS.java) | org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS | Depth 3 | [] | 15 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.ExtrasFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/ExtrasFS.java) | org.gnit.lucenekmp.tests.mockfile.ExtrasFS | Depth 2 | [] | 29 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterAsynchronousFileChannel.java) | org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel | Depth 4 | [] | 10 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.FilterDirectoryStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterDirectoryStream.java) | org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream | Depth 4 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterFileChannel](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileChannel.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileChannel | Depth 3 | [] | 15 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterFileStore](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileStore.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileStore | Depth 5 | [] | 4 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.FilterFileSystem](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileSystem.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileSystem | Depth 4 | [] | 2 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.FilterFileSystemProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileSystemProvider.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileSystemProvider | Depth 3 | [] | 1 | 0 | 0% |
+| [org.apache.lucene.tests.mockfile.FilterFileSystem](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileSystem.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileSystem | Depth 4 | [x] | 2 | 15 | 0% |
+| [org.apache.lucene.tests.mockfile.FilterFileSystemProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterFileSystemProvider.java) | org.gnit.lucenekmp.tests.mockfile.FilterFileSystemProvider | Depth 3 | [x] | 1 | 17 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterInputStream2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterInputStream2.java) | org.gnit.lucenekmp.tests.mockfile.FilterInputStream2 | Depth 4 | [x] | 7 | 12 | 59% |
 | [org.apache.lucene.tests.mockfile.FilterOutputStream2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterOutputStream2.java) | org.gnit.lucenekmp.tests.mockfile.FilterOutputStream2 | Depth 4 | [x] | 5 | 5 | 89% |
-| [org.apache.lucene.tests.mockfile.FilterPath](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterPath.java) | org.gnit.lucenekmp.tests.mockfile.FilterPath | Depth 3 | [] | 2 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.FilterSeekableByteChannel](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/FilterSeekableByteChannel.java) | org.gnit.lucenekmp.tests.mockfile.FilterSeekableByteChannel | Depth 4 | [x] | 5 | 5 | 91% |
 | [org.apache.lucene.tests.mockfile.HandleLimitFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/HandleLimitFS.java) | org.gnit.lucenekmp.tests.mockfile.HandleLimitFS | Depth 2 | [] | 31 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.HandleTrackingFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/HandleTrackingFS.java) | org.gnit.lucenekmp.tests.mockfile.HandleTrackingFS | Depth 3 | [] | 7 | 0 | 0% |
+| [org.apache.lucene.tests.mockfile.HandleTrackingFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/HandleTrackingFS.java) | org.gnit.lucenekmp.tests.mockfile.HandleTrackingFS | Depth 3 | [x] | 7 | 1 | 57% |
 | [org.apache.lucene.tests.mockfile.LeakFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/LeakFS.java) | org.gnit.lucenekmp.tests.mockfile.LeakFS | Depth 2 | [] | 31 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.MockFileSystemTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/MockFileSystemTestCase.java) | org.gnit.lucenekmp.tests.mockfile.MockFileSystemTestCase | Depth 2 | [] | 147 | 0 | 0% |
+| [org.apache.lucene.tests.mockfile.MockFileSystemTestCase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/MockFileSystemTestCase.java) | org.gnit.lucenekmp.tests.mockfile.MockFileSystemTestCase | Depth 2 | [x] | 147 | 10 | 53% |
 | [org.apache.lucene.tests.mockfile.ShuffleFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/ShuffleFS.java) | org.gnit.lucenekmp.tests.mockfile.ShuffleFS | Depth 3 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.TestDisableFsyncFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestDisableFsyncFS.java) | org.gnit.lucenekmp.tests.mockfile.TestDisableFsyncFS | Depth 1 | [] | 148 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.TestExtrasFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestExtrasFS.java) | org.gnit.lucenekmp.tests.mockfile.TestExtrasFS | Depth 1 | [] | 151 | 0 | 0% |
+| [org.apache.lucene.tests.mockfile.TestExtrasFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestExtrasFS.java) | org.gnit.lucenekmp.tests.mockfile.TestExtrasFS | Depth 1 | [x] | 151 | 14 | 63% |
 | [org.apache.lucene.tests.mockfile.TestHandleLimitFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestHandleLimitFS.java) | org.gnit.lucenekmp.tests.mockfile.TestHandleLimitFS | Depth 1 | [] | 149 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.TestHandleTrackingFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestHandleTrackingFS.java) | org.gnit.lucenekmp.tests.mockfile.TestHandleTrackingFS | Depth 2 | [] | 31 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.TestLeakFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestLeakFS.java) | org.gnit.lucenekmp.tests.mockfile.TestLeakFS | Depth 1 | [] | 152 | 0 | 0% |
@@ -13641,7 +13638,7 @@
 | [org.apache.lucene.tests.mockfile.TestWindowsFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/test/org/apache/lucene/tests/mockfile/TestWindowsFS.java) | org.gnit.lucenekmp.tests.mockfile.TestWindowsFS | Depth 2 | [] | 1 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.VerboseFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/VerboseFS.java) | org.gnit.lucenekmp.tests.mockfile.VerboseFS | Depth 2 | [] | 31 | 0 | 0% |
 | [org.apache.lucene.tests.mockfile.VirusCheckingFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/VirusCheckingFS.java) | org.gnit.lucenekmp.tests.mockfile.VirusCheckingFS | Depth 2 | [] | 30 | 0 | 0% |
-| [org.apache.lucene.tests.mockfile.WindowsFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/WindowsFS.java) | org.gnit.lucenekmp.tests.mockfile.WindowsFS | Depth 2 | [] | 34 | 0 | 0% |
+| [org.apache.lucene.tests.mockfile.WindowsFS](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/WindowsFS.java) | org.gnit.lucenekmp.tests.mockfile.WindowsFS | Depth 2 | [x] | 34 | 23 | 21% |
 | [org.apache.lucene.tests.mockfile.WindowsPath](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/mockfile/WindowsPath.java) | org.gnit.lucenekmp.tests.mockfile.WindowsPath | Depth 2 | [] | 23 | 0 | 0% |
 | [org.apache.lucene.tests.search.AssertingCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/AssertingCollector.java) | org.gnit.lucenekmp.tests.search.AssertingCollector | Depth 4 | [x] | 4 | 4 | 64% |
 | [org.apache.lucene.tests.search.AssertingIndexSearcher](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/test-framework/src/java/org/apache/lucene/tests/search/AssertingIndexSearcher.java) | org.gnit.lucenekmp.tests.search.AssertingIndexSearcher | Depth 2 | [x] | 26 | 25 | 87% |
@@ -14017,7 +14014,7 @@
 | [org.apache.lucene.util.quantization.TestScalarQuantizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/quantization/TestScalarQuantizer.java) | org.gnit.lucenekmp.util.quantization.TestScalarQuantizer | Depth 1 | [x] | 151 | 5 | 0% |
 
 
-TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
+TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ## Summary
 
@@ -14031,16 +14028,16 @@ TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Lucene Classes (Semantic Analysis)
 - Total Classes: 3922
-- Ported Classes: 1313
+- Ported Classes: 1320
 - Class Porting Progress: 33%
 - **Semantic Completion Progress: 11%**
 - Total Core Methods Needed: 36423
-- Core Methods Implemented: 4156
+- Core Methods Implemented: 4164
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2622
-- Ported Unit Test Classes: 1918
+- Ported Unit Test Classes: 1932
 - Unit Test Porting Progress: 73%
 - **Unit Test Semantic Completion: 7%**
 - Total Test Core Methods Needed: 134333
-- Test Core Methods Implemented: 9532
+- Test Core Methods Implemented: 9567

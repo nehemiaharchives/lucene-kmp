@@ -132,8 +132,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.store.VerifyingLockFactory → org.gnit.lucenekmp.store.VerifyingLockFactory
 - org.apache.lucene.tests.codecs.mockrandom.MockRandomPostingsFormat → org.gnit.lucenekmp.tests.codecs.mockrandom.MockRandomPostingsFormat
 - org.apache.lucene.tests.mockfile.FilterAsynchronousFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterAsynchronousFileChannel
-- org.apache.lucene.tests.mockfile.FilterDirectoryStream → org.gnit.lucenekmp.tests.mockfile.FilterDirectoryStream
-- org.apache.lucene.tests.mockfile.FilterFileSystem → org.gnit.lucenekmp.tests.mockfile.FilterFileSystem
 - org.apache.lucene.tests.util.TestRuleAssertionsRequired → org.gnit.lucenekmp.tests.util.TestRuleAssertionsRequired
 - org.apache.lucene.tests.util.TestRuleLimitSysouts → org.gnit.lucenekmp.tests.util.TestRuleLimitSysouts
 
@@ -313,9 +311,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.index.RandomCodec → org.gnit.lucenekmp.tests.index.RandomCodec
 - org.apache.lucene.tests.mockfile.DisableFsyncFS → org.gnit.lucenekmp.tests.mockfile.DisableFsyncFS
 - org.apache.lucene.tests.mockfile.FilterFileChannel → org.gnit.lucenekmp.tests.mockfile.FilterFileChannel
-- org.apache.lucene.tests.mockfile.FilterFileSystemProvider → org.gnit.lucenekmp.tests.mockfile.FilterFileSystemProvider
-- org.apache.lucene.tests.mockfile.FilterPath → org.gnit.lucenekmp.tests.mockfile.FilterPath
-- org.apache.lucene.tests.mockfile.HandleTrackingFS → org.gnit.lucenekmp.tests.mockfile.HandleTrackingFS
 - org.apache.lucene.tests.mockfile.ShuffleFS → org.gnit.lucenekmp.tests.mockfile.ShuffleFS
 - org.apache.lucene.tests.search.ShardSearchingTestBase → org.gnit.lucenekmp.tests.search.ShardSearchingTestBase
 - org.apache.lucene.tests.util.FailureMarker → org.gnit.lucenekmp.tests.util.FailureMarker
@@ -357,7 +352,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.sharedterms.TestSTBlockReader → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.TestSTBlockReader
 - org.apache.lucene.index.NoMergeScheduler → org.gnit.lucenekmp.index.NoMergeScheduler
 - org.apache.lucene.index.PersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy
-- org.apache.lucene.index.TestIndexingSequenceNumbers → org.gnit.lucenekmp.index.TestIndexingSequenceNumbers
 - org.apache.lucene.index.TestNumericDocValuesUpdates → org.gnit.lucenekmp.index.TestNumericDocValuesUpdates
 - org.apache.lucene.index.TestPayloads → org.gnit.lucenekmp.index.TestPayloads
 - org.apache.lucene.index.TestPersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.TestPersistentSnapshotDeletionPolicy
@@ -448,15 +442,12 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.codecs.vector.ConfigurableMCodec → org.gnit.lucenekmp.tests.codecs.vector.ConfigurableMCodec
 - org.apache.lucene.tests.geo.EarthDebugger → org.gnit.lucenekmp.tests.geo.EarthDebugger
 - org.apache.lucene.tests.index.PerThreadPKLookup → org.gnit.lucenekmp.tests.index.PerThreadPKLookup
-- org.apache.lucene.tests.mockfile.ExtrasFS → org.gnit.lucenekmp.tests.mockfile.ExtrasFS
 - org.apache.lucene.tests.mockfile.HandleLimitFS → org.gnit.lucenekmp.tests.mockfile.HandleLimitFS
 - org.apache.lucene.tests.mockfile.LeakFS → org.gnit.lucenekmp.tests.mockfile.LeakFS
-- org.apache.lucene.tests.mockfile.MockFileSystemTestCase → org.gnit.lucenekmp.tests.mockfile.MockFileSystemTestCase
 - org.apache.lucene.tests.mockfile.TestHandleTrackingFS → org.gnit.lucenekmp.tests.mockfile.TestHandleTrackingFS
 - org.apache.lucene.tests.mockfile.TestWindowsFS → org.gnit.lucenekmp.tests.mockfile.TestWindowsFS
 - org.apache.lucene.tests.mockfile.VerboseFS → org.gnit.lucenekmp.tests.mockfile.VerboseFS
 - org.apache.lucene.tests.mockfile.VirusCheckingFS → org.gnit.lucenekmp.tests.mockfile.VirusCheckingFS
-- org.apache.lucene.tests.mockfile.WindowsFS → org.gnit.lucenekmp.tests.mockfile.WindowsFS
 - org.apache.lucene.tests.mockfile.WindowsPath → org.gnit.lucenekmp.tests.mockfile.WindowsPath
 - org.apache.lucene.tests.util.SorePoint → org.gnit.lucenekmp.tests.util.SorePoint
 - org.apache.lucene.tests.util.SoreType → org.gnit.lucenekmp.tests.util.SoreType
@@ -505,10 +496,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestIndexableField → org.gnit.lucenekmp.index.TestIndexableField
-- org.apache.lucene.index.TestInfoStream → org.gnit.lucenekmp.index.TestInfoStream
-- org.apache.lucene.index.TestIntBlockPool → org.gnit.lucenekmp.index.TestIntBlockPool
-- org.apache.lucene.index.TestIsCurrent → org.gnit.lucenekmp.index.TestIsCurrent
 - org.apache.lucene.index.TestKnnGraph → org.gnit.lucenekmp.index.TestKnnGraph
 - org.apache.lucene.index.TestLongPostings → org.gnit.lucenekmp.index.TestLongPostings
 - org.apache.lucene.index.TestManyFields → org.gnit.lucenekmp.index.TestManyFields
@@ -700,7 +687,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.tests.index.TestForceMergePolicy → org.gnit.lucenekmp.tests.index.TestForceMergePolicy
 - org.apache.lucene.tests.index.TestMockRandomMergePolicy → org.gnit.lucenekmp.tests.index.TestMockRandomMergePolicy
 - org.apache.lucene.tests.mockfile.TestDisableFsyncFS → org.gnit.lucenekmp.tests.mockfile.TestDisableFsyncFS
-- org.apache.lucene.tests.mockfile.TestExtrasFS → org.gnit.lucenekmp.tests.mockfile.TestExtrasFS
 - org.apache.lucene.tests.mockfile.TestHandleLimitFS → org.gnit.lucenekmp.tests.mockfile.TestHandleLimitFS
 - org.apache.lucene.tests.mockfile.TestLeakFS → org.gnit.lucenekmp.tests.mockfile.TestLeakFS
 - org.apache.lucene.tests.mockfile.TestShuffleFS → org.gnit.lucenekmp.tests.mockfile.TestShuffleFS
