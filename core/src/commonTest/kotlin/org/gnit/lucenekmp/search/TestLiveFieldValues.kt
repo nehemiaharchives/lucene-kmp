@@ -37,9 +37,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestLiveFieldValues : LuceneTestCase() {
-    @OptIn(ExperimentalAtomicApi::class)
+
     @Test
     @Throws(Exception::class)
+    @OptIn(ExperimentalAtomicApi::class)
     fun test() {
         val dir: Directory = newFSDirectory(createTempDir("livefieldupdates"))
         val iwc: IndexWriterConfig = newIndexWriterConfig(MockAnalyzer(random()))

@@ -41,8 +41,7 @@ abstract class LiveFieldValues<S, T : Any>(
     @Volatile
     private var old: MutableMap<String, T> = mutableMapOf()
 
-    private val currentLock = ReentrantLock()
-    private val oldLock = ReentrantLock()
+    private val mapsLock = ReentrantLock()
 
     /** The missingValue must be non-null. */
     init {
@@ -55,8 +54,7 @@ abstract class LiveFieldValues<S, T : Any>(
 
     @Throws(IOException::class)
     override fun beforeRefresh() {
-        oldLock.lock()
-        currentLock.lock()
+        mapsLock.lock()
         try {
             old = current
             // Start sending all updates after this point to the new
@@ -65,14 +63,13 @@ abstract class LiveFieldValues<S, T : Any>(
             // current searcher:
             current = mutableMapOf()
         } finally {
-            currentLock.unlock()
-            oldLock.unlock()
+            mapsLock.unlock()
         }
     }
 
     @Throws(IOException::class)
     override fun afterRefresh(didRefresh: Boolean) {
-        oldLock.lock()
+        mapsLock.lock()
         try {
             // Now drop all the old values because they are now
             // visible via the searcher that was just opened; if
@@ -82,7 +79,7 @@ abstract class LiveFieldValues<S, T : Any>(
             // reader.  So we can safely clear old here:
             old = mutableMapOf()
         } finally {
-            oldLock.unlock()
+            mapsLock.unlock()
         }
     }
 
@@ -91,33 +88,31 @@ abstract class LiveFieldValues<S, T : Any>(
      * just set the field to.
      */
     fun add(id: String, value: T) {
-        currentLock.lock()
+        mapsLock.lock()
         try {
             current[id] = value
         } finally {
-            currentLock.unlock()
+            mapsLock.unlock()
         }
     }
 
     /** Call this after you've successfully deleted a document from the index. */
     fun delete(id: String) {
-        currentLock.lock()
+        mapsLock.lock()
         try {
             current[id] = missingValue
         } finally {
-            currentLock.unlock()
+            mapsLock.unlock()
         }
     }
 
     /** Returns the approximate number of id/value pairs buffered in RAM. */
     fun size(): Int {
-        currentLock.lock()
-        oldLock.lock()
+        mapsLock.lock()
         return try {
             current.size + old.size
         } finally {
-            oldLock.unlock()
-            currentLock.unlock()
+            mapsLock.unlock()
         }
     }
 
@@ -125,12 +120,12 @@ abstract class LiveFieldValues<S, T : Any>(
     @Throws(IOException::class)
     operator fun get(id: String): T? {
         // First try to get the "live" value:
-        currentLock.lock()
+        mapsLock.lock()
         val currentValue =
             try {
                 current[id]
             } finally {
-                currentLock.unlock()
+                mapsLock.unlock()
             }
         if (currentValue == missingValue) {
             // Deleted but the deletion is not yet reflected in
@@ -139,12 +134,12 @@ abstract class LiveFieldValues<S, T : Any>(
         } else if (currentValue != null) {
             return currentValue
         } else {
-            oldLock.lock()
+            mapsLock.lock()
             val oldValue =
                 try {
                     old[id]
                 } finally {
-                    oldLock.unlock()
+                    mapsLock.unlock()
                 }
             if (oldValue == missingValue) {
                 // Deleted but the deletion is not yet reflected in
