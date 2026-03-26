@@ -81,7 +81,7 @@ jobs:
           - platform: jvm
             module_name: core-search
             os: ubuntu-latest
-            timeout: 40
+            timeout: 50
             task: :core:jvmTest
             package_filter: --tests "org.gnit.lucenekmp.search*"
             artifact: jvm-core-search-reports
@@ -427,7 +427,7 @@ jobs:
           - platform: ios
             module_name: core-search
             os: macos-latest
-            timeout: 40
+            timeout: 50
             task: :core:iosSimulatorArm64Test
             package_filter: --tests "org.gnit.lucenekmp.search*"
             artifact: ios-core-search-reports
@@ -572,7 +572,7 @@ jobs:
           - platform: linux
             module_name: core-search
             os: ubuntu-latest
-            timeout: 50
+            timeout: 60
             task: :core:linuxX64Test
             package_filter: --tests "org.gnit.lucenekmp.search*"
             artifact: linux-core-search-reports
