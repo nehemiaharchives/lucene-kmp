@@ -46,9 +46,10 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.toUnsignedInt
 
+private val lucene90DocValuesProducerLogger = KotlinLogging.logger {}
+
 /** reader for [Lucene90DocValuesFormat]  */
 internal class Lucene90DocValuesProducer : DocValuesProducer {
-    private val logger = KotlinLogging.logger {}
     private val numerics: IntObjectHashMap<NumericEntry>
     private val binaries: IntObjectHashMap<BinaryEntry>
     private val sorted: IntObjectHashMap<SortedEntry>
@@ -1178,8 +1179,8 @@ internal class Lucene90DocValuesProducer : DocValuesProducer {
             if (index == -1L) {
                 // empty terms dict
                 this.ord = 0
-                if (logger.isDebugEnabled()) {
-                    logger.debug {
+                if (lucene90DocValuesProducerLogger.isDebugEnabled()) {
+                    lucene90DocValuesProducerLogger.debug {
                         "TermsDict.seekBlock: empty terms dict target=${text.utf8ToString()} ord=${this.ord}"
                     }
                 }
