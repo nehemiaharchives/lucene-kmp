@@ -43,7 +43,7 @@ abstract class QueryVisitor {
      * Implement this to avoid collecting terms from heavy queries such as [TermInSetQuery]
      * that are not running on fields of interest
      */
-    fun acceptField(field: String?): Boolean {
+    open fun acceptField(field: String?): Boolean {
         return true
     }
 
@@ -69,7 +69,7 @@ abstract class QueryVisitor {
          *
          * @param termSet a `Set` to add collected terms to
          */
-        fun termCollector(termSet: MutableSet<Term?>): QueryVisitor {
+        fun termCollector(termSet: MutableSet<Term>): QueryVisitor {
             return object : QueryVisitor() {
                 override fun consumeTerms(query: Query, vararg terms: Term) {
                     termSet.addAll(listOf(*terms))
