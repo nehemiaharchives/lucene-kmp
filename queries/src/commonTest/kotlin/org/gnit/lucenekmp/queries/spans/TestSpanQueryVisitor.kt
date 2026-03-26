@@ -68,7 +68,7 @@ class TestSpanQueryVisitor : LuceneTestCase() {
 
     @Test
     fun testExtractTermsEquivalent() {
-        val terms = HashSet<Term?>()
+        val terms: MutableSet<Term> = mutableSetOf()
         val expected: Set<Term?> = hashSetOf(
             Term("field1", "t1"),
             Term("field1", "tm2"),

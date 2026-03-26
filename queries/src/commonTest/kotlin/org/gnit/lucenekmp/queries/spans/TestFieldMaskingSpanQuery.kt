@@ -145,7 +145,7 @@ class TestFieldMaskingSpanQuery : LuceneTestCase() {
 
         QueryUtils.checkEqual(q, qr)
 
-        val terms = HashSet<Term?>()
+        val terms: MutableSet<Term> = mutableSetOf()
         qr.visit(QueryVisitor.termCollector(terms))
         assertEquals(1, terms.size)
     }
@@ -195,7 +195,7 @@ class TestFieldMaskingSpanQuery : LuceneTestCase() {
 
         QueryUtils.checkUnequal(q, qr)
 
-        val terms = HashSet<Term?>()
+        val terms: MutableSet<Term> = mutableSetOf()
         qr.visit(QueryVisitor.termCollector(terms))
         assertEquals(2, terms.size)
     }
@@ -209,7 +209,7 @@ class TestFieldMaskingSpanQuery : LuceneTestCase() {
 
         QueryUtils.checkEqual(q, qr)
 
-        val set = HashSet<Term?>()
+        val set: MutableSet<Term> = mutableSetOf()
         qr.visit(QueryVisitor.termCollector(set))
         assertEquals(2, set.size)
     }
