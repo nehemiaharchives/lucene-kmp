@@ -451,11 +451,6 @@ class RandomIndexWriter private constructor(
         }
     }
 
-    /*@Throws(IOException::class)
-    fun getReader(): DirectoryReader {
-        return getReader(true, false)
-    }*/
-
     @Throws(IOException::class)
     fun getReader(applyDeletions: Boolean, writeAllDeletes: Boolean): DirectoryReader {
         LuceneTestCase.maybeChangeLiveIndexWriterConfig(r, config)
