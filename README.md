@@ -28,6 +28,23 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
     reformat all the code with 'make reformat' and enable format checks when
     linting. It works like spotless, just don't think about it.
 ```
+## USAGE
+
+in your `build.gradle.kts` add things you need to use among following:
+
+```kotlin
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-common:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-extra:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-kuromoji:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-morfologik:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-nori:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-smartcn:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-codecs:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-core:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-queries:10.2.0-alpha11")
+implementation("org.gnit.lucene-kmp:lucene-kmp-queryparser:10.2.0-alpha11")
+
+```
 
 ## PROGRESS
 ### Classes needed to port to write minimum index:
@@ -54,6 +71,9 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
 * [x] org.apache.lucene.search.BooleanClause
 * [x] org.apache.lucene.search.Sort
 * [x] org.apache.lucene.search.SortField
+
+### Modules
+* `core` module is mostly ported. Other modules are partially ported. 
 
 ### Unit tests needed to port to verify the above classes:
 
