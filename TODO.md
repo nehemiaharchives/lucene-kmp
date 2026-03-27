@@ -496,7 +496,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestKnnGraph → org.gnit.lucenekmp.index.TestKnnGraph
 - org.apache.lucene.index.TestLongPostings → org.gnit.lucenekmp.index.TestLongPostings
 - org.apache.lucene.index.TestManyFields → org.gnit.lucenekmp.index.TestManyFields
 - org.apache.lucene.index.TestMaxPosition → org.gnit.lucenekmp.index.TestMaxPosition

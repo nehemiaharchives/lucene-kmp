@@ -26,7 +26,7 @@
 ### Total KMP classes: 1397
 
 ## Unit Test Dependencies (KMP)
-### Total KMP Unit Test classes: 2018
+### Total KMP Unit Test classes: 2019
 
 ## Progress Table for Lucene Classes
 | Java Class | KMP Class | Depth | Class Ported | Java Core Methods | KMP Core Methods | Semantic Progress | Missing Core Methods |
@@ -12525,7 +12525,7 @@
 | [org.apache.lucene.index.TestInfoStream](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestInfoStream.java) | org.gnit.lucenekmp.index.TestInfoStream | Depth 1 | [x] | 141 | 195 | 0% |
 | [org.apache.lucene.index.TestIntBlockPool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIntBlockPool.java) | org.gnit.lucenekmp.index.TestIntBlockPool | Depth 1 | [x] | 141 | 1 | 0% |
 | [org.apache.lucene.index.TestIsCurrent](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestIsCurrent.java) | org.gnit.lucenekmp.index.TestIsCurrent | Depth 1 | [x] | 141 | 6 | 36% |
-| [org.apache.lucene.index.TestKnnGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestKnnGraph.java) | org.gnit.lucenekmp.index.TestKnnGraph | Depth 1 | [] | 160 | 0 | 0% |
+| [org.apache.lucene.index.TestKnnGraph](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestKnnGraph.java) | org.gnit.lucenekmp.index.TestKnnGraph | Depth 1 | [x] | 160 | 0 | 0% |
 | [org.apache.lucene.index.TestLockableConcurrentApproximatePriorityQueue](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestLockableConcurrentApproximatePriorityQueue.java) | org.gnit.lucenekmp.index.TestLockableConcurrentApproximatePriorityQueue | Depth 2 | [x] | 6 | 3 | 0% |
 | [org.apache.lucene.index.TestLogMergePolicy](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestLogMergePolicy.java) | org.gnit.lucenekmp.index.TestLogMergePolicy | Depth 1 | [x] | 160 | 33 | 47% |
 | [org.apache.lucene.index.TestLongPostings](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestLongPostings.java) | org.gnit.lucenekmp.index.TestLongPostings | Depth 1 | [] | 143 | 0 | 0% |
@@ -14036,7 +14036,7 @@ TODO.md written to: /home/joel/code/bbl-lucene/lucene-kmp/TODO.md
 
 ### Unit Test Classes (Semantic Analysis)
 - Total Unit Test Classes: 2622
-- Ported Unit Test Classes: 1932
+- Ported Unit Test Classes: 1933
 - Unit Test Porting Progress: 73%
 - **Unit Test Semantic Completion: 7%**
 - Total Test Core Methods Needed: 134333
