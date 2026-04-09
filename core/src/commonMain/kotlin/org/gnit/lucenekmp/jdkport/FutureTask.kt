@@ -130,7 +130,7 @@ open class FutureTask<V> : RunnableFuture<V> {
     private var callable: Callable<V>? = null
 
     // Logging support (platform agnostic)
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     /**
      * Returns result or throws exception for completed task.

@@ -82,7 +82,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     directory: Directory,
     globalFieldNumberMap: FieldInfos.FieldNumbers
 ) : AutoCloseable, Accountable {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     private val syncLock = ReentrantLock()
     @OptIn(ExperimentalAtomicApi::class)
     private val pendingNumDocs: AtomicLong

@@ -50,7 +50,7 @@ import okio.IOException
  * @lucene.experimental
  */
 class Lucene99FlatVectorsFormat(private val vectorsScorer: FlatVectorsScorer) : FlatVectorsFormat(NAME) {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     @Throws(IOException::class)
     override fun fieldsWriter(state: SegmentWriteState): FlatVectorsWriter {

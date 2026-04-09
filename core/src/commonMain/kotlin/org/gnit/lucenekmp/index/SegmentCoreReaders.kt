@@ -25,7 +25,7 @@ import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 
-private val segmentCoreReadersLogger = KotlinLogging.logger {}
+private val segmentCoreReadersLogger = org.gnit.lucenekmp.util.luceneLogger {}
 
 /** Holds core readers that are shared (unchanged) when SegmentReader is cloned or reopened  */
 class SegmentCoreReaders(

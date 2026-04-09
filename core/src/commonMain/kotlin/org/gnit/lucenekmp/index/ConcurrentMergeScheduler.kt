@@ -55,7 +55,7 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
-private val concurrentMergeSchedulerLogger = KotlinLogging.logger {}
+private val concurrentMergeSchedulerLogger = org.gnit.lucenekmp.util.luceneLogger {}
 
 /**
  * A [MergeScheduler] that runs each merge using a separate thread.

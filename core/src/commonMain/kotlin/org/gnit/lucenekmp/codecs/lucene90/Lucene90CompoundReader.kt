@@ -15,7 +15,7 @@ import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.IOUtils
 
-private val lucene90CompoundReaderLogger = KotlinLogging.logger {}
+private val lucene90CompoundReaderLogger = org.gnit.lucenekmp.util.luceneLogger {}
 
 /**
  * Class for accessing a compound stream. This class implements a directory, but is limited to only

@@ -8,7 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 open class SerialMergeScheduler : MergeScheduler() {
 
     private val mergeMutex = Mutex()
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     override suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger) {
         mergeMutex.withLock {

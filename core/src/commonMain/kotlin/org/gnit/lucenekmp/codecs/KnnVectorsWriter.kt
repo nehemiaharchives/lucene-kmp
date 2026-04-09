@@ -142,7 +142,7 @@ protected constructor() : Accountable, AutoCloseable {
 
     /** View over multiple vector values supporting iterator-style access via DocIdMerger.  */
     object MergedVectorValues {
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
         private fun validateFieldEncoding(fieldInfo: FieldInfo?, expected: VectorEncoding) {
             require(fieldInfo != null && fieldInfo.hasVectorValues())
             val fieldEncoding: VectorEncoding = fieldInfo.vectorEncoding

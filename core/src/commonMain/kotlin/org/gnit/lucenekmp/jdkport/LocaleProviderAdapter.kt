@@ -171,7 +171,7 @@ abstract class LocaleProviderAdapter {
 
     companion object {
 
-        val logger = KotlinLogging.logger {}
+        val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
         /**
          * Returns the preference order of LocaleProviderAdapter.Type

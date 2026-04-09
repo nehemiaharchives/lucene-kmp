@@ -46,7 +46,7 @@ import okio.IOException
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.toUnsignedInt
 
-private val lucene90DocValuesProducerLogger = KotlinLogging.logger {}
+private val lucene90DocValuesProducerLogger = org.gnit.lucenekmp.util.luceneLogger {}
 
 /** reader for [Lucene90DocValuesFormat]  */
 internal class Lucene90DocValuesProducer : DocValuesProducer {

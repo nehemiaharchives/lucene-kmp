@@ -11,7 +11,7 @@ import okio.IOException
  */
 class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
 
-    val logger = KotlinLogging.logger {}
+    val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     /**
      * Reads the next byte of data from the input stream. The value byte is

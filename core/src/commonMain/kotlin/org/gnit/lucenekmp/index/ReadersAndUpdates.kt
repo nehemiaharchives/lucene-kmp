@@ -29,7 +29,7 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
 import okio.IOException
 
-private val readersAndUpdatesLogger = KotlinLogging.logger {}
+private val readersAndUpdatesLogger = org.gnit.lucenekmp.util.luceneLogger {}
 
 // Used by IndexWriter to hold open SegmentReaders (for
 // searching or merging), plus pending deletes and updates,

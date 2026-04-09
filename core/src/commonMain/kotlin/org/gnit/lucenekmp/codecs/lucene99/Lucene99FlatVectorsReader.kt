@@ -39,7 +39,7 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
  * @lucene.experimental
  */
 class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer) {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     private val fields: IntObjectHashMap<FieldEntry> = IntObjectHashMap()
     private val vectorData: IndexInput
     private val fieldInfos: FieldInfos

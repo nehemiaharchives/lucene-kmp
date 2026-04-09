@@ -430,6 +430,6 @@ protected constructor() : IndexReader() {
     abstract val metaData: LeafMetaData
 
     companion object {
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     }
 }

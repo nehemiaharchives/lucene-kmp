@@ -156,6 +156,6 @@ internal class FieldsIndexReader : FieldsIndex {
     }
 
     companion object {
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     }
 }

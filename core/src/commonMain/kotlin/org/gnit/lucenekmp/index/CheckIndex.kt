@@ -102,7 +102,7 @@ class CheckIndex(
     dir: Directory,
     writeLock: Lock = dir.obtainLock(IndexWriter.WRITE_LOCK_NAME)
 ) : AutoCloseable {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     private val dir: Directory
     private val writeLock: Lock
     private var infoStream: PrintStream?
@@ -1621,7 +1621,7 @@ class CheckIndex(
     }
 
     companion object {
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
         @OptIn(ExperimentalAtomicApi::class)
         private val debugActiveIntegrityChecksCounter: AtomicInteger = AtomicInteger(0)
         @OptIn(ExperimentalAtomicApi::class)

@@ -6,7 +6,7 @@ import kotlin.concurrent.Volatile
 
 
 class StreamDecoder : Reader {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     @Volatile
     private var closed = false

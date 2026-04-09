@@ -172,7 +172,7 @@ import kotlin.math.min
 @OptIn(ExperimentalAtomicApi::class)
 open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, TwoPhaseCommit, Accountable,
     MergePolicy.MergeContext {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     /** Used only for testing.  */
     private val enableTestPoints: Boolean
 

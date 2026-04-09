@@ -13,7 +13,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
-private val dwfqLogger = KotlinLogging.logger {}
+private val dwfqLogger = org.gnit.lucenekmp.util.luceneLogger {}
 
 /**
  * @lucene.internal

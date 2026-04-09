@@ -48,7 +48,7 @@ import kotlin.math.min
  * @lucene.experimental
  */
 class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, HnswGraphProvider {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     private val flatVectorsReader: FlatVectorsReader
     private val fieldInfos: FieldInfos
     private val fields: IntObjectHashMap<FieldEntry>

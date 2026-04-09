@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.store
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.FileSystem
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Files
@@ -50,7 +49,7 @@ import kotlin.time.ExperimentalTime
 class NativeFSLockFactory constructor(
     val fs: FileSystem = FileSystem.SYSTEM
 ) : FSLockFactory() {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     @OptIn(ExperimentalTime::class)
     override fun obtainFSLock(
@@ -233,7 +232,7 @@ class NativeFSLockFactory constructor(
     companion object {
         /** Singleton instance  */
         val INSTANCE: NativeFSLockFactory = NativeFSLockFactory()
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
         private val LOCK_HELD: MutableSet<String> =
             mutableSetOf() /*java.util.Collections.synchronizedSet<String>(HashSet<String>())*/

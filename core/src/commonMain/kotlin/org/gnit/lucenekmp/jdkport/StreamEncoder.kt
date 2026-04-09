@@ -7,7 +7,7 @@ import kotlin.math.min
 
 
 class StreamEncoder : Writer {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     @Volatile
     private var closed = false

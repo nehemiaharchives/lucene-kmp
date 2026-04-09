@@ -56,7 +56,7 @@ class Lucene99HnswVectorsWriter(
     private val numMergeWorkers: Int,
     private val mergeExec: TaskExecutor?
 ) : KnnVectorsWriter() {
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     private val segmentWriteState: SegmentWriteState = state
     private val meta: IndexOutput?
     private val vectorIndex: IndexOutput?

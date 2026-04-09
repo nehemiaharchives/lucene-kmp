@@ -413,7 +413,7 @@ open class ThreadPoolExecutor(
      * holding mainLock.
      */
     private val workers = HashSet<Worker>()
-    private val logger = KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     /**
      * Wait condition to support awaitTermination.

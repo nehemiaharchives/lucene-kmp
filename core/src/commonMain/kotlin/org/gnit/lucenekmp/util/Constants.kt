@@ -185,7 +185,7 @@ object Constants {
     }
 
     private fun logSecurityWarning(property: String) {
-        val logger = KotlinLogging.logger {}
+        val logger = org.gnit.lucenekmp.util.luceneLogger {}
         logger.warn { "SecurityManager prevented access to system property: $property" }
     }
 

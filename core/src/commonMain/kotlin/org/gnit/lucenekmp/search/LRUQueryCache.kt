@@ -82,7 +82,7 @@ open class LRUQueryCache(
     private val leavesToCache: (LeafReaderContext) -> Boolean = minSegmentSizePredicate(10000),
     skipCacheFactor: Float = 10f
 ) : QueryCache, Accountable {
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
+    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     // maps queries that are contained in the cache to a singleton so that this
     // cache does not store several copies of the same query

@@ -150,7 +150,7 @@ protected constructor() : KnnVectorsFormat(PER_FIELD_NAME) {
 
     /** VectorReader that can wrap multiple delegate readers, selected by field.  */
     class FieldsReader : KnnVectorsReader, HnswGraphProvider {
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
         private val fields: IntObjectHashMap<KnnVectorsReader> = IntObjectHashMap()
         private val fieldInfos: FieldInfos
 

@@ -326,7 +326,7 @@ class MMapDirectory(
         // visible for tests:
         val PROVIDER: MMapIndexInputProvider<Any>
 
-        private val logger = KotlinLogging.logger {}
+        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
         private val sharedArenaMaxPermitsSysprop: Int
             get() {

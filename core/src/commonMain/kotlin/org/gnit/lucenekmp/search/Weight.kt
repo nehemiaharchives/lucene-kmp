@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.util.Bits
 import kotlin.math.min
 
-private val logger = KotlinLogging.logger {}
+private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
 
 /**
