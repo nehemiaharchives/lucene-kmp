@@ -154,7 +154,8 @@ abstract class HandleTrackingFS(
     }
 
     override fun openReadOnly(file: Path): FileHandle {
-        val delegateHandle = super.openReadOnly(file)
+        val delegatePath = toDelegate(file)
+        val delegateHandle = openSharedReadOnlyFileHandleOrNull(delegate, delegatePath) ?: super.openReadOnly(file)
         val handle =
             object : FileHandle(delegateHandle.readWrite) {
                 var closed: Boolean = false

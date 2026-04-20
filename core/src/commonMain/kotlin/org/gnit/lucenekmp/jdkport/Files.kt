@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import okio.Buffer
 import okio.BufferedSink
+import okio.FileHandle
 import okio.FileMetadata
 import okio.FileSystem
 import okio.IOException
@@ -74,6 +75,11 @@ object Files {
         return OkioSourceInputStream(source)
     }
 
+    fun openReadOnlyFileHandle(path: Path): FileHandle {
+        val fileSystem = getFileSystem(path)
+        return openReadOnlyFileHandlePlatform(path, fileSystem) ?: fileSystem.openReadOnly(path)
+    }
+
     // New overload that honors open options
     fun newOutputStream(path: Path, vararg options: OpenOption): OutputStream {
         // Defaults for Files.newOutputStream when no options are provided are CREATE & TRUNCATE_EXISTING
@@ -94,6 +100,8 @@ object Files {
         if ((create || createNew) && parent != null && !fileSystem.exists(parent)) {
             createDirectories(parent)
         }
+
+        newOutputStreamPlatform(path, fileSystem, options)?.let { return it }
 
         val exists = fileSystem.exists(path)
         if (createNew) {
@@ -274,6 +282,14 @@ interface KmpSink {
 }
 
 expect fun kmpSink(sink: BufferedSink): KmpSink
+
+internal expect fun openReadOnlyFileHandlePlatform(path: Path, fileSystem: FileSystem): FileHandle?
+
+internal expect fun newOutputStreamPlatform(
+    path: Path,
+    fileSystem: FileSystem,
+    options: Array<out OpenOption>,
+): OutputStream?
 
 /**
  * Platform-specific bulk write used by [OkioSinkOutputStream.write].
