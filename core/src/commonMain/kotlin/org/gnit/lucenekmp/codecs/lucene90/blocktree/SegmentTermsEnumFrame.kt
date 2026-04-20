@@ -118,8 +118,9 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
         // seekExact(TermState) don't pay this cost:
         ste.initIndexInput()
 
-        // TODO: Could we know the number of bytes to prefetch
-        ste.`in`!!.prefetch(fp, 1)
+        // Prefetch a couple of pages so block loads avoid a follow-up serial read on native.
+        // Lucene's intent here is block-level prefetch rather than exact-byte prefetch.
+        ste.`in`!!.prefetch(fp, SEEK_EXACT_PREFETCH_BYTES)
     }
 
     /* Does initial decode of next block of terms; this
@@ -541,6 +542,10 @@ class SegmentTermsEnumFrame constructor(private val ste: SegmentTermsEnum, // Ou
         this.state.totalTermFreq = -1
         suffixLengthBytes = ByteArray(32)
         suffixLengthsReader = ByteArrayDataInput()
+    }
+
+    companion object {
+        private const val SEEK_EXACT_PREFETCH_BYTES = 8192L
     }
 
     // Target's prefix matches this block's prefix; we

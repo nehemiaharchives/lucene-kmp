@@ -21,6 +21,7 @@ import org.gnit.lucenekmp.internal.tests.TestSecrets
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Executor
+import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.ReentrantLock
@@ -5840,6 +5841,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             runBlocking {
                 indexWriterCondition.await(1, TimeUnit.SECONDS)
             }
+        } catch (ie: InterruptedException) {
+            throw ThreadInterruptedException(ie)
         } catch (ie: CancellationException) {
             throw ThreadInterruptedException(ie)
         }

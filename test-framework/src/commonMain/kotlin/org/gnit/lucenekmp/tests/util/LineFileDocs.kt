@@ -105,15 +105,35 @@ class LineFileDocs(
 
                 logger.debug { "LineFileDocs.open() file: $file" }
 
-                size = FileSystem.SYSTEM.metadata(file).size ?: throw IOException("File does not exist or size is not available")
+                val metadata =
+                    try {
+                        FileSystem.SYSTEM.metadata(file)
+                    } catch (ioe: IOException) {
+                        if (path == LuceneTestCase.TEST_LINE_DOCS_FILE) {
+                            null
+                        } else {
+                            throw ioe
+                        }
+                    }
+                if (metadata == null && path == LuceneTestCase.TEST_LINE_DOCS_FILE) {
+                    logger.debug { "LineFileDocs.open() using synthetic fallback data for $path" }
+                    `is` = syntheticLineDocsInputStream()
+                    size = SYNTHETIC_LINE_DOCS_SIZE.toLong()
+                } else {
+                    size = metadata?.size ?: throw IOException("File does not exist or size is not available")
+                }
                 if (isGzip) {
                     // For now, always start at the beginning of the gzip stream.
                     // Okio's GzipSource does not allow arbitrary mid-stream starts.
-                    `is` = openInputStream(file, 0L, true)
+                    if (`is` == null) {
+                        `is` = openInputStream(file, 0L, true)
+                    }
                     needSkip = false
                 } else {
                     // file is not compressed: just open from the start
-                    `is` = OkioSourceInputStream(FileSystem.SYSTEM.source(file).buffer())
+                    if (`is` == null) {
+                        `is` = OkioSourceInputStream(FileSystem.SYSTEM.source(file).buffer())
+                    }
                     needSkip = false
                 }
             } else {
@@ -190,6 +210,25 @@ class LineFileDocs(
         }
         val source = if (gzip) GzipSource(raw).buffer() else raw
         return if (gzip) LenientGzipInputStream(source) else OkioSourceInputStream(source)
+    }
+
+    private fun syntheticLineDocsInputStream(): InputStream {
+        val buffer = Buffer()
+        repeat(SYNTHETIC_LINE_DOCS_COUNT) { i ->
+            val category = SYNTHETIC_TOPICS[i % SYNTHETIC_TOPICS.size]
+            val title = "Synthetic title $i $category"
+            val month = (i % 12) + 1
+            val day = (i % 28) + 1
+            val date = "2024-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
+            val body = syntheticLineDocBody(i, category)
+            buffer.writeUtf8(title)
+            buffer.writeByte(SEP.code)
+            buffer.writeUtf8(date)
+            buffer.writeByte(SEP.code)
+            buffer.writeUtf8(body)
+            buffer.writeByte('\n'.code)
+        }
+        return OkioSourceInputStream(buffer)
     }
 
     // Okio's GzipSource throws if the gzip member ends with trailing bytes.
@@ -463,6 +502,36 @@ class LineFileDocs(
 
         private const val BUFFER_SIZE = 1 shl 16 // 64K
         private const val SEP = '\t'
+        private const val SYNTHETIC_LINE_DOCS_COUNT = 512
+        private val SYNTHETIC_TOPICS =
+            arrayOf(
+                "europe",
+                "science",
+                "history",
+                "economy",
+                "policy",
+                "culture",
+                "sports",
+                "technology"
+            )
+        private val SYNTHETIC_LINE_DOCS_SIZE: Int =
+            buildString {
+                repeat(SYNTHETIC_LINE_DOCS_COUNT) { i ->
+                    val category = SYNTHETIC_TOPICS[i % SYNTHETIC_TOPICS.size]
+                    val month = (i % 12) + 1
+                    val day = (i % 28) + 1
+                    append("Synthetic title $i $category")
+                    append('\t')
+                    append("2024-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}")
+                    append('\t')
+                    append(syntheticLineDocBody(i, category))
+                    append('\n')
+                }
+            }.length
+
+        private fun syntheticLineDocBody(i: Int, category: String): String {
+            return "Synthetic body $i about $category, which explains how the benchmark line docs help a lucene index for the search layer while he reviews postings, stored fields, docvalues, vectors, and analysis."
+        }
     }
 
     private fun getOrCreateDocState(): DocState {

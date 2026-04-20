@@ -65,6 +65,7 @@ class TestDefaultCodecParallelizesIO : LuceneTestCase() {
             val te = terms.iterator()
             suppliers[i] = te.prepareSeekExact(BytesRef(termValues[i]))
         }
+        val afterPrepareCount = dir.count()
         var nonNullIOSuppliers = 0
         for (supplier in suppliers) {
             if (supplier != null) {
@@ -73,10 +74,16 @@ class TestDefaultCodecParallelizesIO : LuceneTestCase() {
             }
         }
 
-        assertTrue(nonNullIOSuppliers > 0)
+        assertTrue(nonNullIOSuppliers > 0, "expected at least one term supplier from LineFileDocs fallback corpus")
         val newCount = dir.count()
-        assertTrue(newCount - prevCount > 0)
-        assertTrue(newCount - prevCount < nonNullIOSuppliers)
+        val prepareDelta = afterPrepareCount - prevCount
+        val readDelta = newCount - afterPrepareCount
+        val delta = newCount - prevCount
+        assertTrue(delta > 0, "expected positive serial I/O count delta but was $delta")
+        assertTrue(
+            delta < nonNullIOSuppliers,
+            "expected seekExact prefetch to reduce serial I/O count: delta=$delta prepareDelta=$prepareDelta readDelta=$readDelta suppliers=$nonNullIOSuppliers"
+        )
     }
 
     /** Simulate stored fields retrieval. */

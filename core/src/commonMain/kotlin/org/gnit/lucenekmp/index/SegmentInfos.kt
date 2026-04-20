@@ -541,8 +541,9 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
                 files.add(segmentFileName)
             }
         }
-        for (info in this) {
-            files.addAll(info.files())
+        val size = size()
+        for (i in 0 until size) {
+            files.addAll(info(i).files())
         }
 
         return files
