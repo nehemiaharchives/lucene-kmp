@@ -10,8 +10,10 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import org.jetbrains.kotlin.konan.target.Family
 
 plugins {
     //alias(libs.plugins.androidLibrary) apply false
@@ -111,6 +113,14 @@ subprojects {
                 @OptIn(ExperimentalKotlinGradlePluginApi::class)
                 compilerOptions {
                     jvmTarget.set(JvmTarget.JVM_11)
+                }
+            }
+
+            targets.withType(KotlinNativeTarget::class.java).configureEach {
+                if (konanTarget.family != Family.MINGW) {
+                    binaries.configureEach {
+                        binaryOptions["sourceInfoType"] = "libbacktrace"
+                    }
                 }
             }
         }
