@@ -38,6 +38,7 @@ kotlin {
     macosX64() // intel mac
     macosArm64() // m1/2/3/4 mac
     linuxX64() // when you are in linux X64 machine, run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios, macos and linux for developer convenience.
+    mingwX64() // windows native
 
     sourceSets {
         val commonMain by getting {
@@ -101,6 +102,7 @@ kotlin {
         macosArm64Main.get().dependsOn(nativeMain)
         macosX64Main.get().dependsOn(nativeMain)
         linuxX64Main.get().dependsOn(nativeMain)
+        mingwX64Main.get().dependsOn(nativeMain)
 
         val nativeTest by creating {
             dependsOn(commonTest)
@@ -113,6 +115,7 @@ kotlin {
         macosArm64Test.get().dependsOn(nativeTest)
         macosX64Test.get().dependsOn(nativeTest)
         linuxX64Test.get().dependsOn(nativeTest)
+        mingwX64Test.get().dependsOn(nativeTest)
     }
 }
 

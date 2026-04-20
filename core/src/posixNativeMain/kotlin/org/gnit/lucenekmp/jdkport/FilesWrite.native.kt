@@ -59,17 +59,9 @@ private fun writeToSinkBufferNative(
         }
     }
 
-    // Mirror RealBufferedSink.write(...) behavior: push complete segments downstream promptly.
     sink.emitCompleteSegments()
 }
 
-/**
- * Native [KmpSink] that keeps Okio [BufferedSink] semantics while using a faster
- * bulk byte-array write path via `UnsafeCursor` + `memcpy`.
- *
- * This avoids the slower generic Kotlin/Native byte-array write path in hot loops with many
- * small records while preserving output bytes, ordering, flushing and close behavior.
- */
 private class NativeKmpSink(
     private val sink: BufferedSink
 ) : KmpSink {
