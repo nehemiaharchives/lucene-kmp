@@ -5,6 +5,7 @@ import okio.FileHandle
 import okio.FileSystem
 import okio.IOException
 import okio.Path
+import org.gnit.lucenekmp.jdkport.Files
 import okio.SYSTEM
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.jdkport.Optional
@@ -383,7 +384,7 @@ class MMapDirectory(
             ): IndexInput {
                 // chunkSizePower/preload/group/attachment are mmap-specific hints in Java Lucene.
                 // The KMP fallback keeps functional behavior with positional file reads.
-                val handle: FileHandle = fileSystem.openReadOnly(path)
+                val handle: FileHandle = Files.openReadOnlyFileHandle(path)
                 var success = false
                 try {
                     val indexInput = NIOFSDirectory.NIOFSIndexInput(

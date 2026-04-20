@@ -4,7 +4,6 @@ import okio.Buffer
 import org.gnit.lucenekmp.util.IOUtils
 import okio.EOFException
 import okio.FileHandle
-import okio.FileSystem
 import okio.IOException
 import okio.Path
 import org.gnit.lucenekmp.jdkport.ByteBuffer
@@ -50,8 +49,6 @@ constructor(
     path: Path,
     lockFactory: LockFactory = FSLockFactory.default
 ) : FSDirectory(path, lockFactory) {
-    private val fileSystem: FileSystem = Files.getFileSystem(directory)
-
     override fun openInput(
         name: String,
         context: IOContext
@@ -60,7 +57,7 @@ constructor(
         ensureCanRead(name)
         val path: Path = directory.resolve(name)
         //val fc: FileChannel = FileChannel.open(path, StandardOpenOption.READ)
-        val fh: FileHandle = fileSystem.openReadOnly(path)
+        val fh: FileHandle = Files.openReadOnlyFileHandle(path)
         var success = false
         try {
             val indexInput =
