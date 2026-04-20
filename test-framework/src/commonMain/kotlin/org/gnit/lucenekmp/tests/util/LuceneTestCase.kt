@@ -2391,7 +2391,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         @Throws(IOException::class)
         fun slowFileExists(dir: Directory, fileName: String): Boolean {
             return try {
-                dir.openInput(fileName, IOContext.READONCE).close()
+                dir.fileLength(fileName)
                 true
             } catch (_: NoSuchFileException) {
                 false

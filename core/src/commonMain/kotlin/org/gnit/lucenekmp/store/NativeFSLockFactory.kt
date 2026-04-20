@@ -1,14 +1,17 @@
+@file:OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.store
 
 import okio.FileSystem
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Files
-import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.StandardOpenOption
+import org.gnit.lucenekmp.jdkport.Thread
 import okio.IOException
 import okio.Path
 import okio.SYSTEM
 import kotlin.concurrent.Volatile
+import kotlin.concurrent.atomics.AtomicInt
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -149,7 +152,7 @@ class NativeFSLockFactory constructor(
 
         @Volatile
         private var closed: Boolean = false
-        private val closeLock = ReentrantLock()
+        private val closeGuard = AtomicInt(0)
 
         init {
             /*this.lock = lock
@@ -194,7 +197,7 @@ class NativeFSLockFactory constructor(
 
         override fun close() {
             val shouldClose: Boolean = try {
-                closeLock.lock()
+                lockAtomic(closeGuard)
                 if (closed) {
                     false
                 } else {
@@ -202,7 +205,7 @@ class NativeFSLockFactory constructor(
                     true
                 }
             } finally {
-                closeLock.unlock()
+                unlockAtomic(closeGuard)
             }
             if (!shouldClose) {
                 return
@@ -236,38 +239,48 @@ class NativeFSLockFactory constructor(
 
         private val LOCK_HELD: MutableSet<String> =
             mutableSetOf() /*java.util.Collections.synchronizedSet<String>(HashSet<String>())*/
-        private val lockHeldLock = ReentrantLock()
+        private val lockHeldGuard = AtomicInt(0)
 
         private fun markLockHeld(path: Path): Boolean {
-            return try {
-                lockHeldLock.lock()
+            return withLockHeldGuard {
                 LOCK_HELD.add(path.toString())
-            } finally {
-                lockHeldLock.unlock()
             }
         }
 
         private fun isLockHeld(path: Path): Boolean {
-            return try {
-                lockHeldLock.lock()
+            return withLockHeldGuard {
                 LOCK_HELD.contains(path.toString())
-            } finally {
-                lockHeldLock.unlock()
             }
         }
 
         @Throws(IOException::class)
         private fun clearLockHeld(path: Path) {
-            val remove = try {
-                lockHeldLock.lock()
+            val remove = withLockHeldGuard {
                 LOCK_HELD.remove(path.toString())
-            } finally {
-                lockHeldLock.unlock()
             }
             if (remove == false) {
                 logger.error { "phase=nativeLock.clear.missing path=$path" }
                 throw AlreadyClosedException("Lock path was cleared but never marked as held: $path")
             }
+        }
+
+        private inline fun <T> withLockHeldGuard(action: () -> T): T {
+            lockAtomic(lockHeldGuard)
+            try {
+                return action()
+            } finally {
+                unlockAtomic(lockHeldGuard)
+            }
+        }
+
+        private fun lockAtomic(guard: AtomicInt) {
+            while (!guard.compareAndSet(0, 1)) {
+                Thread.yield()
+            }
+        }
+
+        private fun unlockAtomic(guard: AtomicInt) {
+            guard.store(0)
         }
     }
 }

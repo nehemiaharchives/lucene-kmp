@@ -1,42 +1,40 @@
+@file:OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
+
 package org.gnit.lucenekmp.store
 
-import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.Thread
 import okio.IOException
 import kotlin.concurrent.Volatile
+import kotlin.concurrent.atomics.AtomicInt
 
 /** Implements a [LockFactory] that provides locks scoped to a single JVM. */
 class SingleInstanceLockFactory : LockFactory() {
     private val locks: MutableSet<String> = mutableSetOf()
-    private val locksMutex = ReentrantLock()
+    private val locksGuard = AtomicInt(0)
 
     @Throws(IOException::class)
     override fun obtainLock(dir: Directory, lockName: String): Lock {
-        return try {
-            locksMutex.lock()
+        return withLocksGuard {
             if (locks.add(lockName)) {
                 SingleInstanceLock(lockName)
             } else {
                 throw LockObtainFailedException("lock instance already obtained: (dir=$dir, lockName=$lockName)")
             }
-        } finally {
-            locksMutex.unlock()
         }
     }
 
     private inner class SingleInstanceLock(private val lockName: String) : Lock() {
         @Volatile
         private var closed = false
+        private val closeGuard = AtomicInt(0)
 
         @Throws(IOException::class)
         override fun ensureValid() {
             if (closed) {
                 throw AlreadyClosedException("Lock instance already released: $this")
             }
-            val held = try {
-                locksMutex.lock()
+            val held = withLocksGuard {
                 locks.contains(lockName)
-            } finally {
-                locksMutex.unlock()
             }
             if (!held) {
                 throw AlreadyClosedException("Lock instance was invalidated from map: $this")
@@ -44,26 +42,44 @@ class SingleInstanceLockFactory : LockFactory() {
         }
 
         override fun close() {
-            if (closed) {
-                return
-            }
             try {
-                val removed = try {
-                    locksMutex.lock()
+                lockAtomic(closeGuard)
+                if (closed) {
+                    return
+                }
+                val removed = withLocksGuard {
                     locks.remove(lockName)
-                } finally {
-                    locksMutex.unlock()
                 }
                 if (!removed) {
                     throw AlreadyClosedException("Lock was already released: $this")
                 }
             } finally {
                 closed = true
+                unlockAtomic(closeGuard)
             }
         }
 
         override fun toString(): String {
             return super.toString() + ": " + lockName
         }
+    }
+
+    private inline fun <T> withLocksGuard(action: () -> T): T {
+        lockAtomic(locksGuard)
+        try {
+            return action()
+        } finally {
+            unlockAtomic(locksGuard)
+        }
+    }
+
+    private fun lockAtomic(guard: AtomicInt) {
+        while (!guard.compareAndSet(0, 1)) {
+            Thread.yield()
+        }
+    }
+
+    private fun unlockAtomic(guard: AtomicInt) {
+        guard.store(0)
     }
 }
