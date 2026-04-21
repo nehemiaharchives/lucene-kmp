@@ -108,7 +108,7 @@ at org.gnit.lucenekmp.tests.util.LuceneTestCase.Companion#expectThrows(Unknown S
 
 
 
-Fail 4, Status (Not Fixed Yet)
+Fail 4, Status (Fixed)
 TestNRTCachingDirectory failed testCreateTempOutputSameName at
 
 okio.IOException: The file exists.
