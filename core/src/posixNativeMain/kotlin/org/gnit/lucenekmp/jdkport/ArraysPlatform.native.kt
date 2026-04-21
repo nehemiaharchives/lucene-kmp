@@ -158,7 +158,10 @@ internal actual fun arraysEqualsFloatRange(
     val bLength = bToIndex - bFromIndex
     if (aLength != bLength) return false
 
-    return equalsByMemcmp(a, aFromIndex, b, bFromIndex, aLength)
+    for (i in 0 until aLength) {
+        if (Float.floatToIntBits(a[aFromIndex + i]) != Float.floatToIntBits(b[bFromIndex + i])) return false
+    }
+    return true
 }
 
 internal actual fun arraysEqualsCharRange(

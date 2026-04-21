@@ -58,7 +58,7 @@ internal actual fun arraysEqualsFloatRange(
     if (aLength != bLength) return false
 
     for (i in 0 until aLength) {
-        if (a[aFromIndex + i] != b[bFromIndex + i]) return false
+        if (Float.floatToIntBits(a[aFromIndex + i]) != Float.floatToIntBits(b[bFromIndex + i])) return false
     }
     return true
 }
