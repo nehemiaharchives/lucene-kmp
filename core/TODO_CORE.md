@@ -28,7 +28,7 @@ at kotlin.test.Asserter#assertTrue(Unknown Source)
 at kotlin.test.Asserter#assertTrue(Unknown Source)
 
 
-Fail 2, Status (Not Fixed Yet)
+Fail 2, Status (Fixed)
 BreakIteratorTest runs more than 51 min and when I saw the output, it hanged at here:
 comparing expected and actual...
 >\u0915\u094d\u094d\u0924<
