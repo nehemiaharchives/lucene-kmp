@@ -1,9 +1,9 @@
 package org.gnit.lucenekmp.tests.util
 
+import okio.FileSystem
 import okio.IOException
 import okio.Path
 import okio.Path.Companion.toPath
-import org.gnit.lucenekmp.jdkport.Files
 import org.gnit.lucenekmp.jdkport.System
 
 internal class TempFilesCleanup {
@@ -11,6 +11,7 @@ internal class TempFilesCleanup {
     private val nextTempIndexByKey: MutableMap<String, Int> = mutableMapOf()
     private var tempDirBase: Path? = null
     private var javaTempDir: Path? = null
+    private val tempFileSystem = FileSystem.SYSTEM
 
     fun createTempDir(prefix: String): Path {
         val base = getPerTestClassTempDir()
@@ -70,7 +71,7 @@ internal class TempFilesCleanup {
         }
         val base = System.getProperty("tempDir", System.getProperty("java.io.tmpdir")) ?: "/tmp"
         val basePath = base.toPath()
-        Files.createDirectories(basePath)
+        tempFileSystem.createDirectories(basePath)
         javaTempDir = basePath
         return javaTempDir!!
     }
@@ -96,12 +97,12 @@ internal class TempFilesCleanup {
             try {
                 if (isDirectory) {
                     // createDirectories succeeds if the directory already exists, so guard for uniqueness
-                    if (Files.getFileSystem().exists(path)) {
+                    if (tempFileSystem.exists(path)) {
                         throw IOException("Path already exists: $path")
                     }
-                    Files.createDirectories(path)
+                    tempFileSystem.createDirectories(path)
                 } else {
-                    Files.createFile(path)
+                    tempFileSystem.write(path, mustCreate = true) {}
                 }
                 nextTempIndexByKey[key] = candidateIndex + 1
                 return path
@@ -112,7 +113,7 @@ internal class TempFilesCleanup {
     }
 
     private fun deleteRecursively(path: Path) {
-        val fs = Files.getFileSystem()
+        val fs = tempFileSystem
         try {
             if (!fs.exists(path)) {
                 return

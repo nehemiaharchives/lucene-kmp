@@ -39,8 +39,10 @@ import platform.windows.GetFileSizeEx
 import platform.windows.GetLastError
 import platform.windows.HANDLE
 import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.INVALID_SET_FILE_POINTER
 import platform.windows.LANG_NEUTRAL
 import platform.windows.LARGE_INTEGER
+import platform.windows.NO_ERROR
 import platform.windows.OPEN_ALWAYS
 import platform.windows.OPEN_EXISTING
 import platform.windows.ReadFile
@@ -230,7 +232,8 @@ private class WindowsFileHandle(
             val distanceToMoveHigh = alloc<IntVar>()
             distanceToMoveHigh.value = (size ushr 32).toInt()
             val movePointerResult = SetFilePointer(file, size.toInt(), distanceToMoveHigh.ptr, FILE_BEGIN.toUInt())
-            if (movePointerResult == 0U) {
+            val lastError = GetLastError()
+            if (movePointerResult == INVALID_SET_FILE_POINTER.toUInt() && lastError != NO_ERROR.toUInt()) {
                 throw lastErrorToIOException()
             }
             if (SetEndOfFile(file) == 0) {
