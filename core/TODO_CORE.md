@@ -146,7 +146,7 @@ at <global>._ZSt25__throw_bad_function_callv(Unknown Source)
 at <global>._ZSt25__throw_bad_function_callv(Unknown Source)
 
 
-Fail 5, Status (Not Fixed Yet)
+Fail 5, Status (Fixed)
 In TestMultiMMap, testSeekingExceptions hangs and no logs are ouput. need to add debug logs for each steps to figure out which steps causes hang.
 
 
