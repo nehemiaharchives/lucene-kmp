@@ -21,6 +21,8 @@ import okio.buffer
 import platform.windows.CREATE_NEW
 import platform.windows.CreateFileA
 import platform.windows.DWORD
+import platform.windows.ERROR_ALREADY_EXISTS
+import platform.windows.ERROR_FILE_EXISTS
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_HANDLE_EOF
 import platform.windows.ERROR_PATH_NOT_FOUND
@@ -256,6 +258,7 @@ private class WindowsFileHandle(
 private fun lastErrorToIOException(): IOException {
     val lastError = GetLastError()
     return when (lastError.toInt()) {
+        ERROR_ALREADY_EXISTS, ERROR_FILE_EXISTS -> FileAlreadyExistsException(lastErrorString(lastError))
         ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND -> okio.FileNotFoundException(lastErrorString(lastError))
         else -> IOException(lastErrorString(lastError))
     }

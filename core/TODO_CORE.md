@@ -57,7 +57,7 @@ next(0) -> 4
 next(-1) -> 0
 
 
-Fail 3, Status (Not Fixed Yet)
+Fail 3, Status (Fixed)
 TestFileSwitchDirectory, TestMMapDirectory, TestMultiMMap, TestNIOFSDirectory  failed at testCreateOutputForExistingFile like this:
 
 
