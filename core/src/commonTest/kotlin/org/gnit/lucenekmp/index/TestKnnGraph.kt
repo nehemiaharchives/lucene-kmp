@@ -415,12 +415,12 @@ class TestKnnGraph : LuceneTestCase() {
             for (ctx in dr.leaves()) {
                 val reader: LeafReader = ctx.reader()
                 val perFieldReader: PerFieldKnnVectorsFormat.FieldsReader? =
-                    (reader as CodecReader).vectorReader as PerFieldKnnVectorsFormat.FieldsReader
+                    (reader as CodecReader).vectorReader as? PerFieldKnnVectorsFormat.FieldsReader
                 if (perFieldReader == null) {
                     continue
                 }
                 val vectorReader: Lucene99HnswVectorsReader? =
-                    perFieldReader.getFieldReader(vectorField) as Lucene99HnswVectorsReader
+                    perFieldReader.getFieldReader(vectorField) as? Lucene99HnswVectorsReader
                 if (vectorReader == null) {
                     continue
                 }
