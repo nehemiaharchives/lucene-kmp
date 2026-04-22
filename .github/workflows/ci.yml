@@ -657,6 +657,151 @@ jobs:
             artifact: linux-queryparser-reports
             needs_konan_cache: true
 
+          # Windows
+          - platform: windows
+            module_name: core-analysis
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.analysis*"
+            artifact: windows-core-analysis-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-codecs
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.codecs*"
+            artifact: windows-core-codecs-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-document
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.document*"
+            artifact: windows-core-document-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-geo
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.geo*"
+            artifact: windows-core-geo-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-index
+            os: windows-latest
+            timeout: 70
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.index*"
+            artifact: windows-core-index-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-internal
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.internal*"
+            artifact: windows-core-internal-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-jdkport
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+            artifact: windows-core-jdkport-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-search
+            os: windows-latest
+            timeout: 70
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.search*"
+            artifact: windows-core-search-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-store
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.store*"
+            artifact: windows-core-store-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-util
+            os: windows-latest
+            timeout: 50
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.util*"
+            artifact: windows-core-util-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-common
+            os: windows-latest
+            timeout: 40
+            task: :analysis:common:mingwX64Test
+            artifact: windows-analysis-common-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-morfologik
+            os: windows-latest
+            timeout: 40
+            task: :analysis:morfologik:mingwX64Test
+            artifact: windows-analysis-morfologik-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-smartcn
+            os: windows-latest
+            timeout: 40
+            task: :analysis:smartcn:mingwX64Test
+            artifact: windows-analysis-smartcn-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-nori
+            os: windows-latest
+            timeout: 40
+            task: :analysis:nori:mingwX64Test
+            artifact: windows-analysis-nori-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-kuromoji
+            os: windows-latest
+            timeout: 40
+            task: :analysis:kuromoji:mingwX64Test
+            artifact: windows-analysis-kuromoji-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-extra
+            os: windows-latest
+            timeout: 40
+            task: :analysis:extra:mingwX64Test
+            artifact: windows-analysis-extra-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: codecs
+            os: windows-latest
+            timeout: 70
+            task: :codecs:mingwX64Test
+            artifact: windows-codecs-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: queries
+            os: windows-latest
+            timeout: 50
+            task: :queries:mingwX64Test
+            artifact: windows-queries-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: queryparser
+            os: windows-latest
+            timeout: 50
+            task: :queryparser:mingwX64Test
+            artifact: windows-queryparser-reports
+            needs_konan_cache: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
