@@ -2428,15 +2428,14 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
         try {
 
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            // must be synced otherwise register merge might throw and exception if merges
-            // changes concurrently, abortMerges is synced as well
-            abortMerges() // this disables merges forever since we are closing and can't reenable them
-            assert(
-                mergingSegments.isEmpty()
-            ) { "we aborted all merges but still have merging segments: $mergingSegments" }
-            //}
+            withIndexWriterLock {
+                // Must be synced otherwise register merge might throw an exception if merges
+                // changes concurrently. abortMerges also uses the IW lock, matching Java reentrancy.
+                abortMerges() // this disables merges forever since we are closing and can't reenable them
+                assert(
+                    mergingSegments.isEmpty()
+                ) { "we aborted all merges but still have merging segments: $mergingSegments" }
+            }
 
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "rollback: done finish merges")
@@ -2463,54 +2462,50 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             // resources
             eventQueue.close()
 
-            // TODO Synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            if (pendingCommit != null) {
-                pendingCommit!!.rollbackCommit(directory)
-                try {
-                    deleter.decRef(pendingCommit!!)
-                } finally {
-                    pendingCommit = null
-
-                    // TODO notifyAll() is not supported in KMP, need to think what to do here
-                    //(this as java.lang.Object).notifyAll()
+            withIndexWriterLock {
+                if (pendingCommit != null) {
+                    pendingCommit!!.rollbackCommit(directory)
+                    try {
+                        deleter.decRef(pendingCommit!!)
+                    } finally {
+                        pendingCommit = null
+                        doNotifyAll()
+                    }
                 }
-            }
-            val totalMaxDoc: Int = segmentInfos.totalMaxDoc()
-            // Keep the same segmentInfos instance but replace all
-            // of its SegmentInfo instances so IFD below will remove
-            // any segments we flushed since the last commit:
-            segmentInfos.rollbackSegmentInfos(rollbackSegments!!)
-            val rollbackMaxDoc: Int = segmentInfos.totalMaxDoc()
-            // now we need to adjust this back to the rolled back SI but don't set it to the absolute
-            // value
-            // otherwise we might hide internal bugsf
-            adjustPendingNumDocs(-(totalMaxDoc - rollbackMaxDoc).toLong())
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message("IW", "rollback: infos=" + segString(segmentInfos))
-            }
+                val totalMaxDoc: Int = segmentInfos.totalMaxDoc()
+                // Keep the same segmentInfos instance but replace all
+                // of its SegmentInfo instances so IFD below will remove
+                // any segments we flushed since the last commit:
+                segmentInfos.rollbackSegmentInfos(rollbackSegments!!)
+                val rollbackMaxDoc: Int = segmentInfos.totalMaxDoc()
+                // Now we need to adjust this back to the rolled back SI but don't set it to the absolute
+                // value otherwise we might hide internal bugs.
+                adjustPendingNumDocs(-(totalMaxDoc - rollbackMaxDoc).toLong())
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "rollback: infos=" + segString(segmentInfos))
+                }
 
-            testPoint("rollback before checkpoint")
+                testPoint("rollback before checkpoint")
 
-            // Ask deleter to locate unreferenced files & remove
-            // them ... only when we are not experiencing a tragedy, else
-            // these methods throw ACE:
-            if (tragedy.load() == null) {
-                deleter.checkpoint(segmentInfos, false)
-                deleter.refresh()
-                deleter.close()
+                // Ask deleter to locate unreferenced files & remove
+                // them ... only when we are not experiencing a tragedy, else
+                // these methods throw ACE:
+                if (tragedy.load() == null) {
+                    deleter.checkpoint(segmentInfos, false)
+                    deleter.refresh()
+                    deleter.close()
+                }
+
+                lastCommitChangeCount = changeCount.load()
+                // Don't bother saving any changes in our segmentInfos
+                readerPool.close()
+                // Must set closed while inside same sync block where we call deleter.refresh, else
+                // concurrent threads may try to sneak a flush in,
+                // after we leave this sync block and before we enter the sync block in the finally clause
+                // below that sets closed:
+                closed = true
+                IOUtils.close(writeLock, cleanupAndNotify)
             }
-
-            lastCommitChangeCount = changeCount.load()
-            // Don't bother saving any changes in our segmentInfos
-            readerPool.close()
-            // Must set closed while inside same sync block where we call deleter.refresh, else
-            // concurrent threads may try to sneak a flush in,
-            // after we leave this sync block and before we enter the sync block in the finally clause
-            // below that sets closed:
-            closed = true
-            IOUtils.close(writeLock, cleanupAndNotify)
-            //} // end synchronized(this)
         } catch (throwable: Throwable) {
             try {
                 // Must not hold IW's lock while closing
@@ -2520,26 +2515,25 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     mergeScheduler,
                     AutoCloseable {
 
-                        // TODO synchronized is not supported in KMP, need to think what to do here
-                        //synchronized(this) {
-                        // we tried to be nice about it: do the minimum
-                        // don't leak a segments_N file if there is a pending commit
-                        if (pendingCommit != null) {
-                            try {
-                                pendingCommit!!.rollbackCommit(directory)
-                                deleter.decRef(pendingCommit!!)
-                            } catch (t: Throwable) {
-                                throwable.addSuppressed(t)
+                        withIndexWriterLock {
+                            // We tried to be nice about it: do the minimum.
+                            // Don't leak a segments_N file if there is a pending commit.
+                            if (pendingCommit != null) {
+                                try {
+                                    pendingCommit!!.rollbackCommit(directory)
+                                    deleter.decRef(pendingCommit!!)
+                                } catch (t: Throwable) {
+                                    throwable.addSuppressed(t)
+                                }
+                                pendingCommit = null
                             }
-                            pendingCommit = null
-                        }
 
-                        // close all the closeables we can (but important is readerPool and writeLock to
-                        // prevent leaks)
-                        IOUtils.closeWhileHandlingException(
-                            readerPool, deleter, writeLock, cleanupAndNotify
-                        )
-                        //}
+                            // Close all the closeables we can (but important is readerPool and writeLock to
+                            // prevent leaks).
+                            IOUtils.closeWhileHandlingException(
+                                readerPool, deleter, writeLock, cleanupAndNotify
+                            )
+                        }
                     })
             } catch (t: Throwable) {
                 throwable.addSuppressed(t)
