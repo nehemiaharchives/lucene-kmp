@@ -131,8 +131,7 @@ abstract class TopFieldCollector private constructor(
 
         @Throws(IOException::class)
         override fun competitiveIterator(): DocIdSetIterator? {
-            // Disable competitive iterators for now to avoid stalls in KMP port.
-            return null
+            return comparator.competitiveIterator()
         }
     }
 

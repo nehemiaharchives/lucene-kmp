@@ -431,8 +431,8 @@ open class TermOrdValComparator(
             competitiveIterator!!.update(minOrd, maxOrd)
         }
 
-        override fun competitiveIterator(): DocIdSetIterator {
-            return competitiveIterator!!
+        override fun competitiveIterator(): DocIdSetIterator? {
+            return competitiveIterator
         }
     }
 
