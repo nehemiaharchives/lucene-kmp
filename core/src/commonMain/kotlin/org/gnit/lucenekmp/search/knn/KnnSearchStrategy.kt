@@ -76,7 +76,7 @@ abstract class KnnSearchStrategy {
      *
      * @lucene.experimental
      */
-    class Seeded(entryPoints: DocIdSetIterator?, numberOfEntryPoints: Int, originalStrategy: KnnSearchStrategy) :
+    open class Seeded(entryPoints: DocIdSetIterator?, numberOfEntryPoints: Int, originalStrategy: KnnSearchStrategy) :
         KnnSearchStrategy() {
         private val entryPoints: DocIdSetIterator
         private val numberOfEntryPoints: Int
@@ -95,7 +95,7 @@ abstract class KnnSearchStrategy {
          *
          * @return DocIdSetIterator of entry points
          */
-        fun entryPoints(): DocIdSetIterator {
+        open fun entryPoints(): DocIdSetIterator {
             return entryPoints
         }
 
@@ -104,7 +104,7 @@ abstract class KnnSearchStrategy {
          *
          * @return number of entry points
          */
-        fun numberOfEntryPoints(): Int {
+        open fun numberOfEntryPoints(): Int {
             return numberOfEntryPoints
         }
 
@@ -113,7 +113,7 @@ abstract class KnnSearchStrategy {
          *
          * @return original strategy
          */
-        fun originalStrategy(): KnnSearchStrategy {
+        open fun originalStrategy(): KnnSearchStrategy {
             return originalStrategy
         }
 

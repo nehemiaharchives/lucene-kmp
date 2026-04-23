@@ -45,7 +45,7 @@ abstract class AbstractKnnVectorQuery(
      * @return the filter that is executed before the KnnVector search happens. Only the results
      * accepted by this filter are returned by the KnnVector search.
      */
-    val filter: Query?, protected val searchStrategy: KnnSearchStrategy
+    val filter: Query?, internal val searchStrategy: KnnSearchStrategy
 ) : Query() {
 
     init {
@@ -172,12 +172,12 @@ abstract class AbstractKnnVectorQuery(
         }
     }
 
-    protected fun getKnnCollectorManager(k: Int, searcher: IndexSearcher): KnnCollectorManager {
+    internal open fun getKnnCollectorManager(k: Int, searcher: IndexSearcher): KnnCollectorManager {
         return TopKnnCollectorManager(k, searcher)
     }
 
     @Throws(IOException::class)
-    protected abstract fun approximateSearch(
+    internal abstract fun approximateSearch(
         context: LeafReaderContext,
         acceptDocs: Bits?,
         visitedLimit: Int,
@@ -185,11 +185,11 @@ abstract class AbstractKnnVectorQuery(
     ): TopDocs
 
     @Throws(IOException::class)
-    abstract fun createVectorScorer(context: LeafReaderContext, fi: FieldInfo): VectorScorer?
+    internal abstract fun createVectorScorer(context: LeafReaderContext, fi: FieldInfo): VectorScorer?
 
     // We allow this to be overridden so that tests can check what search strategy is used
     @Throws(IOException::class)
-    protected open fun exactSearch(
+    internal open fun exactSearch(
         context: LeafReaderContext, acceptIterator: DocIdSetIterator, queryTimeout: QueryTimeout?
     ): TopDocs {
         val fi: FieldInfo? = context.reader().fieldInfos.fieldInfo(field)
@@ -256,7 +256,7 @@ abstract class AbstractKnnVectorQuery(
      * @return index-level kNN results (no constraint on their ordering).
      * @lucene.experimental
      */
-    protected fun mergeLeafResults(perLeafResults: Array<TopDocs>): TopDocs {
+    internal open fun mergeLeafResults(perLeafResults: Array<TopDocs>): TopDocs {
         return TopDocs.merge(k, perLeafResults)
     }
 
