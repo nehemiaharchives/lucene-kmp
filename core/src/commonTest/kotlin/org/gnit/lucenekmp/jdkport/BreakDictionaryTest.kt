@@ -68,7 +68,8 @@ class BreakDictionaryTest {
             4 +
             rowIndexShifts.size +
             4 +
-            (table.size * 2)
+            (table.size * 2) +
+            4
 
         val totalSize = 4 + 4 + dataSize
         val bb = ByteBuffer.allocate(totalSize).order(ByteOrder.BIG_ENDIAN)
@@ -109,6 +110,8 @@ class BreakDictionaryTest {
         for (value in table) {
             bb.putShort(value)
         }
+
+        bb.putInt(0)
 
         return bb.array()
     }

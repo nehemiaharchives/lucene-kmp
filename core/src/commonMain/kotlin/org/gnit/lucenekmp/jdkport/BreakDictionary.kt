@@ -21,7 +21,7 @@ internal class BreakDictionary(/*dictionaryName: String,*/ dictionaryData: ByteA
     private var columnMapIndex: ShortArray? = null
     private var columnMapValues: ByteArray? = null
     private var columnMapBlockSize: Int = 0
-    /*private var supplementaryCharColumnMap: SupplementaryCharacterData? = null*/ // TODO implement later
+    private var supplementaryCharColumnMap: SupplementaryCharacterData? = null
 
     /**
      * The number of actual columns in the table
@@ -166,15 +166,15 @@ internal class BreakDictionary(/*dictionaryName: String,*/ dictionaryData: ByteA
             table!![i] = bb.getShort()
         }
 
-        // finally, prepare the column map for supplementary characters TODO implement later
-        /*len = bb.getInt()
+        // finally, prepare the column map for supplementary characters
+        len = bb.getInt()
         val temp3 = IntArray(len)
         for (i in 0..<len) {
             temp3[i] = bb.getInt()
         }
-        assert(bb.position == bb.limit)
+        require(bb.position == bb.limit) { "Dictionary data has trailing bytes" }
 
-        supplementaryCharColumnMap = SupplementaryCharacterData(temp3)*/
+        supplementaryCharColumnMap = if (temp3.isEmpty()) null else SupplementaryCharacterData(temp3)
     }
 
     //=========================================================================
@@ -196,8 +196,7 @@ internal class BreakDictionary(/*dictionaryName: String,*/ dictionaryData: ByteA
             val base = columnMapIndex!![blockIndex].toInt() and 0xffff
             col = columnMapValues!![base + inBlock].toInt() and 0xff
         } else {
-            throw UnsupportedOperationException("not implemented yet") //TODO implement later
-            /*col = supplementaryCharColumnMap.getValue(ch)*/
+            col = supplementaryCharColumnMap?.getValue(ch) ?: 0
         }
         return getNextState(row, col)
     }
