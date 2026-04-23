@@ -1777,12 +1777,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
             when (dvType) {
                 DocValuesType.NUMERIC -> {
-                    val value = f.numericValue() as Long
+                    val value = f.numericValue() as Long?
                     dvUpdates[i] = NumericDocValuesUpdate(term, f.name(), value)
                 }
 
                 DocValuesType.BINARY -> dvUpdates[i] =
-                    BinaryDocValuesUpdate(term, f.name(), f.binaryValue()!!)
+                    BinaryDocValuesUpdate(term, f.name(), f.binaryValue())
 
                 DocValuesType.NONE, DocValuesType.SORTED, DocValuesType.SORTED_NUMERIC, DocValuesType.SORTED_SET -> throw IllegalArgumentException(
                     "can only update NUMERIC or BINARY fields: field=" + f.name() + ", type=" + dvType
