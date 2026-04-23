@@ -32,9 +32,9 @@ open class DoubleComparator(numHits: Int, field: String, missingValue: Double?, 
 
     @Suppress("INAPPLICABLE_JVM_NAME")
     @JvmName("setTopValueKt")
-    override fun setTopValue(value: Double) {
+    override fun setTopValue(value: Double?) {
         super.setTopValue(value)
-        topValue = value
+        topValue = requireNotNull(value)
     }
 
     override fun value(slot: Int): Double? {

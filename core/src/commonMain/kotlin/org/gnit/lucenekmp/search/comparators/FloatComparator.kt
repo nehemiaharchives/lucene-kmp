@@ -32,9 +32,9 @@ open class FloatComparator(numHits: Int, field: String, missingValue: Float?, re
 
     @Suppress("INAPPLICABLE_JVM_NAME")
     @JvmName("setTopValueKt")
-    override fun setTopValue(value: Float) {
+    override fun setTopValue(value: Float?) {
         super.setTopValue(value)
-        topValue = value
+        topValue = requireNotNull(value)
     }
 
     override fun value(slot: Int): Float? {

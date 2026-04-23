@@ -203,7 +203,7 @@ abstract class TopFieldCollector private constructor(
             // Tell all comparators their top value:
             for (i in comparators.indices) {
                 val comparator: FieldComparator<Any> = comparators[i]
-                comparator.setTopValue(after.fields!![i]!!)
+                comparator.setTopValue(after.fields!![i])
             }
         }
 

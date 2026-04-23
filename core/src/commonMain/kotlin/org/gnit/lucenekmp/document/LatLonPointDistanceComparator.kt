@@ -82,8 +82,8 @@ internal class LatLonPointDistanceComparator(val field: String, val latitude: Do
         setBottomCounter++
     }
 
-    override fun setTopValue(value: Double) {
-        topValue = value
+    override fun setTopValue(value: Double?) {
+        topValue = requireNotNull(value)
     }
 
     @Throws(IOException::class)

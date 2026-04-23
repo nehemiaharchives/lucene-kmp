@@ -78,8 +78,8 @@ internal class XYPointDistanceComparator(val field: String, x: Float, y: Float, 
         setBottomCounter++
     }
 
-    override fun setTopValue(value: Double) {
-        topValue = value
+    override fun setTopValue(value: Double?) {
+        topValue = requireNotNull(value)
     }
 
     @Throws(IOException::class)

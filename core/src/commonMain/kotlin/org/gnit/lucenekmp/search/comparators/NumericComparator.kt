@@ -45,7 +45,8 @@ abstract class NumericComparator<T : Number> protected constructor(
         this.bytesCount = bytesCount
     }
 
-    override fun setTopValue(value: T) {
+    override fun setTopValue(value: T?) {
+        requireNotNull(value)
         topValueSet = true
     }
 

@@ -39,8 +39,8 @@ class DocComparator(numHits: Int, reverse: Boolean, pruning: Pruning) : FieldCom
         return this.DocLeafComparator(context)
     }
 
-    override fun setTopValue(value: Int) {
-        topValue = value
+    override fun setTopValue(value: Int?) {
+        topValue = requireNotNull(value)
         topValueSet = true
     }
 

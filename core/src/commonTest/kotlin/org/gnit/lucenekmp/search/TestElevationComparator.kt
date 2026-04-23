@@ -205,7 +205,7 @@ class ElevationComparatorSource(private val priority: Map<BytesRef, Int>) : Fiel
                 return second!! - first!!
             }
 
-            override fun setTopValue(value: Int) {
+            override fun setTopValue(value: Int?) {
                 throw UnsupportedOperationException()
             }
 

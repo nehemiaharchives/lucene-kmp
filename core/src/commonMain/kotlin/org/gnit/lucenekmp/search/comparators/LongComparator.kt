@@ -31,9 +31,9 @@ open class LongComparator(numHits: Int, field: String, missingValue: Long?, reve
 
     @Suppress("INAPPLICABLE_JVM_NAME")
     @JvmName("setTopValueKt")
-    override fun setTopValue(value: Long) {
+    override fun setTopValue(value: Long?) {
         super.setTopValue(value)
-        topValue = value
+        topValue = requireNotNull(value)
     }
 
     override fun value(slot: Int): Long? {

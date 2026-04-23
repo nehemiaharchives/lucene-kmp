@@ -104,8 +104,8 @@ internal class FeatureSortField(field: String, featureName: String) : SortField(
             this.bottom = values[bottom]
         }
 
-        override fun setTopValue(value: Float) {
-            topValue = value
+        override fun setTopValue(value: Float?) {
+            topValue = requireNotNull(value)
         }
 
         override fun value(slot: Int): Float {

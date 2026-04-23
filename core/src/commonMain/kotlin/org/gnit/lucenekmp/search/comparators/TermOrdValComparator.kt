@@ -138,7 +138,7 @@ open class TermOrdValComparator(
 
     @Suppress("INAPPLICABLE_JVM_NAME")
     @JvmName("setTopValueKt")
-    override fun setTopValue(value: BytesRef) {
+    override fun setTopValue(value: BytesRef?) {
         // null is fine: it means the last doc of the prior
         // search was missing this value
         topValue = value

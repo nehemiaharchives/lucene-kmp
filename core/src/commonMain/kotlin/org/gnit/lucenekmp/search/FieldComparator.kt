@@ -61,7 +61,7 @@ abstract class FieldComparator<T> {
      * called for searches that use searchAfter (deep paging), and is called before any calls to
      * [.getLeafComparator].
      */
-    abstract fun setTopValue(value: T)
+    abstract fun setTopValue(value: T?)
 
     /**
      * Return the actual value in the slot.
@@ -154,8 +154,8 @@ abstract class FieldComparator<T> {
             this.bottom = scores[bottom]
         }
 
-        override fun setTopValue(value: Float) {
-            topValue = value
+        override fun setTopValue(value: Float?) {
+            topValue = requireNotNull(value)
         }
 
         override fun setScorer(scorer: Scorable) {
@@ -210,8 +210,8 @@ abstract class FieldComparator<T> {
         }
 
         override fun compare(slot1: Int, slot2: Int): Int {
-            val val1: BytesRef = values[slot1]!!
-            val val2: BytesRef = values[slot2]!!
+            val val1: BytesRef? = values[slot1]
+            val val2: BytesRef? = values[slot2]
             return compareValues(val1, val2)
         }
 
@@ -248,10 +248,10 @@ abstract class FieldComparator<T> {
         }
 
         override fun setBottom(bottom: Int) {
-            this.bottom = values[bottom]!!
+            this.bottom = values[bottom]
         }
 
-        override fun setTopValue(value: BytesRef) {
+        override fun setTopValue(value: BytesRef?) {
             // null is fine: it means the last doc of the prior
             // search was missing this value
             topValue = value

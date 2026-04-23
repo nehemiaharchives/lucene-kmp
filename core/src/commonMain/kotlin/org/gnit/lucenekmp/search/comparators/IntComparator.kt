@@ -31,9 +31,9 @@ open class IntComparator(numHits: Int, field: String, missingValue: Int?, revers
 
     @Suppress("INAPPLICABLE_JVM_NAME")
     @JvmName("setTopValueKt")
-    override fun setTopValue(value: Int) {
+    override fun setTopValue(value: Int?) {
         super.setTopValue(value)
-        topValue = value
+        topValue = requireNotNull(value)
     }
 
     override fun value(slot: Int): Int? {
