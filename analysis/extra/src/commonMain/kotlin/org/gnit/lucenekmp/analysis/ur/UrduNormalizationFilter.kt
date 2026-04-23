@@ -23,7 +23,8 @@ class UrduNormalizationFilter(input: TokenStream) : TokenFilter(input) {
     override fun incrementToken(): Boolean {
         if (input.incrementToken()) {
             if (!keywordAtt.isKeyword) {
-                termAtt.setLength(normalizer.normalize(termAtt.buffer(), termAtt.length))
+                val length = termAtt.length
+                termAtt.setLength(normalizer.normalize(termAtt.resizeBuffer(length * 2), length))
             }
             return true
         }

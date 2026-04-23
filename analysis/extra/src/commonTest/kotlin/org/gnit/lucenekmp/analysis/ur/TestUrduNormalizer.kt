@@ -36,6 +36,13 @@ class TestUrduNormalizer : BaseTokenStreamTestCase() {
         check("ۓ", "ۓ")
     }
 
+    @Test
+    @Throws(IOException::class)
+    fun testLigatureExpansion() {
+        check("ﻻ", "لا")
+        check("ﻼ", "لا")
+    }
+
     private fun check(input: String, output: String) {
         val tokenizer: Tokenizer = MockTokenizer(MockTokenizer.WHITESPACE, false)
         tokenizer.setReader(StringReader(input))
