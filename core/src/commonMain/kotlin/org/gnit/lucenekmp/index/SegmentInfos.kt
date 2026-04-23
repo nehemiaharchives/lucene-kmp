@@ -11,8 +11,10 @@ import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.jdkport.PrintStream
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.Cloneable
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.store.ChecksumIndexInput
 import org.gnit.lucenekmp.store.DataInput
 import org.gnit.lucenekmp.store.Directory
@@ -92,19 +94,26 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
     /** Used to name new segments.  */
     var counter: Long = 0
 
+    private val versionLock = ReentrantLock()
+
     /** Counts how often the index has been changed.  */
-    var version: Long = 0
+    private var versionValue: Long = 0
+
+    var version: Long
+        get() = versionLock.withLock { versionValue }
         set(newVersion) {
-            require(newVersion >= field) {
-                ("newVersion (="
-                        + newVersion
-                        + ") cannot be less than current version (="
-                        + field
-                        + ")")
+            versionLock.withLock {
+                require(newVersion >= versionValue) {
+                    ("newVersion (="
+                            + newVersion
+                            + ") cannot be less than current version (="
+                            + versionValue
+                            + ")")
+                }
+                // System.out.println(Thread.currentThread().getName() + ": SIS.setVersion change from " +
+                // version + " to " + newVersion);
+                versionValue = newVersion
             }
-            // System.out.println(Thread.currentThread().getName() + ": SIS.setVersion change from " +
-            // version + " to " + newVersion);
-            field = newVersion
         }
 
     /** Returns current generation.  */
@@ -657,7 +666,9 @@ class SegmentInfos(indexCreatedVersionMajor: Int) : Cloneable<SegmentInfos>, Ite
 
     /** Call this before committing if changes have been made to the segments.  */
     fun changed() {
-        version++
+        versionLock.withLock {
+            versionValue++
+        }
         // System.out.println(Thread.currentThread().getName() + ": SIS.change to version=" + version);
         // new Throwable().printStackTrace(System.out);
     }
