@@ -3,14 +3,13 @@ package org.gnit.lucenekmp.search
 
 import org.gnit.lucenekmp.search.DocIdSetIterator.Companion.NO_MORE_DOCS
 import okio.IOException
-import kotlin.jvm.JvmName
 import kotlin.math.min
 
 /**
  * A Scorer for queries with a required part and an optional part. Delays skipTo() on the optional
  * part until a score() is needed.
  */
-internal class ReqOptSumScorer(reqScorer: Scorer, optScorer: Scorer, scoreMode: ScoreMode) : Scorer() {
+internal open class ReqOptSumScorer(reqScorer: Scorer, optScorer: Scorer, scoreMode: ScoreMode) : Scorer() {
     private val reqScorer: Scorer
     private val optScorer: Scorer
     private val reqApproximation: DocIdSetIterator
