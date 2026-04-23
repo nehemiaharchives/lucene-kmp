@@ -494,6 +494,9 @@ abstract class MergePolicy
          */
         @OptIn(ExperimentalCoroutinesApi::class)
         fun hasCompletedSuccessfully(): Optional<Boolean?> {
+            if (!mergeCompleted.isCompleted) {
+                return Optional.empty()
+            }
             return Optional.ofNullable(mergeCompleted.getCompleted())
         }
 
