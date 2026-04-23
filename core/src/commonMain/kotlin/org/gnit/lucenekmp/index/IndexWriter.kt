@@ -3929,19 +3929,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                 seqNo
             }
         } catch (t: Throwable) {
-
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            if (filesToCommit != null) {
-                try {
-                    deleter.decRef(filesToCommit!!)
-                } catch (t1: Throwable) {
-                    t.addSuppressed(t1)
-                } finally {
-                    filesToCommit = null
+            withIndexWriterLock {
+                if (filesToCommit != null) {
+                    try {
+                        deleter.decRef(filesToCommit!!)
+                    } catch (t1: Throwable) {
+                        t.addSuppressed(t1)
+                    } finally {
+                        filesToCommit = null
+                    }
                 }
             }
-            //}
             throw t
         }
         //} // end of synchronized(commitLock)
@@ -4320,73 +4318,65 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         var committedSegmentsFileName: String?
 
         try {
+            withIndexWriterLock {
+                ensureOpen(false)
+                if (tragedy.load() != null) {
+                    throw IllegalStateException(
+                        "this writer hit an unrecoverable error; cannot complete commit", tragedy.load()
+                    )
+                }
+                if (pendingCommit != null) {
+                    val commitFiles = this.filesToCommit
+                    try {
+                        AutoCloseable { deleter.decRef(commitFiles!!) }.use { finalizer ->
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message("IW", "commit: pendingCommit != null")
+                            }
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message("IW", "commit: finishCommit start")
+                            }
+                            committedSegmentsFileName = pendingCommit!!.finishCommit(directory)
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message("IW", "commit: finishCommit done")
+                            }
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            ensureOpen(false)
-            if (tragedy.load() != null) {
-                throw IllegalStateException(
-                    "this writer hit an unrecoverable error; cannot complete commit", tragedy.load()
-                )
-            }
-            if (pendingCommit != null) {
-                val commitFiles = this.filesToCommit
-                try {
-                    AutoCloseable { deleter.decRef(commitFiles!!) }.use { finalizer ->
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "commit: pendingCommit != null")
-                        }
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "commit: finishCommit start")
-                        }
-                        // logger.debug { "finishCommit: start" }
-                        committedSegmentsFileName = pendingCommit!!.finishCommit(directory)
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "commit: finishCommit done")
-                        }
-                        // logger.debug { "finishCommit: done" }
+                            // we committed, if anything goes wrong after this, we are screwed and it's a tragedy:
+                            commitCompleted = true
 
-                        // we committed, if anything goes wrong after this, we are screwed and it's a tragedy:
-                        commitCompleted = true
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message(
+                                    "IW", "commit: done writing segments file \"$committedSegmentsFileName\""
+                                )
+                            }
 
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message(
-                                "IW", "commit: done writing segments file \"$committedSegmentsFileName\""
-                            )
+                            // NOTE: don't use this.checkpoint() here, because
+                            // we do not want to increment changeCount:
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message("IW", "commit: deleter.checkpoint start")
+                            }
+                            deleter.checkpoint(pendingCommit!!, true)
+                            if (infoStream.isEnabled("IW")) {
+                                infoStream.message("IW", "commit: deleter.checkpoint done")
+                            }
+
+                            // Carry over generation to our master SegmentInfos:
+                            segmentInfos.updateGeneration(pendingCommit!!)
+
+                            lastCommitChangeCount = pendingCommitChangeCount
+                            rollbackSegments = pendingCommit!!.createBackupSegmentInfos()
                         }
-
-                        // NOTE: don't use this.checkpoint() here, because
-                        // we do not want to increment changeCount:
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "commit: deleter.checkpoint start")
-                        }
-                        // logger.debug { "finishCommit: deleter.checkpoint start" }
-                        deleter.checkpoint(pendingCommit!!, true)
-                        if (infoStream.isEnabled("IW")) {
-                            infoStream.message("IW", "commit: deleter.checkpoint done")
-                        }
-                        // logger.debug { "finishCommit: deleter.checkpoint done" }
-
-                        // Carry over generation to our master SegmentInfos:
-                        segmentInfos.updateGeneration(pendingCommit!!)
-
-                        lastCommitChangeCount = pendingCommitChangeCount
-                        rollbackSegments = pendingCommit!!.createBackupSegmentInfos()
+                    } finally {
+                        doNotifyAll()
+                        pendingCommit = null
+                        this.filesToCommit = null
                     }
-                } finally {
-
-                    // TODO notifyAll is not supported in KMP, need to think what to do here
-                    //(this as java.lang.Object).notifyAll()
-                    pendingCommit = null
-                    this.filesToCommit = null
-                }
-            } else {
-                assert(filesToCommit == null)
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "commit: pendingCommit == null; skip")
+                } else {
+                    assert(filesToCommit == null)
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "commit: pendingCommit == null; skip")
+                    }
                 }
             }
-            //} // end of synchronized(this)
         } catch (t: Throwable) {
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "hit exception during finishCommit: " + t.message)
@@ -5917,93 +5907,74 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "startCommit(): start")
             }
-//             logger.debug { "startCommit: begin" }
 
-            // TODO synchronized is not supported in KMP, need to think what to do here
-            //synchronized(this) {
-            check(lastCommitChangeCount <= changeCount.load()) { "lastCommitChangeCount=$lastCommitChangeCount,changeCount=$changeCount" }
-            if (pendingCommitChangeCount == lastCommitChangeCount) {
+            withIndexWriterLock {
+                check(lastCommitChangeCount <= changeCount.load()) { "lastCommitChangeCount=$lastCommitChangeCount,changeCount=$changeCount" }
+                if (pendingCommitChangeCount == lastCommitChangeCount) {
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "  skip startCommit(): no changes pending")
+                    }
+                    try {
+                        deleter.decRef(filesToCommit!!)
+                    } finally {
+                        filesToCommit = null
+                    }
+                    return
+                }
+
                 if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "  skip startCommit(): no changes pending")
+                    infoStream.message(
+                        "IW",
+                        ("startCommit index="
+                                + segString(toLiveInfos(toSync))
+                                + " changeCount="
+                                + changeCount)
+                    )
                 }
-                try {
-                    deleter.decRef(filesToCommit!!)
-                } finally {
-                    filesToCommit = null
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "startCommit: filesExist begin")
                 }
-                return
+                assert(filesExist(toSync))
+                if (infoStream.isEnabled("IW")) {
+                    infoStream.message("IW", "startCommit: filesExist done")
+                }
             }
 
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message(
-                    "IW",
-                    ("startCommit index="
-                            + segString(toLiveInfos(toSync))
-                            + " changeCount="
-                            + changeCount)
-                )
-            }
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message("IW", "startCommit: filesExist begin")
-            }
-//             logger.debug { "startCommit: filesExist begin" }
-            assert(filesExist(toSync))
-            if (infoStream.isEnabled("IW")) {
-                infoStream.message("IW", "startCommit: filesExist done")
-            }
-//             logger.debug { "startCommit: filesExist done" }
-            //}
-
-//             logger.debug { "startCommit: midStartCommit enter" }
             testPoint("midStartCommit")
-//             logger.debug { "startCommit: midStartCommit exit" }
 
             var pendingCommitSet = false
 
             try {
-//                 logger.debug { "startCommit: midStartCommit2 enter" }
                 testPoint("midStartCommit2")
-//                 logger.debug { "startCommit: midStartCommit2 exit" }
 
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-//                 logger.debug { "startCommit: assert pendingCommit == null begin" }
-                assert(pendingCommit == null)
-//                 logger.debug { "startCommit: assert pendingCommit == null end" }
-//                 logger.debug { "startCommit: assert generation begin" }
-                val currentGen = segmentInfos.generation
-//                 logger.debug { "startCommit: currentGen=$currentGen" }
-                val toSyncGen = toSync.generation
-//                 logger.debug { "startCommit: toSyncGen=$toSyncGen" }
-                assert(currentGen == toSyncGen)
-//                 logger.debug { "startCommit: assert generation end" }
+                withIndexWriterLock {
+                    assert(pendingCommit == null)
+                    assert(segmentInfos.generation == toSync.generation)
 
-                // Exception here means nothing is prepared
-                // (this method unwinds everything it did on
-                // an exception)
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "startCommit: prepareCommit start")
-                }
-//                 logger.debug { "startCommit: prepareCommit start" }
-                toSync.prepareCommit(directory)
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message("IW", "startCommit: prepareCommit done")
-                }
-//                 logger.debug { "startCommit: prepareCommit done" }
-                if (infoStream.isEnabled("IW")) {
-                    infoStream.message(
-                        "IW",
-                        ("startCommit: wrote pending segments file \""
-                                + IndexFileNames.fileNameFromGeneration(
-                            IndexFileNames.PENDING_SEGMENTS, "", toSync.generation
+                    // Exception here means nothing is prepared
+                    // (this method unwinds everything it did on
+                    // an exception)
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "startCommit: prepareCommit start")
+                    }
+                    toSync.prepareCommit(directory)
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message("IW", "startCommit: prepareCommit done")
+                    }
+                    if (infoStream.isEnabled("IW")) {
+                        infoStream.message(
+                            "IW",
+                            ("startCommit: wrote pending segments file \""
+                                    + IndexFileNames.fileNameFromGeneration(
+                                IndexFileNames.PENDING_SEGMENTS, "", toSync.generation
+                            )
+                                    + "\"")
                         )
-                                + "\"")
-                    )
-                }
+                    }
 
-                pendingCommitSet = true
-                pendingCommit = toSync
-                //}
+                    pendingCommitSet = true
+                    pendingCommit = toSync
+                }
 
                 // This call can take a long time -- 10s of seconds
                 // or more.  We do it without syncing on this:
@@ -6035,44 +6006,38 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     }
                 }
 
-//                 logger.debug { "startCommit: midStartCommitSuccess enter" }
                 testPoint("midStartCommitSuccess")
-//                 logger.debug { "startCommit: midStartCommitSuccess exit" }
             } catch (t: Throwable) {
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                if (!pendingCommitSet) {
-                    if (infoStream.isEnabled("IW")) {
-                        infoStream.message("IW", "hit exception committing segments file")
-                    }
-                    try {
-                        // Hit exception
-                        deleter.decRef(filesToCommit!!)
-                    } catch (t1: Throwable) {
-                        t.addSuppressed(t1)
-                    } finally {
-                        filesToCommit = null
+                withIndexWriterLock {
+                    if (!pendingCommitSet) {
+                        if (infoStream.isEnabled("IW")) {
+                            infoStream.message("IW", "hit exception committing segments file")
+                        }
+                        try {
+                            // Hit exception
+                            deleter.decRef(filesToCommit!!)
+                        } catch (t1: Throwable) {
+                            t.addSuppressed(t1)
+                        } finally {
+                            filesToCommit = null
+                        }
                     }
                 }
-                //}
                 throw t
             } finally {
-                // TODO synchronizedis not supported in KMP, need to think what to do here
-                //synchronized(this) {
-                // Have our master segmentInfos record the
-                // generations we just prepared.  We do this
-                // on error or success so we don't
-                // double-write a segments_N file.
-                segmentInfos.updateGeneration(toSync)
-                //}
+                withIndexWriterLock {
+                    // Have our master segmentInfos record the
+                    // generations we just prepared.  We do this
+                    // on error or success so we don't
+                    // double-write a segments_N file.
+                    segmentInfos.updateGeneration(toSync)
+                }
             }
         } catch (tragedy: Error) {
             tragicEvent(tragedy, "startCommit")
             throw tragedy
         }
-//         logger.debug { "startCommit: finishStartCommit enter" }
         testPoint("finishStartCommit")
-//         logger.debug { "startCommit: finishStartCommit exit" }
     }
 
     /**

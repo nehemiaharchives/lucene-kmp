@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.tests.util
 
 //import org.gnit.lucenekmp.store.FileSwitchDirectory
 //import org.gnit.lucenekmp.store.NRTCachingDirectory
-//import org.gnit.lucenekmp.util.configureTestLogging
+import org.gnit.lucenekmp.util.configureTestLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.TimeZone
 import okio.FileNotFoundException
@@ -97,15 +97,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.test.*
 
-open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherits from junit Assert but in kmp it is not pssible.
-
-    // uncomment only when debugging kotlin/native linuxX64 using KotlinLogging
-    /*init {
-        configureTestLogging()
-    }*/
+open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherits from junit Assert but in kmp it is not possible.
 
     @BeforeTest
     fun resetPerTestFieldTypes() {
+        configureTestLogging()
         // Keep per-field type randomization scoped to a single test method, like Lucene's test runner.
         fieldToType.clear()
     }
