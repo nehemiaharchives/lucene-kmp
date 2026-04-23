@@ -70,10 +70,11 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
+                implementation(project(":codecs"))
+                implementation(project(":test-framework"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.okio.fakefilesystem)
-                implementation(project(":test-framework"))
             }
         }
 
