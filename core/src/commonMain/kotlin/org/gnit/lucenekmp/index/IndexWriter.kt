@@ -3,7 +3,6 @@ package org.gnit.lucenekmp.index
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Semaphore
 import okio.IOException
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.codecs.Codec
@@ -26,6 +25,7 @@ import org.gnit.lucenekmp.jdkport.Math
 import org.gnit.lucenekmp.jdkport.Objects
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.computeIfAbsent
@@ -233,20 +233,28 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         @Volatile
         private var closed = false
 
-        // we use a semaphore here instead of simply synced methods to allow
-        // events to be processed concurrently by multiple threads such that all events
-        // for a certain thread are processed once the thread returns from IW
-        private val permits: Semaphore = Semaphore(Int.MAX_VALUE)
         private val queue: ArrayDeque<Event> = ArrayDeque()
         private val queueLock = ReentrantLock()
+        private var activeOperations = 0
 
         private fun acquire() {
-            if (!permits.tryAcquire()) {
-                throw AlreadyClosedException("queue is closed")
+            queueLock.lock()
+            try {
+                if (closed) {
+                    throw AlreadyClosedException("queue is closed")
+                }
+                activeOperations++
+            } finally {
+                queueLock.unlock()
             }
-            if (closed) {
-                permits.release()
-                throw AlreadyClosedException("queue is closed")
+        }
+
+        private fun releaseOperation() {
+            queueLock.lock()
+            try {
+                activeOperations--
+            } finally {
+                queueLock.unlock()
             }
         }
 
@@ -260,7 +268,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     queueLock.unlock()
                 }
             } finally {
-                permits.release()
+                releaseOperation()
             }
         }
 
@@ -270,15 +278,12 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             try {
                 processEventsInternal()
             } finally {
-                permits.release()
+                releaseOperation()
             }
         }
 
         @Throws(IOException::class)
         private fun processEventsInternal() {
-            assert(
-                Int.MAX_VALUE - permits.availablePermits > 0
-            ) { "must acquire a permit before processing events" }
             var event: Event?
             while (true) {
                 queueLock.lock()
@@ -309,19 +314,21 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     queueLock.unlock()
                 }
             } else {
-                // now we acquire all the permits to ensure we are the only one processing the queue
-                runBlocking {
-                    try {
-                        permits.acquire()
-                    } catch (e: CancellationException) {
-                        throw ThreadInterruptedException(e)
-                    }
-                    try {
-                        processEventsInternal()
+                // Wait for in-flight add/process operations to finish so close() becomes the
+                // exclusive queue drainer, matching Java's acquire-all-permits behavior.
+                while (true) {
+                    queueLock.lock()
+                    val done = try {
+                        activeOperations == 0
                     } finally {
-                        permits.release()
+                        queueLock.unlock()
                     }
+                    if (done) {
+                        break
+                    }
+                    Thread.yield()
                 }
+                processEventsInternal()
             }
         }
     }
