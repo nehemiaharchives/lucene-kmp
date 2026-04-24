@@ -9,9 +9,11 @@ import org.gradle.api.tasks.Sync
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.internal.testing.KotlinTestRunnerListener
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import org.jetbrains.kotlin.konan.target.Family
 
@@ -145,6 +147,66 @@ subprojects {
         environment("SIMCTL_CHILD_tests.linedocsfile", testLineDocsPath)
         environment("tests.indexresourcesdir", indexResourcesDir)
         environment("SIMCTL_CHILD_tests.indexresourcesdir", indexResourcesDir)
+
+        if (this is KotlinNativeSimulatorTest) {
+            val simulatorTask = this
+            addRunListener(object : KotlinTestRunnerListener {
+                override fun runningFailure(failure: Error) {
+                    val failureText = failure.stackTraceToString()
+                    val serializerFailure = failureText.contains("DefaultTestOutputEventSerializer") ||
+                            failureText.contains("BaseSerializerFactory\$EnumSerializer")
+                    if (!serializerFailure) {
+                        return
+                    }
+
+                    val command = buildList {
+                        add("/usr/bin/xcrun")
+                        add("simctl")
+                        add("spawn")
+                        if (simulatorTask.standalone.get()) {
+                            add("--standalone")
+                        }
+                        add(simulatorTask.device.get())
+                        add(simulatorTask.executable.absolutePath)
+                        add("--")
+                        addAll(simulatorTask.args)
+                        add("--ktest_logger=GTEST")
+                        if (simulatorTask.includePatterns.isNotEmpty()) {
+                            add("--ktest_gradle_filter=${simulatorTask.includePatterns.joinToString(",")}")
+                        }
+                        if (simulatorTask.excludePatterns.isNotEmpty()) {
+                            add("--ktest_negative_gradle_filter=${simulatorTask.excludePatterns.joinToString(",")}")
+                        }
+                    }
+
+                    logger.lifecycle(
+                        "Re-running ${simulatorTask.path} with raw Kotlin/Native output to surface the real test failure:"
+                    )
+                    logger.lifecycle(command.joinToString(" "))
+
+                    try {
+                        val processBuilder = ProcessBuilder(command)
+                            .directory(project.file(simulatorTask.workingDir))
+                            .redirectErrorStream(true)
+                        val processEnvironment = processBuilder.environment()
+                        simulatorTask.environment.forEach { (name, value) ->
+                            processEnvironment[name] = value.toString()
+                        }
+
+                        val process = processBuilder.start()
+                        process.inputStream.bufferedReader().useLines { lines ->
+                            lines.forEach { line ->
+                                logger.lifecycle("[native-rerun] $line")
+                            }
+                        }
+                        val exitCode = process.waitFor()
+                        logger.lifecycle("Native rerun for ${simulatorTask.path} exited with code $exitCode")
+                    } catch (rerunError: Throwable) {
+                        logger.error("Unable to re-run ${simulatorTask.path} for raw native diagnostics", rerunError)
+                    }
+                }
+            })
+        }
     }
 
     tasks.withType<AbstractTestTask>().configureEach {

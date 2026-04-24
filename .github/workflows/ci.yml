@@ -836,7 +836,6 @@ jobs:
         run: >
           ./gradlew
           -PenableHangDetection=true
-          --stacktrace
           --console=plain
           ${{ matrix.task }}
           ${{ matrix.package_filter || '' }}
