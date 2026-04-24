@@ -300,8 +300,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.builders.TermQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.TermQueryBuilder
 - org.apache.lucene.queryparser.xml.builders.TermsQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.TermsQueryBuilder
 - org.apache.lucene.queryparser.xml.builders.UserInputQueryBuilder → org.gnit.lucenekmp.queryparser.xml.builders.UserInputQueryBuilder
-- org.apache.lucene.search.SearcherLifetimeManager → org.gnit.lucenekmp.search.SearcherLifetimeManager
-- org.apache.lucene.search.SeededKnnVectorQuery → org.gnit.lucenekmp.search.SeededKnnVectorQuery
 - org.apache.lucene.tests.analysis.MockPayloadFilter → org.gnit.lucenekmp.tests.analysis.MockPayloadFilter
 - org.apache.lucene.tests.codecs.cheapbastard.CheapBastardCodec → org.gnit.lucenekmp.tests.codecs.cheapbastard.CheapBastardCodec
 - org.apache.lucene.tests.codecs.uniformsplit.Rot13CypherTestUtil → org.gnit.lucenekmp.tests.codecs.uniformsplit.Rot13CypherTestUtil
@@ -351,7 +349,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.sharedterms.STUniformSplitPostingsFormat → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.STUniformSplitPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.sharedterms.TestSTBlockReader → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.TestSTBlockReader
 - org.apache.lucene.index.PersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy
-- org.apache.lucene.index.TestPayloads → org.gnit.lucenekmp.index.TestPayloads
 - org.apache.lucene.index.TestPersistentSnapshotDeletionPolicy → org.gnit.lucenekmp.index.TestPersistentSnapshotDeletionPolicy
 - org.apache.lucene.index.TestStressIndexing → org.gnit.lucenekmp.index.TestStressIndexing
 - org.apache.lucene.index.TestTermsHashPerField → org.gnit.lucenekmp.index.TestTermsHashPerField
@@ -426,7 +423,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.ParserException → org.gnit.lucenekmp.queryparser.xml.ParserException
 - org.apache.lucene.search.JustCompileSearch → org.gnit.lucenekmp.search.JustCompileSearch
 - org.apache.lucene.search.SortRescorer → org.gnit.lucenekmp.search.SortRescorer
-- org.apache.lucene.search.TestSearcherManager → org.gnit.lucenekmp.search.TestSearcherManager
 - org.apache.lucene.search.TestSloppyPhraseQuery → org.gnit.lucenekmp.search.TestSloppyPhraseQuery
 - org.apache.lucene.search.TestTermScorer → org.gnit.lucenekmp.search.TestTermScorer
 - org.apache.lucene.search.TestXYPointDistanceSort → org.gnit.lucenekmp.search.TestXYPointDistanceSort
@@ -494,12 +490,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestParallelCompositeReader → org.gnit.lucenekmp.index.TestParallelCompositeReader
-- org.apache.lucene.index.TestParallelLeafReader → org.gnit.lucenekmp.index.TestParallelLeafReader
-- org.apache.lucene.index.TestParallelReaderEmptyIndex → org.gnit.lucenekmp.index.TestParallelReaderEmptyIndex
-- org.apache.lucene.index.TestParallelTermEnum → org.gnit.lucenekmp.index.TestParallelTermEnum
-- org.apache.lucene.index.TestPayloadsOnVectors → org.gnit.lucenekmp.index.TestPayloadsOnVectors
-- org.apache.lucene.index.TestPendingSoftDeletes → org.gnit.lucenekmp.index.TestPendingSoftDeletes
 - org.apache.lucene.index.TestPerSegmentDeletes → org.gnit.lucenekmp.index.TestPerSegmentDeletes
 - org.apache.lucene.index.TestPointValues → org.gnit.lucenekmp.index.TestPointValues
 - org.apache.lucene.index.TestPostingsOffsets → org.gnit.lucenekmp.index.TestPostingsOffsets
@@ -609,8 +599,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
 - org.apache.lucene.search.ReadAheadMatchAllDocsQuery → org.gnit.lucenekmp.search.ReadAheadMatchAllDocsQuery
 - org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
-- org.apache.lucene.search.TestSearchWithThreads → org.gnit.lucenekmp.search.TestSearchWithThreads
-- org.apache.lucene.search.TestSeededKnnByteVectorQuery → org.gnit.lucenekmp.search.TestSeededKnnByteVectorQuery
 - org.apache.lucene.search.TestSeededKnnFloatVectorQuery → org.gnit.lucenekmp.search.TestSeededKnnFloatVectorQuery
 - org.apache.lucene.search.TestSegmentCacheables → org.gnit.lucenekmp.search.TestSegmentCacheables
 - org.apache.lucene.search.TestShardSearching → org.gnit.lucenekmp.search.TestShardSearching
