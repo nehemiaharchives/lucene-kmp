@@ -41,7 +41,7 @@ abstract class BaseExplanationTestCase : LuceneTestCase() {
         // same contents, but no field boost
         const val ALTFIELD: String = "alt"
 
-        protected val docFields =
+        val docFields =
             arrayOf(
                 "w1 w2 w3 w4 w5",
                 "w1 w3 w2 w3 zz",
@@ -68,7 +68,7 @@ abstract class BaseExplanationTestCase : LuceneTestCase() {
 
     @BeforeTest
     @Throws(Exception::class)
-    fun beforeClassTestExplanations() {
+    open fun beforeClassTestExplanations() {
         directory = newDirectory()
         analyzer = MockAnalyzer(random())
         RandomIndexWriter(
@@ -86,13 +86,13 @@ abstract class BaseExplanationTestCase : LuceneTestCase() {
 
     @AfterTest
     @Throws(Exception::class)
-    fun afterClassTestExplanations() {
+    open fun afterClassTestExplanations() {
         searcher = null
-        reader!!.close()
+        reader?.close()
         reader = null
-        directory!!.close()
+        directory?.close()
         directory = null
-        analyzer!!.close()
+        analyzer?.close()
         analyzer = null
     }
 
