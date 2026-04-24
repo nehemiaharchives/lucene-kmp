@@ -59,7 +59,7 @@ open class SnapshotDeletionPolicy(
      * @param commit the commit previously returned by [.snapshot]
      */
     @Throws(IOException::class)
-    fun release(commit: IndexCommit) {
+    open fun release(commit: IndexCommit) {
         val gen = commit.generation
         releaseGen(gen)
     }
@@ -112,7 +112,7 @@ open class SnapshotDeletionPolicy(
      * @return the [IndexCommit] that was snapshotted.
      */
     @Throws(IOException::class)
-    fun snapshot(): IndexCommit {
+    open fun snapshot(): IndexCommit {
         if (!initCalled) {
             throw IllegalStateException(
                 "this instance is not being used by IndexWriter; be sure to use the instance returned from writer.getConfig().getIndexDeletionPolicy()"
