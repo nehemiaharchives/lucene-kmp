@@ -31,7 +31,7 @@ open class PendingDeletes(
     // Writeable live docs, null if this instance is not ready to accept writes, in which
     // case getMutableBits needs to be called
     private var writeableLiveDocs: FixedBitSet? = null
-    protected var pendingDeleteCount: Int
+    internal var pendingDeleteCount: Int
     var liveDocsInitialized: Boolean
 
     constructor(reader: SegmentReader, info: SegmentCommitInfo) : this(

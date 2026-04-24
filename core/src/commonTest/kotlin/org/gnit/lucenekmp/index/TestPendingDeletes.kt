@@ -10,13 +10,13 @@ import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.Version
 import kotlin.test.*
 
-class TestPendingDeletes : LuceneTestCase() {
+open class TestPendingDeletes : LuceneTestCase() {
     protected open fun newPendingDeletes(commitInfo: SegmentCommitInfo): PendingDeletes {
         return PendingDeletes(commitInfo)
     }
 
     @Test
-    fun testDeleteDoc() {
+    open fun testDeleteDoc() {
         val dir: Directory = ByteBuffersDirectory()
         val si = SegmentInfo(
             dir,
@@ -62,7 +62,7 @@ class TestPendingDeletes : LuceneTestCase() {
     }
 
     @Test
-    fun testWriteLiveDocs() {
+    open fun testWriteLiveDocs() {
         val dir: Directory = ByteBuffersDirectory()
         val si = SegmentInfo(
             dir,
@@ -132,7 +132,7 @@ class TestPendingDeletes : LuceneTestCase() {
     }
 
     @Test
-    fun testIsFullyDeleted() {
+    open fun testIsFullyDeleted() {
         val dir: Directory = ByteBuffersDirectory()
         val si = SegmentInfo(
             dir,
@@ -157,8 +157,7 @@ class TestPendingDeletes : LuceneTestCase() {
             if (random().nextBoolean()) {
                 assertTrue(deletes.writeLiveDocs(dir))
             }
-            assertEquals(i == 2, deletes.isFullyDeleted { null as CodecReader })
+            assertEquals(i == 2, deletes.isFullyDeleted { throw UnsupportedOperationException() })
         }
     }
 }
-
