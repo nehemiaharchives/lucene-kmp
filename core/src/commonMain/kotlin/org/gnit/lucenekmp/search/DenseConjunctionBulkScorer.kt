@@ -6,7 +6,6 @@ import org.gnit.lucenekmp.util.Bits
 import org.gnit.lucenekmp.util.FixedBitSet
 import kotlin.math.min
 
-
 /**
  * BulkScorer implementation of [ConjunctionScorer] that is specialized for dense clauses.
  * Whenever sensible, it intersects clauses by loading their matches into a bit set and computing
@@ -168,13 +167,6 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
         docIdStreamView.windowBase = windowBase
         collector.collect(docIdStreamView)
         windowMatches.clear()
-
-        if (iterators.isNotEmpty()) {
-            val lead = iterators[0]
-            if (lead.docID() < windowMax) {
-                lead.advance(windowMax)
-            }
-        }
 
         // If another clause is more advanced than the leading clause then advance the leading clause,
         // it's important to take advantage of large gaps in the postings lists of other clauses.

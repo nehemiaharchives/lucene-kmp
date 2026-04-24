@@ -186,7 +186,7 @@ class FixedBitSet : BitSet {
         require(start < upperBound) { "index=$start, upperBound=$upperBound" }
         require(upperBound <= numBits) { "upperBound=$upperBound, numBits=$numBits" }
         var i = start shr 6
-        var word = bits[i] shr start // skip all the bits to the right of index
+        var word = bits[i] ushr start // skip all the bits to the right of index
 
         if (word != 0L) {
             return start + Long.numberOfTrailingZeros(word)
