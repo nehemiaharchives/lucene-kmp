@@ -360,7 +360,7 @@ open class IndexSearcher(
      * clauses.
      */
     @Throws(IOException::class)
-    fun searchAfter(
+    open fun searchAfter(
         after: ScoreDoc?,
         query: Query,
         numHits: Int
@@ -912,7 +912,7 @@ open class IndexSearcher(
      * @lucene.experimental
      */
     @Throws(IOException::class)
-    fun termStatistics(
+    open fun termStatistics(
         term: Term,
         docFreq: Int,
         totalTermFreq: Long

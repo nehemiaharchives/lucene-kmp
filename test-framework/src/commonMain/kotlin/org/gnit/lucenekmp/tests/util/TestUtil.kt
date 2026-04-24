@@ -62,6 +62,8 @@ import org.gnit.lucenekmp.jdkport.StrictMath
 import org.gnit.lucenekmp.jdkport.TimeUnit
 import org.gnit.lucenekmp.jdkport.appendCodePoint
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.search.FieldDoc
+import org.gnit.lucenekmp.search.TotalHits
 import org.gnit.lucenekmp.jdkport.codePointAt
 import org.gnit.lucenekmp.jdkport.doubleToRawLongBits
 import org.gnit.lucenekmp.jdkport.floatToRawIntBits
@@ -82,7 +84,10 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.random.Random
 import kotlin.reflect.KClass
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class TestUtil {
     companion object {
@@ -1455,58 +1460,41 @@ class TestUtil {
         ) {
             val map: MutableMap<String, T> = HashMap()
             att.reflectWith { attClass: KClass<out Attribute>, key: String, value: Any? ->
-                map.put(
-                    attClass.simpleName + '#' + key,
-                    value as T
-                )
+                map[attClass.simpleName + '#' + key] = value as T
             }
             assertEquals(reflectedValues, map, "Reflection does not produce same map")
         }
 
         /** Assert that the given [TopDocs] have the same top docs and consistent hit counts.  */
-        /*fun assertConsistent(expected: TopDocs, actual: TopDocs) {
+        fun assertConsistent(expected: TopDocs, actual: TopDocs) {
             assertEquals(
-                expected.totalHits.value == 0L, actual.totalHits.value == 0L
-            , "wrong total hits")
+                expected.totalHits.value == 0L,
+                actual.totalHits.value == 0L,
+                "wrong total hits"
+            )
             if (expected.totalHits.relation == TotalHits.Relation.EQUAL_TO) {
                 if (actual.totalHits.relation == TotalHits.Relation.EQUAL_TO) {
-                    assertEquals(
-                        expected.totalHits.value, actual.totalHits.value, "wrong total hits")
+                    assertEquals(expected.totalHits.value, actual.totalHits.value, "wrong total hits")
                 } else {
-                    assertTrue(
-                        expected.totalHits.value >= actual.totalHits.value, "wrong total hits"
-                    )
+                    assertTrue(expected.totalHits.value >= actual.totalHits.value, "wrong total hits")
                 }
             } else if (actual.totalHits.relation == TotalHits.Relation.EQUAL_TO) {
                 assertTrue(expected.totalHits.value <= actual.totalHits.value, "wrong total hits")
             }
-            assertEquals(
-                expected.scoreDocs!!.size.toLong(),
-                actual.scoreDocs!!.size.toLong(),
-                "wrong hit count"
-            )
-            for (hitIDX in expected.scoreDocs!!.indices) {
-                val expectedSD: ScoreDoc = expected.scoreDocs!![hitIDX]
-                val actualSD: ScoreDoc = actual.scoreDocs!![hitIDX]
-                assertEquals(expectedSD.doc.toLong(), actualSD.doc.toLong(), "wrong hit docID")
-                assertEquals(
-                    expectedSD.score.toDouble(),
-                    actualSD.score.toDouble(),
-                    0.0,
-                    "wrong hit score"
-                )
+            assertEquals(expected.scoreDocs.size, actual.scoreDocs.size, "wrong hit count")
+            for (hitIDX in expected.scoreDocs.indices) {
+                val expectedSD = expected.scoreDocs[hitIDX]
+                val actualSD = actual.scoreDocs[hitIDX]
+                assertEquals(expectedSD.doc, actualSD.doc, "wrong hit docID")
+                assertEquals(expectedSD.score.toDouble(), actualSD.score.toDouble(), 0.0, "wrong hit score")
                 if (expectedSD is FieldDoc) {
                     assertTrue(actualSD is FieldDoc)
-                    assertArrayEquals(
-                        (expectedSD as FieldDoc).fields,
-                        (actualSD as FieldDoc).fields,
-                        "wrong sort field values"
-                    )
+                    assertContentEquals(expectedSD.fields, (actualSD as FieldDoc).fields, "wrong sort field values")
                 } else {
                     assertFalse(actualSD is FieldDoc)
                 }
             }
-        }*/
+        }
 
 
         // NOTE: this is likely buggy, and cannot clone fields
