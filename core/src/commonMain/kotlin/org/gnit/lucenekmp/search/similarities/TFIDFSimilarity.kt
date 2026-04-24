@@ -379,7 +379,7 @@ abstract class TFIDFSimilarity : Similarity {
      * @return an Explain object that includes both an idf score factor for the phrase and an
      * explanation for each term.
      */
-    fun idfExplain(
+    open fun idfExplain(
         collectionStats: CollectionStatistics,
         termStats: Array<TermStatistics>
     ): Explanation {

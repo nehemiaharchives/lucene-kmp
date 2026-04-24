@@ -10,7 +10,7 @@ import kotlin.math.sqrt
 /**
  * Expert: Historical scoring implementation. You might want to consider using [ ] instead, which is generally considered superior to TF-IDF.
  */
-class ClassicSimilarity : TFIDFSimilarity {
+open class ClassicSimilarity : TFIDFSimilarity {
     /** Default constructor: parameter-free  */
     constructor() : super()
 
