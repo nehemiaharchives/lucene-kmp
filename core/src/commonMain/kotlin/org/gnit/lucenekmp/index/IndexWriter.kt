@@ -2226,17 +2226,21 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // point, try again to log the config here:
         assert(maxNumSegments == UNBOUNDED_MAX_MERGE_SEGMENTS || maxNumSegments > 0)
         //checkNotNull(trigger)
-        if (!merges.areEnabled()) {
-            return null
-        }
 
-        // Do not start new merges if disaster struck
-        if (tragedy.load() != null) {
-            return null
-        }
+
+
 
         return withIndexWriterLock {
             messageState()
+
+            if (!merges.areEnabled()) {
+                return@withIndexWriterLock null
+            }
+
+            // Do not start new merges if disaster struck
+            if (tragedy.load() != null) {
+                return@withIndexWriterLock null
+            }
             val spec: MergePolicy.MergeSpecification?
             val cachingMergeContext = CachingMergeContext(this)
 //             logger.debug { "updatePendingMerges: trigger=$trigger maxNumSegments=$maxNumSegments segCount=${segmentInfos.size()}" }
