@@ -23,7 +23,7 @@ import okio.IOException
  * synchronization, you should **not** synchronize on the `IndexReader` instance; use
  * your own (non-Lucene) objects instead.
  */
-class MultiReader(
+open class MultiReader(
     subReaders: Array<out IndexReader>,
     subReadersSorter: Comparator<IndexReader>?,
     private val closeSubReaders: Boolean
