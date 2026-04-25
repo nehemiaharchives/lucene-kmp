@@ -578,12 +578,8 @@ open class IndexSearcher(
             // there are no segments, nothing to offload to the executor, but we do need to call reduce to
             // create some kind of empty result
             assert(leafContexts.isEmpty())
-            return collectorManager.reduce(mutableListOf(firstCollector))!!
-        } else if (leafSlices.size == 1) {
-            // Fast path avoids task allocation + runBlocking overhead for single-slice searches.
-            val leaves = leafSlices[0].partitions
-            search(leaves, weight, firstCollector)
-            return collectorManager.reduce(mutableListOf(firstCollector))!!
+            @Suppress("UNCHECKED_CAST")
+            return collectorManager.reduce(mutableListOf(firstCollector)) as T
         } else {
             val collectors: MutableList<C> = ArrayList(leafSlices.size)
             collectors.add(firstCollector)
@@ -604,7 +600,8 @@ open class IndexSearcher(
                     })
             }
             val results: MutableList<C> = runBlocking { taskExecutor.invokeAll(listTasks) }
-            return collectorManager.reduce(results)!!
+            @Suppress("UNCHECKED_CAST")
+            return collectorManager.reduce(results) as T
         }
     }
 
