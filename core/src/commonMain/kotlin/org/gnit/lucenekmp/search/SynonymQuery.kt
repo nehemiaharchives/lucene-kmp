@@ -346,7 +346,7 @@ class SynonymQuery private constructor(
                         )
                     }
 
-                    val norms: NumericDocValues = context.reader().getNormValues(field)!!
+                    val norms: NumericDocValues? = context.reader().getNormValues(field)
 
                     // we must optimize this case (term not in segment), disjunctions require >= 2 subs
                     if (iterators.size == 1) {
@@ -417,7 +417,7 @@ class SynonymQuery private constructor(
         private val disjunctionDisi: DisjunctionDISIApproximation,
         private val impactsDisi: ImpactsDISI,
         private val scorer: SimScorer,
-        private val norms: NumericDocValues
+        private val norms: NumericDocValues?
     ) : Scorer() {
         private val maxScoreCache: MaxScoreCache = impactsDisi.getMaxScoreCache()
 
@@ -487,12 +487,12 @@ class SynonymQuery private constructor(
         boost: Float,
         `in`: TermScorer,
         scorer: SimScorer,
-        norms: NumericDocValues
+        norms: NumericDocValues?
     ) : FilterScorer(`in`) {
         val boost: Float
         override val `in`: TermScorer
         val scorer: SimScorer
-        val norms: NumericDocValues
+        val norms: NumericDocValues?
 
         init {
             require(
