@@ -1033,7 +1033,7 @@
 |     org.apache.lucene.queryparser.simple | 1 | 0 | 0% |
 |       org.apache.lucene.queryparser.surround.query | 4 | 0 | 0% |
 |     org.apache.lucene.queryparser.xml | 3 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 130 | 87% |
+|   org.apache.lucene.search | 149 | 137 | 91% |
 |     org.apache.lucene.search.knn | 1 | 1 | 100% |
 |     org.apache.lucene.search.similarities | 25 | 25 | 100% |
 |   org.apache.lucene.store | 27 | 27 | 100% |
@@ -1047,7 +1047,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 784 | 66% |
+| Total | 1186 | 791 | 66% |
 
 
 ## Tests To Port
@@ -1460,13 +1460,6 @@
 | [org.apache.lucene.queryparser.xml.TestCoreParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCoreParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCoreParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusExtensionsParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser |
 | [org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/TestCorePlusQueriesParser.java) | org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser |
-| [org.apache.lucene.search.TestTermQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTermQuery.java) | org.gnit.lucenekmp.search.TestTermQuery |
-| [org.apache.lucene.search.TestTermRangeQuery](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTermRangeQuery.java) | org.gnit.lucenekmp.search.TestTermRangeQuery |
-| [org.apache.lucene.search.TestTermScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTermScorer.java) | org.gnit.lucenekmp.search.TestTermScorer |
-| [org.apache.lucene.search.TestTopDocsCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTopDocsCollector.java) | org.gnit.lucenekmp.search.TestTopDocsCollector |
-| [org.apache.lucene.search.TestTopDocsMerge](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTopDocsMerge.java) | org.gnit.lucenekmp.search.TestTopDocsMerge |
-| [org.apache.lucene.search.TestTopDocsRRF](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTopDocsRRF.java) | org.gnit.lucenekmp.search.TestTopDocsRRF |
-| [org.apache.lucene.search.TestTopFieldCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTopFieldCollector.java) | org.gnit.lucenekmp.search.TestTopFieldCollector |
 | [org.apache.lucene.search.TestTopFieldCollectorEarlyTermination](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTopFieldCollectorEarlyTermination.java) | org.gnit.lucenekmp.search.TestTopFieldCollectorEarlyTermination |
 | [org.apache.lucene.search.TestTopKnnResults](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTopKnnResults.java) | org.gnit.lucenekmp.search.TestTopKnnResults |
 | [org.apache.lucene.search.TestTotalHitCountCollector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/search/TestTotalHitCountCollector.java) | org.gnit.lucenekmp.search.TestTotalHitCountCollector |
