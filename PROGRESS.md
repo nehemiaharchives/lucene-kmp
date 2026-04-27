@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1582 | 65% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1583 | 65% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
@@ -171,7 +171,7 @@
 |     org.apache.lucene.codecs.lucene94 |         org.gnit.lucenekmp.codecs.lucene94 | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.codecs.lucene95 |         org.gnit.lucenekmp.codecs.lucene95 | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.codecs.lucene99 |         org.gnit.lucenekmp.codecs.lucene99 | 13 | 13 | 100% | [x] |
-|     org.apache.lucene.codecs.memory |         org.gnit.lucenekmp.codecs.memory | 5 | 0 | 0% | [ ] |
+|     org.apache.lucene.codecs.memory |         org.gnit.lucenekmp.codecs.memory | 5 | 1 | 20% | [ ] |
 |     org.apache.lucene.codecs.perfield |         org.gnit.lucenekmp.codecs.perfield | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.codecs.simpletext |         org.gnit.lucenekmp.codecs.simpletext | 29 | 29 | 100% | [x] |
 |     org.apache.lucene.codecs.uniformsplit |         org.gnit.lucenekmp.codecs.uniformsplit | 17 | 0 | 0% | [ ] |
@@ -633,7 +633,6 @@
 | [org.apache.lucene.codecs.bitvectors.FlatBitVectorsScorer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/bitvectors/FlatBitVectorsScorer.java) | org.gnit.lucenekmp.codecs.bitvectors.FlatBitVectorsScorer |
 | [org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/bitvectors/HnswBitVectorsFormat.java) | org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat |
 | [org.apache.lucene.codecs.lucene101.PostingIndexInput](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/codecs/lucene101/PostingIndexInput.java) | org.gnit.lucenekmp.codecs.lucene101.PostingIndexInput |
-| [org.apache.lucene.codecs.memory.DirectPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/memory/DirectPostingsFormat.java) | org.gnit.lucenekmp.codecs.memory.DirectPostingsFormat |
 | [org.apache.lucene.codecs.memory.FSTPostingsFormat](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/memory/FSTPostingsFormat.java) | org.gnit.lucenekmp.codecs.memory.FSTPostingsFormat |
 | [org.apache.lucene.codecs.memory.FSTTermOutputs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/memory/FSTTermOutputs.java) | org.gnit.lucenekmp.codecs.memory.FSTTermOutputs |
 | [org.apache.lucene.codecs.memory.FSTTermsReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/codecs/src/java/org/apache/lucene/codecs/memory/FSTTermsReader.java) | org.gnit.lucenekmp.codecs.memory.FSTTermsReader |
@@ -1009,7 +1008,7 @@
 |   org.apache.lucene.collation | 2 | 0 | 0% |
 |   org.apache.lucene.document | 50 | 49 | 98% |
 |   org.apache.lucene.geo | 17 | 17 | 100% |
-|   org.apache.lucene.index | 197 | 156 | 79% |
+|   org.apache.lucene.index | 197 | 165 | 83% |
 |     org.apache.lucene.internal.hppc | 15 | 15 | 100% |
 |     org.apache.lucene.internal.tests | 1 | 1 | 100% |
 |     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
@@ -1047,7 +1046,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 791 | 66% |
+| Total | 1186 | 800 | 67% |
 
 
 ## Tests To Port
@@ -1369,15 +1368,6 @@
 | [org.apache.lucene.collation.TestCollationDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/collation/TestCollationDocValuesField.java) | org.gnit.lucenekmp.collation.TestCollationDocValuesField |
 | [org.apache.lucene.collation.TestCollationKeyAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/collation/TestCollationKeyAnalyzer.java) | org.gnit.lucenekmp.collation.TestCollationKeyAnalyzer |
 | [org.apache.lucene.index.Test4GBStoredFields](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/Test4GBStoredFields.java) | org.gnit.lucenekmp.index.Test4GBStoredFields |
-| [org.apache.lucene.index.TestReaderPool](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestReaderPool.java) | org.gnit.lucenekmp.index.TestReaderPool |
-| [org.apache.lucene.index.TestReaderWrapperDVTypeCheck](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestReaderWrapperDVTypeCheck.java) | org.gnit.lucenekmp.index.TestReaderWrapperDVTypeCheck |
-| [org.apache.lucene.index.TestRollback](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestRollback.java) | org.gnit.lucenekmp.index.TestRollback |
-| [org.apache.lucene.index.TestRollingUpdates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestRollingUpdates.java) | org.gnit.lucenekmp.index.TestRollingUpdates |
-| [org.apache.lucene.index.TestSameTokenSamePosition](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSameTokenSamePosition.java) | org.gnit.lucenekmp.index.TestSameTokenSamePosition |
-| [org.apache.lucene.index.TestSegmentInfos](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSegmentInfos.java) | org.gnit.lucenekmp.index.TestSegmentInfos |
-| [org.apache.lucene.index.TestSegmentMerger](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSegmentMerger.java) | org.gnit.lucenekmp.index.TestSegmentMerger |
-| [org.apache.lucene.index.TestSegmentReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSegmentReader.java) | org.gnit.lucenekmp.index.TestSegmentReader |
-| [org.apache.lucene.index.TestSegmentTermDocs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSegmentTermDocs.java) | org.gnit.lucenekmp.index.TestSegmentTermDocs |
 | [org.apache.lucene.index.TestSegmentTermEnum](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSegmentTermEnum.java) | org.gnit.lucenekmp.index.TestSegmentTermEnum |
 | [org.apache.lucene.index.TestSegmentToThreadMapping](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSegmentToThreadMapping.java) | org.gnit.lucenekmp.index.TestSegmentToThreadMapping |
 | [org.apache.lucene.index.TestSizeBoundedForceMerge](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/index/TestSizeBoundedForceMerge.java) | org.gnit.lucenekmp.index.TestSizeBoundedForceMerge |

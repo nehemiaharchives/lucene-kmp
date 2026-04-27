@@ -137,7 +137,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 
 ## Depth 3
 - org.apache.lucene.codecs.bitvectors.HnswBitVectorsFormat → org.gnit.lucenekmp.codecs.bitvectors.HnswBitVectorsFormat
-- org.apache.lucene.codecs.memory.DirectPostingsFormat → org.gnit.lucenekmp.codecs.memory.DirectPostingsFormat
 - org.apache.lucene.codecs.uniformsplit.BlockEncoder → org.gnit.lucenekmp.codecs.uniformsplit.BlockEncoder
 - org.apache.lucene.codecs.uniformsplit.FSTDictionary → org.gnit.lucenekmp.codecs.uniformsplit.FSTDictionary
 - org.apache.lucene.codecs.uniformsplit.FieldMetadata → org.gnit.lucenekmp.codecs.uniformsplit.FieldMetadata
@@ -478,18 +477,8 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.TestUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.TestUniformSplitPostingFormat
 - org.apache.lucene.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat
 - org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
-- org.apache.lucene.index.BugReproTokenStream → org.gnit.lucenekmp.index.BugReproTokenStream
 - org.apache.lucene.index.RepeatingTokenizer → org.gnit.lucenekmp.index.RepeatingTokenizer
 - org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
-- org.apache.lucene.index.TestReaderPool → org.gnit.lucenekmp.index.TestReaderPool
-- org.apache.lucene.index.TestReaderWrapperDVTypeCheck → org.gnit.lucenekmp.index.TestReaderWrapperDVTypeCheck
-- org.apache.lucene.index.TestRollback → org.gnit.lucenekmp.index.TestRollback
-- org.apache.lucene.index.TestRollingUpdates → org.gnit.lucenekmp.index.TestRollingUpdates
-- org.apache.lucene.index.TestSameTokenSamePosition → org.gnit.lucenekmp.index.TestSameTokenSamePosition
-- org.apache.lucene.index.TestSegmentInfos → org.gnit.lucenekmp.index.TestSegmentInfos
-- org.apache.lucene.index.TestSegmentMerger → org.gnit.lucenekmp.index.TestSegmentMerger
-- org.apache.lucene.index.TestSegmentReader → org.gnit.lucenekmp.index.TestSegmentReader
-- org.apache.lucene.index.TestSegmentTermDocs → org.gnit.lucenekmp.index.TestSegmentTermDocs
 - org.apache.lucene.index.TestSegmentTermEnum → org.gnit.lucenekmp.index.TestSegmentTermEnum
 - org.apache.lucene.index.TestSegmentToThreadMapping → org.gnit.lucenekmp.index.TestSegmentToThreadMapping
 - org.apache.lucene.index.TestSizeBoundedForceMerge → org.gnit.lucenekmp.index.TestSizeBoundedForceMerge
