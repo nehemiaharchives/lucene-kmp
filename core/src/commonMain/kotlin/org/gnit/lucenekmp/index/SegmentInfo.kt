@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.TrackingDirectoryWrapper
 import org.gnit.lucenekmp.util.StringHelper
 import org.gnit.lucenekmp.util.Version
+import kotlin.collections.LinkedHashMap
 
 
 /**
@@ -68,7 +69,7 @@ class SegmentInfo(
             return UnmodifiableMutableMap(field)
         }
         set(newDiagnostics) {
-            field = HashMap(newDiagnostics)
+            field = LinkedHashMap(newDiagnostics)
         }
 
     /**
@@ -124,9 +125,9 @@ class SegmentInfo(
      */
     fun addDiagnostics(diagnostics: MutableMap<String, String>) {
         requireNotNull(diagnostics)
-        val copy: MutableMap<String, String> = HashMap<String, String>(this.diagnostics)
+        val copy: MutableMap<String, String> = LinkedHashMap<String, String>(this.diagnostics)
         copy.putAll(diagnostics)
-        this.diagnostics = HashMap(copy)
+        this.diagnostics = LinkedHashMap(copy)
     }
 
     /** Returns diagnostics saved into the segment when it was written. The map is immutable.  */
@@ -247,11 +248,11 @@ class SegmentInfo(
         this.useCompoundFile = isCompoundFile
         this.hasBlocks = hasBlocks
         this.codecNullable = codec
-        this.diagnostics = HashMap<String, String>(diagnostics)
+        this.diagnostics = LinkedHashMap<String, String>(diagnostics)
 
         this.id = id
         require(id.size == StringHelper.ID_LENGTH) { "invalid id: " + id.contentToString() }
-        this.attributes = HashMap<String, String>(attributes)
+        this.attributes = LinkedHashMap<String, String>(attributes)
 
         this.indexSort = indexSort
     }
@@ -313,7 +314,7 @@ class SegmentInfo(
      * make a copy on write for every attribute change.
      */
     fun putAttribute(key: String, value: String): String? {
-        val newMap: HashMap<String, String> = HashMap(attributes)
+        val newMap: LinkedHashMap<String, String> = LinkedHashMap(attributes)
         val oldValue: String? = newMap.put(key, value)
         // This needs to be thread-safe because multiple threads may be updating (different) attributes
         // at the same time due to concurrent merging, plus some threads may be calling toString() on
