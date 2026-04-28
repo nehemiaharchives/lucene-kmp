@@ -564,3 +564,7 @@ fun String.Companion.fromCharArray(value: CharArray, offset: Int, count: Int): S
     }
     return value.concatToString(offset, offset + count)
 }
+
+fun String.Companion.fromCharArray(value: CharArray): String {
+    return fromCharArray(value, 0, value.size)
+}
