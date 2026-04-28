@@ -118,6 +118,24 @@ private fun internalArrayEquals(
     }
 }
 
+fun assertArrayEquals(
+    expected: IntArray,
+    actual: IntArray,
+    message: String? = null
+) {
+    assertEquals(
+        expected.size,
+        actual.size,
+        "${message ?: ""} size mismatch: expected ${expected.size} elements, got ${actual.size}"
+    )
+    for (i in expected.indices) {
+        assertEquals(
+            expected[i],
+            actual[i],
+            "${message ?: ""} arrays differ at index $i: expected=${expected[i]}, actual=${actual[i]}"
+        )
+    }
+}
 
 fun assertArrayEquals(
     expected: LongArray,
