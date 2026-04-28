@@ -142,7 +142,21 @@ open class RandomizedTest {
         fun frequently(): Boolean {
             return !rarely()
         }
-        //↑ line 245
+
+        //
+        // Delegates to RandomPicks
+        //
+
+        //
+        // Delegates to RandomPicks
+        //
+        /**
+         * Pick a random object from the given array. The array must not be empty.
+         */
+        fun <T> randomFrom(array: Array<T>): T {
+            return RandomPicks.randomFrom(random(), array)
+        }
+        //↑ line 256
 
 
         //↓ line
