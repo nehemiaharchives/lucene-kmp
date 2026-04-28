@@ -12,5 +12,6 @@ captures
 local.properties
 xcuserdata
 .kotlin
+.run
 #So we don't accidentally commit our private keys
 *.gpg
