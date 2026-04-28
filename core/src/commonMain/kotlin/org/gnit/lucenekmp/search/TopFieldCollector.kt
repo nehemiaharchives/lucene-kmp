@@ -391,7 +391,7 @@ abstract class TopFieldCollector private constructor(
     companion object {
         fun canEarlyTerminate(
             searchSort: Sort,
-            indexSort: Sort
+            indexSort: Sort?
         ): Boolean {
             return canEarlyTerminateOnDocId(searchSort) || canEarlyTerminateOnPrefix(searchSort, indexSort)
         }
@@ -403,7 +403,7 @@ abstract class TopFieldCollector private constructor(
 
         private fun canEarlyTerminateOnPrefix(
             searchSort: Sort,
-            indexSort: Sort
+            indexSort: Sort?
         ): Boolean {
             if (indexSort != null) {
                 val fields1: Array<SortField> = searchSort.sort
