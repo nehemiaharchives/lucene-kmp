@@ -4,15 +4,11 @@ import okio.IOException
 import org.gnit.lucenekmp.index.CorruptIndexException
 import org.gnit.lucenekmp.index.IndexFormatTooNewException
 import org.gnit.lucenekmp.index.IndexFormatTooOldException
-import org.gnit.lucenekmp.jdkport.StandardCharsets
-import org.gnit.lucenekmp.jdkport.fromByteArray
 import org.gnit.lucenekmp.jdkport.toHexString
 import org.gnit.lucenekmp.store.*
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.StringHelper
-import kotlin.experimental.and
-
 
 /**
  * Utility class for reading and writing versioned headers.
@@ -180,7 +176,7 @@ object CodecUtil {
      */
     @Throws(IOException::class)
     fun checkHeaderNoMagic(`in`: DataInput, codec: String?, minVersion: Int, maxVersion: Int): Int {
-        val actualCodec: String = `in`.readString()
+        val actualCodec: String = readSimpleAsciiString(`in`, 127, "codec", true)
         if (actualCodec != codec) {
             throw CorruptIndexException(
                 "codec mismatch: actual codec=$actualCodec vs expected codec=$codec", `in`
@@ -364,16 +360,43 @@ object CodecUtil {
     /** Expert: just reads and verifies the suffix of an index header  */
     @Throws(IOException::class)
     fun checkIndexHeaderSuffix(`in`: DataInput, expectedSuffix: String?): String {
-        val suffixLength: Int = (`in`.readByte().toInt() and 0xFF)
-        val suffixBytes = ByteArray(suffixLength)
-        `in`.readBytes(suffixBytes, 0, suffixBytes.size)
-        val suffix: String = String.fromByteArray(suffixBytes, StandardCharsets.UTF_8)
+        val suffix: String = readSimpleAsciiString(`in`, 255, "suffix", false)
         if (suffix != expectedSuffix) {
             throw CorruptIndexException(
                 "file mismatch, expected suffix=$expectedSuffix, got=$suffix", `in`
             )
         }
         return suffix
+    }
+
+    @Throws(IOException::class)
+    private fun readSimpleAsciiString(
+        `in`: DataInput,
+        maxLength: Int,
+        label: String,
+        lengthAsVInt: Boolean
+    ): String {
+        val length = if (lengthAsVInt) `in`.readVInt() else (`in`.readByte().toInt() and 0xFF)
+        if (length > maxLength) {
+            throw CorruptIndexException(
+                "$label length=$length is invalid for an index header; max=$maxLength",
+                `in`
+            )
+        }
+        val bytes = ByteArray(length)
+        `in`.readBytes(bytes, 0, length)
+        val chars = CharArray(length)
+        for (i in 0..<length) {
+            val value = bytes[i].toInt() and 0xFF
+            if (value >= 0x80) {
+                throw CorruptIndexException(
+                    "$label contains non-ASCII byte 0x${value.toHexString()} in index header",
+                    `in`
+                )
+            }
+            chars[i] = value.toChar()
+        }
+        return chars.concatToString()
     }
 
     /**

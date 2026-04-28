@@ -54,7 +54,6 @@ import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.jdkport.intBitsToFloat
 import org.gnit.lucenekmp.jdkport.longBitsToDouble
 import org.gnit.lucenekmp.jdkport.toHexString
-import kotlin.experimental.and
 import kotlin.math.min
 
 /**
@@ -65,9 +64,9 @@ import kotlin.math.min
 class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
     val version: Int
     private val fieldInfos: FieldInfos?
-    private val indexReader: FieldsIndex
+    private lateinit var indexReader: FieldsIndex
     val maxPointer: Long
-    private val fieldsStream: IndexInput
+    private lateinit var fieldsStream: IndexInput
     val chunkSize: Int
     private val compressionMode: CompressionMode
     private val decompressor: Decompressor
@@ -124,17 +123,19 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
 
         val fieldsStreamFN: String =
             IndexFileNames.segmentFileName(segment, segmentSuffix, FIELDS_EXTENSION)
+        var fieldsStreamLocal: IndexInput? = null
+        var indexReaderLocal: FieldsIndex? = null
         var metaIn: ChecksumIndexInput? = null
         try {
             // Open the data file
-            fieldsStream = d.openInput(fieldsStreamFN, context.withReadAdvice(ReadAdvice.RANDOM))
+            fieldsStreamLocal = d.openInput(fieldsStreamFN, context.withReadAdvice(ReadAdvice.RANDOM))
             version =
                 CodecUtil.checkIndexHeader(
-                    fieldsStream, formatName, VERSION_START, VERSION_CURRENT, si.getId(), segmentSuffix
+                    fieldsStreamLocal, formatName, VERSION_START, VERSION_CURRENT, si.getId(), segmentSuffix
                 )
             require(
                 CodecUtil.indexHeaderLength(formatName, segmentSuffix).toLong()
-                        == fieldsStream.filePointer
+                        == fieldsStreamLocal.filePointer
             )
 
             val metaStreamFN: String =
@@ -160,10 +161,9 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
             // but for now we at least verify proper structure of the checksum footer: which looks
             // for FOOTER_MAGIC + algorithmID. This is cheap and can detect some forms of corruption
             // such as file truncation.
-            CodecUtil.retrieveChecksum(fieldsStream)
+            CodecUtil.retrieveChecksum(fieldsStreamLocal)
 
             var maxPointer: Long = -1
-            var indexReader: FieldsIndex? = null
 
             val fieldsIndexReader =
                 FieldsIndexReader(
@@ -176,11 +176,12 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
                     metaIn,
                     context
                 )
-            indexReader = fieldsIndexReader
+            indexReaderLocal = fieldsIndexReader
             maxPointer = fieldsIndexReader.maxPointer
 
             this.maxPointer = maxPointer
-            this.indexReader = indexReader
+            this.indexReader = indexReaderLocal
+            this.fieldsStream = fieldsStreamLocal
 
             numChunks = metaIn.readVLong()
             numDirtyChunks = metaIn.readVLong()
@@ -227,7 +228,28 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
             }
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(this, metaIn)
+                var priorThrowable: Throwable? = null
+                if (indexReaderLocal != null) {
+                    try {
+                        indexReaderLocal.close()
+                    } catch (t: Throwable) {
+                        priorThrowable = t
+                    }
+                }
+                if (fieldsStreamLocal != null) {
+                    try {
+                        fieldsStreamLocal.close()
+                    } catch (t: Throwable) {
+                        priorThrowable = IOUtils.useOrSuppress(priorThrowable, t)
+                    }
+                }
+                if (metaIn != null) {
+                    try {
+                        metaIn.close()
+                    } catch (t: Throwable) {
+                        priorThrowable = IOUtils.useOrSuppress(priorThrowable, t)
+                    }
+                }
             }
         }
     }
@@ -246,7 +268,13 @@ class Lucene90CompressingStoredFieldsReader : StoredFieldsReader {
     @Throws(IOException::class)
     override fun close() {
         if (!closed) {
-            IOUtils.close(indexReader, fieldsStream)
+            if (this::indexReader.isInitialized && this::fieldsStream.isInitialized) {
+                IOUtils.close(indexReader, fieldsStream)
+            } else if (this::fieldsStream.isInitialized) {
+                IOUtils.close(fieldsStream)
+            } else if (this::indexReader.isInitialized) {
+                IOUtils.close(indexReader)
+            }
             closed = true
         }
     }

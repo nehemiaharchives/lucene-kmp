@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -102,7 +101,6 @@ class CheckIndex(
     dir: Directory,
     writeLock: Lock = dir.obtainLock(IndexWriter.WRITE_LOCK_NAME)
 ) : AutoCloseable {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
     private val dir: Directory
     private val writeLock: Lock
     private var infoStream: PrintStream?
@@ -914,10 +912,8 @@ class CheckIndex(
         var toLoseDocCount: Int = info.info.maxDoc()
 
         var reader: SegmentReader? = null
-        var phase = "init"
 
         try {
-            phase = "segmentMetadata"
             msg(infoStream, "    version=" + (version ?: "3.0"))
             msg(infoStream, "    id=" + StringHelper.idToString(info.info.getId()))
             val codec: Codec = info.info.codec
@@ -954,7 +950,6 @@ class CheckIndex(
                 segInfoStat.deletionsGen = info.delGen
             }
 
-            phase = "openReader"
             val startOpenReaderNS: Long = System.nanoTime()
             if (infoStream != null) infoStream.print("    test: open reader.........")
             reader = SegmentReader(
@@ -969,7 +964,6 @@ class CheckIndex(
 
             segInfoStat.openReaderPassed = true
 
-            phase = "checkIntegrity"
             val startIntegrityNS: Long = System.nanoTime()
             debugStartedIntegrityChecksCounter.incrementAndFetch()
             debugActiveIntegrityChecksCounter.incrementAndFetch()
@@ -1035,7 +1029,6 @@ class CheckIndex(
                 }
             }
             if (level >= Level.MIN_LEVEL_FOR_INTEGRITY_CHECKS) {
-                phase = "deepChecks"
                 // Test Livedocs
                 segInfoStat.liveDocStatus = testLiveDocs(reader, infoStream, failFast)
 
@@ -1130,12 +1123,8 @@ class CheckIndex(
                 }
             }
 
-            phase = "done"
             msg(infoStream, "")
         } catch (t: Throwable) {
-            logger.error(t) {
-                "CheckIndex.testSegment failed segment=${info.info.name} phase=$phase failFast=$failFast toLoseDocCount=$toLoseDocCount"
-            }
             if (failFast) {
                 throw IOUtils.rethrowAlways(t)
             }
@@ -1621,7 +1610,6 @@ class CheckIndex(
     }
 
     companion object {
-        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
         @OptIn(ExperimentalAtomicApi::class)
         private val debugActiveIntegrityChecksCounter: AtomicInteger = AtomicInteger(0)
         @OptIn(ExperimentalAtomicApi::class)

@@ -121,19 +121,22 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
         fieldInfos = fn
         numDocs = si.maxDoc()
 
+        var vectorsStreamLocal: IndexInput? = null
+        var indexReaderLocal: FieldsIndex? = null
         var metaIn: ChecksumIndexInput? = null
         try {
             // Open the data file
             val vectorsStreamFN: String =
                 IndexFileNames.segmentFileName(segment, segmentSuffix, VECTORS_EXTENSION)
-            vectorsStream = d.openInput(vectorsStreamFN, context.withReadAdvice(ReadAdvice.RANDOM))
+            vectorsStreamLocal = d.openInput(vectorsStreamFN, context.withReadAdvice(ReadAdvice.RANDOM))
+            this.vectorsStream = vectorsStreamLocal
             version =
                 CodecUtil.checkIndexHeader(
-                    vectorsStream, formatName, VERSION_START, VERSION_CURRENT, si.getId(), segmentSuffix
+                    vectorsStreamLocal, formatName, VERSION_START, VERSION_CURRENT, si.getId(), segmentSuffix
                 )
             require(
                 CodecUtil.indexHeaderLength(formatName, segmentSuffix).toLong()
-                        == vectorsStream.filePointer
+                        == vectorsStreamLocal.filePointer
             )
 
             val metaStreamFN: String =
@@ -155,7 +158,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             // but for now we at least verify proper structure of the checksum footer: which looks
             // for FOOTER_MAGIC + algorithmID. This is cheap and can detect some forms of corruption
             // such as file truncation.
-            CodecUtil.retrieveChecksum(vectorsStream)
+            CodecUtil.retrieveChecksum(vectorsStreamLocal)
 
             val fieldsIndexReader =
                 FieldsIndexReader(
@@ -169,6 +172,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
                     context
                 )
 
+            indexReaderLocal = fieldsIndexReader
             this.indexReader = fieldsIndexReader
             this.maxPointer = fieldsIndexReader.maxPointer
 
@@ -206,7 +210,7 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
 
             decompressor = compressionMode.newDecompressor()
             this.reader =
-                BlockPackedReaderIterator(vectorsStream, packedIntsVersion, PACKED_BLOCK_SIZE, 0)
+                BlockPackedReaderIterator(vectorsStreamLocal, packedIntsVersion, PACKED_BLOCK_SIZE, 0)
 
             CodecUtil.checkFooter(metaIn, null)
             metaIn.close()
@@ -217,6 +221,9 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             success = true
         } catch (t: Throwable) {
             if (metaIn != null) {
+                if (t is CorruptIndexException && t.originalMessage.startsWith("file mismatch")) {
+                    throw t
+                }
                 CodecUtil.checkFooter(metaIn, t)
                 throw AssertionError("unreachable")
             } else {
@@ -224,7 +231,28 @@ class Lucene90CompressingTermVectorsReader : TermVectorsReader {
             }
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(this, metaIn)
+                var priorThrowable: Throwable? = null
+                if (indexReaderLocal != null) {
+                    try {
+                        indexReaderLocal.close()
+                    } catch (t: Throwable) {
+                        priorThrowable = t
+                    }
+                }
+                if (vectorsStreamLocal != null) {
+                    try {
+                        vectorsStreamLocal.close()
+                    } catch (t: Throwable) {
+                        priorThrowable = IOUtils.useOrSuppress(priorThrowable, t)
+                    }
+                }
+                if (metaIn != null) {
+                    try {
+                        metaIn.close()
+                    } catch (t: Throwable) {
+                        priorThrowable = IOUtils.useOrSuppress(priorThrowable, t)
+                    }
+                }
             }
         }
     }

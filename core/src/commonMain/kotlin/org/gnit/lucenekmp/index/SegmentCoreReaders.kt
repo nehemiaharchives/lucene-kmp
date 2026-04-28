@@ -121,68 +121,81 @@ class SegmentCoreReaders(
         val cfsDir: Directory
         // confusing name: if (cfs) it's the cfsdir, otherwise it's the segment's directory.
         var success = false
+        var cfsReaderLocal: CompoundDirectory? = null
+        var fieldsLocal: FieldsProducer? = null
+        var normsProducerLocal: NormsProducer? = null
+        var fieldsReaderOrigLocal: StoredFieldsReader? = null
+        var termVectorsReaderOrigLocal: TermVectorsReader? = null
+        var pointsReaderLocal: PointsReader? = null
+        var knnVectorsReaderLocal: KnnVectorsReader? = null
+        var segmentLocal: String? = null
+        var coreFieldInfosLocal: FieldInfos? = null
 
         try {
             if (si.info.useCompoundFile) {
-                cfsReader = codec.compoundFormat().getCompoundReader(dir, si.info)
-                cfsDir = cfsReader
+                cfsReaderLocal = codec.compoundFormat().getCompoundReader(dir, si.info)
+                cfsDir = cfsReaderLocal
             } else {
-                cfsReader = null
                 cfsDir = dir
             }
 
-            segment = si.info.name
+            segmentLocal = si.info.name
 
-            coreFieldInfos = codec.fieldInfosFormat().read(cfsDir, si.info, "", context)
+            coreFieldInfosLocal = codec.fieldInfosFormat().read(cfsDir, si.info, "", context)
 
             val segmentReadState =
-                SegmentReadState(cfsDir, si.info, coreFieldInfos, context)
-            if (coreFieldInfos.hasPostings()) {
+                SegmentReadState(cfsDir, si.info, coreFieldInfosLocal, context)
+            if (coreFieldInfosLocal.hasPostings()) {
                 val format: PostingsFormat = codec.postingsFormat()
                 // Ask codec for its Fields
-                fields = format.fieldsProducer(segmentReadState)
-                checkNotNull(fields)
-            } else {
-                fields = null
+                fieldsLocal = format.fieldsProducer(segmentReadState)
+                checkNotNull(fieldsLocal)
             }
 
             // ask codec for its Norms:
             // TODO: since we don't write any norms file if there are no norms,
             // kinda jaky to assume the codec handles the case of no norms file at all gracefully!
-            if (coreFieldInfos.hasNorms()) {
-                normsProducer = codec.normsFormat().normsProducer(segmentReadState)
-                checkNotNull(normsProducer)
-            } else {
-                normsProducer = null
+            if (coreFieldInfosLocal.hasNorms()) {
+                normsProducerLocal = codec.normsFormat().normsProducer(segmentReadState)
+                checkNotNull(normsProducerLocal)
             }
 
-            fieldsReaderOrig =
+            fieldsReaderOrigLocal =
                 si.info
                     .codec
                     .storedFieldsFormat()
-                    .fieldsReader(cfsDir, si.info, coreFieldInfos, context)
+                    .fieldsReader(cfsDir, si.info, coreFieldInfosLocal, context)
 
-            termVectorsReaderOrig = if (coreFieldInfos.hasTermVectors()) { // open term vector files only as needed
+            termVectorsReaderOrigLocal = if (coreFieldInfosLocal.hasTermVectors()) { // open term vector files only as needed
                 si.info
                     .codec
                     .termVectorsFormat()
-                    .vectorsReader(cfsDir, si.info, coreFieldInfos, context)
+                    .vectorsReader(cfsDir, si.info, coreFieldInfosLocal, context)
             } else {
                 null
             }
 
-            pointsReader = if (coreFieldInfos.hasPointValues()) {
+            pointsReaderLocal = if (coreFieldInfosLocal.hasPointValues()) {
                 codec.pointsFormat().fieldsReader(segmentReadState)
             } else {
                 null
             }
 
-            knnVectorsReader = if (coreFieldInfos.hasVectorValues()) {
+            knnVectorsReaderLocal = if (coreFieldInfosLocal.hasVectorValues()) {
                 codec.knnVectorsFormat().fieldsReader(segmentReadState)
             } else {
                 null
             }
 
+            cfsReader = cfsReaderLocal
+            segment = segmentLocal
+            coreFieldInfos = coreFieldInfosLocal
+            fields = fieldsLocal
+            normsProducer = normsProducerLocal
+            fieldsReaderOrig = fieldsReaderOrigLocal
+            termVectorsReaderOrig = termVectorsReaderOrigLocal
+            pointsReader = pointsReaderLocal
+            knnVectorsReader = knnVectorsReaderLocal
             success = true
         } catch (e: EOFException) {
             throw CorruptIndexException("Problem reading index from $dir", dir.toString(), e)
@@ -192,7 +205,15 @@ class SegmentCoreReaders(
             throw CorruptIndexException("Problem reading index.", e.file, e)
         } finally {
             if (!success) {
-                decRef()
+                IOUtils.closeWhileHandlingException(
+                    fieldsLocal,
+                    termVectorsReaderOrigLocal,
+                    fieldsReaderOrigLocal,
+                    cfsReaderLocal,
+                    normsProducerLocal,
+                    pointsReaderLocal,
+                    knnVectorsReaderLocal,
+                )
             }
         }
     }

@@ -16,8 +16,8 @@ import org.gnit.lucenekmp.util.bkd.BKDReader
 
 /** Reads point values previously written with [Lucene90PointsWriter]  */
 class Lucene90PointsReader(private val readState: SegmentReadState) : PointsReader() {
-    private var indexIn: IndexInput
-    private var dataIn: IndexInput
+    private lateinit var indexIn: IndexInput
+    private lateinit var dataIn: IndexInput
     private val readers: IntObjectHashMap<PointValues> = IntObjectHashMap()
 
     /** Sole constructor  */
@@ -43,35 +43,37 @@ class Lucene90PointsReader(private val readState: SegmentReadState) : PointsRead
             )
 
         var success = false
+        var indexInLocal: IndexInput? = null
+        var dataInLocal: IndexInput? = null
         try {
-            indexIn =
+            indexInLocal =
                 readState.directory.openInput(
                     indexFileName, readState.context.withReadAdvice(ReadAdvice.RANDOM_PRELOAD)
                 )
             CodecUtil.checkIndexHeader(
-                indexIn,
+                indexInLocal,
                 Lucene90PointsFormat.INDEX_CODEC_NAME,
                 Lucene90PointsFormat.VERSION_START,
                 Lucene90PointsFormat.VERSION_CURRENT,
                 readState.segmentInfo.getId(),
                 readState.segmentSuffix
             )
-            CodecUtil.retrieveChecksum(indexIn)
+            CodecUtil.retrieveChecksum(indexInLocal)
 
             // Points read whole ranges of bytes at once, so pass ReadAdvice.NORMAL to perform readahead.
-            dataIn =
+            dataInLocal =
                 readState.directory.openInput(
                     dataFileName, readState.context.withReadAdvice(ReadAdvice.NORMAL)
                 )
             CodecUtil.checkIndexHeader(
-                dataIn,
+                dataInLocal,
                 Lucene90PointsFormat.DATA_CODEC_NAME,
                 Lucene90PointsFormat.VERSION_START,
                 Lucene90PointsFormat.VERSION_CURRENT,
                 readState.segmentInfo.getId(),
                 readState.segmentSuffix
             )
-            CodecUtil.retrieveChecksum(dataIn)
+            CodecUtil.retrieveChecksum(dataInLocal)
 
             var indexLength: Long = -1
             var dataLength: Long = -1
@@ -94,7 +96,7 @@ class Lucene90PointsReader(private val readState: SegmentReadState) : PointsRead
                         } else if (fieldNumber < 0) {
                             throw CorruptIndexException("Illegal field number: $fieldNumber", metaIn)
                         }
-                        val reader: PointValues = BKDReader(metaIn, indexIn, dataIn)
+                        val reader: PointValues = BKDReader(metaIn, indexInLocal, dataInLocal)
                         readers.put(fieldNumber, reader)
                     }
                     indexLength = metaIn.readLong()
@@ -107,12 +109,17 @@ class Lucene90PointsReader(private val readState: SegmentReadState) : PointsRead
             }
             // At this point, checksums of the meta file have been validated so we
             // know that indexLength and dataLength are very likely correct.
-            CodecUtil.retrieveChecksum(indexIn, indexLength)
-            CodecUtil.retrieveChecksum(dataIn, dataLength)
+            CodecUtil.retrieveChecksum(indexInLocal, indexLength)
+            CodecUtil.retrieveChecksum(dataInLocal, dataLength)
+            indexIn = indexInLocal
+            dataIn = dataInLocal
+            indexInLocal = null
+            dataInLocal = null
             success = true
         } finally {
             if (!success) {
-                IOUtils.closeWhileHandlingException(this)
+                readers.clear()
+                IOUtils.closeWhileHandlingException(indexInLocal, dataInLocal)
             }
         }
     }

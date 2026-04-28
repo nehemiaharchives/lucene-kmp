@@ -1,13 +1,10 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import kotlin.concurrent.Volatile
 
 
 class StreamDecoder : Reader {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
-
     @Volatile
     private var closed = false
 
@@ -169,7 +166,6 @@ class StreamDecoder : Reader {
             limit(0)
         }
 
-        logger.debug { "ByteBuffer created: capacity=${bb.capacity}, position=${bb.position}, limit=${bb.limit}" }
         // Don't flip the buffer initially, so it can be filled with bytes
     }
 

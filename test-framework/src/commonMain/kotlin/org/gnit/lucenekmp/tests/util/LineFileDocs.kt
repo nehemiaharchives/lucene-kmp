@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.tests.util
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Job
 import okio.FileSystem
 import okio.BufferedSource
@@ -32,7 +31,6 @@ import org.gnit.lucenekmp.jdkport.OkioSourceInputStream
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.set
-import org.gnit.lucenekmp.jdkport.toRealPath
 import org.gnit.lucenekmp.util.CloseableThreadLocal
 import org.gnit.lucenekmp.util.IOUtils
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -48,8 +46,6 @@ class LineFileDocs(
     random: Random,
     private val path: String = LuceneTestCase.TEST_LINE_DOCS_FILE
 ) : AutoCloseable {
-
-    private val logger = KotlinLogging.logger{}
 
     private var reader: BufferedReader? = null
     private val id: AtomicInteger = AtomicInteger(0)
@@ -97,13 +93,10 @@ class LineFileDocs(
                 if(path == "europarl.lines.txt.gz"){
                     val simplePath =
                         "../test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
-                    logger.debug { "LineFileDocs.open() path: $simplePath" }
                     file = simplePath.toPath()
                 }else{
                     file = path.toPath()
                 }
-
-                logger.debug { "LineFileDocs.open() file: $file" }
 
                 val metadata =
                     try {
@@ -116,7 +109,6 @@ class LineFileDocs(
                         }
                     }
                 if (metadata == null && path == LuceneTestCase.TEST_LINE_DOCS_FILE) {
-                    logger.debug { "LineFileDocs.open() using synthetic fallback data for $path" }
                     `is` = syntheticLineDocsInputStream()
                     size = SYNTHETIC_LINE_DOCS_SIZE.toLong()
                 } else {

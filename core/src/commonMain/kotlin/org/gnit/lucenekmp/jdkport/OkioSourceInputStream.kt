@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.Buffer
 import okio.BufferedSource
 import okio.EOFException
@@ -10,8 +9,6 @@ import okio.IOException
  * A InputStream implementation which use okio.Source
  */
 class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
-
-    val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     /**
      * Reads the next byte of data from the input stream. The value byte is
@@ -54,14 +51,10 @@ class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
      */
     override fun read(b: ByteArray, off: Int, len: Int): Int {
         if (len == 0) return 0
-        logger.debug { "KIOSourceInputStream.read(byte[], $off, $len) called" }
 
         val bytesRead = try {
-            val result = source.read(b, off, len)
-            logger.debug { "source.read returned $result" }
-            result
+            source.read(b, off, len)
         } catch (e: EOFException) {
-            logger.debug { "EOFException caught in read ${e.message}" }
             -1
         }
 
@@ -69,20 +62,6 @@ class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
         // Fall back to a single-byte read, which correctly blocks until a true EOF.
 
         if (bytesRead != -1) {
-            if (bytesRead > 0) {
-                logger.debug { "KIOSourceInputStream.read() filled bytes: " +
-                        b.slice(off until off + bytesRead)
-                            .joinToString(", ") { it.toUByte().toString() }
-                }
-
-                // Print byte values as integers for clarity
-                logger.debug { "Byte values as integers: " +
-                        b.slice(off until off + bytesRead)
-                            .joinToString(", ") { it.toInt().toString() }
-                }
-            }else{
-                logger.debug { "KIOSourceInputStream.read() returned $bytesRead (no bytes read)" }
-            }
             return bytesRead
         }
 
@@ -91,12 +70,9 @@ class OkioSourceInputStream(val source: BufferedSource) : InputStream() {
         // To distinguish a real EOF from a temporary lack of data, we check if the
         // source is truly exhausted. Note that `exhausted()` may block and try to
         // read from the underlying source, which is the desired behavior here.
-        logger.debug { "source.read returned -1, checking if source is truly exhausted." }
         return if (source.exhausted()) {
-            logger.debug { "Source is exhausted. Returning -1 for EOF." }
             -1 // Real EOF
         } else {
-            logger.debug { "Source is not exhausted. Returning 0 as no bytes are currently available." }
             0 // Not a real EOF. No data available right now.
         }
     }
