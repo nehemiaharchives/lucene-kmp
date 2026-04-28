@@ -748,7 +748,7 @@ class SortingCodecReader private constructor(
             reader: CodecReader,
             sort: Sort
         ): CodecReader {
-            return wrap(reader, Sorter(sort).sort(reader)!!, sort)
+            return wrap(reader, Sorter(sort).sort(reader), sort)
         }
 
         /**
