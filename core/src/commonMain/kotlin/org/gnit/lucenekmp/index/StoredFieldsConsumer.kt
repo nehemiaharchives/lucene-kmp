@@ -34,7 +34,7 @@ open class StoredFieldsConsumer(
     }
 
     @Throws(IOException::class)
-    fun startDocument(docID: Int) {
+    open fun startDocument(docID: Int) {
         assert(lastDoc < docID)
         initStoredFieldsWriter()
         while (++lastDoc < docID) {
@@ -59,7 +59,7 @@ open class StoredFieldsConsumer(
     }
 
     @Throws(IOException::class)
-    fun finishDocument() {
+    open fun finishDocument() {
         writer!!.finishDocument()
     }
 
