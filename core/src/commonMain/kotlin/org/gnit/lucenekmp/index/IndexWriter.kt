@@ -5010,7 +5010,7 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     }
 
     /** Hook that's called when the specified merge is complete.  */
-    protected fun mergeSuccess(merge: MergePolicy.OneMerge) {}
+    protected open fun mergeSuccess(merge: MergePolicy.OneMerge) {}
 
     @Throws(IOException::class)
     private fun abortOneMerge(merge: MergePolicy.OneMerge) {
