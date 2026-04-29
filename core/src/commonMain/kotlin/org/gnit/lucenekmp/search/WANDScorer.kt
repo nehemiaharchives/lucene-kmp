@@ -50,7 +50,21 @@ internal class WANDScorer(
     private val scalingFactor: Int
 
     // scaled min competitive score
+    private var scaledMinCompetitiveScore: Float = 0f
+
     override var minCompetitiveScore: Float
+        get() = scaledMinCompetitiveScore
+        set(minScore) {
+            // Let this disjunction know about the new min score so that it can skip
+            // over clauses that produce low scores.
+            require(
+                scoreMode === ScoreMode.TOP_SCORES
+            ) { "minCompetitiveScore can only be set for ScoreMode.TOP_SCORES, but got: $scoreMode" }
+            require(minScore >= 0)
+            val scaledMinScore = scaleMinScore(minScore, scalingFactor)
+            require(scaledMinScore >= scaledMinCompetitiveScore)
+            scaledMinCompetitiveScore = scaledMinScore.toFloat()
+        }
 
     private val allScorers: Array<Scorer>
 
@@ -85,7 +99,7 @@ internal class WANDScorer(
         require(minShouldMatch < scorers.size) { "minShouldMatch should be < the number of scorers" }
 
         allScorers = scorers.toTypedArray()
-        this.minCompetitiveScore = 0f
+        this.scaledMinCompetitiveScore = 0f
 
         require(minShouldMatch >= 0) { "minShouldMatch should not be negative, but got $minShouldMatch" }
         this.minShouldMatch = minShouldMatch
@@ -184,15 +198,7 @@ internal class WANDScorer(
     @JvmName("setMinCompetitiveScoreKt")
     @Throws(IOException::class)
     fun setMinCompetitiveScore(minScore: Float) {
-        // Let this disjunction know about the new min score so that it can skip
-        // over clauses that produce low scores.
-        require(
-            scoreMode === ScoreMode.TOP_SCORES
-        ) { "minCompetitiveScore can only be set for ScoreMode.TOP_SCORES, but got: $scoreMode" }
-        require(minScore >= 0)
-        val scaledMinScore = scaleMinScore(minScore, scalingFactor)
-        require(scaledMinScore >= minCompetitiveScore)
-        minCompetitiveScore = scaledMinScore.toFloat()
+        this.minCompetitiveScore = minScore
     }
 
     override val children: MutableCollection<ChildScorable>

@@ -40,11 +40,17 @@ internal class ReqExclScorer(private val reqScorer: Scorer, exclScorer: Scorer) 
         return reqScorer.getMaxScore(upTo)
     }
 
+    override var minCompetitiveScore: Float
+        get() = reqScorer.minCompetitiveScore
+        set(score) {
+            // The score of this scorer is the same as the score of 'reqScorer'.
+            reqScorer.minCompetitiveScore = score
+        }
+
     @JvmName("setMinCompetitiveScoreKt")
     @Throws(IOException::class)
     fun setMinCompetitiveScore(score: Float) {
-        // The score of this scorer is the same as the score of 'reqScorer'.
-        reqScorer.minCompetitiveScore = score
+        this.minCompetitiveScore = score
     }
 
     override val children: MutableCollection<ChildScorable>
