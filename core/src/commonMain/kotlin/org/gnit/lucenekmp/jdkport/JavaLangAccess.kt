@@ -5,6 +5,8 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
 
 object JavaLangAccess {
+    private val lock = ReentrantLock()
+
     /**
      * Decodes ASCII from the source byte array into the destination
      * char array.
@@ -64,18 +66,20 @@ object JavaLangAccess {
     var headStackableScope: StackableScope?
         get() {
             val job = runBlocking { currentCoroutineContext()[Job] }
-            return if (job != null) stackHeads[job] else null
+            return if (job != null) lock.withLock { stackHeads[job] } else null
         }
         set(value) {
             val job = runBlocking { currentCoroutineContext()[Job] }
             if (job != null) {
-                if (value == null) stackHeads.remove(job) else stackHeads[job] = value
+                lock.withLock {
+                    if (value == null) stackHeads.remove(job) else stackHeads[job] = value
+                }
             }
         }
 
     fun headStackableScope(job: Job?): StackableScope? {
-    if (job == null) return null
-    return stackHeads[job]
+        if (job == null) return null
+        return lock.withLock { stackHeads[job] }
     }
 
     /**
@@ -84,32 +88,38 @@ object JavaLangAccess {
     private val threadContainerMap: MutableMap<Job, ThreadContainer> = mutableMapOf()
 
     fun threadContainer(thread: Job): ThreadContainer? {
-    return threadContainerMap[thread]
+        return lock.withLock { threadContainerMap[thread] }
     }
 
     /**
      * Starts a thread in the given ThreadContainer.
      */
     fun start(thread: Job, container: ThreadContainer){
-    // Record the container for this thread and register it for discovery.
-    threadContainerMap[thread] = container
-    registerJob(thread)
-    // Notify the container that the thread is starting.
-    container.onStart(thread)
+        // Record the container for this thread and register it for discovery.
+        lock.withLock {
+            threadContainerMap[thread] = container
+            jobRegistry.add(thread)
+        }
+        // Notify the container that the thread is starting.
+        container.onStart(thread)
     }
 
     private val jobRegistry: MutableSet<Job> = mutableSetOf()
 
     fun registerJob(job: Job) {
-        jobRegistry.add(job)
+        lock.withLock { jobRegistry.add(job) }
     }
 
     fun unregisterJob(job: Job) {
-        jobRegistry.remove(job)
+        lock.withLock {
+            jobRegistry.remove(job)
+            threadContainerMap.remove(job)
+            stackHeads.remove(job)
+        }
     }
 
     val allThreads: Array<Job>
-        get() = jobRegistry.filter { it.isActive }.toTypedArray()
+        get() = lock.withLock { jobRegistry.filter { it.isActive }.toTypedArray() }
 
 
 }

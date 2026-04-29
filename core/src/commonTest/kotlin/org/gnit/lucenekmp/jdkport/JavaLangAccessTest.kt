@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
+import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.Job
 import kotlin.test.*
 
 class JavaLangAccessTest {
@@ -97,5 +99,70 @@ class JavaLangAccessTest {
         val dst = CharArray(2)
         JavaLangAccess.inflateBytesToChars(src, 1, dst, 0, 2)
         assertContentEquals(charArrayOf('A', 'B'), dst)
+    }
+
+    @Test
+    fun testConcurrentStartTracksAllJobs() {
+        val workerCount = 8
+        val jobsPerWorker = 250
+        val rounds = 5
+
+        repeat(rounds) { round ->
+            val container = SharedThreadContainer.create("java-lang-access-test-$round")
+            val jobs: Array<Array<CompletableJob>> =
+                Array(workerCount) {
+                    Array(jobsPerWorker) { Job() }
+                }
+            val registeredJobs = mutableListOf<CompletableJob>()
+            for (workerJobs in jobs) {
+                registeredJobs.addAll(workerJobs)
+            }
+            val ready = CountDownLatch(workerCount)
+            val start = CountDownLatch(1)
+            val done = CountDownLatch(workerCount)
+            val failures = arrayOfNulls<Throwable>(workerCount)
+            val workers =
+                Array(workerCount) { workerIndex ->
+                    Thread {
+                        ready.countDown()
+                        start.await()
+                        try {
+                            for (job in jobs[workerIndex]) {
+                                JavaLangAccess.start(job, container)
+                            }
+                        } catch (t: Throwable) {
+                            failures[workerIndex] = t
+                        } finally {
+                            done.countDown()
+                        }
+                    }
+                }
+
+            try {
+                workers.forEach { it.start() }
+                ready.await()
+                start.countDown()
+                done.await()
+                workers.forEach { it.join() }
+
+                failures.forEachIndexed { index, failure ->
+                    if (failure != null) {
+                        throw AssertionError("worker $index failed during concurrent registration", failure)
+                    }
+                }
+
+                val registeredThreads = JavaLangAccess.allThreads.toSet()
+                assertEquals(registeredJobs.size, registeredJobs.count { it in registeredThreads })
+                registeredJobs.forEach { job ->
+                    assertSame(container, JavaLangAccess.threadContainer(job))
+                }
+            } finally {
+                registeredJobs.forEach { job ->
+                    JavaLangAccess.unregisterJob(job)
+                    job.cancel()
+                }
+                container.close()
+            }
+        }
     }
 }
