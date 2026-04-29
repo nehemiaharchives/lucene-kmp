@@ -455,7 +455,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.CorePlusQueriesParser → org.gnit.lucenekmp.queryparser.xml.CorePlusQueriesParser
 - org.apache.lucene.queryparser.xml.ParserException → org.gnit.lucenekmp.queryparser.xml.ParserException
 - org.apache.lucene.search.JustCompileSearch → org.gnit.lucenekmp.search.JustCompileSearch
-- org.apache.lucene.search.TestXYPointDistanceSort → org.gnit.lucenekmp.search.TestXYPointDistanceSort
 - org.apache.lucene.store.LockStressTest → org.gnit.lucenekmp.store.LockStressTest
 - org.apache.lucene.tests.analysis.MockRandomLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.MockRandomLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.SimplePayloadFilter → org.gnit.lucenekmp.tests.analysis.SimplePayloadFilter
@@ -526,7 +525,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.codecs.uniformsplit.TestUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.TestUniformSplitPostingFormat
 - org.apache.lucene.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat → org.gnit.lucenekmp.codecs.uniformsplit.sharedterms.TestSTUniformSplitPostingFormat
 - org.apache.lucene.document.TestDocument → org.gnit.lucenekmp.document.TestDocument
-- org.apache.lucene.index.Test4GBStoredFields → org.gnit.lucenekmp.index.Test4GBStoredFields
 - org.apache.lucene.index.TestTerm → org.gnit.lucenekmp.index.TestTerm
 - org.apache.lucene.queries.TestCommonTermsQuery → org.gnit.lucenekmp.queries.TestCommonTermsQuery
 - org.apache.lucene.queries.function.FunctionTestSetup → org.gnit.lucenekmp.queries.function.FunctionTestSetup
@@ -620,10 +618,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.xml.TestCorePlusExtensionsParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusExtensionsParser
 - org.apache.lucene.queryparser.xml.TestCorePlusQueriesParser → org.gnit.lucenekmp.queryparser.xml.TestCorePlusQueriesParser
 - org.apache.lucene.search.IntArrayDocIdSet → org.gnit.lucenekmp.search.IntArrayDocIdSet
-- org.apache.lucene.search.TestIndexSearcher → org.gnit.lucenekmp.search.TestIndexSearcher
-- org.apache.lucene.search.TestWANDScorer → org.gnit.lucenekmp.search.TestWANDScorer
-- org.apache.lucene.search.TestWildcardQuery → org.gnit.lucenekmp.search.TestWildcardQuery
-- org.apache.lucene.search.TestWildcardRandom → org.gnit.lucenekmp.search.TestWildcardRandom
 - org.apache.lucene.tests.analysis.TestLookaheadTokenFilter → org.gnit.lucenekmp.tests.analysis.TestLookaheadTokenFilter
 - org.apache.lucene.tests.analysis.TestMockAnalyzer → org.gnit.lucenekmp.tests.analysis.TestMockAnalyzer
 - org.apache.lucene.tests.analysis.TestMockCharFilter → org.gnit.lucenekmp.tests.analysis.TestMockCharFilter
