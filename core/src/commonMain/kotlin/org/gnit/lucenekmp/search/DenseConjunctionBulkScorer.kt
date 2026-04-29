@@ -73,7 +73,7 @@ internal class DenseConjunctionBulkScorer(iterators: MutableList<DocIdSetIterato
             }
 
             val windowBase = lead?.docID() ?: windowMax
-            windowMax = min(max, windowBase + WINDOW_SIZE)
+            windowMax = min(max.toLong(), windowBase.toLong() + WINDOW_SIZE).toInt()
             if (windowMax > windowBase) {
                 scoreWindowUsingBitSet(collector, acceptDocs, iterators, windowBase, windowMax)
             }
