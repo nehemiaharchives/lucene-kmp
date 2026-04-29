@@ -483,7 +483,7 @@ open class IndexSearcher(
      */
     @Throws(IOException::class)
     fun searchAfter(
-        after: ScoreDoc,
+        after: ScoreDoc?,
         query: Query,
         n: Int,
         sort: Sort
@@ -1002,7 +1002,7 @@ open class IndexSearcher(
                 maxClauseCountValue = value
             }
 
-        private var DEFAULT_QUERY_CACHE: QueryCache
+        private var DEFAULT_QUERY_CACHE: QueryCache?
 
         private var DEFAULT_CACHING_POLICY: QueryCachingPolicy =
             UsageTrackingQueryCachingPolicy()
@@ -1044,7 +1044,7 @@ open class IndexSearcher(
             return defaultSimilarity
         }
 */
-        val defaultQueryCache: QueryCache
+        val defaultQueryCache: QueryCache?
             /**
              * Expert: Get the default [QueryCache] or `null` if the cache is disabled.
              *
@@ -1057,7 +1057,7 @@ open class IndexSearcher(
          *
          * @lucene.internal
          */
-        fun setDefaultQueryCache(defaultQueryCache: QueryCache) {
+        fun setDefaultQueryCache(defaultQueryCache: QueryCache?) {
             DEFAULT_QUERY_CACHE = defaultQueryCache
         }
 
