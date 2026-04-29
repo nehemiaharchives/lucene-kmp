@@ -53,7 +53,7 @@ internal class FreqProxTermsWriterPerField(
         }
     }
 
-    override fun start(field: IndexableField, first: Boolean): Boolean {
+    override fun start(field: IndexableField?, first: Boolean): Boolean {
         super.start(field, first)
         termFreqAtt = fieldState.termFreqAttribute
         payloadAttribute = fieldState.payloadAttribute

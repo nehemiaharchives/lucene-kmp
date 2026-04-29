@@ -308,7 +308,7 @@ abstract class TermsHashPerField(
      * Start adding a new field instance; first is true if this is the first time this field name was
      * seen in the document.
      */
-    open fun start(field: IndexableField, first: Boolean): Boolean {
+    open fun start(field: IndexableField?, first: Boolean): Boolean {
         if (nextPerField != null) {
             doNextCall = nextPerField.start(field, first)
         }

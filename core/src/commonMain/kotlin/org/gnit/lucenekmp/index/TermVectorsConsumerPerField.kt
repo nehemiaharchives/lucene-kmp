@@ -108,8 +108,9 @@ class TermVectorsConsumerPerField(
         fieldInfo.setStoreTermVectors()
     }
 
-    override fun start(field: IndexableField, first: Boolean): Boolean {
+    override fun start(field: IndexableField?, first: Boolean): Boolean {
         super.start(field, first)
+        requireNotNull(field)
         termFreqAtt = fieldState.termFreqAttribute
         assert(field.fieldType().indexOptions() != IndexOptions.NONE)
 
