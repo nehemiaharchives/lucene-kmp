@@ -4,7 +4,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 
 ## Depth 6
 - org.apache.lucene.codecs.uniformsplit.IntersectBlockReader → org.gnit.lucenekmp.codecs.uniformsplit.IntersectBlockReader
-- org.apache.lucene.queries.spans.ConjunctionSpans → org.gnit.lucenekmp.queries.spans.ConjunctionSpans
 - org.apache.lucene.queryparser.surround.query.SimpleTermRewriteQuery → org.gnit.lucenekmp.queryparser.surround.query.SimpleTermRewriteQuery
 
 ## Depth 5
@@ -25,7 +24,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queries.intervals.RelativeIterator → org.gnit.lucenekmp.queries.intervals.RelativeIterator
 - org.apache.lucene.queries.intervals.RepeatingIntervalsSource → org.gnit.lucenekmp.queries.intervals.RepeatingIntervalsSource
 - org.apache.lucene.queries.payloads.PayloadMatcherFactory → org.gnit.lucenekmp.queries.payloads.PayloadMatcherFactory
-- org.apache.lucene.queries.spans.NearSpansUnordered → org.gnit.lucenekmp.queries.spans.NearSpansUnordered
 - org.apache.lucene.queryparser.flexible.core.nodes.DeletedQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.DeletedQueryNode
 - org.apache.lucene.queryparser.flexible.core.nodes.NoTokenFoundQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.NoTokenFoundQueryNode
 - org.apache.lucene.queryparser.flexible.core.nodes.RangeQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.RangeQueryNode
@@ -72,15 +70,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queries.intervals.TermIntervalsSource → org.gnit.lucenekmp.queries.intervals.TermIntervalsSource
 - org.apache.lucene.queries.intervals.UnorderedIntervalsSource → org.gnit.lucenekmp.queries.intervals.UnorderedIntervalsSource
 - org.apache.lucene.queries.payloads.PayloadMatcher → org.gnit.lucenekmp.queries.payloads.PayloadMatcher
-- org.apache.lucene.queries.spans.ContainSpans → org.gnit.lucenekmp.queries.spans.ContainSpans
-- org.apache.lucene.queries.spans.NearSpansOrdered → org.gnit.lucenekmp.queries.spans.NearSpansOrdered
-- org.apache.lucene.queries.spans.SpanContainQuery → org.gnit.lucenekmp.queries.spans.SpanContainQuery
-- org.apache.lucene.queries.spans.SpanDisiPriorityQueue → org.gnit.lucenekmp.queries.spans.SpanDisiPriorityQueue
-- org.apache.lucene.queries.spans.SpanDisiWrapper → org.gnit.lucenekmp.queries.spans.SpanDisiWrapper
-- org.apache.lucene.queries.spans.SpanDisjunctionDISIApproximation → org.gnit.lucenekmp.queries.spans.SpanDisjunctionDISIApproximation
-- org.apache.lucene.queries.spans.SpanPositionCheckQuery → org.gnit.lucenekmp.queries.spans.SpanPositionCheckQuery
-- org.apache.lucene.queries.spans.SpanPositionQueue → org.gnit.lucenekmp.queries.spans.SpanPositionQueue
-- org.apache.lucene.queries.spans.TermSpans → org.gnit.lucenekmp.queries.spans.TermSpans
 - org.apache.lucene.queryparser.flexible.core.QueryNodeError → org.gnit.lucenekmp.queryparser.flexible.core.QueryNodeError
 - org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.MatchAllDocsQueryNode
 - org.apache.lucene.queryparser.flexible.core.nodes.MatchNoDocsQueryNode → org.gnit.lucenekmp.queryparser.flexible.core.nodes.MatchNoDocsQueryNode
@@ -207,19 +196,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queries.mlt.MoreLikeThis → org.gnit.lucenekmp.queries.mlt.MoreLikeThis
 - org.apache.lucene.queries.payloads.PayloadScoreQuery → org.gnit.lucenekmp.queries.payloads.PayloadScoreQuery
 - org.apache.lucene.queries.payloads.SpanPayloadCheckQuery → org.gnit.lucenekmp.queries.payloads.SpanPayloadCheckQuery
-- org.apache.lucene.queries.spans.FilterSpans → org.gnit.lucenekmp.queries.spans.FilterSpans
-- org.apache.lucene.queries.spans.SpanContainingQuery → org.gnit.lucenekmp.queries.spans.SpanContainingQuery
-- org.apache.lucene.queries.spans.SpanMultiTermQueryWrapper → org.gnit.lucenekmp.queries.spans.SpanMultiTermQueryWrapper
-- org.apache.lucene.queries.spans.SpanNearQuery → org.gnit.lucenekmp.queries.spans.SpanNearQuery
-- org.apache.lucene.queries.spans.SpanNotQuery → org.gnit.lucenekmp.queries.spans.SpanNotQuery
-- org.apache.lucene.queries.spans.SpanOrQuery → org.gnit.lucenekmp.queries.spans.SpanOrQuery
-- org.apache.lucene.queries.spans.SpanScorer → org.gnit.lucenekmp.queries.spans.SpanScorer
-- org.apache.lucene.queries.spans.SpanTermQuery → org.gnit.lucenekmp.queries.spans.SpanTermQuery
-- org.apache.lucene.queries.spans.SpanWeight → org.gnit.lucenekmp.queries.spans.SpanWeight
-- org.apache.lucene.queries.spans.SpanWithinQuery → org.gnit.lucenekmp.queries.spans.SpanWithinQuery
-- org.apache.lucene.queryparser.classic.QueryParserConstants → org.gnit.lucenekmp.queryparser.classic.QueryParserConstants
-- org.apache.lucene.queryparser.classic.TokenMgrError → org.gnit.lucenekmp.queryparser.classic.TokenMgrError
-- org.apache.lucene.queryparser.complexPhrase.ComplexPhraseQueryParser → org.gnit.lucenekmp.queryparser.complexPhrase.ComplexPhraseQueryParser
 - org.apache.lucene.queryparser.ext.Extensions → org.gnit.lucenekmp.queryparser.ext.Extensions
 - org.apache.lucene.queryparser.flexible.core.QueryParserHelper → org.gnit.lucenekmp.queryparser.flexible.core.QueryParserHelper
 - org.apache.lucene.queryparser.flexible.core.config.AbstractQueryConfig → org.gnit.lucenekmp.queryparser.flexible.core.config.AbstractQueryConfig
@@ -396,22 +372,8 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queries.payloads.PayloadDecoder → org.gnit.lucenekmp.queries.payloads.PayloadDecoder
 - org.apache.lucene.queries.payloads.PayloadFunction → org.gnit.lucenekmp.queries.payloads.PayloadFunction
 - org.apache.lucene.queries.spans.AssertingSpans → org.gnit.lucenekmp.queries.spans.AssertingSpans
-- org.apache.lucene.queries.spans.FieldMaskingSpanQuery → org.gnit.lucenekmp.queries.spans.FieldMaskingSpanQuery
 - org.apache.lucene.queries.spans.JustCompileSearchSpans → org.gnit.lucenekmp.queries.spans.JustCompileSearchSpans
-- org.apache.lucene.queries.spans.SpanCollector → org.gnit.lucenekmp.queries.spans.SpanCollector
-- org.apache.lucene.queries.spans.SpanFirstQuery → org.gnit.lucenekmp.queries.spans.SpanFirstQuery
-- org.apache.lucene.queries.spans.SpanPositionRangeQuery → org.gnit.lucenekmp.queries.spans.SpanPositionRangeQuery
-- org.apache.lucene.queries.spans.SpanQuery → org.gnit.lucenekmp.queries.spans.SpanQuery
-- org.apache.lucene.queries.spans.Spans → org.gnit.lucenekmp.queries.spans.Spans
-- org.apache.lucene.queryparser.charstream.CharStream → org.gnit.lucenekmp.queryparser.charstream.CharStream
-- org.apache.lucene.queryparser.charstream.FastCharStream → org.gnit.lucenekmp.queryparser.charstream.FastCharStream
-- org.apache.lucene.queryparser.classic.MultiFieldQueryParser → org.gnit.lucenekmp.queryparser.classic.MultiFieldQueryParser
-- org.apache.lucene.queryparser.classic.ParseException → org.gnit.lucenekmp.queryparser.classic.ParseException
-- org.apache.lucene.queryparser.classic.QueryParser → org.gnit.lucenekmp.queryparser.classic.QueryParser
-- org.apache.lucene.queryparser.classic.QueryParserBase → org.gnit.lucenekmp.queryparser.classic.QueryParserBase
-- org.apache.lucene.queryparser.classic.QueryParserTokenManager → org.gnit.lucenekmp.queryparser.classic.QueryParserTokenManager
 - org.apache.lucene.queryparser.classic.TestMultiPhraseQueryParsing → org.gnit.lucenekmp.queryparser.classic.TestMultiPhraseQueryParsing
-- org.apache.lucene.queryparser.classic.Token → org.gnit.lucenekmp.queryparser.classic.Token
 - org.apache.lucene.queryparser.complexPhrase.TestComplexPhraseQuery → org.gnit.lucenekmp.queryparser.complexPhrase.TestComplexPhraseQuery
 - org.apache.lucene.queryparser.ext.ExtendableQueryParser → org.gnit.lucenekmp.queryparser.ext.ExtendableQueryParser
 - org.apache.lucene.queryparser.ext.ExtensionQuery → org.gnit.lucenekmp.queryparser.ext.ExtensionQuery
@@ -438,7 +400,6 @@ From PROGRESS2.md → Progress Table for Unit Test Classes, ordered by dependenc
 - org.apache.lucene.queryparser.flexible.spans.SpansQueryConfigHandler → org.gnit.lucenekmp.queryparser.flexible.spans.SpansQueryConfigHandler
 - org.apache.lucene.queryparser.flexible.spans.SpansValidatorQueryNodeProcessor → org.gnit.lucenekmp.queryparser.flexible.spans.SpansValidatorQueryNodeProcessor
 - org.apache.lucene.queryparser.flexible.spans.UniqueFieldQueryNodeProcessor → org.gnit.lucenekmp.queryparser.flexible.spans.UniqueFieldQueryNodeProcessor
-- org.apache.lucene.queryparser.flexible.standard.CommonQueryParserConfiguration → org.gnit.lucenekmp.queryparser.flexible.standard.CommonQueryParserConfiguration
 - org.apache.lucene.queryparser.flexible.standard.QueryParserUtil → org.gnit.lucenekmp.queryparser.flexible.standard.QueryParserUtil
 - org.apache.lucene.queryparser.flexible.standard.StandardQueryParser → org.gnit.lucenekmp.queryparser.flexible.standard.StandardQueryParser
 - org.apache.lucene.queryparser.flexible.standard.TestQPHelper → org.gnit.lucenekmp.queryparser.flexible.standard.TestQPHelper
