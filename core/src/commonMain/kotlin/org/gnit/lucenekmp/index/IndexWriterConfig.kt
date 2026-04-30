@@ -140,9 +140,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      *
      * Only takes effect when IndexWriter is first created.
      */
-    fun setIndexDeletionPolicy(delPolicy: IndexDeletionPolicy): IndexWriterConfig {
-        //requireNotNull(delPolicy) { "indexDeletionPolicy must not be null" }
-        this.delPolicy = delPolicy
+    fun setIndexDeletionPolicy(delPolicy: IndexDeletionPolicy?): IndexWriterConfig {
+        this.delPolicy = requireNotNull(delPolicy) { "indexDeletionPolicy must not be null" }
         return this
     }
 
@@ -174,9 +173,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      *
      * Only takes effect when IndexWriter is first created.
      */
-    fun setSimilarity(similarity: Similarity): IndexWriterConfig {
-        //requireNotNull(similarity) { "similarity must not be null" }
-        this.similarity = similarity
+    fun setSimilarity(similarity: Similarity?): IndexWriterConfig {
+        this.similarity = requireNotNull(similarity) { "similarity must not be null" }
         return this
     }
 
@@ -189,9 +187,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      *
      * Only takes effect when IndexWriter is first created.
      */
-    fun setMergeScheduler(mergeScheduler: MergeScheduler): IndexWriterConfig {
-        //requireNotNull(mergeScheduler) { "mergeScheduler must not be null" }
-        this.mergeScheduler = mergeScheduler
+    fun setMergeScheduler(mergeScheduler: MergeScheduler?): IndexWriterConfig {
+        this.mergeScheduler = requireNotNull(mergeScheduler) { "mergeScheduler must not be null" }
         return this
     }
 
@@ -201,9 +198,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      *
      * Only takes effect when IndexWriter is first created.
      */
-    fun setCodec(codec: Codec): IndexWriterConfig {
-        //requireNotNull(codec) { "codec must not be null" }
-        this.codec = codec
+    fun setCodec(codec: Codec?): IndexWriterConfig {
+        this.codec = requireNotNull(codec) { "codec must not be null" }
         return this
     }
 
@@ -229,9 +225,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      * @see .setMaxBufferedDocs
      * @see .setRAMBufferSizeMB
      */
-    fun setFlushPolicy(flushPolicy: FlushPolicy): IndexWriterConfig {
-        //requireNotNull(flushPolicy) { "flushPolicy must not be null" }
-        this.flushPolicy = flushPolicy
+    fun setFlushPolicy(flushPolicy: FlushPolicy?): IndexWriterConfig {
+        this.flushPolicy = requireNotNull(flushPolicy) { "flushPolicy must not be null" }
         return this
     }
 
@@ -255,22 +250,21 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      * Information about merges, deletes and a message when maxFieldLength is reached will be printed
      * to this. Must not be null, but [InfoStream.NO_OUTPUT] may be used to suppress output.
      */
-    fun setInfoStream(infoStream: InfoStream): IndexWriterConfig {
-        /*requireNotNull(infoStream) {
-            ("Cannot set InfoStream implementation to null. "
-                    + "To disable logging use InfoStream.NO_OUTPUT")
-        }*/
-        this.infoStream = infoStream
+    fun setInfoStream(infoStream: InfoStream?): IndexWriterConfig {
+        this.infoStream =
+            requireNotNull(infoStream) {
+                ("Cannot set InfoStream implementation to null. "
+                        + "To disable logging use InfoStream.NO_OUTPUT")
+            }
         return this
     }
 
     /** Convenience method that uses [PrintStreamInfoStream]. Must not be null.  */
-    fun setInfoStream(printStream: PrintStream): IndexWriterConfig {
-        //requireNotNull(printStream) { "printStream must not be null" }
-        return setInfoStream(PrintStreamInfoStream(printStream))
+    fun setInfoStream(printStream: PrintStream?): IndexWriterConfig {
+        return setInfoStream(PrintStreamInfoStream(requireNotNull(printStream) { "printStream must not be null" }))
     }
 
-    override fun setMergePolicy(mergePolicy: MergePolicy): IndexWriterConfig {
+    override fun setMergePolicy(mergePolicy: MergePolicy?): IndexWriterConfig {
         return super.setMergePolicy(mergePolicy) as IndexWriterConfig
     }
 
@@ -278,7 +272,7 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
         return super.setMaxBufferedDocs(maxBufferedDocs) as IndexWriterConfig
     }
 
-    override fun setMergedSegmentWarmer(mergeSegmentWarmer: IndexReaderWarmer): IndexWriterConfig {
+    override fun setMergedSegmentWarmer(mergeSegmentWarmer: IndexReaderWarmer?): IndexWriterConfig {
         return super.setMergedSegmentWarmer(mergeSegmentWarmer) as IndexWriterConfig
     }
 
@@ -382,8 +376,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      *
      * @see .getSoftDeletesField
      */
-    fun setSoftDeletesField(softDeletesField: String): IndexWriterConfig {
-        this.softDeletesField = softDeletesField
+    fun setSoftDeletesField(softDeletesField: String?): IndexWriterConfig {
+        this.softDeletesField = requireNotNull(softDeletesField) { "softDeletesField must not be null" }
         return this
     }
 
@@ -405,8 +399,8 @@ constructor(analyzer: Analyzer = StandardAnalyzer()) :
      * sorting. In order to maintain the API guarantee that the document order of a block is not
      * altered by the [IndexWriter] a marker for parent documents is required.
      */
-    fun setParentField(parentField: String): IndexWriterConfig {
-        this.parentField = parentField
+    fun setParentField(parentField: String?): IndexWriterConfig {
+        this.parentField = requireNotNull(parentField) { "parentField must not be null" }
         return this
     }
 

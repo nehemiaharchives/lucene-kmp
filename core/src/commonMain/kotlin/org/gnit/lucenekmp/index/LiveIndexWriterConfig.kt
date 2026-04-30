@@ -44,8 +44,8 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
      *
      * Takes effect on the next merge.
      */
-    open fun setMergedSegmentWarmer(mergeSegmentWarmer: IndexReaderWarmer): LiveIndexWriterConfig {
-        this.mergedSegmentWarmer = mergeSegmentWarmer
+    open fun setMergedSegmentWarmer(mergeSegmentWarmer: IndexReaderWarmer?): LiveIndexWriterConfig {
+        this.mergedSegmentWarmer = requireNotNull(mergeSegmentWarmer) { "mergeSegmentWarmer must not be null" }
         return this
     }
 
@@ -310,9 +310,8 @@ open class LiveIndexWriterConfig internal constructor(open val analyzer: Analyze
      * Takes effect on subsequent merge selections. Any merges in flight or any merges already
      * registered by the previous [MergePolicy] are not affected.
      */
-    open fun setMergePolicy(mergePolicy: MergePolicy): LiveIndexWriterConfig {
-        //requireNotNull(mergePolicy) { "mergePolicy must not be null" }
-        this.mergePolicy = mergePolicy
+    open fun setMergePolicy(mergePolicy: MergePolicy?): LiveIndexWriterConfig {
+        this.mergePolicy = requireNotNull(mergePolicy) { "mergePolicy must not be null" }
         return this
     }
 
