@@ -63,6 +63,67 @@ val srcDirMap = mapOf(
     "test" to "test",
 )
 
+val externalLibraryJavaKmpRefs = mapOf(
+    "java.io.Closeable" to setOf("okio.Closeable"),
+    "java.io.EOFException" to setOf("okio.EOFException"),
+    "java.io.FileNotFoundException" to setOf("okio.FileNotFoundException"),
+    "java.io.IOException" to setOf("okio.IOException"),
+    "java.io.InputStream" to setOf("okio.Source", "okio.BufferedSource", "okio.GzipSource"),
+    "java.io.OutputStream" to setOf("okio.Sink", "okio.BufferedSink"),
+    "java.lang.ArrayIndexOutOfBoundsException" to setOf("okio.ArrayIndexOutOfBoundsException"),
+    "java.lang.Class" to setOf("kotlin.reflect.KClass"),
+    "java.lang.Runnable" to setOf("kotlinx.coroutines.Runnable"),
+    "java.math.BigDecimal" to setOf("com.ionspin.kotlin.bignum.decimal.BigDecimal"),
+    "java.math.BigInteger" to setOf("com.ionspin.kotlin.bignum.integer.BigInteger"),
+    "java.nio.channels.FileChannel" to setOf("okio.FileHandle"),
+    "java.nio.channels.SeekableByteChannel" to setOf("okio.FileHandle"),
+    "java.nio.file.FileSystem" to setOf("okio.FileSystem"),
+    "java.nio.file.Path" to setOf("okio.Path"),
+    "java.nio.file.attribute.BasicFileAttributes" to setOf("okio.FileMetadata"),
+    "java.time.Instant" to setOf("kotlinx.datetime.Instant"),
+    "java.time.LocalDate" to setOf("kotlinx.datetime.LocalDate"),
+    "java.time.LocalDateTime" to setOf("kotlinx.datetime.LocalDateTime"),
+    "java.time.LocalTime" to setOf("kotlinx.datetime.LocalTime"),
+    "java.time.ZoneId" to setOf("kotlinx.datetime.TimeZone"),
+    "java.util.Random" to setOf("kotlin.random.Random"),
+    "java.util.SplittableRandom" to setOf("kotlin.random.Random"),
+    "java.util.TimeZone" to setOf("kotlinx.datetime.TimeZone"),
+    "java.util.concurrent.CancellationException" to setOf("kotlinx.coroutines.CancellationException"),
+    "java.util.concurrent.CompletableFuture" to setOf("kotlinx.coroutines.Deferred", "kotlinx.coroutines.CompletableDeferred"),
+    "java.util.concurrent.Executor" to setOf("kotlinx.coroutines.CoroutineScope"),
+    "java.util.concurrent.Future" to setOf("kotlinx.coroutines.Deferred", "kotlinx.coroutines.Job"),
+    "java.util.concurrent.RunnableFuture" to setOf("kotlinx.coroutines.Job"),
+    "java.util.concurrent.TimeoutException" to setOf("kotlinx.coroutines.TimeoutCancellationException"),
+    "java.util.function.BiConsumer" to setOf("kotlin.jvm.functions.Function2"),
+    "java.util.function.BiFunction" to setOf("kotlin.jvm.functions.Function2"),
+    "java.util.function.BiPredicate" to setOf("kotlin.jvm.functions.Function2"),
+    "java.util.function.BooleanSupplier" to setOf("kotlin.jvm.functions.Function0"),
+    "java.util.function.Consumer" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.DoublePredicate" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.DoubleToLongFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.Function" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.IntConsumer" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.IntFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.IntPredicate" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.IntSupplier" to setOf("kotlin.jvm.functions.Function0"),
+    "java.util.function.IntToLongFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.LongPredicate" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.LongSupplier" to setOf("kotlin.jvm.functions.Function0"),
+    "java.util.function.LongToDoubleFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.Predicate" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.Supplier" to setOf("kotlin.jvm.functions.Function0"),
+    "java.util.function.ToDoubleFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.ToIntFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.ToLongFunction" to setOf("kotlin.jvm.functions.Function1"),
+    "java.util.function.UnaryOperator" to setOf("kotlin.jvm.functions.Function1"),
+    // TODO add more pairs of Java classes replaced by external KMP libraries.
+)
+
+private val portedAnnotationFqn = "org.gnit.lucenekmp.jdkport.Ported"
+private val semanticTypeAliases = mutableMapOf<String, String>()
+private val semanticTypeEquivalentKeys = mutableMapOf<String, MutableSet<String>>()
+private val companionClassInfoByOwnerName = mutableMapOf<String, ClassInfo>()
+
 // Helper functions to create markdown links for Java FQNs
 fun markdownLinkForJavaFQN(classInfo: ClassInfo): String {
     // for exammple: https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/Analyzer.java
@@ -125,6 +186,56 @@ class ProgressPrintStream(val term: Terminal, val markDown: StringBuilder) {
 
 class ClassInfoWithDepth(val classInfo: ClassInfo, val depth: Int)
 
+fun topLevelClassName(className: String): String = className.substringBefore("$")
+
+fun topLevelClassInfo(classInfo: ClassInfo, allClassesByName: Map<String, ClassInfo>): ClassInfo =
+    allClassesByName[topLevelClassName(classInfo.name)] ?: classInfo
+
+fun topLevelClassMap(classes: Iterable<ClassInfo>, excludedPrefix: String? = null): Map<String, ClassInfo> =
+    classes
+        .filterNot { classInfo -> excludedPrefix != null && classInfo.name.startsWith(excludedPrefix) }
+        .filterNot { classInfo -> classInfo.name.contains("$") }
+        .associateBy { classInfo -> classInfo.name }
+
+fun resetSemanticTypeAliases() {
+    semanticTypeAliases.clear()
+    semanticTypeEquivalentKeys.clear()
+    externalLibraryJavaKmpRefs.forEach { (javaFqn, kmpFqns) ->
+        kmpFqns.forEach { kmpFqn -> registerSemanticTypeAlias(javaFqn, kmpFqn) }
+    }
+}
+
+fun registerSemanticTypeAlias(javaFqn: String, kmpFqn: String) {
+    val javaKey = normalizeTypeKey(javaFqn)
+    val kmpKey = normalizeTypeKey(kmpFqn)
+    semanticTypeAliases[javaKey] = javaKey
+    semanticTypeAliases[kmpKey] = javaKey
+    semanticTypeEquivalentKeys.getOrPut(javaKey) { mutableSetOf(javaKey) }.add(kmpKey)
+    semanticTypeEquivalentKeys.getOrPut(kmpKey) { mutableSetOf(kmpKey) }.add(javaKey)
+}
+
+fun registerJdkPortedTypeAliases(classes: Iterable<ClassInfo>) {
+    classes
+        .filter { classInfo -> classInfo.name.startsWith("org.gnit.lucenekmp.jdkport.") }
+        .forEach { classInfo ->
+            val portedAnnotation = classInfo.annotationInfo.firstOrNull { annotationInfo ->
+                annotationInfo.name == portedAnnotationFqn
+            }
+            val javaFqn = portedAnnotation?.parameterValues?.getValue("from")?.toString()
+            if (!javaFqn.isNullOrBlank()) {
+                registerSemanticTypeAlias(javaFqn, classInfo.name)
+            }
+        }
+}
+
+fun registerCompanionClasses(classes: Iterable<ClassInfo>) {
+    classes
+        .filter { classInfo -> classInfo.name.endsWith("\$Companion") }
+        .forEach { classInfo ->
+            companionClassInfoByOwnerName[classInfo.name.removeSuffix("\$Companion")] = classInfo
+        }
+}
+
 // Method categorization and analysis utilities
 enum class MethodCategory(val priority: Int, val description: String) {
     CORE_BUSINESS_LOGIC(1, "Core business logic methods"),
@@ -163,12 +274,13 @@ data class MethodAnalysis(
     val synthetic: List<MethodSignature>,
     val totalMethods: Int
 ) {
-    fun getSemanticCompletionPercent(other: MethodAnalysis): Int {
+    fun getSemanticCompletionPercent(actual: MethodAnalysis): Int {
         // Weight different categories differently
         val coreWeight = 5
         val propertyWeight = 3
         val autoGenWeight = 1
-        val syntheticWeight = 1
+        // Synthetic methods are compiler artifacts, not source-level porting requirements.
+        val syntheticWeight = 0
 
         val totalExpectedScore = (coreBusinessLogic.size * coreWeight) +
                 (propertyAccessors.size * propertyWeight) +
@@ -177,10 +289,10 @@ data class MethodAnalysis(
 
         if (totalExpectedScore == 0) return 100
 
-        val actualScore = (matchingMethods(coreBusinessLogic, other.coreBusinessLogic).size * coreWeight) +
-                (matchingMethods(propertyAccessors, other.propertyAccessors).size * propertyWeight) +
-                (matchingMethods(autoGenerated, other.autoGenerated).size * autoGenWeight) +
-                (matchingMethods(synthetic, other.synthetic).size * syntheticWeight)
+        val actualScore = (matchingMethods(coreBusinessLogic, actual.coreBusinessLogic).size * coreWeight) +
+                (matchingMethods(propertyAccessors, actual.propertyAccessors).size * propertyWeight) +
+                (matchingMethods(autoGenerated, actual.autoGenerated).size * autoGenWeight) +
+                (matchingMethods(synthetic, actual.synthetic).size * syntheticWeight)
 
         return (actualScore * 100) / totalExpectedScore
     }
@@ -199,10 +311,10 @@ data class MethodAnalysis(
         val actualNormalized = normalizeMethodName(actual.name, actual.returnType != "void")
 
         return expectedNormalized == actualNormalized &&
-                normalizeType(expected.returnType) == normalizeType(actual.returnType) &&
+                semanticTypesMatch(expected.returnType, actual.returnType) &&
                 expected.parameters.size == actual.parameters.size &&
                 expected.parameters.zip(actual.parameters).all { (exp, act) ->
-                    normalizeType(exp) == normalizeType(act)
+                    semanticTypesMatch(exp, act)
                 }
     }
 
@@ -217,22 +329,123 @@ data class MethodAnalysis(
         }
     }
 
-    private fun normalizeType(type: String): String {
-        // Normalize type names between Java and Kotlin
-        return when (type) {
-            "kotlin.String", "java.lang.String" -> "String"
-            "kotlin.Int", "java.lang.Integer", "int" -> "Int"
-            "kotlin.Long", "java.lang.Long", "long" -> "Long"
-            "kotlin.Boolean", "java.lang.Boolean", "boolean" -> "Boolean"
-            "kotlin.Unit", "java.lang.Void", "void" -> "void"
-            else -> type.substringAfterLast('.')
+}
+
+fun normalizeSemanticType(type: String): String {
+    val normalized = normalizeTypeKey(type)
+
+    val aliased = semanticTypeAliases[normalized] ?: normalized
+
+    return when (aliased) {
+        "kotlin.String", "java.lang.String", "java.lang.CharSequence" -> "String"
+        "kotlin.Int", "java.lang.Integer", "int" -> "Int"
+        "kotlin.Long", "java.lang.Long", "long" -> "Long"
+        "kotlin.Float", "java.lang.Float", "float" -> "Float"
+        "kotlin.Double", "java.lang.Double", "double" -> "Double"
+        "kotlin.Short", "java.lang.Short", "short" -> "Short"
+        "kotlin.Byte", "java.lang.Byte", "byte" -> "Byte"
+        "kotlin.Char", "java.lang.Character", "char" -> "Char"
+        "kotlin.Boolean", "java.lang.Boolean", "boolean" -> "Boolean"
+        "kotlin.Unit", "java.lang.Void", "void" -> "void"
+        else -> aliased
+            .replace("org.apache.lucene.", "")
+            .replace("org.gnit.lucenekmp.", "")
+            .replace('$', '.')
+            .substringAfterLast('.')
+    }
+}
+
+fun semanticTypesMatch(expected: String, actual: String): Boolean {
+    val expectedKey = normalizeTypeKey(expected)
+    val actualKey = normalizeTypeKey(actual)
+    if (expectedKey == actualKey) return true
+    if (luceneComparableTypeKey(expectedKey) == luceneComparableTypeKey(actualKey)) return true
+    if (semanticTypeEquivalentKeys[expectedKey]?.contains(actualKey) == true) return true
+    if (semanticTypeEquivalentKeys[actualKey]?.contains(expectedKey) == true) return true
+    return false
+}
+
+fun normalizeTypeKey(type: String): String {
+    val normalized = eraseTypeArguments(type)
+        .trim()
+        .removeSuffix("?")
+        .removePrefix("? extends ")
+        .removePrefix("? super ")
+        .replace('$', '.')
+        .replace("kotlin.collections.", "")
+
+    return when (normalized) {
+        "kotlin.String", "java.lang.String" -> "String"
+        "kotlin.Int", "java.lang.Integer", "int" -> "Int"
+        "kotlin.Long", "java.lang.Long", "long" -> "Long"
+        "kotlin.Float", "java.lang.Float", "float" -> "Float"
+        "kotlin.Double", "java.lang.Double", "double" -> "Double"
+        "kotlin.Short", "java.lang.Short", "short" -> "Short"
+        "kotlin.Byte", "java.lang.Byte", "byte" -> "Byte"
+        "kotlin.Char", "java.lang.Character", "char" -> "Char"
+        "kotlin.Boolean", "java.lang.Boolean", "boolean" -> "Boolean"
+        "kotlin.Unit", "java.lang.Void", "void" -> "void"
+        else -> normalized
+    }
+}
+
+fun eraseTypeArguments(type: String): String {
+    val sb = StringBuilder()
+    var depth = 0
+    type.forEach { ch ->
+        when (ch) {
+            '<' -> depth++
+            '>' -> if (depth > 0) depth--
+            else -> if (depth == 0) sb.append(ch)
         }
+    }
+    return sb.toString()
+}
+
+fun luceneComparableTypeKey(type: String): String =
+    when {
+        type.startsWith("org.apache.lucene.") -> "lucene." + type.removePrefix("org.apache.lucene.")
+        type.startsWith("org.gnit.lucenekmp.") -> "lucene." + type.removePrefix("org.gnit.lucenekmp.")
+        else -> type
+    }
+
+fun kotlinSuspendReturnType(continuationType: String): String? {
+    val normalized = continuationType
+        .trim()
+        .removeSuffix("?")
+        .replace('$', '.')
+
+    if (!eraseTypeArguments(normalized).trim().removeSuffix("?").endsWith("kotlin.coroutines.Continuation")) {
+        return null
+    }
+
+    val genericStart = normalized.indexOf('<')
+    val genericEnd = normalized.lastIndexOf('>')
+    if (genericStart == -1 || genericEnd <= genericStart) return null
+
+    return normalized.substring(genericStart + 1, genericEnd)
+        .trim()
+        .removePrefix("? super ")
+        .removePrefix("? extends ")
+        .trim()
+        .takeIf { it.isNotEmpty() }
+}
+
+fun normalizeKotlinSuspendSignature(returnType: String, parameters: List<String>): Pair<String, List<String>> {
+    val suspendReturnType = parameters.lastOrNull()?.let(::kotlinSuspendReturnType)
+    val hasSuspendBytecodeShape = suspendReturnType != null && normalizeTypeKey(returnType) in setOf("java.lang.Object", "kotlin.Any")
+
+    return if (hasSuspendBytecodeShape) {
+        suspendReturnType!! to parameters.dropLast(1)
+    } else {
+        returnType to parameters
     }
 }
 
 // Method analysis utilities
 fun analyzeClassMethods(classInfo: ClassInfo): MethodAnalysis {
-    val methods = classInfo.methodInfo.toList()
+    val methods = classInfo.declaredMethodInfo.toList() +
+            companionClassInfoByOwnerName[classInfo.name]?.declaredMethodInfo.orEmpty()
 
     val coreBusinessLogic = mutableListOf<MethodSignature>()
     val propertyAccessors = mutableListOf<MethodSignature>()
@@ -261,10 +474,11 @@ fun analyzeClassMethods(classInfo: ClassInfo): MethodAnalysis {
 
 fun createMethodSignature(methodInfo: MethodInfo): MethodSignature {
     val name = methodInfo.name
-    val returnType = methodInfo.typeSignatureOrTypeDescriptor?.resultType?.toString() ?: "void"
-    val parameters = methodInfo.parameterInfo?.map {
+    val rawReturnType = methodInfo.typeSignatureOrTypeDescriptor?.resultType?.toString() ?: "void"
+    val rawParameters = methodInfo.parameterInfo?.map {
         it.typeSignatureOrTypeDescriptor?.toString() ?: "Object"
     } ?: emptyList()
+    val (returnType, parameters) = normalizeKotlinSuspendSignature(rawReturnType, rawParameters)
 
     val category = categorizeMethod(methodInfo)
 
@@ -351,10 +565,10 @@ fun methodsSemanticMatch(javaMethod: MethodSignature, kmpMethod: MethodSignature
     val kmpMethodName = normalizeMethodNameForComparison(kmpMethod.name, kmpMethod.returnType != "void")
 
     return javaMethodName == kmpMethodName &&
-            normalizeTypeForComparison(javaMethod.returnType) == normalizeTypeForComparison(kmpMethod.returnType) &&
+            semanticTypesMatch(javaMethod.returnType, kmpMethod.returnType) &&
             javaMethod.parameters.size == kmpMethod.parameters.size &&
             javaMethod.parameters.zip(kmpMethod.parameters).all { (javaParam, kmpParam) ->
-                normalizeTypeForComparison(javaParam) == normalizeTypeForComparison(kmpParam)
+                semanticTypesMatch(javaParam, kmpParam)
             }
 }
 
@@ -369,14 +583,7 @@ fun normalizeMethodNameForComparison(name: String, isGetter: Boolean): String {
 }
 
 fun normalizeTypeForComparison(type: String): String {
-    return when (type) {
-        "kotlin.String", "java.lang.String" -> "String"
-        "kotlin.Int", "java.lang.Integer", "int" -> "Int"
-        "kotlin.Long", "java.lang.Long", "long" -> "Long"
-        "kotlin.Boolean", "java.lang.Boolean", "boolean" -> "Boolean"
-        "kotlin.Unit", "java.lang.Void", "void" -> "void"
-        else -> type.substringAfterLast('.')
-    }
+    return normalizeSemanticType(type)
 }
 
 fun createDetailedClassReport(
@@ -402,7 +609,7 @@ fun createDetailedClassReport(
         sb.appendLine("- **KMP Auto-Generated**: ${kmpAnalysis.autoGenerated.size}")
         sb.appendLine("- **KMP Synthetic**: ${kmpAnalysis.synthetic.size}")
 
-        val semanticCompletion = kmpAnalysis.getSemanticCompletionPercent(javaAnalysis)
+        val semanticCompletion = javaAnalysis.getSemanticCompletionPercent(kmpAnalysis)
         sb.appendLine("- **Semantic Completion**: ${semanticCompletion}%")
     } else {
         sb.appendLine("- **KMP Class**: Not yet ported")
@@ -472,6 +679,8 @@ class Progress : CliktCommand() {
         require(javaRoot.isDirectory && kmpRoot.isDirectory) {
             "Invalid roots. javaRoot=$javaRoot (exists=${javaRoot.exists()}), kmpRoot=$kmpRoot (exists=${kmpRoot.exists()})"
         }
+        resetSemanticTypeAliases()
+        companionClassInfoByOwnerName.clear()
 
         ps.println("# Lucene KMP Port Progress")
 
@@ -492,6 +701,7 @@ class Progress : CliktCommand() {
             )
             .enableInterClassDependencies()
             .scan()
+        val javaLuceneClassesByName = javaLucene.allClasses.associateBy { classInfo -> classInfo.name }
 
         // Collect depth-1 dependencies for priority-1 classes
         val pr1DependenciesDepth1 = javaLucene.classDependencyMap.entries
@@ -514,13 +724,8 @@ class Progress : CliktCommand() {
         val javaPr1Classes: Map<String/*fqn*/, ClassInfoWithDepth> =
             pr1DepthToDependencyClassMap.flatMap { (depth, classes) ->
                 classes.map { classInfo ->
-                    val className = classInfo.name!!
-                    val topLevelClassName = if (className.contains("$")) {
-                        className.substringBefore("$")
-                    } else {
-                        className
-                    }
-                    topLevelClassName to ClassInfoWithDepth(classInfo, depth)
+                    val topLevelInfo = topLevelClassInfo(classInfo, javaLuceneClassesByName)
+                    topLevelInfo.name to ClassInfoWithDepth(topLevelInfo, depth)
                 }
             }
                 .groupBy({ it.first }, { it.second })
@@ -557,6 +762,7 @@ class Progress : CliktCommand() {
             )
             .enableInterClassDependencies()
             .scan()
+        val javaLuceneUnitTestClassesByName = javaLuceneUnitTest.allClasses.associateBy { classInfo -> classInfo.name }
 
         ps.println("### total unit test classes: ${javaLuceneUnitTest.allClasses.size}")
 
@@ -595,13 +801,8 @@ class Progress : CliktCommand() {
         // Create javaUnitTestClasses: Map<String/*fqn*/, ClassInfoWithDepth>
         val javaUnitTestClasses: Map<String, ClassInfoWithDepth> = pr1UnitTestDependencyToDepthMap
             .map { (classInfo, depth) ->
-                val className = classInfo.name
-                val topLevelClassName = if (className.contains("$")) {
-                    className.substringBefore("$")
-                } else {
-                    className
-                }
-                topLevelClassName to ClassInfoWithDepth(classInfo, depth)
+                val topLevelInfo = topLevelClassInfo(classInfo, javaLuceneUnitTestClassesByName)
+                topLevelInfo.name to ClassInfoWithDepth(topLevelInfo, depth)
             }
             .groupBy({ it.first }, { it.second })
             .mapValues { (_, classInfoWithDepths) ->
@@ -627,17 +828,13 @@ class Progress : CliktCommand() {
             .overrideClasspath(
                 kmpMainPaths
             ).scan()
+        registerJdkPortedTypeAliases(kmpSR.allClasses)
+        registerCompanionClasses(kmpSR.allClasses)
 
-        // Build indexes for faster lookup - filter out inner classes and get unique top-level classes
-        val kmpClasses: Map<String/*fqn*/, ClassInfo> = kmpSR.allClasses
-            .filterNot { it.name.startsWith("org.gnit.lucenekmp.jdkport.") }.associate { classInfo ->
-                val className = classInfo.name
-                if (className.contains("$")) {
-                    className.substringBefore("$") to classInfo
-                } else {
-                    className to classInfo
-                }
-            }
+        // Build indexes for faster lookup. Keep the real top-level class; nested/anonymous Kotlin
+        // bytecode classes must not overwrite their enclosing class in semantic method analysis.
+        val kmpClasses: Map<String/*fqn*/, ClassInfo> =
+            topLevelClassMap(kmpSR.allClasses, excludedPrefix = "org.gnit.lucenekmp.jdkport.")
 
         ps.println("### Total KMP classes: ${kmpClasses.size}")
 
@@ -662,16 +859,11 @@ class Progress : CliktCommand() {
             .overrideClasspath(
                 kmpUnitTestPaths
             ).scan()
+        registerJdkPortedTypeAliases(kmpUnitTestSR.allClasses)
+        registerCompanionClasses(kmpUnitTestSR.allClasses)
 
-        val kmpUnitTestClasses: Map<String/*fqn*/, ClassInfo> = kmpUnitTestSR.allClasses
-            .filterNot { it.name.startsWith("org.gnit.lucenekmp.jdkport.") }.associate { classInfo ->
-                val className = classInfo.name
-                if (className.contains("$")) {
-                    className.substringBefore("$") to classInfo
-                } else {
-                    className to classInfo
-                }
-            }
+        val kmpUnitTestClasses: Map<String/*fqn*/, ClassInfo> =
+            topLevelClassMap(kmpUnitTestSR.allClasses, excludedPrefix = "org.gnit.lucenekmp.jdkport.")
 
         ps.println("### Total KMP Unit Test classes: ${kmpUnitTestClasses.size}")
 
@@ -713,8 +905,8 @@ class Progress : CliktCommand() {
             val javaCoreMethodCount = javaAnalysis.coreBusinessLogic.size
             val kmpCoreMethodCount = kmpAnalysis?.coreBusinessLogic?.size ?: 0
 
-            val semanticProgressPercent = if (kmpAnalysis != null && javaCoreMethodCount > 0) {
-                kmpAnalysis.getSemanticCompletionPercent(javaAnalysis)
+            val semanticProgressPercent = if (kmpAnalysis != null) {
+                javaAnalysis.getSemanticCompletionPercent(kmpAnalysis)
             } else {
                 0
             }
@@ -805,8 +997,8 @@ class Progress : CliktCommand() {
             val javaTestCoreMethodCount = javaTestAnalysis.coreBusinessLogic.size
             val kmpTestCoreMethodCount = kmpTestAnalysis?.coreBusinessLogic?.size ?: 0
 
-            val testSemanticProgressPercent = if (kmpTestAnalysis != null && javaTestCoreMethodCount > 0) {
-                kmpTestAnalysis.getSemanticCompletionPercent(javaTestAnalysis)
+            val testSemanticProgressPercent = if (kmpTestAnalysis != null) {
+                javaTestAnalysis.getSemanticCompletionPercent(kmpTestAnalysis)
             } else {
                 0
             }
@@ -892,8 +1084,9 @@ class Progress : CliktCommand() {
 
         ps.println("")
         ps.println("### Lucene Classes (Semantic Analysis)")
-        val totalAllClasses = javaLucene.allClasses.size
-        val portedAllClasses = javaLucene.allClasses.count { classInfo ->
+        val javaLuceneTopLevelClasses = topLevelClassMap(javaLucene.allClasses).values
+        val totalAllClasses = javaLuceneTopLevelClasses.size
+        val portedAllClasses = javaLuceneTopLevelClasses.count { classInfo ->
             val kmpFqn = mapToKmp(classInfo.name)
             kmpClasses.containsKey(kmpFqn)
         }
@@ -901,7 +1094,7 @@ class Progress : CliktCommand() {
 
         var totalAllCoreMethodsNeeded = 0
         var totalAllCoreMethodsImplemented = 0
-        javaLucene.allClasses.forEach { classInfo ->
+        javaLuceneTopLevelClasses.forEach { classInfo ->
             val javaAnalysis = analyzeClassMethods(classInfo)
             val kmpFqn = mapToKmp(classInfo.name)
             val kmpClassInfo = kmpClasses[kmpFqn]
