@@ -87,6 +87,7 @@ val externalLibraryJavaKmpRefs = mapOf(
     "java.time.ZoneId" to setOf("kotlinx.datetime.TimeZone"),
     "java.util.Random" to setOf("kotlin.random.Random"),
     "java.util.SplittableRandom" to setOf("kotlin.random.Random"),
+    "java.util.Date" to setOf("kotlin.time.Instant"),
     "java.util.TimeZone" to setOf("kotlinx.datetime.TimeZone"),
     "java.util.concurrent.CancellationException" to setOf("kotlinx.coroutines.CancellationException"),
     "java.util.concurrent.CompletableFuture" to setOf("kotlinx.coroutines.Deferred", "kotlinx.coroutines.CompletableDeferred"),
@@ -252,7 +253,8 @@ data class MethodSignature(
     val isPublic: Boolean,
     val isProtected: Boolean,
     val isPrivate: Boolean,
-    val category: MethodCategory
+    val category: MethodCategory,
+    val supportsDefaultArguments: Boolean = false
 ) {
     fun toNormalizedString(): String {
         val visibility = when {
@@ -312,10 +314,7 @@ data class MethodAnalysis(
 
         return expectedNormalized == actualNormalized &&
                 semanticTypesMatch(expected.returnType, actual.returnType) &&
-                expected.parameters.size == actual.parameters.size &&
-                expected.parameters.zip(actual.parameters).all { (exp, act) ->
-                    semanticTypesMatch(exp, act)
-                }
+                methodParametersMatch(expected, actual)
     }
 
     private fun normalizeMethodName(name: String, isGetter: Boolean): String {
@@ -375,7 +374,7 @@ fun normalizeTypeKey(type: String): String {
         .replace("kotlin.collections.", "")
 
     return when (normalized) {
-        "kotlin.String", "java.lang.String" -> "String"
+        "kotlin.String", "java.lang.String", "java.lang.CharSequence" -> "String"
         "kotlin.Int", "java.lang.Integer", "int" -> "Int"
         "kotlin.Long", "java.lang.Long", "long" -> "Long"
         "kotlin.Float", "java.lang.Float", "float" -> "Float"
@@ -442,10 +441,35 @@ fun normalizeKotlinSuspendSignature(returnType: String, parameters: List<String>
     }
 }
 
+fun kotlinDefaultArgumentMethodNames(methods: List<MethodInfo>): Set<String> =
+    methods
+        .map { it.name }
+        .filter { it.endsWith("\$default") }
+        .map { it.removeSuffix("\$default") }
+        .toSet()
+
+fun methodParametersMatch(expected: MethodSignature, actual: MethodSignature): Boolean {
+    if (expected.parameters.size == actual.parameters.size) {
+        return expected.parameters.zip(actual.parameters).all { (expectedParam, actualParam) ->
+            semanticTypesMatch(expectedParam, actualParam)
+        }
+    }
+
+    if (!actual.supportsDefaultArguments || expected.parameters.size > actual.parameters.size) {
+        return false
+    }
+
+    return expected.parameters.zip(actual.parameters.take(expected.parameters.size))
+        .all { (expectedParam, actualParam) ->
+            semanticTypesMatch(expectedParam, actualParam)
+        }
+}
+
 // Method analysis utilities
 fun analyzeClassMethods(classInfo: ClassInfo): MethodAnalysis {
     val methods = classInfo.declaredMethodInfo.toList() +
             companionClassInfoByOwnerName[classInfo.name]?.declaredMethodInfo.orEmpty()
+    val defaultArgumentMethodNames = kotlinDefaultArgumentMethodNames(methods)
 
     val coreBusinessLogic = mutableListOf<MethodSignature>()
     val propertyAccessors = mutableListOf<MethodSignature>()
@@ -453,7 +477,7 @@ fun analyzeClassMethods(classInfo: ClassInfo): MethodAnalysis {
     val synthetic = mutableListOf<MethodSignature>()
 
     methods.forEach { methodInfo ->
-        val signature = createMethodSignature(methodInfo)
+        val signature = createMethodSignature(methodInfo, defaultArgumentMethodNames)
 
         when (signature.category) {
             MethodCategory.CORE_BUSINESS_LOGIC -> coreBusinessLogic.add(signature)
@@ -472,7 +496,7 @@ fun analyzeClassMethods(classInfo: ClassInfo): MethodAnalysis {
     )
 }
 
-fun createMethodSignature(methodInfo: MethodInfo): MethodSignature {
+fun createMethodSignature(methodInfo: MethodInfo, defaultArgumentMethodNames: Set<String> = emptySet()): MethodSignature {
     val name = methodInfo.name
     val rawReturnType = methodInfo.typeSignatureOrTypeDescriptor?.resultType?.toString() ?: "void"
     val rawParameters = methodInfo.parameterInfo?.map {
@@ -490,7 +514,8 @@ fun createMethodSignature(methodInfo: MethodInfo): MethodSignature {
         isPublic = methodInfo.isPublic,
         isProtected = methodInfo.isProtected,
         isPrivate = methodInfo.isPrivate,
-        category = category
+        category = category,
+        supportsDefaultArguments = name in defaultArgumentMethodNames
     )
 }
 
@@ -566,10 +591,7 @@ fun methodsSemanticMatch(javaMethod: MethodSignature, kmpMethod: MethodSignature
 
     return javaMethodName == kmpMethodName &&
             semanticTypesMatch(javaMethod.returnType, kmpMethod.returnType) &&
-            javaMethod.parameters.size == kmpMethod.parameters.size &&
-            javaMethod.parameters.zip(kmpMethod.parameters).all { (javaParam, kmpParam) ->
-                semanticTypesMatch(javaParam, kmpParam)
-            }
+            methodParametersMatch(javaMethod, kmpMethod)
 }
 
 fun normalizeMethodNameForComparison(name: String, isGetter: Boolean): String {
