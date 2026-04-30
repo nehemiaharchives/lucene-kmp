@@ -81,6 +81,9 @@ internal class BooleanWeight(override val query: BooleanQuery, searcher: IndexSe
                 "Failure to match minimum number of optional clauses: $minShouldMatch", subs
             )
         } else {
+            if (!scoreMode.needsScores()) {
+                return Explanation.match(0f, "sum of:", subs)
+            }
             // Replicating the same floating-point errors as the scorer does is quite
             // complex (essentially because of how ReqOptSumScorer casts intermediate
             // contributions to the score to floats), so in order to make sure that
