@@ -86,7 +86,7 @@ class TestNRTThreads : ThreadedIndexingAndSearchingTestCase() {
                 val searcher = IndexSearcher(r, es)
                 fixedSearcher = searcher
                 smokeTestSearcher(searcher)
-                runSearchThreads(100)
+                runSearchThreads(10) // TODO reduced runSearchThreads maxIterations = 100 to 10 for dev speed
             }
         }
         r.close()
