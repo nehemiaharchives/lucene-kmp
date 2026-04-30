@@ -13,6 +13,7 @@ import okio.buffer
 /**
  * port of java.nio.file.Files
  */
+@Ported(from = "java.nio.file.Files")
 object Files {
     // FileSystem to use - defaults to SystemFileSystem but can be overridden for testing
     private var fileSystem: FileSystem = FileSystem.SYSTEM

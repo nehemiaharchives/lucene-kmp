@@ -21,6 +21,7 @@ package org.gnit.lucenekmp.jdkport
  * @see java.lang.Thread.interrupted
  * @since   1.0
  */
+@Ported(from = "java.lang.InterruptedException")
 open class InterruptedException : Exception {
     /**
      * Constructs an `InterruptedException` with no detail  message.

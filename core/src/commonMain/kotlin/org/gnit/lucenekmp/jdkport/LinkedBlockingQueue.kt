@@ -13,6 +13,7 @@ import kotlin.math.min
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
+@Ported(from = "java.util.concurrent.LinkedBlockingQueue")
 open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
     AbstractQueue<E>(), BlockingQueue<E> {
 

@@ -14,8 +14,6 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.gnit.lucenekmp.util.CloseableThreadLocal
-import org.gnit.lucenekmp.jdkport.ReentrantLock
-import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement

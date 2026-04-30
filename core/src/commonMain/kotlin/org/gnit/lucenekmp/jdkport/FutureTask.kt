@@ -27,6 +27,7 @@ fun interface Executor {
 /**
  * Function interface to replace java.util.concurrent.Callable
  */
+@Ported(from = "java.util.concurrent.Callable")
 fun interface Callable<T> {
     fun call(): T
 }
@@ -58,12 +59,14 @@ interface Future<T> {
 /**
  * Interface to replace java.util.concurrent.RunnableFuture
  */
+@Ported(from = "java.util.concurrent.RunnableFuture")
 interface RunnableFuture<T> : Future<T>, Runnable
 
 
 /**
  * Exception to replace java.util.concurrent.ExecutionException
  */
+@Ported(from = "java.util.concurrent.ExecutionException")
 class ExecutionException(cause: Throwable? = null) : Exception(cause)
 
 /**
@@ -88,6 +91,7 @@ class ExecutionException(cause: Throwable? = null) : Exception(cause)
  *
  * @param <V> The result type returned by this FutureTask's `get` methods
  */
+@Ported(from = "java.util.concurrent.FutureTask")
 open class FutureTask<V> : RunnableFuture<V> {
     /**
      * The run state of this task, initially NEW. The run state
@@ -491,6 +495,7 @@ open class FutureTask<V> : RunnableFuture<V> {
 }
 
 // Platform-agnostic equivalent of Executors.callable
+@Ported(from = "java.util.concurrent.Executors")
 object Executors {
     fun <T> callable(runnable: Runnable, result: T?): Callable<T> {
         return Callable {

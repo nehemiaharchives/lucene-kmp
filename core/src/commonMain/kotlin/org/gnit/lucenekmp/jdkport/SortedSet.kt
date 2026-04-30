@@ -91,6 +91,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.2
 </E> */
+@Ported(from = "java.util.SortedSet")
 interface SortedSet<E> : MutableSet<E>, SequencedSet<E> {
     /**
      * Returns the comparator used to order the elements in this set,

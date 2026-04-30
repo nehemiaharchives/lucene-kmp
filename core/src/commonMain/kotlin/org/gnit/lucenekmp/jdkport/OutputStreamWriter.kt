@@ -51,6 +51,7 @@ import okio.IOException
  * @author      Mark Reinhold
  * @since       1.1
  */
+@Ported(from = "java.io.OutputStreamWriter")
 open class OutputStreamWriter : Writer {
     private val se: StreamEncoder
 

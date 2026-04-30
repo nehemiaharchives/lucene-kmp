@@ -11,6 +11,7 @@ package org.gnit.lucenekmp.jdkport
  * @since 1.5
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.TimeoutException")
 open class TimeoutException : Exception {
     /**
      * Constructs a `TimeoutException` with no specified detail

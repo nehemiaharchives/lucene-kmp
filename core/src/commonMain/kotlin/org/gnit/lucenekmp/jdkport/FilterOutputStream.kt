@@ -20,6 +20,7 @@ import kotlin.concurrent.Volatile
  * @author  Jonathan Payne
  * @since   1.0
  */
+@Ported(from = "java.io.FilterOutputStream")
 open class FilterOutputStream(
     /**
      * The underlying output stream to be filtered.

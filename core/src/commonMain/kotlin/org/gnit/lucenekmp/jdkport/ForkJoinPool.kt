@@ -2,7 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.Job
 
-@Ported(from = "ForkJoinPool")
+@Ported(from = "java.util.concurrent.ForkJoinPool")
 class ForkJoinPool {
 
     /**

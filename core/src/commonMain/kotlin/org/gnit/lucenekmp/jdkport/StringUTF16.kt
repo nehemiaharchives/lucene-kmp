@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.lang.StringUTF16")
 object StringUTF16 {
     private var HI_BYTE_SHIFT: Int
     private var LO_BYTE_SHIFT: Int

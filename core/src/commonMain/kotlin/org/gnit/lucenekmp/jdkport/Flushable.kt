@@ -11,6 +11,7 @@ import okio.IOException
  *
  * @since 1.5
  */
+@Ported(from = "java.io.Flushable")
 interface Flushable {
     /**
      * Flushes this stream by writing any buffered output to the underlying

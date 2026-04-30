@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.jdkport
 import okio.IOException
 import kotlin.concurrent.Volatile
 
-
+@Ported(from = "sun.nio.cs.StreamDecoder")
 class StreamDecoder : Reader {
     @Volatile
     private var closed = false

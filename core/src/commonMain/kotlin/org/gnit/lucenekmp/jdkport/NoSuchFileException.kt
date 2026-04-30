@@ -9,6 +9,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.file.NoSuchFileException")
 class NoSuchFileException : FileSystemException {
     /**
      * Constructs an instance of this class.

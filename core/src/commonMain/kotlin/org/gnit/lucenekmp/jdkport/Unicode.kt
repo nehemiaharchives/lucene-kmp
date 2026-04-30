@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-
+@Ported(from = "sun.nio.cs.Unicode")
 abstract class Unicode(name: String, aliases: Set<String>) : Charset(name, aliases)/*,
     sun.nio.cs.HistoricallyNamedCharset*/ {
     override fun contains(cs: Charset): Boolean {

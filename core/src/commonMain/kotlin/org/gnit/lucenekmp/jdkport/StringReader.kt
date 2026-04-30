@@ -4,7 +4,7 @@ import okio.IOException
 import kotlin.math.max
 import kotlin.math.min
 
-
+@Ported(from = "java.io.StringReader")
 class StringReader(s: String) : Reader() {
     private val length = s.length
     private var str: String?

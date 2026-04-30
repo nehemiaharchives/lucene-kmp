@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.min
 
+@Ported(from = "sun.nio.cs.US_ASCII")
 class US_ASCII : Charset("US-ASCII", StandardCharsets.aliases_US_ASCII()) {
     override fun contains(cs: Charset): Boolean {
         return cs === this

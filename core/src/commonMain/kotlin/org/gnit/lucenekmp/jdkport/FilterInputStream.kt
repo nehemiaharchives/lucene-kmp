@@ -18,6 +18,7 @@ import kotlin.concurrent.Volatile
  * @author  Jonathan Payne
  * @since   1.0
  */
+@Ported(from = "java.io.FilterInputStream")
 open class FilterInputStream protected constructor(`in`: InputStream) : InputStream() {
     /**
      * The input stream to be filtered.

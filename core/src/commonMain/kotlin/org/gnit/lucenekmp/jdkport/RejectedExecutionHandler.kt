@@ -8,6 +8,7 @@ import kotlinx.coroutines.Runnable
  * @since 1.5
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.RejectedExecutionHandler")
 interface RejectedExecutionHandler {
     /**
      * Method that may be invoked by a [ThreadPoolExecutor] when

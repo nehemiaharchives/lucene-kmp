@@ -33,6 +33,7 @@ import kotlin.jvm.Transient
  * @param V the type of mapped values
  */
 @Suppress("UNCHECKED_CAST", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+@Ported(from = "java.util.TreeMap")
 class TreeMap<K, V> : NavigableMap<K, V>, AbstractMutableMap<K, V>
 /*, MutableMap<K, V> , Cloneable // Consider if cloning is truly needed */ { // End TreeMap class
 

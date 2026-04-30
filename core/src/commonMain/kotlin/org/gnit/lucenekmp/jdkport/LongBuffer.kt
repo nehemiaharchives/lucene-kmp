@@ -14,6 +14,7 @@ import kotlin.math.min
  * All indices (position, limit, capacity) are in units of longs (8 bytes).
  * we convert indices by multiplying by 8.
  */
+@Ported(from = "java.nio.LongBuffer")
 class LongBuffer(private val buffer: Buffer, val capacity: Int, private val baseOffset: Long = 0L) : Comparable<LongBuffer> {
 
     var position: Int = 0

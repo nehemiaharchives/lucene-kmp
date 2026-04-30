@@ -10,6 +10,7 @@ import kotlin.reflect.KClass
  * @since 1.5
  * @serial exclude
  */
+@Ported(from = "java.util.RegularEnumSet")
 class RegularEnumSet<E : Enum<E>>(
     elementType: KClass<E>,
     universe: Array<Enum<E>>

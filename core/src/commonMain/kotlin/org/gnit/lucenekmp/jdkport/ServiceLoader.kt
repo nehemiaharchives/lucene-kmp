@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 /**
  * No-op ServiceLoader for Kotlin Multiplatform. Mimics java.util.ServiceLoader
  */
+@Ported(from = "java.util.ServiceLoader")
 class ServiceLoader<S> {
 
     companion object{

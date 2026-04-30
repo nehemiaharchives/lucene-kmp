@@ -13,6 +13,7 @@ package org.gnit.lucenekmp.jdkport
  * @author JSR-51 Expert Group
  * @since 1.4
  */
+@Ported(from = "java.nio.charset.CodingErrorAction")
 class CodingErrorAction private constructor(private val name: String) {
     /**
      * Returns a string describing this action.

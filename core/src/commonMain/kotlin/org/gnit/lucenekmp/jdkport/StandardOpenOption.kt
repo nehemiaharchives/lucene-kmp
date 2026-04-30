@@ -7,6 +7,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.file.StandardOpenOption")
 enum class StandardOpenOption : OpenOption {
     /**
      * Open for read access.

@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 /**
  * ported from java.nio.ByteOrder
  */
+@Ported(from = "java.nio.ByteOrder")
 class ByteOrder private constructor(private val name: String) {
     /**
      * Constructs a string describing this object.

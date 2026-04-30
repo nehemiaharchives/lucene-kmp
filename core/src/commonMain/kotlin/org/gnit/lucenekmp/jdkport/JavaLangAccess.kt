@@ -4,6 +4,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
 
+@Ported(from = "jdk.internal.access.JavaLangAccess")
 object JavaLangAccess {
     private val lock = ReentrantLock()
 

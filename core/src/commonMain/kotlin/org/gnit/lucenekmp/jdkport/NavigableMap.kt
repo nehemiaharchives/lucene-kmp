@@ -71,6 +71,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <V> the type of mapped values
  * @since 1.6
 </V></K> */
+@Ported(from = "java.util.NavigableMap")
 interface NavigableMap<K, V> : SortedMap<K, V> {
     /**
      * Returns a key-value mapping associated with the greatest key

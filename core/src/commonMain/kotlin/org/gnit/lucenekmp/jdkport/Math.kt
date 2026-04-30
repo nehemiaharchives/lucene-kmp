@@ -4,6 +4,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
+@Ported(from = "java.lang.Math")
 object Math {
 
     /**

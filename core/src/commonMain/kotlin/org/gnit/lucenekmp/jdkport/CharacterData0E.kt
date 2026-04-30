@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 
 /** The CharacterData class encapsulates the large tables found in
  * Java.lang.Character.  */
+@Ported(from = "java.lang.CharacterData0E")
 internal class CharacterData0E private constructor() // The X table has 2048 entries for a total of 4096 bytes.
     : CharacterData() {
     /* The character properties are currently encoded into 32 bits in the following manner:

@@ -8,6 +8,7 @@ package org.gnit.lucenekmp.jdkport
  * It stores enqueued references in an internal list and ignores the concurrency,
  * waiting, and GC‑integration that the real Java version provides.
  */
+@Ported(from = "java.lang.ref.ReferenceQueue")
 open class ReferenceQueue<T> {
 
     // Internal queue for storing enqueued references.

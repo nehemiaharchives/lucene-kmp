@@ -117,6 +117,7 @@ import kotlinx.coroutines.runBlocking
  * @since 1.5
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.ExecutorService")
 interface ExecutorService : Executor, AutoCloseable {
     /**
      * Initiates an orderly shutdown in which previously submitted

@@ -6,6 +6,7 @@ package org.gnit.lucenekmp.jdkport
  * Thrown when an attempt is made to access a file or directory and the
  * operation is denied.
  */
+@Ported(from = "java.nio.file.AccessDeniedException")
 class AccessDeniedException : FileSystemException {
     constructor(file: String) : super(file)
     constructor(file: String, other: String, reason: String) : super(file, other, reason)

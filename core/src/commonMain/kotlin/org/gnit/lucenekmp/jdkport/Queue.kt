@@ -110,6 +110,7 @@ package org.gnit.lucenekmp.jdkport
  * @author Doug Lea
  * @param <E> the type of elements held in this queue
 </E> */
+@Ported(from = "java.util.Queue")
 interface Queue<E> : MutableCollection<E> {
     /**
      * Inserts the specified element into this queue if it is possible to do so

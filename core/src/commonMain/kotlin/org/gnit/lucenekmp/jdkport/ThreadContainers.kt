@@ -8,6 +8,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 /**
  * This class consists exclusively of static methods to support groupings of threads.
  */
+@Ported(from = "jdk.internal.vm.ThreadContainers")
 object ThreadContainers {
     private val JLA: JavaLangAccess = /*SharedSecrets.getJavaLangAccess()*/ JavaLangAccess
 

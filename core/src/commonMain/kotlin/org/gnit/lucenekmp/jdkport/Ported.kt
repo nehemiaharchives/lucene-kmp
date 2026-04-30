@@ -11,5 +11,8 @@ package org.gnit.lucenekmp.jdkport
  * @Ported(from = "java.io.Reader")
  * class Reader
  * ```
+ *
+ * This annotation is used in the `progressv2.main.kts` script to normalize the method/function signatures of java lucene classes and lucene-kmp ported counterparts.
+ *
  */
 annotation class Ported(val from: String)

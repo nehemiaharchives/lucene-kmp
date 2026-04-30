@@ -69,6 +69,7 @@ import kotlinx.coroutines.Runnable
  *
  * @since 1.5
 </V> */
+@Ported(from = "java.util.concurrent.ExecutorCompletionService")
 class ExecutorCompletionService<V> : CompletionService<V> {
     private val executor: Executor
     private val aes: AbstractExecutorService?

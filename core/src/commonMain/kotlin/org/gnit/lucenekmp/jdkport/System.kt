@@ -21,6 +21,7 @@ import kotlin.time.TimeSource
  *
  * @since   1.0
  */
+@Ported(from = "java.lang.System")
 object System {
 
     // Anchor for monotonic time to ensure nanoTime() is monotonic within process

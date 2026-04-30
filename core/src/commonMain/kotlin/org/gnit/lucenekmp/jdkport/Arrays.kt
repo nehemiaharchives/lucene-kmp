@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.min
 
+@Ported(from = "java.util.Arrays")
 object Arrays {
 
     /**

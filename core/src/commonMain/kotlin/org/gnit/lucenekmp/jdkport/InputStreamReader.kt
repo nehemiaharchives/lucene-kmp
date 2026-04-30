@@ -36,6 +36,7 @@ import okio.IOException
  * @author      Mark Reinhold
  * @since       1.1
  */
+@Ported(from = "java.io.InputStreamReader")
 open class InputStreamReader : Reader {
     private fun debug(message: () -> String) {
         println("[DEBUG] ${message()}")

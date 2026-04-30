@@ -3,8 +3,6 @@ package org.gnit.lucenekmp.jdkport
 import okio.IOException
 import kotlin.math.min
 
-import org.gnit.lucenekmp.jdkport.Objects
-
 /**
  * A `ByteArrayInputStream` contains an internal buffer that contains bytes that may be read
  * from the stream. An internal counter keeps track of the next byte to be supplied by the

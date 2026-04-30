@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 
 /** The CharacterData class encapsulates the large tables found in
  * Java.lang.Character.  */
+@Ported(from = "java.lang.CharacterDataPrivateUse")
 internal class CharacterDataPrivateUse private constructor() : CharacterData() {
     override fun getProperties(ch: Int): Int {
         return 0

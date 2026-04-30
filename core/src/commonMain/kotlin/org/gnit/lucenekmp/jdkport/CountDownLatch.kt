@@ -2,9 +2,6 @@ package org.gnit.lucenekmp.jdkport
 
 /**
  * port of java.util.concurrent.CountDownLatch
- * currently only have placeholder implementation to make compile pass
- *
- * TODO later we will implement or refactor with kotlin coroutines
  */
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
@@ -12,6 +9,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+@Ported(from = "java.util.concurrent.CountDownLatch")
 class CountDownLatch(count: Int) {
 
     @OptIn(ExperimentalAtomicApi::class)

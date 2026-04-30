@@ -5,6 +5,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * Note: This implementation is not truly thread‑safe.
  */
+@Ported(from = "java.lang.StringBuffer")
 class StringBuffer : Appendable, CharSequence, Comparable<StringBuffer> {
 
     // Internal storage – we use a Kotlin StringBuilder.

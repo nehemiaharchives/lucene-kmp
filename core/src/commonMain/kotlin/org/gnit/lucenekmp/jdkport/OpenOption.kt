@@ -15,4 +15,5 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.file.OpenOption")
 interface OpenOption

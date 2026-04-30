@@ -15,6 +15,7 @@ import kotlin.math.min
  * @author  Arthur van Hoff
  * @since   1.0
  */
+@Ported(from = "java.io.BufferedOutputStream")
 open class BufferedOutputStream private constructor(out: OutputStream, initialSize: Int, maxSize: Int) :
     FilterOutputStream(out) {
 

@@ -165,6 +165,7 @@ import kotlin.experimental.or
  *      RFC 4007: IPv6 Scoped Address Architecture
  * @since 1.4
  */
+@Ported(from = "java.net.Inet6Address")
 class Inet6Address: InetAddress {
 
     val holder6: Inet6AddressHolder

@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
  * @since 1.6
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.locks.AbstractOwnableSynchronizer")
 abstract class AbstractOwnableSynchronizer
 
 /**

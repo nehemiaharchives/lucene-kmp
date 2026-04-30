@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.min
 
+@Ported(from = "sun.nio.cs.ISO_8859_1")
 class ISO_8859_1 : Charset("ISO-8859-1", StandardCharsets.aliases_ISO_8859_1()) {
     override fun contains(cs: Charset): Boolean {
         // LATIN1 contains only itself.

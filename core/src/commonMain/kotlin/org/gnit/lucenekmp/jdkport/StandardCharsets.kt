@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.jdkport
 
 /**
- * ported from java.nio.StandardCharsets
+ * ported from java.nio.charset.StandardCharsets
  *
  * Constant definitions for the standard [charsets][Charset]. These
  * charsets are guaranteed to be available on every implementation of the Java
@@ -11,6 +11,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.charset.StandardCharsets")
 class StandardCharsets private constructor() {
     // To avoid accidental eager initialization of often unused Charsets
     // from happening while the VM is booting up, which may delay

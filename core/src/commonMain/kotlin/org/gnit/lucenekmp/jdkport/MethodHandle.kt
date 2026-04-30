@@ -24,6 +24,7 @@ fun classForName(name: String, initialize: Boolean, loader: ClassLoader): KClass
     throw UnsupportedOperationException("classForName is not supported in KMP common")
 }
 
+@Ported(from = "java.lang.invoke.MethodHandle")
 class MethodHandle {
     fun invokeExact(): AttributeImpl {
         throw UnsupportedOperationException("MethodHandle.invokeExact is not supported in KMP common")
@@ -35,6 +36,7 @@ class MethodHandle {
     }
 }
 
+@Ported(from = "java.lang.invoke.MethodHandles")
 class MethodHandles {
     class Lookup {
         fun findConstructor(@Suppress("UNUSED_PARAMETER") clazz: KClass<*>, @Suppress("UNUSED_PARAMETER") NO_ARG_CTOR: MethodType): MethodHandle {
@@ -54,6 +56,7 @@ class MethodHandles {
     }
 }
 
+@Ported(from = "java.lang.invoke.MethodType")
 class MethodType {
     companion object {
         fun methodType(@Suppress("UNUSED_PARAMETER") type: KClass<*>): MethodType {

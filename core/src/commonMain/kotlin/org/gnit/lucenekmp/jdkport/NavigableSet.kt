@@ -54,6 +54,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <E> the type of elements maintained by this set
  * @since 1.6
 </E> */
+@Ported(from = "java.util.NavigableSet")
 interface NavigableSet<E> : SortedSet<E> {
     /**
      * Returns the greatest element in this set strictly less than the

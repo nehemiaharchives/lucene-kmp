@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.util.TimSort")
 object Timsort {
     private const val MIN_MERGE = 32
 

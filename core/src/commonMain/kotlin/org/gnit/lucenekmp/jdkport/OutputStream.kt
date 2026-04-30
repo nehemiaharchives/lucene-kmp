@@ -30,6 +30,7 @@ import kotlin.concurrent.Volatile
  * @see java.io.OutputStream.write
  * @since   1.0
  */
+@Ported(from = "java.io.OutputStream")
 abstract class OutputStream
 /**
  * Constructor for subclasses to call.

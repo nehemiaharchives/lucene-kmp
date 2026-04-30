@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 /**
  * ported from jdk.internal.math.DoubleConsts
  */
+@Ported(from = "jdk.internal.math.DoubleConsts")
 object DoubleConsts {
     /**
      * The number of logical bits in the significand of a

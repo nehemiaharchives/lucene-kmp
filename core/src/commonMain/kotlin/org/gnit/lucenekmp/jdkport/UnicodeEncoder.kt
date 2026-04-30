@@ -4,6 +4,7 @@ package org.gnit.lucenekmp.jdkport
 /**
  * Base class for different flavors of UTF-16 encoders
  */
+@Ported(from = "sun.nio.cs.UnicodeEncoder")
 abstract class UnicodeEncoder protected constructor(
     cs: Charset,
     bo: Int,

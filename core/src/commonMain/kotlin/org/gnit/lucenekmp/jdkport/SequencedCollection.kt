@@ -56,6 +56,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <E> the type of elements in this collection
  * @since 21
 </E> */
+@Ported(from = "java.util.SequencedCollection")
 interface SequencedCollection<E> : MutableCollection<E> {
     /**
      * Returns a reverse-ordered [view](Collection.html#view) of this collection.

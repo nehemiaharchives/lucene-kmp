@@ -17,6 +17,7 @@ import okio.IOException
  * @author  Arthur van Hoff
  * @since   1.0
  */
+@Ported(from = "java.io.ByteArrayOutputStream")
 class ByteArrayOutputStream (size: Int = 32) : OutputStream() {
     /**
      * The buffer where data is stored.

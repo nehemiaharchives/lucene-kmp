@@ -109,6 +109,7 @@ import kotlin.math.min
  *
  * @see CharsetDecoder
  */
+@Ported(from = "java.nio.charset.CharsetEncoder")
 abstract class CharsetEncoder protected constructor(
     cs: Charset,
     averageBytesPerChar: Float,

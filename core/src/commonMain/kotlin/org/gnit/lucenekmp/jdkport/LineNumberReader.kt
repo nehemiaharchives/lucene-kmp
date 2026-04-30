@@ -26,6 +26,7 @@ import kotlin.math.min
  * @author      Mark Reinhold
  * @since       1.1
  */
+@Ported(from = "java.io.LineNumberReader")
 class LineNumberReader : BufferedReader {
     /** The previous character type  */
     private var prevChar = NONE

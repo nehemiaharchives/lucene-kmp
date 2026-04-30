@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "sun.nio.cs.UnicodeDecoder")
 internal abstract class UnicodeDecoder(cs: Charset, private var currentByteOrder: Int) :
     CharsetDecoder(cs, 0.5f, 1.0f) {
     private val expectedByteOrder: Int

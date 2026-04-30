@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.lang.StrictMath")
 object StrictMath {
 
     /**

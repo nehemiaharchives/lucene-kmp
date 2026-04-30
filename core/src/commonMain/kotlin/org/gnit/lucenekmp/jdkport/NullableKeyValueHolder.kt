@@ -43,6 +43,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <K> the key type
  * @param <V> the value type
 </V></K> */
+@Ported(from = "jdk.internal.util.KeyValueHolder")
 class NullableKeyValueHolder<K, V> : MutableMap.MutableEntry<K, V> {
     /**
      * Gets the key from this holder.

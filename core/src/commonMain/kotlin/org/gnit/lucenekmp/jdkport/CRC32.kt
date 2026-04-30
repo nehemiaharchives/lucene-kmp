@@ -8,6 +8,7 @@ package org.gnit.lucenekmp.jdkport
  * - For each byte, updates: crc = table[(crc xor byte) & 0xFF] xor (crc ushr 8)
  * - When getValue() is called, returns (crc xor 0xFFFFFFFF) masked to 32 bits.
  */
+@Ported(from = "java.util.zip.CRC32")
 class CRC32 : Checksum {
     private var crc: Int = -1  // equivalent to 0xFFFFFFFF
 

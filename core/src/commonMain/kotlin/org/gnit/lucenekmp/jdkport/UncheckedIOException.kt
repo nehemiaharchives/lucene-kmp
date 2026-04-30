@@ -8,6 +8,7 @@ import okio.IOException
  *
  * @since   1.8
  */
+@Ported(from = "java.io.UncheckedIOException")
 class UncheckedIOException : RuntimeException {
     /**
      * Constructs an instance of this class.

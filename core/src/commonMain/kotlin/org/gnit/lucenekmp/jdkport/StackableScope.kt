@@ -13,6 +13,7 @@ import kotlin.reflect.KClass
  * popForcefully methods are used to pop the StackableScope from the current thread's
  * scope stack.
  */
+@Ported(from = "jdk.internal.vm.StackableScope")
 open class StackableScope(shared: Boolean) {
     private val owner: Job?
 

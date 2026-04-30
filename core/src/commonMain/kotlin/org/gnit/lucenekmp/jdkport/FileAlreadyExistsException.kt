@@ -8,6 +8,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.file.FileAlreadyExistsException")
 class FileAlreadyExistsException : FileSystemException {
     /**
      * Constructs an instance of this class.

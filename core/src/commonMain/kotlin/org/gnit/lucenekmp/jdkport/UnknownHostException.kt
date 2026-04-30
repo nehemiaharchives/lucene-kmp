@@ -8,6 +8,7 @@ import okio.IOException
  * @author  Jonathan Payne
  * @since   1.0
  */
+@Ported(from = "java.net.UnknownHostException")
 class UnknownHostException : IOException {
     /**
      * Constructs a new `UnknownHostException` with the

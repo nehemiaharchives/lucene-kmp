@@ -26,6 +26,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <E> the type of elements in this sequenced set
  * @since 21
 </E> */
+@Ported(from = "java.util.SequencedSet")
 interface SequencedSet<E> : SequencedCollection<E>, MutableSet<E> {
     /**
      * {@inheritDoc}

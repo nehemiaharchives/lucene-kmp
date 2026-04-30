@@ -12,6 +12,7 @@ import okio.IOException
  * @author      David Connelly
  * @since 1.1
  */
+@Ported(from = "java.util.zip.CheckedOutputStream")
 open class CheckedOutputStream(out: OutputStream, private val cksum: Checksum) :
     FilterOutputStream(out) {
 

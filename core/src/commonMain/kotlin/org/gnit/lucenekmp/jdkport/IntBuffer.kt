@@ -14,6 +14,7 @@ import kotlin.math.min
  * All indices (position, limit, capacity) are in units of ints (4 bytes).
  * we convert indices by multiplying by 4.
  */
+@Ported(from = "java.nio.IntBuffer")
 class IntBuffer(private val buffer: Buffer, val capacity: Int, private val baseOffset: Long = 0L) : Comparable<IntBuffer> {
 
     var position: Int = 0

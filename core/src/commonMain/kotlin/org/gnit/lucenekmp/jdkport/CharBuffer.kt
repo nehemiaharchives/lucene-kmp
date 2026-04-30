@@ -13,6 +13,7 @@ package org.gnit.lucenekmp.jdkport
  * - Implements CharSequence (the sequence being the “remaining” characters,
  *   i.e. from the current position up to the limit) and Appendable.
  */
+@Ported(from = "java.nio.CharBuffer")
 class CharBuffer private constructor(
     private val array: CharArray,
     private val arrayOffset: Int,

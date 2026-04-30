@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
 /**
  * port of java.lang.ClassValue
  */
+@Ported(from = "java.lang.ClassValue")
 abstract class KClassValue<T : Any>
 /**
  * Sole constructor.  (For invocation by subclass constructors, typically

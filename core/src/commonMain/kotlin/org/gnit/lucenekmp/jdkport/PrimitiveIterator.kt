@@ -39,6 +39,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.8
 </T_CONS></T> */
+@Ported(from = "java.util.PrimitiveIterator")
 interface PrimitiveIterator<T, T_CONS> : MutableIterator<T> {
     /**
      * Performs the given action for each remaining element until all elements

@@ -26,6 +26,7 @@ import kotlin.math.max
  * @author  Arthur van Hoff
  * @since   1.0
  */
+@Ported(from = "java.io.BufferedInputStream")
 open class BufferedInputStream @JvmOverloads constructor(`in`: InputStream, size: Int = DEFAULT_BUFFER_SIZE) :
     FilterInputStream(`in`) {
     // initialized to null when BufferedInputStream is sub-classed

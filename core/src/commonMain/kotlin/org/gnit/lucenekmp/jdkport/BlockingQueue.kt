@@ -149,6 +149,7 @@ package org.gnit.lucenekmp.jdkport
  * @author Doug Lea
  * @param <E> the type of elements held in this queue
 </E> */
+@Ported(from = "java.util.concurrent.BlockingQueue")
 interface BlockingQueue<E> : Queue<E> {
     /**
      * Inserts the specified element into this queue if it is possible to do

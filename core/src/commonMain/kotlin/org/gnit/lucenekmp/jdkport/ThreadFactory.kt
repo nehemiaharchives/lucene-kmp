@@ -2,10 +2,6 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-
 
 /**
  * An object that creates new threads on demand.  Using thread factories
@@ -28,6 +24,7 @@ import kotlinx.coroutines.launch
  * @author Doug Lea
  * @see Thread.Builder.factory
  */
+@Ported(from = "java.util.concurrent.ThreadFactory")
 interface ThreadFactory {
     /**
      * Constructs a new unstarted `Thread` to run the given runnable.

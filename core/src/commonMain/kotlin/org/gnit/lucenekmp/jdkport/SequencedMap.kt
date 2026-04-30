@@ -106,6 +106,7 @@ package org.gnit.lucenekmp.jdkport
  * @param <V> the type of mapped values
  * @since 21
 </V></K> */
+@Ported(from = "java.util.SequencedMap")
 interface SequencedMap<K, V> : MutableMap<K, V> {
     /**
      * Returns a reverse-ordered [view](Collection.html#view) of this map.

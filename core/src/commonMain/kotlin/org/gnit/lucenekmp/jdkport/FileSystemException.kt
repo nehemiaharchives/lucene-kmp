@@ -8,6 +8,7 @@ import okio.IOException
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.file.FileSystemException")
 open class FileSystemException
 
     : IOException {

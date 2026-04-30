@@ -32,6 +32,7 @@ import kotlinx.coroutines.Runnable
  *
  * @since 1.5
 </V> */
+@Ported(from = "java.util.concurrent.CompletionService")
 interface CompletionService<V> {
     /**
      * Submits a value-returning task for execution and returns a Future

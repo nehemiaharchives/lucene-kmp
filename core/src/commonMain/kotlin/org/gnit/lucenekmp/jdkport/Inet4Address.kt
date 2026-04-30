@@ -97,6 +97,7 @@ package org.gnit.lucenekmp.jdkport
  *      RFC 6943: Issues in Identifier Comparison for Security Purposes
  * @since 1.4
  */
+@Ported(from = "java.net.Inet4Address")
 class Inet4Address : InetAddress {
 
     constructor() : super() {

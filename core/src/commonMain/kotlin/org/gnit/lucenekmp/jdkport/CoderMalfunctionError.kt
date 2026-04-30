@@ -7,6 +7,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.4
  */
+@Ported(from = "java.nio.charset.CoderMalfunctionError")
 class CoderMalfunctionError
 
 /**

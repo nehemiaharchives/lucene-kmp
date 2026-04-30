@@ -5,6 +5,7 @@ import org.gnit.lucenekmp.jdkport.CharacterDataLatin1.Companion.B
 
 /** The CharacterData class encapsulates the large tables found in
  * Java.lang.Character.  */
+@Ported(from = "java.lang.CharacterDataLatin1")
 internal class CharacterDataLatin1 private constructor() // The A table has 256 entries for a total of 1024 bytes.
     : CharacterData() {
     /* The character properties are currently encoded into 32 bits in the following manner:

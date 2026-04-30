@@ -15,6 +15,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @param T the type of elements returned by this Spliterator
  */
+@Ported(from = "java.util.Spliterator")
 interface Spliterator<T> {
 
     /**

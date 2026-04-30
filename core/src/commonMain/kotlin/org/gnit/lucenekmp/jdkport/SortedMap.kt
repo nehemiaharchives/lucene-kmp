@@ -96,6 +96,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.2
 </V></K> */
+@Ported(from = "java.util.SortedMap")
 interface SortedMap<K, V> : SequencedMap<K, V> {
     /**
      * Returns the comparator used to order the keys in this map, or

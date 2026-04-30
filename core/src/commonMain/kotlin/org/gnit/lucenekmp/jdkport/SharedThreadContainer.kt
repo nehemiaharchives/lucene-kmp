@@ -8,6 +8,7 @@ import kotlin.concurrent.Volatile
  * A "shared" thread container. A shared thread container doesn't have an owner
  * and is intended for unstructured uses, e.g. thread pools.
  */
+@Ported(from = "jdk.internal.vm.SharedThreadContainer")
 class SharedThreadContainer
 /**
  * Initialize a new SharedThreadContainer.

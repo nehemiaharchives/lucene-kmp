@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import kotlin.comparisons.reverseOrder
-
+@Ported(from = "java.util.Collections")
 object Collections {
     fun <T> unmodifiableSet(set: Set<T>): MutableSet<T> {
         return UnmodifiableMutableSet(set)

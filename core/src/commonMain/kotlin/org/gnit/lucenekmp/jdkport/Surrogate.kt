@@ -8,6 +8,7 @@ package org.gnit.lucenekmp.jdkport
  * @author Martin Buchholz
  * @author Ulf Zibis
  */
+@Ported(from = "sun.nio.cs.Surrogate")
 object Surrogate {
     // TODO: Deprecate/remove the following redundant definitions
     val MIN_HIGH: Char = Character.MIN_HIGH_SURROGATE

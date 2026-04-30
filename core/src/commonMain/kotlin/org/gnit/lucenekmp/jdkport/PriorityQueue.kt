@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.util.PriorityQueue")
 class PriorityQueue<E : Any> {
 
     companion object {

@@ -6,6 +6,7 @@ package org.gnit.lucenekmp.jdkport
  * The CharacterData00 class encapsulates the large tables once found in
  * Character
  */
+@Ported(from = "java.lang.CharacterData00")
 internal class CharacterData00 private constructor() : CharacterData() {
     /* The character properties are currently encoded into 32 bits in the following manner:
             1 bit   mirrored property

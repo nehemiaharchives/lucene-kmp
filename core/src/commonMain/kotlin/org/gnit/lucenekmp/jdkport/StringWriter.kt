@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.io.StringWriter")
 class StringWriter : Writer() {
     private val builder = StringBuilder()
 

@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.jdkport
 
 import kotlin.math.max
 
+@Ported(from = "jdk.internal.util.ArraysSupport")
 object ArraysSupport {
     /**
      * Returns the index of the first element that differs between the two [LongArray]s,

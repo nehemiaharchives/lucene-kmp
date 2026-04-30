@@ -1,13 +1,11 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import kotlin.concurrent.Volatile
 import kotlin.math.min
 
-
+@Ported(from = "sun.nio.cs.StreamEncoder")
 class StreamEncoder : Writer {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
 
     @Volatile
     private var closed = false

@@ -113,6 +113,7 @@ import kotlin.time.Instant
  *
  * @since 1.5
  */
+@Ported(from = "java.util.concurrent.locks.LockSupport")
 object LockSupport {
 
     private val blockerMutex = Mutex()

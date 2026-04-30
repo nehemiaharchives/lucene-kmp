@@ -5,6 +5,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * minimum implementation to support usage in lucene
  */
+@Ported(from = "sun.net.util.IPAddressUtil")
 object IPAddressUtil {
     private const val INADDR4SZ: Int = 4
     private const val INADDR16SZ: Int = 16

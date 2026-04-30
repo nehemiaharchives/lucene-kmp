@@ -22,6 +22,7 @@ import kotlin.math.min
  *    U+100000..U10FFFF         F4          80..8F      80..BF      80..BF
  *
  */
+@Ported(from = "sun.nio.cs.UTF_8")
 class UTF_8 : Unicode("UTF-8", StandardCharsets.aliases_UTF_8()) {
     /*override fun historicalName(): String {
         return "UTF8"

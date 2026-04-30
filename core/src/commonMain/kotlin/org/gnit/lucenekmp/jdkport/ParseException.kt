@@ -21,6 +21,7 @@ package org.gnit.lucenekmp.jdkport
  * @param s the detail message
  * @param errorOffset the position where the error is found while parsing.
  */
+@Ported(from = "java.text.ParseException")
 class ParseException(
     message: String,
 

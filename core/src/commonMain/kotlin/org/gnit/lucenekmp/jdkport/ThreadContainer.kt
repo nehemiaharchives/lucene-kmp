@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 /**
  * A container of threads.
  */
+@Ported(from = "jdk.internal.vm.ThreadContainer")
 abstract class ThreadContainer
 /**
  * Creates a ThreadContainer.

@@ -7,6 +7,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.7
  */
+@Ported(from = "java.nio.file.StandardCopyOption")
 enum class StandardCopyOption : CopyOption {
     /**
      * Replace an existing file if it exists.

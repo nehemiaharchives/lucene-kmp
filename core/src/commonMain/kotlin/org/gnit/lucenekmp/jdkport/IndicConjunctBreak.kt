@@ -13,6 +13,7 @@ package org.gnit.lucenekmp.jdkport
  * Code point conditions included in this class are derived from the "Derived Property: Indic_Conjunct_Break"
  * section in DerivedCoreProperties.txt of the Unicode Character Database.
  */
+@Ported(from = "jdk.internal.util.regex.IndicConjunctBreak")
 internal object IndicConjunctBreak {
     fun isLinker(cp: Int): Boolean {
         return cp == 0x094D || cp == 0x09CD || cp == 0x0ACD || cp == 0x0B4D || cp == 0x0C4D || cp == 0x0D4D

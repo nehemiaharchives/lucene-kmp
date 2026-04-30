@@ -43,6 +43,7 @@ import kotlin.math.min
  * @author      Mark Reinhold
  * @since       1.1
  */
+@Ported(from = "java.io.BufferedReader")
 open class BufferedReader @JvmOverloads constructor(`in`: Reader, sz: Int = DEFAULT_CHAR_BUFFER_SIZE) :
     Reader(/*`in`*/) {
     private var `in`: Reader?

@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 /**
  * Utility class for string encoding and decoding.
  */
+@Ported(from = "java.lang.StringCoding")
 internal object StringCoding {
 
     // implement if needed

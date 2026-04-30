@@ -1,9 +1,10 @@
 package org.gnit.lucenekmp.jdkport
 
 /**
- * partially ported from java.util.Objects
+ * partial port of java.util.Objects
  *
  */
+@Ported(from = "java.util.Objects")
 object Objects {
     fun hashCode(o: Any?): Int {
         return if (o != null) o.hashCode() else 0

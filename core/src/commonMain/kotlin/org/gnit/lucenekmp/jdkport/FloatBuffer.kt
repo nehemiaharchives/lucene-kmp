@@ -9,7 +9,6 @@ import kotlin.math.min
 // class BufferOverflowException(message: String = "") : RuntimeException(message)
 // class BufferUnderflowException(message: String = "") : RuntimeException(message)
 
-
 /**
  * ported from java.nio.FloatBuffer
  *
@@ -23,6 +22,7 @@ import kotlin.math.min
  * All indices (position, limit, capacity) are in units of floats (4 bytes).
  * we convert indices by multiplying by 4.
  */
+@Ported(from = "java.nio.FloatBuffer")
 class FloatBuffer(private val buffer: Buffer, val capacity: Int, private val baseOffset: Long = 0L) :
     Comparable<FloatBuffer> {
 

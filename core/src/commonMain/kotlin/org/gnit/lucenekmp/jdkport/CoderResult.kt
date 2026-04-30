@@ -61,6 +61,7 @@ import org.gnit.lucenekmp.jdkport.CoderResult.Cache.Companion.INSTANCE
  * @author JSR-51 Expert Group
  * @since 1.4
  */
+@Ported(from = "java.nio.charset.CoderResult")
 class CoderResult private constructor(private val type: Int, val length: Int) {
     /**
      * Returns a string describing this coder result.

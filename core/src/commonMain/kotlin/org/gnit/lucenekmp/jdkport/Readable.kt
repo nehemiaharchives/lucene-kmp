@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
+@Ported(from = "java.lang.Readable")
 interface Readable {
     /**
      * Attempts to read characters into the specified character buffer.

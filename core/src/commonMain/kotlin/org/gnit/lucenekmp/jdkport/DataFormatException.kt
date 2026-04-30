@@ -8,6 +8,7 @@ package org.gnit.lucenekmp.jdkport
  * @author      David Connelly
  * @since 1.1
  */
+@Ported(from = "java.util.zip.DataFormatException")
 class DataFormatException : Exception {
     /**
      * Constructs a DataFormatException with no detail message.

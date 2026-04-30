@@ -41,6 +41,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * @since 1.5
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.AbstractExecutorService")
 abstract class AbstractExecutorService
 /**
  * Constructor for subclasses to call.

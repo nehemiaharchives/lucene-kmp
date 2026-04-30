@@ -53,6 +53,7 @@ import okio.IOException
  * @author      Mark Reinhold
  * @since       1.1
  */
+@Ported(from = "java.io.BufferedWriter")
 open class BufferedWriter private constructor(out: Writer, initialSize: Int, maxSize: Int) : Writer() {
     private var out: Writer?
 

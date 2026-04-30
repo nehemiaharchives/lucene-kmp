@@ -3,6 +3,7 @@ package org.gnit.lucenekmp.jdkport
 /**
  * port of [java.lang.Character](https://docs.oracle.com/en/java/javase/24/docs/api/java.base/java/lang/Character.html)
  */
+@Ported(from = "java.lang.Character")
 class Character {
 
     companion object {

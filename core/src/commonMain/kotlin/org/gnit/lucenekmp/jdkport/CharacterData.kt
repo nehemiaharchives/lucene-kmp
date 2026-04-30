@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-
+@Ported(from = "java.lang.CharacterData")
 internal abstract class CharacterData {
     abstract fun getProperties(ch: Int): Int
     abstract fun getType(ch: Int): Int

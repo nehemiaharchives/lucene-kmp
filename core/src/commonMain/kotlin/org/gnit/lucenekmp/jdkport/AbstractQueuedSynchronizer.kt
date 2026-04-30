@@ -280,6 +280,7 @@ import kotlin.time.Instant
  * @since 1.5
  * @author Doug Lea
  */
+@Ported(from = "java.util.concurrent.locks.AbstractQueuedSynchronizer")
 abstract class AbstractQueuedSynchronizer
 
 /**

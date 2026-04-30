@@ -15,6 +15,7 @@ package org.gnit.lucenekmp.jdkport
  *
  * @since 1.8
 </T> */
+@Ported(from = "java.util.function.Consumer")
 fun interface Consumer<T> {
     /**
      * Performs this operation on the given argument.
