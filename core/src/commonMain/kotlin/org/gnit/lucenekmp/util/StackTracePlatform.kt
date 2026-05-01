@@ -59,6 +59,8 @@ expect fun <T> withReadOnlyCloneCallPathHint(block: () -> T): T
 
 expect fun <T> withDocumentsWriterPerThreadFlushCallPathHint(block: () -> T): T
 
+expect fun <T> withIndexingChainFlushCallPathHint(block: () -> T): T
+
 internal expect fun currentStackTraceHasClassMethodFastPath(className: String, methodName: String): Boolean?
 
 internal expect fun currentStackTraceHasAnyMethodFastPath(methodNames: Set<String>): Boolean?

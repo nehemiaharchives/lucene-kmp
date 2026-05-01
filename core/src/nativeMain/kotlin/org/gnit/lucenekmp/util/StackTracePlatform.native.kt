@@ -8,6 +8,8 @@ private const val CHECKPOINT_CLASS_NAME = "org.gnit.lucenekmp.index.IndexFileDel
 private const val CHECKPOINT_METHOD_NAME = "checkpoint"
 private const val DOCUMENTS_WRITER_PER_THREAD_CLASS_NAME = "org.gnit.lucenekmp.index.DocumentsWriterPerThread"
 private const val DOCUMENTS_WRITER_PER_THREAD_FLUSH_METHOD_NAME = "flush"
+private const val INDEXING_CHAIN_CLASS_NAME = "org.gnit.lucenekmp.index.IndexingChain"
+private const val INDEXING_CHAIN_FLUSH_METHOD_NAME = "flush"
 private const val PERSISTENT_SNAPSHOT_DELETION_POLICY_CLASS_NAME =
     "org.gnit.lucenekmp.index.PersistentSnapshotDeletionPolicy"
 private const val PERSISTENT_SNAPSHOT_DELETION_POLICY_PERSIST_METHOD_NAME = "persist"
@@ -15,6 +17,7 @@ private const val READ_ONLY_CLONE_METHOD_NAME = "getReadOnlyClone"
 private val checkpointHintLock = ReentrantLock()
 private val checkpointHintDepthByThread = mutableMapOf<Long, Int>()
 private val documentsWriterPerThreadFlushHintDepthByThread = mutableMapOf<Long, Int>()
+private val indexingChainFlushHintDepthByThread = mutableMapOf<Long, Int>()
 private val readOnlyCloneHintDepthByThread = mutableMapOf<Long, Int>()
 
 actual fun <T> withCheckpointCallPathHint(block: () -> T): T {
@@ -93,6 +96,32 @@ actual fun <T> withDocumentsWriterPerThreadFlushCallPathHint(block: () -> T): T 
     }
 }
 
+actual fun <T> withIndexingChainFlushCallPathHint(block: () -> T): T {
+    val threadId = currentThreadId()
+    checkpointHintLock.lock()
+    try {
+        indexingChainFlushHintDepthByThread[threadId] =
+            (indexingChainFlushHintDepthByThread[threadId] ?: 0) + 1
+    } finally {
+        checkpointHintLock.unlock()
+    }
+    try {
+        return block()
+    } finally {
+        checkpointHintLock.lock()
+        try {
+            val nextDepth = (indexingChainFlushHintDepthByThread[threadId] ?: 1) - 1
+            if (nextDepth <= 0) {
+                indexingChainFlushHintDepthByThread.remove(threadId)
+            } else {
+                indexingChainFlushHintDepthByThread[threadId] = nextDepth
+            }
+        } finally {
+            checkpointHintLock.unlock()
+        }
+    }
+}
+
 internal actual fun currentStackTraceHasClassMethodFastPath(
     className: String,
     methodName: String
@@ -106,6 +135,9 @@ internal actual fun currentStackTraceHasClassMethodFastPath(
             className == DOCUMENTS_WRITER_PER_THREAD_CLASS_NAME &&
                 methodName == DOCUMENTS_WRITER_PER_THREAD_FLUSH_METHOD_NAME ->
                 documentsWriterPerThreadFlushHintDepthByThread[threadId]?.let { it > 0 } ?: false
+            className == INDEXING_CHAIN_CLASS_NAME &&
+                methodName == INDEXING_CHAIN_FLUSH_METHOD_NAME ->
+                indexingChainFlushHintDepthByThread[threadId]?.let { it > 0 } ?: false
             className == PERSISTENT_SNAPSHOT_DELETION_POLICY_CLASS_NAME &&
                 methodName == PERSISTENT_SNAPSHOT_DELETION_POLICY_PERSIST_METHOD_NAME ->
                 hasCurrentCallPathHint(className, methodName)
