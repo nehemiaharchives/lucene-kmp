@@ -121,8 +121,6 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
     //↑ line 2870 of LuceneTestCase.java
 
     companion object {
-        val logger = getLogger()
-
 
         // ↓ line 277 of LuceneTestCase.java
         // --------------------------------------------------------------------

@@ -29,17 +29,22 @@ private fun parseConfiguredLogLevel(): Level {
     }
 }
 
-private fun ensureProductionLoggingConfigured() {
+@PublishedApi
+internal fun ensureProductionLoggingConfigured() {
     if (!luceneLoggingConfigured) {
         configureLogging(parseConfiguredLogLevel())
     }
 }
 
-fun getLogger(): KLogger {
+@Suppress("NOTHING_TO_INLINE")
+inline fun getLogger(): KLogger {
     ensureProductionLoggingConfigured()
-    return KotlinLogging.logger {}
+    return KotlinLogging.logger(currentLoggerNameFromCallSite())
 }
 
 fun configureTestLogging() {
     configureLogging(Level.DEBUG)
 }
+
+@PublishedApi
+internal expect fun currentLoggerNameFromCallSite(): String

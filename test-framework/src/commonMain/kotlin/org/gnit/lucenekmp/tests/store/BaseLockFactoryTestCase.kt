@@ -41,6 +41,8 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.TimeSource
 
+private val baseLockFactoryTestCaseLogger = getLogger()
+
 /** Base class for per-LockFactory tests. */
 @OptIn(ExperimentalAtomicApi::class)
 abstract class BaseLockFactoryTestCase : LuceneTestCase() {
@@ -48,9 +50,6 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
     init {
         configureTestLogging()
     }
-
-    private val logger = getLogger()
-
     /**
      * Subclass returns the Directory to be tested; if it's an FS-based directory it should point to
      * the specified path, else it can ignore it.
@@ -182,7 +181,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
 
         val numIterations = atLeast(3)
         // TODO reduced numIterations = atLeast(20) to atLeast(3) for dev speed
-        logger.debug { "phase=stressLocks.start tempPath=$tempPath numIterations=$numIterations" }
+        baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.start tempPath=$tempPath numIterations=$numIterations" }
         val writer = WriterThread(numIterations, dir)
         val searcher = SearcherThread(numIterations, dir)
 
@@ -192,12 +191,12 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
             writerJob.join()
             searcherJob.join()
         }
-        logger.debug { "phase=stressLocks.elapsedMs total=${totalStart.elapsedNow().inWholeMilliseconds}" }
+        baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.elapsedMs total=${totalStart.elapsedNow().inWholeMilliseconds}" }
 
         assertTrue(!writer.hitException, "IndexWriter hit unexpected exceptions")
         assertTrue(!searcher.hitException, "IndexSearcher hit unexpected exceptions")
 
-        logger.debug { "phase=stressLocks.finish writerHitException=${writer.hitException} searcherHitException=${searcher.hitException}" }
+        baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.finish writerHitException=${writer.hitException} searcherHitException=${searcher.hitException}" }
         dir.close()
     }
 
@@ -224,7 +223,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
             for (i in 0 until this.numIteration) {
                 val iterStart = TimeSource.Monotonic.markNow()
                 if (i % 5 == 0) {
-                    logger.debug { "phase=stressLocks.writer.iter iter=$i total=$numIteration" }
+                    baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.writer.iter iter=$i total=$numIteration" }
                 }
                 if (VERBOSE) {
                     println("TEST: WriterThread iter=$i")
@@ -244,7 +243,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     val createStart = TimeSource.Monotonic.markNow()
                     writer = IndexWriter(dir, iwc)
                     if (i % 5 == 0) {
-                        logger.debug {
+                        baseLockFactoryTestCaseLogger.debug {
                             "phase=stressLocks.writer.createMs iter=$i elapsed=${createStart.elapsedNow().inWholeMilliseconds}"
                         }
                     }
@@ -265,7 +264,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     val addDocStart = TimeSource.Monotonic.markNow()
                     addDoc(writer)
                     if (i % 5 == 0) {
-                        logger.debug {
+                        baseLockFactoryTestCaseLogger.debug {
                             "phase=stressLocks.writer.addDocMs iter=$i elapsed=${addDocStart.elapsedNow().inWholeMilliseconds}"
                         }
                     }
@@ -280,7 +279,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     val closeStart = TimeSource.Monotonic.markNow()
                     writer.close()
                     if (i % 5 == 0) {
-                        logger.debug {
+                        baseLockFactoryTestCaseLogger.debug {
                             "phase=stressLocks.writer.closeMs iter=$i elapsed=${closeStart.elapsedNow().inWholeMilliseconds}"
                         }
                     }
@@ -293,13 +292,13 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     break
                 }
                 if (i % 5 == 0) {
-                    logger.debug {
+                    baseLockFactoryTestCaseLogger.debug {
                         "phase=stressLocks.writer.iterElapsedMs iter=$i elapsed=${iterStart.elapsedNow().inWholeMilliseconds}"
                     }
                 }
             }
-            logger.debug { "phase=stressLocks.writer.totalElapsedMs value=${totalStart.elapsedNow().inWholeMilliseconds}" }
-            logger.debug { "phase=stressLocks.writer.done hitException=$hitException" }
+            baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.writer.totalElapsedMs value=${totalStart.elapsedNow().inWholeMilliseconds}" }
+            baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.writer.done hitException=$hitException" }
         }
     }
 
@@ -315,7 +314,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
             val query: Query = TermQuery(Term("content", "aaa"))
             for (i in 0 until this.numIteration) {
                 if (i % 5 == 0) {
-                    logger.debug { "phase=stressLocks.searcher.iter iter=$i total=$numIteration" }
+                    baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.searcher.iter iter=$i total=$numIteration" }
                 }
                 try {
                     reader = DirectoryReader.open(dir)
@@ -343,7 +342,7 @@ abstract class BaseLockFactoryTestCase : LuceneTestCase() {
                     break
                 }
             }
-            logger.debug { "phase=stressLocks.searcher.done hitException=$hitException" }
+            baseLockFactoryTestCaseLogger.debug { "phase=stressLocks.searcher.done hitException=$hitException" }
         }
     }
 }

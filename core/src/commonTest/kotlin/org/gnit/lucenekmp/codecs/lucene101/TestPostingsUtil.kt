@@ -5,11 +5,14 @@ import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.util.GroupVIntUtil
+import org.gnit.lucenekmp.util.getLogger
 import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestPostingsUtil : LuceneTestCase() {
+
+    private val logger = getLogger()
 
     // checks for bug described in https://github.com/apache/lucene/issues/13373
     @Test
