@@ -1,22 +1,16 @@
 package org.gnit.lucenekmp.codecs.lucene101
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
-import org.gnit.lucenekmp.util.configureTestLogging
 import org.gnit.lucenekmp.util.GroupVIntUtil
 import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestPostingsUtil : LuceneTestCase() {
-    init {
-        configureTestLogging()
-    }
 
-    private val logger = KotlinLogging.logger {}
     // checks for bug described in https://github.com/apache/lucene/issues/13373
     @Test
     fun testIntegerOverflow() {

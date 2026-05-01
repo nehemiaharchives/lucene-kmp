@@ -1,15 +1,11 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.test.*
-
-private val logger = KotlinLogging.logger {}
 
 class CharBufferTest {
 
     @Test
     fun testAllocateBasic() {
-        logger.debug { "Testing CharBuffer.allocate() with positive capacity" }
         val capacity = 10
         val buffer = CharBuffer.allocate(capacity)
         assertEquals(capacity, buffer.capacity, "Capacity should be as allocated")
@@ -21,7 +17,6 @@ class CharBufferTest {
 
     @Test
     fun testAllocateZeroCapacity() {
-        logger.debug { "Testing CharBuffer.allocate() with zero capacity" }
         val capacity = 0
         val buffer = CharBuffer.allocate(capacity)
         assertEquals(capacity, buffer.capacity, "Capacity should be 0")
@@ -31,7 +26,6 @@ class CharBufferTest {
 
     @Test
     fun testAllocateNegativeCapacity() {
-        logger.debug { "Testing CharBuffer.allocate() with negative capacity" }
         assertFailsWith<IllegalArgumentException>("Should throw IllegalArgumentException for negative capacity") {
             CharBuffer.allocate(-1)
         }
@@ -39,7 +33,6 @@ class CharBufferTest {
 
     @Test
     fun testWrapCharArrayBasic() {
-        logger.debug { "Testing CharBuffer.wrap(CharArray) basic" }
         val charArray = charArrayOf('a', 'b', 'c', 'd', 'e')
         val buffer = CharBuffer.wrap(charArray)
 
@@ -65,7 +58,6 @@ class CharBufferTest {
 
     @Test
     fun testWrapCharArrayWithOffsetAndLength() {
-        logger.debug { "Testing CharBuffer.wrap(CharArray, offset, length)" }
         val charArray = charArrayOf('w', 'x', 'y', 'z')
         val offset = 1
         val length = 2 // Should wrap 'x', 'y'
@@ -91,7 +83,6 @@ class CharBufferTest {
 
     @Test
     fun testWrapCharArrayInvalidOffsetLength() {
-        logger.debug { "Testing CharBuffer.wrap(CharArray) with invalid offset/length" }
         val charArray = charArrayOf('a', 'b', 'c', 'd', 'e')
 
         assertFailsWith<IndexOutOfBoundsException>("Negative offset") {
@@ -118,7 +109,6 @@ class CharBufferTest {
 
     @Test
     fun testWrapCharSequenceBasic() {
-        logger.debug { "Testing CharBuffer.wrap(CharSequence) basic" }
         val sequence: CharSequence = "hello"
         val buffer = CharBuffer.wrap(sequence)
 
@@ -146,7 +136,6 @@ class CharBufferTest {
 
     @Test
     fun testWrapCharSequenceWithStartAndEnd() {
-        logger.debug { "Testing CharBuffer.wrap(CharSequence, start, end)" }
         val sequence: CharSequence = "abcdefgh"
         val start = 2 // 'c'
         val end = 5   // up to 'f' (exclusive), so 'c', 'd', 'e'
@@ -177,7 +166,6 @@ class CharBufferTest {
 
     @Test
     fun testWrapCharSequenceInvalidStartEnd() {
-        logger.debug { "Testing CharBuffer.wrap(CharSequence) with invalid start/end" }
         val sequence: CharSequence = "hello"
 
         assertFailsWith<IndexOutOfBoundsException>("Negative start") {
@@ -198,7 +186,6 @@ class CharBufferTest {
 
     @Test
     fun testGetBasic() {
-        logger.debug { "Testing CharBuffer.get() basic functionality" }
         val buffer = CharBuffer.wrap(charArrayOf('a', 'b', 'c'))
         assertEquals(0, buffer.position(), "Initial position should be 0")
 
@@ -215,7 +202,6 @@ class CharBufferTest {
 
     @Test
     fun testGetUnderflow() {
-        logger.debug { "Testing CharBuffer.get() underflow" }
         val buffer = CharBuffer.wrap(charArrayOf('x', 'y'))
         buffer.position = buffer.limit // Move position to the limit
 
@@ -232,7 +218,6 @@ class CharBufferTest {
 
     @Test
     fun testPutBasic() {
-        logger.debug { "Testing CharBuffer.put(Char) basic functionality" }
         val buffer = CharBuffer.allocate(3)
 
         assertSame(buffer, buffer.put('x'), "put() should return itself (1st put)")
@@ -254,7 +239,6 @@ class CharBufferTest {
 
     @Test
     fun testPutOverflow() {
-        logger.debug { "Testing CharBuffer.put(Char) overflow" }
         val buffer = CharBuffer.allocate(2)
         buffer.put('a')
         buffer.put('b')
@@ -273,7 +257,6 @@ class CharBufferTest {
 
     @Test
     fun testPutOnReadOnlyBuffer() {
-        logger.debug { "Testing CharBuffer.put(Char) on a read-only buffer" }
         val readOnlyBuffer = CharBuffer.wrap("test") // wrap(CharSequence) creates a read-only buffer
         assertTrue(readOnlyBuffer.isReadOnly(), "Buffer should be read-only")
 
@@ -292,7 +275,6 @@ class CharBufferTest {
 
     @Test
     fun testGetAbsoluteBasic() {
-        logger.debug { "Testing CharBuffer.getAbsolute(index) basic functionality" }
         val chars = charArrayOf('x', 'y', 'z')
         val buffer = CharBuffer.wrap(chars)
 
@@ -309,7 +291,6 @@ class CharBufferTest {
 
     @Test
     fun testGetAbsoluteOutOfBounds() {
-        logger.debug { "Testing CharBuffer.getAbsolute(index) with out-of-bounds indices" }
         val buffer = CharBuffer.wrap(charArrayOf('a', 'b', 'c')) // limit=3, capacity=3
 
         assertFailsWith<IndexOutOfBoundsException>("getAbsolute(-1)") {
@@ -337,7 +318,6 @@ class CharBufferTest {
 
     @Test
     fun testPutAbsoluteBasic() {
-        logger.debug { "Testing CharBuffer.putAbsolute(index, Char) basic functionality" }
         val buffer = CharBuffer.allocate(5)
         // Set some initial content using relative put then clear to reset position/limit for putAbsolute testing.
         // Note: After allocate, array has \u0000. We'll overwrite some.
@@ -366,7 +346,6 @@ class CharBufferTest {
 
     @Test
     fun testPutAbsoluteOutOfBounds() {
-        logger.debug { "Testing CharBuffer.putAbsolute(index, Char) with out-of-bounds indices" }
         val buffer = CharBuffer.allocate(3) // limit=3, capacity=3
 
         assertFailsWith<IndexOutOfBoundsException>("putAbsolute(-1, 'a')") {
@@ -400,7 +379,6 @@ class CharBufferTest {
 
     @Test
     fun testPutAbsoluteOnReadOnlyBuffer() {
-        logger.debug { "Testing CharBuffer.putAbsolute(index, Char) on a read-only buffer" }
         val readOnlyBuffer = CharBuffer.wrap("test") // wrap(CharSequence) creates a read-only buffer
         assertTrue(readOnlyBuffer.isReadOnly(), "Buffer should be read-only")
         val originalPosition = readOnlyBuffer.position()
@@ -428,7 +406,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkGetBasic() {
-        logger.debug { "Testing CharBuffer.get(CharArray, Int, Int) basic functionality" }
         val content = "abcdefgh"
         val buffer = CharBuffer.wrap(content.toCharArray())
         val destination = CharArray(5) { '?' } // Initialize with placeholder
@@ -452,7 +429,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkGetFullBuffer() {
-        logger.debug { "Testing CharBuffer.get(CharArray, Int, Int) to read full buffer" }
         val content = "short"
         val buffer = CharBuffer.wrap(content.toCharArray())
         val destination = CharArray(buffer.remaining())
@@ -465,7 +441,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkGetToEmptyDestination() {
-        logger.debug { "Testing CharBuffer.get(CharArray, Int, Int) with length 0" }
         val buffer = CharBuffer.wrap("test".toCharArray())
         val destination = CharArray(5) { '?' }
         val originalDestination = destination.copyOf()
@@ -478,7 +453,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkGetUnderflow() {
-        logger.debug { "Testing CharBuffer.get(CharArray, Int, Int) underflow" }
         val buffer = CharBuffer.wrap("abc".toCharArray())
         val destination = CharArray(5) { '?' }
         val originalDestination = destination.copyOf()
@@ -499,7 +473,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkGetDestinationOutOfBounds() {
-        logger.debug { "Testing CharBuffer.get(CharArray, Int, Int) with destination out of bounds" }
         val buffer = CharBuffer.wrap("abcdef".toCharArray())
         val destination = CharArray(3)
         val initialPosition = buffer.position()
@@ -530,7 +503,6 @@ class CharBufferTest {
     // 1. put(src: CharArray, offset: Int, length: Int)
     @Test
     fun testBulkPutCharArrayBasic() {
-        logger.debug { "Testing CharBuffer.put(CharArray, Int, Int) basic" }
         val buffer = CharBuffer.allocate(10)
         val source = "hello".toCharArray()
         val offset = 0
@@ -547,7 +519,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharArrayFull() {
-        logger.debug { "Testing CharBuffer.put(CharArray, Int, Int) to fill buffer" }
         val buffer = CharBuffer.allocate(5)
         val source = "world".toCharArray()
 
@@ -561,7 +532,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharArrayOverflow() {
-        logger.debug { "Testing CharBuffer.put(CharArray, Int, Int) overflow" }
         val buffer = CharBuffer.allocate(3)
         val source = "longstring".toCharArray()
         val initialPosition = buffer.position()
@@ -574,7 +544,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharArraySourceOutOfBounds() {
-        logger.debug { "Testing CharBuffer.put(CharArray, Int, Int) source out of bounds" }
         val buffer = CharBuffer.allocate(10)
         val source = "short".toCharArray()
         val initialPosition = buffer.position()
@@ -602,7 +571,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharArrayOnReadOnlyBuffer() {
-        logger.debug { "Testing CharBuffer.put(CharArray, Int, Int) on read-only buffer" }
         val buffer = CharBuffer.allocate(5).asReadOnlyBuffer()
         val source = "test".toCharArray()
         val initialPosition = buffer.position()
@@ -616,7 +584,6 @@ class CharBufferTest {
     // 2. put(src: CharBuffer)
     @Test
     fun testBulkPutCharBufferBasic() {
-        logger.debug { "Testing CharBuffer.put(CharBuffer) basic" }
         val destBuffer = CharBuffer.allocate(10)
         val sourceBuffer = CharBuffer.wrap("hello".toCharArray())
         val sourceRemaining = sourceBuffer.remaining()
@@ -632,7 +599,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharBufferOverflow() {
-        logger.debug { "Testing CharBuffer.put(CharBuffer) overflow" }
         val destBuffer = CharBuffer.allocate(3)
         val sourceBuffer = CharBuffer.wrap("longstring".toCharArray())
         val destInitialPosition = destBuffer.position()
@@ -647,7 +613,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharBufferToSelf() {
-        logger.debug { "Testing CharBuffer.put(CharBuffer) to self" }
         val buffer = CharBuffer.allocate(10)
         // The current implementation uses a generic Exception.
         // Java NIO throws IllegalArgumentException.
@@ -658,7 +623,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutCharBufferOnReadOnlyDest() {
-        logger.debug { "Testing CharBuffer.put(CharBuffer) on read-only destination" }
         val destBuffer = CharBuffer.allocate(10).asReadOnlyBuffer()
         val sourceBuffer = CharBuffer.wrap("test".toCharArray())
         val destInitialPosition = destBuffer.position()
@@ -674,7 +638,6 @@ class CharBufferTest {
     // 3. put(src: String)
     @Test
     fun testBulkPutStringBasic() {
-        logger.debug { "Testing CharBuffer.put(String) basic" }
         val buffer = CharBuffer.allocate(10)
         val sourceString = "kotlin"
         
@@ -687,7 +650,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutStringOverflow() {
-        logger.debug { "Testing CharBuffer.put(String) overflow" }
         val buffer = CharBuffer.allocate(3)
         val sourceString = "toolong"
         val initialPosition = buffer.position()
@@ -700,7 +662,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutStringOnReadOnlyBuffer() {
-        logger.debug { "Testing CharBuffer.put(String) on read-only buffer" }
         val buffer = CharBuffer.allocate(10).asReadOnlyBuffer()
         val sourceString = "test"
         val initialPosition = buffer.position()
@@ -714,7 +675,6 @@ class CharBufferTest {
     // 4. put(src: String, start: Int, end: Int)
     @Test
     fun testBulkPutStringRangeBasic() {
-        logger.debug { "Testing CharBuffer.put(String, Int, Int) basic" }
         val buffer = CharBuffer.allocate(10)
         val sourceString = "substringexample"
         val start = 3 // "string"
@@ -730,7 +690,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutStringRangeOverflow() {
-        logger.debug { "Testing CharBuffer.put(String, Int, Int) overflow" }
         val buffer = CharBuffer.allocate(3)
         val sourceString = "longsubstring"
         val start = 0
@@ -745,7 +704,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutStringRangeSourceOutOfBounds() {
-        logger.debug { "Testing CharBuffer.put(String, Int, Int) source out of bounds" }
         val buffer = CharBuffer.allocate(10)
         val sourceString = "src" // length 3
         val initialPosition = buffer.position()
@@ -773,7 +731,6 @@ class CharBufferTest {
 
     @Test
     fun testBulkPutStringRangeOnReadOnlyBuffer() {
-        logger.debug { "Testing CharBuffer.put(String, Int, Int) on read-only buffer" }
         val buffer = CharBuffer.allocate(10).asReadOnlyBuffer()
         val sourceString = "readonlytest"
         val initialPosition = buffer.position()

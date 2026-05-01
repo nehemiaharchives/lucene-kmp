@@ -2,11 +2,17 @@ package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.test.*
 
 class ThreadPoolExecutorTest {
 
     private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp() {
+        configureTestLogging()
+    }
 
     private fun newExecutor(
         core: Int = 1,

@@ -1,11 +1,10 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.test.*
-import org.gnit.lucenekmp.jdkport.CheckedOutputStream
-import org.gnit.lucenekmp.jdkport.Checksum
 import org.gnit.lucenekmp.jdkport.OutputStream // Assuming this is the base OutputStream in the jdkport
 import okio.IOException // Corrected IOException import
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
 
 // Mock implementations will be added here later
 
@@ -74,14 +73,13 @@ class MockChecksum : Checksum {
 }
 
 class CheckedOutputStreamTest {
-    private val logger = KotlinLogging.logger {}
-
     private lateinit var mockOut: MockOutputStream
     private lateinit var mockChecksum: MockChecksum
     private lateinit var checkedOut: CheckedOutputStream
 
     @BeforeTest
     fun setUp() {
+        configureTestLogging()
         mockOut = MockOutputStream()
         mockChecksum = MockChecksum()
         checkedOut = CheckedOutputStream(mockOut, mockChecksum)
@@ -89,7 +87,6 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testWriteSingleByte() {
-        logger.info { "Test: Writing a single byte" }
         val byteToWrite = 'A'.code
         checkedOut.write(byteToWrite)
 
@@ -100,7 +97,6 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testWriteByteArray() {
-        logger.info { "Test: Writing a byte array" }
         val data = "Hello".encodeToByteArray()
         checkedOut.write(data)
 
@@ -112,7 +108,6 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testWriteByteArrayWithOffsetAndLength() {
-        logger.info { "Test: Writing a byte array with offset and length" }
         val data = "WorldData".encodeToByteArray()
         // Write "orld" from "WorldData"
         // offset = 1, len = 4
@@ -126,7 +121,6 @@ class CheckedOutputStreamTest {
     
     @Test
     fun testGetChecksum() {
-        logger.info { "Test: Retrieving checksum" }
         val data = "Test".encodeToByteArray()
         checkedOut.write(data)
 
@@ -137,7 +131,6 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testIOExceptionDuringWrite() {
-        logger.info { "Test: IOException during write" }
         mockOut.throwOnWrite = true
         val byteToWrite = 'X'.code
         
@@ -150,14 +143,12 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testFlush() {
-        logger.info { "Test: Flushing the stream" }
         checkedOut.flush()
         assertTrue(mockOut.flushCalled, "flush() should be called on the underlying stream")
     }
 
     @Test
     fun testClose() {
-        logger.info { "Test: Closing the stream" }
         assertFalse(mockOut.isStreamClosed(), "Underlying stream should not be closed initially")
 
         checkedOut.close() // This should close mockOut
@@ -175,7 +166,6 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testIsClosedBehavior() { // Renamed to reflect behavior testing
-        logger.info { "Test: Checking stream closed state via behavior" }
         // Check initial state: should not throw
         try {
             checkedOut.write('A'.code) // A write should succeed
@@ -195,7 +185,6 @@ class CheckedOutputStreamTest {
 
     @Test
     fun testWriteToClosedStream() {
-        logger.info { "Test: Writing to a closed stream" }
         checkedOut.close() // Close the CheckedOutputStream
 
         // Verify the underlying mock stream is also closed

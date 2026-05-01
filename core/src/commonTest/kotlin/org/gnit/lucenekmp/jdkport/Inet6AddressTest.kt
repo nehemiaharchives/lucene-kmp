@@ -6,10 +6,6 @@ import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import kotlin.test.assertContentEquals
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
-
 class Inet6AddressTest {
 
     @Test

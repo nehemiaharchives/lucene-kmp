@@ -6,12 +6,19 @@ import okio.Buffer
 import okio.Source
 import okio.Timeout
 import okio.buffer
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 
 class KIOSourceInputStreamTest {
 
     private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp() {
+        configureTestLogging()
+    }
 
     private fun createTestStream(data: ByteArray): OkioSourceInputStream {
         val source = Buffer().apply { write(data) }

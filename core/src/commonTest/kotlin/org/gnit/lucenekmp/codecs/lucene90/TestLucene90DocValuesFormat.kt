@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.analysis.standard.StandardAnalyzer
@@ -25,7 +24,6 @@ import org.gnit.lucenekmp.index.IndexWriter
 import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.index.IndexableField
 import org.gnit.lucenekmp.index.LeafReader
-import org.gnit.lucenekmp.index.MultiDocValues
 import org.gnit.lucenekmp.index.NumericDocValues
 import org.gnit.lucenekmp.index.SerialMergeScheduler
 import org.gnit.lucenekmp.index.SortedDocValues
@@ -51,7 +49,6 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.BytesRefBuilder
 import org.gnit.lucenekmp.util.CollectionUtil
-import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.test.Test
@@ -64,11 +61,6 @@ import kotlin.test.assertTrue
 /** Tests Lucene90DocValuesFormat  */
 open class TestLucene90DocValuesFormat : BaseCompressingDocValuesFormatTestCase() {
 
-    init {
-        configureTestLogging()
-    }
-
-    private val logger = KotlinLogging.logger {}
     override val codec: Codec = TestUtil.getDefaultCodec()
 
     // TODO: these big methods can easily blow up some of the other ram-hungry codecs...

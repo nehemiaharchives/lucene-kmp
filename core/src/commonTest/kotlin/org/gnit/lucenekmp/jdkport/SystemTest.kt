@@ -1,9 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.test.*
-import io.github.oshai.kotlinlogging.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
 
 class SystemTest {
     @Test
@@ -12,7 +9,6 @@ class SystemTest {
         val defaultValue = "default"
         val value = System.getProperty(key, defaultValue)
         assertEquals(defaultValue, value)
-        logger.debug { "testGetPropertyDefault passed" }
     }
 
     @Test

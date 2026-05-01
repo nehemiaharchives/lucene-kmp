@@ -1,18 +1,11 @@
 package org.gnit.lucenekmp.internal.vectorization
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
-import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestVectorizationProvider : LuceneTestCase() {
-    init {
-        configureTestLogging()
-    }
-
-    private val logger = KotlinLogging.logger {}
 
     @Test
     fun testCallerOfGetter() {

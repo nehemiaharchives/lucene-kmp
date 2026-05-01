@@ -16,7 +16,6 @@
  */
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.FileNotFoundException
 import okio.IOException
 import org.gnit.lucenekmp.analysis.Analyzer
@@ -75,8 +74,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
-
-private val testIndexWriterExceptionsLogger = KotlinLogging.logger {}
 
 // @SuppressCodecs("SimpleText") // too slow here
 @OptIn(ExperimentalAtomicApi::class)
@@ -919,7 +916,6 @@ class TestIndexWriterExceptions : LuceneTestCase() {
         override fun eval(dir: MockDirectoryWrapper) {
             if (doFail && didFail == false && dir.isSyncing) {
                 didFail = true
-                testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.inject-sync-failure didFail=$didFail" }
                 if (VERBOSE) {
                     println("TEST: now throw exc:")
                 }
@@ -942,7 +938,6 @@ class TestIndexWriterExceptions : LuceneTestCase() {
         val dir = newMockDirectory()
         val failure = FailOnlyInSync()
         dir.failOn(failure)
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.start" }
 
         val writer =
             IndexWriter(
@@ -954,42 +949,29 @@ class TestIndexWriterExceptions : LuceneTestCase() {
             )
 
         for (i in 0 until 23) {
-            testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.addDoc.start i=$i" }
             addDoc(writer)
-            testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.addDoc.done i=$i" }
             if ((i - 1) % 2 == 0) {
                 failure.setDoFail()
-                testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.commit.start i=$i" }
                 try {
                     writer.commit()
-                    testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.commit.done i=$i result=success" }
                 } catch (ioe: IOException) {
                     // expected
-                    testIndexWriterExceptionsLogger.debug(ioe) { "phase=testExceptionDuringSync.commit.done i=$i result=expected-ioexception" }
                 } finally {
                     failure.clearDoFail()
-                    testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.commit.finally i=$i didFail=${failure.didFail}" }
                 }
             }
         }
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.cms.sync.start didFail=${failure.didFail}" }
         runBlocking { (writer.config.mergeScheduler as ConcurrentMergeScheduler).sync() }
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.cms.sync.done didFail=${failure.didFail}" }
         assertTrue(failure.didFail)
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.writer.close.start" }
         writer.close()
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.writer.close.done" }
 
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.reader.open.start" }
         val reader = DirectoryReader.open(dir)
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.reader.open.done numDocs=${reader.numDocs()}" }
         assertEquals(23, reader.numDocs())
         reader.close()
         dir.close()
-        testIndexWriterExceptionsLogger.debug { "phase=testExceptionDuringSync.done" }
     }
 
-    private inner class FailOnlyInCommit(
+    private class FailOnlyInCommit(
         private val dontFailDuringGlobalFieldMap: Boolean,
         private val dontFailDuringSyncMetadata: Boolean,
         private val stage: String
@@ -1237,7 +1219,7 @@ class TestIndexWriterExceptions : LuceneTestCase() {
     // LUCENE-1044: Simulate checksum error in segments_N
     @Test
     fun testSegmentsChecksumError() {
-        val dir = newDirectory() as BaseDirectoryWrapper
+        val dir = newDirectory()
         dir.checkIndexOnClose = false // we corrupt the index
 
         var writer: IndexWriter?
@@ -1280,7 +1262,7 @@ class TestIndexWriterExceptions : LuceneTestCase() {
     // IOException trying to open the index:
     @Test
     fun testSimulatedCorruptIndex1() {
-        val dir = newDirectory() as BaseDirectoryWrapper
+        val dir = newDirectory()
         dir.checkIndexOnClose = false // we are corrupting it!
 
         var writer: IndexWriter?

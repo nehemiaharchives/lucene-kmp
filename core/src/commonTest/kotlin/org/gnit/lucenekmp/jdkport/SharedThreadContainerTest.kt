@@ -1,18 +1,12 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-
-private val logger = KotlinLogging.logger {}
 
 class SharedThreadContainerTest {
 
@@ -40,7 +34,6 @@ class SharedThreadContainerTest {
 
         // threads() should contain our job (jobs treated as platform threads here)
         val threads = container.threads().toList()
-        logger.debug { "threads=$threads" }
         assertTrue(threads.contains(job))
 
         job.cancel()

@@ -4,10 +4,17 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertNull
 import io.github.oshai.kotlinlogging.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 
 class IPAddressUtilTest {
+
+    private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp() {
+        configureTestLogging()
+    }
 
     @Test
     fun testConvertFromIPv4MappedAddress_valid() {

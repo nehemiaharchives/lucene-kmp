@@ -1,13 +1,18 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertContentEquals
 
 class StringExtTest {
-    val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp() {
+        configureTestLogging()
+    }
 
     @Test
     fun testCodePointsBasicMultiLingualPlane() {
@@ -86,7 +91,6 @@ class StringExtTest {
         )
         val str = String.fromCharArray(arr, 1, 3)
         val codePoints = str.codePointSequence().joinToString(",")
-        logger.debug { "codePoints: $codePoints" }
         assertEquals("ΒΓΔ", str)
     }
 

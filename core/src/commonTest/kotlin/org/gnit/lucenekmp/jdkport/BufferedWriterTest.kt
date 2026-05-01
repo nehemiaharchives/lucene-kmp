@@ -1,15 +1,11 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.tests.junitport.assertEquals
 import kotlin.test.Test
 import org.gnit.lucenekmp.jdkport.Charset // Explicit import for Charset
 
 class BufferedWriterTest {
-
-    // per issue description, though direct logging in tests might not be needed
-    private val logger = KotlinLogging.logger {}
 
     @Test
     fun testWrite() {

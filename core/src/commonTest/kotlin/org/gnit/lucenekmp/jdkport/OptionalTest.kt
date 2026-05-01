@@ -1,9 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.test.*
-
-private val logger = KotlinLogging.logger {}
 
 class OptionalTest {
     // Test methods will be added here

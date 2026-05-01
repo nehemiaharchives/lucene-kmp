@@ -1,13 +1,21 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
-private val logger = KotlinLogging.logger {}
-
 class TimeUnitTest {
+
+    private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp() {
+        configureTestLogging()
+    }
+
     @Test
     fun testTimeUnitConversion() {
         assertEquals(1000L, TimeUnit.SECONDS.toMillis(1))

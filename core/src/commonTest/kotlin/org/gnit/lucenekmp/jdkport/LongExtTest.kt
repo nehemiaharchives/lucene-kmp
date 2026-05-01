@@ -2,17 +2,22 @@ package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+
+
 class LongExtTest {
-    init {
-        configureTestLogging()
-    }
 
     private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setup() {
+        configureTestLogging()
+    }
 
     @Test
     fun testCompare() {

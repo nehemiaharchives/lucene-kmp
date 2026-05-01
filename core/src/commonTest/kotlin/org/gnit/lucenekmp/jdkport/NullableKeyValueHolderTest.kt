@@ -1,15 +1,24 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
-private val logger = KotlinLogging.logger {}
+
 
 class NullableKeyValueHolderTest {
+    
+    private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp(){
+        configureTestLogging()
+    }
 
     @Test
     fun testGetKey() {

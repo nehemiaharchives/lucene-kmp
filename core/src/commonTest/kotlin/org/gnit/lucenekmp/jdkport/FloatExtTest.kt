@@ -1,11 +1,18 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.test.*
 
-private val logger = KotlinLogging.logger {}
-
 class FloatExtTest {
+
+    private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setup() {
+        configureTestLogging()
+    }
+
     @Test
     fun testCompare() {
         logger.debug { "Testing Float.compare" }

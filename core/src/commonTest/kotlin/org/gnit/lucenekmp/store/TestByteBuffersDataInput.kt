@@ -6,7 +6,6 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomNumbers
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.ArrayUtil
-import org.gnit.lucenekmp.util.IOConsumer
 import org.gnit.lucenekmp.jdkport.ByteBuffer
 import org.gnit.lucenekmp.jdkport.ByteOrder
 import org.gnit.lucenekmp.util.configureTestLogging

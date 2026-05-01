@@ -1,9 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.test.*
-import io.github.oshai.kotlinlogging.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
 
 class TreeMapTest {
     private fun newMap(vararg entries: Pair<Int, String>): TreeMap<Int, String> {
@@ -21,7 +18,6 @@ class TreeMapTest {
         map[2] = "two"
         assertEquals("one", map[1])
         assertEquals("two", map[2])
-        logger.debug { "testPutAndGet passed" }
     }
 
     @Test
@@ -30,7 +26,6 @@ class TreeMapTest {
         map[1] = "one"
         map.remove(1)
         assertNull(map[1])
-        logger.debug { "testRemove passed" }
     }
 
     @Test
@@ -40,7 +35,6 @@ class TreeMapTest {
         map[1] = "one"
         map[3] = "three"
         assertEquals(listOf(1, 2, 3), map.keys.toList())
-        logger.debug { "testOrder passed" }
     }
 
     @Test

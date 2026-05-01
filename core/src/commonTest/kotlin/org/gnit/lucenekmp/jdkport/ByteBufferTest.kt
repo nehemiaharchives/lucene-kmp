@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.random.Random
 import kotlin.time.TimeSource
 import kotlin.test.Test
@@ -11,13 +10,17 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import okio.IOException
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 
 class ByteBufferTest {
-    init {
+
+    private val logger = KotlinLogging.logger {  }
+
+    @BeforeTest
+    fun setUp() {
         configureTestLogging()
     }
-
-    private val logger = KotlinLogging.logger {}
 
     @Test
     fun testAllocate() {

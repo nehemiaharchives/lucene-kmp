@@ -1,13 +1,5 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.FilterCodec
@@ -29,19 +21,14 @@ import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.index.BasePointsFormatTestCase
 import org.gnit.lucenekmp.tests.index.MockRandomMergePolicy
 import org.gnit.lucenekmp.tests.util.TestUtil
-import org.gnit.lucenekmp.util.NativeCrashProbe
 import org.gnit.lucenekmp.util.bkd.BKDConfig
-import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.TimeSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestLucene90PointsFormat : BasePointsFormatTestCase() {
-    private val logger = KotlinLogging.logger {}
     override val codec: Codec
     private val maxPointsInLeafNode: Int
 

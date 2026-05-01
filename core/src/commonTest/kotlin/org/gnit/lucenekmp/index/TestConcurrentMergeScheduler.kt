@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
@@ -57,8 +56,6 @@ Problems found:
 
 @OptIn(ExperimentalAtomicApi::class)
 class TestConcurrentMergeScheduler : LuceneTestCase() {
-
-    private val logger = KotlinLogging.logger { }
 
     private class FailOnlyOnFlush : MockDirectoryWrapper.Failure() {
         var hitExc: Boolean = false
@@ -540,7 +537,6 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
     }
 
     private class TrackingCMS(val atLeastOneMerge: CountDownLatch) : ConcurrentMergeScheduler() {
-        private val logger = KotlinLogging.logger {}
         var totMergedBytes: Long = 0
 
         init {

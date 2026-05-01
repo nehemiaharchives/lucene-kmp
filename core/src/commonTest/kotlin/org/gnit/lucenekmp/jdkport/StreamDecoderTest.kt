@@ -4,13 +4,23 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.Buffer
 import okio.BufferedSource
 import okio.IOException
+import org.gnit.lucenekmp.util.configureTestLogging
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFailsWith
 
+
+
 class StreamDecoderTest {
+
     private val logger = KotlinLogging.logger {}
+
+    @BeforeTest
+    fun setUp() {
+        configureTestLogging()
+    }
 
     private fun byteArraySource(data: ByteArray): BufferedSource = Buffer().apply { write(data) }
 
