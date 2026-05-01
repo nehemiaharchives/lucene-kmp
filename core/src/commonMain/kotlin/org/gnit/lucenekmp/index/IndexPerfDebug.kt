@@ -5,6 +5,7 @@ import org.gnit.lucenekmp.jdkport.withLock
 
 internal object IndexPerfDebug {
     private val lock = ReentrantLock()
+    private var enabled = false
 
     private var openFromWriterCalls = 0L
     private var openFromWriterNrtIsCurrentMs = 0L
@@ -34,6 +35,15 @@ internal object IndexPerfDebug {
     private var doFlushFlushSegmentMs = 0L
     private var doFlushDoAfterFlushMs = 0L
     private var doFlushAfterSegmentsFlushedMs = 0L
+
+    fun enable() {
+        reset()
+        enabled = true
+    }
+
+    fun disable() {
+        enabled = false
+    }
 
     fun reset() {
         lock.withLock {
@@ -70,6 +80,7 @@ internal object IndexPerfDebug {
         getReaderMs: Long,
         versionCheckMs: Long
     ) {
+        if (!enabled) return
         lock.withLock {
             openFromWriterCalls++
             openFromWriterNrtIsCurrentMs += nrtIsCurrentMs
@@ -89,6 +100,7 @@ internal object IndexPerfDebug {
         finishFullFlushMs: Long,
         maybeMergeMs: Long
     ) {
+        if (!enabled) return
         lock.withLock {
             getReaderCalls++
             getReaderBeforeFlushMs += beforeFlushMs
@@ -109,6 +121,7 @@ internal object IndexPerfDebug {
         waitForFlushMs: Long,
         freezeGlobalBufferMs: Long
     ) {
+        if (!enabled) return
         lock.withLock {
             flushAllThreadsCalls++
             flushAllThreadsMarkFullFlushMs += markFullFlushMs
@@ -125,6 +138,7 @@ internal object IndexPerfDebug {
         doAfterFlushMs: Long,
         afterSegmentsFlushedMs: Long
     ) {
+        if (!enabled) return
         lock.withLock {
             doFlushCalls++
             doFlushNextPendingFlushMs += nextPendingFlushMs
@@ -136,10 +150,14 @@ internal object IndexPerfDebug {
     }
 
     fun snapshot(): String =
-        lock.withLock {
-            "substep=open_from_writer calls=$openFromWriterCalls nrtIsCurrentMs=$openFromWriterNrtIsCurrentMs getReaderMs=$openFromWriterGetReaderMs versionCheckMs=$openFromWriterVersionCheckMs " +
-                "substep=get_reader calls=$getReaderCalls beforeFlushMs=$getReaderBeforeFlushMs flushAllThreadsMs=$getReaderFlushAllThreadsMs publishFlushedSegmentsMs=$getReaderPublishFlushedSegmentsMs processEventsMs=$getReaderProcessEventsMs applyDeletesMs=$getReaderApplyDeletesMs writeReaderPoolMs=$getReaderWriteReaderPoolMs openReaderMs=$getReaderOpenReaderMs finishFullFlushMs=$getReaderFinishFullFlushMs maybeMergeMs=$getReaderMaybeMergeMs " +
-                "substep=flush_all_threads calls=$flushAllThreadsCalls markFullFlushMs=$flushAllThreadsMarkFullFlushMs maybeFlushMs=$flushAllThreadsMaybeFlushMs waitForFlushMs=$flushAllThreadsWaitForFlushMs freezeGlobalBufferMs=$flushAllThreadsFreezeGlobalBufferMs " +
-                "substep=do_flush calls=$doFlushCalls nextPendingFlushMs=$doFlushNextPendingFlushMs prepareTicketMs=$doFlushPrepareTicketMs flushSegmentMs=$doFlushFlushSegmentMs doAfterFlushMs=$doFlushDoAfterFlushMs afterSegmentsFlushedMs=$doFlushAfterSegmentsFlushedMs"
+        if (!enabled) {
+            "substep=index_perf_debug disabled=true"
+        } else {
+            lock.withLock {
+                "substep=open_from_writer calls=$openFromWriterCalls nrtIsCurrentMs=$openFromWriterNrtIsCurrentMs getReaderMs=$openFromWriterGetReaderMs versionCheckMs=$openFromWriterVersionCheckMs " +
+                    "substep=get_reader calls=$getReaderCalls beforeFlushMs=$getReaderBeforeFlushMs flushAllThreadsMs=$getReaderFlushAllThreadsMs publishFlushedSegmentsMs=$getReaderPublishFlushedSegmentsMs processEventsMs=$getReaderProcessEventsMs applyDeletesMs=$getReaderApplyDeletesMs writeReaderPoolMs=$getReaderWriteReaderPoolMs openReaderMs=$getReaderOpenReaderMs finishFullFlushMs=$getReaderFinishFullFlushMs maybeMergeMs=$getReaderMaybeMergeMs " +
+                    "substep=flush_all_threads calls=$flushAllThreadsCalls markFullFlushMs=$flushAllThreadsMarkFullFlushMs maybeFlushMs=$flushAllThreadsMaybeFlushMs waitForFlushMs=$flushAllThreadsWaitForFlushMs freezeGlobalBufferMs=$flushAllThreadsFreezeGlobalBufferMs " +
+                    "substep=do_flush calls=$doFlushCalls nextPendingFlushMs=$doFlushNextPendingFlushMs prepareTicketMs=$doFlushPrepareTicketMs flushSegmentMs=$doFlushFlushSegmentMs doAfterFlushMs=$doFlushDoAfterFlushMs afterSegmentsFlushedMs=$doFlushAfterSegmentsFlushedMs"
+            }
         }
 }

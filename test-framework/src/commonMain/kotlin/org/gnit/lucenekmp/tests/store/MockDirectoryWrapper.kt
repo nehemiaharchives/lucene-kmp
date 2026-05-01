@@ -1,12 +1,5 @@
 package org.gnit.lucenekmp.tests.store
 
-import org.gnit.lucenekmp.util.getLogger
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.yield
 import okio.FileNotFoundException
 import okio.IOException
 import org.gnit.lucenekmp.index.DirectoryReader
@@ -36,6 +29,9 @@ import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.ThrottledIndexOutput
 import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.IOUtils
+import org.gnit.lucenekmp.jdkport.Thread
+import org.gnit.lucenekmp.util.getLogger
+import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
@@ -89,9 +85,9 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     private var createdFiles: MutableSet<String>? = null
     private val stateLock = ReentrantLock()
     private var openFilesForWrite: MutableSet<String> = mutableSetOf()
-    private val openLocksMutex = Mutex()
+    private val openLocksLock = ReentrantLock()
     private val openLocks: MutableMap<String, RuntimeException> = mutableMapOf()
-    private val openFilesMutex = Mutex()
+    private val openFilesLock = ReentrantLock()
 
     @Volatile
     var crashed: Boolean = false
@@ -152,7 +148,10 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     private var openFilesDeleted: MutableSet<String>? = null
 
     private fun <T> withOpenFilesLock(action: () -> T): T =
-        runBlocking { openFilesMutex.withLock { action() } }
+        openFilesLock.withLock(action)
+
+    private fun <T> withOpenLocksLock(action: () -> T): T =
+        openLocksLock.withLock(action)
 
     private inline fun <T> withStateLock(action: () -> T): T {
         stateLock.lock()
@@ -668,11 +667,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     fun clearCrash() {
         crashed = false
-        runBlocking {
-            openLocksMutex.withLock {
-                openLocks.clear()
-            }
-        }
+        withOpenLocksLock { openLocks.clear() }
     }
 
     @Throws(IOException::class)
@@ -686,9 +681,9 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
             val ioe =
                 IOException("a random IOException" + (if (message == null) "" else " ($message)"))
             if (LuceneTestCase.VERBOSE) {
-                val jobName = runBlocking { currentCoroutineContext()[Job]?.toString() ?: "unknown" }
+                val threadName = Thread.currentThread().getName()
                 println(
-                    (jobName
+                    (threadName
                             + ": MockDirectoryWrapper: now throw random exception"
                             + (if (message == null) "" else " ($message)"))
                 )
@@ -702,9 +697,9 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     fun maybeThrowIOExceptionOnOpen(name: String) {
         if (randomState.nextDouble() < randomIOExceptionRateOnOpen) {
             if (LuceneTestCase.VERBOSE) {
-                val jobName = runBlocking { currentCoroutineContext()[Job]?.toString() ?: "unknown" }
+                val threadName = Thread.currentThread().getName()
                 println(
-                    (jobName
+                    (threadName
                             + ": MockDirectoryWrapper: now throw random exception during open file="
                             + name)
                 )
@@ -791,7 +786,7 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
 
     private fun maybeYield() {
         if (randomState.nextBoolean()) {
-            runBlocking { yield() }
+            Thread.yield()
         }
     }
 
@@ -1063,11 +1058,8 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
                     cause
                 )
             }
-            val openLocksSnapshot: Map<String, RuntimeException> = runBlocking {
-                openLocksMutex.withLock {
-                    openLocks.toMap()
-                }
-            }
+            val openLocksSnapshot: Map<String, RuntimeException> =
+                withOpenLocksLock { openLocks.toMap() }
             if (openLocksSnapshot.isNotEmpty()) {
                 var cause: Exception? = null
                 val stacktraces: Iterator<RuntimeException> =

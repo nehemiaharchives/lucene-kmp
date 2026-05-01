@@ -20,6 +20,8 @@ import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
+internal expect fun platformThreadYield()
+
 /**
  * port of java.lang.Thread
  */
@@ -201,9 +203,7 @@ open class Thread : Runnable {
         }
 
         fun yield() {
-            runBlocking {
-                kotlinx.coroutines.yield()
-            }
+            platformThreadYield()
         }
     }
 }
