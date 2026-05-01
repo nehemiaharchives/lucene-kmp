@@ -1,7 +1,9 @@
 package org.gnit.lucenekmp.index
 
 import okio.IOException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.assert
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.store.Directory
 
 /**
@@ -20,6 +22,7 @@ open class SnapshotDeletionPolicy(
     /** Wrapped [IndexDeletionPolicy]  */
     private val primary: IndexDeletionPolicy
 ) : IndexDeletionPolicy() {
+    private val lock = ReentrantLock()
 
     /** Records how many snapshots are held against each commit generation */
     protected val refCounts: MutableMap<Long, Int> = HashMap()
@@ -35,21 +38,25 @@ open class SnapshotDeletionPolicy(
 
     @Throws(IOException::class)
     override fun onCommit(commits: MutableList<out IndexCommit>) {
-        primary.onCommit(wrapCommits(commits))
-        lastCommit = commits[commits.size - 1]
+        lock.withLock {
+            primary.onCommit(wrapCommits(commits))
+            lastCommit = commits[commits.size - 1]
+        }
     }
 
     @Throws(IOException::class)
     override fun onInit(commits: MutableList<out IndexCommit>) {
-        initCalled = true
-        primary.onInit(wrapCommits(commits))
-        for (commit in commits) {
-            if (refCounts.containsKey(commit.generation)) {
-                indexCommits[commit.generation] = commit
+        lock.withLock {
+            initCalled = true
+            primary.onInit(wrapCommits(commits))
+            for (commit in commits) {
+                if (refCounts.containsKey(commit.generation)) {
+                    indexCommits[commit.generation] = commit
+                }
             }
-        }
-        if (commits.isNotEmpty()) {
-            lastCommit = commits[commits.size - 1]
+            if (commits.isNotEmpty()) {
+                lastCommit = commits[commits.size - 1]
+            }
         }
     }
 
@@ -60,42 +67,48 @@ open class SnapshotDeletionPolicy(
      */
     @Throws(IOException::class)
     open fun release(commit: IndexCommit) {
-        val gen = commit.generation
-        releaseGen(gen)
+        lock.withLock {
+            val gen = commit.generation
+            releaseGen(gen)
+        }
     }
 
     /** Release a snapshot by generation.  */
     @Throws(IOException::class)
     protected fun releaseGen(gen: Long) {
-        if (!initCalled) {
-            throw IllegalStateException(
-                "this instance is not being used by IndexWriter; be sure to use the instance returned from writer.getConfig().getIndexDeletionPolicy()"
-            )
-        }
-        val refCount = refCounts[gen]
-            ?: throw IllegalArgumentException("commit gen=$gen is not currently snapshotted")
-        assert(refCount > 0)
-        val newRefCount = refCount - 1
-        if (newRefCount == 0) {
-            refCounts.remove(gen)
-            indexCommits.remove(gen)
-        } else {
-            refCounts[gen] = newRefCount
+        lock.withLock {
+            if (!initCalled) {
+                throw IllegalStateException(
+                    "this instance is not being used by IndexWriter; be sure to use the instance returned from writer.getConfig().getIndexDeletionPolicy()"
+                )
+            }
+            val refCount = refCounts[gen]
+                ?: throw IllegalArgumentException("commit gen=$gen is not currently snapshotted")
+            assert(refCount > 0)
+            val newRefCount = refCount - 1
+            if (newRefCount == 0) {
+                refCounts.remove(gen)
+                indexCommits.remove(gen)
+            } else {
+                refCounts[gen] = newRefCount
+            }
         }
     }
 
     /** Increments the refCount for this [IndexCommit].  */
     protected fun incRef(ic: IndexCommit) {
-        val gen = ic.generation
-        val refCount = refCounts[gen]
-        val refCountInt: Int =
-            if (refCount == null) {
-                indexCommits[gen] = lastCommit!!
-                0
-            } else {
-                refCount
-            }
-        refCounts[gen] = refCountInt + 1
+        lock.withLock {
+            val gen = ic.generation
+            val refCount = refCounts[gen]
+            val refCountInt: Int =
+                if (refCount == null) {
+                    indexCommits[gen] = lastCommit!!
+                    0
+                } else {
+                    refCount
+                }
+            refCounts[gen] = refCountInt + 1
+        }
     }
 
     /**
@@ -113,31 +126,36 @@ open class SnapshotDeletionPolicy(
      */
     @Throws(IOException::class)
     open fun snapshot(): IndexCommit {
-        if (!initCalled) {
-            throw IllegalStateException(
-                "this instance is not being used by IndexWriter; be sure to use the instance returned from writer.getConfig().getIndexDeletionPolicy()"
-            )
+        return lock.withLock {
+            if (!initCalled) {
+                throw IllegalStateException(
+                    "this instance is not being used by IndexWriter; be sure to use the instance returned from writer.getConfig().getIndexDeletionPolicy()"
+                )
+            }
+            val lastCommit = lastCommit ?: throw IllegalStateException("No index commit to snapshot")
+
+            incRef(lastCommit)
+
+            lastCommit
         }
-        val lastCommit = lastCommit ?: throw IllegalStateException("No index commit to snapshot")
-
-        incRef(lastCommit)
-
-        return lastCommit
     }
 
     /** Returns all IndexCommits held by at least one snapshot.  */
     fun getSnapshots(): MutableList<IndexCommit> {
-        return ArrayList(indexCommits.values)
+        return lock.withLock {
+            ArrayList(indexCommits.values)
+        }
     }
 
     /** Returns the total number of snapshots currently held.  */
     fun getSnapshotCount(): Int {
-        var total = 0
-        for (refCount in refCounts.values) {
-            total += refCount
+        return lock.withLock {
+            var total = 0
+            for (refCount in refCounts.values) {
+                total += refCount
+            }
+            total
         }
-
-        return total
     }
 
     /**
@@ -145,7 +163,9 @@ open class SnapshotDeletionPolicy(
      * currently snapshotted
      */
     fun getIndexCommit(gen: Long): IndexCommit? {
-        return indexCommits[gen]
+        return lock.withLock {
+            indexCommits[gen]
+        }
     }
 
     /** Wraps each [IndexCommit] as a [SnapshotCommitPoint].  */
@@ -168,10 +188,12 @@ open class SnapshotDeletionPolicy(
         }
 
         override fun delete() {
-            // Suppress the delete request if this commit point is
-            // currently snapshotted.
-            if (!refCounts.containsKey(cp.generation)) {
-                cp.delete()
+            lock.withLock {
+                // Suppress the delete request if this commit point is
+                // currently snapshotted.
+                if (!refCounts.containsKey(cp.generation)) {
+                    cp.delete()
+                }
             }
         }
 
