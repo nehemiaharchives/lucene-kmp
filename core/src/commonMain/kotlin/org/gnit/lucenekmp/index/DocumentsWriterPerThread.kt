@@ -8,6 +8,7 @@ import org.gnit.lucenekmp.index.IndexingChain.ReservedField
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.document.NumericDocValuesField
 import org.gnit.lucenekmp.util.withDocumentsWriterPerThreadFlushCallPathHint
+import org.gnit.lucenekmp.util.withIndexingChainCallPathHint
 import org.gnit.lucenekmp.jdkport.Condition
 import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.Lock
@@ -391,64 +392,66 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         flushNotifications: FlushNotifications,
         onNewDocOnRAM: Runnable
     ): Long {
-        try {
-            testPoint("DocumentsWriterPerThread addDocuments start")
-            assert(abortingException == null) { "DWPT has hit aborting exception but is still indexing" }
-            if (INFO_VERBOSE && infoStream.isEnabled("DWPT")) {
-                infoStream.message(
-                    "DWPT",
-                    (/*java.lang.Thread.currentThread().getName() // TODO Thread is not supported in KMP, need to think what to do here
-                            + */" update delTerm="
-                            + deleteNode
-                            + " docID="
-                            + numDocsInRAM
-                            + " seg="
-                            + segmentInfo.name)
-                )
-            }
-            val docsInRamBefore = numDocsInRAM
-            var allDocsIndexed = false
+        return withIndexingChainCallPathHint {
             try {
-                val iterator: Iterator<Iterable<IndexableField>> = docs.iterator()
-                while (iterator.hasNext()) {
-                    var doc: Iterable<IndexableField> = iterator.next()
-                    if (parentField != null) {
-                        if (!iterator.hasNext()) {
-                            doc = addParentField(doc, parentField)
-                        }
-                    } else require(
-                        !(segmentInfo.indexSort != null && iterator.hasNext()
-                                && indexMajorVersionCreated >= Version.LUCENE_10_0_0.major)
-                    ) { "a parent field must be set in order to use document blocks with index sorting; see IndexWriterConfig#setParentField" }
+                testPoint("DocumentsWriterPerThread addDocuments start")
+                assert(abortingException == null) { "DWPT has hit aborting exception but is still indexing" }
+                if (INFO_VERBOSE && infoStream.isEnabled("DWPT")) {
+                    infoStream.message(
+                        "DWPT",
+                        (/*java.lang.Thread.currentThread().getName() // TODO Thread is not supported in KMP, need to think what to do here
+                                + */" update delTerm="
+                                + deleteNode
+                                + " docID="
+                                + numDocsInRAM
+                                + " seg="
+                                + segmentInfo.name)
+                    )
+                }
+                val docsInRamBefore = numDocsInRAM
+                var allDocsIndexed = false
+                try {
+                    val iterator: Iterator<Iterable<IndexableField>> = docs.iterator()
+                    while (iterator.hasNext()) {
+                        var doc: Iterable<IndexableField> = iterator.next()
+                        if (parentField != null) {
+                            if (!iterator.hasNext()) {
+                                doc = addParentField(doc, parentField)
+                            }
+                        } else require(
+                            !(segmentInfo.indexSort != null && iterator.hasNext()
+                                    && indexMajorVersionCreated >= Version.LUCENE_10_0_0.major)
+                        ) { "a parent field must be set in order to use document blocks with index sorting; see IndexWriterConfig#setParentField" }
 
-                    // Even on exception, the document is still added (but marked
-                    // deleted), so we don't need to un-reserve at that point.
-                    // Aborting exceptions will actually "lose" more than one
-                    // document, so the counter will be "wrong" in that case, but
-                    // it's very hard to fix (we can't easily distinguish aborting
-                    // vs non-aborting exceptions):
-                    reserveOneDoc()
-                    try {
-                        indexingChain.processDocument(numDocsInRAM++, doc)
-                    } finally {
-                        onNewDocOnRAM.run()
+                        // Even on exception, the document is still added (but marked
+                        // deleted), so we don't need to un-reserve at that point.
+                        // Aborting exceptions will actually "lose" more than one
+                        // document, so the counter will be "wrong" in that case, but
+                        // it's very hard to fix (we can't easily distinguish aborting
+                        // vs non-aborting exceptions):
+                        reserveOneDoc()
+                        try {
+                            indexingChain.processDocument(numDocsInRAM++, doc)
+                        } finally {
+                            onNewDocOnRAM.run()
+                        }
+                    }
+                    val numDocs = numDocsInRAM - docsInRamBefore
+                    if (numDocs > 1) {
+                        segmentInfo.setHasBlocks()
+                    }
+                    allDocsIndexed = true
+                    return@withIndexingChainCallPathHint finishDocuments(deleteNode, docsInRamBefore)
+                } finally {
+                    if (!allDocsIndexed && !this.isAborted) {
+                        // the iterator threw an exception that is not aborting
+                        // go and mark all docs from this block as deleted
+                        deleteLastDocs(numDocsInRAM - docsInRamBefore)
                     }
                 }
-                val numDocs = numDocsInRAM - docsInRamBefore
-                if (numDocs > 1) {
-                    segmentInfo.setHasBlocks()
-                }
-                allDocsIndexed = true
-                return finishDocuments(deleteNode, docsInRamBefore)
             } finally {
-                if (!allDocsIndexed && !this.isAborted) {
-                    // the iterator threw an exception that is not aborting
-                    // go and mark all docs from this block as deleted
-                    deleteLastDocs(numDocsInRAM - docsInRamBefore)
-                }
+                maybeAbort("updateDocuments", flushNotifications)
             }
-        } finally {
-            maybeAbort("updateDocuments", flushNotifications)
         }
     }
 
