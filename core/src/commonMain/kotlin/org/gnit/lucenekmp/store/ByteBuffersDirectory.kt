@@ -7,17 +7,17 @@ import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.NoSuchFileException
 import org.gnit.lucenekmp.jdkport.FileAlreadyExistsException
 import org.gnit.lucenekmp.jdkport.AccessDeniedException
+import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.index.IndexFileNames
 import org.gnit.lucenekmp.jdkport.CRC32
 import org.gnit.lucenekmp.jdkport.putIfAbsent
 import org.gnit.lucenekmp.jdkport.remove
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
+import kotlin.time.TimeSource
 
 /** A [Directory] storing files as lists of [ByteBuffer]s in memory. */
 class ByteBuffersDirectory : BaseDirectory {
@@ -46,7 +46,7 @@ class ByteBuffersDirectory : BaseDirectory {
     }
 
     private val files = mutableMapOf<String, FileEntry>()
-    private val filesMutex = Mutex()
+    private val filesLock = ReentrantLock()
     private val outputToInput: (String, ByteBuffersDataOutput) -> IndexInput
     private val bbOutputSupplier: () -> ByteBuffersDataOutput
 
@@ -66,7 +66,7 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun listAll(): Array<String> {
         ensureOpen()
-        return withFilesLock {
+        return withFilesLock("listAll") {
             files.keys.sorted().toTypedArray()
         }
     }
@@ -74,7 +74,7 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun deleteFile(name: String) {
         ensureOpen()
-        val removed = withFilesLock { files.remove(name) }
+        val removed = withFilesLock("deleteFile") { files.remove(name) }
         if (removed == null) {
             throw NoSuchFileException(name)
         }
@@ -83,13 +83,13 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun fileLength(name: String): Long {
         ensureOpen()
-        val file = withFilesLock { files[name] } ?: throw NoSuchFileException(name)
+        val file = withFilesLock("fileLength") { files[name] } ?: throw NoSuchFileException(name)
         return file.length()
     }
 
     fun fileExists(name: String): Boolean {
         ensureOpen()
-        return withFilesLock {
+        return withFilesLock("fileExists") {
             files.containsKey(name)
         }
     }
@@ -98,7 +98,7 @@ class ByteBuffersDirectory : BaseDirectory {
     override fun createOutput(name: String, context: IOContext): IndexOutput {
         ensureOpen()
         val e = FileEntry(name)
-        if (withFilesLock { files.putIfAbsent(name, e) } != null) {
+        if (withFilesLock("createOutput") { files.putIfAbsent(name, e) } != null) {
             throw FileAlreadyExistsException("File already exists: $name")
         }
         return e.createOutput(outputToInput)
@@ -110,7 +110,7 @@ class ByteBuffersDirectory : BaseDirectory {
         while (true) {
             val name = IndexFileNames.segmentFileName(prefix, tempFileName.invoke(suffix), "tmp")
             val e = FileEntry(name)
-            if (withFilesLock { files.putIfAbsent(name, e) } == null) {
+            if (withFilesLock("createTempOutput") { files.putIfAbsent(name, e) } == null) {
                 return e.createOutput(outputToInput)
             }
         }
@@ -119,7 +119,7 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun rename(source: String, dest: String) {
         ensureOpen()
-        withFilesLock {
+        withFilesLock("rename") {
             val file = files[source] ?: throw NoSuchFileException(source)
             if (files.putIfAbsent(dest, file) != null) {
                 throw FileAlreadyExistsException(dest)
@@ -144,20 +144,26 @@ class ByteBuffersDirectory : BaseDirectory {
     @Throws(IOException::class)
     override fun openInput(name: String, context: IOContext): IndexInput {
         ensureOpen()
-        val e = withFilesLock { files[name] } ?: throw NoSuchFileException(name)
+        val e = withFilesLock("openInput") { files[name] } ?: throw NoSuchFileException(name)
         return e.openInput()
     }
 
     @Throws(IOException::class)
     override fun close() {
         isOpen = false
-        withFilesLock {
+        withFilesLock("close") {
             files.clear()
         }
     }
 
-    private fun <T> withFilesLock(action: () -> T): T =
-        runBlocking { filesMutex.withLock { action() } }
+    private fun <T> withFilesLock(operation: String, action: () -> T): T {
+        val start = TimeSource.Monotonic.markNow()
+        try {
+            return filesLock.withLock(action)
+        } finally {
+            ByteBuffersDirectoryPerfDebug.record(operation, start.elapsedNow().inWholeNanoseconds)
+        }
+    }
 
     override val pendingDeletions: MutableSet<String>
         get() = mutableSetOf()

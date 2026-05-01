@@ -16,6 +16,7 @@
  */
 package org.gnit.lucenekmp.index
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
@@ -32,6 +33,8 @@ import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.jdkport.get
 import org.gnit.lucenekmp.search.DocIdSetIterator
 import org.gnit.lucenekmp.store.AlreadyClosedException
+import org.gnit.lucenekmp.store.ByteBuffersDirectory
+import org.gnit.lucenekmp.store.ByteBuffersDirectoryPerfDebug
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.LockObtainFailedException
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
@@ -55,11 +58,21 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.TimeSource
 
 /** MultiThreaded IndexWriter tests */
 @OptIn(ExperimentalAtomicApi::class)
 @SuppressCodecs("SimpleText")
 class TestIndexWriterWithThreads : LuceneTestCase() {
+    companion object {
+        private val logger = KotlinLogging.logger {}
+
+        private fun perfLog(message: String) {
+            logger.debug { message }
+            println(message)
+        }
+    }
+
     // Used by test cases below
     private class IndexerThread(
         var writer: IndexWriter,
@@ -622,33 +635,52 @@ class TestIndexWriterWithThreads : LuceneTestCase() {
 
     @Test
     fun testUpdateSingleDocWithThreads() {
-        stressUpdateSingleDocWithThreads(false, rarely())
+        stressUpdateSingleDocWithThreads(false, rarely(), null)
     }
 
     @Test
     fun testSoftUpdateSingleDocWithThreads() {
-        stressUpdateSingleDocWithThreads(true, rarely())
+        stressUpdateSingleDocWithThreads(true, rarely(), null)
+    }
+
+    @Test
+    fun testUpdateSingleDocWithThreadsPerfFixed() {
+        stressUpdateSingleDocWithThreads(false, false, 600) { ByteBuffersDirectory() }
     }
 
     fun stressUpdateSingleDocWithThreads(
         useSoftDeletes: Boolean,
-        forceMerge: Boolean
+        forceMerge: Boolean,
+        fixedItersPerThread: Int?,
+        directoryFactory: () -> Directory = { newDirectory() }
     ) {
-        newDirectory().use { dir ->
+        val shouldProfile = fixedItersPerThread != null
+        if (shouldProfile) {
+            IndexPerfDebug.reset()
+            ByteBuffersDirectoryPerfDebug.reset()
+        }
+        val totalStart = if (shouldProfile) TimeSource.Monotonic.markNow() else null
+        directoryFactory().use { dir ->
+            val setupStart = TimeSource.Monotonic.markNow()
             RandomIndexWriter(
                 random(),
                 dir,
                 newIndexWriterConfig().setMaxBufferedDocs(-1).setRAMBufferSizeMB(0.00001),
                 useSoftDeletes
             ).use { writer ->
+                perfLog("phase=test_setup elapsedMs=${setupStart.elapsedNow().inWholeMilliseconds} useSoftDeletes=$useSoftDeletes forceMerge=$forceMerge")
                 val numThreads = if (TEST_NIGHTLY) 3 + random().nextInt(3) else 3
                 val threads = arrayOfNulls<Thread>(numThreads)
                 val done = AtomicInteger(0)
                 val barrier = CyclicBarrier(threads.size + 1)
                 val doc = Document()
                 doc.add(StringField("id", "1", Field.Store.NO))
+                val initialUpdateStart = TimeSource.Monotonic.markNow()
                 writer.updateDocument(Term("id", "1"), doc)
-                val itersPerThread = 100 + random().nextInt(2000)
+                perfLog("phase=initial_update elapsedMs=${initialUpdateStart.elapsedNow().inWholeMilliseconds}")
+                val itersPerThread = fixedItersPerThread ?: (100 + random().nextInt(2000))
+                perfLog("phase=thread_config numThreads=$numThreads itersPerThread=$itersPerThread")
+                val threadLaunchStart = TimeSource.Monotonic.markNow()
                 for (i in threads.indices) {
                     threads[i] =
                         Thread {
@@ -667,28 +699,65 @@ class TestIndexWriterWithThreads : LuceneTestCase() {
                         }
                     threads[i]!!.start()
                 }
+                perfLog("phase=thread_launch elapsedMs=${threadLaunchStart.elapsedNow().inWholeMilliseconds} numThreads=${threads.size}")
+                val openStart = TimeSource.Monotonic.markNow()
                 var open = DirectoryReader.open(writer.w)
+                perfLog("phase=open_initial_reader elapsedMs=${openStart.elapsedNow().inWholeMilliseconds}")
                 assertEquals(1, open.numDocs())
+                val barrierStart = TimeSource.Monotonic.markNow()
                 barrier.await()
+                perfLog("phase=barrier_release elapsedMs=${barrierStart.elapsedNow().inWholeMilliseconds}")
+                val loopStart = TimeSource.Monotonic.markNow()
+                var loopIterations = 0
+                var forceMergeCount = 0
+                var forceMergeElapsedMs = 0L
+                var reopenCount = 0
+                var reopenElapsedMs = 0L
+                var openIfChangedCount = 0
+                var openIfChangedElapsedMs = 0L
+                var numDocsCheckCount = 0
+                var numDocsCheckElapsedMs = 0L
                 try {
                     do {
+                        loopIterations++
                         if (forceMerge && random().nextBoolean()) {
+                            val forceMergeStart = TimeSource.Monotonic.markNow()
                             writer.forceMerge(1)
+                            forceMergeCount++
+                            forceMergeElapsedMs += forceMergeStart.elapsedNow().inWholeMilliseconds
                         }
+                        val openIfChangedStart = TimeSource.Monotonic.markNow()
                         val newReader = DirectoryReader.openIfChanged(open)
+                        openIfChangedCount++
+                        openIfChangedElapsedMs +=
+                            openIfChangedStart.elapsedNow().inWholeMilliseconds
                         if (newReader != null) {
+                            val reopenStart = TimeSource.Monotonic.markNow()
                             open.close()
                             open = newReader
+                            reopenCount++
+                            reopenElapsedMs += reopenStart.elapsedNow().inWholeMilliseconds
                         }
+                        val numDocsCheckStart = TimeSource.Monotonic.markNow()
                         assertEquals(1, open.numDocs())
+                        numDocsCheckCount++
+                        numDocsCheckElapsedMs += numDocsCheckStart.elapsedNow().inWholeMilliseconds
                     } while (done.get() < threads.size)
+                    perfLog("phase=main_loop elapsedMs=${loopStart.elapsedNow().inWholeMilliseconds} loopIterations=$loopIterations forceMergeCount=$forceMergeCount forceMergeElapsedMs=$forceMergeElapsedMs openIfChangedCount=$openIfChangedCount openIfChangedElapsedMs=$openIfChangedElapsedMs reopenCount=$reopenCount reopenElapsedMs=$reopenElapsedMs numDocsCheckCount=$numDocsCheckCount numDocsCheckElapsedMs=$numDocsCheckElapsedMs")
                 } finally {
+                    val joinStart = TimeSource.Monotonic.markNow()
                     open.close()
                     for (i in threads.indices) {
                         threads[i]!!.join()
                     }
+                    perfLog("phase=cleanup elapsedMs=${joinStart.elapsedNow().inWholeMilliseconds}")
                 }
             }
+        }
+        if (shouldProfile) {
+            perfLog("phase=test_total elapsedMs=${totalStart!!.elapsedNow().inWholeMilliseconds} useSoftDeletes=$useSoftDeletes forceMerge=$forceMerge")
+            perfLog(IndexPerfDebug.snapshot())
+            perfLog(ByteBuffersDirectoryPerfDebug.snapshot())
         }
     }
 }

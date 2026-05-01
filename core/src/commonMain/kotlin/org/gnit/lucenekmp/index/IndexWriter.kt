@@ -58,6 +58,7 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.InfoStream
 import org.gnit.lucenekmp.util.NativeCrashProbe
 import org.gnit.lucenekmp.util.StringHelper
+import kotlin.time.TimeSource
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import org.gnit.lucenekmp.util.UnicodeUtil
 import org.gnit.lucenekmp.util.Version
@@ -519,7 +520,6 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         // this method is called:
         readerPool.enableReaderPooling()
         var r: StandardDirectoryReader? = null
-        doBeforeFlush()
         var anyChanges = false
         val maxFullFlushMergeWaitMillis: Long = config.maxFullFlushMergeWaitMillis
         /*
@@ -556,6 +556,15 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         var onGetReaderMergeResources: AutoCloseable? = null
         var openingSegmentInfos: SegmentInfos? = null
         var success2 = false
+        var beforeFlushElapsedMs = 0L
+        var flushAllThreadsElapsedMs = 0L
+        var publishFlushedSegmentsElapsedMs = 0L
+        var processEventsElapsedMs = 0L
+        var applyDeletesElapsedMs = 0L
+        var writeReaderPoolElapsedMs = 0L
+        var openReaderElapsedMs = 0L
+        var finishFullFlushElapsedMs = 0L
+        var maybeMergeElapsedMs = 0L
         try {
             /* This is the essential part of the getReader method. We need to take care of the following things:
        *  - flush all currently in-memory DWPTs to disk
@@ -575,20 +584,26 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
        */
             var success = false
 
+            beforeFlushElapsedMs = TimeSource.Monotonic.markNow().also { doBeforeFlush() }.elapsedNow().inWholeMilliseconds
             withFullFlushLock {
                 try {
                 // TODO: should we somehow make the seqNo available in the returned NRT reader
-                anyChanges = runBlocking { docWriter.flushAllThreads() } < 0
+                flushAllThreadsElapsedMs = TimeSource.Monotonic.markNow().also {
+                    anyChanges = runBlocking { docWriter.flushAllThreads() } < 0
+                }.elapsedNow().inWholeMilliseconds
                 if (!anyChanges) {
                     // prevent double increment since docWriter#doFlush increments the flushcount
                     // if we flushed anything.
                     flushCount.incrementAndFetch()
                 }
-                publishFlushedSegments(true)
-                processEvents(false)
+                publishFlushedSegmentsElapsedMs =
+                    TimeSource.Monotonic.markNow().also { publishFlushedSegments(true) }.elapsedNow().inWholeMilliseconds
+                processEventsElapsedMs =
+                    TimeSource.Monotonic.markNow().also { processEvents(false) }.elapsedNow().inWholeMilliseconds
 
                 if (applyAllDeletes) {
-                    applyAllDeletesAndUpdates()
+                    applyDeletesElapsedMs =
+                        TimeSource.Monotonic.markNow().also { applyAllDeletesAndUpdates() }.elapsedNow().inWholeMilliseconds
                 }
 
                 withIndexWriterLock {
@@ -600,15 +615,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
                     // then do this w/o IW's lock
                     // Must do this sync'd on IW to prevent a merge from completing at the last second and
                     // failing to write its DV updates:
-                    writeReaderPool(writeAllDeletes)
+                    writeReaderPoolElapsedMs =
+                        TimeSource.Monotonic.markNow().also { writeReaderPool(writeAllDeletes) }.elapsedNow().inWholeMilliseconds
 
                     // Prevent segmentInfos from changing while opening the
                     // reader; in theory we could instead do similar retry logic,
                     // just like we do when loading segments_N
-                    r =
-                        StandardDirectoryReader.open(
+                    val openReaderStart = TimeSource.Monotonic.markNow()
+                    r = StandardDirectoryReader.open(
                             this, readerFactory, segmentInfos, applyAllDeletes, writeAllDeletes
                         )
+                    openReaderElapsedMs = openReaderStart.elapsedNow().inWholeMilliseconds
                     if (infoStream.isEnabled("IW")) {
                         infoStream.message("IW", "return reader version=" + r.version + " reader=" + r)
                     }
@@ -674,7 +691,8 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
                 // TODO Thread is not supported in KMP, need to think what to do here
                 //assert(java.lang.Thread.holdsLock(fullFlushLock))
-                docWriter.finishFullFlush(success)
+                finishFullFlushElapsedMs =
+                    TimeSource.Monotonic.markNow().also { docWriter.finishFullFlush(success) }.elapsedNow().inWholeMilliseconds
                 if (success) {
                     processEvents(false)
                     doAfterFlush()
@@ -708,11 +726,13 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
 
             anyChanges = anyChanges or maybeMerge.getAndSet(false)
             if (anyChanges) {
-                maybeMerge(
+                maybeMergeElapsedMs = TimeSource.Monotonic.markNow().also {
+                    maybeMerge(
                     config.mergePolicy,
                     MergeTrigger.FULL_FLUSH,
                     UNBOUNDED_MAX_MERGE_SEGMENTS
                 )
+                }.elapsedNow().inWholeMilliseconds
             }
             if (infoStream.isEnabled("IW")) {
                 infoStream.message("IW", "getReader took " + (System.currentTimeMillis() - tStart) + " ms")
@@ -722,6 +742,17 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
             tragicEvent(tragedy, "getReader")
             throw tragedy
         } finally {
+            IndexPerfDebug.recordGetReader(
+                beforeFlushMs = beforeFlushElapsedMs,
+                flushAllThreadsMs = flushAllThreadsElapsedMs,
+                publishFlushedSegmentsMs = publishFlushedSegmentsElapsedMs,
+                processEventsMs = processEventsElapsedMs,
+                applyDeletesMs = applyDeletesElapsedMs,
+                writeReaderPoolMs = writeReaderPoolElapsedMs,
+                openReaderMs = openReaderElapsedMs,
+                finishFullFlushMs = finishFullFlushElapsedMs,
+                maybeMergeMs = maybeMergeElapsedMs
+            )
             if (!success2) {
                 try {
                     IOUtils.closeWhileHandlingException(r, onGetReaderMergeResources)

@@ -91,19 +91,41 @@ class StandardDirectoryReader internal constructor(
             return doOpenFromCommit(commit)
         }
 
-        if (writer!!.nrtIsCurrent(segmentInfos)) {
+        val nrtIsCurrentStart = kotlin.time.TimeSource.Monotonic.markNow()
+        val nrtIsCurrent = writer!!.nrtIsCurrent(segmentInfos)
+        val nrtIsCurrentElapsedMs = nrtIsCurrentStart.elapsedNow().inWholeMilliseconds
+        if (nrtIsCurrent) {
+            IndexPerfDebug.recordOpenFromWriter(
+                nrtIsCurrentMs = nrtIsCurrentElapsedMs,
+                getReaderMs = 0L,
+                versionCheckMs = 0L
+            )
             return null
         }
 
+        val getReaderStart = kotlin.time.TimeSource.Monotonic.markNow()
         val reader: DirectoryReader = writer.getReader(applyAllDeletes, writeAllDeletes)
+        val getReaderElapsedMs = getReaderStart.elapsedNow().inWholeMilliseconds
 
         // If in fact no changes took place, return null:
+        val versionCheckStart = kotlin.time.TimeSource.Monotonic.markNow()
         if (reader.version == segmentInfos.version) {
             runBlocking {
                 reader.decRef()
             }
+            IndexPerfDebug.recordOpenFromWriter(
+                nrtIsCurrentMs = nrtIsCurrentElapsedMs,
+                getReaderMs = getReaderElapsedMs,
+                versionCheckMs = versionCheckStart.elapsedNow().inWholeMilliseconds
+            )
             return null
         }
+
+        IndexPerfDebug.recordOpenFromWriter(
+            nrtIsCurrentMs = nrtIsCurrentElapsedMs,
+            getReaderMs = getReaderElapsedMs,
+            versionCheckMs = versionCheckStart.elapsedNow().inWholeMilliseconds
+        )
 
         return reader
     }

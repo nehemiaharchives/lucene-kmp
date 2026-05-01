@@ -19,6 +19,7 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
+import kotlin.time.TimeSource
 
 /**
  * This class accepts multiple added documents and directly writes segment files.
@@ -482,6 +483,11 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         var flushingDWPT: DocumentsWriterPerThread = flushingDWPT
         checkNotNull(flushingDWPT) { "Flushing DWPT must not be null" }
         // logger.debug { "DW.doFlush() start seg=${flushingDWPT.getSegmentInfo().name} docsInRAM=${flushingDWPT.numDocsInRAM}" }
+        var nextPendingFlushElapsedMs = 0L
+        var prepareTicketElapsedMs = 0L
+        var flushSegmentElapsedMs = 0L
+        var doAfterFlushElapsedMs = 0L
+        var afterSegmentsFlushedElapsedMs = 0L
         do {
             assert(!flushingDWPT.hasFlushed())
             var success = false
@@ -517,14 +523,18 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                     assert(assertTicketQueueModification(flushingDWPT.deleteQueue))
                     val dwpt: DocumentsWriterPerThread = flushingDWPT
                     // Each flush is assigned a ticket in the order they acquire the ticketQueue lock
+                    val prepareTicketStart = TimeSource.Monotonic.markNow()
                     val flushTicket =
                         checkNotNull(ticketQueue.addTicket { FlushTicket(dwpt.prepareFlush(), true) })
+                    prepareTicketElapsedMs += prepareTicketStart.elapsedNow().inWholeMilliseconds
                     ticket = flushTicket
                     val flushingDocsInRam: Int = flushingDWPT.numDocsInRAM
                     var dwptSuccess = false
                     try {
                         // flush concurrently without locking
+                        val flushSegmentStart = TimeSource.Monotonic.markNow()
                         val newSegment: FlushedSegment = flushingDWPT.flush(flushNotifications)!!
+                        flushSegmentElapsedMs += flushSegmentStart.elapsedNow().inWholeMilliseconds
                         ticketQueue.addSegment(flushTicket, newSegment)
                         dwptSuccess = true
                         //logger.debug { "DW.doFlush() flushed seg=${newSegment.segmentInfo.info.name} delCount=${newSegment.delCount}" }
@@ -566,11 +576,15 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 }
             } finally {
                 // logger.debug { "DW.doFlush() before doAfterFlush seg=${flushingDWPT.getSegmentInfo().name}" }
+                val doAfterFlushStart = TimeSource.Monotonic.markNow()
                 flushControl.doAfterFlush(flushingDWPT)
+                doAfterFlushElapsedMs += doAfterFlushStart.elapsedNow().inWholeMilliseconds
                 // logger.debug { "DW.doFlush() after doAfterFlush seg=${flushingDWPT.getSegmentInfo().name} queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}" }
             }
             // poll next pending flush safely
+            val nextPendingFlushStart = TimeSource.Monotonic.markNow()
             val next: DocumentsWriterPerThread? = flushControl.nextPendingFlush()
+            nextPendingFlushElapsedMs += nextPendingFlushStart.elapsedNow().inWholeMilliseconds
             if (next != null) {
                 flushingDWPT = next
                 //logger.debug { "DW.doFlush() chaining to next seg=${flushingDWPT.getSegmentInfo().name}" }
@@ -579,7 +593,16 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             }
         } while (true)
         // logger.debug { "DW.doFlush() before afterSegmentsFlushed" }
+        val afterSegmentsFlushedStart = TimeSource.Monotonic.markNow()
         flushNotifications.afterSegmentsFlushed()
+        afterSegmentsFlushedElapsedMs = afterSegmentsFlushedStart.elapsedNow().inWholeMilliseconds
+        IndexPerfDebug.recordDoFlush(
+            nextPendingFlushMs = nextPendingFlushElapsedMs,
+            prepareTicketMs = prepareTicketElapsedMs,
+            flushSegmentMs = flushSegmentElapsedMs,
+            doAfterFlushMs = doAfterFlushElapsedMs,
+            afterSegmentsFlushedMs = afterSegmentsFlushedElapsedMs
+        )
         // logger.debug { "DW.doFlush() end" }
     }
 
@@ -729,11 +752,14 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
          * otherwise a new DWPT could sneak into the loop with an already flushing
          * delete queue */
         val seqNo: Long
+        var markFullFlushElapsedMs = 0L
         syncLock.lock()
         try {
             pendingChangesInCurrentFullFlush = anyChanges()
             flushingDeleteQueue = deleteQueue
+            val markFullFlushStart = TimeSource.Monotonic.markNow()
             seqNo = flushControl.markForFullFlush() // swaps this.deleteQueue synced on FlushControl
+            markFullFlushElapsedMs = markFullFlushStart.elapsedNow().inWholeMilliseconds
             assert(setFlushingDeleteQueue(flushingDeleteQueue))
         } finally {
             syncLock.unlock()
@@ -743,6 +769,9 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
         assert(currentFullFlushDelQueue != deleteQueue)
 
         var anythingFlushed = false
+        var maybeFlushElapsedMs = 0L
+        var waitForFlushElapsedMs = 0L
+        var freezeGlobalBufferElapsedMs = 0L
         try {
             // Keep flushing pending DWPTs until none are left. This avoids relying on
             // other threads to help out and prevents waitForFlush() from spinning.
@@ -753,14 +782,18 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 // logger.debug {
                 //     "DW.flushAllThreads() loop: queued=$queued blocked=$blocked flushing=$flushing fullFlush=${flushControl.isFullFlush}"
                 // }
+                val maybeFlushStart = TimeSource.Monotonic.markNow()
                 val flushedNow = maybeFlush()
+                maybeFlushElapsedMs += maybeFlushStart.elapsedNow().inWholeMilliseconds
                 // logger.debug { "DW.flushAllThreads() maybeFlush -> $flushedNow" }
                 anythingFlushed = anythingFlushed or flushedNow
             } while (flushControl.numQueuedFlushes() > 0)
 
             // logger.debug { "DW.flushAllThreads() waiting for inflight flushes... flushing=${flushControl.numFlushingDWPT()}" }
             // If a concurrent flush is still in flight wait for it
+            val waitForFlushStart = TimeSource.Monotonic.markNow()
             flushControl.waitForFlush()
+            waitForFlushElapsedMs = waitForFlushStart.elapsedNow().inWholeMilliseconds
             // logger.debug {
             //     "DW.flushAllThreads() inflight flushes done. queued=${flushControl.numQueuedFlushes()} flushing=${flushControl.numFlushingDWPT()}"
             // }
@@ -774,7 +807,9 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
                 }
                 // logger.debug { "DW.flushAllThreads() adding ticket to freeze global deletes" }
                 assert(assertTicketQueueModification(flushingDeleteQueue))
+                val freezeGlobalBufferStart = TimeSource.Monotonic.markNow()
                 ticketQueue.addTicket { maybeFreezeGlobalBuffer(flushingDeleteQueue) }
+                freezeGlobalBufferElapsedMs = freezeGlobalBufferStart.elapsedNow().inWholeMilliseconds
             }
             // we can't assert that we don't have any tickets in the queue since we might add a
             // DocumentsWriterDeleteQueue
@@ -788,6 +823,12 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
             // ticket-queue
         }
         val result = if (anythingFlushed) -seqNo else seqNo
+        IndexPerfDebug.recordFlushAllThreads(
+            markFullFlushMs = markFullFlushElapsedMs,
+            maybeFlushMs = maybeFlushElapsedMs,
+            waitForFlushMs = waitForFlushElapsedMs,
+            freezeGlobalBufferMs = freezeGlobalBufferElapsedMs
+        )
         // logger.debug { "DW.flushAllThreads() exit: resultSeq=$result" }
         return result
     }

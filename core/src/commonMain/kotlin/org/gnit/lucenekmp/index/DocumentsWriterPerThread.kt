@@ -36,6 +36,240 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+
+/* Written by GitHub Copilot CLI:
+ * Findings from JVM vs Kotlin/Native (linuxX64) profiling for
+ * TestIndexWriterWithThreads.testUpdateSingleDocWithThreads:
+ *
+ * 1. Coarse timing showed the dominant top-level cost was not thread startup or
+ *    barrier handling. The slow phase on both targets was the NRT reopen loop:
+ *    DirectoryReader.openIfChanged -> StandardDirectoryReader.doOpenFromWriter ->
+ *    IndexWriter.getReader.
+ *
+ * 2. Deeper timing inside getReader showed the main cost was
+ *    DocumentsWriter.flushAllThreads(), not nrtIsCurrent(), reader open, or
+ *    delete application.
+ *
+ * 3. Deeper timing inside flushAllThreads showed the dominant substep was
+ *    maybeFlush().
+ *
+ * 4. Deeper timing inside maybeFlush showed the lowest measured hotspot was
+ *    DocumentsWriterPerThread.flush(), specifically the flushSegment work
+ *    performed by flushingDWPT.flush(flushNotifications).
+ *
+ * Reproducible fixed-work perf run (testUpdateSingleDocWithThreadsPerfFixed,
+ * numThreads=3, itersPerThread=600, forceMerge=false):
+ *
+ * Target   | Total | openIfChanged | getReader.flushAllThreads | flush_all_threads.maybeFlush | do_flush.flushSegment |
+ * -------- | ----- | ------------- | ------------------------- | ---------------------------- | --------------------- |
+ * JVM      | 4.15s | 2.80s         | 2.00s                     | 1.95s                        | 1.02s                 |
+ * linuxX64 | 9.34s | 8.30s         | 6.82s                     | 6.74s                        | 5.38s                 |
+ *
+ * So the lowest measured native/JVM gap in this path is concentrated in
+ * flushSegment, at roughly 5x slower on linuxX64 than JVM for comparable work.
+ *
+ * A native-only optimization attempt in posixNativeMain FilesWrite.native.kt
+ * replaced the custom pinned/memcpy KmpSink path with direct BufferedSink
+ * delegation, but it regressed linuxX64 instead of improving it
+ * (~10.17 s -> ~10.78 s on the fixed perf test), so that change was reverted.
+ *
+ * Current conclusion: further optimization work should focus below this method,
+ * in the indexing-chain / codec / file-writing work executed during segment
+ * flush, not in test orchestration, barrier setup, or openIfChanged control
+ * flow itself.
+ */
+
+
+/* Written by Codex:
+ *
+ * Additional comment: most likely next speed-up path.
+ *
+ * Do not restart the investigation from the test-level timing unless the
+ * existing numbers become non-reproducible. The important information from
+ * the previous run is already:
+ *
+ *   test main loop
+ *     -> DirectoryReader.openIfChanged
+ *       -> StandardDirectoryReader.doOpenFromWriter
+ *         -> IndexWriter.getReader
+ *           -> DocumentsWriter.flushAllThreads
+ *             -> DocumentsWriterFlushControl.maybeFlush
+ *               -> DocumentsWriter.doFlush
+ *                 -> DocumentsWriterPerThread.flush
+ *
+ * The next target is below DocumentsWriterPerThread.flush, and the first
+ * thing to verify is whether the native time is really codec byte writing or
+ * synchronous in-memory directory bookkeeping. This test uses newDirectory()
+ * and the current test infrastructure normally routes that to ByteBuffers-
+ * backed directories, not real POSIX files. That means the reverted
+ * FilesWrite.native.kt experiment probably optimized the wrong concrete I/O
+ * implementation for this benchmark.
+ *
+ * Highest-probability native bottleneck:
+ *
+ *   ByteBuffersDirectory.withFilesLock currently does:
+ *
+ *     runBlocking { filesMutex.withLock { action() } }
+ *
+ *   for synchronous Directory APIs such as createOutput, createTempOutput,
+ *   openInput, listAll, deleteFile, rename, fileLength, and close. Segment
+ *   flush plus NRT reopen call these APIs many times while creating tiny
+ *   per-segment files and immediately reopening them. On JVM, the coroutine
+ *   bridge cost is mostly hidden by the JIT and by faster coroutine runtime
+ *   paths. On Kotlin/Native, repeatedly entering runBlocking from a purely
+ *   synchronous hot path is a very plausible source of seconds of overhead.
+ *
+ *   The most promising expect/actual optimization is therefore:
+ *
+ *     1. Add timing/counters around ByteBuffersDirectory.withFilesLock.
+ *        Track calls and elapsed time by operation name:
+ *        createOutput, createTempOutput, openInput, listAll, deleteFile,
+ *        rename, fileLength, sync, syncMetaData, and close.
+ *
+ *     2. Run testUpdateSingleDocWithThreadsPerfFixed on JVM and linuxX64.
+ *        If ByteBuffersDirectory lock time is a large part of
+ *        do_flush.flushSegment or openIfChanged, stop descending into codecs
+ *        and patch this first.
+ *
+ *     3. Replace the coroutine Mutex in ByteBuffersDirectory with the existing
+ *        org.gnit.lucenekmp.jdkport.ReentrantLock and withLock helper. This
+ *        already uses expect/actual:
+ *
+ *          commonMain:
+ *            private val filesLock = ReentrantLock()
+ *            private inline fun <T> withFilesLock(action: () -> T): T =
+ *                filesLock.withLock(action)
+ *
+ *          jvmAndroidMain actual:
+ *            java.util.concurrent.locks.ReentrantLock
+ *
+ *          posixNativeMain actual:
+ *            pthread_mutex_t / pthread_cond_t based lock
+ *
+ *        This keeps Directory APIs synchronous, removes runBlocking from the
+ *        hot path, and stays behaviorally close to Java Lucene's synchronized
+ *        in-memory directory bookkeeping.
+ *
+ *     4. Re-run the same fixed-work perf method and report:
+ *        total elapsed, openIfChanged elapsed, getReader.flushAllThreads,
+ *        do_flush.flushSegment, ByteBuffersDirectory.withFilesLock elapsed,
+ *        and withFilesLock call count.
+ *
+ *   Acceptance signal:
+ *
+ *     If linuxX64 fixed perf drops by multiple seconds while JVM stays flat,
+ *     keep the patch. This can plausibly move a 9-10 second fixed run toward
+ *     the requested 5-10 second range because it removes a native-only
+ *     coroutine bridge from every tiny directory metadata operation.
+ *
+ * If ByteBuffersDirectory is not dominant:
+ *
+ *   Descend into IndexingChain.flush in this exact order and keep only the
+ *   dominant branch:
+ *
+ *     maybeSortSegment
+ *     writeNorms
+ *     writeDocValues
+ *     writePoints
+ *     vectorValuesConsumer.flush
+ *     storedFieldsConsumer.finish + storedFieldsConsumer.flush
+ *     termsHash.flush
+ *     fieldInfosFormat.write
+ *
+ *   For this specific test document, the document is:
+ *
+ *     StringField("id", "1", Field.Store.NO)
+ *
+ *   That means no stored field payload, no points, no vectors, no doc values,
+ *   and omitted norms. The likely codec branch after ByteBuffersDirectory is
+ *   therefore termsHash.flush, then FreqProxTermsWriter.flush, then
+ *   state.segmentInfo.codec.postingsFormat().fieldsConsumer(state).use {
+ *       consumer.write(fields, norms)
+ *   }
+ *
+ * If termsHash/postings is dominant:
+ *
+ *   Descend in this order:
+ *
+ *     FreqProxTermsWriter.flush:
+ *       super.flush
+ *       perField.sortTerms
+ *       CollectionUtil.introSort(allFields)
+ *       applyDeletes
+ *       fieldsConsumer construction
+ *       consumer.write(fields, norms)
+ *       consumer.close
+ *
+ *     Lucene90BlockTreeTermsWriter.write:
+ *       postingsWriter.init
+ *       per-field terms iteration
+ *       writeBlocks / PendingBlock.compileIndex
+ *       suffixLengthsWriter/metaWriter/statsWriter copyTo(termsOut)
+ *       write field metadata
+ *       CodecUtil.writeFooter
+ *
+ *     Lucene101PostingsWriter:
+ *       startTerm/startDoc/addPosition/finishDoc/finishTerm
+ *       writeVInt15/writeVLong15
+ *       level0Output.copyTo(docOut)
+ *       level1Output.copyTo(docOut)
+ *       CodecUtil.writeFooter
+ *
+ *   Use batch-level timing and counters, not Clock calls around every byte
+ *   write. Per-call clocks will distort the native profile.
+ *
+ * Second-likeliest native bottom step:
+ *
+ *   DataOutput.writeVInt/writeVLong and DataOutput.writeInt/writeLong feed
+ *   ByteBuffersIndexOutput -> ByteBuffersDataOutput -> jdkport.ByteBuffer.
+ *   JVM can inline most of that stack. Kotlin/Native often cannot, so the
+ *   repeated virtual writeByte calls, ByteBuffer.position/limit checks, and
+ *   small ByteArray copies can dominate even though all data is in memory.
+ *
+ *   If counters prove this path dominates, the next expect/actual patch should
+ *   be a native fast path for array-backed ByteBuffersDataOutput, not a POSIX
+ *   file sink patch. The minimal shape should be:
+ *
+ *     commonMain:
+ *       Add platform helpers near ByteBufferPlatform:
+ *         byteBufferPutShortPlatform(array, index, value, bigEndian)
+ *         byteBufferPutIntPlatform(array, index, value, bigEndian)
+ *         byteBufferPutLongPlatform(array, index, value, bigEndian)
+ *       Change jdkport.ByteBuffer.putShort/putInt/putLong to delegate to
+ *       those helpers after a single bounds/writable check.
+ *
+ *     jvmAndroidMain:
+ *       Keep the current pure ByteArray implementation or use the same simple
+ *       shifts. JVM is already fast enough and should not take risk.
+ *
+ *     nativeMain or posixNativeMain:
+ *       Implement only if a micro-benchmark proves it faster than simple
+ *       ByteArray indexing. Avoid per-primitive usePinned if it regresses.
+ *       A pinned block writer is preferable to pinning every int/long.
+ *
+ *   If variable-length writes are the real bottom step, consider making
+ *   DataOutput.writeVInt/writeVLong open and overriding them in
+ *   ByteBuffersDataOutput with direct writes into the current backing array.
+ *   This is not a Lucene behavior change; it only removes native dispatch and
+ *   ByteBuffer method overhead. Keep it only if JVM and native compile/tests
+ *   pass and linuxX64 timing improves.
+ *
+ * Measurement rules for the next agent:
+ *
+ *   - Keep testUpdateSingleDocWithThreadsPerfFixed as the fixed workload.
+ *   - Always capture JVM and linuxX64 numbers from the same commit.
+ *   - Use one summary line per layer with stable keys:
+ *       phase=byte_buffers_directory op=createOutput calls=... elapsedMs=...
+ *       phase=indexing_chain substep=termsHashFlush elapsedMs=...
+ *       phase=postings_writer substep=finishDoc elapsedMs=...
+ *   - Do not keep temporary logs after the final optimization unless the user
+ *     explicitly asks to retain profiling.
+ *   - If ByteBuffersDirectory.withFilesLock is confirmed, patch that before
+ *     touching codecs. It has a small behavior surface and uses the project's
+ *     existing expect/actual ReentrantLock implementation.
+ */
+
+
 @OptIn(ExperimentalAtomicApi::class)
 class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
     private val indexMajorVersionCreated: Int,
