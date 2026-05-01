@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import okio.Buffer
 import okio.BufferedSource
 import org.gnit.lucenekmp.util.configureTestLogging
@@ -11,7 +11,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 class InputStreamReaderTest {
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @BeforeTest
     fun setUp() {

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,7 +24,7 @@ import kotlin.test.assertTrue
 /** Simple testcase for RateLimiter.SimpleRateLimiter */
 class TestRateLimiter : LuceneTestCase() {
 
-    private val logger = KotlinLogging.logger {  }
+    private val logger = getLogger()
 
     // LUCENE-6075
     @Test

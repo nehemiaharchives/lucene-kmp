@@ -1,7 +1,7 @@
 package org.gnit.lucenekmp.tests.index
 
 import com.ionspin.kotlin.bignum.integer.BigInteger
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.document.BinaryPoint
@@ -62,7 +62,7 @@ import kotlin.test.fail
  * given PointsFormat that this test fails to catch then this test needs to be improved!
  */
 abstract class BasePointsFormatTestCase : BaseIndexFileFormatTestCase() {
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
     private val closeSlowThreshold = 10.seconds
     private var testWithExceptionsRunCounter = 0
     private var activeTestWithExceptionsRun = 0

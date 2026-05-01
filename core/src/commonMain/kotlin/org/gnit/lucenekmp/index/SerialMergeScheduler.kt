@@ -2,13 +2,12 @@ package org.gnit.lucenekmp.index
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import io.github.oshai.kotlinlogging.KotlinLogging
 
 /** A [MergeScheduler] that simply does each merge sequentially, using the current thread. */
 open class SerialMergeScheduler : MergeScheduler() {
 
     private val mergeMutex = Mutex()
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
 
     override suspend fun merge(mergeSource: MergeSource, trigger: MergeTrigger) {
         mergeMutex.withLock {

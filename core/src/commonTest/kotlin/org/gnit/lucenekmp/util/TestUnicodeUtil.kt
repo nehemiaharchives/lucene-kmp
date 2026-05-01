@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.util
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.jdkport.Arrays
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
@@ -80,7 +80,7 @@ import kotlin.test.*
 
 class TestUnicodeUtil : LuceneTestCase() {
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @Test
     fun testCodePointCount() {

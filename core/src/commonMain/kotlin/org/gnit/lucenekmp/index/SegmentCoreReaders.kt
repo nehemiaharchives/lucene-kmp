@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.CompoundDirectory
 import org.gnit.lucenekmp.codecs.FieldsProducer
@@ -25,7 +24,7 @@ import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 
-private val segmentCoreReadersLogger = org.gnit.lucenekmp.util.luceneLogger {}
+private val segmentCoreReadersLogger = org.gnit.lucenekmp.util.getLogger()
 
 /** Holds core readers that are shared (unchanged) when SegmentReader is cloned or reopened  */
 class SegmentCoreReaders(

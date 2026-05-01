@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.util.configureTestLogging
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class TimeUnitTest {
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @BeforeTest
     fun setUp() {

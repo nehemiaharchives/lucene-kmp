@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.tests.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import dev.scottpierce.envvar.EnvVar
 import okio.FileSystem
 import okio.IOException
@@ -2264,7 +2264,7 @@ abstract class BaseKnnVectorsFormatTestCase : BaseIndexFileFormatTestCase() {
     }
 
     companion object {
-        private val logger = KotlinLogging.logger {}
+        private val logger = getLogger()
 
         fun randomVector(dim: Int): FloatArray {
             assert(dim > 0)

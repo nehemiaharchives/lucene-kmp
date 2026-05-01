@@ -37,13 +37,13 @@ import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration.Companion.minutes
 
-private val logger = KotlinLogging.logger {}
+private val logger = getLogger()
 
 /**
  * Abstract class to do basic tests for a norms format. NOTE: This test focuses on the norms impl,

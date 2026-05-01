@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlin.reflect.KClass
 
 /**
@@ -171,7 +171,7 @@ abstract class LocaleProviderAdapter {
 
     companion object {
 
-        private val logger = KotlinLogging.logger {}
+        private val logger = getLogger()
 
         /**
          * Returns the preference order of LocaleProviderAdapter.Type

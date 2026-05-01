@@ -134,7 +134,7 @@ open class FutureTask<V> : RunnableFuture<V> {
     private var callable: Callable<V>? = null
 
     // Logging support (platform agnostic)
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
 
     /**
      * Returns result or throws exception for completed task.

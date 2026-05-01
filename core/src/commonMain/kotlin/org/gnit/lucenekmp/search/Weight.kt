@@ -1,12 +1,11 @@
 package org.gnit.lucenekmp.search
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.LeafReaderContext
 import org.gnit.lucenekmp.util.Bits
 import kotlin.math.min
 
-private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+private val logger = org.gnit.lucenekmp.util.getLogger()
 
 
 /**

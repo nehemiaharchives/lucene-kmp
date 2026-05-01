@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.search
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.runBlocking
 import okio.IOException
@@ -33,7 +33,7 @@ class TestTaskExecutor : LuceneTestCase() {
         configureTestLogging()
     }
 
-    private val logger = KotlinLogging.logger {  }
+    private val logger = getLogger()
 
     private fun createExecutor(): ExecutorService =
         Executors.newFixedThreadPool(

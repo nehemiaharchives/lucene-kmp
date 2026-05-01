@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.codecs.lucene99
 
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.CodecUtil
 import org.gnit.lucenekmp.codecs.KnnFieldVectorsWriter
 import org.gnit.lucenekmp.codecs.KnnVectorsWriter
@@ -56,7 +55,7 @@ class Lucene99HnswVectorsWriter(
     private val numMergeWorkers: Int,
     private val mergeExec: TaskExecutor?
 ) : KnnVectorsWriter() {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     private val segmentWriteState: SegmentWriteState = state
     private val meta: IndexOutput?
     private val vectorIndex: IndexOutput?

@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.Codec
 import org.gnit.lucenekmp.codecs.DocValuesFormat
 import org.gnit.lucenekmp.codecs.FieldInfosFormat
@@ -29,7 +28,7 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.math.max
 import okio.IOException
 
-private val readersAndUpdatesLogger = org.gnit.lucenekmp.util.luceneLogger {}
+private val readersAndUpdatesLogger = org.gnit.lucenekmp.util.getLogger()
 
 // Used by IndexWriter to hold open SegmentReaders (for
 // searching or merging), plus pending deletes and updates,

@@ -1,9 +1,9 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlin.test.*
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 
-private val logger = KotlinLogging.logger {}
+private val logger = getLogger()
 
 class TreeSetTest {
     @Test

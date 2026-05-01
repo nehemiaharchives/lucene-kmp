@@ -23,7 +23,7 @@ import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.coroutines.runBlocking
 import okio.IOException
 import org.gnit.lucenekmp.codecs.Codec
@@ -91,7 +91,7 @@ import kotlin.test.assertTrue
 
 class TestUtil {
     companion object {
-        private val logger = KotlinLogging.logger {}
+        private val logger = getLogger()
 
         /**
          * A comparator that compares UTF-16 strings / char sequences according to Unicode code point

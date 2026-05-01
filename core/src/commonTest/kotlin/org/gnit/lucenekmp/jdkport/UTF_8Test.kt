@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlin.test.assertContentEquals
 
 class UTF_8Test {
@@ -114,7 +114,7 @@ class UTF_8Test {
 
     // --- UTF-8 combinations decoding tests ---
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
     private val utf8DecoderCombo = UTF_8().newDecoder()
 
     // Characters for each bit-width

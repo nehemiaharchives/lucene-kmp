@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.index.DocumentsWriterFlushQueue.FlushTicket
 import org.gnit.lucenekmp.index.DocumentsWriterPerThread.FlushedSegment
 import org.gnit.lucenekmp.search.Query
@@ -82,7 +81,7 @@ class DocumentsWriter @OptIn(ExperimentalAtomicApi::class) constructor(
     directory: Directory,
     globalFieldNumberMap: FieldInfos.FieldNumbers
 ) : AutoCloseable, Accountable {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     private val syncLock = ReentrantLock()
     @OptIn(ExperimentalAtomicApi::class)
     private val pendingNumDocs: AtomicLong

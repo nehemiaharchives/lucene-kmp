@@ -15,7 +15,7 @@ import kotlin.math.max
  * @lucene.internal
  */
 class FrequencyTrackingRingBuffer(maxSize: Int, sentinel: Int) : Accountable {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     private val maxSize: Int
     private val buffer: IntArray
     private var position: Int

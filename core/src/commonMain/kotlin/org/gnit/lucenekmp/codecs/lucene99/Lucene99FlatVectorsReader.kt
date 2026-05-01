@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.codecs.lucene99
 
 
 import org.gnit.lucenekmp.codecs.CodecUtil
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
 import org.gnit.lucenekmp.codecs.lucene95.OffHeapByteVectorValues
@@ -39,7 +38,7 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
  * @lucene.experimental
  */
 class Lucene99FlatVectorsReader(state: SegmentReadState, scorer: FlatVectorsScorer) : FlatVectorsReader(scorer) {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     private val fields: IntObjectHashMap<FieldEntry> = IntObjectHashMap()
     private val vectorData: IndexInput
     private val fieldInfos: FieldInfos

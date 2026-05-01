@@ -4,7 +4,6 @@ package org.gnit.lucenekmp.codecs.lucene99
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsFormat
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsScorer
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsWriter
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
@@ -50,7 +49,7 @@ import okio.IOException
  * @lucene.experimental
  */
 class Lucene99FlatVectorsFormat(private val vectorsScorer: FlatVectorsScorer) : FlatVectorsFormat(NAME) {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
 
     @Throws(IOException::class)
     override fun fieldsWriter(state: SegmentWriteState): FlatVectorsWriter {

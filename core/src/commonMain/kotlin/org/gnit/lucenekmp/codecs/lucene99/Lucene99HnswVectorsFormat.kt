@@ -6,7 +6,6 @@ import org.gnit.lucenekmp.codecs.KnnVectorsReader
 import org.gnit.lucenekmp.codecs.KnnVectorsWriter
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorScorerUtil
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsFormat
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.index.SegmentReadState
 import org.gnit.lucenekmp.index.SegmentWriteState
 import org.gnit.lucenekmp.search.TaskExecutor
@@ -69,7 +68,7 @@ class Lucene99HnswVectorsFormat @JvmOverloads constructor(
     numMergeWorkers: Int = DEFAULT_NUM_MERGE_WORKER,
     mergeExec: ExecutorService? = null
 ) : KnnVectorsFormat("Lucene99HnswVectorsFormat") {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     /**
      * Controls how many of the nearest neighbor candidates are connected to the new node. Defaults to
      * [Lucene99HnswVectorsFormat.DEFAULT_MAX_CONN]. See [HnswGraph] for more details.

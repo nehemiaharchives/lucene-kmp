@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.internal.vectorization
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.codecs.lucene101.ForUtil
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.store.IOContext
@@ -20,7 +20,7 @@ class TestPostingDecodingUtil : LuceneTestCase() {
         configureTestLogging()
     }
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @Test
     fun testDuelSplitInts() {

@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.document
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.document.ShapeField.QueryRelation
 import org.gnit.lucenekmp.geo.Component2D
 import org.gnit.lucenekmp.geo.Line

@@ -3,16 +3,13 @@
 package org.gnit.lucenekmp.store
 
 import okio.FileSystem
-import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Files
-import org.gnit.lucenekmp.jdkport.StandardOpenOption
 import org.gnit.lucenekmp.jdkport.Thread
 import okio.IOException
 import okio.Path
 import okio.SYSTEM
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicInt
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -52,7 +49,7 @@ import kotlin.time.ExperimentalTime
 class NativeFSLockFactory constructor(
     val fs: FileSystem = FileSystem.SYSTEM
 ) : FSLockFactory() {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
 
     @OptIn(ExperimentalTime::class)
     override fun obtainFSLock(
@@ -235,7 +232,7 @@ class NativeFSLockFactory constructor(
     companion object {
         /** Singleton instance  */
         val INSTANCE: NativeFSLockFactory = NativeFSLockFactory()
-        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+        private val logger = org.gnit.lucenekmp.util.getLogger()
 
         private val LOCK_HELD: MutableSet<String> =
             mutableSetOf() /*java.util.Collections.synchronizedSet<String>(HashSet<String>())*/

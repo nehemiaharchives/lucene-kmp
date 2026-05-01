@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.index.DocumentsWriterPerThread.FlushedSegment
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.ReentrantLock
@@ -13,7 +12,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
-private val dwfqLogger = org.gnit.lucenekmp.util.luceneLogger {}
+private val dwfqLogger = org.gnit.lucenekmp.util.getLogger()
 
 /**
  * @lucene.internal

@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.tests.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -94,7 +94,7 @@ abstract class LegacyBaseDocValuesFormatTestCase : BaseIndexFileFormatTestCase()
         configureTestLogging()
     }
 
-    private val logger = KotlinLogging.logger {  }
+    private val logger = getLogger()
 
     override fun addRandomFields(doc: Document) {
         if (usually()) {

@@ -34,7 +34,6 @@ import org.gnit.lucenekmp.util.ThreadInterruptedException
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.AtomicInteger
 import org.gnit.lucenekmp.jdkport.Executor
-import org.gnit.lucenekmp.jdkport.InterruptedException
 import org.gnit.lucenekmp.jdkport.LinkedBlockingQueue
 import org.gnit.lucenekmp.jdkport.ReentrantLock
 import org.gnit.lucenekmp.jdkport.System
@@ -44,7 +43,6 @@ import org.gnit.lucenekmp.jdkport.UncheckedIOException
 import org.gnit.lucenekmp.jdkport.assert
 import org.gnit.lucenekmp.jdkport.get
 import org.gnit.lucenekmp.jdkport.currentThreadId
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.jdkport.accumulateAndGet
 import kotlin.concurrent.Volatile
 // import java.util.concurrent.SynchronousQueue
@@ -55,7 +53,7 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
-private val concurrentMergeSchedulerLogger = org.gnit.lucenekmp.util.luceneLogger {}
+private val concurrentMergeSchedulerLogger = org.gnit.lucenekmp.util.getLogger()
 
 /**
  * A [MergeScheduler] that runs each merge using a separate thread.

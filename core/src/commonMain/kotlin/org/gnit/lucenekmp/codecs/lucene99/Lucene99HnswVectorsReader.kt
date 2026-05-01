@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.codecs.lucene99
 
 
 import org.gnit.lucenekmp.codecs.CodecUtil
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.codecs.KnnVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.FlatVectorsReader
 import org.gnit.lucenekmp.codecs.hnsw.HnswGraphProvider
@@ -48,7 +47,7 @@ import kotlin.math.min
  * @lucene.experimental
  */
 class Lucene99HnswVectorsReader : KnnVectorsReader, QuantizedVectorsReader, HnswGraphProvider {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     private val flatVectorsReader: FlatVectorsReader
     private val fieldInfos: FieldInfos
     private val fields: IntObjectHashMap<FieldEntry>

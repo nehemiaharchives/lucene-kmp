@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.tests.store
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
@@ -41,7 +41,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.min
 import kotlin.random.Random
 
-private val mockDirectoryWrapperLogger = KotlinLogging.logger {}
+private val mockDirectoryWrapperLogger = getLogger()
 
 /**
  * This is a Directory Wrapper that adds methods intended to be used only by unit tests. It also

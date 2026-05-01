@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.jdkport
 import kotlin.test.*
 import org.gnit.lucenekmp.jdkport.OutputStream // Assuming this is the base OutputStream in the jdkport
 import okio.IOException // Corrected IOException import
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.util.configureTestLogging
 
 // Mock implementations will be added here later
@@ -48,7 +48,7 @@ class MockOutputStream : OutputStream() {
     fun isStreamClosed(): Boolean = streamClosed // Custom method to check closed state
 
     companion object {
-        private val logger = KotlinLogging.logger {}
+        private val logger = getLogger()
     }
 }
 

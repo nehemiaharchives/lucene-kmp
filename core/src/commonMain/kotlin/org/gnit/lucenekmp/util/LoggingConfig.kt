@@ -35,9 +35,9 @@ private fun ensureProductionLoggingConfigured() {
     }
 }
 
-fun luceneLogger(func: () -> Unit): KLogger {
+fun getLogger(): KLogger {
     ensureProductionLoggingConfigured()
-    return KotlinLogging.logger(func)
+    return KotlinLogging.logger {}
 }
 
 fun configureTestLogging() {

@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.store
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.FileHandle
 import okio.FileSystem
 import okio.IOException
@@ -327,7 +326,7 @@ class MMapDirectory(
         // visible for tests:
         val PROVIDER: MMapIndexInputProvider<Any>
 
-        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+        private val logger = org.gnit.lucenekmp.util.getLogger()
 
         private val sharedArenaMaxPermitsSysprop: Int
             get() {

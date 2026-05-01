@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.tests.util
 //import org.gnit.lucenekmp.store.FileSwitchDirectory
 //import org.gnit.lucenekmp.store.NRTCachingDirectory
 import org.gnit.lucenekmp.util.configureTestLogging
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import kotlinx.datetime.TimeZone
 import okio.FileNotFoundException
 import okio.IOException
@@ -121,7 +121,7 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
     //↑ line 2870 of LuceneTestCase.java
 
     companion object {
-        val logger = KotlinLogging.logger {}
+        val logger = getLogger()
 
 
         // ↓ line 277 of LuceneTestCase.java

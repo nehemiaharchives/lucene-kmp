@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import okio.Buffer
 import okio.BufferedSource
 import okio.IOException
@@ -15,7 +15,7 @@ import kotlin.test.assertFailsWith
 
 class StreamDecoderTest {
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @BeforeTest
     fun setUp() {

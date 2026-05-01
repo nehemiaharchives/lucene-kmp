@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.index.VectorEncoding
 import org.gnit.lucenekmp.index.VectorSimilarityFunction.EUCLIDEAN
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomPicks
 //import org.gnit.lucenekmp.util.configureTestLogging
@@ -26,7 +26,7 @@ class TestVectorScorer : LuceneTestCase() {
         configureTestLogging()
     }*/
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @Test
     fun testFindAll() {

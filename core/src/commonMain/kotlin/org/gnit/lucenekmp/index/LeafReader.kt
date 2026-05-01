@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.search.KnnCollector
 import org.gnit.lucenekmp.search.TopDocs
@@ -430,6 +429,6 @@ protected constructor() : IndexReader() {
     abstract val metaData: LeafMetaData
 
     companion object {
-        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+        private val logger = org.gnit.lucenekmp.util.getLogger()
     }
 }

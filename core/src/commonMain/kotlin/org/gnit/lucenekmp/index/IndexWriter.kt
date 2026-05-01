@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import okio.IOException
@@ -173,7 +172,7 @@ import kotlin.math.min
 @OptIn(ExperimentalAtomicApi::class)
 open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, TwoPhaseCommit, Accountable,
     MergePolicy.MergeContext {
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
     /** Used only for testing.  */
     private val enableTestPoints: Boolean
 

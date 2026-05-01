@@ -1,7 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
 import kotlinx.coroutines.Job
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
@@ -413,7 +412,7 @@ open class ThreadPoolExecutor(
      * holding mainLock.
      */
     private val workers = HashSet<Worker>()
-    private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+    private val logger = org.gnit.lucenekmp.util.getLogger()
 
     /**
      * Wait condition to support awaitTermination.

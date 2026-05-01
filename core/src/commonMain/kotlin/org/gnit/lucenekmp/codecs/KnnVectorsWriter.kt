@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import org.gnit.lucenekmp.index.VectorEncoding.BYTE
 import org.gnit.lucenekmp.index.VectorEncoding.FLOAT32
@@ -142,7 +141,7 @@ protected constructor() : Accountable, AutoCloseable {
 
     /** View over multiple vector values supporting iterator-style access via DocIdMerger.  */
     object MergedVectorValues {
-        private val logger = org.gnit.lucenekmp.util.luceneLogger {}
+        private val logger = org.gnit.lucenekmp.util.getLogger()
         private fun validateFieldEncoding(fieldInfo: FieldInfo?, expected: VectorEncoding) {
             require(fieldInfo != null && fieldInfo.hasVectorValues())
             val fieldEncoding: VectorEncoding = fieldInfo.vectorEncoding

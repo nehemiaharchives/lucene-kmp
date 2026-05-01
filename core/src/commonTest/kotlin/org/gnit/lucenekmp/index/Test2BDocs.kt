@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.index
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.document.Document
 import org.gnit.lucenekmp.document.Field
 import org.gnit.lucenekmp.document.StringField
@@ -30,7 +30,7 @@ class Test2BDocs : LuceneTestCase() {
         configureTestLogging()
     }
 
-    private val logger = KotlinLogging.logger {  }
+    private val logger = getLogger()
 
     // indexes Integer.MAX_VALUE docs with indexed field(s)
     @Test

@@ -1,6 +1,5 @@
 package org.gnit.lucenekmp.codecs.lucene90
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import okio.IOException
 import okio.FileNotFoundException
 import org.gnit.lucenekmp.codecs.CodecUtil
@@ -15,7 +14,7 @@ import org.gnit.lucenekmp.store.ReadAdvice
 import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.IOUtils
 
-private val lucene90CompoundReaderLogger = org.gnit.lucenekmp.util.luceneLogger {}
+private val lucene90CompoundReaderLogger = org.gnit.lucenekmp.util.getLogger()
 
 /**
  * Class for accessing a compound stream. This class implements a directory, but is limited to only

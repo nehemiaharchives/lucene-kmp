@@ -21,6 +21,7 @@ import org.gnit.lucenekmp.index.Term
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.index.RandomIndexWriter
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.util.getLogger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -43,7 +44,7 @@ import kotlin.test.assertSame
  *       \./
  */
 class TestSort : LuceneTestCase() {
-    private val logger = io.github.oshai.kotlinlogging.KotlinLogging.logger {}
+    private val logger = getLogger()
     private fun assertEqualsInTestSort(a: Sort, b: Sort) {
         /*LuceneTestCase.*/assertEquals(a, b)
         /*LuceneTestCase.*/assertEquals(b, a)

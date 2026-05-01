@@ -2,7 +2,6 @@ package org.gnit.lucenekmp.util
 
 import org.gnit.lucenekmp.store.ReadAdvice
 import dev.scottpierce.envvar.EnvVar
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gnit.lucenekmp.jdkport.PrivilegedAction
 
 object Constants {
@@ -185,7 +184,7 @@ object Constants {
     }
 
     private fun logSecurityWarning(property: String) {
-        val logger = org.gnit.lucenekmp.util.luceneLogger {}
+        val logger = org.gnit.lucenekmp.util.getLogger()
         logger.warn { "SecurityManager prevented access to system property: $property" }
     }
 

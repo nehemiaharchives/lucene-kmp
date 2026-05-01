@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.jdkport
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.tests.junitport.assertEquals
 import okio.Buffer
 import okio.Source
@@ -13,7 +13,7 @@ import kotlin.test.assertContentEquals
 
 class KIOSourceInputStreamTest {
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     @BeforeTest
     fun setUp() {

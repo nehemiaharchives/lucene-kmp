@@ -1,6 +1,6 @@
 package org.gnit.lucenekmp.store
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.gnit.lucenekmp.util.getLogger
 import org.gnit.lucenekmp.tests.util.RandomizedTest
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.RandomNumbers
@@ -23,7 +23,7 @@ class TestByteBuffersDataInput : RandomizedTest() {
         configureTestLogging()
     }
 
-    private val logger = KotlinLogging.logger {}
+    private val logger = getLogger()
 
     private fun addRandomData(out: ByteBuffersDataOutput, rnd: Random, maxAddCalls: Int): List<(ByteBuffersDataInput) -> Unit> {
         val operations = mutableListOf<(ByteBuffersDataInput) -> Unit>()
