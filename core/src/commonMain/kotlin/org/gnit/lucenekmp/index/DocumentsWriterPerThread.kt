@@ -36,7 +36,6 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlin.time.TimeSource
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -397,7 +396,6 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
         onNewDocOnRAM: Runnable
     ): Long {
         return withIndexingChainCallPathHint {
-            val methodStart = TimeSource.Monotonic.markNow()
             try {
                 testPoint("DocumentsWriterPerThread addDocuments start")
                 assert(abortingException == null) { "DWPT has hit aborting exception but is still indexing" }
@@ -415,7 +413,6 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                 }
                 val docsInRamBefore = numDocsInRAM
                 var allDocsIndexed = false
-                val processDocsStart = TimeSource.Monotonic.markNow()
                 try {
                     val iterator: Iterator<Iterable<IndexableField>> = docs.iterator()
                     var docCount = 0
@@ -449,10 +446,7 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                         segmentInfo.setHasBlocks()
                     }
                     allDocsIndexed = true
-                    logger.debug { "substep=processDocs docCount=$docCount elapsedMs=${processDocsStart.elapsedNow().inWholeMilliseconds}" }
-                    val finishStart = TimeSource.Monotonic.markNow()
                     val result = finishDocuments(deleteNode, docsInRamBefore)
-                    logger.debug { "substep=finishDocs elapsedMs=${finishStart.elapsedNow().inWholeMilliseconds}" }
                     return@withIndexingChainCallPathHint result
                 } finally {
                     if (!allDocsIndexed && !this.isAborted) {
@@ -462,7 +456,6 @@ class DocumentsWriterPerThread @OptIn(ExperimentalAtomicApi::class) constructor(
                     }
                 }
             } finally {
-                logger.debug { "substep=updateDocumentsTotal elapsedMs=${methodStart.elapsedNow().inWholeMilliseconds}" }
                 maybeAbort("updateDocuments", flushNotifications)
             }
         }
