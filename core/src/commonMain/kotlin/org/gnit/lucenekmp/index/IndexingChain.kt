@@ -622,7 +622,7 @@ class IndexingChain(
             // build schema for each unique doc field
             for (field in document) {
                 val fieldType: IndexableFieldType = field.fieldType()
-                val isReserved = field::class == ReservedField::class
+                val isReserved = field is ReservedField<*>
                 val pf =
                     getOrAddPerField(
                         field.name(),
