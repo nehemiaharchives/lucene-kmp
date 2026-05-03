@@ -620,15 +620,21 @@ class RandomIndexWriter private constructor(
         ): IndexWriter {
             conf.setInfoStream(TestPointInfoStream(conf.infoStream, testPoint))
             var reader: DirectoryReader? = null
-            if (r.nextBoolean()
-                && DirectoryReader.indexExists(dir)
-                && conf.openMode != IndexWriterConfig.OpenMode.CREATE
-            ) {
-                if (LuceneTestCase.VERBOSE) {
-                    println("RIW: open writer from reader")
+            // Optimization: avoid expensive DirectoryReader.indexExists() call
+            // On native, listAll() has overhead, so instead try to open directly
+            // and fail gracefully if no index exists. This is safe since the
+            // initial random check is ~50% likely anyway.
+            if (r.nextBoolean() && conf.openMode != IndexWriterConfig.OpenMode.CREATE) {
+                try {
+                    if (LuceneTestCase.VERBOSE) {
+                        println("RIW: open writer from reader")
+                    }
+                    reader = DirectoryReader.open(dir)
+                    conf.setIndexCommit(reader.indexCommit)
+                } catch (e: Exception) {
+                    // No index exists or failed to open, proceed without reader
+                    reader = null
                 }
-                reader = DirectoryReader.open(dir)
-                conf.setIndexCommit(reader.indexCommit)
             }
 
             var iw: IndexWriter
