@@ -778,9 +778,14 @@ class TestIndexWriterMergePolicy : LuceneTestCase() {
         stressUpdateSameDocumentWithMergeOnX(false)
     }
 
+
     @Throws(Exception::class)
     fun stressUpdateSameDocumentWithMergeOnX(useGetReader: Boolean) {
+        val testStart = kotlin.time.TimeSource.Monotonic.markNow()
+        val dirStart = kotlin.time.TimeSource.Monotonic.markNow()
         newDirectory().use { directory ->
+            val dirMs = dirStart.elapsedNow().inWholeMilliseconds
+            val writerStart = kotlin.time.TimeSource.Monotonic.markNow()
             RandomIndexWriter(
                 random(),
                 directory,
@@ -795,13 +800,24 @@ class TestIndexWriterMergePolicy : LuceneTestCase() {
                     .setSoftDeletesField("soft_delete")
                     .setMergeScheduler(ConcurrentMergeScheduler())
             ).use { writer ->
+                val writerMs = writerStart.elapsedNow().inWholeMilliseconds
+                val docStart = kotlin.time.TimeSource.Monotonic.markNow()
                 val d1 = Document().apply { add(StringField("id", "1", Field.Store.NO)) }
+                val docMs = docStart.elapsedNow().inWholeMilliseconds
+                val updateStart = kotlin.time.TimeSource.Monotonic.markNow()
                 writer.updateDocument(Term("id", "1"), d1)
+                val updateMs = updateStart.elapsedNow().inWholeMilliseconds
+                val commitStart = kotlin.time.TimeSource.Monotonic.markNow()
                 writer.commit()
+                val commitMs = commitStart.elapsedNow().inWholeMilliseconds
+                val setupMs = testStart.elapsedNow().inWholeMilliseconds
+                println(">>> substep dir=$dirMs writer=$writerMs doc=$docMs update=$updateMs commit=$commitMs setup_total=$setupMs")
 
                 val iters = AtomicInteger(100 + random().nextInt(if (TEST_NIGHTLY) 5000 else 1000))
                 val numFullFlushes = AtomicInteger(10 + random().nextInt(if (TEST_NIGHTLY) 500 else 100))
                 val done = AtomicBoolean(false)
+                println(">>> iters=${iters.load()} flushes=${numFullFlushes.load()}")
+                
                 val threads = Array(1 + random().nextInt(4)) {
                     Thread {
                         try {
@@ -821,6 +837,8 @@ class TestIndexWriterMergePolicy : LuceneTestCase() {
                 for (t in threads) {
                     t.start()
                 }
+                val loopStart = kotlin.time.TimeSource.Monotonic.markNow()
+                var opCount = 0
                 try {
                     while (!done.load()) {
                         if (useGetReader) {
@@ -848,7 +866,10 @@ class TestIndexWriterMergePolicy : LuceneTestCase() {
                             }
                         }
                         numFullFlushes.decrementAndFetch()
+                        opCount++
                     }
+                    val loopMs = loopStart.elapsedNow().inWholeMilliseconds
+                    println(">>> main_loop_ms=$loopMs ops=$opCount")
                 } finally {
                     while (numFullFlushes.load() > 0) {
                         numFullFlushes.decrementAndFetch()
@@ -856,10 +877,13 @@ class TestIndexWriterMergePolicy : LuceneTestCase() {
                     for (t in threads) {
                         t.join()
                     }
+                    val totalMs = testStart.elapsedNow().inWholeMilliseconds
+                    println(">>> TOTAL_ms=$totalMs")
                 }
             }
         }
     }
+
 
     // Test basic semantics of merge on getReader
     @Test
