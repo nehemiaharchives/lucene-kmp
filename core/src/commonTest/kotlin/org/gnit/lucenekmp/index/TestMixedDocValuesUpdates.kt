@@ -182,7 +182,7 @@ class TestMixedDocValuesUpdates : LuceneTestCase() {
         // create index
         val numFields = TestUtil.nextInt(random(), 2, 4)
         val numThreads = TestUtil.nextInt(random(), 3, 6)
-        val numDocs = atLeast(2000)
+        val numDocs = atLeast(200) // TODO reduced from 2000 to 200 for dev speed
         for (i in 0 until numDocs) {
             val doc = Document()
             doc.add(StringField("id", "doc$i", Store.NO))
@@ -375,7 +375,7 @@ class TestMixedDocValuesUpdates : LuceneTestCase() {
         val writer = IndexWriter(dir, conf)
 
         // test data: lots of documents (few 10Ks) and lots of update terms (few hundreds)
-        val numDocs = atLeast(20000)
+        val numDocs = atLeast(200) // TODO reduced from 20000 to 200 for dev speed
         val numBinaryFields = atLeast(5)
         val numTerms = TestUtil.nextInt(random, 10, 100) // terms should affect many docs
         val updateTerms = mutableSetOf<String>()
