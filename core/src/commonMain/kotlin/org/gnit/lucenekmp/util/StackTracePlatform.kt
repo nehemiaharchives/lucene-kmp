@@ -63,6 +63,8 @@ expect fun <T> withIndexingChainFlushCallPathHint(block: () -> T): T
 
 expect fun <T> withIndexingChainCallPathHint(block: () -> T): T
 
+expect fun <T> withMockDirectoryWrapperDeleteFileCallPathHint(block: () -> T): T
+
 internal expect fun currentStackTraceHasClassMethodFastPath(className: String, methodName: String): Boolean?
 
 internal expect fun currentStackTraceHasAnyMethodFastPath(methodNames: Set<String>): Boolean?

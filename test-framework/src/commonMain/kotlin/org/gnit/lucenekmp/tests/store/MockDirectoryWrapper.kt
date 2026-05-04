@@ -31,6 +31,7 @@ import org.gnit.lucenekmp.util.CollectionUtil
 import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.jdkport.Thread
 import org.gnit.lucenekmp.util.getLogger
+import org.gnit.lucenekmp.util.withMockDirectoryWrapperDeleteFileCallPathHint
 import org.gnit.lucenekmp.jdkport.withLock
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -724,39 +725,42 @@ class MockDirectoryWrapper(random: Random, delegate: Directory) : BaseDirectoryW
     /*@Synchronized*/
     @Throws(IOException::class)
     override fun deleteFile(name: String) {
-        withStateLock {
-            isDeletingFile = true
-            try {
-                maybeYield()
+        // Import withMockDirectoryWrapperDeleteFileCallPathHint for native optimization
+        return withMockDirectoryWrapperDeleteFileCallPathHint {
+            withStateLock {
+                isDeletingFile = true
+                try {
+                    maybeYield()
 
-                maybeThrowDeterministicException()
+                    maybeThrowDeterministicException()
 
-                if (crashed) {
-                    throw IOException("cannot delete after crash")
-                }
-
-                withOpenFilesLock {
-                    if (openFiles!!.containsKey(name)) {
-                        openFilesDeleted!!.add(name)
-                        if (assertNoDeleteOpenFile) {
-                            throw fillOpenTrace(
-                                IOException(
-                                    "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
-                                ),
-                                name,
-                                true
-                            )
-                        }
-                    } else {
-                        openFilesDeleted!!.remove(name)
+                    if (crashed) {
+                        throw IOException("cannot delete after crash")
                     }
-                }
 
-                unSyncedFiles!!.remove(name)
-                `in`.deleteFile(name)
-                createdFiles!!.remove(name)
-            } finally {
-                isDeletingFile = false
+                    withOpenFilesLock {
+                        if (openFiles!!.containsKey(name)) {
+                            openFilesDeleted!!.add(name)
+                            if (assertNoDeleteOpenFile) {
+                                throw fillOpenTrace(
+                                    IOException(
+                                        "MockDirectoryWrapper: file \"$name\" is still open: cannot delete"
+                                    ),
+                                    name,
+                                    true
+                                )
+                            }
+                        } else {
+                            openFilesDeleted!!.remove(name)
+                        }
+                    }
+
+                    unSyncedFiles!!.remove(name)
+                    `in`.deleteFile(name)
+                    createdFiles!!.remove(name)
+                } finally {
+                    isDeletingFile = false
+                }
             }
         }
     }

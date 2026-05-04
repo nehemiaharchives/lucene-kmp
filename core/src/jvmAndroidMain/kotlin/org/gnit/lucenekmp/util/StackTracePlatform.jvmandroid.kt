@@ -20,6 +20,10 @@ actual fun <T> withIndexingChainCallPathHint(block: () -> T): T {
     return block()
 }
 
+actual fun <T> withMockDirectoryWrapperDeleteFileCallPathHint(block: () -> T): T {
+    return block()
+}
+
 internal actual fun currentStackTraceHasClassMethodFastPath(
     className: String,
     methodName: String
