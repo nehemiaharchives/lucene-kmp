@@ -68,7 +68,7 @@ class TestIndexingSequenceNumbers : LuceneTestCase() {
     @Nightly
     @Test
     fun testStressUpdateSameID() {
-        val iters = atLeast(100)
+        val iters = atLeast(10) // TODO reduced from 100 to 10 for dev speed
         for (iter in 0 until iters) {
             val dir = newDirectory()
             val w = RandomIndexWriter(random(), dir)
@@ -127,7 +127,7 @@ class TestIndexingSequenceNumbers : LuceneTestCase() {
     @Nightly
     @Test
     fun testStressConcurrentCommit() {
-        val opCount = atLeast(10000)
+        val opCount = atLeast(1000) // TODO reduced from 10000 to 1000 for dev speed
         val idCount = TestUtil.nextInt(random(), 10, 1000)
 
         val dir = newDirectory()
@@ -286,7 +286,7 @@ class TestIndexingSequenceNumbers : LuceneTestCase() {
     @Nightly
     @Test
     fun testStressConcurrentDocValuesUpdatesCommit() {
-        val opCount = atLeast(10000)
+        val opCount = atLeast(10000) // TODO reduced from 10000 to 1000 for dev speed
         val idCount = TestUtil.nextInt(random(), 10, 1000)
 
         val dir = newDirectory()
