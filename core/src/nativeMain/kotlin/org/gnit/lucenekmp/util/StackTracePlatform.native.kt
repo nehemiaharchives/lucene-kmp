@@ -20,6 +20,8 @@ private const val PERSISTENT_SNAPSHOT_DELETION_POLICY_PERSIST_METHOD_NAME = "per
 private const val READ_ONLY_CLONE_METHOD_NAME = "getReadOnlyClone"
 private const val MOCK_DIRECTORY_WRAPPER_CLASS_NAME = "org.gnit.lucenekmp.tests.store.MockDirectoryWrapper"
 private const val MOCK_DIRECTORY_WRAPPER_DELETE_FILE_METHOD_NAME = "deleteFile"
+private const val PER_FIELD_CLASS_NAME = "org.gnit.lucenekmp.index.IndexingChain\$PerField"
+private const val PER_FIELD_INVERT_METHOD_NAME = "invert"
 private val checkpointHintLock = ReentrantLock()
 private val checkpointHintDepthByThread = mutableMapOf<Long, Int>()
 private val documentsWriterPerThreadFlushHintDepthByThread = mutableMapOf<Long, Int>()
@@ -27,6 +29,7 @@ private val indexingChainFlushHintDepthByThread = mutableMapOf<Long, Int>()
 private val indexingChainCallHintDepthByThread = mutableMapOf<Long, Int>()
 private val readOnlyCloneHintDepthByThread = mutableMapOf<Long, Int>()
 private val mockDirectoryWrapperDeleteFileHintDepthByThread = mutableMapOf<Long, Int>()
+private val perFieldInvertHintDepthByThread = mutableMapOf<Long, Int>()
 
 actual fun <T> withCheckpointCallPathHint(block: () -> T): T {
     val threadId = currentThreadId()
@@ -181,6 +184,31 @@ actual fun <T> withMockDirectoryWrapperDeleteFileCallPathHint(block: () -> T): T
     }
 }
 
+actual fun <T> withPerFieldInvertCallPathHint(block: () -> T): T {
+    val threadId = currentThreadId()
+    checkpointHintLock.lock()
+    try {
+        perFieldInvertHintDepthByThread[threadId] = (perFieldInvertHintDepthByThread[threadId] ?: 0) + 1
+    } finally {
+        checkpointHintLock.unlock()
+    }
+    try {
+        return block()
+    } finally {
+        checkpointHintLock.lock()
+        try {
+            val nextDepth = (perFieldInvertHintDepthByThread[threadId] ?: 1) - 1
+            if (nextDepth <= 0) {
+                perFieldInvertHintDepthByThread.remove(threadId)
+            } else {
+                perFieldInvertHintDepthByThread[threadId] = nextDepth
+            }
+        } finally {
+            checkpointHintLock.unlock()
+        }
+    }
+}
+
 internal actual fun currentStackTraceHasClassMethodFastPath(
     className: String,
     methodName: String
@@ -200,6 +228,9 @@ internal actual fun currentStackTraceHasClassMethodFastPath(
             className == MOCK_DIRECTORY_WRAPPER_CLASS_NAME &&
                 methodName == MOCK_DIRECTORY_WRAPPER_DELETE_FILE_METHOD_NAME ->
                 mockDirectoryWrapperDeleteFileHintDepthByThread[threadId]?.let { it > 0 } ?: false
+            className == PER_FIELD_CLASS_NAME &&
+                methodName == PER_FIELD_INVERT_METHOD_NAME ->
+                perFieldInvertHintDepthByThread[threadId]?.let { it > 0 } ?: false
             className == PERSISTENT_SNAPSHOT_DELETION_POLICY_CLASS_NAME &&
                 methodName == PERSISTENT_SNAPSHOT_DELETION_POLICY_PERSIST_METHOD_NAME ->
                 hasCurrentCallPathHint(className, methodName)

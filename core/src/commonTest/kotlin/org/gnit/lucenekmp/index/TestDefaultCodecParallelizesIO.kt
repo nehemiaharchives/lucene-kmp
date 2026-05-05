@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.index
 
 import okio.IOException
 import org.gnit.lucenekmp.document.Document
+import org.gnit.lucenekmp.jdkport.System
 import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.store.Directory
 import org.gnit.lucenekmp.tests.store.SerialIOCountingDirectory
@@ -24,6 +25,7 @@ class TestDefaultCodecParallelizesIO : LuceneTestCase() {
     @Throws(Exception::class)
     fun beforeClass() {
         val bbDir: Directory = ByteBuffersDirectory()
+        val startTime = System.currentTimeMillis()
         LineFileDocs(random()).use { docs ->
             IndexWriter(
                 bbDir,
@@ -42,6 +44,8 @@ class TestDefaultCodecParallelizesIO : LuceneTestCase() {
                 w.forceMerge(1)
             }
         }
+        val elapsedMs = System.currentTimeMillis() - startTime
+        println("=== Indexing took $elapsedMs ms for ~${atLeast(10_000)} docs ===")
         dir = SerialIOCountingDirectory(bbDir)
         reader = DirectoryReader.open(dir)
     }

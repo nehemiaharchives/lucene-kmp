@@ -38,6 +38,7 @@ import org.gnit.lucenekmp.util.IntBlockPool
 import org.gnit.lucenekmp.util.RamUsageEstimator
 import org.gnit.lucenekmp.util.Version
 import org.gnit.lucenekmp.util.withIndexingChainFlushCallPathHint
+import org.gnit.lucenekmp.util.withPerFieldInvertCallPathHint
 import kotlin.time.Clock
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -789,11 +790,15 @@ class IndexingChain(
         // Invert indexed fields
         if (fieldType.indexOptions() != IndexOptions.NONE) {
             if (pf.first) { // first time we see this field in this doc
-                pf.invert(docID, field, true)
+                withPerFieldInvertCallPathHint {
+                    pf.invert(docID, field, true)
+                }
                 pf.first = false
                 indexedField = true
             } else {
-                pf.invert(docID, field, false)
+                withPerFieldInvertCallPathHint {
+                    pf.invert(docID, field, false)
+                }
             }
         }
 
