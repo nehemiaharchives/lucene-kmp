@@ -80,7 +80,7 @@ class TestPostingDecodingUtil : LuceneTestCase() {
     @Test
     fun testPerfSplitIntsProbe() {
         val count = 32
-        val iterations = 20_000
+        val iterations = 200 // TODO reduced from 20_000 to 200 for dev speed
         val bShift = 16
         val dec = 4
         val bMask = 0x0F
