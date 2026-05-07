@@ -869,7 +869,7 @@ jobs:
         run:  |
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestI*"
 
-      - name: Run core-index tests K-U
+      - name: Run core-index tests K-O
         if: ${{ matrix.module_name == 'core-index' }}
         run:  |
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestK*"
@@ -877,6 +877,10 @@ jobs:
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestM*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestN*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestO*"
+
+      - name: Run core-index tests P-U
+        if: ${{ matrix.module_name == 'core-index' }}
+        run:  |          
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestP*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestR*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestS*"
