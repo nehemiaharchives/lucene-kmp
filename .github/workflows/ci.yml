@@ -870,10 +870,9 @@ jobs:
             SAFE_FILTER=$(printf '%s' "$FILTER" | tr -c 'A-Za-z0-9' '_')
             LOG_FILE="$LOG_DIR/${SAFE_FILTER}.log"
             set +e
-            /usr/bin/env "SIMCTL_CHILD_tests.linedocsfile=$TEST_LINE_DOCS" "SIMCTL_CHILD_tests.indexresourcesdir=$INDEX_RESOURCES_DIR" xcrun simctl spawn --standalone "$DEVICE_ID" "$TEST_KEXE" --ktest_logger=GTEST --ktest_gradle_filter="$FILTER" > "$LOG_FILE" 2>&1
-            STATUS=$?
+            /usr/bin/env "SIMCTL_CHILD_tests.linedocsfile=$TEST_LINE_DOCS" "SIMCTL_CHILD_tests.indexresourcesdir=$INDEX_RESOURCES_DIR" xcrun simctl spawn --standalone "$DEVICE_ID" "$TEST_KEXE" --ktest_logger=GTEST --ktest_gradle_filter="$FILTER" 2>&1 | tee "$LOG_FILE" | .github/workflows/ios_logs_formatter.sh
+            STATUS=${PIPESTATUS[0]}
             set -e
-            .github/workflows/ios_logs_formatter.sh "$LOG_FILE"
             if [ "$STATUS" -ne 0 ]; then
               echo "FAILED iOS core-index filter: $FILTER"
               echo "Full log: $LOG_FILE"
@@ -881,24 +880,7 @@ jobs:
               return "$STATUS"
             fi
           }
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*Test2*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestA*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestB*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestC*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestD*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestE*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestF*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestI*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestK*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestL*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestM*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestN*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestO*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestP*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestR*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestS*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestT*"
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*TestU*"
+          run_ios_core_index_tests "org.gnit.lucenekmp.index*"
 
       - name: Run core-index tests 2-F
         if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
@@ -916,18 +898,14 @@ jobs:
         run:  |
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestI*"
 
-      - name: Run core-index tests K-O
+      - name: Run core-index tests K-U
         if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
         run:  |
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestK*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestL*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestM*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestN*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestO*"
-
-      - name: Run core-index tests P-U
-        if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
-        run:  |          
+          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestO*"  
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestP*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestR*"
           ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestS*"

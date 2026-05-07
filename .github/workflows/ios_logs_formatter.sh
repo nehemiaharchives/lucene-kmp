@@ -24,5 +24,6 @@ function format_duration(elapsed_ms) {
   elapsed_ms = $6
   gsub(/\(/, "", elapsed_ms)
   print "PASSED SUITE: " format_duration(elapsed_ms + 0) " | " suite " (" count " tests)"
+  fflush()
 }
-' "$1"
+' "${1:--}"
