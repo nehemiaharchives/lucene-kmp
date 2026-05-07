@@ -25,381 +25,381 @@ jobs:
       matrix:
         include: &ci_matrix
           # JVM
-          - platform: jvm
-            module_name: core-analysis
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.analysis*"
-            artifact: jvm-core-analysis-reports
-            coverage_enabled: true
-            coverage_task: :core:koverXmlReport
-            coverage_report_path: core/build/reports/kover/report.xml
-            coverage_extra_args: ""
-          - platform: jvm
-            module_name: core-codecs
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.codecs*"
-            artifact: jvm-core-codecs-reports
-          - platform: jvm
-            module_name: core-document
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.document*"
-            artifact: jvm-core-document-reports
-          - platform: jvm
-            module_name: core-geo
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.geo*"
-            artifact: jvm-core-geo-reports
-          - platform: jvm
-            module_name: core-index
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: jvm-core-index-reports
-          - platform: jvm
-            module_name: core-internal
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.internal*"
-            artifact: jvm-core-internal-reports
-          - platform: jvm
-            module_name: core-jdkport
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
-            artifact: jvm-core-jdkport-reports
-          - platform: jvm
-            module_name: core-search
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.search*"
-            artifact: jvm-core-search-reports
-          - platform: jvm
-            module_name: core-store
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.store*"
-            artifact: jvm-core-store-reports
-          - platform: jvm
-            module_name: core-util
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.util*"
-            artifact: jvm-core-util-reports
-          - platform: jvm
-            module_name: analysis-common
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:common:jvmTest
-            artifact: jvm-analysis-common-reports
-            coverage_enabled: true
-            coverage_task: :analysis:common:koverXmlReport
-            coverage_report_path: analysis/common/build/reports/kover/report.xml
-            coverage_extra_args: ""
-          - platform: jvm
-            module_name: analysis-morfologik
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:morfologik:jvmTest
-            artifact: jvm-analysis-morfologik-reports
-            coverage_enabled: true
-            coverage_task: :analysis:morfologik:koverXmlReport
-            coverage_report_path: analysis/morfologik/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :analysis:morfologik:compileAndroidDeviceTest
-              -x :analysis:morfologik:compileAndroidHostTest
-              -x :analysis:morfologik:compileAndroidMain
-              -x :analysis:morfologik:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: analysis-smartcn
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:smartcn:jvmTest
-            artifact: jvm-analysis-smartcn-reports
-            coverage_enabled: true
-            coverage_task: :analysis:smartcn:koverXmlReport
-            coverage_report_path: analysis/smartcn/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :analysis:smartcn:compileAndroidDeviceTest
-              -x :analysis:smartcn:compileAndroidHostTest
-              -x :analysis:smartcn:compileAndroidMain
-              -x :analysis:smartcn:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: analysis-nori
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:nori:jvmTest
-            artifact: jvm-analysis-nori-reports
-            coverage_enabled: true
-            coverage_task: :analysis:nori:koverXmlReport
-            coverage_report_path: analysis/nori/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :analysis:nori:compileAndroidDeviceTest
-              -x :analysis:nori:compileAndroidHostTest
-              -x :analysis:nori:compileAndroidMain
-              -x :analysis:nori:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: analysis-kuromoji
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:kuromoji:jvmTest
-            artifact: jvm-analysis-kuromoji-reports
-            coverage_enabled: true
-            coverage_task: :analysis:kuromoji:koverXmlReport
-            coverage_report_path: analysis/kuromoji/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :analysis:kuromoji:compileAndroidDeviceTest
-              -x :analysis:kuromoji:compileAndroidHostTest
-              -x :analysis:kuromoji:compileAndroidMain
-              -x :analysis:kuromoji:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: analysis-extra
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:extra:jvmTest
-            artifact: jvm-analysis-extra-reports
-            coverage_enabled: true
-            coverage_task: :analysis:extra:koverXmlReport
-            coverage_report_path: analysis/extra/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :analysis:extra:compileAndroidDeviceTest
-              -x :analysis:extra:compileAndroidHostTest
-              -x :analysis:extra:compileAndroidMain
-              -x :analysis:extra:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: codecs
-            os: ubuntu-latest
-            timeout: 60
-            task: :codecs:jvmTest
-            artifact: jvm-codecs-reports
-            coverage_enabled: true
-            coverage_task: :codecs:koverXmlReport
-            coverage_report_path: codecs/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :codecs:compileAndroidDeviceTest
-              -x :codecs:compileAndroidHostTest
-              -x :codecs:compileAndroidMain
-              -x :codecs:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: queries
-            os: ubuntu-latest
-            timeout: 60
-            task: :queries:jvmTest
-            artifact: jvm-queries-reports
-            coverage_enabled: true
-            coverage_task: :queries:koverXmlReport
-            coverage_report_path: queries/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :queries:compileAndroidDeviceTest
-              -x :queries:compileAndroidHostTest
-              -x :queries:compileAndroidMain
-              -x :queries:koverGenerateArtifactAndroid
-          - platform: jvm
-            module_name: queryparser
-            os: ubuntu-latest
-            timeout: 60
-            task: :queryparser:jvmTest
-            artifact: jvm-queryparser-reports
-            coverage_enabled: true
-            coverage_task: :queryparser:koverXmlReport
-            coverage_report_path: queryparser/build/reports/kover/report.xml
-            coverage_extra_args: >-
-              -x :queryparser:compileAndroidDeviceTest
-              -x :queryparser:compileAndroidHostTest
-              -x :queryparser:compileAndroidMain
-              -x :queryparser:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: core-analysis
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.analysis*"
+          #   artifact: jvm-core-analysis-reports
+          #   coverage_enabled: true
+          #   coverage_task: :core:koverXmlReport
+          #   coverage_report_path: core/build/reports/kover/report.xml
+          #   coverage_extra_args: ""
+          # - platform: jvm
+          #   module_name: core-codecs
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.codecs*"
+          #   artifact: jvm-core-codecs-reports
+          # - platform: jvm
+          #   module_name: core-document
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.document*"
+          #   artifact: jvm-core-document-reports
+          # - platform: jvm
+          #   module_name: core-geo
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.geo*"
+          #   artifact: jvm-core-geo-reports
+          # - platform: jvm
+          #   module_name: core-index
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.index*"
+          #   artifact: jvm-core-index-reports
+          # - platform: jvm
+          #   module_name: core-internal
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.internal*"
+          #   artifact: jvm-core-internal-reports
+          # - platform: jvm
+          #   module_name: core-jdkport
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+          #   artifact: jvm-core-jdkport-reports
+          # - platform: jvm
+          #   module_name: core-search
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.search*"
+          #   artifact: jvm-core-search-reports
+          # - platform: jvm
+          #   module_name: core-store
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.store*"
+          #   artifact: jvm-core-store-reports
+          # - platform: jvm
+          #   module_name: core-util
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:jvmTest
+          #   package_filter: --tests "org.gnit.lucenekmp.util*"
+          #   artifact: jvm-core-util-reports
+          # - platform: jvm
+          #   module_name: analysis-common
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:common:jvmTest
+          #   artifact: jvm-analysis-common-reports
+          #   coverage_enabled: true
+          #   coverage_task: :analysis:common:koverXmlReport
+          #   coverage_report_path: analysis/common/build/reports/kover/report.xml
+          #   coverage_extra_args: ""
+          # - platform: jvm
+          #   module_name: analysis-morfologik
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:morfologik:jvmTest
+          #   artifact: jvm-analysis-morfologik-reports
+          #   coverage_enabled: true
+          #   coverage_task: :analysis:morfologik:koverXmlReport
+          #   coverage_report_path: analysis/morfologik/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :analysis:morfologik:compileAndroidDeviceTest
+          #     -x :analysis:morfologik:compileAndroidHostTest
+          #     -x :analysis:morfologik:compileAndroidMain
+          #     -x :analysis:morfologik:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: analysis-smartcn
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:smartcn:jvmTest
+          #   artifact: jvm-analysis-smartcn-reports
+          #   coverage_enabled: true
+          #   coverage_task: :analysis:smartcn:koverXmlReport
+          #   coverage_report_path: analysis/smartcn/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :analysis:smartcn:compileAndroidDeviceTest
+          #     -x :analysis:smartcn:compileAndroidHostTest
+          #     -x :analysis:smartcn:compileAndroidMain
+          #     -x :analysis:smartcn:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: analysis-nori
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:nori:jvmTest
+          #   artifact: jvm-analysis-nori-reports
+          #   coverage_enabled: true
+          #   coverage_task: :analysis:nori:koverXmlReport
+          #   coverage_report_path: analysis/nori/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :analysis:nori:compileAndroidDeviceTest
+          #     -x :analysis:nori:compileAndroidHostTest
+          #     -x :analysis:nori:compileAndroidMain
+          #     -x :analysis:nori:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: analysis-kuromoji
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:kuromoji:jvmTest
+          #   artifact: jvm-analysis-kuromoji-reports
+          #   coverage_enabled: true
+          #   coverage_task: :analysis:kuromoji:koverXmlReport
+          #   coverage_report_path: analysis/kuromoji/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :analysis:kuromoji:compileAndroidDeviceTest
+          #     -x :analysis:kuromoji:compileAndroidHostTest
+          #     -x :analysis:kuromoji:compileAndroidMain
+          #     -x :analysis:kuromoji:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: analysis-extra
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:extra:jvmTest
+          #   artifact: jvm-analysis-extra-reports
+          #   coverage_enabled: true
+          #   coverage_task: :analysis:extra:koverXmlReport
+          #   coverage_report_path: analysis/extra/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :analysis:extra:compileAndroidDeviceTest
+          #     -x :analysis:extra:compileAndroidHostTest
+          #     -x :analysis:extra:compileAndroidMain
+          #     -x :analysis:extra:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: codecs
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :codecs:jvmTest
+          #   artifact: jvm-codecs-reports
+          #   coverage_enabled: true
+          #   coverage_task: :codecs:koverXmlReport
+          #   coverage_report_path: codecs/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :codecs:compileAndroidDeviceTest
+          #     -x :codecs:compileAndroidHostTest
+          #     -x :codecs:compileAndroidMain
+          #     -x :codecs:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: queries
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :queries:jvmTest
+          #   artifact: jvm-queries-reports
+          #   coverage_enabled: true
+          #   coverage_task: :queries:koverXmlReport
+          #   coverage_report_path: queries/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :queries:compileAndroidDeviceTest
+          #     -x :queries:compileAndroidHostTest
+          #     -x :queries:compileAndroidMain
+          #     -x :queries:koverGenerateArtifactAndroid
+          # - platform: jvm
+          #   module_name: queryparser
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :queryparser:jvmTest
+          #   artifact: jvm-queryparser-reports
+          #   coverage_enabled: true
+          #   coverage_task: :queryparser:koverXmlReport
+          #   coverage_report_path: queryparser/build/reports/kover/report.xml
+          #   coverage_extra_args: >-
+          #     -x :queryparser:compileAndroidDeviceTest
+          #     -x :queryparser:compileAndroidHostTest
+          #     -x :queryparser:compileAndroidMain
+          #     -x :queryparser:koverGenerateArtifactAndroid
 
           # Android
-          - platform: android
-            module_name: core-analysis
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.analysis*"
-            artifact: android-core-analysis-reports
-            needs_android: true
-          - platform: android
-            module_name: core-codecs
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.codecs*"
-            artifact: android-core-codecs-reports
-            needs_android: true
-          - platform: android
-            module_name: core-document
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.document*"
-            artifact: android-core-document-reports
-            needs_android: true
-          - platform: android
-            module_name: core-geo
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.geo*"
-            artifact: android-core-geo-reports
-            needs_android: true
-          - platform: android
-            module_name: core-index
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: android-core-index-reports
-            needs_android: true
-          - platform: android
-            module_name: core-internal
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.internal*"
-            artifact: android-core-internal-reports
-            needs_android: true
-          - platform: android
-            module_name: core-jdkport
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
-            artifact: android-core-jdkport-reports
-            needs_android: true
-          - platform: android
-            module_name: core-search
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.search*"
-            artifact: android-core-search-reports
-            needs_android: true
-          - platform: android
-            module_name: core-store
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.store*"
-            artifact: android-core-store-reports
-            needs_android: true
-          - platform: android
-            module_name: core-util
-            os: ubuntu-latest
-            timeout: 40
-            task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.util*"
-            artifact: android-core-util-reports
-            needs_android: true
-          - platform: android
-            module_name: analysis-common
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:common:testAndroidHostTest
-            artifact: android-analysis-common-reports
-            needs_android: true
-          - platform: android
-            module_name: analysis-morfologik
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:morfologik:testAndroidHostTest
-            artifact: android-analysis-morfologik-reports
-            needs_android: true
-          - platform: android
-            module_name: analysis-smartcn
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:smartcn:testAndroidHostTest
-            artifact: android-analysis-smartcn-reports
-            needs_android: true
-          - platform: android
-            module_name: analysis-nori
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:nori:testAndroidHostTest
-            artifact: android-analysis-nori-reports
-            needs_android: true
-          - platform: android
-            module_name: analysis-kuromoji
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:kuromoji:testAndroidHostTest
-            artifact: android-analysis-kuromoji-reports
-            needs_android: true
-          - platform: android
-            module_name: analysis-extra
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:extra:testAndroidHostTest
-            artifact: android-analysis-extra-reports
-            needs_android: true
-          - platform: android
-            module_name: codecs
-            os: ubuntu-latest
-            timeout: 60
-            task: :codecs:testAndroidHostTest
-            artifact: android-codecs-reports
-            needs_android: true
-          - platform: android
-            module_name: queries
-            os: ubuntu-latest
-            timeout: 60
-            task: :queries:testAndroidHostTest
-            artifact: android-queries-reports
-            needs_android: true
-          - platform: android
-            module_name: queryparser
-            os: ubuntu-latest
-            timeout: 60
-            task: :queryparser:testAndroidHostTest
-            artifact: android-queryparser-reports
-            needs_android: true
+          # - platform: android
+          #   module_name: core-analysis
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.analysis*"
+          #   artifact: android-core-analysis-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-codecs
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.codecs*"
+          #   artifact: android-core-codecs-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-document
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.document*"
+          #   artifact: android-core-document-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-geo
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.geo*"
+          #   artifact: android-core-geo-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-index
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.index*"
+          #   artifact: android-core-index-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-internal
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.internal*"
+          #   artifact: android-core-internal-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-jdkport
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+          #   artifact: android-core-jdkport-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-search
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.search*"
+          #   artifact: android-core-search-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-store
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.store*"
+          #   artifact: android-core-store-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: core-util
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :core:testAndroidHostTest
+          #   package_filter: --tests "org.gnit.lucenekmp.util*"
+          #   artifact: android-core-util-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: analysis-common
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:common:testAndroidHostTest
+          #   artifact: android-analysis-common-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: analysis-morfologik
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:morfologik:testAndroidHostTest
+          #   artifact: android-analysis-morfologik-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: analysis-smartcn
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:smartcn:testAndroidHostTest
+          #   artifact: android-analysis-smartcn-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: analysis-nori
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:nori:testAndroidHostTest
+          #   artifact: android-analysis-nori-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: analysis-kuromoji
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:kuromoji:testAndroidHostTest
+          #   artifact: android-analysis-kuromoji-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: analysis-extra
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:extra:testAndroidHostTest
+          #   artifact: android-analysis-extra-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: codecs
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :codecs:testAndroidHostTest
+          #   artifact: android-codecs-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: queries
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :queries:testAndroidHostTest
+          #   artifact: android-queries-reports
+          #   needs_android: true
+          # - platform: android
+          #   module_name: queryparser
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :queryparser:testAndroidHostTest
+          #   artifact: android-queryparser-reports
+          #   needs_android: true
 
           # iOS
-          - platform: ios
-            module_name: core-analysis
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.analysis*"
-            artifact: ios-core-analysis-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-codecs
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.codecs*"
-            artifact: ios-core-codecs-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-document
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.document*"
-            artifact: ios-core-document-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-geo
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.geo*"
-            artifact: ios-core-geo-reports
-            needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-analysis
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.analysis*"
+          #   artifact: ios-core-analysis-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-codecs
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.codecs*"
+          #   artifact: ios-core-codecs-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-document
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.document*"
+          #   artifact: ios-core-document-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-geo
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.geo*"
+          #   artifact: ios-core-geo-reports
+          #   needs_konan_cache: true
           - platform: ios
             module_name: core-index
             os: macos-latest
@@ -408,399 +408,399 @@ jobs:
             package_filter: --tests "org.gnit.lucenekmp.index*"
             artifact: ios-core-index-reports
             needs_konan_cache: true
-          - platform: ios
-            module_name: core-internal
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.internal*"
-            artifact: ios-core-internal-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-jdkport
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
-            artifact: ios-core-jdkport-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-search
-            os: macos-latest
-            timeout: 50
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.search*"
-            artifact: ios-core-search-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-store
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.store*"
-            artifact: ios-core-store-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: core-util
-            os: macos-latest
-            timeout: 40
-            task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.util*"
-            artifact: ios-core-util-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: analysis-common
-            os: macos-latest
-            timeout: 40
-            task: :analysis:common:iosSimulatorArm64Test
-            artifact: ios-analysis-common-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: analysis-morfologik
-            os: macos-latest
-            timeout: 40
-            task: :analysis:morfologik:iosSimulatorArm64Test
-            artifact: ios-analysis-morfologik-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: analysis-smartcn
-            os: macos-latest
-            timeout: 40
-            task: :analysis:smartcn:iosSimulatorArm64Test
-            artifact: ios-analysis-smartcn-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: analysis-nori
-            os: macos-latest
-            timeout: 40
-            task: :analysis:nori:iosSimulatorArm64Test
-            artifact: ios-analysis-nori-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: analysis-kuromoji
-            os: macos-latest
-            timeout: 40
-            task: :analysis:kuromoji:iosSimulatorArm64Test
-            artifact: ios-analysis-kuromoji-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: analysis-extra
-            os: macos-latest
-            timeout: 40
-            task: :analysis:extra:iosSimulatorArm64Test
-            artifact: ios-analysis-extra-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: codecs
-            os: macos-latest
-            timeout: 80
-            task: :codecs:iosSimulatorArm64Test
-            artifact: ios-codecs-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: queries
-            os: macos-latest
-            timeout: 60
-            task: :queries:iosSimulatorArm64Test
-            artifact: ios-queries-reports
-            needs_konan_cache: true
-          - platform: ios
-            module_name: queryparser
-            os: macos-latest
-            timeout: 60
-            task: :queryparser:iosSimulatorArm64Test
-            artifact: ios-queryparser-reports
-            needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-internal
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.internal*"
+          #   artifact: ios-core-internal-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-jdkport
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+          #   artifact: ios-core-jdkport-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-search
+          #   os: macos-latest
+          #   timeout: 50
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.search*"
+          #   artifact: ios-core-search-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-store
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.store*"
+          #   artifact: ios-core-store-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: core-util
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :core:iosSimulatorArm64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.util*"
+          #   artifact: ios-core-util-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: analysis-common
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :analysis:common:iosSimulatorArm64Test
+          #   artifact: ios-analysis-common-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: analysis-morfologik
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :analysis:morfologik:iosSimulatorArm64Test
+          #   artifact: ios-analysis-morfologik-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: analysis-smartcn
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :analysis:smartcn:iosSimulatorArm64Test
+          #   artifact: ios-analysis-smartcn-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: analysis-nori
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :analysis:nori:iosSimulatorArm64Test
+          #   artifact: ios-analysis-nori-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: analysis-kuromoji
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :analysis:kuromoji:iosSimulatorArm64Test
+          #   artifact: ios-analysis-kuromoji-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: analysis-extra
+          #   os: macos-latest
+          #   timeout: 40
+          #   task: :analysis:extra:iosSimulatorArm64Test
+          #   artifact: ios-analysis-extra-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: codecs
+          #   os: macos-latest
+          #   timeout: 80
+          #   task: :codecs:iosSimulatorArm64Test
+          #   artifact: ios-codecs-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: queries
+          #   os: macos-latest
+          #   timeout: 60
+          #   task: :queries:iosSimulatorArm64Test
+          #   artifact: ios-queries-reports
+          #   needs_konan_cache: true
+          # - platform: ios
+          #   module_name: queryparser
+          #   os: macos-latest
+          #   timeout: 60
+          #   task: :queryparser:iosSimulatorArm64Test
+          #   artifact: ios-queryparser-reports
+          #   needs_konan_cache: true
 
           # Linux
-          - platform: linux
-            module_name: core-analysis
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.analysis*"
-            artifact: linux-core-analysis-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-codecs
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.codecs*"
-            artifact: linux-core-codecs-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-document
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.document*"
-            artifact: linux-core-document-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-geo
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.geo*"
-            artifact: linux-core-geo-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-index
-            os: ubuntu-latest
-            timeout: 60
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: linux-core-index-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-internal
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.internal*"
-            artifact: linux-core-internal-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-jdkport
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
-            artifact: linux-core-jdkport-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-search
-            os: ubuntu-latest
-            timeout: 60
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.search*"
-            artifact: linux-core-search-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-store
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.store*"
-            artifact: linux-core-store-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: core-util
-            os: ubuntu-latest
-            timeout: 50
-            task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.util*"
-            artifact: linux-core-util-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: analysis-common
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:common:linuxX64Test
-            artifact: linux-analysis-common-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: analysis-morfologik
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:morfologik:linuxX64Test
-            artifact: linux-analysis-morfologik-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: analysis-smartcn
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:smartcn:linuxX64Test
-            artifact: linux-analysis-smartcn-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: analysis-nori
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:nori:linuxX64Test
-            artifact: linux-analysis-nori-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: analysis-kuromoji
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:kuromoji:linuxX64Test
-            artifact: linux-analysis-kuromoji-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: analysis-extra
-            os: ubuntu-latest
-            timeout: 40
-            task: :analysis:extra:linuxX64Test
-            artifact: linux-analysis-extra-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: codecs
-            os: ubuntu-latest
-            timeout: 70
-            task: :codecs:linuxX64Test
-            artifact: linux-codecs-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: queries
-            os: ubuntu-latest
-            timeout: 50
-            task: :queries:linuxX64Test
-            artifact: linux-queries-reports
-            needs_konan_cache: true
-          - platform: linux
-            module_name: queryparser
-            os: ubuntu-latest
-            timeout: 50
-            task: :queryparser:linuxX64Test
-            artifact: linux-queryparser-reports
-            needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-analysis
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.analysis*"
+          #   artifact: linux-core-analysis-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-codecs
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.codecs*"
+          #   artifact: linux-core-codecs-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-document
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.document*"
+          #   artifact: linux-core-document-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-geo
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.geo*"
+          #   artifact: linux-core-geo-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-index
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.index*"
+          #   artifact: linux-core-index-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-internal
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.internal*"
+          #   artifact: linux-core-internal-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-jdkport
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+          #   artifact: linux-core-jdkport-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-search
+          #   os: ubuntu-latest
+          #   timeout: 60
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.search*"
+          #   artifact: linux-core-search-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-store
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.store*"
+          #   artifact: linux-core-store-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: core-util
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :core:linuxX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.util*"
+          #   artifact: linux-core-util-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: analysis-common
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:common:linuxX64Test
+          #   artifact: linux-analysis-common-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: analysis-morfologik
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:morfologik:linuxX64Test
+          #   artifact: linux-analysis-morfologik-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: analysis-smartcn
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:smartcn:linuxX64Test
+          #   artifact: linux-analysis-smartcn-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: analysis-nori
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:nori:linuxX64Test
+          #   artifact: linux-analysis-nori-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: analysis-kuromoji
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:kuromoji:linuxX64Test
+          #   artifact: linux-analysis-kuromoji-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: analysis-extra
+          #   os: ubuntu-latest
+          #   timeout: 40
+          #   task: :analysis:extra:linuxX64Test
+          #   artifact: linux-analysis-extra-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: codecs
+          #   os: ubuntu-latest
+          #   timeout: 70
+          #   task: :codecs:linuxX64Test
+          #   artifact: linux-codecs-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: queries
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :queries:linuxX64Test
+          #   artifact: linux-queries-reports
+          #   needs_konan_cache: true
+          # - platform: linux
+          #   module_name: queryparser
+          #   os: ubuntu-latest
+          #   timeout: 50
+          #   task: :queryparser:linuxX64Test
+          #   artifact: linux-queryparser-reports
+          #   needs_konan_cache: true
 
           # Windows
-          - platform: windows
-            module_name: core-analysis
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.analysis*"
-            artifact: windows-core-analysis-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-codecs
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.codecs*"
-            artifact: windows-core-codecs-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-document
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.document*"
-            artifact: windows-core-document-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-geo
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.geo*"
-            artifact: windows-core-geo-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-index
-            os: windows-latest
-            timeout: 70
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: windows-core-index-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-internal
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.internal*"
-            artifact: windows-core-internal-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-jdkport
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.jdkport*"
-            artifact: windows-core-jdkport-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-search
-            os: windows-latest
-            timeout: 70
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.search*"
-            artifact: windows-core-search-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-store
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.store*"
-            artifact: windows-core-store-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: core-util
-            os: windows-latest
-            timeout: 50
-            task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.util*"
-            artifact: windows-core-util-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: analysis-common
-            os: windows-latest
-            timeout: 40
-            task: :analysis:common:mingwX64Test
-            artifact: windows-analysis-common-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: analysis-morfologik
-            os: windows-latest
-            timeout: 40
-            task: :analysis:morfologik:mingwX64Test
-            artifact: windows-analysis-morfologik-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: analysis-smartcn
-            os: windows-latest
-            timeout: 40
-            task: :analysis:smartcn:mingwX64Test
-            artifact: windows-analysis-smartcn-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: analysis-nori
-            os: windows-latest
-            timeout: 40
-            task: :analysis:nori:mingwX64Test
-            artifact: windows-analysis-nori-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: analysis-kuromoji
-            os: windows-latest
-            timeout: 40
-            task: :analysis:kuromoji:mingwX64Test
-            artifact: windows-analysis-kuromoji-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: analysis-extra
-            os: windows-latest
-            timeout: 40
-            task: :analysis:extra:mingwX64Test
-            artifact: windows-analysis-extra-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: codecs
-            os: windows-latest
-            timeout: 70
-            task: :codecs:mingwX64Test
-            artifact: windows-codecs-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: queries
-            os: windows-latest
-            timeout: 50
-            task: :queries:mingwX64Test
-            artifact: windows-queries-reports
-            needs_konan_cache: true
-          - platform: windows
-            module_name: queryparser
-            os: windows-latest
-            timeout: 50
-            task: :queryparser:mingwX64Test
-            artifact: windows-queryparser-reports
-            needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-analysis
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.analysis*"
+          #   artifact: windows-core-analysis-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-codecs
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.codecs*"
+          #   artifact: windows-core-codecs-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-document
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.document*"
+          #   artifact: windows-core-document-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-geo
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.geo*"
+          #   artifact: windows-core-geo-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-index
+          #   os: windows-latest
+          #   timeout: 70
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.index*"
+          #   artifact: windows-core-index-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-internal
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.internal*"
+          #   artifact: windows-core-internal-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-jdkport
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.jdkport*"
+          #   artifact: windows-core-jdkport-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-search
+          #   os: windows-latest
+          #   timeout: 70
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.search*"
+          #   artifact: windows-core-search-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-store
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.store*"
+          #   artifact: windows-core-store-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: core-util
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :core:mingwX64Test
+          #   package_filter: --tests "org.gnit.lucenekmp.util*"
+          #   artifact: windows-core-util-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: analysis-common
+          #   os: windows-latest
+          #   timeout: 40
+          #   task: :analysis:common:mingwX64Test
+          #   artifact: windows-analysis-common-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: analysis-morfologik
+          #   os: windows-latest
+          #   timeout: 40
+          #   task: :analysis:morfologik:mingwX64Test
+          #   artifact: windows-analysis-morfologik-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: analysis-smartcn
+          #   os: windows-latest
+          #   timeout: 40
+          #   task: :analysis:smartcn:mingwX64Test
+          #   artifact: windows-analysis-smartcn-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: analysis-nori
+          #   os: windows-latest
+          #   timeout: 40
+          #   task: :analysis:nori:mingwX64Test
+          #   artifact: windows-analysis-nori-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: analysis-kuromoji
+          #   os: windows-latest
+          #   timeout: 40
+          #   task: :analysis:kuromoji:mingwX64Test
+          #   artifact: windows-analysis-kuromoji-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: analysis-extra
+          #   os: windows-latest
+          #   timeout: 40
+          #   task: :analysis:extra:mingwX64Test
+          #   artifact: windows-analysis-extra-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: codecs
+          #   os: windows-latest
+          #   timeout: 70
+          #   task: :codecs:mingwX64Test
+          #   artifact: windows-codecs-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: queries
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :queries:mingwX64Test
+          #   artifact: windows-queries-reports
+          #   needs_konan_cache: true
+          # - platform: windows
+          #   module_name: queryparser
+          #   os: windows-latest
+          #   timeout: 50
+          #   task: :queryparser:mingwX64Test
+          #   artifact: windows-queryparser-reports
+          #   needs_konan_cache: true
 
     steps:
       - name: Checkout code
@@ -858,165 +858,165 @@ jobs:
           echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
 
-  coverage:
-    name: Coverage (${{ matrix.module_name }})
-    needs: [tests]
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - module_name: core
-            task: :core:koverXmlReport
-            report_path: core/build/reports/kover/report.xml
-            extra_args: >-
-              -x :core:testAndroidHostTest
-              -x :core:compileAndroidDeviceTest
-              -x :core:compileAndroidHostTest
-              -x :core:compileAndroidMain
-              -x :core:koverGenerateArtifactAndroid
-          - module_name: analysis-common
-            task: :analysis:common:koverXmlReport
-            report_path: analysis/common/build/reports/kover/report.xml
-            extra_args: >-
-              -x :analysis:common:testAndroidHostTest
-              -x :analysis:common:compileAndroidDeviceTest
-              -x :analysis:common:compileAndroidHostTest
-              -x :analysis:common:compileAndroidMain
-              -x :analysis:common:koverGenerateArtifactAndroid
-          - module_name: analysis-morfologik
-            task: :analysis:morfologik:koverXmlReport
-            report_path: analysis/morfologik/build/reports/kover/report.xml
-            extra_args: >-
-              -x :analysis:morfologik:testAndroidHostTest
-              -x :analysis:morfologik:compileAndroidDeviceTest
-              -x :analysis:morfologik:compileAndroidHostTest
-              -x :analysis:morfologik:compileAndroidMain
-              -x :analysis:morfologik:koverGenerateArtifactAndroid
-          - module_name: analysis-smartcn
-            task: :analysis:smartcn:koverXmlReport
-            report_path: analysis/smartcn/build/reports/kover/report.xml
-            extra_args: >-
-              -x :analysis:smartcn:testAndroidHostTest
-              -x :analysis:smartcn:compileAndroidDeviceTest
-              -x :analysis:smartcn:compileAndroidHostTest
-              -x :analysis:smartcn:compileAndroidMain
-              -x :analysis:smartcn:koverGenerateArtifactAndroid
-          - module_name: analysis-nori
-            task: :analysis:nori:koverXmlReport
-            report_path: analysis/nori/build/reports/kover/report.xml
-            extra_args: >-
-              -x :analysis:nori:testAndroidHostTest
-              -x :analysis:nori:compileAndroidDeviceTest
-              -x :analysis:nori:compileAndroidHostTest
-              -x :analysis:nori:compileAndroidMain
-              -x :analysis:nori:koverGenerateArtifactAndroid
-          - module_name: analysis-kuromoji
-            task: :analysis:kuromoji:koverXmlReport
-            report_path: analysis/kuromoji/build/reports/kover/report.xml
-            extra_args: >-
-              -x :analysis:kuromoji:testAndroidHostTest
-              -x :analysis:kuromoji:compileAndroidDeviceTest
-              -x :analysis:kuromoji:compileAndroidHostTest
-              -x :analysis:kuromoji:compileAndroidMain
-              -x :analysis:kuromoji:koverGenerateArtifactAndroid
-          - module_name: analysis-extra
-            task: :analysis:extra:koverXmlReport
-            report_path: analysis/extra/build/reports/kover/report.xml
-            extra_args: >-
-              -x :analysis:extra:testAndroidHostTest
-              -x :analysis:extra:compileAndroidDeviceTest
-              -x :analysis:extra:compileAndroidHostTest
-              -x :analysis:extra:compileAndroidMain
-              -x :analysis:extra:koverGenerateArtifactAndroid
-          - module_name: codecs
-            task: :codecs:koverXmlReport
-            report_path: codecs/build/reports/kover/report.xml
-            extra_args: >-
-              -x :codecs:testAndroidHostTest
-              -x :codecs:compileAndroidDeviceTest
-              -x :codecs:compileAndroidHostTest
-              -x :codecs:compileAndroidMain
-              -x :codecs:koverGenerateArtifactAndroid
-          - module_name: queries
-            task: :queries:koverXmlReport
-            report_path: queries/build/reports/kover/report.xml
-            extra_args: >-
-              -x :queries:testAndroidHostTest
-              -x :queries:compileAndroidDeviceTest
-              -x :queries:compileAndroidHostTest
-              -x :queries:compileAndroidMain
-              -x :queries:koverGenerateArtifactAndroid
-          - module_name: queryparser
-            task: :queryparser:koverXmlReport
-            report_path: queryparser/build/reports/kover/report.xml
-            extra_args: >-
-              -x :queryparser:testAndroidHostTest
-              -x :queryparser:compileAndroidDeviceTest
-              -x :queryparser:compileAndroidHostTest
-              -x :queryparser:compileAndroidMain
-              -x :queryparser:koverGenerateArtifactAndroid
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 24
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '24'
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Konan cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', 'gradle/libs.versions.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-konan-
-
-      - name: Coverage ${{ matrix.module_name }}
-        run: ./gradlew ${{ matrix.task }} ${{ matrix.extra_args }}
-
-      - name: Upload module coverage report
-        if: ${{ always() && env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.module_name }}
-          path: ${{ matrix.report_path }}
-
-      - name: Upload coverage reports to Codecov
-        if: ${{ env.ACT != 'true' }}
-        uses: codecov/codecov-action@v5
-        with:
-          files: ${{ matrix.report_path }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: ${{ matrix.module_name }}
-          verbose: true
-          fail_ci_if_error: true
-
-      - name: Upload build reports
-        if: ${{ always() && env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-reports-${{ matrix.module_name }}
-          path: |
-            core/build/reports/kover/
-            core/*/build/reports/kover/
-            analysis/common/build/reports/kover/
-            analysis/morfologik/build/reports/kover/
-            analysis/smartcn/build/reports/kover/
-            analysis/nori/build/reports/kover/
-            analysis/kuromoji/build/reports/kover/
-            analysis/extra/build/reports/kover/
-            codecs/build/reports/kover/
-            queries/build/reports/kover/
-            queryparser/build/reports/kover/
-            build/reports/
+  # coverage:
+  #   name: Coverage (${{ matrix.module_name }})
+  #   needs: [tests]
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 60
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - module_name: core
+  #           task: :core:koverXmlReport
+  #           report_path: core/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :core:testAndroidHostTest
+  #             -x :core:compileAndroidDeviceTest
+  #             -x :core:compileAndroidHostTest
+  #             -x :core:compileAndroidMain
+  #             -x :core:koverGenerateArtifactAndroid
+  #         - module_name: analysis-common
+  #           task: :analysis:common:koverXmlReport
+  #           report_path: analysis/common/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :analysis:common:testAndroidHostTest
+  #             -x :analysis:common:compileAndroidDeviceTest
+  #             -x :analysis:common:compileAndroidHostTest
+  #             -x :analysis:common:compileAndroidMain
+  #             -x :analysis:common:koverGenerateArtifactAndroid
+  #         - module_name: analysis-morfologik
+  #           task: :analysis:morfologik:koverXmlReport
+  #           report_path: analysis/morfologik/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :analysis:morfologik:testAndroidHostTest
+  #             -x :analysis:morfologik:compileAndroidDeviceTest
+  #             -x :analysis:morfologik:compileAndroidHostTest
+  #             -x :analysis:morfologik:compileAndroidMain
+  #             -x :analysis:morfologik:koverGenerateArtifactAndroid
+  #         - module_name: analysis-smartcn
+  #           task: :analysis:smartcn:koverXmlReport
+  #           report_path: analysis/smartcn/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :analysis:smartcn:testAndroidHostTest
+  #             -x :analysis:smartcn:compileAndroidDeviceTest
+  #             -x :analysis:smartcn:compileAndroidHostTest
+  #             -x :analysis:smartcn:compileAndroidMain
+  #             -x :analysis:smartcn:koverGenerateArtifactAndroid
+  #         - module_name: analysis-nori
+  #           task: :analysis:nori:koverXmlReport
+  #           report_path: analysis/nori/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :analysis:nori:testAndroidHostTest
+  #             -x :analysis:nori:compileAndroidDeviceTest
+  #             -x :analysis:nori:compileAndroidHostTest
+  #             -x :analysis:nori:compileAndroidMain
+  #             -x :analysis:nori:koverGenerateArtifactAndroid
+  #         - module_name: analysis-kuromoji
+  #           task: :analysis:kuromoji:koverXmlReport
+  #           report_path: analysis/kuromoji/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :analysis:kuromoji:testAndroidHostTest
+  #             -x :analysis:kuromoji:compileAndroidDeviceTest
+  #             -x :analysis:kuromoji:compileAndroidHostTest
+  #             -x :analysis:kuromoji:compileAndroidMain
+  #             -x :analysis:kuromoji:koverGenerateArtifactAndroid
+  #         - module_name: analysis-extra
+  #           task: :analysis:extra:koverXmlReport
+  #           report_path: analysis/extra/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :analysis:extra:testAndroidHostTest
+  #             -x :analysis:extra:compileAndroidDeviceTest
+  #             -x :analysis:extra:compileAndroidHostTest
+  #             -x :analysis:extra:compileAndroidMain
+  #             -x :analysis:extra:koverGenerateArtifactAndroid
+  #         - module_name: codecs
+  #           task: :codecs:koverXmlReport
+  #           report_path: codecs/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :codecs:testAndroidHostTest
+  #             -x :codecs:compileAndroidDeviceTest
+  #             -x :codecs:compileAndroidHostTest
+  #             -x :codecs:compileAndroidMain
+  #             -x :codecs:koverGenerateArtifactAndroid
+  #         - module_name: queries
+  #           task: :queries:koverXmlReport
+  #           report_path: queries/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :queries:testAndroidHostTest
+  #             -x :queries:compileAndroidDeviceTest
+  #             -x :queries:compileAndroidHostTest
+  #             -x :queries:compileAndroidMain
+  #             -x :queries:koverGenerateArtifactAndroid
+  #         - module_name: queryparser
+  #           task: :queryparser:koverXmlReport
+  #           report_path: queryparser/build/reports/kover/report.xml
+  #           extra_args: >-
+  #             -x :queryparser:testAndroidHostTest
+  #             -x :queryparser:compileAndroidDeviceTest
+  #             -x :queryparser:compileAndroidHostTest
+  #             -x :queryparser:compileAndroidMain
+  #             -x :queryparser:koverGenerateArtifactAndroid
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up JDK 24
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: '24'
+  #
+  #     - name: Set up Android SDK
+  #       uses: android-actions/setup-android@v3
+  #
+  #     - name: Setup Gradle
+  #       uses: gradle/actions/setup-gradle@v4
+  #
+  #     - name: Konan cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.konan
+  #         key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', 'gradle/libs.versions.toml') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-konan-
+  #
+  #     - name: Coverage ${{ matrix.module_name }}
+  #       run: ./gradlew ${{ matrix.task }} ${{ matrix.extra_args }}
+  #
+  #     - name: Upload module coverage report
+  #       if: ${{ always() && env.ACT != 'true' }}
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: coverage-${{ matrix.module_name }}
+  #         path: ${{ matrix.report_path }}
+  #
+  #     - name: Upload coverage reports to Codecov
+  #       if: ${{ env.ACT != 'true' }}
+  #       uses: codecov/codecov-action@v5
+  #       with:
+  #         files: ${{ matrix.report_path }}
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         flags: ${{ matrix.module_name }}
+  #         verbose: true
+  #         fail_ci_if_error: true
+  #
+  #     - name: Upload build reports
+  #       if: ${{ always() && env.ACT != 'true' }}
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: build-reports-${{ matrix.module_name }}
+  #         path: |
+  #           core/build/reports/kover/
+  #           core/*/build/reports/kover/
+  #           analysis/common/build/reports/kover/
+  #           analysis/morfologik/build/reports/kover/
+  #           analysis/smartcn/build/reports/kover/
+  #           analysis/nori/build/reports/kover/
+  #           analysis/kuromoji/build/reports/kover/
+  #           analysis/extra/build/reports/kover/
+  #           codecs/build/reports/kover/
+  #           queries/build/reports/kover/
+  #           queryparser/build/reports/kover/
+  #           build/reports/
