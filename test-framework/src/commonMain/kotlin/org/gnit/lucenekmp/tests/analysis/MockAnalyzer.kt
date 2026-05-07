@@ -3,6 +3,8 @@ package org.gnit.lucenekmp.tests.analysis
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.analysis.TokenFilter
 import org.gnit.lucenekmp.analysis.TokenStream
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.util.automaton.CharacterRunAutomaton
@@ -20,6 +22,7 @@ class MockAnalyzer(
     private var positionIncrementGap: Int = 0
     private var offsetGap: Int? = null
     private val previousMappings = mutableMapOf<String, Int>()
+    private val maybePayloadLock = ReentrantLock()
     private var enableChecks = true
     private var maxTokenLength = MockTokenizer.DEFAULT_MAX_TOKEN_LENGTH
 
@@ -43,7 +46,7 @@ class MockAnalyzer(
         return result
     }
 
-    private fun maybePayload(stream: TokenFilter, fieldName: String): TokenFilter {
+    private fun maybePayload(stream: TokenFilter, fieldName: String): TokenFilter = maybePayloadLock.withLock {
         var valInt = previousMappings[fieldName]
         if (valInt == null) {
             var v = -1
