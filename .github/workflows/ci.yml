@@ -68,12 +68,43 @@ jobs:
             package_filter: --tests "org.gnit.lucenekmp.geo*"
             artifact: jvm-core-geo-reports
           - platform: jvm
-            module_name: core-index
+            module_name: core-index-2f
             os: ubuntu-latest
             timeout: 50
             task: :core:jvmTest
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: jvm-core-index-reports
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*Test2*"
+              --tests "org.gnit.lucenekmp.index*TestA*"
+              --tests "org.gnit.lucenekmp.index*TestB*"
+              --tests "org.gnit.lucenekmp.index*TestC*"
+              --tests "org.gnit.lucenekmp.index*TestD*"
+              --tests "org.gnit.lucenekmp.index*TestE*"
+              --tests "org.gnit.lucenekmp.index*TestF*"
+            artifact: jvm-core-index-2f-reports
+          - platform: jvm
+            module_name: core-index-i
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:jvmTest
+            package_filter: --tests "org.gnit.lucenekmp.index*TestI*"
+            artifact: jvm-core-index-i-reports
+          - platform: jvm
+            module_name: core-index-ku
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:jvmTest
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*TestK*"
+              --tests "org.gnit.lucenekmp.index*TestL*"
+              --tests "org.gnit.lucenekmp.index*TestM*"
+              --tests "org.gnit.lucenekmp.index*TestN*"
+              --tests "org.gnit.lucenekmp.index*TestO*"
+              --tests "org.gnit.lucenekmp.index*TestP*"
+              --tests "org.gnit.lucenekmp.index*TestR*"
+              --tests "org.gnit.lucenekmp.index*TestS*"
+              --tests "org.gnit.lucenekmp.index*TestT*"
+              --tests "org.gnit.lucenekmp.index*TestU*"
+            artifact: jvm-core-index-ku-reports
           - platform: jvm
             module_name: core-internal
             os: ubuntu-latest
@@ -266,12 +297,45 @@ jobs:
             artifact: android-core-geo-reports
             needs_android: true
           - platform: android
-            module_name: core-index
+            module_name: core-index-2f
             os: ubuntu-latest
             timeout: 50
             task: :core:testAndroidHostTest
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: android-core-index-reports
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*Test2*"
+              --tests "org.gnit.lucenekmp.index*TestA*"
+              --tests "org.gnit.lucenekmp.index*TestB*"
+              --tests "org.gnit.lucenekmp.index*TestC*"
+              --tests "org.gnit.lucenekmp.index*TestD*"
+              --tests "org.gnit.lucenekmp.index*TestE*"
+              --tests "org.gnit.lucenekmp.index*TestF*"
+            artifact: android-core-index-2f-reports
+            needs_android: true
+          - platform: android
+            module_name: core-index-i
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:testAndroidHostTest
+            package_filter: --tests "org.gnit.lucenekmp.index*TestI*"
+            artifact: android-core-index-i-reports
+            needs_android: true
+          - platform: android
+            module_name: core-index-ku
+            os: ubuntu-latest
+            timeout: 50
+            task: :core:testAndroidHostTest
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*TestK*"
+              --tests "org.gnit.lucenekmp.index*TestL*"
+              --tests "org.gnit.lucenekmp.index*TestM*"
+              --tests "org.gnit.lucenekmp.index*TestN*"
+              --tests "org.gnit.lucenekmp.index*TestO*"
+              --tests "org.gnit.lucenekmp.index*TestP*"
+              --tests "org.gnit.lucenekmp.index*TestR*"
+              --tests "org.gnit.lucenekmp.index*TestS*"
+              --tests "org.gnit.lucenekmp.index*TestT*"
+              --tests "org.gnit.lucenekmp.index*TestU*"
+            artifact: android-core-index-ku-reports
             needs_android: true
           - platform: android
             module_name: core-internal
@@ -411,12 +475,45 @@ jobs:
             artifact: ios-core-geo-reports
             needs_konan_cache: true
           - platform: ios
-            module_name: core-index
+            module_name: core-index-2f
             os: macos-latest
             timeout: 60
             task: :core:iosSimulatorArm64Test
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: ios-core-index-reports
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*Test2*"
+              --tests "org.gnit.lucenekmp.index*TestA*"
+              --tests "org.gnit.lucenekmp.index*TestB*"
+              --tests "org.gnit.lucenekmp.index*TestC*"
+              --tests "org.gnit.lucenekmp.index*TestD*"
+              --tests "org.gnit.lucenekmp.index*TestE*"
+              --tests "org.gnit.lucenekmp.index*TestF*"
+            artifact: ios-core-index-2f-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-index-i
+            os: macos-latest
+            timeout: 60
+            task: :core:iosSimulatorArm64Test
+            package_filter: --tests "org.gnit.lucenekmp.index*TestI*"
+            artifact: ios-core-index-i-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: core-index-ku
+            os: macos-latest
+            timeout: 60
+            task: :core:iosSimulatorArm64Test
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*TestK*"
+              --tests "org.gnit.lucenekmp.index*TestL*"
+              --tests "org.gnit.lucenekmp.index*TestM*"
+              --tests "org.gnit.lucenekmp.index*TestN*"
+              --tests "org.gnit.lucenekmp.index*TestO*"
+              --tests "org.gnit.lucenekmp.index*TestP*"
+              --tests "org.gnit.lucenekmp.index*TestR*"
+              --tests "org.gnit.lucenekmp.index*TestS*"
+              --tests "org.gnit.lucenekmp.index*TestT*"
+              --tests "org.gnit.lucenekmp.index*TestU*"
+            artifact: ios-core-index-ku-reports
             needs_konan_cache: true
           - platform: ios
             module_name: core-internal
@@ -556,12 +653,45 @@ jobs:
             artifact: linux-core-geo-reports
             needs_konan_cache: true
           - platform: linux
-            module_name: core-index
+            module_name: core-index-2f
             os: ubuntu-latest
             timeout: 60
             task: :core:linuxX64Test
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: linux-core-index-reports
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*Test2*"
+              --tests "org.gnit.lucenekmp.index*TestA*"
+              --tests "org.gnit.lucenekmp.index*TestB*"
+              --tests "org.gnit.lucenekmp.index*TestC*"
+              --tests "org.gnit.lucenekmp.index*TestD*"
+              --tests "org.gnit.lucenekmp.index*TestE*"
+              --tests "org.gnit.lucenekmp.index*TestF*"
+            artifact: linux-core-index-2f-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-index-i
+            os: ubuntu-latest
+            timeout: 60
+            task: :core:linuxX64Test
+            package_filter: --tests "org.gnit.lucenekmp.index*TestI*"
+            artifact: linux-core-index-i-reports
+            needs_konan_cache: true
+          - platform: linux
+            module_name: core-index-ku
+            os: ubuntu-latest
+            timeout: 60
+            task: :core:linuxX64Test
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*TestK*"
+              --tests "org.gnit.lucenekmp.index*TestL*"
+              --tests "org.gnit.lucenekmp.index*TestM*"
+              --tests "org.gnit.lucenekmp.index*TestN*"
+              --tests "org.gnit.lucenekmp.index*TestO*"
+              --tests "org.gnit.lucenekmp.index*TestP*"
+              --tests "org.gnit.lucenekmp.index*TestR*"
+              --tests "org.gnit.lucenekmp.index*TestS*"
+              --tests "org.gnit.lucenekmp.index*TestT*"
+              --tests "org.gnit.lucenekmp.index*TestU*"
+            artifact: linux-core-index-ku-reports
             needs_konan_cache: true
           - platform: linux
             module_name: core-internal
@@ -701,12 +831,45 @@ jobs:
             artifact: windows-core-geo-reports
             needs_konan_cache: true
           - platform: windows
-            module_name: core-index
+            module_name: core-index-2f
             os: windows-latest
             timeout: 70
             task: :core:mingwX64Test
-            package_filter: --tests "org.gnit.lucenekmp.index*"
-            artifact: windows-core-index-reports
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*Test2*"
+              --tests "org.gnit.lucenekmp.index*TestA*"
+              --tests "org.gnit.lucenekmp.index*TestB*"
+              --tests "org.gnit.lucenekmp.index*TestC*"
+              --tests "org.gnit.lucenekmp.index*TestD*"
+              --tests "org.gnit.lucenekmp.index*TestE*"
+              --tests "org.gnit.lucenekmp.index*TestF*"
+            artifact: windows-core-index-2f-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-index-i
+            os: windows-latest
+            timeout: 70
+            task: :core:mingwX64Test
+            package_filter: --tests "org.gnit.lucenekmp.index*TestI*"
+            artifact: windows-core-index-i-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: core-index-ku
+            os: windows-latest
+            timeout: 70
+            task: :core:mingwX64Test
+            package_filter: >-
+              --tests "org.gnit.lucenekmp.index*TestK*"
+              --tests "org.gnit.lucenekmp.index*TestL*"
+              --tests "org.gnit.lucenekmp.index*TestM*"
+              --tests "org.gnit.lucenekmp.index*TestN*"
+              --tests "org.gnit.lucenekmp.index*TestO*"
+              --tests "org.gnit.lucenekmp.index*TestP*"
+              --tests "org.gnit.lucenekmp.index*TestR*"
+              --tests "org.gnit.lucenekmp.index*TestS*"
+              --tests "org.gnit.lucenekmp.index*TestT*"
+              --tests "org.gnit.lucenekmp.index*TestU*"
+            artifact: windows-core-index-ku-reports
             needs_konan_cache: true
           - platform: windows
             module_name: core-internal
@@ -842,9 +1005,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-konan-
 
-      # tests other than core-index will run this
+      # tests other than core-index shards will run this
       - name: Run tests
-        if: ${{ matrix.module_name != 'core-index' }}
+        if: ${{ !startsWith(matrix.module_name, 'core-index-') }}
         run: >
           ./gradlew
           -PenableHangDetection=true
@@ -852,9 +1015,9 @@ jobs:
           ${{ matrix.task }}
           ${{ matrix.package_filter || '' }}
 
-      # core-index tests are split into 3 parts for debugging purpose
+      # iOS core-index shards run test.kexe directly to avoid Gradle/Kotlin Native test-reporting flakes.
       - name: Run iOS core-index tests directly
-        if: ${{ matrix.module_name == 'core-index' && matrix.platform == 'ios' }}
+        if: ${{ startsWith(matrix.module_name, 'core-index-') && matrix.platform == 'ios' }}
         run:  |
           ./gradlew --no-configuration-cache -PenableHangDetection=true --console=plain :core:syncIndexTestResources :core:linkDebugTestIosSimulatorArm64
           DEVICE_ID=$(xcrun simctl list devices available -j | /usr/bin/python3 -c 'import json, sys; data = json.load(sys.stdin); devices = [d for runtime, items in data["devices"].items() if "iOS" in runtime for d in items if d.get("isAvailable") and d.get("name", "").startswith("iPhone")]; booted = [d for d in devices if d.get("state") == "Booted"]; print((booted or devices)[0]["udid"])')
@@ -867,74 +1030,67 @@ jobs:
           mkdir -p "$LOG_DIR"
           run_ios_core_index_tests() {
             SHARD="$1"
-            FILTER="$2"
-            NEGATIVE_FILTER="${3:-}"
-            SAFE_FILTER=$(printf '%s' "$FILTER" | tr -c 'A-Za-z0-9' '_')
-            LOG_FILE="$LOG_DIR/${SHARD}-${SAFE_FILTER}.log"
+            shift
+            SAFE_SHARD=$(printf '%s' "$SHARD" | tr -c 'A-Za-z0-9' '_')
+            LOG_FILE="$LOG_DIR/${SAFE_SHARD}.log"
+            FILTERS=$(IFS=,; echo "$*")
             COMMAND=(
               /usr/bin/env
               "SIMCTL_CHILD_tests.linedocsfile=$TEST_LINE_DOCS"
               "SIMCTL_CHILD_tests.indexresourcesdir=$INDEX_RESOURCES_DIR"
               xcrun simctl spawn --standalone "$DEVICE_ID" "$TEST_KEXE"
               --ktest_logger=GTEST
-              --ktest_gradle_filter="$FILTER"
+              --ktest_gradle_filter="$FILTERS"
             )
-            if [ -n "$NEGATIVE_FILTER" ]; then
-              COMMAND+=(--ktest_negative_gradle_filter="$NEGATIVE_FILTER")
-            fi
             set +e
             "${COMMAND[@]}" 2>&1 | tee "$LOG_FILE" | .github/workflows/ios_logs_formatter.sh | awk -v prefix="[$SHARD] " '{ print prefix $0; fflush() }'
             STATUS=${PIPESTATUS[0]}
             set -e
             if [ "$STATUS" -ne 0 ]; then
               echo "FAILED iOS core-index shard: $SHARD"
-              echo "Filter: $FILTER"
-              if [ -n "$NEGATIVE_FILTER" ]; then
-                echo "Negative filter: $NEGATIVE_FILTER"
-              fi
+              echo "Filters: $FILTERS"
               echo "Full log: $LOG_FILE"
               tail -n 400 "$LOG_FILE"
               return "$STATUS"
             fi
           }
-          run_ios_core_index_tests "CPU1" "org.gnit.lucenekmp.index*TestI*" &
-          PID_I=$!
-          run_ios_core_index_tests "CPU2" "org.gnit.lucenekmp.index*" "org.gnit.lucenekmp.index*TestI*" &
-          PID_NON_I=$!
-          STATUS=0
-          wait "$PID_I" || STATUS=$?
-          wait "$PID_NON_I" || STATUS=$?
-          exit "$STATUS"
+          case "${{ matrix.module_name }}" in
+            core-index-2f)
+              run_ios_core_index_tests "2F" \
+                "org.gnit.lucenekmp.index*Test2*" \
+                "org.gnit.lucenekmp.index*TestA*" \
+                "org.gnit.lucenekmp.index*TestB*" \
+                "org.gnit.lucenekmp.index*TestC*" \
+                "org.gnit.lucenekmp.index*TestD*" \
+                "org.gnit.lucenekmp.index*TestE*" \
+                "org.gnit.lucenekmp.index*TestF*"
+              ;;
+            core-index-i)
+              run_ios_core_index_tests "I" "org.gnit.lucenekmp.index*TestI*"
+              ;;
+            core-index-ku)
+              run_ios_core_index_tests "KU" \
+                "org.gnit.lucenekmp.index*TestK*" \
+                "org.gnit.lucenekmp.index*TestL*" \
+                "org.gnit.lucenekmp.index*TestM*" \
+                "org.gnit.lucenekmp.index*TestN*" \
+                "org.gnit.lucenekmp.index*TestO*" \
+                "org.gnit.lucenekmp.index*TestP*" \
+                "org.gnit.lucenekmp.index*TestR*" \
+                "org.gnit.lucenekmp.index*TestS*" \
+                "org.gnit.lucenekmp.index*TestT*" \
+                "org.gnit.lucenekmp.index*TestU*"
+              ;;
+          esac
 
-      - name: Run core-index tests 2-F
-        if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
-        run:  |
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*Test2*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestA*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestB*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestC*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestD*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestE*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestF*"
-
-      - name: Run core-index tests I
-        if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
-        run:  |
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestI*"
-
-      - name: Run core-index tests K-U
-        if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
-        run:  |
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestK*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestL*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestM*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestN*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestO*"  
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestP*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestR*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestS*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestT*"
-          ./gradlew -PenableHangDetection=true --console=plain ${{ matrix.task }} --tests "org.gnit.lucenekmp.index*TestU*"   
+      - name: Run core-index shard tests
+        if: ${{ startsWith(matrix.module_name, 'core-index-') && matrix.platform != 'ios' }}
+        run: >
+          ./gradlew
+          -PenableHangDetection=true
+          --console=plain
+          ${{ matrix.task }}
+          ${{ matrix.package_filter }}
 
       - name: Upload build reports
         if: ${{ always() && env.ACT != 'true' }}
