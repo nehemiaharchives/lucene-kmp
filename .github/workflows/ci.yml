@@ -897,9 +897,9 @@ jobs:
               return "$STATUS"
             fi
           }
-          run_ios_core_index_tests "I" "org.gnit.lucenekmp.index*TestI*" &
+          run_ios_core_index_tests "CPU1" "org.gnit.lucenekmp.index*TestI*" &
           PID_I=$!
-          run_ios_core_index_tests "non-I" "org.gnit.lucenekmp.index*" "org.gnit.lucenekmp.index*TestI*" &
+          run_ios_core_index_tests "CPU2" "org.gnit.lucenekmp.index*" "org.gnit.lucenekmp.index*TestI*" &
           PID_NON_I=$!
           STATUS=0
           wait "$PID_I" || STATUS=$?
