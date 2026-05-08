@@ -866,21 +866,45 @@ jobs:
           LOG_DIR="$PWD/core/build/native-direct-test-logs"
           mkdir -p "$LOG_DIR"
           run_ios_core_index_tests() {
-            FILTER="$1"
+            SHARD="$1"
+            FILTER="$2"
+            NEGATIVE_FILTER="${3:-}"
             SAFE_FILTER=$(printf '%s' "$FILTER" | tr -c 'A-Za-z0-9' '_')
-            LOG_FILE="$LOG_DIR/${SAFE_FILTER}.log"
+            LOG_FILE="$LOG_DIR/${SHARD}-${SAFE_FILTER}.log"
+            COMMAND=(
+              /usr/bin/env
+              "SIMCTL_CHILD_tests.linedocsfile=$TEST_LINE_DOCS"
+              "SIMCTL_CHILD_tests.indexresourcesdir=$INDEX_RESOURCES_DIR"
+              xcrun simctl spawn --standalone "$DEVICE_ID" "$TEST_KEXE"
+              --ktest_logger=GTEST
+              --ktest_gradle_filter="$FILTER"
+            )
+            if [ -n "$NEGATIVE_FILTER" ]; then
+              COMMAND+=(--ktest_negative_gradle_filter="$NEGATIVE_FILTER")
+            fi
             set +e
-            /usr/bin/env "SIMCTL_CHILD_tests.linedocsfile=$TEST_LINE_DOCS" "SIMCTL_CHILD_tests.indexresourcesdir=$INDEX_RESOURCES_DIR" xcrun simctl spawn --standalone "$DEVICE_ID" "$TEST_KEXE" --ktest_logger=GTEST --ktest_gradle_filter="$FILTER" 2>&1 | tee "$LOG_FILE" | .github/workflows/ios_logs_formatter.sh
+            "${COMMAND[@]}" 2>&1 | tee "$LOG_FILE" | .github/workflows/ios_logs_formatter.sh | awk -v prefix="[$SHARD] " '{ print prefix $0; fflush() }'
             STATUS=${PIPESTATUS[0]}
             set -e
             if [ "$STATUS" -ne 0 ]; then
-              echo "FAILED iOS core-index filter: $FILTER"
+              echo "FAILED iOS core-index shard: $SHARD"
+              echo "Filter: $FILTER"
+              if [ -n "$NEGATIVE_FILTER" ]; then
+                echo "Negative filter: $NEGATIVE_FILTER"
+              fi
               echo "Full log: $LOG_FILE"
               tail -n 400 "$LOG_FILE"
               return "$STATUS"
             fi
           }
-          run_ios_core_index_tests "org.gnit.lucenekmp.index*"
+          run_ios_core_index_tests "I" "org.gnit.lucenekmp.index*TestI*" &
+          PID_I=$!
+          run_ios_core_index_tests "non-I" "org.gnit.lucenekmp.index*" "org.gnit.lucenekmp.index*TestI*" &
+          PID_NON_I=$!
+          STATUS=0
+          wait "$PID_I" || STATUS=$?
+          wait "$PID_NON_I" || STATUS=$?
+          exit "$STATUS"
 
       - name: Run core-index tests 2-F
         if: ${{ matrix.module_name == 'core-index' && matrix.platform != 'ios' }}
