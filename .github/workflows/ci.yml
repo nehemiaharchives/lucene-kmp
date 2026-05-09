@@ -1015,14 +1015,24 @@ jobs:
           ${{ matrix.task }}
           ${{ matrix.package_filter || '' }}
 
-      # iOS core-index shards run test.kexe directly to avoid Gradle/Kotlin Native test-reporting flakes.
-      - name: Run iOS core-index tests directly
+      - name: Build iOS core-index test executable
         if: ${{ startsWith(matrix.module_name, 'core-index-') && matrix.platform == 'ios' }}
         run:  |
           ./gradlew --no-configuration-cache -PenableHangDetection=true --console=plain :core:syncIndexTestResources :core:linkDebugTestIosSimulatorArm64
+
+      - name: Boot iOS simulator for core-index
+        if: ${{ startsWith(matrix.module_name, 'core-index-') && matrix.platform == 'ios' }}
+        run:  |
           DEVICE_ID=$(xcrun simctl list devices available -j | /usr/bin/python3 -c 'import json, sys; data = json.load(sys.stdin); devices = [d for runtime, items in data["devices"].items() if "iOS" in runtime for d in items if d.get("isAvailable") and d.get("name", "").startswith("iPhone")]; booted = [d for d in devices if d.get("state") == "Booted"]; print((booted or devices)[0]["udid"])')
           xcrun simctl boot "$DEVICE_ID" || true
           xcrun simctl bootstatus "$DEVICE_ID" -b
+          echo "IOS_SIMULATOR_DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+
+      # iOS core-index shards run test.kexe directly to avoid Gradle/Kotlin Native test-reporting flakes.
+      - name: Run iOS core-index shard
+        if: ${{ startsWith(matrix.module_name, 'core-index-') && matrix.platform == 'ios' }}
+        run:  |
+          DEVICE_ID="$IOS_SIMULATOR_DEVICE_ID"
           TEST_KEXE="$PWD/core/build/bin/iosSimulatorArm64/debugTest/test.kexe"
           TEST_LINE_DOCS="$PWD/test-framework/src/commonTest/resources/org/gnit/lucenekmp/tests/util/europarl.lines.txt.gz"
           INDEX_RESOURCES_DIR="$PWD/core/build/generated/test-resources/index"
