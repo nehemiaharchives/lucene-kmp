@@ -26,6 +26,25 @@ subprojects {
     group = providers.gradleProperty("group").get()
     version = providers.gradleProperty("version").get()
 
+    val kotlinDataDir = System.getProperty("kotlin.data.dir") ?: ""
+    val duplicateKlibStrategyArg = "-Xklib-duplicated-unique-name-strategy=allow-first-with-warning"
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>().configureEach {
+        inputs.property("kotlinDataDir", kotlinDataDir)
+    }
+
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
+            targets.withType(KotlinNativeTarget::class.java).configureEach {
+                compilations.configureEach {
+                    compileTaskProvider.configure {
+                        compilerOptions.freeCompilerArgs.add(duplicateKlibStrategyArg)
+                    }
+                }
+            }
+        }
+    }
+
     // Centralized publication configuration for modules that apply the Vanniktech Maven Publish plugin
     pluginManager.withPlugin("com.vanniktech.maven.publish") {
         extensions.configure<com.vanniktech.maven.publish.MavenPublishBaseExtension>("mavenPublishing") {
