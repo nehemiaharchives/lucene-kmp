@@ -44,7 +44,10 @@ class BibleKoreanAnalyzer(
 }
 
 private object BibleKoreanUserDictionary {
-    private const val ENTRIES = "그리스도"
+    private val ENTRIES = """
+        예수아
+        그리스도
+    """.trimIndent()
 
     val instance: UserDictionary? by lazy {
         runCatching { UserDictionary.open(StringReader(ENTRIES)) }
