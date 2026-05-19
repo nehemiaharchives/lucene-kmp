@@ -4,6 +4,7 @@ import org.gnit.lucenekmp.analysis.CharArraySet
 import org.gnit.lucenekmp.analysis.LowerCaseFilter
 import org.gnit.lucenekmp.analysis.StopFilter
 import org.gnit.lucenekmp.analysis.StopwordAnalyzerBase
+import org.gnit.lucenekmp.analysis.TokenFilter
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.Tokenizer
 import org.gnit.lucenekmp.analysis.`in`.IndicNormalizationFilter
@@ -15,6 +16,7 @@ import org.gnit.lucenekmp.analysis.mr.MarathiAnalyzer
 import org.gnit.lucenekmp.analysis.mr.MarathiNormalizationFilter
 import org.gnit.lucenekmp.analysis.mr.MarathiStemFilter
 import org.gnit.lucenekmp.analysis.standard.StandardTokenizer
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.jdkport.Reader
 
 /**
@@ -42,6 +44,7 @@ class BibleMarathiAnalyzer : StopwordAnalyzerBase {
         result = IndicNormalizationFilter(result)
         result = MarathiNormalizationFilter(result)
         result = StopFilter(result, stopwords)
+        result = BibleMarathiJesusChristFilter(result)
         result = MarathiStemFilter(result)
         return TokenStreamComponents(source, result)
     }
@@ -72,5 +75,39 @@ class BibleMarathiAnalyzer : StopwordAnalyzerBase {
                 add(from, to)
             }
         }.build()
+    }
+}
+
+private class BibleMarathiJesusChristFilter(input: TokenStream) : TokenFilter(input) {
+    private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
+
+    override fun incrementToken(): Boolean {
+        if (!input.incrementToken()) {
+            return false
+        }
+
+        val token = termAtt.buffer().concatToString(0, termAtt.length)
+        when {
+            shouldCanonicalizeJesus(token) -> termAtt.copyBuffer(JESUS, 0, JESUS.size)
+            shouldCanonicalizeChrist(token) -> termAtt.copyBuffer(CHRIST, 0, CHRIST.size)
+        }
+        return true
+    }
+
+    private fun shouldCanonicalizeJesus(token: String): Boolean {
+        return (token.startsWith("येशू") && !token.startsWith("येशूवा")) ||
+            (token.startsWith("येशु") && !token.startsWith("येशुवा"))
+    }
+
+    private fun shouldCanonicalizeChrist(token: String): Boolean {
+        return (token.startsWith("ख्रिस्त") &&
+            !token.startsWith("ख्रिस्तविरोध") &&
+            !token.startsWith("ख्रिस्ती")) ||
+            (token.startsWith("खरिसत") && !token.startsWith("खरिसतविरोध"))
+    }
+
+    companion object {
+        private val JESUS = "येशु".toCharArray()
+        private val CHRIST = "खरिसत".toCharArray()
     }
 }

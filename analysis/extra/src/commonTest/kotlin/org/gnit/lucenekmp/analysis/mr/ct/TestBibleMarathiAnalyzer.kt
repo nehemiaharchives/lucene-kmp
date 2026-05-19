@@ -41,6 +41,28 @@ class TestBibleMarathiAnalyzer : BaseTokenStreamTestCase() {
         analyzer.close()
     }
 
+    @Test
+    fun testInflectedJesusChristFormsAreCanonicalized() {
+        val analyzer = BibleMarathiAnalyzer()
+        val terms = termsFromTokenStream(
+            analyzer.tokenStream("text", "गुप्त गोष्टींचा ख्रिस्त येशूकडून न्याय करील")
+        )
+        assertTrue(terms.contains("येश"), "Expected token 'येश' in $terms")
+        assertTrue(terms.contains("खरिसत"), "Expected token 'खरिसत' in $terms")
+        analyzer.close()
+    }
+
+    @Test
+    fun testInflectedCaseMarkersRemainSearchable() {
+        val analyzer = BibleMarathiAnalyzer()
+        val terms = termsFromTokenStream(
+            analyzer.tokenStream("text", "येशूवर विश्वास आणि ख्रिस्तावरील कृपा")
+        )
+        assertTrue(terms.contains("येश"), "Expected token 'येश' in $terms")
+        assertTrue(terms.contains("खरिसत"), "Expected token 'खरिसत' in $terms")
+        analyzer.close()
+    }
+
     private fun termsFromTokenStream(ts: TokenStream): List<String> {
         val termAtt = ts.addAttribute(CharTermAttribute::class)
         val terms = mutableListOf<String>()
