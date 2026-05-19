@@ -46,11 +46,41 @@ class BibleSwedishAnalyzer : StopwordAnalyzerBase {
 		return TokenStreamComponents(source, result)
 	}
 
-	override fun normalize(fieldName: String, `in`: TokenStream): TokenStream {
-		var result: TokenStream = LowerCaseFilter(`in`)
-		result = BibleSwedishJesusChristFilter(result, emitOriginal = false)
-		return result
-	}
+    override fun normalize(fieldName: String, `in`: TokenStream): TokenStream {
+        var result: TokenStream = LowerCaseFilter(`in`)
+        result = BibleSwedishJesusChristFilter(result, emitOriginal = false)
+        return result
+    }
+
+    companion object {
+        private val NT_SCOPE_FORMS: Set<String> = setOf(
+            "jesu",
+            "jesus",
+            "kristi",
+            "kristus"
+        )
+
+        fun requiresNewTestamentScope(text: String): Boolean {
+            return wordTokens(text).any { it in NT_SCOPE_FORMS }
+        }
+
+        private fun wordTokens(text: String): List<String> {
+            val tokens = ArrayList<String>()
+            val current = StringBuilder()
+            for (ch in text.lowercase()) {
+                if (ch.isLetter()) {
+                    current.append(ch)
+                } else if (current.isNotEmpty()) {
+                    tokens.add(current.toString())
+                    current.clear()
+                }
+            }
+            if (current.isNotEmpty()) {
+                tokens.add(current.toString())
+            }
+            return tokens
+        }
+    }
 }
 
 private class BibleSwedishJesusChristFilter(
