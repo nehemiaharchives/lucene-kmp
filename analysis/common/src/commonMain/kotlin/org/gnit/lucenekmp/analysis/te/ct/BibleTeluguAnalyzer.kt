@@ -41,6 +41,7 @@ class BibleTeluguAnalyzer : StopwordAnalyzerBase {
         keywordSet.add(JESUS_TEXT)
         keywordSet.add(CHRIST_TEXT)
         keywordSet.add(CHRIST_LOCATIVE_TEXT)
+        keywordSet.add(CHRIST_COMITATIVE_TEXT)
         return keywordSet
     }
 
@@ -121,6 +122,7 @@ private class BibleTeluguJesusChristFilter(
         return when {
             matches(buffer, length, JESUS) -> JESUS
             matches(buffer, length, CHRIST) || matches(buffer, length, CHRIST_LOCATIVE) -> CHRIST
+            matches(buffer, length, CHRIST_COMITATIVE) -> CHRIST
             else -> null
         }
     }
@@ -141,6 +143,8 @@ private class BibleTeluguJesusChristFilter(
 private const val JESUS_TEXT = "యెసు"
 private const val CHRIST_TEXT = "క్రిస్త"
 private const val CHRIST_LOCATIVE_TEXT = "క్రిస్తులొ"
+private const val CHRIST_COMITATIVE_TEXT = "క్రిస్తుతొను"
 private val JESUS = JESUS_TEXT.toCharArray()
 private val CHRIST = CHRIST_TEXT.toCharArray()
 private val CHRIST_LOCATIVE = CHRIST_LOCATIVE_TEXT.toCharArray()
+private val CHRIST_COMITATIVE = CHRIST_COMITATIVE_TEXT.toCharArray()
