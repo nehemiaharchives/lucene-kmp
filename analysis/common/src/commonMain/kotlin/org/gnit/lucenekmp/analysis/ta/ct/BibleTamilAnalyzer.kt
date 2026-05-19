@@ -15,6 +15,7 @@ import org.gnit.lucenekmp.analysis.snowball.SnowballFilter
 import org.gnit.lucenekmp.analysis.standard.StandardTokenizer
 import org.gnit.lucenekmp.analysis.ta.TamilAnalyzer
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
 import org.tartarus.snowball.ext.TamilStemmer
 
@@ -73,20 +74,21 @@ private class BibleTamilJesusChristFilter(
 	private val emitOriginal: Boolean
 ) : TokenFilter(input) {
 	private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
+    private val keywordAtt: KeywordAttribute = addAttribute(KeywordAttribute::class)
 	private val posIncAtt: PositionIncrementAttribute = addAttribute(PositionIncrementAttribute::class)
 	private var pendingState: State? = null
-	private var pendingTerm: CharArray? = null
+	private val pendingTerms = ArrayDeque<CharArray>()
 
 	@Throws(IOException::class)
 	override fun incrementToken(): Boolean {
-		if (pendingState != null) {
+		if (pendingTerms.isNotEmpty()) {
 			restoreState(pendingState!!)
-			pendingState = null
-			val pending = pendingTerm
-			pendingTerm = null
-			if (pending != null) {
-				posIncAtt.setPositionIncrement(0)
-				termAtt.copyBuffer(pending, 0, pending.size)
+			val pending = pendingTerms.removeFirst()
+			posIncAtt.setPositionIncrement(0)
+			termAtt.copyBuffer(pending, 0, pending.size)
+			keywordAtt.isKeyword = true
+			if (pendingTerms.isEmpty()) {
+				pendingState = null
 			}
 			return true
 		}
@@ -98,10 +100,15 @@ private class BibleTamilJesusChristFilter(
 		val length = termAtt.length
 		val normalized = normalizedForm(buffer, length)
 		if (normalized != null) {
+			keywordAtt.isKeyword = true
 			if (emitOriginal) {
-				if (!matches(buffer, length, normalized)) {
+				if (isCompoundForm(buffer, length)) {
 					pendingState = captureState()
-					pendingTerm = normalized
+					if (!matches(buffer, length, JESUS_CHRIST)) {
+						pendingTerms.add(JESUS_CHRIST)
+					}
+					pendingTerms.add(JESUS)
+					pendingTerms.add(CHRIST)
 				}
 			} else {
 				termAtt.copyBuffer(normalized, 0, normalized.size)
@@ -114,10 +121,13 @@ private class BibleTamilJesusChristFilter(
 	override fun reset() {
 		super.reset()
 		pendingState = null
-		pendingTerm = null
+		pendingTerms.clear()
 	}
 
 	private fun normalizedForm(buffer: CharArray, length: Int): CharArray? {
+		if (matches(buffer, length, JESUS) || matches(buffer, length, CHRIST)) {
+			return buffer.copyOf(length)
+		}
 		if (startsWith(buffer, length, JESUS_CHRIST)) {
 			return JESUS_CHRIST
 		}
@@ -130,6 +140,10 @@ private class BibleTamilJesusChristFilter(
 		} else {
 			null
 		}
+	}
+
+	private fun isCompoundForm(buffer: CharArray, length: Int): Boolean {
+		return matches(buffer, length, JESUS_CHRIST) || startsWith(buffer, length, JESUS_CHRIST)
 	}
 
 	private fun matches(buffer: CharArray, length: Int, target: CharArray): Boolean {
@@ -166,5 +180,7 @@ private class BibleTamilJesusChristFilter(
 
 	companion object {
 		private val JESUS_CHRIST = JESUS_CHRIST_TEXT.toCharArray()
+		private val JESUS = "இயேசு".toCharArray()
+		private val CHRIST = "கிறிஸ்து".toCharArray()
 	}
 }

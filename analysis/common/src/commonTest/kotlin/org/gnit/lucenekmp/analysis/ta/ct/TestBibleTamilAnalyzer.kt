@@ -9,12 +9,17 @@ class TestBibleTamilAnalyzer : BaseTokenStreamTestCase() {
 	@Throws(IOException::class)
 	fun testDeclensionNormalization() {
 		val a = BibleTamilAnalyzer()
-		assertAnalyzesTo(a, "இயேசுகிறிஸ்து", arrayOf("இயேசுகிறிஸ்து"))
+		assertAnalyzesTo(
+			a,
+			"இயேசுகிறிஸ்துவின்",
+			arrayOf("இயேசுகிறிஸ்துவின்", "இயேசுகிறிஸ்து", "இயேசு", "கிறிஸ்து"),
+			posIncrements = intArrayOf(1, 0, 0, 0)
+		)
 		assertAnalyzesTo(
 			a,
 			"இயேசுகிறிஸ்துவைக்கொண்டு",
-			arrayOf("இயேசுகிறிஸ்துவைக்கொண்டு", "இயேசுகிறிஸ்து"),
-			posIncrements = intArrayOf(1, 0)
+			arrayOf("இயேசுகிறிஸ்துவைக்கொண்டு", "இயேசுகிறிஸ்து", "இயேசு", "கிறிஸ்து"),
+			posIncrements = intArrayOf(1, 0, 0, 0)
 		)
 		a.close()
 	}
