@@ -10,11 +10,32 @@ import kotlin.test.Test
 class TestBibleRussianAnalyzer : BaseTokenStreamTestCase() {
     @Test
     @Throws(IOException::class)
-    fun testJesusStaysDistinctFromJoshuaCaseForms() {
+    fun testJesusCaseFormsEmitCanonicalName() {
         val analyzer: Analyzer = BibleRussianAnalyzer()
-        assertAnalyzesTo(analyzer, "Иисуса", arrayOf("иисуса"))
-        assertAnalyzesTo(analyzer, "Иисусу", arrayOf("иисусу"))
-        assertAnalyzesTo(analyzer, "Иисуса Христа", arrayOf("иисуса", "христа"))
+        assertAnalyzesTo(
+            analyzer,
+            "Иисуса",
+            arrayOf("иисуса", "иисус"),
+            posIncrements = intArrayOf(1, 0)
+        )
+        assertAnalyzesTo(
+            analyzer,
+            "Иисусу",
+            arrayOf("иисусу", "иисус"),
+            posIncrements = intArrayOf(1, 0)
+        )
+        assertAnalyzesTo(
+            analyzer,
+            "Иисуса Христа",
+            arrayOf("иисуса", "иисус", "христа", "христос"),
+            posIncrements = intArrayOf(1, 0, 1, 0)
+        )
+        assertAnalyzesTo(
+            analyzer,
+            "Иисусом Христом",
+            arrayOf("иисусом", "иисус", "христом", "христос"),
+            posIncrements = intArrayOf(1, 0, 1, 0)
+        )
         analyzer.close()
     }
 
