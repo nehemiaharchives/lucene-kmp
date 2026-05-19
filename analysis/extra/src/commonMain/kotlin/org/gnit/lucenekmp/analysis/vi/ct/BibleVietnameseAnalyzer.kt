@@ -39,7 +39,7 @@ class BibleVietnameseAnalyzer(
 private class BibleVietnameseJesusChristFilter(input: TokenStream) : TokenFilter(input) {
     private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
     private val posIncAtt: PositionIncrementAttribute = addAttribute(PositionIncrementAttribute::class)
-    private val pendingTerms = ArrayDeque<CharArray>()
+    private val pendingTerms = ArrayDeque<PendingTerm>()
     private var pendingState: State? = null
 
     @Throws(IOException::class)
@@ -47,8 +47,8 @@ private class BibleVietnameseJesusChristFilter(input: TokenStream) : TokenFilter
         if (pendingTerms.isNotEmpty()) {
             restoreState(pendingState!!)
             val pending = pendingTerms.removeFirst()
-            posIncAtt.setPositionIncrement(1)
-            termAtt.copyBuffer(pending, 0, pending.size)
+            posIncAtt.setPositionIncrement(pending.posInc)
+            termAtt.copyBuffer(pending.term, 0, pending.term.size)
             if (pendingTerms.isEmpty()) {
                 pendingState = null
             }
@@ -61,8 +61,25 @@ private class BibleVietnameseJesusChristFilter(input: TokenStream) : TokenFilter
 
         if (matches(termAtt.buffer(), termAtt.length, JESUS_CHRIST)) {
             pendingState = captureState()
-            pendingTerms.add(CHRIST)
+            pendingTerms.add(PendingTerm(CHRIST, 1))
             termAtt.copyBuffer(JESUS, 0, JESUS.size)
+            return true
+        }
+
+        val currentToken = termAtt.buffer().concatToString(0, termAtt.length)
+        val normalizedToken = currentToken.trim()
+        val contextEmissions = mutableListOf<PendingTerm>()
+        if (normalizedToken != "jesus" && containsWholeWord(normalizedToken, "jesus")) {
+            contextEmissions.add(PendingTerm(JESUS, 0))
+        }
+        if (normalizedToken != "christ" && containsWholeWord(normalizedToken, "christ")) {
+            contextEmissions.add(PendingTerm(CHRIST, 0))
+        }
+        if (contextEmissions.isNotEmpty()) {
+            pendingState = captureState()
+            contextEmissions.forEach { emission ->
+                pendingTerms.add(emission)
+            }
         }
 
         return true
@@ -85,6 +102,18 @@ private class BibleVietnameseJesusChristFilter(input: TokenStream) : TokenFilter
         }
         return true
     }
+
+    private fun containsWholeWord(text: String, target: String): Boolean {
+        if (text.isEmpty()) {
+            return false
+        }
+        return text.split(' ').any { part -> part == target }
+    }
+
+    private data class PendingTerm(
+        val term: CharArray,
+        val posInc: Int
+    )
 
     companion object {
         private val JESUS_CHRIST = charArrayOf('j', 'e', 's', 'u', 's', ' ', 'c', 'h', 'r', 'i', 's', 't')
