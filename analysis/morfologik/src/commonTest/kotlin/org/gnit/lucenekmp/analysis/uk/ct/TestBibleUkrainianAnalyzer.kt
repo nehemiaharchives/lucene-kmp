@@ -10,10 +10,26 @@ import kotlin.test.assertTrue
 class TestBibleUkrainianAnalyzer : BaseTokenStreamTestCase() {
     @Test
     @Throws(IOException::class)
-    fun testBibleNamePreservation() {
+    fun testBibleNameCanonicalization() {
         val analyzer: Analyzer = BibleUkrainianAnalyzer()
-        assertAnalyzesTo(analyzer, "Ісуса", arrayOf("ісуса"))
-        assertAnalyzesTo(analyzer, "Ісуса Христа", arrayOf("ісуса", "христа"))
+        assertAnalyzesTo(
+            analyzer,
+            "Ісуса",
+            arrayOf("ісуса", "ісус"),
+            posIncrements = intArrayOf(1, 0)
+        )
+        assertAnalyzesTo(
+            analyzer,
+            "Ісуса Христа",
+            arrayOf("ісуса", "ісус", "христа", "христос"),
+            posIncrements = intArrayOf(1, 0, 1, 0)
+        )
+        assertAnalyzesTo(
+            analyzer,
+            "Ісусом Христом",
+            arrayOf("ісусом", "ісус", "христом", "христос"),
+            posIncrements = intArrayOf(1, 0, 1, 0)
+        )
         analyzer.close()
     }
 

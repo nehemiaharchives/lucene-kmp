@@ -1,11 +1,13 @@
 package org.gnit.lucenekmp.analysis.uk.ct
 
 import morfologik.stemming.Dictionary
+import okio.IOException
 import okio.Buffer
 import org.gnit.lucenekmp.analysis.CharArraySet
 import org.gnit.lucenekmp.analysis.LowerCaseFilter
 import org.gnit.lucenekmp.analysis.StopFilter
 import org.gnit.lucenekmp.analysis.StopwordAnalyzerBase
+import org.gnit.lucenekmp.analysis.TokenFilter
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.Tokenizer
 import org.gnit.lucenekmp.analysis.WordlistLoader
@@ -18,6 +20,9 @@ import org.gnit.lucenekmp.analysis.uk.UKRAINIAN_STOPWORD_DATA
 import org.gnit.lucenekmp.analysis.uk.ukrainianDictData
 import org.gnit.lucenekmp.analysis.uk.ukrainianInfoData
 import org.gnit.lucenekmp.analysis.uk.UkrainianMorfologikAnalyzer
+import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
+import org.gnit.lucenekmp.analysis.tokenattributes.PositionIncrementAttribute
 import org.gnit.lucenekmp.jdkport.OkioSourceInputStream
 import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.jdkport.StringReader
@@ -44,6 +49,7 @@ class BibleUkrainianAnalyzer : StopwordAnalyzerBase {
         val source: Tokenizer = StandardTokenizer()
         var result: TokenStream = LowerCaseFilter(source)
         result = StopFilter(result, stopwords)
+        result = BibleUkrainianNameFormFilter(result)
         if (!stemExclusionSet.isEmpty()) {
             result = SetKeywordMarkerFilter(result, stemExclusionSet)
         }
@@ -57,12 +63,13 @@ class BibleUkrainianAnalyzer : StopwordAnalyzerBase {
     }
 
     private fun buildBibleNameExclusionSet(): CharArraySet {
-        val keywordSet = CharArraySet(stemExclusionSet.size + BIBLE_NAME_FORMS.size, true)
+        val keywordSet = CharArraySet(stemExclusionSet.size + BIBLE_NAME_FORMS.size * 2, true)
         for (item in stemExclusionSet) {
             keywordSet.add(item)
         }
         for (form in BIBLE_NAME_FORMS) {
-            keywordSet.add(form)
+            keywordSet.add(form.term)
+            keywordSet.add(form.canonicalTerm)
         }
         return keywordSet
     }
@@ -80,26 +87,27 @@ class BibleUkrainianAnalyzer : StopwordAnalyzerBase {
             add("Ґ", "Г")
         }.build()
 
-        private val BIBLE_NAME_FORMS: Array<String> = arrayOf(
-            "ісус",
-            "ісуса",
-            "ісусу",
-            "ісусом",
-            "ісусі",
-            "ісусов",
-            "ісусового",
-            "ісусовому",
-            "христос",
-            "христа",
-            "христу",
-            "христом",
-            "христі",
-            "христов",
-            "христового",
-            "христовому"
+        private val BIBLE_NAME_FORMS: Array<BibleNameForm> = arrayOf(
+            BibleNameForm("ісус", "Jesus", "nominative", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісуса", "Jesus", "genitive/accusative", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісусу", "Jesus", "dative", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісусом", "Jesus", "instrumental", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісусі", "Jesus", "prepositional", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісусов", "Jesus", "genitive adjective, masculine", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісусового", "Jesus", "genitive adjective, neuter", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("ісусовому", "Jesus", "dative adjective, neuter", "ісус", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христос", "Christ", "nominative", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христа", "Christ", "genitive/accusative", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христу", "Christ", "dative", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христом", "Christ", "instrumental", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христі", "Christ", "prepositional", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христов", "Christ", "genitive adjective, masculine", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христового", "Christ", "genitive adjective, neuter", "христос", BibleNameAction.PRESERVE_EXACT),
+            BibleNameForm("христовому", "Christ", "dative adjective, neuter", "христос", BibleNameAction.PRESERVE_EXACT)
         )
 
-        private val JESUS_OR_CHRIST_FORMS: Set<String> = BIBLE_NAME_FORMS.toSet()
+        private val JESUS_OR_CHRIST_FORMS: Set<String> = BIBLE_NAME_FORMS.map { it.term }.toSet()
+        internal val CANONICAL_BY_FORM: Map<String, String> = BIBLE_NAME_FORMS.associate { it.term to it.canonicalTerm }
         private val JOSHUA_CONTEXT_PREFIX = "навин"
 
         private val defaultResources: DefaultResources by lazy(LazyThreadSafetyMode.NONE) {
@@ -154,5 +162,62 @@ class BibleUkrainianAnalyzer : StopwordAnalyzerBase {
             val defaultStopSet: CharArraySet = defaultResources.stopSet
             val defaultDictionary: Dictionary = defaultResources.dictionary
         }
+    }
+}
+
+private data class BibleNameForm(
+    val term: String,
+    val canonicalName: String,
+    val grammar: String,
+    val canonicalTerm: String,
+    val action: BibleNameAction
+)
+
+private enum class BibleNameAction {
+    PRESERVE_EXACT
+}
+
+private class BibleUkrainianNameFormFilter(input: TokenStream) : TokenFilter(input) {
+    private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
+    private val keywordAtt: KeywordAttribute = addAttribute(KeywordAttribute::class)
+    private val posIncAtt: PositionIncrementAttribute = addAttribute(PositionIncrementAttribute::class)
+    private var pendingState: State? = null
+    private var pendingCanonical: CharArray? = null
+
+    @Throws(IOException::class)
+    override fun incrementToken(): Boolean {
+        if (pendingState != null) {
+            restoreState(pendingState!!)
+            pendingState = null
+            val canonical = pendingCanonical
+            pendingCanonical = null
+            if (canonical != null) {
+                posIncAtt.setPositionIncrement(0)
+                termAtt.copyBuffer(canonical, 0, canonical.size)
+                keywordAtt.isKeyword = true
+            }
+            return true
+        }
+
+        if (!input.incrementToken()) {
+            return false
+        }
+
+        val term = termAtt.toString()
+        val canonical = BibleUkrainianAnalyzer.CANONICAL_BY_FORM[term]
+        if (canonical != null) {
+            keywordAtt.isKeyword = true
+            if (canonical != term) {
+                pendingState = captureState()
+                pendingCanonical = canonical.toCharArray()
+            }
+        }
+        return true
+    }
+
+    override fun reset() {
+        super.reset()
+        pendingState = null
+        pendingCanonical = null
     }
 }
