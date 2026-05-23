@@ -7,6 +7,7 @@ import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
 import org.tartarus.snowball.SnowballStemmer
 import org.tartarus.snowball.ext.RussianStemmer
+import org.tartarus.snowball.ext.TurkishStemmer
 
 /**
  * A filter that stems words using a Snowball-generated stemmer.
@@ -17,16 +18,17 @@ class SnowballFilter : TokenFilter {
     private val keywordAttr: KeywordAttribute = addAttribute(KeywordAttribute::class)
 
     constructor(input: TokenStream, stemmer: SnowballStemmer) : super(input) {
-        this.stemmer = stemmer
+        this.stemmer = requireNotNull(stemmer) { "stemmer" }
     }
 
-    constructor(input: TokenStream, name: String) : super(input) {
-        var resolvedName = name
+    constructor(`in`: TokenStream, name: String) : super(`in`) {
+        var resolvedName = requireNotNull(name) { "name" }
         if (resolvedName == "German2") {
             resolvedName = "German"
         }
         stemmer = when (resolvedName) {
             "Russian" -> RussianStemmer()
+            "Turkish" -> TurkishStemmer()
             else -> throw IllegalArgumentException("Invalid stemmer class specified: $resolvedName")
         }
     }

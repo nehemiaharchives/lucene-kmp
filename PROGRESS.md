@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1602 | 66% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1607 | 66% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
@@ -152,7 +152,7 @@
 |     org.apache.lucene.analysis.te |         org.gnit.lucenekmp.analysis.te | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.th |         org.gnit.lucenekmp.analysis.th | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 24 | 21 | 87% | [ ] |
-|     org.apache.lucene.analysis.tr |         org.gnit.lucenekmp.analysis.tr | 5 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.tr |         org.gnit.lucenekmp.analysis.tr | 5 | 5 | 100% | [x] |
 |     org.apache.lucene.analysis.uk |         org.gnit.lucenekmp.analysis.uk | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.util |         org.gnit.lucenekmp.analysis.util | 11 | 9 | 81% | [ ] |
 |     org.apache.lucene.analysis.wikipedia |         org.gnit.lucenekmp.analysis.wikipedia | 3 | 0 | 0% | [ ] |
@@ -604,11 +604,6 @@
 | [org.apache.lucene.analysis.tokenattributes.SentenceAttribute](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/tokenattributes/SentenceAttribute.java) | org.gnit.lucenekmp.analysis.tokenattributes.SentenceAttribute |
 | [org.apache.lucene.analysis.tokenattributes.SentenceAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/tokenattributes/SentenceAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.SentenceAttributeImpl |
 | [org.apache.lucene.analysis.tokenattributes.TermFrequencyAttributeImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/tokenattributes/TermFrequencyAttributeImpl.java) | org.gnit.lucenekmp.analysis.tokenattributes.TermFrequencyAttributeImpl |
-| [org.apache.lucene.analysis.tr.ApostropheFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/tr/ApostropheFilter.java) | org.gnit.lucenekmp.analysis.tr.ApostropheFilter |
-| [org.apache.lucene.analysis.tr.ApostropheFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/tr/ApostropheFilterFactory.java) | org.gnit.lucenekmp.analysis.tr.ApostropheFilterFactory |
-| [org.apache.lucene.analysis.tr.TurkishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/tr/TurkishAnalyzer.java) | org.gnit.lucenekmp.analysis.tr.TurkishAnalyzer |
-| [org.apache.lucene.analysis.tr.TurkishLowerCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/tr/TurkishLowerCaseFilter.java) | org.gnit.lucenekmp.analysis.tr.TurkishLowerCaseFilter |
-| [org.apache.lucene.analysis.tr.TurkishLowerCaseFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/tr/TurkishLowerCaseFilterFactory.java) | org.gnit.lucenekmp.analysis.tr.TurkishLowerCaseFilterFactory |
 | [org.apache.lucene.analysis.util.FilesystemResourceLoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/util/FilesystemResourceLoader.java) | org.gnit.lucenekmp.analysis.util.FilesystemResourceLoader |
 | [org.apache.lucene.analysis.util.UnicodeProps](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/util/UnicodeProps.java) | org.gnit.lucenekmp.analysis.util.UnicodeProps |
 | [org.apache.lucene.analysis.wikipedia.WikipediaTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/wikipedia/WikipediaTokenizer.java) | org.gnit.lucenekmp.analysis.wikipedia.WikipediaTokenizer |
@@ -965,7 +960,7 @@
 |     org.apache.lucene.analysis.te | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.th | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.tokenattributes | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.tr | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.tr | 5 | 1 | 20% |
 |     org.apache.lucene.analysis.uk | 1 | 1 | 100% |
 |     org.apache.lucene.analysis.util | 8 | 7 | 87% |
 |     org.apache.lucene.analysis.wikipedia | 2 | 0 | 0% |
@@ -1029,7 +1024,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 863 | 72% |
+| Total | 1186 | 864 | 72% |
 
 
 ## Tests To Port
@@ -1316,7 +1311,6 @@
 | [org.apache.lucene.analysis.synonym.word2vec.TestWord2VecSynonymProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestWord2VecSynonymProvider.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestWord2VecSynonymProvider |
 | [org.apache.lucene.analysis.tr.TestApostropheFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestApostropheFilter.java) | org.gnit.lucenekmp.analysis.tr.TestApostropheFilter |
 | [org.apache.lucene.analysis.tr.TestApostropheFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestApostropheFilterFactory.java) | org.gnit.lucenekmp.analysis.tr.TestApostropheFilterFactory |
-| [org.apache.lucene.analysis.tr.TestTurkishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestTurkishAnalyzer.java) | org.gnit.lucenekmp.analysis.tr.TestTurkishAnalyzer |
 | [org.apache.lucene.analysis.tr.TestTurkishLowerCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestTurkishLowerCaseFilter.java) | org.gnit.lucenekmp.analysis.tr.TestTurkishLowerCaseFilter |
 | [org.apache.lucene.analysis.tr.TestTurkishLowerCaseFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestTurkishLowerCaseFilterFactory.java) | org.gnit.lucenekmp.analysis.tr.TestTurkishLowerCaseFilterFactory |
 | [org.apache.lucene.analysis.util.TestFilesystemResourceLoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/util/TestFilesystemResourceLoader.java) | org.gnit.lucenekmp.analysis.util.TestFilesystemResourceLoader |
