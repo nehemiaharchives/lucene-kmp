@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
+import org.gnit.lucenekmp.analysis.ar.ArabicNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.ar.ArabicStemFilterFactory
 import org.gnit.lucenekmp.analysis.bn.BengaliNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.bn.BengaliStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
@@ -12,6 +14,9 @@ import org.gnit.lucenekmp.analysis.de.GermanNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishPluralStemFilterFactory
+import org.gnit.lucenekmp.analysis.fa.PersianCharFilterFactory
+import org.gnit.lucenekmp.analysis.fa.PersianNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.fa.PersianStemFilterFactory
 import org.gnit.lucenekmp.analysis.hi.HindiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.hi.HindiStemFilterFactory
 import org.gnit.lucenekmp.analysis.`in`.IndicNormalizationFilterFactory
@@ -34,6 +39,31 @@ object AnalysisCommonFactories {
 
     fun ensureInitialized() {
         if (initialized) return
+        AnalysisSPIRegistry.register(
+            CharFilterFactory::class,
+            PersianCharFilterFactory.NAME,
+            PersianCharFilterFactory::class
+        ) { args -> PersianCharFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            ArabicNormalizationFilterFactory.NAME,
+            ArabicNormalizationFilterFactory::class
+        ) { args -> ArabicNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            ArabicStemFilterFactory.NAME,
+            ArabicStemFilterFactory::class
+        ) { args -> ArabicStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            PersianNormalizationFilterFactory.NAME,
+            PersianNormalizationFilterFactory::class
+        ) { args -> PersianNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            PersianStemFilterFactory.NAME,
+            PersianStemFilterFactory::class
+        ) { args -> PersianStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             BengaliNormalizationFilterFactory.NAME,

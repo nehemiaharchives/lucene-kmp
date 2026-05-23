@@ -67,9 +67,9 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1586 | 66% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1602 | 66% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
-|     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.bn |         org.gnit.lucenekmp.analysis.bn | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.boost |         org.gnit.lucenekmp.analysis.boost | 2 | 2 | 100% | [x] |
@@ -95,7 +95,7 @@
 |     org.apache.lucene.analysis.es |         org.gnit.lucenekmp.analysis.es | 10 | 7 | 70% | [ ] |
 |     org.apache.lucene.analysis.et |         org.gnit.lucenekmp.analysis.et | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.eu |         org.gnit.lucenekmp.analysis.eu | 1 | 0 | 0% | [ ] |
-|     org.apache.lucene.analysis.fa |         org.gnit.lucenekmp.analysis.fa | 9 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.fa |         org.gnit.lucenekmp.analysis.fa | 9 | 9 | 100% | [x] |
 |     org.apache.lucene.analysis.fi |         org.gnit.lucenekmp.analysis.fi | 4 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.fr |         org.gnit.lucenekmp.analysis.fr | 7 | 5 | 71% | [ ] |
 |     org.apache.lucene.analysis.ga |         org.gnit.lucenekmp.analysis.ga | 3 | 0 | 0% | [ ] |
@@ -261,13 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.ar.ArabicAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicAnalyzer.java) | org.gnit.lucenekmp.analysis.ar.ArabicAnalyzer |
-| [org.apache.lucene.analysis.ar.ArabicNormalizationFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicNormalizationFilter.java) | org.gnit.lucenekmp.analysis.ar.ArabicNormalizationFilter |
-| [org.apache.lucene.analysis.ar.ArabicNormalizationFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicNormalizationFilterFactory.java) | org.gnit.lucenekmp.analysis.ar.ArabicNormalizationFilterFactory |
-| [org.apache.lucene.analysis.ar.ArabicNormalizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicNormalizer.java) | org.gnit.lucenekmp.analysis.ar.ArabicNormalizer |
-| [org.apache.lucene.analysis.ar.ArabicStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicStemFilter.java) | org.gnit.lucenekmp.analysis.ar.ArabicStemFilter |
-| [org.apache.lucene.analysis.ar.ArabicStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicStemFilterFactory.java) | org.gnit.lucenekmp.analysis.ar.ArabicStemFilterFactory |
-| [org.apache.lucene.analysis.ar.ArabicStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/ar/ArabicStemmer.java) | org.gnit.lucenekmp.analysis.ar.ArabicStemmer |
 | [org.apache.lucene.analysis.bg.BulgarianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/bg/BulgarianAnalyzer.java) | org.gnit.lucenekmp.analysis.bg.BulgarianAnalyzer |
 | [org.apache.lucene.analysis.bg.BulgarianStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/bg/BulgarianStemFilter.java) | org.gnit.lucenekmp.analysis.bg.BulgarianStemFilter |
 | [org.apache.lucene.analysis.bg.BulgarianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/bg/BulgarianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.bg.BulgarianStemFilterFactory |
@@ -353,15 +346,6 @@
 | [org.apache.lucene.analysis.es.SpanishMinimalStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/es/SpanishMinimalStemmer.java) | org.gnit.lucenekmp.analysis.es.SpanishMinimalStemmer |
 | [org.apache.lucene.analysis.et.EstonianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/et/EstonianAnalyzer.java) | org.gnit.lucenekmp.analysis.et.EstonianAnalyzer |
 | [org.apache.lucene.analysis.eu.BasqueAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/eu/BasqueAnalyzer.java) | org.gnit.lucenekmp.analysis.eu.BasqueAnalyzer |
-| [org.apache.lucene.analysis.fa.PersianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianAnalyzer.java) | org.gnit.lucenekmp.analysis.fa.PersianAnalyzer |
-| [org.apache.lucene.analysis.fa.PersianCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianCharFilter.java) | org.gnit.lucenekmp.analysis.fa.PersianCharFilter |
-| [org.apache.lucene.analysis.fa.PersianCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianCharFilterFactory.java) | org.gnit.lucenekmp.analysis.fa.PersianCharFilterFactory |
-| [org.apache.lucene.analysis.fa.PersianNormalizationFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianNormalizationFilter.java) | org.gnit.lucenekmp.analysis.fa.PersianNormalizationFilter |
-| [org.apache.lucene.analysis.fa.PersianNormalizationFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianNormalizationFilterFactory.java) | org.gnit.lucenekmp.analysis.fa.PersianNormalizationFilterFactory |
-| [org.apache.lucene.analysis.fa.PersianNormalizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianNormalizer.java) | org.gnit.lucenekmp.analysis.fa.PersianNormalizer |
-| [org.apache.lucene.analysis.fa.PersianStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianStemFilter.java) | org.gnit.lucenekmp.analysis.fa.PersianStemFilter |
-| [org.apache.lucene.analysis.fa.PersianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.fa.PersianStemFilterFactory |
-| [org.apache.lucene.analysis.fa.PersianStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fa/PersianStemmer.java) | org.gnit.lucenekmp.analysis.fa.PersianStemmer |
 | [org.apache.lucene.analysis.fi.FinnishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fi/FinnishAnalyzer.java) | org.gnit.lucenekmp.analysis.fi.FinnishAnalyzer |
 | [org.apache.lucene.analysis.fi.FinnishLightStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fi/FinnishLightStemFilter.java) | org.gnit.lucenekmp.analysis.fi.FinnishLightStemFilter |
 | [org.apache.lucene.analysis.fi.FinnishLightStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/fi/FinnishLightStemFilterFactory.java) | org.gnit.lucenekmp.analysis.fi.FinnishLightStemFilterFactory |
@@ -904,7 +888,7 @@
 | --- | --- | --- | --- |
 | org.apache.lucene | 6 | 0 | 0% |
 |   org.apache.lucene.analysis | 15 | 15 | 100% |
-|     org.apache.lucene.analysis.ar | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.ar | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.bg | 3 | 0 | 0% |
 |     org.apache.lucene.analysis.bn | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.boost | 1 | 0 | 0% |
@@ -928,7 +912,7 @@
 |     org.apache.lucene.analysis.es | 7 | 5 | 71% |
 |     org.apache.lucene.analysis.et | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.eu | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.fa | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.fa | 5 | 5 | 100% |
 |     org.apache.lucene.analysis.fi | 3 | 0 | 0% |
 |     org.apache.lucene.analysis.fr | 5 | 3 | 60% |
 |     org.apache.lucene.analysis.ga | 3 | 0 | 0% |
@@ -1045,7 +1029,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 843 | 71% |
+| Total | 1186 | 863 | 72% |
 
 
 ## Tests To Port
@@ -1056,10 +1040,6 @@
 | [org.apache.lucene.TestExternalCodecs](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestExternalCodecs.java) | org.gnit.lucenekmp.TestExternalCodecs |
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
-| [org.apache.lucene.analysis.ar.TestArabicAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/ar/TestArabicAnalyzer.java) | org.gnit.lucenekmp.analysis.ar.TestArabicAnalyzer |
-| [org.apache.lucene.analysis.ar.TestArabicFilters](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/ar/TestArabicFilters.java) | org.gnit.lucenekmp.analysis.ar.TestArabicFilters |
-| [org.apache.lucene.analysis.ar.TestArabicNormalizationFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/ar/TestArabicNormalizationFilter.java) | org.gnit.lucenekmp.analysis.ar.TestArabicNormalizationFilter |
-| [org.apache.lucene.analysis.ar.TestArabicStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/ar/TestArabicStemFilter.java) | org.gnit.lucenekmp.analysis.ar.TestArabicStemFilter |
 | [org.apache.lucene.analysis.bg.TestBulgarianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/bg/TestBulgarianAnalyzer.java) | org.gnit.lucenekmp.analysis.bg.TestBulgarianAnalyzer |
 | [org.apache.lucene.analysis.bg.TestBulgarianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/bg/TestBulgarianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.bg.TestBulgarianStemFilterFactory |
 | [org.apache.lucene.analysis.bg.TestBulgarianStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/bg/TestBulgarianStemmer.java) | org.gnit.lucenekmp.analysis.bg.TestBulgarianStemmer |
@@ -1121,11 +1101,6 @@
 | [org.apache.lucene.analysis.es.TestSpanishMinimalStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/es/TestSpanishMinimalStemFilterFactory.java) | org.gnit.lucenekmp.analysis.es.TestSpanishMinimalStemFilterFactory |
 | [org.apache.lucene.analysis.et.TestEstonianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/et/TestEstonianAnalyzer.java) | org.gnit.lucenekmp.analysis.et.TestEstonianAnalyzer |
 | [org.apache.lucene.analysis.eu.TestBasqueAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/eu/TestBasqueAnalyzer.java) | org.gnit.lucenekmp.analysis.eu.TestBasqueAnalyzer |
-| [org.apache.lucene.analysis.fa.TestPersianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fa/TestPersianAnalyzer.java) | org.gnit.lucenekmp.analysis.fa.TestPersianAnalyzer |
-| [org.apache.lucene.analysis.fa.TestPersianCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fa/TestPersianCharFilter.java) | org.gnit.lucenekmp.analysis.fa.TestPersianCharFilter |
-| [org.apache.lucene.analysis.fa.TestPersianNormalizationFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fa/TestPersianNormalizationFilter.java) | org.gnit.lucenekmp.analysis.fa.TestPersianNormalizationFilter |
-| [org.apache.lucene.analysis.fa.TestPersianNormalizationFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fa/TestPersianNormalizationFilterFactory.java) | org.gnit.lucenekmp.analysis.fa.TestPersianNormalizationFilterFactory |
-| [org.apache.lucene.analysis.fa.TestPersianStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fa/TestPersianStemFilter.java) | org.gnit.lucenekmp.analysis.fa.TestPersianStemFilter |
 | [org.apache.lucene.analysis.fi.TestFinnishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fi/TestFinnishAnalyzer.java) | org.gnit.lucenekmp.analysis.fi.TestFinnishAnalyzer |
 | [org.apache.lucene.analysis.fi.TestFinnishLightStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fi/TestFinnishLightStemFilter.java) | org.gnit.lucenekmp.analysis.fi.TestFinnishLightStemFilter |
 | [org.apache.lucene.analysis.fi.TestFinnishLightStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fi/TestFinnishLightStemFilterFactory.java) | org.gnit.lucenekmp.analysis.fi.TestFinnishLightStemFilterFactory |

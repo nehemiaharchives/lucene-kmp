@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.jvm.JvmStatic
 import kotlin.jvm.JvmOverloads
 import kotlin.random.Random
 import kotlin.test.assertEquals
@@ -1687,6 +1688,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         @Throws(IOException::class)
+        @JvmStatic
         fun whitespaceMockTokenizer(input: Reader): MockTokenizer {
             val mockTokenizer: MockTokenizer =
                 MockTokenizer(
@@ -1698,6 +1700,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         @Throws(IOException::class)
+        @JvmStatic
         protected fun whitespaceMockTokenizer(input: String): MockTokenizer {
             val mockTokenizer: MockTokenizer =
                 MockTokenizer(
@@ -1709,6 +1712,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         @Throws(IOException::class)
+        @JvmStatic
         protected fun keywordMockTokenizer(input: Reader): MockTokenizer {
             val mockTokenizer =
                 MockTokenizer(
@@ -1720,6 +1724,7 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
         }
 
         @Throws(IOException::class)
+        @JvmStatic
         protected fun keywordMockTokenizer(input: String): MockTokenizer {
             val mockTokenizer =
                 MockTokenizer(
