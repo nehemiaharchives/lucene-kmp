@@ -27,7 +27,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 75,000,000 | Tamil (analysis:common) | ta | LK SG | org.apache.lucene.analysis.ta.TamilAnalyzer | org.gnit.lucenekmp.analysis.ta.TamilAnalyzer |
 | 73,100,000 | Yue Chinese | yue | CN MY BN |  |  |
 | 70,000,000 | Urdu (analysis:extra) | ur | PK |  | org.gnit.lucenekmp.analysis.ur.UrduAnalyzer |
-| 68,300,000 | Javanese | jv | ID |  |  |
+| 68,300,000 | Javanese (analysis:extra) | jv | ID |  | org.gnit.lucenekmp.analysis.jv.JavaneseAnalyzer |
 | 64,800,000 | Italian (analysis:common) | it | IT CH VA | org.apache.lucene.analysis.it.ItalianAnalyzer | org.gnit.lucenekmp.analysis.it.ItalianAnalyzer |
 | 57,000,000 | Gujarati (analysis:extra) | gu | IN |  | org.gnit.lucenekmp.analysis.gu.GujaratiAnalyzer |
 | 52,800,000 | Iranian Persian | pes | IR |  |  |
