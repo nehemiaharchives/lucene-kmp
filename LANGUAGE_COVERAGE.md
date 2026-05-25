@@ -21,7 +21,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 82,231,620 | Turkish (analysis:common) | tr | TR CY | org.apache.lucene.analysis.tr.TurkishAnalyzer | org.gnit.lucenekmp.analysis.tr.TurkishAnalyzer |
 | 82,000,000 | Telugu (analysis:common) | te | IN | org.apache.lucene.analysis.te.TeluguAnalyzer | org.gnit.lucenekmp.analysis.te.TeluguAnalyzer |
 | 81,700,000 | Korean (analysis:nori) | ko | KR KP | org.apache.lucene.analysis.ko.KoreanAnalyzer | org.gnit.lucenekmp.analysis.ko.KoreanAnalyzer |
-| 77,000,000 | Malay | ms | MY SG BN |  |  |
+| 77,000,000 | Malay (analysis:extra) | ms | MY SG BN |  | org.gnit.lucenekmp.analysis.ms.MalayAnalyzer |
 | 75,600,000 | German (analysis:common) | de | DE BE AT CH LU LI | org.apache.lucene.analysis.de.GermanAnalyzer | org.gnit.lucenekmp.analysis.de.GermanAnalyzer |
 | 75,000,000 | Vietnamese (analysis:extra) | vi | VN |  | org.gnit.lucenekmp.analysis.vi.VietnameseAnalyzer |
 | 75,000,000 | Tamil (analysis:common) | ta | LK SG | org.apache.lucene.analysis.ta.TamilAnalyzer | org.gnit.lucenekmp.analysis.ta.TamilAnalyzer |
