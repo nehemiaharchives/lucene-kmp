@@ -37,7 +37,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 44,000,000 | Levantine Arabic | apc | SY LB JO PS IL |  |  |
 | 39,700,000 | Polish (analysis:morfologik) | po | PL | org.apache.lucene.analysis.morfologik.MorfologikAnalyzer | org.gnit.lucenekmp.analysis.morfologik.MorfologikAnalyzer |
 | 34,500,000 | Odia (analysis:extra) | or | IN |  | org.gnit.lucenekmp.analysis.or.OdiaAnalyzer |
-| 32,400,000 | Sundanese | su | ID |  |  |
+| 32,400,000 | Sundanese (analysis:extra) | su | ID |  | org.gnit.lucenekmp.analysis.su.SundaneseAnalyzer |
 | 32,000,000 | Ukrainian (analysis:morfologik) | uk | UA | org.apache.lucene.analysis.uk.UkrainianMorfologikAnalyzer | org.gnit.lucenekmp.analysis.uk.UkrainianMorfologikAnalyzer |
 | 28,000,000 | Tagalog (analysis:extra) | tl | PH |  | org.gnit.lucenekmp.analysis.tl.TagalogAnalyzer |
 | 27,000,000 | Igbo | ig | NG |  |  |
