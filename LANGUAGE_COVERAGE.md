@@ -40,7 +40,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 32,400,000 | Sundanese (analysis:extra) | su | ID |  | org.gnit.lucenekmp.analysis.su.SundaneseAnalyzer |
 | 32,000,000 | Ukrainian (analysis:morfologik) | uk | UA | org.apache.lucene.analysis.uk.UkrainianMorfologikAnalyzer | org.gnit.lucenekmp.analysis.uk.UkrainianMorfologikAnalyzer |
 | 28,000,000 | Tagalog (analysis:extra) | tl | PH |  | org.gnit.lucenekmp.analysis.tl.TagalogAnalyzer |
-| 27,000,000 | Igbo | ig | NG |  |  |
+| 27,000,000 | Igbo (analysis:extra) | ig | NG |  | org.gnit.lucenekmp.analysis.ig.IgboAnalyzer |
 | 24,600,000 | North Levantine Arabic | apc | TR SY |  |  |
 | 24,000,000 | Oromo | om | ET KE |  |  |
 | 23,100,000 | Dutch (analysis:common) | nl | NL BE AW SX | org.apache.lucene.analysis.nl.DutchAnalyzer | org.gnit.lucenekmp.analysis.nl.DutchAnalyzer |
