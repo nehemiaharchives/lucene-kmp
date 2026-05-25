@@ -14,7 +14,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 208,157,220 | French (analysis:common) | fr | CD FR CA CI CM TD SN RW BJ BI | org.apache.lucene.analysis.fr.FrenchAnalyzer | org.gnit.lucenekmp.analysis.fr.FrenchAnalyzer |
 | 198,996,550 | Indonesian (analysis:common) | id | ID | org.apache.lucene.analysis.id.IndonesianAnalyzer | org.gnit.lucenekmp.analysis.id.IndonesianAnalyzer |
 | 154,000,000 | Russian (analysis:common) | ru | RU KZ TJ BY | org.apache.lucene.analysis.ru.RussianAnalyzer | org.gnit.lucenekmp.analysis.ru.RussianAnalyzer |
-| 125,000,000 | Punjabi | pa | PK IN |  |  |
+| 125,000,000 | Punjabi | pa | PK IN |  | org.gnit.lucenekmp.analysis.pa.PunjabiAnalyzer |
 | 123,000,000 | Japanese (analysis:kuromoji) | ja | JP PW | org.apache.lucene.analysis.ja.JapaneseAnalyzer | org.gnit.lucenekmp.analysis.ja.JapaneseAnalyzer |
 | 83,100,000 | Marathi (analysis:extra) | mr | IN |  | org.gnit.lucenekmp.analysis.mr.MarathiAnalyzer |
 | 82,300,000 | Swahili | sw | TZ KE UG CD RW BI |  |  |

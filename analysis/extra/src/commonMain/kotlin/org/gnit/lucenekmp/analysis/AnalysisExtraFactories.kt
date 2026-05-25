@@ -4,6 +4,8 @@ import org.gnit.lucenekmp.analysis.gu.GujaratiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.gu.GujaratiStemFilterFactory
 import org.gnit.lucenekmp.analysis.mr.MarathiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.mr.MarathiStemFilterFactory
+import org.gnit.lucenekmp.analysis.pa.PunjabiNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.pa.PunjabiStemFilterFactory
 import org.gnit.lucenekmp.analysis.tl.TagalogNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.tl.TagalogStemFilterFactory
 import org.gnit.lucenekmp.analysis.ur.UrduNormalizationFilterFactory
@@ -37,6 +39,16 @@ object AnalysisExtraFactories {
             GujaratiStemFilterFactory.NAME,
             GujaratiStemFilterFactory::class
         ) { args -> GujaratiStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            PunjabiNormalizationFilterFactory.NAME,
+            PunjabiNormalizationFilterFactory::class
+        ) { args -> PunjabiNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            PunjabiStemFilterFactory.NAME,
+            PunjabiStemFilterFactory::class
+        ) { args -> PunjabiStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             UrduNormalizationFilterFactory.NAME,

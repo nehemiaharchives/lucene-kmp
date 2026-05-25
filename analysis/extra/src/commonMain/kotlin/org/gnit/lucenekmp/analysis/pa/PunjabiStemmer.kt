@@ -1,0 +1,221 @@
+package org.gnit.lucenekmp.analysis.pa
+
+/**
+ * Light Stemmer for Punjabi written in Gurmukhi.
+ *
+ * Applies suffix-stripping rules based on the public PunjabiStemmer rule format. This keeps the
+ * analyzer lightweight and resource-free for Kotlin/Native while covering common noun and verb
+ * inflections.
+ */
+internal class PunjabiStemmer {
+    fun stem(buffer: CharArray, len: Int): Int {
+        if (len <= 2) return len
+        val word = buffer.concatToString(0, len)
+        val stemmed = stripSuffix(word)
+        if (stemmed == word || stemmed.length < 2) return len
+
+        val outLen = stemmed.length
+        var i = 0
+        while (i < outLen) {
+            buffer[i] = stemmed[i]
+            i += 1
+        }
+        return outLen
+    }
+
+    private fun stripSuffix(word: String): String {
+        for (rule in RULES) {
+            if (word.length > rule.match.length + 1 && word.endsWith(rule.match)) {
+                return word.substring(0, word.length - rule.strip.length) + rule.add
+            }
+        }
+        return word
+    }
+
+    private class Rule(val match: String, val strip: String, val add: String = "")
+
+    companion object {
+        // Ordered longest to shortest to prefer more specific matches.
+        private val RULES: Array<Rule> = arrayOf(
+            Rule("ਉਂਦੀਆਂ", "ਉਂਦੀਆਂ"),
+            Rule("ਉਣੀਆਂ", "ਉਣੀਆਂ"),
+            Rule("ਉਦਿਆਂ", "ਉਦਿਆਂ"),
+            Rule("ਉਦੀਆਂ", "ਉਦੀਆਂ"),
+            Rule("ਪੂਰਵਕ", "ਪੂਰਵਕ"),
+            Rule("ਵਾਂਗੀਆ", "ਵਾਂਗੀਆ"),
+            Rule("ਾਵਾਂਗਾ", "ਵਾਂਗਾ"),
+            Rule("ਾਵਾਂਗੀ", "ਵਾਂਗੀ"),
+            Rule("ਾਵਾਂਗੇ", "ਵਾਂਗੇ"),
+            Rule("ੀਕਰਨ", "ੀਕਰਨ"),
+            Rule("ਪ੍ਰਸਤ", "ਪ੍ਰਸਤ"),
+            Rule("ਸ਼ੀਲਤਾ", "ਸ਼ੀਲਤਾ"),
+            Rule("ਉਂਦਾ", "ਉਂਦਾ"),
+            Rule("ਉਂਦੀ", "ਉਂਦੀ"),
+            Rule("ਉਂਦੇ", "ਉਂਦੇ"),
+            Rule("ਉਣਾ", "ਉਣਾ"),
+            Rule("ਉਣੀ", "ਉਣੀ"),
+            Rule("ਉਣੇ", "ਉਣੇ"),
+            Rule("ਆਵਣੀ", "ਆਵਣੀ"),
+            Rule("ਈਆਂ", "ਈਆਂ"),
+            Rule("ਇਆਂ", "ਿਆਂ"),
+            Rule("ੀਆਂ", "ਆਂ"),
+            Rule("ਿਆਂ", "ਿਆਂ", "ਾ"),
+            Rule("ੂਆਂ", "ਆਂ"),
+            Rule("ੋਆਂ", "ਆਂ"),
+            Rule("ਦੀਆਂ", "ਆਂ"),
+            Rule("ਨੀਆਂ", "ੀਆਂ"),
+            Rule("ਾਵਣੀ", "ਵਣੀ"),
+            Rule("ਾਂਗਾ", "ਾਂਗਾ"),
+            Rule("ਾਂਗੀ", "ਾਂਗੀ"),
+            Rule("ਾਂਗੇ", "ਾਂਗੇ"),
+            Rule("ੇਗੀ", "ੇਗੀ"),
+            Rule("ੇਗਾ", "ੇਗਾ"),
+            Rule("ੋਗੀ", "ੋਗੀ"),
+            Rule("ੋਗੇ", "ੋਗੇ"),
+            Rule("ਏਗਾ", "ਏਗਾ"),
+            Rule("ਏਗੀ", "ਏਗੀ"),
+            Rule("ਵੇਗਾ", "ਵੇਗਾ"),
+            Rule("ਵੇਗੀ", "ਵੇਗੀ"),
+            Rule("ਣਗੇ", "ਣਗੇ"),
+            Rule("ਣੀਆਂ", "ਣੀਆਂ"),
+            Rule("ਉਦਿਆਂ", "ਉਦਿਆਂ"),
+            Rule("ਆਵਣ", "ਵਣ"),
+            Rule("ਕਰਣ", "ਕਰਣ"),
+            Rule("ਕਾਰਕ", "ਕਾਰਕ"),
+            Rule("ਜਨਕ", "ਜਨਕ"),
+            Rule("ਗਰਦੀ", "ਗਰਦੀ"),
+            Rule("ਤੰਤਰ", "ਤੰਤਰ"),
+            Rule("ਦਾਇਕ", "ਦਾਇਕ"),
+            Rule("ਨਵੀਸ", "ਨਵੀਸ"),
+            Rule("ਪਾਤਰ", "ਪਾਤਰ"),
+            Rule("ਪੂਰਣ", "ਪੂਰਣ"),
+            Rule("ਸ਼ਕਤੀ", "ਸ਼ਕਤੀ"),
+            Rule("ਓਗੇ", "ਓਗੇ"),
+            Rule("ਣਾ", "ਣਾ"),
+            Rule("ਆਣੀ", "ਆਣੀ"),
+            Rule("ਆਰਾ", "ਆਰਾ"),
+            Rule("ਆਰੀ", "ਆਰੀ"),
+            Rule("ਆਲਾ", "ਆਲਾ"),
+            Rule("ਆਲੂ", "ਆਲੂ"),
+            Rule("ਏਟਾ", "ਏਟਾ"),
+            Rule("ਏਟੀ", "ਏਟੀ"),
+            Rule("ਏਰਾ", "ਏਰਾ"),
+            Rule("ਏਲੀ", "ਏਲੀ"),
+            Rule("ਈਲਾ", "ਈਲਾ"),
+            Rule("ਕਾਰ", "ਕਾਰ"),
+            Rule("ਕਾਰੀ", "ਕਾਰੀ"),
+            Rule("ਕੁਸ਼ੀ", "ਕੁਸ਼ੀ"),
+            Rule("ਖੋਰਾਂ", "ਖੋਰਾਂ"),
+            Rule("ਖ਼ੋਰ", "ਖ਼ੋਰ"),
+            Rule("ਖੋਰ", "ਖੋਰ"),
+            Rule("ਖ਼ਾਨਾ", "ਖ਼ਾਨਾ"),
+            Rule("ਗਾਰ", "ਗਾਰ"),
+            Rule("ਗਿਰੀ", "ਗਿਰੀ"),
+            Rule("ਗੀਰ", "ਗੀਰ"),
+            Rule("ਘਾਤ", "ਘਾਤ"),
+            Rule("ਚਾਰੀ", "ਚਾਰੀ"),
+            Rule("ਤਾਈ", "ਤਾਈ"),
+            Rule("ਤੇਰਾ", "ਤੇਰਾ"),
+            Rule("ਦਾਨ", "ਦਾਨ"),
+            Rule("ਦਾਰੀ", "ਦਾਰੀ"),
+            Rule("ਦਿਲ", "ਦਿਲ"),
+            Rule("ਂਦੀਆ", "ਂਦੀਆ"),
+            Rule("ਦਿਆ", "ਦਿਆ"),
+            Rule("ਦੀਆ", "ਆ"),
+            Rule("ਧਾਰ", "ਧਾਰ"),
+            Rule("ਧਾਰੀ", "ਧਾਰੀ"),
+            Rule("ਨਾਕ", "ਨਾਕ"),
+            Rule("ਪੁਣਾ", "ਪੁਣਾ"),
+            Rule("ਪੁੱਣਾ", "ਪੁੱਣਾ"),
+            Rule("ਪੋਸ਼", "ਪੋਸ਼"),
+            Rule("ਪੰਥੀ", "ਪੰਥੀ"),
+            Rule("ਬਾਜ਼ੀ", "ਬਾਜ਼ੀ"),
+            Rule("ਬਾਜੀ", "ਬਾਜੀ"),
+            Rule("ਬਾਨ", "ਬਾਨ"),
+            Rule("ਬਾਜ", "ਬਾਜ"),
+            Rule("ਬੱਧ", "ਬੱਧ"),
+            Rule("ਬਾਜ਼", "ਬਾਜ਼"),
+            Rule("ਮਾਨ", "ਮਾਨ"),
+            Rule("ਮਾਰ", "ਮਾਰ"),
+            Rule("ਮੁਖੀ", "ਮੁਖੀ"),
+            Rule("ਮੰਦੀ", "ਮੰਦੀ"),
+            Rule("ਮੰਦ", "ਮੰਦ"),
+            Rule("ਯੋਗ", "ਯੋਗ"),
+            Rule("ਵਾਂਗਾ", "ਵਾਂਗਾ"),
+            Rule("ਵਾਂਗੇ", "ਵਾਂਗੇ"),
+            Rule("ਵਾਂਗੀ", "ਵਾਂਗੀ"),
+            Rule("ਵੋਗੇ", "ਵੋਗੇ"),
+            Rule("ਵਾਲਾ", "ਵਾਲਾ"),
+            Rule("ਾਵਲੀ", "ਾਵਲੀ"),
+            Rule("ਾਵਟ", "ਾਵਟ"),
+            Rule("ਵਟੀ", "ਵਟੀ"),
+            Rule("ਾਵਣ", "ਵਣ"),
+            Rule("ਵਾਲ", "ਵਾਲ"),
+            Rule("ਵੰਤੀ", "ਵੰਤੀ"),
+            Rule("ਵੰਤ", "ਵੰਤ"),
+            Rule("ਵੰਦ", "ਵੰਦ"),
+            Rule("ਸ਼ੀਲ", "ਸ਼ੀਲ"),
+            Rule("ਸਾਜ਼", "ਸਾਜ਼"),
+            Rule("ਸਾਜ", "ਸਾਜ"),
+            Rule("ਸਾਰ", "ਸਾਰ"),
+            Rule("ਸਾਲ", "ਸਾਲ"),
+            Rule("ਹਾਰੀ", "ਹਾਰੀ"),
+            Rule("ਹਾਰਾ", "ਹਾਰਾ"),
+            Rule("ਹਾਰ", "ਹਾਰ"),
+            Rule("ਹੀਣ", "ਹੀਣ"),
+            Rule("ਾਹਟ", "ਾਹਟ"),
+            Rule("ਿਉਂ", "ਿਉਂ", "ਾ"),
+            Rule("ਿਓਂ", "ਿਓਂ", "ੇ"),
+            Rule("ਿਆਈ", "ਿਆਈ", "ਾ"),
+            Rule("ਿਆ", "ਿਆ", "ਾ"),
+            Rule("ਿਏ", "ਿਏ", "ੀ"),
+            Rule("ੀਏ", "ਏ"),
+            Rule("ਈਂ", "ਈਂ"),
+            Rule("ਓਣ", "ਓਣ"),
+            Rule("ਅਈ", "ਅਈ"),
+            Rule("ਅਣ", "ਅਣ"),
+            Rule("ਅਤ", "ਅਤ"),
+            Rule("ਆਈ", "ਆਈ"),
+            Rule("ਆਉਂ", "ਆਉਂ"),
+            Rule("ਆਉ", "ਆਉ"),
+            Rule("ਆਕ", "ਆਕ"),
+            Rule("ਆਨ", "ਆਨ"),
+            Rule("ਆਰ", "ਆਰ"),
+            Rule("ਆਲ", "ਆਲ"),
+            Rule("ਐਲ", "ਐਲ"),
+            Rule("ਆੜੀ", "ਆੜੀ"),
+            Rule("ਇਕ", "ਇਕ"),
+            Rule("ਇਤ", "ਇਤ"),
+            Rule("ਇਆ", "ਇਆ"),
+            Rule("ਈਆ", "ਆ"),
+            Rule("ਈਨ", "ਈਨ"),
+            Rule("ਇਏ", "ਇਏ"),
+            Rule("ਈਏ", "ਈਏ"),
+            Rule("ਤਣ", "ਣ"),
+            Rule("ਤਰ", "ਤਰ"),
+            Rule("ਧਰ", "ਧਰ"),
+            Rule("ਪਣ", "ਪਣ"),
+            Rule("ਪਨ", "ਪਨ"),
+            Rule("ਪੁਰ", "ਪੁਰ"),
+            Rule("ਗਰ", "ਗਰ"),
+            Rule("ਘਰ", "ਘਰ"),
+            Rule("ਵਟ", "ਵਟ"),
+            Rule("ਵਰ", "ਵਰ"),
+            Rule("ਵਾਦ", "ਵਾਦ"),
+            Rule("ਵਾਨ", "ਵਾਨ"),
+            Rule("ਾਂ", "ਾਂ"),
+            Rule("ਆਂ", "ਆਂ"),
+            Rule("ਆ", "ਆ"),
+            Rule("ਾਈ", "ਾਈ"),
+            Rule("ਈ", "ਈ"),
+            Rule("ਏ", "ਏ"),
+            Rule("ਕੇ", "ਕੇ"),
+            Rule("ਗੀ", "ਗੀ"),
+            Rule("ਚੀ", "ੀ"),
+            Rule("ਣੀ", "ਣੀ"),
+            Rule("ਊ", "ਊ"),
+            Rule("ਉ", "ਉ"),
+            Rule("ਓ", "ਓ")
+        )
+    }
+}
