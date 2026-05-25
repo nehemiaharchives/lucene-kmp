@@ -2,6 +2,8 @@ package org.gnit.lucenekmp.analysis
 
 import org.gnit.lucenekmp.analysis.gu.GujaratiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.gu.GujaratiStemFilterFactory
+import org.gnit.lucenekmp.analysis.ha.HausaNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.ha.HausaStemFilterFactory
 import org.gnit.lucenekmp.analysis.ig.IgboNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ig.IgboStemFilterFactory
 import org.gnit.lucenekmp.analysis.jv.JavaneseNormalizationFilterFactory
@@ -51,6 +53,16 @@ object AnalysisExtraFactories {
             GujaratiStemFilterFactory.NAME,
             GujaratiStemFilterFactory::class
         ) { args -> GujaratiStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HausaNormalizationFilterFactory.NAME,
+            HausaNormalizationFilterFactory::class
+        ) { args -> HausaNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HausaStemFilterFactory.NAME,
+            HausaStemFilterFactory::class
+        ) { args -> HausaStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             IgboNormalizationFilterFactory.NAME,
