@@ -235,6 +235,20 @@ jobs:
                -x :analysis:hebmorph:compileAndroidMain
                -x :analysis:hebmorph:koverGenerateArtifactAndroid
           - platform: jvm
+            module_name: analysis-horn
+            os: ubuntu-latest
+            timeout: 40
+            task: :analysis:horn:jvmTest
+            artifact: jvm-analysis-horn-reports
+            coverage_enabled: true
+            coverage_task: :analysis:horn:koverXmlReport
+            coverage_report_path: analysis/horn/build/reports/kover/report.xml
+            coverage_extra_args: >-
+               -x :analysis:horn:compileAndroidDeviceTest
+               -x :analysis:horn:compileAndroidHostTest
+               -x :analysis:horn:compileAndroidMain
+               -x :analysis:horn:koverGenerateArtifactAndroid
+          - platform: jvm
             module_name: codecs
             os: ubuntu-latest
             timeout: 60
@@ -441,6 +455,13 @@ jobs:
             artifact: android-analysis-hebmorph-reports
             needs_android: true
           - platform: android
+            module_name: analysis-horn
+            os: ubuntu-latest
+            timeout: 40
+            task: :analysis:horn:testAndroidHostTest
+            artifact: android-analysis-horn-reports
+            needs_android: true
+          - platform: android
             module_name: codecs
             os: ubuntu-latest
             timeout: 60
@@ -624,6 +645,13 @@ jobs:
             timeout: 40
             task: :analysis:hebmorph:iosSimulatorArm64Test
             artifact: ios-analysis-hebmorph-reports
+            needs_konan_cache: true
+          - platform: ios
+            module_name: analysis-horn
+            os: macos-latest
+            timeout: 40
+            task: :analysis:horn:iosSimulatorArm64Test
+            artifact: ios-analysis-horn-reports
             needs_konan_cache: true
           - platform: ios
             module_name: codecs
@@ -811,6 +839,13 @@ jobs:
             artifact: linux-analysis-hebmorph-reports
             needs_konan_cache: true
           - platform: linux
+            module_name: analysis-horn
+            os: ubuntu-latest
+            timeout: 40
+            task: :analysis:horn:linuxX64Test
+            artifact: linux-analysis-horn-reports
+            needs_konan_cache: true
+          - platform: linux
             module_name: codecs
             os: ubuntu-latest
             timeout: 70
@@ -994,6 +1029,13 @@ jobs:
             timeout: 40
             task: :analysis:hebmorph:mingwX64Test
             artifact: windows-analysis-hebmorph-reports
+            needs_konan_cache: true
+          - platform: windows
+            module_name: analysis-horn
+            os: windows-latest
+            timeout: 40
+            task: :analysis:horn:mingwX64Test
+            artifact: windows-analysis-horn-reports
             needs_konan_cache: true
           - platform: windows
             module_name: codecs
@@ -1243,6 +1285,15 @@ jobs:
               -x :analysis:hebmorph:compileAndroidHostTest
               -x :analysis:hebmorph:compileAndroidMain
               -x :analysis:hebmorph:koverGenerateArtifactAndroid
+          - module_name: analysis-horn
+            task: :analysis:horn:koverXmlReport
+            report_path: analysis/horn/build/reports/kover/report.xml
+            extra_args: >-
+              -x :analysis:horn:testAndroidHostTest
+              -x :analysis:horn:compileAndroidDeviceTest
+              -x :analysis:horn:compileAndroidHostTest
+              -x :analysis:horn:compileAndroidMain
+              -x :analysis:horn:koverGenerateArtifactAndroid
           - module_name: codecs
             task: :codecs:koverXmlReport
             report_path: codecs/build/reports/kover/report.xml
@@ -1330,6 +1381,7 @@ jobs:
             analysis/kuromoji/build/reports/kover/
             analysis/extra/build/reports/kover/
             analysis/hebmorph/build/reports/kover/
+            analysis/horn/build/reports/kover/
             codecs/build/reports/kover/
             queries/build/reports/kover/
             queryparser/build/reports/kover/

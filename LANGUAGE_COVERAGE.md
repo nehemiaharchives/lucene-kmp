@@ -39,17 +39,17 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 39,700,000 | Polish (analysis:morfologik)    | po | PL | org.apache.lucene.analysis.morfologik.MorfologikAnalyzer | org.gnit.lucenekmp.analysis.morfologik.MorfologikAnalyzer |
 | 34,500,000 | Odia (analysis:extra)           | or | IN |  | org.gnit.lucenekmp.analysis.or.OdiaAnalyzer |
 | 32,400,000 | Sundanese (analysis:extra)      | su | ID |  | org.gnit.lucenekmp.analysis.su.SundaneseAnalyzer |
-| 32,100,000 | Amharic                         | am | ET |  |  |
+| 32,100,000 | Amharic (analysis:horn)   | am | ET |  | org.gnit.lucenekmp.analysis.am.AmharicAnalyzer |
 | 32,000,000 | Ukrainian (analysis:morfologik) | uk | UA | org.apache.lucene.analysis.uk.UkrainianMorfologikAnalyzer | org.gnit.lucenekmp.analysis.uk.UkrainianMorfologikAnalyzer |
 | 28,000,000 | Tagalog (analysis:extra)        | tl | PH |  | org.gnit.lucenekmp.analysis.tl.TagalogAnalyzer |
 | 27,000,000 | Igbo (analysis:extra)           | ig | NG |  | org.gnit.lucenekmp.analysis.ig.IgboAnalyzer |
 | 24,600,000 | North Levantine Arabic          | apc | TR SY |  |  |
-| 24,000,000 | Oromo                           | om | ET KE |  |  |
+| 24,000,000 | Oromo (analysis:horn)     | om | ET KE |  | org.gnit.lucenekmp.analysis.om.OromoAnalyzer |
 | 23,000,000 | Romanian (analysis:common)      | ro | RO | org.apache.lucene.analysis.ro.RomanianAnalyzer |  |
 | 23,100,000 | Dutch (analysis:common)         | nl | NL BE AW SX | org.apache.lucene.analysis.nl.DutchAnalyzer | org.gnit.lucenekmp.analysis.nl.DutchAnalyzer |
 | 22,400,000 | Saʽidi Arabic                   | aec | EG |  |  |
 | 22,000,000 | Awadhi                          | awa | IN NP |  |  |
-| 21,000,000 | Kurdish                         | ku | IQ | org.apache.lucene.analysis.ckb.SoraniAnalyzer |  |
+| 21,000,000 | Kurmanji Kurdish                | kmr | IQ TR SY |  |  |
 | 20,700,000 | Thai (analysis:common)          | th | TH | org.apache.lucene.analysis.th.ThaiAnalyzer | org.gnit.lucenekmp.analysis.th.ThaiAnalyzer |
 | 20,000,000 | Kongu Tamil                     | xko | IN |  |  |
 | 16,600,000 | Khmer                           | km | KH |  |  |
@@ -79,7 +79,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 7,600,000 | Mooré                           | mos | BF ML TG |  |  |
 | 7,600,000 | Belarusian                      | be | BY |  |  |
 | 7,507,780 | Tigrinya                        | ti | ER |  |  |
-| 7,250,000 | Sorani                          | ckb | IQ |  |  |
+| 7,250,000 | Sorani Kurdish (analysis:common) | ckb | IQ IR | org.apache.lucene.analysis.ckb.SoraniAnalyzer |  |
 | 6,300,000 | Luba-Kasai                      | lua | CD AO |  |  |
 | 6,000,000 | Slovak                          | sk | SK |  |  |
 | 5,830,000 | Wolayttattuwa                   | wal | ET |  |  |
