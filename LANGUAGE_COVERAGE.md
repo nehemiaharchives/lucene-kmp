@@ -9,7 +9,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 485,000,000 | Spanish (analysis:common) | es | MX CO ES AR VE CL GT EC BO HN | org.apache.lucene.analysis.es.SpanishAnalyzer | org.gnit.lucenekmp.analysis.es.SpanishAnalyzer |
 | 341,000,000 | Hindi (analysis:common) | hi | IN | org.apache.lucene.analysis.hi.HindiAnalyzer | org.gnit.lucenekmp.analysis.hi.HindiAnalyzer |
 | 315,421,300 | Arabic (analysis:common) | ar | EG DZ AF SD IQ MA SA YE SY TD | org.apache.lucene.analysis.ar.ArabicAnalyzer | org.gnit.lucenekmp.analysis.ar.ArabicAnalyzer |
-| 300,000,000 | Bangla (analysis:common) | bn | BD | org.apache.lucene.analysis.bn.BengaliAnalyzer | org.gnit.lucenekmp.analysis.bn.BengaliAnalyzer |
+| 300,000,000 | Bengali (analysis:common) | bn | BD | org.apache.lucene.analysis.bn.BengaliAnalyzer | org.gnit.lucenekmp.analysis.bn.BengaliAnalyzer |
 | 254,300,000 | Portuguese (analysis:common) | pt | BR AO PT TL CV ST | org.apache.lucene.analysis.pt.PortugueseAnalyzer | org.gnit.lucenekmp.analysis.pt.PortugueseAnalyzer |
 | 208,157,220 | French (analysis:common) | fr | CD FR CA CI CM TD SN RW BJ BI | org.apache.lucene.analysis.fr.FrenchAnalyzer | org.gnit.lucenekmp.analysis.fr.FrenchAnalyzer |
 | 198,996,550 | Indonesian (analysis:common) | id | ID | org.apache.lucene.analysis.id.IndonesianAnalyzer | org.gnit.lucenekmp.analysis.id.IndonesianAnalyzer |
@@ -26,6 +26,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 75,000,000 | Vietnamese (analysis:extra) | vi | VN |  | org.gnit.lucenekmp.analysis.vi.VietnameseAnalyzer |
 | 75,000,000 | Tamil (analysis:common) | ta | LK SG | org.apache.lucene.analysis.ta.TamilAnalyzer | org.gnit.lucenekmp.analysis.ta.TamilAnalyzer |
 | 73,100,000 | Yue Chinese | yue | CN MY BN |  |  |
+| 72,000,000 | Hausa | ha | NG NE |  |  |
 | 70,000,000 | Urdu (analysis:extra) | ur | PK |  | org.gnit.lucenekmp.analysis.ur.UrduAnalyzer |
 | 68,300,000 | Javanese (analysis:extra) | jv | ID |  | org.gnit.lucenekmp.analysis.jv.JavaneseAnalyzer |
 | 64,800,000 | Italian (analysis:common) | it | IT CH VA | org.apache.lucene.analysis.it.ItalianAnalyzer | org.gnit.lucenekmp.analysis.it.ItalianAnalyzer |
@@ -38,11 +39,13 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 | 39,700,000 | Polish (analysis:morfologik) | po | PL | org.apache.lucene.analysis.morfologik.MorfologikAnalyzer | org.gnit.lucenekmp.analysis.morfologik.MorfologikAnalyzer |
 | 34,500,000 | Odia (analysis:extra) | or | IN |  | org.gnit.lucenekmp.analysis.or.OdiaAnalyzer |
 | 32,400,000 | Sundanese (analysis:extra) | su | ID |  | org.gnit.lucenekmp.analysis.su.SundaneseAnalyzer |
+| 32,100,000 | Amharic | am | ET |  |  |
 | 32,000,000 | Ukrainian (analysis:morfologik) | uk | UA | org.apache.lucene.analysis.uk.UkrainianMorfologikAnalyzer | org.gnit.lucenekmp.analysis.uk.UkrainianMorfologikAnalyzer |
 | 28,000,000 | Tagalog (analysis:extra) | tl | PH |  | org.gnit.lucenekmp.analysis.tl.TagalogAnalyzer |
 | 27,000,000 | Igbo (analysis:extra) | ig | NG |  | org.gnit.lucenekmp.analysis.ig.IgboAnalyzer |
 | 24,600,000 | North Levantine Arabic | apc | TR SY |  |  |
 | 24,000,000 | Oromo | om | ET KE |  |  |
+| 23,000,000 | Romanian (analysis:common) | ro | RO | org.apache.lucene.analysis.ro.RomanianAnalyzer |  |
 | 23,100,000 | Dutch (analysis:common) | nl | NL BE AW SX | org.apache.lucene.analysis.nl.DutchAnalyzer | org.gnit.lucenekmp.analysis.nl.DutchAnalyzer |
 | 22,400,000 | Saʽidi Arabic | aec | EG |  |  |
 | 22,000,000 | Awadhi | awa | IN NP |  |  |
