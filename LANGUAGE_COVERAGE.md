@@ -73,7 +73,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |   9,270,000 | Central Kanuri                   | knc  | NG CM NE TD                   |                                                           | TBD                                                        |
 |   9,244,250 | Swedish (analysis:common)        |  sv  | SE FI                         | org.apache.lucene.analysis.sv.SwedishAnalyzer             | org.gnit.lucenekmp.analysis.sv.SwedishAnalyzer             |
 |   9,100,000 | Ilocano (analysis:extra)         | ilo  | PH                            |                                                           | org.gnit.lucenekmp.analysis.ilo.IlocanoAnalyzer            |
-|   9,000,000 | Bulgarian                        |  bg  | BG                            | org.apache.lucene.analysis.bg.BulgarianAnalyzer           |                                                            |
+|   9,000,000 | Bulgarian (analysis:common)      |  bg  | BG                            | org.apache.lucene.analysis.bg.BulgarianAnalyzer           | org.gnit.lucenekmp.analysis.bg.BulgarianAnalyzer           |
 |   9,000,000 | Serbian                          |  sr  | BA XK                         | org.apache.lucene.analysis.sr.SerbianAnalyzer             |                                                            |
 |   8,500,000 | Austrian German                  | bar  | AT                            |                                                           |                                                            |
 |   7,856,410 | Marwari                          | mwr  | IN                            |                                                           |                                                            |
