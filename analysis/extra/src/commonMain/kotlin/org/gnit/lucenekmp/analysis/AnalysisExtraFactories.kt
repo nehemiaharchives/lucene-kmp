@@ -10,6 +10,8 @@ import org.gnit.lucenekmp.analysis.ht.HaitianCreoleNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ht.HaitianCreoleStemFilterFactory
 import org.gnit.lucenekmp.analysis.ig.IgboNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ig.IgboStemFilterFactory
+import org.gnit.lucenekmp.analysis.ilo.IlocanoNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.ilo.IlocanoStemFilterFactory
 import org.gnit.lucenekmp.analysis.jv.JavaneseNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.jv.JavaneseStemFilterFactory
 import org.gnit.lucenekmp.analysis.mr.MarathiNormalizationFilterFactory
@@ -97,6 +99,16 @@ object AnalysisExtraFactories {
             IgboStemFilterFactory.NAME,
             IgboStemFilterFactory::class
         ) { args -> IgboStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            IlocanoNormalizationFilterFactory.NAME,
+            IlocanoNormalizationFilterFactory::class
+        ) { args -> IlocanoNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            IlocanoStemFilterFactory.NAME,
+            IlocanoStemFilterFactory::class
+        ) { args -> IlocanoStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             JavaneseNormalizationFilterFactory.NAME,
