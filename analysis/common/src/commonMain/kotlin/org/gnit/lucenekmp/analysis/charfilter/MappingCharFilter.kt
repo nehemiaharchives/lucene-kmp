@@ -13,7 +13,7 @@ import org.gnit.lucenekmp.util.fst.Outputs
  * Simplistic CharFilter that applies the mappings contained in a [NormalizeCharMap]
  * to the character stream, correcting resulting changes to the offsets.
  */
-class MappingCharFilter(normMap: NormalizeCharMap, override val input: Reader) : BaseCharFilter(input) {
+open class MappingCharFilter(normMap: NormalizeCharMap, override val input: Reader) : BaseCharFilter(input) {
     private val outputs: Outputs<CharsRef> = CharSequenceOutputs.singleton
     private val map: FST<CharsRef>? = normMap.map
     private val fstReader: FST.BytesReader? = map?.getBytesReader()
