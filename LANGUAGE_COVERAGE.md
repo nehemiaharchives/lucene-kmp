@@ -53,11 +53,11 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |  20,700,000 | Thai (analysis:common)           |  th  | TH                            | org.apache.lucene.analysis.th.ThaiAnalyzer                | org.gnit.lucenekmp.analysis.th.ThaiAnalyzer          |
 |  20,000,000 | Kongu Tamil                      | xko  | IN                            |                                                           | TBD                                                  |
 |  16,600,000 | Khmer (analysis:extra)           |  km  | KH                            |                                                           | org.gnit.lucenekmp.analysis.km.KhmerAnalyzer         |
-|  15,900,000 | Cebuano                          | ceb  | PH                            |                                                           | IN PROGRESS                                          |
+|  15,900,000 | Cebuano (analysis:extra)         | ceb  | PH                            |                                                           | org.gnit.lucenekmp.analysis.ceb.CebuanoAnalyzer      |
 |  15,800,000 | Nepali (analysis:common)         |  ne  | NP                            | org.apache.lucene.analysis.ne.NepaliAnalyzer              | org.gnit.lucenekmp.analysis.ne.NepaliAnalyzer        |
 |  15,000,000 | Modern Greek (analysis:common)   |  el  | GR CY                         | org.apache.lucene.analysis.el.GreekAnalyzer               | org.gnit.lucenekmp.analysis.el.GreekAnalyzer         |
-|  14,500,000 | Nigerian Fulfulde                | fuv  | NG                            |                                                           |                                                      |
-|  14,100,000 | Bavarian                         | bar  | AT                            |                                                           |                                                      |
+|  14,500,000 | Nigerian Fulfulde                | fuv  | NG                            |                                                           | TBD                                                  |
+|  14,100,000 | Bavarian                         | bar  | AT                            |                                                           | TBD                                                  |
 |  13,800,000 | South Azerbaijani                | azb  | TR                            |                                                           |                                                      |
 |  13,500,000 | Banyumasan                       | jsx  | ID                            |                                                           |                                                      |
 |  13,000,000 | Chittagonian                     | ctg  | BD                            |                                                           |                                                      |
