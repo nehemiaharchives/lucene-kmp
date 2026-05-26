@@ -21,6 +21,7 @@ import org.gnit.lucenekmp.analysis.fa.PersianNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.fa.PersianStemFilterFactory
 import org.gnit.lucenekmp.analysis.hi.HindiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.hi.HindiStemFilterFactory
+import org.gnit.lucenekmp.analysis.hu.HungarianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.`in`.IndicNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.id.IndonesianStemFilterFactory
 import org.gnit.lucenekmp.analysis.it.ItalianLightStemFilterFactory
@@ -157,6 +158,11 @@ object AnalysisCommonFactories {
             HindiStemFilterFactory.NAME,
             HindiStemFilterFactory::class
         ) { args -> HindiStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HungarianLightStemFilterFactory.NAME,
+            HungarianLightStemFilterFactory::class
+        ) { args -> HungarianLightStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             IndonesianStemFilterFactory.NAME,
