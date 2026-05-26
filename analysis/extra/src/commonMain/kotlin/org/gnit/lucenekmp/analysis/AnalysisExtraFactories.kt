@@ -6,6 +6,8 @@ import org.gnit.lucenekmp.analysis.ceb.CebuanoNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ceb.CebuanoStemFilterFactory
 import org.gnit.lucenekmp.analysis.ha.HausaNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ha.HausaStemFilterFactory
+import org.gnit.lucenekmp.analysis.ht.HaitianCreoleNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.ht.HaitianCreoleStemFilterFactory
 import org.gnit.lucenekmp.analysis.ig.IgboNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ig.IgboStemFilterFactory
 import org.gnit.lucenekmp.analysis.jv.JavaneseNormalizationFilterFactory
@@ -75,6 +77,16 @@ object AnalysisExtraFactories {
             HausaStemFilterFactory.NAME,
             HausaStemFilterFactory::class
         ) { args -> HausaStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HaitianCreoleNormalizationFilterFactory.NAME,
+            HaitianCreoleNormalizationFilterFactory::class
+        ) { args -> HaitianCreoleNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HaitianCreoleStemFilterFactory.NAME,
+            HaitianCreoleStemFilterFactory::class
+        ) { args -> HaitianCreoleStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             IgboNormalizationFilterFactory.NAME,
