@@ -30,6 +30,7 @@ import org.gnit.lucenekmp.analysis.pt.PortugueseMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseStemFilterFactory
 import org.gnit.lucenekmp.analysis.ro.RomanianNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ru.RussianLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.sr.SerbianNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.sv.SwedishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.sv.SwedishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.te.TeluguNormalizationFilterFactory
@@ -198,6 +199,11 @@ object AnalysisCommonFactories {
             RussianLightStemFilterFactory.NAME,
             RussianLightStemFilterFactory::class
         ) { args -> RussianLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            SerbianNormalizationFilterFactory.NAME,
+            SerbianNormalizationFilterFactory::class
+        ) { args -> SerbianNormalizationFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             SwedishLightStemFilterFactory.NAME,
