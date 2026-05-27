@@ -7,7 +7,7 @@
 
 lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [Apache Lucene](https://github.com/apache/lucene/) for projects that need Lucene-style indexing and full text search outside the JVM. Its main advantage is that it brings local full-text search to mobile and tablet targets where Java Lucene does not run, including iOS through Kotlin/Native.
 
-The goal is to let Kotlin Multiplatform apps share one search implementation across Android, iOS, desktop, and native targets. The core indexing, search, and store paths are the most tested parts of the port, while some non-core Lucene APIs and modules are still incomplete. Current releases are published to [Maven Central](https://central.sonatype.com/) as alpha builds while the port catches up from the Lucene source baseline toward the 10.2.0 release.
+The goal is to let Kotlin Multiplatform apps share one search implementation across Android, iOS, desktop, and native targets. The core indexing, search, and store paths are the most tested parts of the port, while some non-core Lucene APIs and modules are still incomplete. Current releases are published to [Maven Central](https://central.sonatype.com/search?q=lucene-kmp) as alpha builds while the port catches up from the Lucene source baseline toward the 10.2.0 release.
 
 ## Supported platforms
 * Kotlin/Jvm
