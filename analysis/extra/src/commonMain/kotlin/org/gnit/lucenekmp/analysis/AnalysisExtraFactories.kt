@@ -1,5 +1,7 @@
 package org.gnit.lucenekmp.analysis
 
+import org.gnit.lucenekmp.analysis.be.BelarusianNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.be.BelarusianStemFilterFactory
 import org.gnit.lucenekmp.analysis.gu.GujaratiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.gu.GujaratiStemFilterFactory
 import org.gnit.lucenekmp.analysis.ceb.CebuanoNormalizationFilterFactory
@@ -69,6 +71,16 @@ object AnalysisExtraFactories {
             CebuanoStemFilterFactory.NAME,
             CebuanoStemFilterFactory::class
         ) { args -> CebuanoStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            BelarusianNormalizationFilterFactory.NAME,
+            BelarusianNormalizationFilterFactory::class
+        ) { args -> BelarusianNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            BelarusianStemFilterFactory.NAME,
+            BelarusianStemFilterFactory::class
+        ) { args -> BelarusianStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             HausaNormalizationFilterFactory.NAME,
