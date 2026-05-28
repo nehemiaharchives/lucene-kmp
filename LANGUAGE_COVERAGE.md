@@ -1,7 +1,4 @@
 # LANGUAGE COVERAGE
-
-Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218` ISO 639-1 code), queried on 2026-05-25.
-
 |  Population | Language                         | Code | Country                       | Java Lucene                                               | lucene-kmp                                                 |
 |------------:|----------------------------------|:----:|-------------------------------|-----------------------------------------------------------|------------------------------------------------------------|
 | 988,000,000 | Chinese (analysis:smartcn)       |  zh  | CN TW SG HK MO                | org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer  | org.gnit.lucenekmp.analysis.cn.smart.SmartChineseAnalyzer  |
@@ -68,8 +65,8 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |  13,800,000 | South Azerbaijani [Ar]           | azb  | IR TR IQ SY                   |                                                           | Fallback: fa                                               |
 |  13,694,000 | Madurese                         | mad  | ID                            |                                                           | Fallback: id                                               |
 |  13,500,000 | Banyumasan                       | jsx  | ID                            |                                                           | Fallback: id / jv                                          |
-|  13,220,000 | Sinhala                          |  si  | LK                            |                                                           | Need to be covered                                         |
-|  13,000,000 | Chittagonian                     | ctg  | BD                            |                                                           | TBD                                                        |
+|  13,220,000 | Sinhala (analysis:extra)         |  si  | LK                            |                                                           | org.gnit.lucenekmp.analysis.si.SinhalaAnalyzer             |
+|  13,000,000 | Chittagonian                     | ctg  | BD                            |                                                           | Fallback: bn                                               |
 |  13,000,000 | Tsonga                           |  ts  | ZA MZ ZW                      |                                                           | Need to be covered                                         |
 |  13,000,000 | Haryanvi                         | bgc  | IN                            |                                                           | Need to be covered                                         |
 |  12,800,000 | Dakhanī                          | dcc  | IN                            |                                                           | TBD                                                        |
@@ -139,3 +136,5 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |   3,270,000 | Mazanderani                      | mzn  | IR                            |                                                           |                                                            |
 |   3,160,000 | Dagbanli                         | dag  | GH                            |                                                           |                                                            |
 |   3,100,000 | Waray                            | war  | PH                            |                                                           |                                                            |
+
+Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218` ISO 639-1 code), queried on 2026-05-25.
