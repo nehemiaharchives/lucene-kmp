@@ -20,6 +20,8 @@ import org.gnit.lucenekmp.analysis.mr.MarathiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.mr.MarathiStemFilterFactory
 import org.gnit.lucenekmp.analysis.ms.MalayNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ms.MalayStemFilterFactory
+import org.gnit.lucenekmp.analysis.my.BurmeseNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.my.BurmeseStemFilterFactory
 import org.gnit.lucenekmp.analysis.or.OdiaNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.or.OdiaStemFilterFactory
 import org.gnit.lucenekmp.analysis.pa.PunjabiNormalizationFilterFactory
@@ -145,6 +147,16 @@ object AnalysisExtraFactories {
             MalayStemFilterFactory.NAME,
             MalayStemFilterFactory::class
         ) { args -> MalayStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            BurmeseNormalizationFilterFactory.NAME,
+            BurmeseNormalizationFilterFactory::class
+        ) { args -> BurmeseNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            BurmeseStemFilterFactory.NAME,
+            BurmeseStemFilterFactory::class
+        ) { args -> BurmeseStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             OdiaNormalizationFilterFactory.NAME,

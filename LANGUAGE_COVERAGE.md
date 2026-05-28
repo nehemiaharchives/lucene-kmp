@@ -41,7 +41,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |  34,500,000 | Odia (analysis:extra)            |  or  | IN                            |                                                           | org.gnit.lucenekmp.analysis.or.OdiaAnalyzer                |
 |  34,022,000 | Malayalam                        |  ml  | IN                            |                                                           | Need to be covered                                         |
 |  33,663,000 | Kannada                          |  kn  | IN                            |                                                           | Need to be covered                                         |
-|  33,000,000 | Burmese                          |  my  | MM                            |                                                           | Need to be covered                                         |
+|  33,000,000 | Burmese (analysis:extra)         |  my  | MM                            |                                                           | org.gnit.lucenekmp.analysis.my.BurmeseAnalyzer             |
 |  32,400,000 | Sundanese (analysis:extra)       |  su  | ID                            |                                                           | org.gnit.lucenekmp.analysis.su.SundaneseAnalyzer           |
 |  32,100,000 | Amharic (analysis:horn)          |  am  | ET                            |                                                           | org.gnit.lucenekmp.analysis.am.AmharicAnalyzer             |
 |  32,000,000 | Ukrainian (analysis:morfologik)  |  uk  | UA                            | org.apache.lucene.analysis.uk.UkrainianMorfologikAnalyzer | org.gnit.lucenekmp.analysis.uk.UkrainianMorfologikAnalyzer |
