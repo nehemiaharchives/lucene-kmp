@@ -1391,20 +1391,22 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
     /*@Synchronized*/
     @Throws(IOException::class)
     fun tryDeleteDocument(readerIn: IndexReader, docID: Int): Long {
-        // NOTE: DON'T use docID inside the closure
-        return tryModifyDocument(
-            readerIn,
-            docID
-        ) { leafDocId: Int, rld: ReadersAndUpdates ->
-            if (rld.delete(leafDocId)) {
-                if (isFullyDeleted(rld)) {
-                    dropDeletedSegment(rld.info)
-                    checkpoint()
-                }
+        return withIndexWriterLock {
+            // NOTE: DON'T use docID inside the closure
+            return@withIndexWriterLock tryModifyDocument(
+                readerIn,
+                docID
+            ) { leafDocId: Int, rld: ReadersAndUpdates ->
+                if (rld.delete(leafDocId)) {
+                    if (isFullyDeleted(rld)) {
+                        dropDeletedSegment(rld.info)
+                        checkpoint()
+                    }
 
-                // Must bump changeCount so if no other changes
-                // happened, we still commit this change:
-                changed()
+                    // Must bump changeCount so if no other changes
+                    // happened, we still commit this change:
+                    changed()
+                }
             }
         }
     }
@@ -1432,68 +1434,70 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         docID: Int,
         vararg fields: Field
     ): Long {
-        // NOTE: DON'T use docID inside the closure
-        val dvUpdates: Array<DocValuesUpdate> = buildDocValuesUpdate(null, fields)
-        return tryModifyDocument(
-            readerIn,
-            docID
-        ) { leafDocId: Int, rld: ReadersAndUpdates ->
-            val nextGen: Long = bufferedUpdatesStream.getNextGen()
-            try {
-                val fieldUpdatesMap: MutableMap<String, DocValuesFieldUpdates> = HashMap()
-                for (update in dvUpdates) {
-                    val docValuesFieldUpdates: DocValuesFieldUpdates =
-                        fieldUpdatesMap.computeIfAbsent(
-                            update.field
-                        ) { k: String ->
+        return withIndexWriterLock {
+            // NOTE: DON'T use docID inside the closure
+            val dvUpdates: Array<DocValuesUpdate> = buildDocValuesUpdate(null, fields)
+            return@withIndexWriterLock tryModifyDocument(
+                readerIn,
+                docID
+            ) { leafDocId: Int, rld: ReadersAndUpdates ->
+                val nextGen: Long = bufferedUpdatesStream.getNextGen()
+                try {
+                    val fieldUpdatesMap: MutableMap<String, DocValuesFieldUpdates> = HashMap()
+                    for (update in dvUpdates) {
+                        val docValuesFieldUpdates: DocValuesFieldUpdates =
+                            fieldUpdatesMap.computeIfAbsent(
+                                update.field
+                            ) { k: String ->
+                                when (update.type) {
+                                    DocValuesType.NUMERIC -> return@computeIfAbsent NumericDocValuesFieldUpdates(
+                                        nextGen, k, rld.info.info.maxDoc()
+                                    )
+
+                                    DocValuesType.BINARY -> return@computeIfAbsent BinaryDocValuesFieldUpdates(
+                                        nextGen, k, rld.info.info.maxDoc()
+                                    )
+
+                                    DocValuesType.NONE, DocValuesType.SORTED, DocValuesType.SORTED_NUMERIC, DocValuesType.SORTED_SET -> throw AssertionError(
+                                        "type: " + update.type + " is not supported"
+                                    )
+
+                                    else -> throw AssertionError("type: " + update.type + " is not supported")
+                                }
+                            }!!
+                        if (update.hasValue()) {
                             when (update.type) {
-                                DocValuesType.NUMERIC -> return@computeIfAbsent NumericDocValuesFieldUpdates(
-                                    nextGen, k, rld.info.info.maxDoc()
+                                DocValuesType.NUMERIC -> docValuesFieldUpdates.add(
+                                    leafDocId,
+                                    (update as NumericDocValuesUpdate).getValue()
                                 )
 
-                                DocValuesType.BINARY -> return@computeIfAbsent BinaryDocValuesFieldUpdates(
-                                    nextGen, k, rld.info.info.maxDoc()
+                                DocValuesType.BINARY -> docValuesFieldUpdates.add(
+                                    leafDocId,
+                                    (update as BinaryDocValuesUpdate).getValue()!!
                                 )
 
-                                DocValuesType.NONE, DocValuesType.SORTED, DocValuesType.SORTED_NUMERIC, DocValuesType.SORTED_SET -> throw AssertionError(
+                                DocValuesType.NONE, DocValuesType.SORTED, DocValuesType.SORTED_SET, DocValuesType.SORTED_NUMERIC -> throw AssertionError(
                                     "type: " + update.type + " is not supported"
                                 )
 
                                 else -> throw AssertionError("type: " + update.type + " is not supported")
                             }
-                        }!!
-                    if (update.hasValue()) {
-                        when (update.type) {
-                            DocValuesType.NUMERIC -> docValuesFieldUpdates.add(
-                                leafDocId,
-                                (update as NumericDocValuesUpdate).getValue()
-                            )
-
-                            DocValuesType.BINARY -> docValuesFieldUpdates.add(
-                                leafDocId,
-                                (update as BinaryDocValuesUpdate).getValue()!!
-                            )
-
-                            DocValuesType.NONE, DocValuesType.SORTED, DocValuesType.SORTED_SET, DocValuesType.SORTED_NUMERIC -> throw AssertionError(
-                                "type: " + update.type + " is not supported"
-                            )
-
-                            else -> throw AssertionError("type: " + update.type + " is not supported")
+                        } else {
+                            docValuesFieldUpdates.reset(leafDocId)
                         }
-                    } else {
-                        docValuesFieldUpdates.reset(leafDocId)
                     }
+                    for (updates in fieldUpdatesMap.values) {
+                        updates.finish()
+                        rld.addDVUpdate(updates)
+                    }
+                } finally {
+                    bufferedUpdatesStream.finishedSegment(nextGen)
                 }
-                for (updates in fieldUpdatesMap.values) {
-                    updates.finish()
-                    rld.addDVUpdate(updates)
-                }
-            } finally {
-                bufferedUpdatesStream.finishedSegment(nextGen)
+                // Must bump changeCount so if no other changes
+                // happened, we still commit this change:
+                changed()
             }
-            // Must bump changeCount so if no other changes
-            // happened, we still commit this change:
-            changed()
         }
     }
 
@@ -1510,41 +1514,39 @@ open class IndexWriter(d: Directory, conf: IndexWriterConfig) : AutoCloseable, T
         docID: Int,
         toApply: DocModifier
     ): Long {
-        var docID = docID
-        val reader: LeafReader
-        if (readerIn is LeafReader) {
-            // Reader is already atomic: use the incoming docID:
-            reader = readerIn
-        } else {
-            // Composite reader: lookup sub-reader and re-base docID:
-            val leaves: MutableList<LeafReaderContext> = readerIn.leaves()
-            val subIndex: Int = ReaderUtil.subIndex(docID, leaves)
-            reader = leaves[subIndex].reader()
-            docID -= leaves[subIndex].docBase
-            assert(docID >= 0)
-            assert(docID < reader.maxDoc())
-        }
-
-        require(reader is SegmentReader) { "the reader must be a SegmentReader or composite reader containing only SegmentReaders" }
-
-        val info: SegmentCommitInfo = reader.originalSegmentInfo
-
-        // TODO: this is a slow linear search, but, number of
-        // segments should be contained unless something is
-        // seriously wrong w/ the index, so it should be a minor
-        // cost:
-        if (segmentInfos.indexOf(info) != -1) {
-            val rld: ReadersAndUpdates? = getPooledInstance(info, false)
-            if (rld != null) {
-
-                // TODO synchronized is not supported in KMP, need to think what to do here
-                //synchronized(bufferedUpdatesStream) {
-                toApply.run(docID, rld)
-                return docWriter.nextSequenceNumber
-                //}
+        return withIndexWriterLock {
+            var docID = docID
+            val reader: LeafReader
+            if (readerIn is LeafReader) {
+                // Reader is already atomic: use the incoming docID:
+                reader = readerIn
+            } else {
+                // Composite reader: lookup sub-reader and re-base docID:
+                val leaves: MutableList<LeafReaderContext> = readerIn.leaves()
+                val subIndex: Int = ReaderUtil.subIndex(docID, leaves)
+                reader = leaves[subIndex].reader()
+                docID -= leaves[subIndex].docBase
+                assert(docID >= 0)
+                assert(docID < reader.maxDoc())
             }
+
+            require(reader is SegmentReader) { "the reader must be a SegmentReader or composite reader containing only SegmentReaders" }
+
+            val info: SegmentCommitInfo = reader.originalSegmentInfo
+
+            // TODO: this is a slow linear search, but, number of
+            // segments should be contained unless something is
+            // seriously wrong w/ the index, so it should be a minor
+            // cost:
+            if (segmentInfos.indexOf(info) != -1) {
+                val rld: ReadersAndUpdates? = getPooledInstance(info, false)
+                if (rld != null) {
+                    toApply.run(docID, rld)
+                    return@withIndexWriterLock docWriter.nextSequenceNumber
+                }
+            }
+            return@withIndexWriterLock -1
         }
-        return -1
     }
 
     /** Drops a segment that has 100% deleted documents.  */
