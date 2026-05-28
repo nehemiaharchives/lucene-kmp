@@ -100,12 +100,12 @@
 |   7,000,000 | Akan                             |  ak  | GH                            |                                                           | Need to be covered                                         |
 |   7,000,000 | Hiligaynon                       | hil  | PH                            |                                                           | Need to be covered                                         |
 |   7,000,000 | Shona                            |  sn  | ZW                            |                                                           | Need to be covered                                         |
-|   6,300,000 | Luba-Kasai                       | lua  | CD AO                         |                                                           |                                                            |
+|   6,300,000 | Luba-Kasai                       | lua  | CD AO                         |                                                           | Need to be covered                                         |
 |   6,000,000 | Slovak                           |  sk  | SK                            |                                                           | Need to be covered                                         |
 |   5,830,000 | Wolayttattuwa                    | wal  | ET                            |                                                           |                                                            |
 |   5,530,000 | Minangkabau                      | min  | MY                            |                                                           |                                                            |
 |   5,430,000 | Sukuma                           | suk  | TZ                            |                                                           |                                                            |
-|   5,225,552 | Lao                              |  lo  | LA                            |                                                           |                                                            |
+|   5,225,552 | Lao                              |  lo  | LA                            |                                                           | Need to be covered                                         |
 |   5,200,000 | Norwegian (analysis:common)      |  no  | NO                            | org.apache.lucene.analysis.no.NorwegianAnalyzer           | org.gnit.lucenekmp.analysis.no.NorwegianAnalyzer           |
 |   5,017,800 | Bugis                            | bug  | ID                            |                                                           |                                                            |
 |   5,000,000 | Mewati                           | wtm  | IN                            |                                                           |                                                            |
@@ -125,7 +125,7 @@
 |   4,000,000 | Miao                             | blu  | CN                            |                                                           |                                                            |
 |   4,000,000 | S'gaw Karen                      | ksw  | TH MM                         |                                                           |                                                            |
 |   4,000,000 | Merwari                          | wry  | IN                            |                                                           |                                                            |
-|   4,000,000 | Lithuanian                       |  lt  | LT                            | org.apache.lucene.analysis.lt.LithuanianAnalyzer          |                                                            |
+|   4,000,000 | Lithuanian (analysis:common)     |  lt  | LT                            | org.apache.lucene.analysis.lt.LithuanianAnalyzer          | org.gnit.lucenekmp.analysis.lt.LithuanianAnalyzer          |
 |   4,000,000 | Bokmål                           |  nb  | NO                            |                                                           |                                                            |
 |   3,893,000 | Kamba                            | kam  | KE                            |                                                           |                                                            |
 |   3,763,900 | Hassaniya Arabic                 | mey  | DZ MA ML MR                   |                                                           |                                                            |
