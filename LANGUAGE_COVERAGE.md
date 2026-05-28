@@ -106,7 +106,7 @@
 |   5,530,000 | Minangkabau                      | min  | MY                            |                                                           |                                                            |
 |   5,430,000 | Sukuma                           | suk  | TZ                            |                                                           |                                                            |
 |   5,225,552 | Lao                              |  lo  | LA                            |                                                           |                                                            |
-|   5,200,000 | Norwegian                        |  no  | NO                            | org.apache.lucene.analysis.no.NorwegianAnalyzer           |                                                            |
+|   5,200,000 | Norwegian (analysis:common)      |  no  | NO                            | org.apache.lucene.analysis.no.NorwegianAnalyzer           | org.gnit.lucenekmp.analysis.no.NorwegianAnalyzer           |
 |   5,017,800 | Bugis                            | bug  | ID                            |                                                           |                                                            |
 |   5,000,000 | Mewati                           | wtm  | IN                            |                                                           |                                                            |
 |   5,000,000 | Ghanaian Pidgin English          | gpe  | GH                            |                                                           |                                                            |

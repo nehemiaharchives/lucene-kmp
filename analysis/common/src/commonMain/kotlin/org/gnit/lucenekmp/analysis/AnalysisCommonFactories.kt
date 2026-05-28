@@ -25,6 +25,9 @@ import org.gnit.lucenekmp.analysis.hu.HungarianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.`in`.IndicNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.id.IndonesianStemFilterFactory
 import org.gnit.lucenekmp.analysis.it.ItalianLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.no.NorwegianLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.no.NorwegianMinimalStemFilterFactory
+import org.gnit.lucenekmp.analysis.no.NorwegianNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.pt.PortugueseStemFilterFactory
@@ -174,6 +177,21 @@ object AnalysisCommonFactories {
             ItalianLightStemFilterFactory.NAME,
             ItalianLightStemFilterFactory::class
         ) { args -> ItalianLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            NorwegianLightStemFilterFactory.NAME,
+            NorwegianLightStemFilterFactory::class
+        ) { args -> NorwegianLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            NorwegianMinimalStemFilterFactory.NAME,
+            NorwegianMinimalStemFilterFactory::class
+        ) { args -> NorwegianMinimalStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            NorwegianNormalizationFilterFactory.NAME,
+            NorwegianNormalizationFilterFactory::class
+        ) { args -> NorwegianNormalizationFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             PortugueseLightStemFilterFactory.NAME,
