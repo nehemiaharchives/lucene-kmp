@@ -72,7 +72,7 @@
 |  12,800,000 | Dakhanī                          | dcc  | IN                            |                                                           | TBD                                                        |
 |  12,600,000 | Hungarian (analysis:common)      |  hu  | HU                            | org.apache.lucene.analysis.hu.HungarianAnalyzer           | org.gnit.lucenekmp.analysis.hu.HungarianAnalyzer           |
 |  12,100,000 | Zulu                             |  zu  | ZA                            |                                                           | Need to be covered                                         |
-|  12,000,000 | Czech                            |  cs  | CZ                            |                                                           | Need to be covered                                         |
+|  12,000,000 | Czech (analysis:common)          |  cs  | CZ                            | org.apache.lucene.analysis.cz.CzechAnalyzer               | org.gnit.lucenekmp.analysis.cz.CzechAnalyzer               |
 |  12,000,000 | Magahi                           | mag  | IN                            |                                                           | Need to be covered                                         |
 |  11,000,000 | Northern Min Chinese             | mnp  | CN                            |                                                           | Fallback: zh                                               |
 |  10,985,000 | Chhattisgarhi                    | hne  | IN                            |                                                           | Need to be covered                                         |

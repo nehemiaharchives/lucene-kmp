@@ -6,6 +6,7 @@ import org.gnit.lucenekmp.analysis.bn.BengaliNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.bn.BengaliStemFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniStemFilterFactory
+import org.gnit.lucenekmp.analysis.cz.CzechStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
 import org.gnit.lucenekmp.analysis.en.KStemFilterFactory
@@ -94,6 +95,11 @@ object AnalysisCommonFactories {
             SoraniStemFilterFactory.NAME,
             SoraniStemFilterFactory::class
         ) { args -> SoraniStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            CzechStemFilterFactory.NAME,
+            CzechStemFilterFactory::class
+        ) { args -> CzechStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             ElisionFilterFactory.NAME,
