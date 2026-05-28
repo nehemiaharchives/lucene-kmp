@@ -58,7 +58,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |  21,000,000 | Kurmanji Kurdish                 | kmr  | IQ TR SY                      |                                                           | TBD                                                        |
 |  20,700,000 | Thai (analysis:common)           |  th  | TH                            | org.apache.lucene.analysis.th.ThaiAnalyzer                | org.gnit.lucenekmp.analysis.th.ThaiAnalyzer                |
 |  20,000,000 | Kongu Tamil                      | xko  | IN                            |                                                           | TBD                                                        |
-|  18,466,000 | Uzbek                            |  uz  | UZ                            |                                                           | Need to be covered                                         |
+|  18,466,000 | Uzbek (analysis:extra)           |  uz  | UZ                            |                                                           | org.gnit.lucenekmp.analysis.uz.UzbekAnalyzer               |
 |  16,600,000 | Khmer (analysis:extra)           |  km  | KH                            |                                                           | org.gnit.lucenekmp.analysis.km.KhmerAnalyzer               |
 |  15,900,000 | Cebuano (analysis:extra)         | ceb  | PH                            |                                                           | org.gnit.lucenekmp.analysis.ceb.CebuanoAnalyzer            |
 |  15,800,000 | Nepali (analysis:common)         |  ne  | NP                            | org.apache.lucene.analysis.ne.NepaliAnalyzer              | org.gnit.lucenekmp.analysis.ne.NepaliAnalyzer              |

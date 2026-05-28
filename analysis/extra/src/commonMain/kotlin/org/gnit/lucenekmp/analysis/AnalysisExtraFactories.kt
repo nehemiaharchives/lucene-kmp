@@ -38,6 +38,8 @@ import org.gnit.lucenekmp.analysis.ti.TigrinyaNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ti.TigrinyaStemFilterFactory
 import org.gnit.lucenekmp.analysis.ur.UrduNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ur.UrduStemFilterFactory
+import org.gnit.lucenekmp.analysis.uz.UzbekNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.uz.UzbekStemFilterFactory
 import org.gnit.lucenekmp.analysis.vi.VietnameseNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.vi.VietnameseStemFilterFactory
 import org.gnit.lucenekmp.analysis.yo.YorubaNormalizationFilterFactory
@@ -219,6 +221,16 @@ object AnalysisExtraFactories {
             UrduStemFilterFactory.NAME,
             UrduStemFilterFactory::class
         ) { args -> UrduStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            UzbekNormalizationFilterFactory.NAME,
+            UzbekNormalizationFilterFactory::class
+        ) { args -> UzbekNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            UzbekStemFilterFactory.NAME,
+            UzbekStemFilterFactory::class
+        ) { args -> UzbekStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             TagalogNormalizationFilterFactory.NAME,
