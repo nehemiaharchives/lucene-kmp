@@ -96,12 +96,12 @@
 |   7,600,000 | Belarusian (analysis:extra)      |  be  | BY                            |                                                           | org.gnit.lucenekmp.analysis.be.BelarusianAnalyzer          |
 |   7,595,512 | Uyghur                           |  ug  | CN                            |                                                           | Need to be covered                                         |
 |   7,507,780 | Tigrinya (analysis:extra)        |  ti  | ER                            |                                                           | org.gnit.lucenekmp.analysis.ti.TigrinyaAnalyzer            |
-|   7,250,000 | Sorani Kurdish (analysis:common) | ckb  | IQ IR                         | org.apache.lucene.analysis.ckb.SoraniAnalyzer             |                                                            |
+|   7,250,000 | Sorani Kurdish (analysis:common) | ckb  | IQ IR                         | org.apache.lucene.analysis.ckb.SoraniAnalyzer             | org.gnit.lucenekmp.analysis.ckb.SoraniAnalyser             |
 |   7,000,000 | Akan                             |  ak  | GH                            |                                                           | Need to be covered                                         |
 |   7,000,000 | Hiligaynon                       | hil  | PH                            |                                                           | Need to be covered                                         |
 |   7,000,000 | Shona                            |  sn  | ZW                            |                                                           | Need to be covered                                         |
 |   6,300,000 | Luba-Kasai                       | lua  | CD AO                         |                                                           |                                                            |
-|   6,000,000 | Slovak                           |  sk  | SK                            |                                                           |                                                            |
+|   6,000,000 | Slovak                           |  sk  | SK                            |                                                           | Need to be covered                                         |
 |   5,830,000 | Wolayttattuwa                    | wal  | ET                            |                                                           |                                                            |
 |   5,530,000 | Minangkabau                      | min  | MY                            |                                                           |                                                            |
 |   5,430,000 | Sukuma                           | suk  | TZ                            |                                                           |                                                            |
