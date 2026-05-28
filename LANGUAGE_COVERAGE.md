@@ -110,7 +110,7 @@
 |   5,017,800 | Bugis                            | bug  | ID                            |                                                           |                                                            |
 |   5,000,000 | Mewati                           | wtm  | IN                            |                                                           |                                                            |
 |   5,000,000 | Ghanaian Pidgin English          | gpe  | GH                            |                                                           |                                                            |
-|   4,873,396 | Catalan                          |  ca  | AD                            | org.apache.lucene.analysis.ca.CatalanAnalyzer             |                                                            |
+|   4,873,396 | Catalan (analysis:common)        |  ca  | AD                            | org.apache.lucene.analysis.ca.CatalanAnalyzer             | org.gnit.lucenekmp.analysis.ca.CatalanAnalyzer             |
 |   4,850,000 | Paraguayan Guaraní               | gug  | PY                            |                                                           |                                                            |
 |   4,600,000 | Huizhou Chinese                  | czh  | CN                            |                                                           |                                                            |
 |   4,600,000 | Sango                            |  sg  | CF                            |                                                           |                                                            |
