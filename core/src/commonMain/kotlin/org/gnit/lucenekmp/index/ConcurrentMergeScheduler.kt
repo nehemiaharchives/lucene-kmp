@@ -822,6 +822,13 @@ open class ConcurrentMergeScheduler
         val job: Job = scope.launch(context = uncaughtHandler, start = CoroutineStart.LAZY) {
             runMerge()  // suspending function containing your merge code
         }
+        init {
+            // Java threads release their OS thread when run() exits. For coroutine-backed merge
+            // threads we must explicitly close the dedicated dispatcher on completion.
+            job.invokeOnCompletion {
+                threadDispatcher.close()
+            }
+        }
 
         /** Mirrors Thread.getName() */
         fun getName(): String = threadName

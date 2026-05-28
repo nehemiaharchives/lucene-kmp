@@ -10,6 +10,8 @@ import org.gnit.lucenekmp.util.IOUtils
 import org.gnit.lucenekmp.util.RefCount
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.Character
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 
 /**
  * Manages the [DocValuesProducer] held by [SegmentReader] and keeps track of their
@@ -17,6 +19,7 @@ import org.gnit.lucenekmp.jdkport.Character
  */
 class SegmentDocValues {
     private val genDVProducers: LongObjectHashMap<RefCount<DocValuesProducer>> = LongObjectHashMap()
+    private val lock = ReentrantLock()
 
     @Throws(IOException::class)
     private fun newDocValuesProducer(
@@ -47,11 +50,9 @@ class SegmentDocValues {
             @Throws(IOException::class)
             override fun release() {
                 `object`!!.close()
-
-                // for now, we will commenting this out, if there is problem, we will implement
-                //synchronized(this@SegmentDocValues) {
-                genDVProducers.remove(gen)
-                //}
+                lock.withLock {
+                    genDVProducers.remove(gen)
+                }
             }
         }
     }
@@ -64,11 +65,10 @@ class SegmentDocValues {
         si: SegmentCommitInfo,
         dir: Directory,
         infos: FieldInfos
-    ): DocValuesProducer {
+    ): DocValuesProducer = lock.withLock {
         var dvp: RefCount<DocValuesProducer>? = genDVProducers.get(gen)
         if (dvp == null) {
             dvp = newDocValuesProducer(si, dir, gen, infos)
-            //checkNotNull(dvp)
             genDVProducers.put(gen, dvp)
         } else {
             dvp.incRef()
@@ -79,7 +79,7 @@ class SegmentDocValues {
     /** Decrement the reference count of the given [DocValuesProducer] generations.  */
     /*@Synchronized*/
     @Throws(IOException::class)
-    fun decRef(dvProducersGens: LongArrayList) {
+    fun decRef(dvProducersGens: LongArrayList) = lock.withLock {
         IOUtils.applyToAll(
             dvProducersGens.map { it.value }
         ) { gen: Long ->
