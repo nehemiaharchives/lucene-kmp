@@ -16,6 +16,8 @@ import org.gnit.lucenekmp.analysis.ilo.IlocanoNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ilo.IlocanoStemFilterFactory
 import org.gnit.lucenekmp.analysis.jv.JavaneseNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.jv.JavaneseStemFilterFactory
+import org.gnit.lucenekmp.analysis.ml.MalayalamNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.ml.MalayalamStemFilterFactory
 import org.gnit.lucenekmp.analysis.mr.MarathiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.mr.MarathiStemFilterFactory
 import org.gnit.lucenekmp.analysis.ms.MalayNormalizationFilterFactory
@@ -137,6 +139,16 @@ object AnalysisExtraFactories {
             JavaneseStemFilterFactory.NAME,
             JavaneseStemFilterFactory::class
         ) { args -> JavaneseStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            MalayalamNormalizationFilterFactory.NAME,
+            MalayalamNormalizationFilterFactory::class
+        ) { args -> MalayalamNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            MalayalamStemFilterFactory.NAME,
+            MalayalamStemFilterFactory::class
+        ) { args -> MalayalamStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             MalayNormalizationFilterFactory.NAME,

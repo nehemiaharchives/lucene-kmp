@@ -1,0 +1,31 @@
+package org.gnit.lucenekmp.analysis.ml
+
+import org.gnit.lucenekmp.analysis.TokenFilterFactory
+import org.gnit.lucenekmp.analysis.TokenStream
+
+/** Factory for [MalayalamNormalizationFilter]. */
+class MalayalamNormalizationFilterFactory : TokenFilterFactory {
+    /** Creates a new MalayalamNormalizationFilterFactory. */
+    constructor(args: MutableMap<String, String>) : super(args) {
+        if (args.isNotEmpty()) {
+            throw IllegalArgumentException("Unknown parameters: $args")
+        }
+    }
+
+    /** Default ctor for compatibility with SPI. */
+    constructor() {
+        throw defaultCtorException()
+    }
+
+    override fun create(input: TokenStream): TokenStream {
+        return MalayalamNormalizationFilter(input)
+    }
+
+    override fun normalize(input: TokenStream): TokenStream {
+        return create(input)
+    }
+
+    companion object {
+        const val NAME: String = "malayalamNormalization"
+    }
+}
