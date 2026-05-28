@@ -33,6 +33,7 @@ Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218
 |  57,000,000 | Gujarati (analysis:extra)        |  gu  | IN                            |                                                           | org.gnit.lucenekmp.analysis.gu.GujaratiAnalyzer            |
 |  52,800,000 | Iranian Persian                  | pes  | IR                            |                                                           | TBD                                                        |
 |  47,500,000 | Nigerian Pidgin                  | pcm  | NG                            |                                                           | TBD                                                        |
+|  47,000,000 | Yoruba (analysis:extra)          |  yo  | NG BJ                         |                                                           | org.gnit.lucenekmp.analysis.yo.YorubaAnalyzer              |
 |  46,900,000 | Jin Chinese                      | cjy  | CN                            |                                                           | Read in zh                                                 |
 |  45,000,000 | Persian (analysis:common)        |  fa  | IR                            | org.apache.lucene.analysis.fa.PersianAnalyzer             | org.gnit.lucenekmp.analysis.fa.PersianAnalyzer             |
 |  44,000,000 | Levantine Arabic                 | apc  | SY LB JO PS IL                |                                                           | TBD                                                        |

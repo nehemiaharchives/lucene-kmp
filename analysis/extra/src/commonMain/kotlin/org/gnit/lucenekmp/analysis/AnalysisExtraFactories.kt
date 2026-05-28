@@ -36,6 +36,8 @@ import org.gnit.lucenekmp.analysis.ur.UrduNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ur.UrduStemFilterFactory
 import org.gnit.lucenekmp.analysis.vi.VietnameseNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.vi.VietnameseStemFilterFactory
+import org.gnit.lucenekmp.analysis.yo.YorubaNormalizationFilterFactory
+import org.gnit.lucenekmp.analysis.yo.YorubaStemFilterFactory
 
 /** Registers analysis/extra factories for SPI lookups. */
 object AnalysisExtraFactories {
@@ -223,6 +225,16 @@ object AnalysisExtraFactories {
             VietnameseStemFilterFactory.NAME,
             VietnameseStemFilterFactory::class
         ) { args -> VietnameseStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            YorubaNormalizationFilterFactory.NAME,
+            YorubaNormalizationFilterFactory::class
+        ) { args -> YorubaNormalizationFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            YorubaStemFilterFactory.NAME,
+            YorubaStemFilterFactory::class
+        ) { args -> YorubaStemFilterFactory(args) }
         initialized = true
     }
 }
