@@ -2,6 +2,7 @@ package org.gnit.lucenekmp.util.automaton
 
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.tests.util.LuceneTestCase
+import org.gnit.lucenekmp.tests.util.RandomNumbers
 import org.gnit.lucenekmp.tests.util.TestUtil
 import org.gnit.lucenekmp.tests.util.automaton.AutomatonTestUtil
 import org.gnit.lucenekmp.util.BytesRef
@@ -18,12 +19,10 @@ import kotlin.test.assertTrue
 
 class TestOperations : LuceneTestCase() {
     /** Test string union.  */
-    // TODO originally this test was following
-    /*@Test
+    @Test
     fun testStringUnion() {
-        val strings: MutableList<BytesRef> =
-            ArrayList()
-        var i: Int = *//*RandomNumbers.randomIntBetween(random(), 0, 1000)*//* random().nextInt(0, 1000)
+        val strings: MutableList<BytesRef> = ArrayList()
+        var i: Int = RandomNumbers.randomIntBetween(random(), 0, 1000)
         while (--i >= 0) {
             strings.add(BytesRef(TestUtil.randomUnicodeString(random())))
         }
@@ -37,15 +36,13 @@ class TestOperations : LuceneTestCase() {
         assertTrue(naiveUnion.isDeterministic)
         assertFalse(Operations.hasDeadStatesFromInitial(naiveUnion))
 
-        assertTrue(
-            AutomatonTestUtil.sameLanguage(
-                union,
-                naiveUnion
-            )
-        )
-    }*/
+        assertTrue(AutomatonTestUtil.sameLanguage(union, naiveUnion))
+    }
+
+    // previously somehow we commented out above and fell back following simpler one
+    // we keep this for historical reason.
     @Test
-    fun testStringUnion() {
+    fun testStringUnionSimple() {
         val strings =
             listOf("abc", "abd", "abe").map { BytesRef(it) }.sorted()
 
@@ -635,33 +632,15 @@ class TestOperations : LuceneTestCase() {
         }
     }
 
-    // Previously flaky due to unbounded determinization; now bounded and skips TooComplex cases.
     @Test
-    fun testDuelRepeat() {
-        val iters: Int = atLeast(3) // TODO originally 1_000 but reduced to 3 for dev speed
+    fun testDuelRepeatSimple() {
+        val iters: Int = atLeast(1000)
         val determinizeWorkLimit = DEFAULT_DETERMINIZE_WORK_LIMIT
-        for (iter in 0..<iters) {
-            val a: Automaton =
-                AutomatonTestUtil.randomAutomaton(random())
-            try {
-                val repeat1: Automaton =
-                    Operations.determinize(
-                        Operations.repeat(a), determinizeWorkLimit
-                    )
-                val repeat2: Automaton =
-                    Operations.determinize(
-                        naiveRepeat(a), determinizeWorkLimit
-                    )
-                assertTrue(
-                    AutomatonTestUtil.sameLanguage(
-                        repeat1,
-                        repeat2
-                    )
-                )
-            } catch (e: TooComplexToDeterminizeException) {
-                // skip this iteration if determinization is too complex
-                continue
-            }
+        repeat(iters) {
+            val a: Automaton = AutomatonTestUtil.randomAutomaton(random())
+            val repeat1: Automaton = Operations.determinize(Operations.repeat(a), determinizeWorkLimit)
+            val repeat2: Automaton = Operations.determinize(naiveRepeat(a), determinizeWorkLimit)
+            assertTrue(AutomatonTestUtil.sameLanguage(repeat1, repeat2))
         }
     }
 
