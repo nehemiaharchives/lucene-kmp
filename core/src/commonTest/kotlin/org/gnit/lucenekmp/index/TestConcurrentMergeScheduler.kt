@@ -199,7 +199,7 @@ class TestConcurrentMergeScheduler : LuceneTestCase() {
             }
 
             writer.close()
-            // TODO: enable when TestIndexWriter.assertNoUnreferencedFiles is ported.
+            TestIndexWriter.assertNoUnreferencedFiles(directory, "testNoExtraFiles")
 
             writer =
                 IndexWriter(
