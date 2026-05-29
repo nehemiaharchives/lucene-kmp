@@ -67,13 +67,13 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1649 | 68% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1657 | 69% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.bn |         org.gnit.lucenekmp.analysis.bn | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.boost |         org.gnit.lucenekmp.analysis.boost | 2 | 2 | 100% | [x] |
-|     org.apache.lucene.analysis.br |         org.gnit.lucenekmp.analysis.br | 4 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.br |         org.gnit.lucenekmp.analysis.br | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.ca |         org.gnit.lucenekmp.analysis.ca | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.charfilter |         org.gnit.lucenekmp.analysis.charfilter | 6 | 3 | 50% | [ ] |
 |     org.apache.lucene.analysis.cjk |         org.gnit.lucenekmp.analysis.cjk | 7 | 3 | 42% | [ ] |
@@ -86,7 +86,7 @@
 |       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 6 | 25% | [ ] |
 |     org.apache.lucene.analysis.custom |         org.gnit.lucenekmp.analysis.custom | 1 | 0 | 0% | [ ] |
-|     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.da |         org.gnit.lucenekmp.analysis.da | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.de |         org.gnit.lucenekmp.analysis.de | 12 | 12 | 100% | [x] |
 |     org.apache.lucene.analysis.el |         org.gnit.lucenekmp.analysis.el | 6 | 6 | 100% | [x] |
@@ -261,10 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.br.BrazilianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/br/BrazilianAnalyzer.java) | org.gnit.lucenekmp.analysis.br.BrazilianAnalyzer |
-| [org.apache.lucene.analysis.br.BrazilianStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/br/BrazilianStemFilter.java) | org.gnit.lucenekmp.analysis.br.BrazilianStemFilter |
-| [org.apache.lucene.analysis.br.BrazilianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/br/BrazilianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.br.BrazilianStemFilterFactory |
-| [org.apache.lucene.analysis.br.BrazilianStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/br/BrazilianStemmer.java) | org.gnit.lucenekmp.analysis.br.BrazilianStemmer |
 | [org.apache.lucene.analysis.charfilter.HTMLStripCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/charfilter/HTMLStripCharFilter.java) | org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilter |
 | [org.apache.lucene.analysis.charfilter.HTMLStripCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/charfilter/HTMLStripCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilterFactory |
 | [org.apache.lucene.analysis.charfilter.MappingCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/charfilter/MappingCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.MappingCharFilterFactory |
@@ -314,10 +310,6 @@
 | [org.apache.lucene.analysis.core.WhitespaceAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/WhitespaceAnalyzer.java) | org.gnit.lucenekmp.analysis.core.WhitespaceAnalyzer |
 | [org.apache.lucene.analysis.core.WhitespaceTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/WhitespaceTokenizerFactory.java) | org.gnit.lucenekmp.analysis.core.WhitespaceTokenizerFactory |
 | [org.apache.lucene.analysis.custom.CustomAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/custom/CustomAnalyzer.java) | org.gnit.lucenekmp.analysis.custom.CustomAnalyzer |
-| [org.apache.lucene.analysis.cz.CzechAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cz/CzechAnalyzer.java) | org.gnit.lucenekmp.analysis.cz.CzechAnalyzer |
-| [org.apache.lucene.analysis.cz.CzechStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cz/CzechStemFilter.java) | org.gnit.lucenekmp.analysis.cz.CzechStemFilter |
-| [org.apache.lucene.analysis.cz.CzechStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cz/CzechStemFilterFactory.java) | org.gnit.lucenekmp.analysis.cz.CzechStemFilterFactory |
-| [org.apache.lucene.analysis.cz.CzechStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cz/CzechStemmer.java) | org.gnit.lucenekmp.analysis.cz.CzechStemmer |
 | [org.apache.lucene.analysis.da.DanishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/da/DanishAnalyzer.java) | org.gnit.lucenekmp.analysis.da.DanishAnalyzer |
 | [org.apache.lucene.analysis.email.UAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailAnalyzer |
 | [org.apache.lucene.analysis.email.UAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizer |
@@ -845,7 +837,7 @@
 |     org.apache.lucene.analysis.bg | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.bn | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.boost | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.br | 2 | 0 | 0% |
+|     org.apache.lucene.analysis.br | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.ca | 1 | 1 | 100% |
 |     org.apache.lucene.analysis.charfilter | 4 | 1 | 25% |
 |     org.apache.lucene.analysis.cjk | 7 | 0 | 0% |
@@ -856,7 +848,7 @@
 |     org.apache.lucene.analysis.compound | 3 | 0 | 0% |
 |     org.apache.lucene.analysis.core | 15 | 0 | 0% |
 |     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.cz | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.cz | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.da | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.de | 9 | 9 | 100% |
 |     org.apache.lucene.analysis.el | 4 | 4 | 100% |
@@ -982,7 +974,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1004 | 84% |
+| Total | 1186 | 1009 | 85% |
 
 
 ## Tests To Port
@@ -994,8 +986,6 @@
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
 | [org.apache.lucene.analysis.boost.TestDelimitedBoostTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/boost/TestDelimitedBoostTokenFilter.java) | org.gnit.lucenekmp.analysis.boost.TestDelimitedBoostTokenFilter |
-| [org.apache.lucene.analysis.br.TestBrazilianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/br/TestBrazilianAnalyzer.java) | org.gnit.lucenekmp.analysis.br.TestBrazilianAnalyzer |
-| [org.apache.lucene.analysis.br.TestBrazilianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/br/TestBrazilianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.br.TestBrazilianStemFilterFactory |
 | [org.apache.lucene.analysis.charfilter.TestHTMLStripCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/charfilter/TestHTMLStripCharFilter.java) | org.gnit.lucenekmp.analysis.charfilter.TestHTMLStripCharFilter |
 | [org.apache.lucene.analysis.charfilter.TestHTMLStripCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/charfilter/TestHTMLStripCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.TestHTMLStripCharFilterFactory |
 | [org.apache.lucene.analysis.charfilter.TestMappingCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/charfilter/TestMappingCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.TestMappingCharFilterFactory |
@@ -1030,9 +1020,6 @@
 | [org.apache.lucene.analysis.core.TestUnicodeWhitespaceTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestUnicodeWhitespaceTokenizer.java) | org.gnit.lucenekmp.analysis.core.TestUnicodeWhitespaceTokenizer |
 | [org.apache.lucene.analysis.core.TestWhitespaceAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestWhitespaceAnalyzer.java) | org.gnit.lucenekmp.analysis.core.TestWhitespaceAnalyzer |
 | [org.apache.lucene.analysis.custom.TestCustomAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/custom/TestCustomAnalyzer.java) | org.gnit.lucenekmp.analysis.custom.TestCustomAnalyzer |
-| [org.apache.lucene.analysis.cz.TestCzechAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/cz/TestCzechAnalyzer.java) | org.gnit.lucenekmp.analysis.cz.TestCzechAnalyzer |
-| [org.apache.lucene.analysis.cz.TestCzechStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/cz/TestCzechStemFilterFactory.java) | org.gnit.lucenekmp.analysis.cz.TestCzechStemFilterFactory |
-| [org.apache.lucene.analysis.cz.TestCzechStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/cz/TestCzechStemmer.java) | org.gnit.lucenekmp.analysis.cz.TestCzechStemmer |
 | [org.apache.lucene.analysis.da.TestDanishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/da/TestDanishAnalyzer.java) | org.gnit.lucenekmp.analysis.da.TestDanishAnalyzer |
 | [org.apache.lucene.analysis.email.TestUAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailAnalyzer |
 | [org.apache.lucene.analysis.email.TestUAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailTokenizer |
