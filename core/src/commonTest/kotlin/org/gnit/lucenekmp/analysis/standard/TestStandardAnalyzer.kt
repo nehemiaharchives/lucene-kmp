@@ -5,9 +5,15 @@ import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.Tokenizer
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
+import org.gnit.lucenekmp.document.Document
+import org.gnit.lucenekmp.document.Field
+import org.gnit.lucenekmp.document.TextField
+import org.gnit.lucenekmp.index.IndexWriter
+import org.gnit.lucenekmp.index.IndexWriterConfig
 import org.gnit.lucenekmp.jdkport.Character
 import org.gnit.lucenekmp.jdkport.Reader
 import org.gnit.lucenekmp.jdkport.StringReader
+import org.gnit.lucenekmp.store.ByteBuffersDirectory
 import org.gnit.lucenekmp.tests.analysis.BaseTokenStreamTestCase
 import org.gnit.lucenekmp.tests.analysis.MockGraphTokenFilter
 import org.gnit.lucenekmp.tests.analysis.standard.EmojiTokenizationTestUnicode_12_1
@@ -284,6 +290,23 @@ class TestStandardAnalyzer : BaseTokenStreamTestCase() {
         assertAnalyzesTo(a, "Jim's", arrayOf("Jim's"))
         assertAnalyzesTo(a, "don't", arrayOf("don't"))
         assertAnalyzesTo(a, "O'Reilly's", arrayOf("O'Reilly's"))
+    }
+
+    // This test is lucene-kmp only. based on https://github.com/nehemiaharchives/lucene-kmp/issues/244
+    @Test
+    @Throws(Exception::class)
+    fun testIndexingWithRightSingleQuotationMark() {
+        val analyzer = StandardAnalyzer()
+        val directory = ByteBuffersDirectory()
+        val writer = IndexWriter(directory, IndexWriterConfig(analyzer))
+
+        val doc = Document()
+        doc.add(TextField("text", "God’s Spirit", Field.Store.YES))
+        writer.addDocument(doc)
+
+        writer.close()
+        directory.close()
+        analyzer.close()
     }
 
     @Test
