@@ -1,5 +1,6 @@
 package org.gnit.lucenekmp.util
 
+import dev.scottpierce.envvar.EnvVar
 import okio.FileSystem
 import okio.IOException
 import okio.Path
@@ -31,7 +32,8 @@ class ClasspathResourceLoader(private val clazz: KClass<*>? = null) : ResourceLo
             }
         }
 
-        val roots = listOf(
+        val roots = listOfNotNull(
+            EnvVar["analysis.common.testresourcesdir"],
             "",
             "src/commonTest/resources",
             "src/commonMain/resources",

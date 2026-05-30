@@ -155,15 +155,24 @@ subprojects {
         into(layout.buildDirectory.dir("generated/test-resources/index"))
     }
 
+    val syncAnalysisCommonTestResources = tasks.register<Sync>("syncAnalysisCommonTestResources") {
+        from(rootProject.layout.projectDirectory.dir("analysis/common/src/commonTest/resources"))
+        into(layout.buildDirectory.dir("generated/test-resources/analysis-common"))
+    }
+
     tasks.withType<KotlinNativeTest>().configureEach {
         dependsOn(syncIndexTestResources)
+        dependsOn(syncAnalysisCommonTestResources)
         val indexResourcesDir = syncIndexTestResources.get().destinationDir.absolutePath
+        val analysisCommonResourcesDir = syncAnalysisCommonTestResources.get().destinationDir.absolutePath
 
         // iOS simulator tests are launched via `simctl spawn`; forward env to child process.
         environment("tests.linedocsfile", testLineDocsPath)
         environment("SIMCTL_CHILD_tests.linedocsfile", testLineDocsPath)
         environment("tests.indexresourcesdir", indexResourcesDir)
         environment("SIMCTL_CHILD_tests.indexresourcesdir", indexResourcesDir)
+        environment("analysis.common.testresourcesdir", analysisCommonResourcesDir)
+        environment("SIMCTL_CHILD_analysis.common.testresourcesdir", analysisCommonResourcesDir)
     }
 
     tasks.withType<AbstractTestTask>().configureEach {
