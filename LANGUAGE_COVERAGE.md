@@ -106,6 +106,7 @@
 |   5,830,000 | Wolayttattuwa                    |  wal  | ET                            |                                                           | TBD                                                        |
 |   5,530,000 | Minangkabau                      |  min  | MY                            |                                                           | TBD                                                        |
 |   5,500,000 | Danish (analysis:common)         |  da   | DK                            | org.apache.lucene.analysis.da.DanishAnalyzer              | org.gnit.lucenekmp.analysis.da.DanishAnalyzer              |
+|   5,500,000 | Finnish (analysis:common)        |  fi   | FI                            | org.apache.lucene.analysis.fi.FinnishAnalyzer             | Need to be covered                                         |
 |   5,430,000 | Sukuma                           |  suk  | TZ                            |                                                           | TBD                                                        |
 |   5,225,552 | Lao                              |  lo   | LA                            |                                                           | Need to be covered                                         |
 |   5,200,000 | Norwegian (analysis:common)      |  no   | NO                            | org.apache.lucene.analysis.no.NorwegianAnalyzer           | org.gnit.lucenekmp.analysis.no.NorwegianAnalyzer           |
@@ -139,5 +140,6 @@
 |   3,160,000 | Dagbanli                         |  dag  | GH                            |                                                           | TBD                                                        |
 |   3,100,000 | Waray                            |  war  | PH                            |                                                           | TBD                                                        |
 |   1,100,000 | Estonian (analysis:common)       |  et   | EE                            | org.apache.lucene.analysis.et.EstonianAnalyzer            | org.gnit.lucenekmp.analysis.et.EstonianAnalyzer            |
+|     750,000 | Basque (analysis:common)         |  eu   | ES FR                         | org.apache.lucene.analysis.eu.BasqueAnalyzer              | org.gnit.lucenekmp.analysis.eu.BasqueAnalyzer              |
  
 Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218` ISO 639-1 code), queried on 2026-05-25.
