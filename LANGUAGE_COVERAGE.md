@@ -105,6 +105,7 @@
 |   6,000,000 | Slovak                           |  sk   | SK                            |                                                           | Need to be covered                                         |
 |   5,830,000 | Wolayttattuwa                    |  wal  | ET                            |                                                           | TBD                                                        |
 |   5,530,000 | Minangkabau                      |  min  | MY                            |                                                           | TBD                                                        |
+|   5,500,000 | Danish (analysis:common)         |  da   | DK                            | org.apache.lucene.analysis.da.DanishAnalyzer              | org.gnit.lucenekmp.analysis.da.DanishAnalyzer              |
 |   5,430,000 | Sukuma                           |  suk  | TZ                            |                                                           | TBD                                                        |
 |   5,225,552 | Lao                              |  lo   | LA                            |                                                           | Need to be covered                                         |
 |   5,200,000 | Norwegian (analysis:common)      |  no   | NO                            | org.apache.lucene.analysis.no.NorwegianAnalyzer           | org.gnit.lucenekmp.analysis.no.NorwegianAnalyzer           |
