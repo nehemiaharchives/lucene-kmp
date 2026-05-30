@@ -5,6 +5,9 @@ import org.gnit.lucenekmp.analysis.ar.ArabicStemFilterFactory
 import org.gnit.lucenekmp.analysis.bn.BengaliNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.bn.BengaliStemFilterFactory
 import org.gnit.lucenekmp.analysis.br.BrazilianStemFilterFactory
+import org.gnit.lucenekmp.analysis.cjk.CJKBigramFilterFactory
+import org.gnit.lucenekmp.analysis.cjk.CJKWidthCharFilterFactory
+import org.gnit.lucenekmp.analysis.cjk.CJKWidthFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniStemFilterFactory
 import org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilterFactory
@@ -55,6 +58,11 @@ object AnalysisCommonFactories {
         if (initialized) return
         AnalysisSPIRegistry.register(
             CharFilterFactory::class,
+            CJKWidthCharFilterFactory.NAME,
+            CJKWidthCharFilterFactory::class
+        ) { args -> CJKWidthCharFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            CharFilterFactory::class,
             HTMLStripCharFilterFactory.NAME,
             HTMLStripCharFilterFactory::class
         ) { args -> HTMLStripCharFilterFactory(args) }
@@ -103,6 +111,16 @@ object AnalysisCommonFactories {
             BrazilianStemFilterFactory.NAME,
             BrazilianStemFilterFactory::class
         ) { args -> BrazilianStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            CJKBigramFilterFactory.NAME,
+            CJKBigramFilterFactory::class
+        ) { args -> CJKBigramFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            CJKWidthFilterFactory.NAME,
+            CJKWidthFilterFactory::class
+        ) { args -> CJKWidthFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             SoraniNormalizationFilterFactory.NAME,
