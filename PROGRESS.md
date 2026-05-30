@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1657 | 69% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1660 | 69% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -75,7 +75,7 @@
 |     org.apache.lucene.analysis.boost |         org.gnit.lucenekmp.analysis.boost | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.analysis.br |         org.gnit.lucenekmp.analysis.br | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.ca |         org.gnit.lucenekmp.analysis.ca | 1 | 1 | 100% | [x] |
-|     org.apache.lucene.analysis.charfilter |         org.gnit.lucenekmp.analysis.charfilter | 6 | 3 | 50% | [ ] |
+|     org.apache.lucene.analysis.charfilter |         org.gnit.lucenekmp.analysis.charfilter | 6 | 6 | 100% | [x] |
 |     org.apache.lucene.analysis.cjk |         org.gnit.lucenekmp.analysis.cjk | 7 | 3 | 42% | [ ] |
 |     org.apache.lucene.analysis.ckb |         org.gnit.lucenekmp.analysis.ckb | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.classic |         org.gnit.lucenekmp.analysis.classic | 6 | 0 | 0% | [ ] |
@@ -261,9 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.charfilter.HTMLStripCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/charfilter/HTMLStripCharFilter.java) | org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilter |
-| [org.apache.lucene.analysis.charfilter.HTMLStripCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/charfilter/HTMLStripCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilterFactory |
-| [org.apache.lucene.analysis.charfilter.MappingCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/charfilter/MappingCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.MappingCharFilterFactory |
 | [org.apache.lucene.analysis.cjk.CJKAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cjk/CJKAnalyzer.java) | org.gnit.lucenekmp.analysis.cjk.CJKAnalyzer |
 | [org.apache.lucene.analysis.cjk.CJKBigramFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cjk/CJKBigramFilter.java) | org.gnit.lucenekmp.analysis.cjk.CJKBigramFilter |
 | [org.apache.lucene.analysis.cjk.CJKBigramFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/cjk/CJKBigramFilterFactory.java) | org.gnit.lucenekmp.analysis.cjk.CJKBigramFilterFactory |
@@ -839,7 +836,7 @@
 |     org.apache.lucene.analysis.boost | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.br | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.ca | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.charfilter | 4 | 1 | 25% |
+|     org.apache.lucene.analysis.charfilter | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.cjk | 7 | 0 | 0% |
 |     org.apache.lucene.analysis.ckb | 5 | 5 | 100% |
 |     org.apache.lucene.analysis.classic | 2 | 0 | 0% |
@@ -974,7 +971,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1009 | 85% |
+| Total | 1186 | 1012 | 85% |
 
 
 ## Tests To Port
@@ -986,9 +983,6 @@
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
 | [org.apache.lucene.analysis.boost.TestDelimitedBoostTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/boost/TestDelimitedBoostTokenFilter.java) | org.gnit.lucenekmp.analysis.boost.TestDelimitedBoostTokenFilter |
-| [org.apache.lucene.analysis.charfilter.TestHTMLStripCharFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/charfilter/TestHTMLStripCharFilter.java) | org.gnit.lucenekmp.analysis.charfilter.TestHTMLStripCharFilter |
-| [org.apache.lucene.analysis.charfilter.TestHTMLStripCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/charfilter/TestHTMLStripCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.TestHTMLStripCharFilterFactory |
-| [org.apache.lucene.analysis.charfilter.TestMappingCharFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/charfilter/TestMappingCharFilterFactory.java) | org.gnit.lucenekmp.analysis.charfilter.TestMappingCharFilterFactory |
 | [org.apache.lucene.analysis.cjk.TestCJKAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/cjk/TestCJKAnalyzer.java) | org.gnit.lucenekmp.analysis.cjk.TestCJKAnalyzer |
 | [org.apache.lucene.analysis.cjk.TestCJKBigramFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/cjk/TestCJKBigramFilter.java) | org.gnit.lucenekmp.analysis.cjk.TestCJKBigramFilter |
 | [org.apache.lucene.analysis.cjk.TestCJKBigramFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/cjk/TestCJKBigramFilterFactory.java) | org.gnit.lucenekmp.analysis.cjk.TestCJKBigramFilterFactory |
