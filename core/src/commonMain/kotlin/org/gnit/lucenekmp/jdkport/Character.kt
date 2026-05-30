@@ -622,6 +622,30 @@ class Character {
         }
 
         /**
+         * Determines if the given `char` value is a
+         * [
+         * Unicode low-surrogate code unit](http://www.unicode.org/glossary/#low_surrogate_code_unit)
+         * (also known as *trailing-surrogate code unit*).
+         *
+         *
+         * Such values do not represent characters by themselves,
+         * but are used in the representation of
+         * [supplementary characters](#supplementary)
+         * in the UTF-16 encoding.
+         *
+         * @param  ch the `char` value to be tested.
+         * @return `true` if the `char` value is between
+         * [.MIN_LOW_SURROGATE] and
+         * [.MAX_LOW_SURROGATE] inclusive;
+         * `false` otherwise.
+         * @see Character.isHighSurrogate
+         * @since  1.5
+         */
+        fun isLowSurrogate(ch: Char): Boolean {
+            return ch >= MIN_LOW_SURROGATE && ch.code < (MAX_LOW_SURROGATE.code + 1)
+        }
+
+        /**
          * Converts the character (Unicode code point) argument to
          * uppercase using case mapping information from the UnicodeData
          * file.

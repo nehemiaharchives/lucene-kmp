@@ -7,6 +7,8 @@ import org.gnit.lucenekmp.analysis.bn.BengaliStemFilterFactory
 import org.gnit.lucenekmp.analysis.br.BrazilianStemFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniStemFilterFactory
+import org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilterFactory
+import org.gnit.lucenekmp.analysis.charfilter.MappingCharFilterFactory
 import org.gnit.lucenekmp.analysis.cz.CzechStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
@@ -51,6 +53,16 @@ object AnalysisCommonFactories {
 
     fun ensureInitialized() {
         if (initialized) return
+        AnalysisSPIRegistry.register(
+            CharFilterFactory::class,
+            HTMLStripCharFilterFactory.NAME,
+            HTMLStripCharFilterFactory::class
+        ) { args -> HTMLStripCharFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            CharFilterFactory::class,
+            MappingCharFilterFactory.NAME,
+            MappingCharFilterFactory::class
+        ) { args -> MappingCharFilterFactory(args) }
         AnalysisSPIRegistry.register(
             CharFilterFactory::class,
             PersianCharFilterFactory.NAME,

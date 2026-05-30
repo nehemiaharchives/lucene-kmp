@@ -48,7 +48,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
      * @param ignoreCase `false` if and only if the set should be case sensitive otherwise
      * `true`.
      */
-    constructor(c: MutableMap<Any, V>, ignoreCase: Boolean) : this(c.size, ignoreCase) {
+    constructor(c: Map<Any, V>, ignoreCase: Boolean) : this(c.size, ignoreCase) {
         putAll(c)
     }
 

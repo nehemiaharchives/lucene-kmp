@@ -42,6 +42,14 @@ class CharacterTest {
     }
 
     @Test
+    fun testIsLowSurrogate() {
+        assertTrue(Character.isLowSurrogate('\uDC00'))
+        assertTrue(Character.isLowSurrogate('\uDFFF'))
+        assertFalse(Character.isLowSurrogate('\uD800'))
+        assertFalse(Character.isLowSurrogate('A'))
+    }
+
+    @Test
     fun testCompare() {
         assertEquals(0, Character.compare('a', 'a'))
         assertTrue(Character.compare('a', 'b') < 0)
