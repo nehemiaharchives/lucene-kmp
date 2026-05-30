@@ -128,15 +128,16 @@
 |   4,000,000 | S'gaw Karen                      |  ksw  | TH MM                         |                                                           | TBD                                                        |
 |   4,000,000 | Merwari                          |  wry  | IN                            |                                                           | TBD                                                        |
 |   4,000,000 | Lithuanian (analysis:common)     |  lt   | LT                            | org.apache.lucene.analysis.lt.LithuanianAnalyzer          | org.gnit.lucenekmp.analysis.lt.LithuanianAnalyzer          |
-|   4,000,000 | Bokmål                           |  nb   | NO                            |                                                           |                                                            |
-|   3,893,000 | Kamba                            |  kam  | KE                            |                                                           |                                                            |
-|   3,763,900 | Hassaniya Arabic                 |  mey  | DZ MA ML MR                   |                                                           |                                                            |
-|   3,633,900 | Goan Konkani                     |  gom  | IN                            |                                                           |                                                            |
-|   3,600,000 | Bemba                            |  bem  | CD ZM                         |                                                           |                                                            |
-|   3,500,032 | Acehnese                         |  ace  | ID                            |                                                           |                                                            |
-|   3,500,000 | Banjar                           |  bjn  | ID                            |                                                           |                                                            |
-|   3,270,000 | Mazanderani                      |  mzn  | IR                            |                                                           |                                                            |
-|   3,160,000 | Dagbanli                         |  dag  | GH                            |                                                           |                                                            |
-|   3,100,000 | Waray                            |  war  | PH                            |                                                           |                                                            |
-
+|   4,000,000 | Bokmål                           |  nb   | NO                            |                                                           | TBD                                                        |
+|   3,893,000 | Kamba                            |  kam  | KE                            |                                                           | TBD                                                        |
+|   3,763,900 | Hassaniya Arabic                 |  mey  | DZ MA ML MR                   |                                                           | TBD                                                        |
+|   3,633,900 | Goan Konkani                     |  gom  | IN                            |                                                           | TBD                                                        |
+|   3,600,000 | Bemba                            |  bem  | CD ZM                         |                                                           | TBD                                                        |
+|   3,500,032 | Acehnese                         |  ace  | ID                            |                                                           | TBD                                                        |
+|   3,500,000 | Banjar                           |  bjn  | ID                            |                                                           | TBD                                                        |
+|   3,270,000 | Mazanderani                      |  mzn  | IR                            |                                                           | TBD                                                        |
+|   3,160,000 | Dagbanli                         |  dag  | GH                            |                                                           | TBD                                                        |
+|   3,100,000 | Waray                            |  war  | PH                            |                                                           | TBD                                                        |
+|   1,100,000 | Estonian (analysis:common)       |  et   | EE                            | org.apache.lucene.analysis.et.EstonianAnalyzer            | org.gnit.lucenekmp.analysis.et.EstonianAnalyzer            |
+ 
 Population source: Wikidata SPARQL (`P1098` native-speaker count, optional `P218` ISO 639-1 code), queried on 2026-05-25.
