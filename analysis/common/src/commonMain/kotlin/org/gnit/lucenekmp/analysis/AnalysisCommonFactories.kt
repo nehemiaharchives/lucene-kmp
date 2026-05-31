@@ -16,6 +16,7 @@ import org.gnit.lucenekmp.analysis.commongrams.CommonGramsFilterFactory
 import org.gnit.lucenekmp.analysis.commongrams.CommonGramsQueryFilterFactory
 import org.gnit.lucenekmp.analysis.compound.DictionaryCompoundWordTokenFilterFactory
 import org.gnit.lucenekmp.analysis.compound.HyphenationCompoundWordTokenFilterFactory
+import org.gnit.lucenekmp.analysis.core.DecimalDigitFilterFactory
 import org.gnit.lucenekmp.analysis.cz.CzechStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
@@ -160,6 +161,11 @@ object AnalysisCommonFactories {
             CzechStemFilterFactory.NAME,
             CzechStemFilterFactory::class
         ) { args -> CzechStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            DecimalDigitFilterFactory.NAME,
+            DecimalDigitFilterFactory::class
+        ) { args -> DecimalDigitFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             ElisionFilterFactory.NAME,

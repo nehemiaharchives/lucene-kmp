@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1690 | 70% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1691 | 70% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -84,7 +84,7 @@
 |     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 5 | 100% | [x] |
 |       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 8 | 100% | [x] |
-|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 6 | 25% | [ ] |
+|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 7 | 29% | [ ] |
 |     org.apache.lucene.analysis.custom |         org.gnit.lucenekmp.analysis.custom | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.da |         org.gnit.lucenekmp.analysis.da | 1 | 1 | 100% | [x] |
@@ -261,7 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.core.DecimalDigitFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/DecimalDigitFilterFactory.java) | org.gnit.lucenekmp.analysis.core.DecimalDigitFilterFactory |
 | [org.apache.lucene.analysis.core.FlattenGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/FlattenGraphFilter.java) | org.gnit.lucenekmp.analysis.core.FlattenGraphFilter |
 | [org.apache.lucene.analysis.core.FlattenGraphFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/FlattenGraphFilterFactory.java) | org.gnit.lucenekmp.analysis.core.FlattenGraphFilterFactory |
 | [org.apache.lucene.analysis.core.KeywordAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/KeywordAnalyzer.java) | org.gnit.lucenekmp.analysis.core.KeywordAnalyzer |
@@ -813,7 +812,7 @@
 |       org.apache.lucene.analysis.cn.smart | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.commongrams | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.compound | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.core | 15 | 0 | 0% |
+|     org.apache.lucene.analysis.core | 15 | 2 | 13% |
 |     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.cz | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.da | 1 | 1 | 100% |
@@ -941,7 +940,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1030 | 86% |
+| Total | 1186 | 1032 | 87% |
 
 
 ## Tests To Port
@@ -955,8 +954,6 @@
 | [org.apache.lucene.analysis.boost.TestDelimitedBoostTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/boost/TestDelimitedBoostTokenFilter.java) | org.gnit.lucenekmp.analysis.boost.TestDelimitedBoostTokenFilter |
 | [org.apache.lucene.analysis.core.TestAnalyzers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestAnalyzers.java) | org.gnit.lucenekmp.analysis.core.TestAnalyzers |
 | [org.apache.lucene.analysis.core.TestCoreFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestCoreFactories.java) | org.gnit.lucenekmp.analysis.core.TestCoreFactories |
-| [org.apache.lucene.analysis.core.TestDecimalDigitFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDecimalDigitFilter.java) | org.gnit.lucenekmp.analysis.core.TestDecimalDigitFilter |
-| [org.apache.lucene.analysis.core.TestDecimalDigitFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDecimalDigitFilterFactory.java) | org.gnit.lucenekmp.analysis.core.TestDecimalDigitFilterFactory |
 | [org.apache.lucene.analysis.core.TestDuelingAnalyzers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDuelingAnalyzers.java) | org.gnit.lucenekmp.analysis.core.TestDuelingAnalyzers |
 | [org.apache.lucene.analysis.core.TestFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestFactories.java) | org.gnit.lucenekmp.analysis.core.TestFactories |
 | [org.apache.lucene.analysis.core.TestFlattenGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestFlattenGraphFilter.java) | org.gnit.lucenekmp.analysis.core.TestFlattenGraphFilter |
