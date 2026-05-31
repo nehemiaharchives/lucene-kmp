@@ -48,4 +48,8 @@ class WhitespaceTokenizer : CharTokenizer {
     override fun isTokenChar(c: Int): Boolean {
         return !c.toChar().isWhitespace()
     }
+
+    companion object {
+        const val DEFAULT_MAX_WORD_LEN: Int = CharTokenizer.DEFAULT_MAX_WORD_LEN
+    }
 }

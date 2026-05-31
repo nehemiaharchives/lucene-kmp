@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1696 | 70% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1708 | 71% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -84,7 +84,7 @@
 |     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 5 | 100% | [x] |
 |       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 8 | 100% | [x] |
-|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 10 | 41% | [ ] |
+|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 22 | 91% | [ ] |
 |     org.apache.lucene.analysis.custom |         org.gnit.lucenekmp.analysis.custom | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.da |         org.gnit.lucenekmp.analysis.da | 1 | 1 | 100% | [x] |
@@ -261,20 +261,8 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.core.LetterTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LetterTokenizerFactory.java) | org.gnit.lucenekmp.analysis.core.LetterTokenizerFactory |
 | [org.apache.lucene.analysis.core.LowerCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilter.java) | org.gnit.lucenekmp.analysis.core.LowerCaseFilter |
-| [org.apache.lucene.analysis.core.LowerCaseFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilterFactory.java) | org.gnit.lucenekmp.analysis.core.LowerCaseFilterFactory |
-| [org.apache.lucene.analysis.core.StopAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/StopAnalyzer.java) | org.gnit.lucenekmp.analysis.core.StopAnalyzer |
 | [org.apache.lucene.analysis.core.StopFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/StopFilter.java) | org.gnit.lucenekmp.analysis.core.StopFilter |
-| [org.apache.lucene.analysis.core.StopFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/StopFilterFactory.java) | org.gnit.lucenekmp.analysis.core.StopFilterFactory |
-| [org.apache.lucene.analysis.core.TypeTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/TypeTokenFilter.java) | org.gnit.lucenekmp.analysis.core.TypeTokenFilter |
-| [org.apache.lucene.analysis.core.TypeTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/TypeTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.core.TypeTokenFilterFactory |
-| [org.apache.lucene.analysis.core.UnicodeWhitespaceAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/UnicodeWhitespaceAnalyzer.java) | org.gnit.lucenekmp.analysis.core.UnicodeWhitespaceAnalyzer |
-| [org.apache.lucene.analysis.core.UnicodeWhitespaceTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/UnicodeWhitespaceTokenizer.java) | org.gnit.lucenekmp.analysis.core.UnicodeWhitespaceTokenizer |
-| [org.apache.lucene.analysis.core.UpperCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/UpperCaseFilter.java) | org.gnit.lucenekmp.analysis.core.UpperCaseFilter |
-| [org.apache.lucene.analysis.core.UpperCaseFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/UpperCaseFilterFactory.java) | org.gnit.lucenekmp.analysis.core.UpperCaseFilterFactory |
-| [org.apache.lucene.analysis.core.WhitespaceAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/WhitespaceAnalyzer.java) | org.gnit.lucenekmp.analysis.core.WhitespaceAnalyzer |
-| [org.apache.lucene.analysis.core.WhitespaceTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/WhitespaceTokenizerFactory.java) | org.gnit.lucenekmp.analysis.core.WhitespaceTokenizerFactory |
 | [org.apache.lucene.analysis.custom.CustomAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/custom/CustomAnalyzer.java) | org.gnit.lucenekmp.analysis.custom.CustomAnalyzer |
 | [org.apache.lucene.analysis.email.UAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailAnalyzer |
 | [org.apache.lucene.analysis.email.UAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizer |
@@ -807,7 +795,7 @@
 |       org.apache.lucene.analysis.cn.smart | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.commongrams | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.compound | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.core | 15 | 5 | 33% |
+|     org.apache.lucene.analysis.core | 15 | 11 | 73% |
 |     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.cz | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.da | 1 | 1 | 100% |
@@ -935,7 +923,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1035 | 87% |
+| Total | 1186 | 1041 | 87% |
 
 
 ## Tests To Port
@@ -951,12 +939,6 @@
 | [org.apache.lucene.analysis.core.TestCoreFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestCoreFactories.java) | org.gnit.lucenekmp.analysis.core.TestCoreFactories |
 | [org.apache.lucene.analysis.core.TestDuelingAnalyzers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDuelingAnalyzers.java) | org.gnit.lucenekmp.analysis.core.TestDuelingAnalyzers |
 | [org.apache.lucene.analysis.core.TestFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestFactories.java) | org.gnit.lucenekmp.analysis.core.TestFactories |
-| [org.apache.lucene.analysis.core.TestStopAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestStopAnalyzer.java) | org.gnit.lucenekmp.analysis.core.TestStopAnalyzer |
-| [org.apache.lucene.analysis.core.TestStopFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestStopFilterFactory.java) | org.gnit.lucenekmp.analysis.core.TestStopFilterFactory |
-| [org.apache.lucene.analysis.core.TestTypeTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestTypeTokenFilter.java) | org.gnit.lucenekmp.analysis.core.TestTypeTokenFilter |
-| [org.apache.lucene.analysis.core.TestTypeTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestTypeTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.core.TestTypeTokenFilterFactory |
-| [org.apache.lucene.analysis.core.TestUnicodeWhitespaceTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestUnicodeWhitespaceTokenizer.java) | org.gnit.lucenekmp.analysis.core.TestUnicodeWhitespaceTokenizer |
-| [org.apache.lucene.analysis.core.TestWhitespaceAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestWhitespaceAnalyzer.java) | org.gnit.lucenekmp.analysis.core.TestWhitespaceAnalyzer |
 | [org.apache.lucene.analysis.custom.TestCustomAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/custom/TestCustomAnalyzer.java) | org.gnit.lucenekmp.analysis.custom.TestCustomAnalyzer |
 | [org.apache.lucene.analysis.email.TestUAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailAnalyzer |
 | [org.apache.lucene.analysis.email.TestUAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailTokenizer |
