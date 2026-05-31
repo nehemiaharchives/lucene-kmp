@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1677 | 69% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1690 | 70% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -82,8 +82,8 @@
 |       org.apache.lucene.analysis.cn.smart |           org.gnit.lucenekmp.analysis.cn.smart | 8 | 8 | 100% | [x] |
 |         org.apache.lucene.analysis.cn.smart.hhmm |             org.gnit.lucenekmp.analysis.cn.smart.hhmm | 10 | 10 | 100% | [x] |
 |     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 4 | 100% | [x] |
-|     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 0 | 0% | [ ] |
-|       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 5 | 100% | [x] |
+|       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 8 | 100% | [x] |
 |     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 6 | 25% | [ ] |
 |     org.apache.lucene.analysis.custom |         org.gnit.lucenekmp.analysis.custom | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 4 | 100% | [x] |
@@ -261,19 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.compound.CompoundWordTokenFilterBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/CompoundWordTokenFilterBase.java) | org.gnit.lucenekmp.analysis.compound.CompoundWordTokenFilterBase |
-| [org.apache.lucene.analysis.compound.DictionaryCompoundWordTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/DictionaryCompoundWordTokenFilter.java) | org.gnit.lucenekmp.analysis.compound.DictionaryCompoundWordTokenFilter |
-| [org.apache.lucene.analysis.compound.DictionaryCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/DictionaryCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.DictionaryCompoundWordTokenFilterFactory |
-| [org.apache.lucene.analysis.compound.HyphenationCompoundWordTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/HyphenationCompoundWordTokenFilter.java) | org.gnit.lucenekmp.analysis.compound.HyphenationCompoundWordTokenFilter |
-| [org.apache.lucene.analysis.compound.HyphenationCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/HyphenationCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.HyphenationCompoundWordTokenFilterFactory |
-| [org.apache.lucene.analysis.compound.hyphenation.ByteVector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/ByteVector.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.ByteVector |
-| [org.apache.lucene.analysis.compound.hyphenation.CharVector](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/CharVector.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.CharVector |
-| [org.apache.lucene.analysis.compound.hyphenation.Hyphen](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/Hyphen.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.Hyphen |
-| [org.apache.lucene.analysis.compound.hyphenation.Hyphenation](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/Hyphenation.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.Hyphenation |
-| [org.apache.lucene.analysis.compound.hyphenation.HyphenationTree](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/HyphenationTree.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.HyphenationTree |
-| [org.apache.lucene.analysis.compound.hyphenation.PatternConsumer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/PatternConsumer.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.PatternConsumer |
-| [org.apache.lucene.analysis.compound.hyphenation.PatternParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/PatternParser.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.PatternParser |
-| [org.apache.lucene.analysis.compound.hyphenation.TernaryTree](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/hyphenation/TernaryTree.java) | org.gnit.lucenekmp.analysis.compound.hyphenation.TernaryTree |
 | [org.apache.lucene.analysis.core.DecimalDigitFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/DecimalDigitFilterFactory.java) | org.gnit.lucenekmp.analysis.core.DecimalDigitFilterFactory |
 | [org.apache.lucene.analysis.core.FlattenGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/FlattenGraphFilter.java) | org.gnit.lucenekmp.analysis.core.FlattenGraphFilter |
 | [org.apache.lucene.analysis.core.FlattenGraphFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/FlattenGraphFilterFactory.java) | org.gnit.lucenekmp.analysis.core.FlattenGraphFilterFactory |
@@ -825,7 +812,7 @@
 |     org.apache.lucene.analysis.classic | 2 | 2 | 100% |
 |       org.apache.lucene.analysis.cn.smart | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.commongrams | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.compound | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.compound | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.core | 15 | 0 | 0% |
 |     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.cz | 3 | 3 | 100% |
@@ -954,7 +941,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1027 | 86% |
+| Total | 1186 | 1030 | 86% |
 
 
 ## Tests To Port
@@ -966,9 +953,6 @@
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
 | [org.apache.lucene.analysis.boost.TestDelimitedBoostTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/boost/TestDelimitedBoostTokenFilter.java) | org.gnit.lucenekmp.analysis.boost.TestDelimitedBoostTokenFilter |
-| [org.apache.lucene.analysis.compound.TestCompoundWordTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/compound/TestCompoundWordTokenFilter.java) | org.gnit.lucenekmp.analysis.compound.TestCompoundWordTokenFilter |
-| [org.apache.lucene.analysis.compound.TestDictionaryCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/compound/TestDictionaryCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.TestDictionaryCompoundWordTokenFilterFactory |
-| [org.apache.lucene.analysis.compound.TestHyphenationCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/compound/TestHyphenationCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.TestHyphenationCompoundWordTokenFilterFactory |
 | [org.apache.lucene.analysis.core.TestAnalyzers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestAnalyzers.java) | org.gnit.lucenekmp.analysis.core.TestAnalyzers |
 | [org.apache.lucene.analysis.core.TestCoreFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestCoreFactories.java) | org.gnit.lucenekmp.analysis.core.TestCoreFactories |
 | [org.apache.lucene.analysis.core.TestDecimalDigitFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDecimalDigitFilter.java) | org.gnit.lucenekmp.analysis.core.TestDecimalDigitFilter |

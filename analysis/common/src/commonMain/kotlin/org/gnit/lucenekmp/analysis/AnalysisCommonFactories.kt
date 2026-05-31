@@ -14,6 +14,8 @@ import org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilterFactory
 import org.gnit.lucenekmp.analysis.charfilter.MappingCharFilterFactory
 import org.gnit.lucenekmp.analysis.commongrams.CommonGramsFilterFactory
 import org.gnit.lucenekmp.analysis.commongrams.CommonGramsQueryFilterFactory
+import org.gnit.lucenekmp.analysis.compound.DictionaryCompoundWordTokenFilterFactory
+import org.gnit.lucenekmp.analysis.compound.HyphenationCompoundWordTokenFilterFactory
 import org.gnit.lucenekmp.analysis.cz.CzechStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
@@ -133,6 +135,16 @@ object AnalysisCommonFactories {
             CommonGramsQueryFilterFactory.NAME,
             CommonGramsQueryFilterFactory::class
         ) { args -> CommonGramsQueryFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            DictionaryCompoundWordTokenFilterFactory.NAME,
+            DictionaryCompoundWordTokenFilterFactory::class
+        ) { args -> DictionaryCompoundWordTokenFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            HyphenationCompoundWordTokenFilterFactory.NAME,
+            HyphenationCompoundWordTokenFilterFactory::class
+        ) { args -> HyphenationCompoundWordTokenFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             SoraniNormalizationFilterFactory.NAME,

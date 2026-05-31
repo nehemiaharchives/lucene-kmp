@@ -1,0 +1,1 @@
+org.gnit.lucenekmp.analysis.compound package
