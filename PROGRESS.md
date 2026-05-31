@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1691 | 70% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1696 | 70% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -84,7 +84,7 @@
 |     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 5 | 100% | [x] |
 |       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 8 | 100% | [x] |
-|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 7 | 29% | [ ] |
+|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 10 | 41% | [ ] |
 |     org.apache.lucene.analysis.custom |         org.gnit.lucenekmp.analysis.custom | 1 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.da |         org.gnit.lucenekmp.analysis.da | 1 | 1 | 100% | [x] |
@@ -146,7 +146,7 @@
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.stempel |         org.gnit.lucenekmp.analysis.stempel | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.sv |         org.gnit.lucenekmp.analysis.sv | 7 | 7 | 100% | [x] |
-|     org.apache.lucene.analysis.synonym |         org.gnit.lucenekmp.analysis.synonym | 7 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.synonym |         org.gnit.lucenekmp.analysis.synonym | 7 | 2 | 28% | [ ] |
 |       org.apache.lucene.analysis.synonym.word2vec |           org.gnit.lucenekmp.analysis.synonym.word2vec | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.ta |         org.gnit.lucenekmp.analysis.ta | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.te |         org.gnit.lucenekmp.analysis.te | 7 | 7 | 100% | [x] |
@@ -261,9 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.core.FlattenGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/FlattenGraphFilter.java) | org.gnit.lucenekmp.analysis.core.FlattenGraphFilter |
-| [org.apache.lucene.analysis.core.FlattenGraphFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/FlattenGraphFilterFactory.java) | org.gnit.lucenekmp.analysis.core.FlattenGraphFilterFactory |
-| [org.apache.lucene.analysis.core.KeywordAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/KeywordAnalyzer.java) | org.gnit.lucenekmp.analysis.core.KeywordAnalyzer |
 | [org.apache.lucene.analysis.core.LetterTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LetterTokenizerFactory.java) | org.gnit.lucenekmp.analysis.core.LetterTokenizerFactory |
 | [org.apache.lucene.analysis.core.LowerCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilter.java) | org.gnit.lucenekmp.analysis.core.LowerCaseFilter |
 | [org.apache.lucene.analysis.core.LowerCaseFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilterFactory.java) | org.gnit.lucenekmp.analysis.core.LowerCaseFilterFactory |
@@ -506,9 +503,7 @@
 | [org.apache.lucene.analysis.synonym.SolrSynonymParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/SolrSynonymParser.java) | org.gnit.lucenekmp.analysis.synonym.SolrSynonymParser |
 | [org.apache.lucene.analysis.synonym.SynonymFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/SynonymFilter.java) | org.gnit.lucenekmp.analysis.synonym.SynonymFilter |
 | [org.apache.lucene.analysis.synonym.SynonymFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/SynonymFilterFactory.java) | org.gnit.lucenekmp.analysis.synonym.SynonymFilterFactory |
-| [org.apache.lucene.analysis.synonym.SynonymGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/SynonymGraphFilter.java) | org.gnit.lucenekmp.analysis.synonym.SynonymGraphFilter |
 | [org.apache.lucene.analysis.synonym.SynonymGraphFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/SynonymGraphFilterFactory.java) | org.gnit.lucenekmp.analysis.synonym.SynonymGraphFilterFactory |
-| [org.apache.lucene.analysis.synonym.SynonymMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/SynonymMap.java) | org.gnit.lucenekmp.analysis.synonym.SynonymMap |
 | [org.apache.lucene.analysis.synonym.WordnetSynonymParser](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/WordnetSynonymParser.java) | org.gnit.lucenekmp.analysis.synonym.WordnetSynonymParser |
 | [org.apache.lucene.analysis.synonym.word2vec.Dl4jModelReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/word2vec/Dl4jModelReader.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.Dl4jModelReader |
 | [org.apache.lucene.analysis.synonym.word2vec.TermAndBoost](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/synonym/word2vec/TermAndBoost.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TermAndBoost |
@@ -812,7 +807,7 @@
 |       org.apache.lucene.analysis.cn.smart | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.commongrams | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.compound | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.core | 15 | 2 | 13% |
+|     org.apache.lucene.analysis.core | 15 | 5 | 33% |
 |     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.cz | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.da | 1 | 1 | 100% |
@@ -940,7 +935,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1032 | 87% |
+| Total | 1186 | 1035 | 87% |
 
 
 ## Tests To Port
@@ -956,9 +951,6 @@
 | [org.apache.lucene.analysis.core.TestCoreFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestCoreFactories.java) | org.gnit.lucenekmp.analysis.core.TestCoreFactories |
 | [org.apache.lucene.analysis.core.TestDuelingAnalyzers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDuelingAnalyzers.java) | org.gnit.lucenekmp.analysis.core.TestDuelingAnalyzers |
 | [org.apache.lucene.analysis.core.TestFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestFactories.java) | org.gnit.lucenekmp.analysis.core.TestFactories |
-| [org.apache.lucene.analysis.core.TestFlattenGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestFlattenGraphFilter.java) | org.gnit.lucenekmp.analysis.core.TestFlattenGraphFilter |
-| [org.apache.lucene.analysis.core.TestKeywordAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestKeywordAnalyzer.java) | org.gnit.lucenekmp.analysis.core.TestKeywordAnalyzer |
-| [org.apache.lucene.analysis.core.TestKeywordTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestKeywordTokenizer.java) | org.gnit.lucenekmp.analysis.core.TestKeywordTokenizer |
 | [org.apache.lucene.analysis.core.TestStopAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestStopAnalyzer.java) | org.gnit.lucenekmp.analysis.core.TestStopAnalyzer |
 | [org.apache.lucene.analysis.core.TestStopFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestStopFilterFactory.java) | org.gnit.lucenekmp.analysis.core.TestStopFilterFactory |
 | [org.apache.lucene.analysis.core.TestTypeTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestTypeTokenFilter.java) | org.gnit.lucenekmp.analysis.core.TestTypeTokenFilter |
