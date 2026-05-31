@@ -333,9 +333,9 @@ abstract class AbstractAnalysisFactory {
         if (list == null) return mutableListOf()
 
         val result: MutableList<String> = mutableListOf()
-        for (item in list.split(("(<!\\\\)[$separator]").toRegex())
+        for (item in list.split(("(?<!\\\\)[$separator]").toRegex())
             .dropLastWhile { it.isEmpty() }.toTypedArray()) {
-            result.add(item.replace(("\\\\(=[$separator])").toRegex(), ""))
+            result.add(item.replace(("\\\\(?=[$separator])").toRegex(), ""))
         }
 
         return result

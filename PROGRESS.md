@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1673 | 69% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1677 | 69% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -81,7 +81,7 @@
 |     org.apache.lucene.analysis.classic |         org.gnit.lucenekmp.analysis.classic | 6 | 6 | 100% | [x] |
 |       org.apache.lucene.analysis.cn.smart |           org.gnit.lucenekmp.analysis.cn.smart | 8 | 8 | 100% | [x] |
 |         org.apache.lucene.analysis.cn.smart.hhmm |             org.gnit.lucenekmp.analysis.cn.smart.hhmm | 10 | 10 | 100% | [x] |
-|     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 0 | 0% | [ ] |
 |       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 6 | 25% | [ ] |
@@ -261,10 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.commongrams.CommonGramsFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/commongrams/CommonGramsFilter.java) | org.gnit.lucenekmp.analysis.commongrams.CommonGramsFilter |
-| [org.apache.lucene.analysis.commongrams.CommonGramsFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/commongrams/CommonGramsFilterFactory.java) | org.gnit.lucenekmp.analysis.commongrams.CommonGramsFilterFactory |
-| [org.apache.lucene.analysis.commongrams.CommonGramsQueryFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/commongrams/CommonGramsQueryFilter.java) | org.gnit.lucenekmp.analysis.commongrams.CommonGramsQueryFilter |
-| [org.apache.lucene.analysis.commongrams.CommonGramsQueryFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/commongrams/CommonGramsQueryFilterFactory.java) | org.gnit.lucenekmp.analysis.commongrams.CommonGramsQueryFilterFactory |
 | [org.apache.lucene.analysis.compound.CompoundWordTokenFilterBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/CompoundWordTokenFilterBase.java) | org.gnit.lucenekmp.analysis.compound.CompoundWordTokenFilterBase |
 | [org.apache.lucene.analysis.compound.DictionaryCompoundWordTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/DictionaryCompoundWordTokenFilter.java) | org.gnit.lucenekmp.analysis.compound.DictionaryCompoundWordTokenFilter |
 | [org.apache.lucene.analysis.compound.DictionaryCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/compound/DictionaryCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.DictionaryCompoundWordTokenFilterFactory |
@@ -828,7 +824,7 @@
 |     org.apache.lucene.analysis.ckb | 5 | 5 | 100% |
 |     org.apache.lucene.analysis.classic | 2 | 2 | 100% |
 |       org.apache.lucene.analysis.cn.smart | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.commongrams | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.commongrams | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.compound | 3 | 0 | 0% |
 |     org.apache.lucene.analysis.core | 15 | 0 | 0% |
 |     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
@@ -958,7 +954,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1024 | 86% |
+| Total | 1186 | 1027 | 86% |
 
 
 ## Tests To Port
@@ -970,9 +966,6 @@
 | [org.apache.lucene.TestMergeSchedulerExternal](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestMergeSchedulerExternal.java) | org.gnit.lucenekmp.TestMergeSchedulerExternal |
 | [org.apache.lucene.TestSearchForDuplicates](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/TestSearchForDuplicates.java) | org.gnit.lucenekmp.TestSearchForDuplicates |
 | [org.apache.lucene.analysis.boost.TestDelimitedBoostTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/boost/TestDelimitedBoostTokenFilter.java) | org.gnit.lucenekmp.analysis.boost.TestDelimitedBoostTokenFilter |
-| [org.apache.lucene.analysis.commongrams.TestCommonGramsFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/commongrams/TestCommonGramsFilter.java) | org.gnit.lucenekmp.analysis.commongrams.TestCommonGramsFilter |
-| [org.apache.lucene.analysis.commongrams.TestCommonGramsFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/commongrams/TestCommonGramsFilterFactory.java) | org.gnit.lucenekmp.analysis.commongrams.TestCommonGramsFilterFactory |
-| [org.apache.lucene.analysis.commongrams.TestCommonGramsQueryFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/commongrams/TestCommonGramsQueryFilterFactory.java) | org.gnit.lucenekmp.analysis.commongrams.TestCommonGramsQueryFilterFactory |
 | [org.apache.lucene.analysis.compound.TestCompoundWordTokenFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/compound/TestCompoundWordTokenFilter.java) | org.gnit.lucenekmp.analysis.compound.TestCompoundWordTokenFilter |
 | [org.apache.lucene.analysis.compound.TestDictionaryCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/compound/TestDictionaryCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.TestDictionaryCompoundWordTokenFilterFactory |
 | [org.apache.lucene.analysis.compound.TestHyphenationCompoundWordTokenFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/compound/TestHyphenationCompoundWordTokenFilterFactory.java) | org.gnit.lucenekmp.analysis.compound.TestHyphenationCompoundWordTokenFilterFactory |

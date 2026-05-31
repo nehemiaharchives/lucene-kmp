@@ -12,6 +12,8 @@ import org.gnit.lucenekmp.analysis.ckb.SoraniNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.ckb.SoraniStemFilterFactory
 import org.gnit.lucenekmp.analysis.charfilter.HTMLStripCharFilterFactory
 import org.gnit.lucenekmp.analysis.charfilter.MappingCharFilterFactory
+import org.gnit.lucenekmp.analysis.commongrams.CommonGramsFilterFactory
+import org.gnit.lucenekmp.analysis.commongrams.CommonGramsQueryFilterFactory
 import org.gnit.lucenekmp.analysis.cz.CzechStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.en.EnglishPossessiveFilterFactory
@@ -121,6 +123,16 @@ object AnalysisCommonFactories {
             CJKWidthFilterFactory.NAME,
             CJKWidthFilterFactory::class
         ) { args -> CJKWidthFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            CommonGramsFilterFactory.NAME,
+            CommonGramsFilterFactory::class
+        ) { args -> CommonGramsFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            CommonGramsQueryFilterFactory.NAME,
+            CommonGramsQueryFilterFactory::class
+        ) { args -> CommonGramsQueryFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             SoraniNormalizationFilterFactory.NAME,
