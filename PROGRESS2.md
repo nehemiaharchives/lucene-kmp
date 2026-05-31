@@ -2053,7 +2053,7 @@
 | [org.apache.lucene.util.WeakIdentityMap](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/WeakIdentityMap.java) | org.gnit.lucenekmp.util.WeakIdentityMap | Depth 3 | [] | 12 | 0 | 0% |
 | [org.apache.lucene.util.automaton.RegExp](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/automaton/RegExp.java) | org.gnit.lucenekmp.util.automaton.RegExp | Depth 3 | [x] | 49 | 52 | 98% |
 | [org.apache.lucene.util.automaton.StringsToAutomaton](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/automaton/StringsToAutomaton.java) | org.gnit.lucenekmp.util.automaton.StringsToAutomaton | Depth 3 | [x] | 7 | 7 | 85% |
-| [org.apache.lucene.util.automaton.TestOperations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestOperations.java) | org.gnit.lucenekmp.util.automaton.TestOperations | Depth 1 | [x] | 31 | 33 | 96% |
+| [org.apache.lucene.util.automaton.TestOperations](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestOperations.java) | org.gnit.lucenekmp.util.automaton.TestOperations | Depth 1 | [x] | 31 | 34 | 93% |
 | [org.apache.lucene.util.automaton.TestRegExp](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestRegExp.java) | org.gnit.lucenekmp.util.automaton.TestRegExp | Depth 1 | [x] | 15 | 12 | 80% |
 | [org.apache.lucene.util.automaton.TestUTF32ToUTF8](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/test/org/apache/lucene/util/automaton/TestUTF32ToUTF8.java) | org.gnit.lucenekmp.util.automaton.TestUTF32ToUTF8 | Depth 1 | [x] | 12 | 10 | 83% |
 | [org.apache.lucene.util.bkd.BKDConfig](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/util/bkd/BKDConfig.java) | org.gnit.lucenekmp.util.bkd.BKDConfig | Depth 2 | [x] | 7 | 3 | 47% |
@@ -2102,4 +2102,4 @@ TODO.md written to: /Users/joel/code/bbl-lucene/lucene-kmp/TODO.md
 - Unit Test Porting Progress: 79%
 - **Unit Test Semantic Completion: 83%**
 - Total Test Core Methods Needed: 18425
-- Test Core Methods Implemented: 15402
+- Test Core Methods Implemented: 15401
