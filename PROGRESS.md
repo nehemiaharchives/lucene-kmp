@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1806 | 75% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1810 | 75% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -90,7 +90,7 @@
 |     org.apache.lucene.analysis.da |         org.gnit.lucenekmp.analysis.da | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.de |         org.gnit.lucenekmp.analysis.de | 12 | 12 | 100% | [x] |
 |     org.apache.lucene.analysis.el |         org.gnit.lucenekmp.analysis.el | 6 | 6 | 100% | [x] |
-|     org.apache.lucene.analysis.email |         org.gnit.lucenekmp.analysis.email | 4 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.email |         org.gnit.lucenekmp.analysis.email | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.en |         org.gnit.lucenekmp.analysis.en | 21 | 21 | 100% | [x] |
 |     org.apache.lucene.analysis.es |         org.gnit.lucenekmp.analysis.es | 10 | 7 | 70% | [ ] |
 |     org.apache.lucene.analysis.et |         org.gnit.lucenekmp.analysis.et | 1 | 1 | 100% | [x] |
@@ -261,10 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.email.UAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailAnalyzer |
-| [org.apache.lucene.analysis.email.UAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizer |
-| [org.apache.lucene.analysis.email.UAX29URLEmailTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizerFactory.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizerFactory |
-| [org.apache.lucene.analysis.email.UAX29URLEmailTokenizerImpl](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizerImpl.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizerImpl |
 | [org.apache.lucene.analysis.es.SpanishMinimalStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/es/SpanishMinimalStemFilter.java) | org.gnit.lucenekmp.analysis.es.SpanishMinimalStemFilter |
 | [org.apache.lucene.analysis.es.SpanishMinimalStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/es/SpanishMinimalStemFilterFactory.java) | org.gnit.lucenekmp.analysis.es.SpanishMinimalStemFilterFactory |
 | [org.apache.lucene.analysis.es.SpanishMinimalStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/es/SpanishMinimalStemmer.java) | org.gnit.lucenekmp.analysis.es.SpanishMinimalStemmer |
@@ -704,7 +700,7 @@
 |     org.apache.lucene.analysis.da | 1 | 1 | 100% |
 |     org.apache.lucene.analysis.de | 9 | 9 | 100% |
 |     org.apache.lucene.analysis.el | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.email | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.email | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.en | 7 | 7 | 100% |
 |     org.apache.lucene.analysis.es | 7 | 5 | 71% |
 |     org.apache.lucene.analysis.et | 1 | 1 | 100% |
@@ -826,7 +822,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1115 | 94% |
+| Total | 1186 | 1118 | 94% |
 
 
 ## Tests To Port
@@ -842,9 +838,6 @@
 | [org.apache.lucene.analysis.core.TestCoreFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestCoreFactories.java) | org.gnit.lucenekmp.analysis.core.TestCoreFactories |
 | [org.apache.lucene.analysis.core.TestDuelingAnalyzers](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestDuelingAnalyzers.java) | org.gnit.lucenekmp.analysis.core.TestDuelingAnalyzers |
 | [org.apache.lucene.analysis.core.TestFactories](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/core/TestFactories.java) | org.gnit.lucenekmp.analysis.core.TestFactories |
-| [org.apache.lucene.analysis.email.TestUAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailAnalyzer |
-| [org.apache.lucene.analysis.email.TestUAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailTokenizer |
-| [org.apache.lucene.analysis.email.TestUAX29URLEmailTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/email/TestUAX29URLEmailTokenizerFactory.java) | org.gnit.lucenekmp.analysis.email.TestUAX29URLEmailTokenizerFactory |
 | [org.apache.lucene.analysis.es.TestSpanishMinimalStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/es/TestSpanishMinimalStemFilter.java) | org.gnit.lucenekmp.analysis.es.TestSpanishMinimalStemFilter |
 | [org.apache.lucene.analysis.es.TestSpanishMinimalStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/es/TestSpanishMinimalStemFilterFactory.java) | org.gnit.lucenekmp.analysis.es.TestSpanishMinimalStemFilterFactory |
 | [org.apache.lucene.analysis.fi.TestFinnishAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/fi/TestFinnishAnalyzer.java) | org.gnit.lucenekmp.analysis.fi.TestFinnishAnalyzer |

@@ -106,7 +106,7 @@
 |   5,830,000 | Wolayttattuwa                    |  wal  | ET                            |                                                           | TBD                                                        |
 |   5,530,000 | Minangkabau                      |  min  | MY                            |                                                           | TBD                                                        |
 |   5,500,000 | Danish (analysis:common)         |  da   | DK                            | org.apache.lucene.analysis.da.DanishAnalyzer              | org.gnit.lucenekmp.analysis.da.DanishAnalyzer              |
-|   5,500,000 | Finnish (analysis:common)        |  fi   | FI                            | org.apache.lucene.analysis.fi.FinnishAnalyzer             | Need to be covered                                         |
+|   5,500,000 | Finnish (analysis:common)        |  fi   | FI                            | org.apache.lucene.analysis.fi.FinnishAnalyzer             | org.gnit.lucenekmp.analysis.fi.FinnishAnalyzer             |
 |   5,430,000 | Sukuma                           |  suk  | TZ                            |                                                           | TBD                                                        |
 |   5,225,552 | Lao                              |  lo   | LA                            |                                                           | Need to be covered                                         |
 |   5,200,000 | Norwegian (analysis:common)      |  no   | NO                            | org.apache.lucene.analysis.no.NorwegianAnalyzer           | org.gnit.lucenekmp.analysis.no.NorwegianAnalyzer           |
@@ -139,6 +139,8 @@
 |   3,270,000 | Mazanderani                      |  mzn  | IR                            |                                                           | TBD                                                        |
 |   3,160,000 | Dagbanli                         |  dag  | GH                            |                                                           | TBD                                                        |
 |   3,100,000 | Waray                            |  war  | PH                            |                                                           | TBD                                                        |
+|   2,400,000 | Galician (analysis:common)       |  gl   | ES                            | org.apache.lucene.analysis.gl.GalicianAnalyzer            | org.gnit.lucenekmp.analysis.gl.GalicianAnalyzer            |
+|   1,760,000 | Irish (analysis:common)          |  ga   | IE                            | org.apache.lucene.analysis.ga.IrishAnalyzer               | org.gnit.lucenekmp.analysis.ga.IrishAnalyzer               |
 |   1,100,000 | Estonian (analysis:common)       |  et   | EE                            | org.apache.lucene.analysis.et.EstonianAnalyzer            | org.gnit.lucenekmp.analysis.et.EstonianAnalyzer            |
 |     750,000 | Basque (analysis:common)         |  eu   | ES FR                         | org.apache.lucene.analysis.eu.BasqueAnalyzer              | org.gnit.lucenekmp.analysis.eu.BasqueAnalyzer              |
  

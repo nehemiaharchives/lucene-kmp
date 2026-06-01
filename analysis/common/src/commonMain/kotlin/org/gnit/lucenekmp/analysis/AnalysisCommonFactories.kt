@@ -31,6 +31,7 @@ import org.gnit.lucenekmp.analysis.es.SpanishLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishPluralStemFilterFactory
 import org.gnit.lucenekmp.analysis.el.GreekLowerCaseFilterFactory
 import org.gnit.lucenekmp.analysis.el.GreekStemFilterFactory
+import org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizerFactory
 import org.gnit.lucenekmp.analysis.fa.PersianCharFilterFactory
 import org.gnit.lucenekmp.analysis.fa.PersianNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.fa.PersianStemFilterFactory
@@ -571,6 +572,11 @@ object AnalysisCommonFactories {
             ThaiTokenizerFactory.NAME,
             ThaiTokenizerFactory::class
         ) { args -> ThaiTokenizerFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenizerFactory::class,
+            UAX29URLEmailTokenizerFactory.NAME,
+            UAX29URLEmailTokenizerFactory::class
+        ) { args -> UAX29URLEmailTokenizerFactory(args) }
         initialized = true
     }
 }
