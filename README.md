@@ -647,6 +647,97 @@ Date:   Sun Mar 2 14:11:10 2025 -0500
     linting. It works like spotless, just don't think about it.
 ```
 
+## Java Lucene and lucene-kmp
+This section lists some differences between the Java Lucene source project and the lucene-kmp port.
+
+### Modules
+lucene-kmp prioritizes the core indexing and search APIs, then adds common analyzers and codecs.
+However extra analyzers where Java Lucene does not have are added.
+Those analyzers support languages with a lot of speaking population as in `LANGUAGE_COVERAGE.md`.
+
+| Java Lucene                 | lucene-kmp            | Note                          |
+|-----------------------------|-----------------------|-------------------------------|
+| `analysis/common`           | `analysis/common`     | Language Analyzers            |
+| `analysis/icu`              |                       |                               |
+| `analysis/kuromoji`         | `analysis/kuromoji`   | JapaneseAnalyzer              |
+| `analysis/morfologik`       | `analysis/morfologik` | Polish and Ukranian Analyzers |
+| `analysis/morfologik.tests` |                       |                               |
+| `analysis/nori`             | `analysis/nori`       | KoreanAnalyzer                |
+| `analysis/opennlp`          |                       |                               |
+| `analysis/phonetic`         |                       |                               |
+| `analysis/smartcn`          | `analysis/smartcn`    | SmartChineseAnalyzer          |
+| `analysis/stempel`          |                       |                               |
+|                             | `analysis/extra`      | Additional Language Analyzers |
+|                             | `analysis/hebmorph`   | HebrewAnalzyer                |
+|                             | `analysis/horn`       | AmharicAnalyzer               |
+| `analysis.tests`            |                       |                               |
+| `backward-codecs`           |                       | Will not be supported in kmp  |
+| `benchmark`                 |                       |                               |
+| `benchmark-jmh`             |                       |                               |
+| `classification`            |                       |                               |
+| `codecs`                    | `codecs`              | Index format codecs           |
+| `core`                      | `core`                | Indexing and Searching        |
+| `core.tests`                |                       |                               |
+| `demo`                      |                       |                               |
+| `distribution`              |                       |                               |
+| `distribution.tests`        |                       |                               |
+| `documentation`             |                       |                               |
+| `expressions`               |                       |                               |
+| `facet`                     |                       |                               |
+| `grouping`                  |                       |                               |
+| `highlighter`               |                       |                               |
+| `join`                      |                       |                               |
+| `luke`                      |                       |                               |
+| `memory`                    |                       |                               |
+| `misc`                      |                       |                               |
+| `monitor`                   |                       |                               |
+| `queries`                   | `queries`             | Span and positional queries   |
+| `queryparser`               | `queryparser`         | Parses query strings          |
+| `replicator`                |                       |                               |
+| `sandbox`                   |                       |                               |
+| `spatial-extras`            |                       |                               |
+| `spatial-test-fixtures`     |                       |                               |
+| `spatial3d`                 |                       |                               |
+| `suggest`                   |                       |                               |
+| `test-framework`            | `test-framework`      | Shared test classes           |
+
+### `jdkport` package
+
+Lucene is heavily dependent on JDK classes which drop in replacement is not available in Kotlin/Common standard library.
+
+The `org.gnit.lucenekmp.jdkport` package lives inside the `core` module and provides
+Kotlin Multiplatform replacements for JDK classes and interfaces that the Java Lucene code base
+depends on but that are not part of the Kotlin standard library, such as `TreeMap`, `ByteBuffer`,
+`BufferedReader`, `ReentrantLock`, `ThreadPoolExecutor`, `Charset`, `BreakIterator`, and `Math`.
+
+Porting those jdk source doe into kmp consumes a lot of time, effort and tokens, 
+but I thought it worth doing it to behave as close as possible to the Java Lucene 
+and side by side easy review.
+
+When the Java code being ported references a JDK type that is unavailable in Kotlin/Common, the
+port first checks this package. If a `jdkport` class with the same name is already present, the
+port reuses it. Only when no equivalent is found is a new class copied from the JDK source and
+ported into this package. Every such class is marked with the `@Ported(from = "...")`
+annotation so its JDK origin is explicit, and the annotation is also consumed by the
+`progressv2.main.kts` script to compare method/function signatures against upstream Lucene.
+
+The package follows the same conventions as the rest of the port: it is platform-agnostic common
+code, each ported class has a matching `ClassNameTest.kt` under
+`org.gnit.lucenekmp.jdkport` in `commonTest`, and interfaces or abstract classes are tested
+indirectly through their concrete implementations.
+
+The jdkport classes are mostly ported from openjdk 24 fully.
+In some case, partial methods/functions are ported.
+And in case such as concurrency utilities, Kotlin Coroutines are as alternative to Java Threads and locks.
+java.util.Date is replaced by kotlin.time.Instant
+
+### 3rd-party dependencies
+lucene-kmp try not to depend on other libraries as much as possible but exceptionally depends on following kmp libs:
+* [`io.github.oshai:kotlin-logging`](https://github.com/oshai/kotlin-logging) for logging
+* [`dev.scottpierce:kotlin-env-var`](https://github.com/ScottPierce/kotlin-env-var) for environment variable access in tests
+* [`com.squareup.okio:okio`](https://github.com/square/okio) for file and path access replacing `java.nio.Path` and related operations
+* [`com.ionspin.kotlin:bignum`](https://github.com/ionspin/kotlin-multiplatform-bignum) replaces `java.math.BigInteger`
+
 ## Porting Progress
 Package-level completion for Lucene modules, split by production code and tests.
 
