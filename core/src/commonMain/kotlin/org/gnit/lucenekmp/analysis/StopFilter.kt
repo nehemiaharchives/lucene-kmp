@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.analysis
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 
 /** Removes stop words from a token stream.  */
-class StopFilter(`in`: TokenStream, private val stopWords: CharArraySet) : FilteringTokenFilter(`in`) {
+open class StopFilter(`in`: TokenStream, private val stopWords: CharArraySet) : FilteringTokenFilter(`in`) {
     private val termAtt: CharTermAttribute = addAttribute(CharTermAttribute::class)
 
     /** Returns the next input Token whose term() is not a stop word.  */

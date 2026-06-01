@@ -2,9 +2,9 @@
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 748 | 745 | 99% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 748 | 747 | 99% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 15 | 15 | 100% | [x] |
-|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 2 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 2 | 2 | 100% | [x] |
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 3 | 3 | 100% | [x] |
 |     org.apache.lucene.analysis.tokenattributes |         org.gnit.lucenekmp.analysis.tokenattributes | 11 | 11 | 100% | [x] |
 |   org.apache.lucene.codecs |       org.gnit.lucenekmp.codecs | 35 | 35 | 100% | [x] |
@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1804 | 75% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1806 | 75% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -84,7 +84,7 @@
 |     org.apache.lucene.analysis.commongrams |         org.gnit.lucenekmp.analysis.commongrams | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.compound |         org.gnit.lucenekmp.analysis.compound | 5 | 5 | 100% | [x] |
 |       org.apache.lucene.analysis.compound.hyphenation |           org.gnit.lucenekmp.analysis.compound.hyphenation | 8 | 8 | 100% | [x] |
-|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 22 | 91% | [ ] |
+|     org.apache.lucene.analysis.core |         org.gnit.lucenekmp.analysis.core | 24 | 24 | 100% | [x] |
 |     org.apache.lucene.analysis.custom |         org.gnit.lucenekmp.analysis.custom | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.cz |         org.gnit.lucenekmp.analysis.cz | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.da |         org.gnit.lucenekmp.analysis.da | 1 | 1 | 100% | [x] |
@@ -261,8 +261,6 @@
 ## KMP Deps To Port
 | Java FQN | Expected KMP FQN |
 | --- | --- |
-| [org.apache.lucene.analysis.core.LowerCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilter.java) | org.gnit.lucenekmp.analysis.core.LowerCaseFilter |
-| [org.apache.lucene.analysis.core.StopFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/core/StopFilter.java) | org.gnit.lucenekmp.analysis.core.StopFilter |
 | [org.apache.lucene.analysis.email.UAX29URLEmailAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailAnalyzer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailAnalyzer |
 | [org.apache.lucene.analysis.email.UAX29URLEmailTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizer.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizer |
 | [org.apache.lucene.analysis.email.UAX29URLEmailTokenizerFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/email/UAX29URLEmailTokenizerFactory.java) | org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizerFactory |

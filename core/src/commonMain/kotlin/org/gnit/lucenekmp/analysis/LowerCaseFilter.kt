@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import okio.IOException
 
 /** Normalizes token text to lower case.  */
-class LowerCaseFilter
+open class LowerCaseFilter
 /**
  * Create a new LowerCaseFilter, that normalizes token text to lower case.
  *
