@@ -255,7 +255,7 @@ class TestNGramTokenizer : BaseTokenStreamTestCase() {
             val grams =
                 object : NGramTokenizer(minGram, maxGram, edgesOnly) {
                     override fun isTokenChar(chr: Int): Boolean {
-                        return nonTokenChars.indexOf(chr.toChar()) < 0
+                        return isTokenChar(nonTokenChars, chr)
                     }
                 }
             grams.setReader(StringReader(s))
