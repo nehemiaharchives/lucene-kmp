@@ -471,7 +471,10 @@ class TestWordDelimiterFilter : BaseTokenStreamTestCase() {
             arrayOf("abc", "abcdef", "abcdef123456", "def", "123", "123456", "456"),
             startOffsets = intArrayOf(0, 0, 0, 4, 8, 8, 12),
             endOffsets = intArrayOf(3, 7, 15, 7, 11, 15, 15),
-            posIncrements = intArrayOf(1, 0, 0, 1, 1, 0, 1)
+            types = null,
+            posIncrements = intArrayOf(1, 0, 0, 1, 1, 0, 1),
+            posLengths = null,
+            graphOffsetsAreCorrect = false
         )
         a.close()
     }
@@ -505,7 +508,10 @@ class TestWordDelimiterFilter : BaseTokenStreamTestCase() {
             arrayOf("abc-def-123-456", "abc", "abcdef", "abcdef123456", "def", "123", "123456", "456"),
             startOffsets = intArrayOf(0, 0, 0, 0, 4, 8, 8, 12),
             endOffsets = intArrayOf(15, 3, 7, 15, 7, 11, 15, 15),
-            posIncrements = intArrayOf(1, 0, 0, 0, 1, 1, 0, 1)
+            types = null,
+            posIncrements = intArrayOf(1, 0, 0, 0, 1, 1, 0, 1),
+            posLengths = null,
+            graphOffsetsAreCorrect = false
         )
         a.close()
     }

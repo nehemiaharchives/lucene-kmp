@@ -985,9 +985,9 @@ abstract class BaseTokenStreamTestCase : LuceneTestCase() {
             output: Array<String>,
             startOffsets: IntArray,
             endOffsets: IntArray,
-            types: Array<String>,
+            types: Array<String>?,
             posIncrements: IntArray,
-            posLengths: IntArray,
+            posLengths: IntArray?,
             graphOffsetsAreCorrect: Boolean
         ) {
             assertTokenStreamContents(
