@@ -93,6 +93,9 @@ implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-kuromoji:10.2.0-alpha12"
 ```
 
 ## Usage
+Lucene expects to have a inverted index on disk or in memory built prior to searching. 
+The examples below show how to build an index and run queries against it.
+
 ### Building Index
 
 Create a `Directory`, configure an `IndexWriter`, then add one Lucene `Document` per record in your
