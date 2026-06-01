@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1829 | 76% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1833 | 76% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -118,7 +118,7 @@
 |       org.apache.lucene.analysis.ko.dict |           org.gnit.lucenekmp.analysis.ko.dict | 18 | 18 | 100% | [x] |
 |       org.apache.lucene.analysis.ko.tokenattributes |           org.gnit.lucenekmp.analysis.ko.tokenattributes | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.lt |         org.gnit.lucenekmp.analysis.lt | 1 | 1 | 100% | [x] |
-|     org.apache.lucene.analysis.lv |         org.gnit.lucenekmp.analysis.lv | 4 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.lv |         org.gnit.lucenekmp.analysis.lv | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.minhash |         org.gnit.lucenekmp.analysis.minhash | 2 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.miscellaneous |         org.gnit.lucenekmp.analysis.miscellaneous | 64 | 64 | 100% | [x] |
 |     org.apache.lucene.analysis.morfologik |         org.gnit.lucenekmp.analysis.morfologik | 5 | 5 | 100% | [x] |
@@ -321,10 +321,6 @@
 | [org.apache.lucene.analysis.in.IndicNormalizationFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/in/IndicNormalizationFilter.java) | org.gnit.lucenekmp.analysis.in.IndicNormalizationFilter |
 | [org.apache.lucene.analysis.in.IndicNormalizationFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/in/IndicNormalizationFilterFactory.java) | org.gnit.lucenekmp.analysis.in.IndicNormalizationFilterFactory |
 | [org.apache.lucene.analysis.in.IndicNormalizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/in/IndicNormalizer.java) | org.gnit.lucenekmp.analysis.in.IndicNormalizer |
-| [org.apache.lucene.analysis.lv.LatvianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/lv/LatvianAnalyzer.java) | org.gnit.lucenekmp.analysis.lv.LatvianAnalyzer |
-| [org.apache.lucene.analysis.lv.LatvianStemFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/lv/LatvianStemFilter.java) | org.gnit.lucenekmp.analysis.lv.LatvianStemFilter |
-| [org.apache.lucene.analysis.lv.LatvianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/lv/LatvianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.lv.LatvianStemFilterFactory |
-| [org.apache.lucene.analysis.lv.LatvianStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/lv/LatvianStemmer.java) | org.gnit.lucenekmp.analysis.lv.LatvianStemmer |
 | [org.apache.lucene.analysis.minhash.MinHashFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/minhash/MinHashFilter.java) | org.gnit.lucenekmp.analysis.minhash.MinHashFilter |
 | [org.apache.lucene.analysis.minhash.MinHashFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/minhash/MinHashFilterFactory.java) | org.gnit.lucenekmp.analysis.minhash.MinHashFilterFactory |
 | [org.apache.lucene.analysis.opennlp.OpenNLPChunkerFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/opennlp/src/java/org/apache/lucene/analysis/opennlp/OpenNLPChunkerFilter.java) | org.gnit.lucenekmp.analysis.opennlp.OpenNLPChunkerFilter |
@@ -706,7 +702,7 @@
 |     org.apache.lucene.analysis.ko | 8 | 8 | 100% |
 |       org.apache.lucene.analysis.ko.dict | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.lt | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.lv | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.lv | 3 | 3 | 100% |
 |     org.apache.lucene.analysis.minhash | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.miscellaneous | 55 | 55 | 100% |
 |     org.apache.lucene.analysis.morfologik | 2 | 2 | 100% |
@@ -739,7 +735,7 @@
 |     org.apache.lucene.analysis.te | 4 | 4 | 100% |
 |     org.apache.lucene.analysis.th | 2 | 2 | 100% |
 |     org.apache.lucene.analysis.tokenattributes | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.tr | 5 | 1 | 20% |
+|     org.apache.lucene.analysis.tr | 5 | 5 | 100% |
 |     org.apache.lucene.analysis.uk | 1 | 1 | 100% |
 |     org.apache.lucene.analysis.util | 8 | 7 | 87% |
 |     org.apache.lucene.analysis.wikipedia | 2 | 0 | 0% |
@@ -803,7 +799,7 @@
 |     org.apache.lucene.util.mutable | 1 | 1 | 100% |
 |     org.apache.lucene.util.packed | 3 | 3 | 100% |
 |     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1133 | 95% |
+| Total | 1186 | 1140 | 96% |
 
 
 ## Tests To Port
@@ -883,9 +879,6 @@
 | [org.apache.lucene.analysis.icu.segmentation.TestMyanmarSyllable](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/test/org/apache/lucene/analysis/icu/segmentation/TestMyanmarSyllable.java) | org.gnit.lucenekmp.analysis.icu.segmentation.TestMyanmarSyllable |
 | [org.apache.lucene.analysis.icu.segmentation.TestWithCJKBigramFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/test/org/apache/lucene/analysis/icu/segmentation/TestWithCJKBigramFilter.java) | org.gnit.lucenekmp.analysis.icu.segmentation.TestWithCJKBigramFilter |
 | [org.apache.lucene.analysis.in.TestIndicNormalizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/in/TestIndicNormalizer.java) | org.gnit.lucenekmp.analysis.in.TestIndicNormalizer |
-| [org.apache.lucene.analysis.lv.TestLatvianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/lv/TestLatvianAnalyzer.java) | org.gnit.lucenekmp.analysis.lv.TestLatvianAnalyzer |
-| [org.apache.lucene.analysis.lv.TestLatvianStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/lv/TestLatvianStemFilterFactory.java) | org.gnit.lucenekmp.analysis.lv.TestLatvianStemFilterFactory |
-| [org.apache.lucene.analysis.lv.TestLatvianStemmer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/lv/TestLatvianStemmer.java) | org.gnit.lucenekmp.analysis.lv.TestLatvianStemmer |
 | [org.apache.lucene.analysis.minhash.TestMinHashFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/minhash/TestMinHashFilter.java) | org.gnit.lucenekmp.analysis.minhash.TestMinHashFilter |
 | [org.apache.lucene.analysis.morfologik.tests.TestMorfologikAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/morfologik.tests/src/test/org/apache/lucene/analysis/morfologik/tests/TestMorfologikAnalyzer.java) | org.gnit.lucenekmp.analysis.morfologik.tests.TestMorfologikAnalyzer |
 | [org.apache.lucene.analysis.opennlp.TestOpenNLPChunkerFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/opennlp/src/test/org/apache/lucene/analysis/opennlp/TestOpenNLPChunkerFilterFactory.java) | org.gnit.lucenekmp.analysis.opennlp.TestOpenNLPChunkerFilterFactory |
@@ -928,10 +921,6 @@
 | [org.apache.lucene.analysis.synonym.word2vec.TestWord2VecSynonymFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestWord2VecSynonymFilter.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestWord2VecSynonymFilter |
 | [org.apache.lucene.analysis.synonym.word2vec.TestWord2VecSynonymFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestWord2VecSynonymFilterFactory.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestWord2VecSynonymFilterFactory |
 | [org.apache.lucene.analysis.synonym.word2vec.TestWord2VecSynonymProvider](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestWord2VecSynonymProvider.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestWord2VecSynonymProvider |
-| [org.apache.lucene.analysis.tr.TestApostropheFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestApostropheFilter.java) | org.gnit.lucenekmp.analysis.tr.TestApostropheFilter |
-| [org.apache.lucene.analysis.tr.TestApostropheFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestApostropheFilterFactory.java) | org.gnit.lucenekmp.analysis.tr.TestApostropheFilterFactory |
-| [org.apache.lucene.analysis.tr.TestTurkishLowerCaseFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestTurkishLowerCaseFilter.java) | org.gnit.lucenekmp.analysis.tr.TestTurkishLowerCaseFilter |
-| [org.apache.lucene.analysis.tr.TestTurkishLowerCaseFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/tr/TestTurkishLowerCaseFilterFactory.java) | org.gnit.lucenekmp.analysis.tr.TestTurkishLowerCaseFilterFactory |
 | [org.apache.lucene.analysis.util.TestFilesystemResourceLoader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/util/TestFilesystemResourceLoader.java) | org.gnit.lucenekmp.analysis.util.TestFilesystemResourceLoader |
 | [org.apache.lucene.analysis.util.TestSegmentingTokenizerBase](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/util/TestSegmentingTokenizerBase.java) | org.gnit.lucenekmp.analysis.util.TestSegmentingTokenizerBase |
 | [org.apache.lucene.analysis.wikipedia.TestWikipediaTokenizer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/wikipedia/TestWikipediaTokenizer.java) | org.gnit.lucenekmp.analysis.wikipedia.TestWikipediaTokenizer |

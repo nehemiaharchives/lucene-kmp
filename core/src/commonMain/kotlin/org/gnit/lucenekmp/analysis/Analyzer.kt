@@ -59,8 +59,6 @@ import kotlin.jvm.Transient
  * indexing phonetic signatures (for sounds-alike search).
  *  * [Smart Chinese]({@docRoot}/../analysis/smartcn/overview-summary.html): Analyzer
  * for Simplified Chinese, which indexes words.
- *  * [Stempel]({@docRoot}/../analysis/stempel/overview-summary.html): Algorithmic
- * Stemmer for the Polish Language.
  *
  *
  * @since 3.1

@@ -48,6 +48,7 @@ import org.gnit.lucenekmp.analysis.hu.HungarianLightStemFilterFactory
 import org.gnit.lucenekmp.analysis.`in`.IndicNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.id.IndonesianStemFilterFactory
 import org.gnit.lucenekmp.analysis.it.ItalianLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.lv.LatvianStemFilterFactory
 import org.gnit.lucenekmp.analysis.miscellaneous.CapitalizationFilterFactory
 import org.gnit.lucenekmp.analysis.miscellaneous.ConcatenateGraphFilterFactory
 import org.gnit.lucenekmp.analysis.miscellaneous.CodepointCountFilterFactory
@@ -99,6 +100,8 @@ import org.gnit.lucenekmp.analysis.sv.SwedishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.te.TeluguNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.te.TeluguStemFilterFactory
 import org.gnit.lucenekmp.analysis.th.ThaiTokenizerFactory
+import org.gnit.lucenekmp.analysis.tr.ApostropheFilterFactory
+import org.gnit.lucenekmp.analysis.tr.TurkishLowerCaseFilterFactory
 import org.gnit.lucenekmp.analysis.synonym.SynonymFilterFactory
 import org.gnit.lucenekmp.analysis.synonym.SynonymGraphFilterFactory
 import org.gnit.lucenekmp.analysis.util.ElisionFilterFactory
@@ -134,6 +137,11 @@ object AnalysisCommonFactories {
             ASCIIFoldingFilterFactory.NAME,
             ASCIIFoldingFilterFactory::class
         ) { args -> ASCIIFoldingFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            ApostropheFilterFactory.NAME,
+            ApostropheFilterFactory::class
+        ) { args -> ApostropheFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             ArabicNormalizationFilterFactory.NAME,
@@ -344,6 +352,11 @@ object AnalysisCommonFactories {
             KStemFilterFactory.NAME,
             KStemFilterFactory::class
         ) { args -> KStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            LatvianStemFilterFactory.NAME,
+            LatvianStemFilterFactory::class
+        ) { args -> LatvianStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             ProtectedTermFilterFactory.NAME,
@@ -579,6 +592,11 @@ object AnalysisCommonFactories {
             TeluguStemFilterFactory.NAME,
             TeluguStemFilterFactory::class
         ) { args -> TeluguStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            TurkishLowerCaseFilterFactory.NAME,
+            TurkishLowerCaseFilterFactory::class
+        ) { args -> TurkishLowerCaseFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             TrimFilterFactory.NAME,
