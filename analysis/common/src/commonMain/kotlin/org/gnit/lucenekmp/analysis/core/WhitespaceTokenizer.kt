@@ -46,7 +46,7 @@ class WhitespaceTokenizer : CharTokenizer {
 
     /** Collects only characters which do not satisfy [Character.isWhitespace].  */
     override fun isTokenChar(c: Int): Boolean {
-        return !c.toChar().isWhitespace()
+        return !Character.isWhitespace(c)
     }
 
     companion object {
