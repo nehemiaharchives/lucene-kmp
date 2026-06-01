@@ -6,6 +6,8 @@ import org.gnit.lucenekmp.analysis.TokenStream
 import org.gnit.lucenekmp.analysis.tokenattributes.CharTermAttribute
 import org.gnit.lucenekmp.analysis.tokenattributes.KeywordAttribute
 import org.tartarus.snowball.SnowballStemmer
+import org.tartarus.snowball.ext.FinnishStemmer
+import org.tartarus.snowball.ext.IrishStemmer
 import org.tartarus.snowball.ext.RussianStemmer
 import org.tartarus.snowball.ext.TurkishStemmer
 
@@ -27,6 +29,8 @@ class SnowballFilter : TokenFilter {
             resolvedName = "German"
         }
         stemmer = when (resolvedName) {
+            "Finnish" -> FinnishStemmer()
+            "Irish" -> IrishStemmer()
             "Russian" -> RussianStemmer()
             "Turkish" -> TurkishStemmer()
             else -> throw IllegalArgumentException("Invalid stemmer class specified: $resolvedName")

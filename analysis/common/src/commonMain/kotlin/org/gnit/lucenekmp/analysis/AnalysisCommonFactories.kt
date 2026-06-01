@@ -28,6 +28,7 @@ import org.gnit.lucenekmp.analysis.de.GermanMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.de.GermanStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.es.SpanishMinimalStemFilterFactory
 import org.gnit.lucenekmp.analysis.es.SpanishPluralStemFilterFactory
 import org.gnit.lucenekmp.analysis.el.GreekLowerCaseFilterFactory
 import org.gnit.lucenekmp.analysis.el.GreekStemFilterFactory
@@ -35,6 +36,12 @@ import org.gnit.lucenekmp.analysis.email.UAX29URLEmailTokenizerFactory
 import org.gnit.lucenekmp.analysis.fa.PersianCharFilterFactory
 import org.gnit.lucenekmp.analysis.fa.PersianNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.fa.PersianStemFilterFactory
+import org.gnit.lucenekmp.analysis.fi.FinnishLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.fr.FrenchLightStemFilterFactory
+import org.gnit.lucenekmp.analysis.fr.FrenchMinimalStemFilterFactory
+import org.gnit.lucenekmp.analysis.ga.IrishLowerCaseFilterFactory
+import org.gnit.lucenekmp.analysis.gl.GalicianMinimalStemFilterFactory
+import org.gnit.lucenekmp.analysis.gl.GalicianStemFilterFactory
 import org.gnit.lucenekmp.analysis.hi.HindiNormalizationFilterFactory
 import org.gnit.lucenekmp.analysis.hi.HindiStemFilterFactory
 import org.gnit.lucenekmp.analysis.hu.HungarianLightStemFilterFactory
@@ -304,6 +311,11 @@ object AnalysisCommonFactories {
         ) { args -> FingerprintFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
+            FinnishLightStemFilterFactory.NAME,
+            FinnishLightStemFilterFactory::class
+        ) { args -> FinnishLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
             EnglishPossessiveFilterFactory.NAME,
             EnglishPossessiveFilterFactory::class
         ) { args -> EnglishPossessiveFilterFactory(args) }
@@ -379,6 +391,16 @@ object AnalysisCommonFactories {
         ) { args -> FixedShingleFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
+            FrenchLightStemFilterFactory.NAME,
+            FrenchLightStemFilterFactory::class
+        ) { args -> FrenchLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            FrenchMinimalStemFilterFactory.NAME,
+            FrenchMinimalStemFilterFactory::class
+        ) { args -> FrenchMinimalStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
             ShingleFilterFactory.NAME,
             ShingleFilterFactory::class
         ) { args -> ShingleFilterFactory(args) }
@@ -404,6 +426,16 @@ object AnalysisCommonFactories {
         ) { args -> GermanNormalizationFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
+            GalicianMinimalStemFilterFactory.NAME,
+            GalicianMinimalStemFilterFactory::class
+        ) { args -> GalicianMinimalStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            GalicianStemFilterFactory.NAME,
+            GalicianStemFilterFactory::class
+        ) { args -> GalicianStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
             GreekLowerCaseFilterFactory.NAME,
             GreekLowerCaseFilterFactory::class
         ) { args -> GreekLowerCaseFilterFactory(args) }
@@ -417,6 +449,11 @@ object AnalysisCommonFactories {
             SpanishLightStemFilterFactory.NAME,
             SpanishLightStemFilterFactory::class
         ) { args -> SpanishLightStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            SpanishMinimalStemFilterFactory.NAME,
+            SpanishMinimalStemFilterFactory::class
+        ) { args -> SpanishMinimalStemFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             SpanishPluralStemFilterFactory.NAME,
@@ -447,6 +484,11 @@ object AnalysisCommonFactories {
             IndonesianStemFilterFactory.NAME,
             IndonesianStemFilterFactory::class
         ) { args -> IndonesianStemFilterFactory(args) }
+        AnalysisSPIRegistry.register(
+            TokenFilterFactory::class,
+            IrishLowerCaseFilterFactory.NAME,
+            IrishLowerCaseFilterFactory::class
+        ) { args -> IrishLowerCaseFilterFactory(args) }
         AnalysisSPIRegistry.register(
             TokenFilterFactory::class,
             ItalianLightStemFilterFactory.NAME,

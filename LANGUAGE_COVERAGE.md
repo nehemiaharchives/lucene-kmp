@@ -141,6 +141,7 @@
 |   3,100,000 | Waray                            |  war  | PH                            |                                                           | TBD                                                        |
 |   2,400,000 | Galician (analysis:common)       |  gl   | ES                            | org.apache.lucene.analysis.gl.GalicianAnalyzer            | org.gnit.lucenekmp.analysis.gl.GalicianAnalyzer            |
 |   1,760,000 | Irish (analysis:common)          |  ga   | IE                            | org.apache.lucene.analysis.ga.IrishAnalyzer               | org.gnit.lucenekmp.analysis.ga.IrishAnalyzer               |
+|   1,500,000 | Latvian (analysis:common)        |  lv   | LV                            | org.apache.lucene.analysis.lv.LatvianAnalyzer             | org.gnit.lucenekmp.analysis.lv.LatvianAnalyzer             |
 |   1,100,000 | Estonian (analysis:common)       |  et   | EE                            | org.apache.lucene.analysis.et.EstonianAnalyzer            | org.gnit.lucenekmp.analysis.et.EstonianAnalyzer            |
 |     750,000 | Basque (analysis:common)         |  eu   | ES FR                         | org.apache.lucene.analysis.eu.BasqueAnalyzer              | org.gnit.lucenekmp.analysis.eu.BasqueAnalyzer              |
  

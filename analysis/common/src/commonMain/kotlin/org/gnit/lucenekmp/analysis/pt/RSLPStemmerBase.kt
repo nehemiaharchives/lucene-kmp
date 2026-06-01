@@ -3,8 +3,11 @@ package org.gnit.lucenekmp.analysis.pt
 import org.gnit.lucenekmp.analysis.CharArraySet
 import org.gnit.lucenekmp.analysis.util.StemmerUtil.endsWith
 import org.gnit.lucenekmp.jdkport.BufferedReader
+import org.gnit.lucenekmp.jdkport.InputStreamReader
+import org.gnit.lucenekmp.jdkport.StandardCharsets
 import org.gnit.lucenekmp.jdkport.StringReader
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.util.ClasspathResourceLoader
 
 /**
  * Base class for stemmers that use a set of RSLP-like stemming steps.
@@ -604,8 +607,8 @@ abstract class RSLPStemmerBase {
         private fun parseInternal(resource: String): Map<String, Step> {
             val data = when (resource) {
                 "portuguese.rslp" -> PORTUGUESE_RSLP_DATA
-                else -> null
-            } ?: throw RuntimeException("Unable to load resource: $resource")
+                else -> readResource(resource)
+            }
 
             val reader = LineReader(BufferedReader(StringReader(data)))
             val steps = mutableMapOf<String, Step>()
@@ -616,6 +619,25 @@ abstract class RSLPStemmerBase {
                 header = reader.readLine()
             }
             return steps
+        }
+
+        private fun readResource(resource: String): String {
+            try {
+                ClasspathResourceLoader(RSLPStemmerBase::class).openResource(resource).use { input ->
+                    InputStreamReader(input, StandardCharsets.UTF_8).use { reader ->
+                        val builder = StringBuilder()
+                        val buffer = CharArray(1024)
+                        while (true) {
+                            val count = reader.read(buffer, 0, buffer.size)
+                            if (count == -1) break
+                            builder.append(buffer.concatToString(0, count))
+                        }
+                        return builder.toString()
+                    }
+                }
+            } catch (e: Exception) {
+                throw RuntimeException("Unable to load resource: $resource", e)
+            }
         }
 
         private fun parseStep(reader: LineReader, header: String): Step {
