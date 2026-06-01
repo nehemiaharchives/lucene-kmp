@@ -101,6 +101,7 @@
 |   7,000,000 | Akan                             |  ak   | GH                            |                                                           | Need to be covered                                         |
 |   7,000,000 | Hiligaynon                       |  hil  | PH                            |                                                           | Need to be covered                                         |
 |   7,000,000 | Shona                            |  sn   | ZW                            |                                                           | Need to be covered                                         |
+|   6,700,000 | Armenian (analysis:common)       |  hy   | AM                            | org.apache.lucene.analysis.hy.ArmenianAnalyzer            | org.gnit.lucenekmp.analysis.hy.ArmenianAnalyzer            |
 |   6,300,000 | Luba-Kasai                       |  lua  | CD AO                         |                                                           | Need to be covered                                         |
 |   6,000,000 | Slovak                           |  sk   | SK                            |                                                           | Need to be covered                                         |
 |   5,830,000 | Wolayttattuwa                    |  wal  | ET                            |                                                           | TBD                                                        |
