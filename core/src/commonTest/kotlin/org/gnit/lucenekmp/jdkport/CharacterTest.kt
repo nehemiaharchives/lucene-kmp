@@ -34,6 +34,16 @@ class CharacterTest {
     }
 
     @Test
+    fun testIsLetter() {
+        assertTrue(Character.isLetter('A'.code))
+        assertTrue(Character.isLetter('ß'.code))
+        assertTrue(Character.isLetter('Ж'.code))
+        assertFalse(Character.isLetter('1'.code))
+        assertFalse(Character.isLetter('-'.code))
+        assertFalse(Character.isLetter(' '.code))
+    }
+
+    @Test
     fun testIsHighSurrogate() {
         assertTrue(Character.isHighSurrogate('\uD800'))
         assertTrue(Character.isHighSurrogate('\uDBFF'))
@@ -170,5 +180,45 @@ class CharacterTest {
         assertTrue(Character.isSupplementaryCodePoint(0x10000))
         assertTrue(Character.isSupplementaryCodePoint(0x10FFFF))
         assertFalse(Character.isSupplementaryCodePoint(0xFFFF))
+    }
+
+    @Test
+    fun testIsWhitespace() {
+        assertTrue(Character.isWhitespace(' '.code))
+        assertTrue(Character.isWhitespace('\n'.code))
+        assertTrue(Character.isWhitespace('\t'.code))
+        assertTrue(Character.isWhitespace('\u001C'.code))
+        assertFalse(Character.isWhitespace('\u00A0'.code))
+        assertFalse(Character.isWhitespace('A'.code))
+        assertFalse(Character.isWhitespace('1'.code))
+    }
+
+    @Test
+    fun testCodePointCount() {
+        assertEquals(4, Character.codePointCount(charArrayOf('a', 'b', 'c', 'd'), 0, 4))
+        assertEquals(3, Character.codePointCount(charArrayOf('a', '\uD83D', '\uDE00', 'b'), 0, 4))
+        assertEquals(2, Character.codePointCount(charArrayOf('\uD83D', '\uDE00', 'b'), 0, 3))
+        assertFailsWith<IndexOutOfBoundsException> {
+            Character.codePointCount(charArrayOf('a', 'b'), -1, 1)
+        }
+        assertFailsWith<IndexOutOfBoundsException> {
+            Character.codePointCount(charArrayOf('a', 'b'), 1, 3)
+        }
+    }
+
+    @Test
+    fun testOffsetByCodePoints() {
+        val chars = charArrayOf('a', '\uD83D', '\uDE00', 'b', 'c')
+        assertEquals(1, Character.offsetByCodePoints(chars, 0, chars.size, 0, 1))
+        assertEquals(3, Character.offsetByCodePoints(chars, 0, chars.size, 0, 2))
+        assertEquals(4, Character.offsetByCodePoints(chars, 0, chars.size, 1, 2))
+        assertEquals(1, Character.offsetByCodePoints(chars, 0, chars.size, 4, -2))
+        assertEquals(0, Character.offsetByCodePoints(chars, 0, chars.size, 3, -2))
+        assertFailsWith<IndexOutOfBoundsException> {
+            Character.offsetByCodePoints(chars, 0, chars.size, 0, 6)
+        }
+        assertFailsWith<IndexOutOfBoundsException> {
+            Character.offsetByCodePoints(chars, 0, chars.size, 0, -1)
+        }
     }
 }

@@ -56,7 +56,7 @@ abstract class AbstractWordsFileFilterFactory protected constructor(args: Mutabl
     }
 
     /** Default word set implementation. */
-    protected abstract fun createDefaultWords(): CharArraySet
+    protected abstract fun createDefaultWords(): CharArraySet?
 
     fun getWords(): CharArraySet? {
         return words

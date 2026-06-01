@@ -24,7 +24,7 @@ import kotlin.math.max
  *
  * @lucene.experimental
  */
-class TokenStreamToAutomaton {
+open class TokenStreamToAutomaton {
     private var preservePositionIncrements = true
     private var finalOffsetGapAsHole = false
     private var unicodeArcs = false
@@ -72,7 +72,7 @@ class TokenStreamToAutomaton {
      * Subclass and implement this if you need to change the token (such as escaping certain bytes)
      * before it's turned into a graph.
      */
-    protected fun changeToken(`in`: BytesRef): BytesRef {
+    protected open fun changeToken(`in`: BytesRef): BytesRef {
         return `in`
     }
 

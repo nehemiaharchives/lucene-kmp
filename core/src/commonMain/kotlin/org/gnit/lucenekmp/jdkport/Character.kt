@@ -597,6 +597,31 @@ class Character {
         }
 
         /**
+         * Determines if the specified character (Unicode code point) is a letter.
+         *
+         *
+         * A character is considered to be a letter if its general category type, provided
+         * by [getType(codePoint)][Character.getType], is any of the following:
+         * `UPPERCASE_LETTER`, `LOWERCASE_LETTER`, `TITLECASE_LETTER`,
+         * `MODIFIER_LETTER`, or `OTHER_LETTER`.
+         *
+         * @param codePoint the character (Unicode code point) to be tested.
+         * @return `true` if the character is a letter; `false` otherwise.
+         * @see Character.getType
+         * @since 1.5
+         */
+        fun isLetter(codePoint: Int): Boolean {
+            return when (getType(codePoint)) {
+                UPPERCASE_LETTER.toInt(),
+                LOWERCASE_LETTER.toInt(),
+                TITLECASE_LETTER.toInt(),
+                MODIFIER_LETTER.toInt(),
+                OTHER_LETTER.toInt() -> true
+                else -> false
+            }
+        }
+
+        /**
          * Determines if the given `char` value is a
          * [Unicode high-surrogate code unit](http://www.unicode.org/glossary/#high_surrogate_code_unit)
          * (also known as *leading-surrogate code unit*).
@@ -972,6 +997,121 @@ class Character {
          */
         fun getType(codePoint: Int): Int {
             return CharacterData.of(codePoint).getType(codePoint)
+        }
+
+        /**
+         * Determines if the specified character (Unicode code point) is
+         * white space according to Java.
+         *
+         * <p>A character is a Java whitespace character if and only if it satisfies one
+         * of the following criteria:
+         *
+         * <ul>
+         * <li>It is a Unicode space character ([SPACE_SEPARATOR],
+         * [LINE_SEPARATOR], or [PARAGRAPH_SEPARATOR]) but is not
+         * also a non-breaking space (`'\u00A0'`, `'\u2007'`, `'\u202F'`).
+         * <li>It is `'\u0009'`, HORIZONTAL TABULATION.
+         * <li>It is `'\u000A'`, LINE FEED.
+         * <li>It is `'\u000B'`, VERTICAL TABULATION.
+         * <li>It is `'\u000C'`, FORM FEED.
+         * <li>It is `'\u000D'`, CARRIAGE RETURN.
+         * <li>It is `'\u001C'`, FILE SEPARATOR.
+         * <li>It is `'\u001D'`, GROUP SEPARATOR.
+         * <li>It is `'\u001E'`, RECORD SEPARATOR.
+         * <li>It is `'\u001F'`, UNIT SEPARATOR.
+         * </ul>
+         *
+         * @param codePoint the character (Unicode code point) to be tested.
+         * @return `true` if the character is a Java whitespace character;
+         * `false` otherwise.
+         * @since 1.5
+         */
+        fun isWhitespace(codePoint: Int): Boolean {
+            return CharacterData.of(codePoint).isWhitespace(codePoint)
+        }
+
+        /**
+         * Returns the number of Unicode code points in a subarray of the
+         * `char` array argument.
+         *
+         * @param a the `char` array to be scanned
+         * @param offset the index of the first `char` of the
+         * subarray
+         * @param count the length of the subarray in `char`s
+         * @return the number of Unicode code points in the specified subarray
+         * @since 1.5
+         */
+        fun codePointCount(a: CharArray, offset: Int, count: Int): Int {
+            if (count > a.size - offset || offset < 0 || count < 0) {
+                throw IndexOutOfBoundsException()
+            }
+            return codePointCountImpl(a, offset, count)
+        }
+
+        /**
+         * Returns the index within the given char subarray that is offset from
+         * the given `index` by `codePointOffset` code points.
+         *
+         * @param a the `char` array to be indexed
+         * @param start the index of the first `char` of the subarray
+         * @param count the length of the subarray in `char`s
+         * @param index the index to be offset and converted
+         * @param codePointOffset the number of code points to offset by
+         * @return the index within the subarray
+         * @since 1.5
+         */
+        fun offsetByCodePoints(
+            a: CharArray,
+            start: Int,
+            count: Int,
+            index: Int,
+            codePointOffset: Int
+        ): Int {
+            val end = start + count
+            if (start < 0 || count < 0 || index < start || index > end || end > a.size) {
+                throw IndexOutOfBoundsException()
+            }
+            var x = index
+            if (codePointOffset >= 0) {
+                var i = codePointOffset
+                while (i > 0) {
+                    if (x >= end) {
+                        throw IndexOutOfBoundsException()
+                    }
+                    val c1 = a[x++]
+                    if (isHighSurrogate(c1) && x < end && isLowSurrogate(a[x])) {
+                        x++
+                    }
+                    i--
+                }
+            } else {
+                var i = codePointOffset
+                while (i < 0) {
+                    if (x <= start) {
+                        throw IndexOutOfBoundsException()
+                    }
+                    val c2 = a[--x]
+                    if (isLowSurrogate(c2) && x > start && isHighSurrogate(a[x - 1])) {
+                        x--
+                    }
+                    i++
+                }
+            }
+            return x
+        }
+
+        private fun codePointCountImpl(a: CharArray, offset: Int, count: Int): Int {
+            var endIndex = offset
+            endIndex += count
+            var n = count
+            var i = offset
+            while (i < endIndex) {
+                if (isHighSurrogate(a[i++]) && i < endIndex && isLowSurrogate(a[i])) {
+                    n--
+                    i++
+                }
+            }
+            return n
         }
 
         /**

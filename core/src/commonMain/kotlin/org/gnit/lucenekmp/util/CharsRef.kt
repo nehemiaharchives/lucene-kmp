@@ -99,11 +99,26 @@ class CharsRef(
             return CharsRef(copy, 0, other.length)
         }
 
-        /**
-         * Comparator that orders UTF-16 the same way as UTF-8 for ASCII-only data.
-         * This is sufficient for current tests, which use ASCII input.
-         */
+        /** Comparator that orders UTF-16 the same way as UTF-8. */
         val UTF16SortedAsUTF8Comparator: Comparator<CharsRef> =
-            Comparator { a, b -> a.compareTo(b) }
+            Comparator { a, b ->
+                val aLimit = a.length
+                val bLimit = b.length
+                val limit = minOf(aLimit, bLimit)
+                var i = 0
+                while (i < limit) {
+                    var aChar = a.chars[a.offset + i]
+                    var bChar = b.chars[b.offset + i]
+                    if (aChar != bChar) {
+                        if (aChar >= '\ud800' && bChar >= '\ud800') {
+                            aChar = if (aChar >= '\ue000') (aChar.code - 0x800).toChar() else (aChar.code + 0x2000).toChar()
+                            bChar = if (bChar >= '\ue000') (bChar.code - 0x800).toChar() else (bChar.code + 0x2000).toChar()
+                        }
+                        return@Comparator aChar.code - bChar.code
+                    }
+                    i++
+                }
+                a.length - b.length
+            }
     }
 }
