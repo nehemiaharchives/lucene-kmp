@@ -208,5 +208,15 @@ Then I also built [bbl-android](https://github.com/nehemiaharchives/bbl-android)
 I knoew Lucene was already ported to 13 languages/platforms but it was too large codebase for me alone to port.
 Then AI coding assistants/agents start to emerge and I started [bbl-kmp](https://github.com/nehemiaharchives/bbl-kmp) to read and search bible in cli and mobile porting and dogfooding lucene-kmp!
 
+
+## AI Usage
+* I started to port Lucene using JetBrains' Covert [Java to Kotlin](https://www.jetbrains.com/help/idea/get-started-with-kotlin.html#convert-java-to-kotlin) feature.
+At that time, one line suggestion of GitHub Copilot was only AI assistant I used.
+* Then when it gets time and effort consuming to rewrite such as "Java threading to Kotlin coroutines", I used ChatGPT on the web to draft the ported code.
+* Then GitHub Copilot plugin for IntelliJ IDEA launched and I used "Edit" feature to rewrite 10s of lines of block of code.
+* Codex launched, I immediately started to use it but for partial edit, coworking with human review and modification.
+* [ANGENTS.md](ANGENTS.md) and [SKILL.md](.agents/skills/port/SKILL.md) are created based on the know-hows and lessons learned from the semi-manual porting process.
+* Codex with gpt-5.4 under the hood were the first model which is reliably able to port a whole class. gpt-5.5 managed to port a whole package.
+
 ## License
 Apache License 2.0, see [LICENSE](LICENSE) file.
