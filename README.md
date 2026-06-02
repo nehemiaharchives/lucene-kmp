@@ -5,7 +5,7 @@
 
 ## Overview
 
-lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [Apache Lucene](https://github.com/apache/lucene/) enabling ondevice indexing and full text search capabilities in KMP/CMP mobile and desktop apps.
+lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [Apache Lucene](https://github.com/apache/lucene/) enabling On-device indexing and full text search capabilities in KMP/CMP mobile and desktop apps.
 
 ## Supported platforms
 * Kotlin/Jvm
@@ -16,7 +16,7 @@ lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform
 * Kotlin/Native Windows (mingwX64)
 
 ## Features
-* **On-device full-text search**: build and query local indexes without a backend service, useful for offline-first mobile apps and private user data.
+* **On-device full-text search**: build and query local indexes without a backend service, useful for offline-first mobile/desktop apps and private user data.
 * **Relevance-ranked results**: return the best matches first instead of only exact substring matches.
 * **Analyzer-based tokenization**: normalize text with analyzers for case folding, tokenization, stop words, stemming, and language-specific search behavior.
 * **Rich query support**: support common search features such as phrases, boolean queries, wildcard queries, range queries, and query parsing.
