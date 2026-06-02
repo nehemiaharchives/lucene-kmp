@@ -10,38 +10,38 @@ in your `build.gradle.kts` add things you need to use among following:
 ```kotlin
 // Core Lucene APIs for indexing, searching, documents, fields, stores, analyzers, geo, and IP address queries.
 // Most apps should start with this module.
-implementation("org.gnit.lucene-kmp:lucene-kmp-core:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-core:10.2.0-alpha13")
 
 // Classic query parsers for user-entered search strings, fielded queries, phrases, wildcards, and boolean syntax.
-implementation("org.gnit.lucene-kmp:lucene-kmp-queryparser:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-queryparser:10.2.0-alpha13")
 
 // Span and positional query APIs for precise token-order, proximity, containment, and advanced text matching.
-implementation("org.gnit.lucene-kmp:lucene-kmp-queries:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-queries:10.2.0-alpha13")
 
 // Additional codec implementations such as SimpleText, memory postings, and block-tree ords formats.
 // Add this when you need explicit codec support beyond the core default path.
-implementation("org.gnit.lucene-kmp:lucene-kmp-codecs:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-codecs:10.2.0-alpha13")
 
 // Common analyzers, tokenizers, stemmers, and filters for broad language support.
 // Includes English, French, German, Spanish, Portuguese, Italian, Dutch, Russian, Swedish, 
 // Hindi, Bengali, Thai, Indonesian, Nepali, Tamil, Telugu.
-implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-common:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-common:10.2.0-alpha13")
 
 // Extra analyzers for languages and integrations that are useful but less central than analysis-common.
 // Includes Vietnamese, Tagalog, Marathi, Gujarati, Urdu.
-implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-extra:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-extra:10.2.0-alpha13")
 
 // Morfologik dictionary-backed morphological analysis, currently including Polish and Ukrainian analyzers.
-implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-morfologik:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-morfologik:10.2.0-alpha13")
 
 // Chinese analyzer powered by Smart Chinese analysis.
-implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-smartcn:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-smartcn:10.2.0-alpha13")
 
 // Korean analyzer powered by Nori morphological analysis.
-implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-nori:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-nori:10.2.0-alpha13")
 
 // Japanese analyzer powered by Kuromoji morphological analysis.
-implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-kuromoji:10.2.0-alpha12")
+implementation("org.gnit.lucene-kmp:lucene-kmp-analysis-kuromoji:10.2.0-alpha13")
 ```
 
 ## Building Index
