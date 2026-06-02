@@ -178,7 +178,7 @@ is not a search server or database by itself; it is the indexing and query engin
 embed when they need fast full-text search, relevance ranking, fielded search, filters, sorting,
 faceting-style building blocks, and specialized query types over local or server-side data.
 
-Lucene started as an open source Java project created by Doug Cutting and later became an [Apache
+Lucene started as an open source Java project created by Doug Cutting [@cutting](https://github.com/cutting) and later became an [Apache
 Software Foundation](https://www.apache.org/) project. Over time it became one of the foundational libraries for information
 retrieval on the JVM, with a long history of production use, careful index-format evolution, and
 deep engineering around analyzers, inverted indexes, scoring, segment merging, and low-level search
