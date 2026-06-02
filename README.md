@@ -66,54 +66,55 @@ For indexed field types, filters, sort, phrase/fuzzy/wildcard queries, geo and I
 
 ## Java Lucene and lucene-kmp
 lucene-kmp prioritizes the core indexing and search APIs, then adds common analyzers and codecs.
-However extra analyzers where Java Lucene does not have are added.
-Those analyzers support languages with a lot of speaking population as in [LANGUAGE_COVERAGE.md](LANGUAGE_COVERAGE.md).
+`core` and `queryparser` classes ported so far get the index and search jobs done. Some optionals left not ported yet.
+Language with large population of speakers where Java Lucene does not cover, lucene-kmp provided extra language analyzers.
+See [LANGUAGE_COVERAGE.md](LANGUAGE_COVERAGE.md) for language coverage comparison table.
 
-| Java Lucene                 | lucene-kmp            | Note                          |
-|-----------------------------|-----------------------|-------------------------------|
-| `analysis/common`           | `analysis/common`     | Language Analyzers            |
-| `analysis/icu`              |                       |                               |
-| `analysis/kuromoji`         | `analysis/kuromoji`   | JapaneseAnalyzer              |
-| `analysis/morfologik`       | `analysis/morfologik` | Polish and Ukranian Analyzers |
-| `analysis/morfologik.tests` |                       |                               |
-| `analysis/nori`             | `analysis/nori`       | KoreanAnalyzer                |
-| `analysis/opennlp`          |                       |                               |
-| `analysis/phonetic`         |                       |                               |
-| `analysis/smartcn`          | `analysis/smartcn`    | SmartChineseAnalyzer          |
-| `analysis/stempel`          |                       |                               |
-|                             | `analysis/extra`      | Additional Language Analyzers |
-|                             | `analysis/hebmorph`   | HebrewAnalzyer                |
-|                             | `analysis/horn`       | AmharicAnalyzer               |
-| `analysis.tests`            |                       |                               |
-| `backward-codecs`           |                       | Will not be supported in kmp  |
-| `benchmark`                 |                       |                               |
-| `benchmark-jmh`             |                       |                               |
-| `classification`            |                       |                               |
-| `codecs`                    | `codecs`              | Index format codecs           |
-| `core`                      | `core`                | Indexing and Searching        |
-| `core.tests`                |                       |                               |
-| `demo`                      |                       |                               |
-| `distribution`              |                       |                               |
-| `distribution.tests`        |                       |                               |
-| `documentation`             |                       |                               |
-| `expressions`               |                       |                               |
-| `facet`                     |                       |                               |
-| `grouping`                  |                       |                               |
-| `highlighter`               |                       |                               |
-| `join`                      |                       |                               |
-| `luke`                      |                       |                               |
-| `memory`                    |                       |                               |
-| `misc`                      |                       |                               |
-| `monitor`                   |                       |                               |
-| `queries`                   | `queries`             | Span and positional queries   |
-| `queryparser`               | `queryparser`         | Parses query strings          |
-| `replicator`                |                       |                               |
-| `sandbox`                   |                       |                               |
-| `spatial-extras`            |                       |                               |
-| `spatial-test-fixtures`     |                       |                               |
-| `spatial3d`                 |                       |                               |
-| `suggest`                   |                       |                               |
-| `test-framework`            | `test-framework`      | Shared test classes           |
+| Java Lucene                 | lucene-kmp            | Ported | Note                          |
+|-----------------------------|-----------------------|--------|-------------------------------|
+| `analysis/common`           | `analysis/common`     | `83%`  | Language Analyzers            |
+| `analysis/icu`              |                       |        |                               |
+| `analysis/kuromoji`         | `analysis/kuromoji`   | `98%`  | JapaneseAnalyzer              |
+| `analysis/morfologik`       | `analysis/morfologik` | `100%` | Polish and Ukranian Analyzers |
+| `analysis/morfologik.tests` |                       |        |                               |
+| `analysis/nori`             | `analysis/nori`       | `100%` | KoreanAnalyzer                |
+| `analysis/opennlp`          |                       |        |                               |
+| `analysis/phonetic`         |                       |        |                               |
+| `analysis/smartcn`          | `analysis/smartcn`    | `100%` | SmartChineseAnalyzer          |
+| `analysis/stempel`          |                       |        |                               |
+|                             | `analysis/extra`      | `new`  | Additional Language Analyzers |
+|                             | `analysis/hebmorph`   | `new`  | HebrewAnalzyer                |
+|                             | `analysis/horn`       | `new`  | AmharicAnalyzer               |
+| `analysis.tests`            |                       |        |                               |
+| `backward-codecs`           |                       |        | Will not be supported in kmp  |
+| `benchmark`                 |                       |        |                               |
+| `benchmark-jmh`             |                       |        |                               |
+| `classification`            |                       |        |                               |
+| `codecs`                    | `codecs`              | `59%`  | Index format codecs           |
+| `core`                      | `core`                | `97%`  | Indexing and Searching        |
+| `core.tests`                |                       |        |                               |
+| `demo`                      |                       |        |                               |
+| `distribution`              |                       |        |                               |
+| `distribution.tests`        |                       |        |                               |
+| `documentation`             |                       |        |                               |
+| `expressions`               |                       |        |                               |
+| `facet`                     |                       |        |                               |
+| `grouping`                  |                       |        |                               |
+| `highlighter`               |                       |        |                               |
+| `join`                      |                       |        |                               | 
+| `luke`                      |                       |        |                               |
+| `memory`                    |                       |        |                               |
+| `misc`                      |                       |        |                               |
+| `monitor`                   |                       |        |                               |
+| `queries`                   | `queries`             | `17%`  | Span and positional queries   |
+| `queryparser`               | `queryparser`         | `5%`   | Parses query strings          |
+| `replicator`                |                       |        |                               |
+| `sandbox`                   |                       |        |                               |
+| `spatial-extras`            |                       |        |                               |
+| `spatial-test-fixtures`     |                       |        |                               |
+| `spatial3d`                 |                       |        |                               |
+| `suggest`                   |                       |        |                               |
+| `test-framework`            | `test-framework`      | `77%`  | Shared test classes           |
 
 ## Lucene or SQL
 
