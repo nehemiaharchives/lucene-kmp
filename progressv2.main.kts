@@ -1,4 +1,4 @@
-#!/usr/bin/env -S kotlin -J--enable-native-access=ALL-UNNAMED -J--sun-misc-unsafe-memory-access=allow
+#!/usr/bin/env -S kotlin -J-Xmx4g -J--enable-native-access=ALL-UNNAMED -J--sun-misc-unsafe-memory-access=allow
 
 @file:DependsOn("com.github.ajalt.clikt:clikt-jvm:5.0.3")
 @file:DependsOn("com.github.ajalt.mordant:mordant:3.0.2")
@@ -49,19 +49,57 @@ private val coreSearch = setOf(
 
 private val pri1Names get() = coreWrite + coreSearch
 
+data class ModuleToPort(
+    val lucenePath: String?,
+    val kmpPath: String,
+)
+
 val modulesToPort = listOf(
-    "core",
-    "test-framework",
-    "queryparser",
-    "queries",
-    "analysis",
-    "codecs",
+    ModuleToPort("core", "core"),
+    ModuleToPort("test-framework", "test-framework"),
+    ModuleToPort("queryparser", "queryparser"),
+    ModuleToPort("queries", "queries"),
+    ModuleToPort("codecs", "codecs"),
+    ModuleToPort("analysis/common", "analysis/common"),
+    ModuleToPort("analysis/icu", "analysis/icu"),
+    ModuleToPort("analysis/kuromoji", "analysis/kuromoji"),
+    ModuleToPort("analysis/morfologik", "analysis/morfologik"),
+    ModuleToPort("analysis/nori", "analysis/nori"),
+    ModuleToPort("analysis/opennlp", "analysis/opennlp"),
+    ModuleToPort("analysis/phonetic", "analysis/phonetic"),
+    ModuleToPort("analysis/smartcn", "analysis/smartcn"),
+    ModuleToPort(null, "analysis/extra"),
+    ModuleToPort(null, "analysis/hebmorph"),
+    ModuleToPort(null, "analysis/horn"),
 )
 
 val srcDirMap = mapOf(
     "main" to "java",
     "test" to "test",
 )
+
+fun existingPaths(paths: Iterable<String>): List<String> =
+    paths.filter { path -> File(path).isDirectory }
+
+fun javaMainClassPaths(javaDir: String): List<String> =
+    existingPaths(modulesToPort.mapNotNull { module ->
+        module.lucenePath?.let { "$javaDir/lucene/$it/build/classes/java/main" }
+    })
+
+fun javaTestClassPaths(javaDir: String): List<String> =
+    existingPaths(modulesToPort.mapNotNull { module ->
+        module.lucenePath?.let { "$javaDir/lucene/$it/build/classes/java/test" }
+    })
+
+fun kmpMainClassPaths(kmpDir: String): List<String> =
+    existingPaths(modulesToPort.map { module ->
+        "$kmpDir/${module.kmpPath}/build/classes/kotlin/jvm/main"
+    })
+
+fun kmpTestClassPaths(kmpDir: String): List<String> =
+    existingPaths(modulesToPort.map { module ->
+        "$kmpDir/${module.kmpPath}/build/classes/kotlin/jvm/test"
+    })
 
 val externalLibraryJavaKmpRefs = mapOf(
     "java.io.Closeable" to setOf("okio.Closeable"),
@@ -130,7 +168,9 @@ fun markdownLinkForJavaFQN(classInfo: ClassInfo): String {
     // for exammple: https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/core/src/java/org/apache/lucene/analysis/Analyzer.java
 
     val classPath = classInfo.classpathElementURL.toString()
-    val luceneModule = modulesToPort.first { classPath.contains("/$it/build/classes/java/") }
+    val luceneModule = modulesToPort
+        .mapNotNull { it.lucenePath }
+        .first { classPath.contains("/$it/build/classes/java/") }
 
     //println("classPath: $classPath luceneModule: $luceneModule")
 
@@ -712,9 +752,7 @@ class Progress : CliktCommand() {
         ps.println("")
         ps.println("## Priority 1 Dependencies (Java)")
 
-        val javaClassPaths = modulesToPort.map {
-            "$javaDir/lucene/$it/build/classes/java/main"
-        }.toTypedArray()
+        val javaClassPaths = javaMainClassPaths(javaDir).toTypedArray()
 
         val javaLucene: ScanResult = ClassGraph().enableAllInfo()
             //.acceptPackages()
@@ -767,13 +805,9 @@ class Progress : CliktCommand() {
 
         // Collect all Unit Test classes for priority-1 classes and their dependencie
         //             "$javaDir/lucene/$it/build/classes/java/main"
-        val javaUnitTestMainPaths: List<String> = modulesToPort.map { luceneModule ->
-            "$javaDir/lucene/$luceneModule/build/classes/java/main"
-        }
+        val javaUnitTestMainPaths: List<String> = javaMainClassPaths(javaDir)
 
-        val javaUnitTestTestPaths: List<String> = modulesToPort.map { luceneModule ->
-            "$javaDir/lucene/$luceneModule/build/classes/java/test"
-        }
+        val javaUnitTestTestPaths: List<String> = javaTestClassPaths(javaDir)
 
         val javaUnitTestPaths = (javaUnitTestMainPaths + javaUnitTestTestPaths).asIterable()
 
@@ -841,9 +875,7 @@ class Progress : CliktCommand() {
         ps.println("## Priority 1 Dependencies (KMP)")
 
         // operation on KMP classes
-        val kmpMainPaths: List<String> = modulesToPort.map { luceneModule ->
-            "$kmpDir/$luceneModule/build/classes/kotlin/jvm/main"
-        }
+        val kmpMainPaths: List<String> = kmpMainClassPaths(kmpDir)
 
         val kmpSR: ScanResult = ClassGraph().enableAllInfo()
             //.acceptPackages()
@@ -866,13 +898,9 @@ class Progress : CliktCommand() {
         ps.println("")
         ps.println("## Unit Test Dependencies (KMP)")
 
-        val kmpUnitTestMainPaths: List<String> = modulesToPort.map { luceneModule ->
-            "$kmpDir/$luceneModule/build/classes/kotlin/jvm/main"
-        }
+        val kmpUnitTestMainPaths: List<String> = kmpMainClassPaths(kmpDir)
 
-        val kmpUnitTestTestPaths: List<String> = modulesToPort.map { luceneModule ->
-            "$kmpDir/$luceneModule/build/classes/kotlin/jvm/test"
-        }
+        val kmpUnitTestTestPaths: List<String> = kmpTestClassPaths(kmpDir)
 
         val kmpUnitTestPaths = (kmpUnitTestMainPaths + kmpUnitTestTestPaths).asIterable()
 
