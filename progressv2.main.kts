@@ -159,6 +159,7 @@ val externalLibraryJavaKmpRefs = mapOf(
 )
 
 private val portedAnnotationFqn = "org.gnit.lucenekmp.jdkport.Ported"
+private val deprecatedAnnotationFqn = "java.lang.Deprecated"
 private val semanticTypeAliases = mutableMapOf<String, String>()
 private val semanticTypeEquivalentKeys = mutableMapOf<String, MutableSet<String>>()
 private val companionClassInfoByOwnerName = mutableMapOf<String, ClassInfo>()
@@ -231,6 +232,12 @@ fun topLevelClassName(className: String): String = className.substringBefore("$"
 
 fun topLevelClassInfo(classInfo: ClassInfo, allClassesByName: Map<String, ClassInfo>): ClassInfo =
     allClassesByName[topLevelClassName(classInfo.name)] ?: classInfo
+
+fun ClassInfo.hasDeprecatedAnnotation(): Boolean =
+    annotationInfo.any { annotationInfo -> annotationInfo.name == deprecatedAnnotationFqn }
+
+fun isDeprecatedJavaClass(classInfo: ClassInfo, allClassesByName: Map<String, ClassInfo>): Boolean =
+    topLevelClassInfo(classInfo, allClassesByName).hasDeprecatedAnnotation()
 
 fun topLevelClassMap(classes: Iterable<ClassInfo>, excludedPrefix: String? = null): Map<String, ClassInfo> =
     classes
@@ -761,19 +768,29 @@ class Progress : CliktCommand() {
             )
             .enableInterClassDependencies()
             .scan()
-        val javaLuceneClassesByName = javaLucene.allClasses.associateBy { classInfo -> classInfo.name }
+        val javaLuceneAllClassesByName = javaLucene.allClasses.associateBy { classInfo -> classInfo.name }
+        val javaLuceneClasses = javaLucene.allClasses
+            .filterNot { classInfo -> isDeprecatedJavaClass(classInfo, javaLuceneAllClassesByName) }
+        val javaLuceneClassesByName = javaLuceneClasses.associateBy { classInfo -> classInfo.name }
 
         // Collect depth-1 dependencies for priority-1 classes
         val pr1DependenciesDepth1 = javaLucene.classDependencyMap.entries
-            .filter { (classInfo, _) -> classInfo.name in pri1Names }
+            .filter { (classInfo, _) ->
+                classInfo.name in pri1Names && !isDeprecatedJavaClass(classInfo, javaLuceneAllClassesByName)
+            }
             .flatMap { (_, dependencies) -> dependencies }
+            .filterNot { classInfo -> isDeprecatedJavaClass(classInfo, javaLuceneAllClassesByName) }
             .toSet()
 
-        val pri1Classes = javaLucene.allClasses.filter { it.name in pri1Names }
+        val pri1Classes = javaLuceneClasses.filter { it.name in pri1Names }
         val pr1DepthToDependencyClassMap = buildDependencyDepthMap(
             initial = pr1DependenciesDepth1,
             seedSeen = pr1DependenciesDepth1 + pri1Classes,
-            dependencyProvider = { classInfo -> javaLucene.classDependencyMap[classInfo].orEmpty().toSet() }
+            dependencyProvider = { classInfo ->
+                javaLucene.classDependencyMap[classInfo].orEmpty()
+                    .filterNot { dependency -> isDeprecatedJavaClass(dependency, javaLuceneAllClassesByName) }
+                    .toSet()
+            }
         )
 
         pr1DepthToDependencyClassMap.entries.forEach { (depth, classes) ->
@@ -788,6 +805,9 @@ class Progress : CliktCommand() {
                     topLevelInfo.name to ClassInfoWithDepth(topLevelInfo, depth)
                 }
             }
+                .filterNot { (_, classInfoWithDepth) ->
+                    isDeprecatedJavaClass(classInfoWithDepth.classInfo, javaLuceneAllClassesByName)
+                }
                 .groupBy({ it.first }, { it.second })
                 .mapValues { (_, classInfoWithDepths) ->
                     // For each top-level class, keep the one with maximum depth
@@ -818,16 +838,19 @@ class Progress : CliktCommand() {
             )
             .enableInterClassDependencies()
             .scan()
-        val javaLuceneUnitTestClassesByName = javaLuceneUnitTest.allClasses.associateBy { classInfo -> classInfo.name }
+        val javaLuceneUnitTestAllClassesByName = javaLuceneUnitTest.allClasses.associateBy { classInfo -> classInfo.name }
+        val javaLuceneUnitTestClasses = javaLuceneUnitTest.allClasses
+            .filterNot { classInfo -> isDeprecatedJavaClass(classInfo, javaLuceneUnitTestAllClassesByName) }
+        val javaLuceneUnitTestClassesByName = javaLuceneUnitTestClasses.associateBy { classInfo -> classInfo.name }
 
-        ps.println("### total unit test classes: ${javaLuceneUnitTest.allClasses.size}")
+        ps.println("### total unit test classes: ${javaLuceneUnitTestClasses.size}")
 
         val classNeedsUnitTestTopNames = (pri1Classes.map { it.name } + javaPr1Classes.keys).toSet()
         val expectedTestNames = classNeedsUnitTestTopNames
             .map { fqn -> "Test${fqn.substringAfterLast('.')}" }
             .toSet()
 
-        val testClasses = javaLuceneUnitTest.allClasses.filter { classInfo ->
+        val testClasses = javaLuceneUnitTestClasses.filter { classInfo ->
             classInfo.classpathElementURL.toString().contains("/build/classes/java/test/")
         }
 
@@ -842,7 +865,11 @@ class Progress : CliktCommand() {
         val pr1UnitTestDepthToDependencyClassMap = buildDependencyDepthMap(
             initial = pr1UnitTestClasses.toSet(),
             seedSeen = pr1UnitTestClasses.toSet(),
-            dependencyProvider = { classInfo -> javaLuceneUnitTest.classDependencyMap[classInfo].orEmpty().toSet() }
+            dependencyProvider = { classInfo ->
+                javaLuceneUnitTest.classDependencyMap[classInfo].orEmpty()
+                    .filterNot { dependency -> isDeprecatedJavaClass(dependency, javaLuceneUnitTestAllClassesByName) }
+                    .toSet()
+            }
         )
 
         pr1UnitTestDepthToDependencyClassMap.entries.forEach { (depth, classes) ->
@@ -859,6 +886,9 @@ class Progress : CliktCommand() {
             .map { (classInfo, depth) ->
                 val topLevelInfo = topLevelClassInfo(classInfo, javaLuceneUnitTestClassesByName)
                 topLevelInfo.name to ClassInfoWithDepth(topLevelInfo, depth)
+            }
+            .filterNot { (_, classInfoWithDepth) ->
+                isDeprecatedJavaClass(classInfoWithDepth.classInfo, javaLuceneUnitTestAllClassesByName)
             }
             .groupBy({ it.first }, { it.second })
             .mapValues { (_, classInfoWithDepths) ->
@@ -1134,7 +1164,7 @@ class Progress : CliktCommand() {
 
         ps.println("")
         ps.println("### Lucene Classes (Semantic Analysis)")
-        val javaLuceneTopLevelClasses = topLevelClassMap(javaLucene.allClasses).values
+        val javaLuceneTopLevelClasses = topLevelClassMap(javaLuceneClasses).values
         val totalAllClasses = javaLuceneTopLevelClasses.size
         val portedAllClasses = javaLuceneTopLevelClasses.count { classInfo ->
             val kmpFqn = mapToKmp(classInfo.name)

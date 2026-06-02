@@ -67,7 +67,7 @@
 ## Package statistics (all deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |
-| org.apache.lucene |     org.gnit.lucenekmp | 2399 | 1833 | 76% | [ ] |
+| org.apache.lucene |     org.gnit.lucenekmp | 2390 | 1825 | 76% | [ ] |
 |   org.apache.lucene.analysis |       org.gnit.lucenekmp.analysis | 25 | 25 | 100% | [x] |
 |     org.apache.lucene.analysis.ar |         org.gnit.lucenekmp.analysis.ar | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.bg |         org.gnit.lucenekmp.analysis.bg | 4 | 4 | 100% | [x] |
@@ -92,7 +92,7 @@
 |     org.apache.lucene.analysis.el |         org.gnit.lucenekmp.analysis.el | 6 | 6 | 100% | [x] |
 |     org.apache.lucene.analysis.email |         org.gnit.lucenekmp.analysis.email | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.en |         org.gnit.lucenekmp.analysis.en | 21 | 21 | 100% | [x] |
-|     org.apache.lucene.analysis.es |         org.gnit.lucenekmp.analysis.es | 10 | 10 | 100% | [x] |
+|     org.apache.lucene.analysis.es |         org.gnit.lucenekmp.analysis.es | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.et |         org.gnit.lucenekmp.analysis.et | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.eu |         org.gnit.lucenekmp.analysis.eu | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.fa |         org.gnit.lucenekmp.analysis.fa | 9 | 9 | 100% | [x] |
@@ -103,7 +103,7 @@
 |     org.apache.lucene.analysis.hi |         org.gnit.lucenekmp.analysis.hi | 7 | 7 | 100% | [x] |
 |     org.apache.lucene.analysis.hu |         org.gnit.lucenekmp.analysis.hu | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.hunspell |         org.gnit.lucenekmp.analysis.hunspell | 34 | 0 | 0% | [ ] |
-|     org.apache.lucene.analysis.hy |         org.gnit.lucenekmp.analysis.hy | 1 | 0 | 0% | [ ] |
+|     org.apache.lucene.analysis.hy |         org.gnit.lucenekmp.analysis.hy | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.icu |         org.gnit.lucenekmp.analysis.icu | 11 | 0 | 0% | [ ] |
 |       org.apache.lucene.analysis.icu.segmentation |           org.gnit.lucenekmp.analysis.icu.segmentation | 8 | 0 | 0% | [ ] |
 |       org.apache.lucene.analysis.icu.tokenattributes |           org.gnit.lucenekmp.analysis.icu.tokenattributes | 3 | 0 | 0% | [ ] |
@@ -120,7 +120,7 @@
 |     org.apache.lucene.analysis.lt |         org.gnit.lucenekmp.analysis.lt | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.lv |         org.gnit.lucenekmp.analysis.lv | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.minhash |         org.gnit.lucenekmp.analysis.minhash | 2 | 0 | 0% | [ ] |
-|     org.apache.lucene.analysis.miscellaneous |         org.gnit.lucenekmp.analysis.miscellaneous | 64 | 64 | 100% | [x] |
+|     org.apache.lucene.analysis.miscellaneous |         org.gnit.lucenekmp.analysis.miscellaneous | 60 | 60 | 100% | [x] |
 |     org.apache.lucene.analysis.morfologik |         org.gnit.lucenekmp.analysis.morfologik | 5 | 5 | 100% | [x] |
 |     org.apache.lucene.analysis.morph |         org.gnit.lucenekmp.analysis.morph | 15 | 15 | 100% | [x] |
 |     org.apache.lucene.analysis.ne |         org.gnit.lucenekmp.analysis.ne | 1 | 1 | 100% | [x] |
@@ -146,7 +146,7 @@
 |     org.apache.lucene.analysis.standard |         org.gnit.lucenekmp.analysis.standard | 4 | 4 | 100% | [x] |
 |     org.apache.lucene.analysis.stempel |         org.gnit.lucenekmp.analysis.stempel | 3 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.sv |         org.gnit.lucenekmp.analysis.sv | 7 | 7 | 100% | [x] |
-|     org.apache.lucene.analysis.synonym |         org.gnit.lucenekmp.analysis.synonym | 7 | 7 | 100% | [x] |
+|     org.apache.lucene.analysis.synonym |         org.gnit.lucenekmp.analysis.synonym | 5 | 5 | 100% | [x] |
 |       org.apache.lucene.analysis.synonym.word2vec |           org.gnit.lucenekmp.analysis.synonym.word2vec | 7 | 0 | 0% | [ ] |
 |     org.apache.lucene.analysis.ta |         org.gnit.lucenekmp.analysis.ta | 1 | 1 | 100% | [x] |
 |     org.apache.lucene.analysis.te |         org.gnit.lucenekmp.analysis.te | 7 | 7 | 100% | [x] |
@@ -295,7 +295,6 @@
 | [org.apache.lucene.analysis.hunspell.WordContext](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/hunspell/WordContext.java) | org.gnit.lucenekmp.analysis.hunspell.WordContext |
 | [org.apache.lucene.analysis.hunspell.WordFormGenerator](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/hunspell/WordFormGenerator.java) | org.gnit.lucenekmp.analysis.hunspell.WordFormGenerator |
 | [org.apache.lucene.analysis.hunspell.WordStorage](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/hunspell/WordStorage.java) | org.gnit.lucenekmp.analysis.hunspell.WordStorage |
-| [org.apache.lucene.analysis.hy.ArmenianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/java/org/apache/lucene/analysis/hy/ArmenianAnalyzer.java) | org.gnit.lucenekmp.analysis.hy.ArmenianAnalyzer |
 | [org.apache.lucene.analysis.icu.ICUCollationAttributeFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/java/org/apache/lucene/analysis/icu/ICUCollationAttributeFactory.java) | org.gnit.lucenekmp.analysis.icu.ICUCollationAttributeFactory |
 | [org.apache.lucene.analysis.icu.ICUCollationDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/java/org/apache/lucene/analysis/icu/ICUCollationDocValuesField.java) | org.gnit.lucenekmp.analysis.icu.ICUCollationDocValuesField |
 | [org.apache.lucene.analysis.icu.ICUCollationKeyAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/java/org/apache/lucene/analysis/icu/ICUCollationKeyAnalyzer.java) | org.gnit.lucenekmp.analysis.icu.ICUCollationKeyAnalyzer |
@@ -657,123 +656,123 @@
 | Subpackage | Count | Ported | % |
 | --- | --- | --- | --- |
 | org.apache.lucene | 6 | 0 | 0% |
-|   org.apache.lucene.analysis | 15 | 15 | 100% |
-|     org.apache.lucene.analysis.ar | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.bg | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.bn | 4 | 4 | 100% |
+|   org.apache.lucene.analysis | 15 | 0 | 0% |
+|     org.apache.lucene.analysis.ar | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.bg | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.bn | 4 | 0 | 0% |
 |     org.apache.lucene.analysis.boost | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.br | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.ca | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.charfilter | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.cjk | 7 | 7 | 100% |
-|     org.apache.lucene.analysis.ckb | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.classic | 2 | 2 | 100% |
-|       org.apache.lucene.analysis.cn.smart | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.commongrams | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.compound | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.core | 15 | 11 | 73% |
-|     org.apache.lucene.analysis.custom | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.cz | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.da | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.de | 9 | 9 | 100% |
-|     org.apache.lucene.analysis.el | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.email | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.en | 7 | 7 | 100% |
-|     org.apache.lucene.analysis.es | 7 | 7 | 100% |
-|     org.apache.lucene.analysis.et | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.eu | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.fa | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.fi | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.fr | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.ga | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.gl | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.hi | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.hu | 3 | 3 | 100% |
+|     org.apache.lucene.analysis.br | 2 | 0 | 0% |
+|     org.apache.lucene.analysis.ca | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.charfilter | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.cjk | 7 | 0 | 0% |
+|     org.apache.lucene.analysis.ckb | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.classic | 2 | 0 | 0% |
+|       org.apache.lucene.analysis.cn.smart | 2 | 0 | 0% |
+|     org.apache.lucene.analysis.commongrams | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.compound | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.core | 15 | 0 | 0% |
+|     org.apache.lucene.analysis.custom | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.cz | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.da | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.de | 9 | 0 | 0% |
+|     org.apache.lucene.analysis.el | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.email | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.en | 7 | 0 | 0% |
+|     org.apache.lucene.analysis.es | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.et | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.eu | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.fa | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.fi | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.fr | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.ga | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.gl | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.hi | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.hu | 3 | 0 | 0% |
 |     org.apache.lucene.analysis.hunspell | 46 | 0 | 0% |
 |     org.apache.lucene.analysis.hy | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.icu | 10 | 0 | 0% |
 |       org.apache.lucene.analysis.icu.segmentation | 6 | 0 | 0% |
-|     org.apache.lucene.analysis.id | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.in | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.it | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.ja | 24 | 24 | 100% |
-|       org.apache.lucene.analysis.ja.completion | 1 | 1 | 100% |
-|       org.apache.lucene.analysis.ja.dict | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.ko | 8 | 8 | 100% |
-|       org.apache.lucene.analysis.ko.dict | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.lt | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.lv | 3 | 3 | 100% |
+|     org.apache.lucene.analysis.id | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.in | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.it | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.ja | 24 | 0 | 0% |
+|       org.apache.lucene.analysis.ja.completion | 1 | 0 | 0% |
+|       org.apache.lucene.analysis.ja.dict | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.ko | 8 | 0 | 0% |
+|       org.apache.lucene.analysis.ko.dict | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.lt | 2 | 0 | 0% |
+|     org.apache.lucene.analysis.lv | 3 | 0 | 0% |
 |     org.apache.lucene.analysis.minhash | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.miscellaneous | 55 | 55 | 100% |
-|     org.apache.lucene.analysis.morfologik | 2 | 2 | 100% |
+|     org.apache.lucene.analysis.miscellaneous | 53 | 0 | 0% |
+|     org.apache.lucene.analysis.morfologik | 2 | 0 | 0% |
 |       org.apache.lucene.analysis.morfologik.tests | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.ne | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.ngram | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.nl | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.no | 7 | 7 | 100% |
+|     org.apache.lucene.analysis.ne | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.ngram | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.nl | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.no | 7 | 0 | 0% |
 |     org.apache.lucene.analysis.opennlp | 5 | 0 | 0% |
 |     org.apache.lucene.analysis.path | 2 | 0 | 0% |
-|     org.apache.lucene.analysis.pattern | 11 | 1 | 9% |
-|     org.apache.lucene.analysis.payloads | 5 | 5 | 100% |
+|     org.apache.lucene.analysis.pattern | 11 | 0 | 0% |
+|     org.apache.lucene.analysis.payloads | 5 | 0 | 0% |
 |     org.apache.lucene.analysis.phonetic | 8 | 0 | 0% |
 |     org.apache.lucene.analysis.pl | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.pt | 7 | 7 | 100% |
+|     org.apache.lucene.analysis.pt | 7 | 0 | 0% |
 |     org.apache.lucene.analysis.query | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.reverse | 2 | 0 | 0% |
-|     org.apache.lucene.analysis.ro | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.ru | 3 | 3 | 100% |
-|     org.apache.lucene.analysis.shingle | 4 | 4 | 100% |
+|     org.apache.lucene.analysis.ro | 2 | 0 | 0% |
+|     org.apache.lucene.analysis.ru | 3 | 0 | 0% |
+|     org.apache.lucene.analysis.shingle | 4 | 0 | 0% |
 |     org.apache.lucene.analysis.sinks | 1 | 0 | 0% |
 |     org.apache.lucene.analysis.snowball | 2 | 0 | 0% |
-|     org.apache.lucene.analysis.sr | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.standard | 2 | 2 | 100% |
+|     org.apache.lucene.analysis.sr | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.standard | 2 | 0 | 0% |
 |     org.apache.lucene.analysis.stempel | 1 | 0 | 0% |
-|     org.apache.lucene.analysis.sv | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.synonym | 6 | 3 | 50% |
+|     org.apache.lucene.analysis.sv | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.synonym | 3 | 0 | 0% |
 |       org.apache.lucene.analysis.synonym.word2vec | 4 | 0 | 0% |
-|     org.apache.lucene.analysis.ta | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.te | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.th | 2 | 2 | 100% |
-|     org.apache.lucene.analysis.tokenattributes | 4 | 4 | 100% |
-|     org.apache.lucene.analysis.tr | 5 | 5 | 100% |
-|     org.apache.lucene.analysis.uk | 1 | 1 | 100% |
-|     org.apache.lucene.analysis.util | 8 | 7 | 87% |
+|     org.apache.lucene.analysis.ta | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.te | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.th | 2 | 0 | 0% |
+|     org.apache.lucene.analysis.tokenattributes | 4 | 0 | 0% |
+|     org.apache.lucene.analysis.tr | 5 | 0 | 0% |
+|     org.apache.lucene.analysis.uk | 1 | 0 | 0% |
+|     org.apache.lucene.analysis.util | 8 | 0 | 0% |
 |     org.apache.lucene.analysis.wikipedia | 2 | 0 | 0% |
-|   org.apache.lucene.codecs | 4 | 3 | 75% |
+|   org.apache.lucene.codecs | 4 | 0 | 0% |
 |     org.apache.lucene.codecs.bitvectors | 1 | 0 | 0% |
 |     org.apache.lucene.codecs.blockterms | 3 | 0 | 0% |
-|     org.apache.lucene.codecs.blocktreeords | 1 | 1 | 100% |
+|     org.apache.lucene.codecs.blocktreeords | 1 | 0 | 0% |
 |     org.apache.lucene.codecs.bloom | 1 | 0 | 0% |
-|     org.apache.lucene.codecs.compressing | 5 | 5 | 100% |
-|     org.apache.lucene.codecs.hnsw | 1 | 1 | 100% |
-|     org.apache.lucene.codecs.lucene101 | 6 | 6 | 100% |
-|     org.apache.lucene.codecs.lucene102 | 2 | 2 | 100% |
-|     org.apache.lucene.codecs.lucene90 | 14 | 14 | 100% |
-|       org.apache.lucene.codecs.lucene90.blocktree | 1 | 1 | 100% |
-|       org.apache.lucene.codecs.lucene90.compressing | 3 | 3 | 100% |
-|     org.apache.lucene.codecs.lucene94 | 1 | 1 | 100% |
-|     org.apache.lucene.codecs.lucene99 | 6 | 6 | 100% |
+|     org.apache.lucene.codecs.compressing | 5 | 0 | 0% |
+|     org.apache.lucene.codecs.hnsw | 1 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene101 | 6 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene102 | 2 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene90 | 14 | 0 | 0% |
+|       org.apache.lucene.codecs.lucene90.blocktree | 1 | 0 | 0% |
+|       org.apache.lucene.codecs.lucene90.compressing | 3 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene94 | 1 | 0 | 0% |
+|     org.apache.lucene.codecs.lucene99 | 6 | 0 | 0% |
 |     org.apache.lucene.codecs.memory | 2 | 0 | 0% |
-|     org.apache.lucene.codecs.perfield | 4 | 4 | 100% |
-|     org.apache.lucene.codecs.simpletext | 11 | 10 | 90% |
+|     org.apache.lucene.codecs.perfield | 4 | 0 | 0% |
+|     org.apache.lucene.codecs.simpletext | 11 | 0 | 0% |
 |     org.apache.lucene.codecs.uniformsplit | 5 | 0 | 0% |
 |       org.apache.lucene.codecs.uniformsplit.sharedterms | 2 | 0 | 0% |
 |   org.apache.lucene.collation | 2 | 0 | 0% |
-|   org.apache.lucene.document | 50 | 49 | 98% |
-|   org.apache.lucene.geo | 17 | 17 | 100% |
-|   org.apache.lucene.index | 197 | 196 | 99% |
-|     org.apache.lucene.internal.hppc | 15 | 15 | 100% |
-|     org.apache.lucene.internal.tests | 1 | 1 | 100% |
-|     org.apache.lucene.internal.vectorization | 4 | 4 | 100% |
+|   org.apache.lucene.document | 50 | 0 | 0% |
+|   org.apache.lucene.geo | 17 | 0 | 0% |
+|   org.apache.lucene.index | 197 | 0 | 0% |
+|     org.apache.lucene.internal.hppc | 15 | 0 | 0% |
+|     org.apache.lucene.internal.tests | 1 | 0 | 0% |
+|     org.apache.lucene.internal.vectorization | 4 | 0 | 0% |
 |   org.apache.lucene.queries | 1 | 0 | 0% |
 |     org.apache.lucene.queries.function | 13 | 0 | 0% |
 |       org.apache.lucene.queries.function.docvalues | 1 | 0 | 0% |
 |     org.apache.lucene.queries.intervals | 7 | 0 | 0% |
 |     org.apache.lucene.queries.mlt | 1 | 0 | 0% |
 |     org.apache.lucene.queries.payloads | 6 | 0 | 0% |
-|     org.apache.lucene.queries.spans | 21 | 21 | 100% |
-|     org.apache.lucene.queryparser.classic | 4 | 4 | 100% |
-|     org.apache.lucene.queryparser.complexPhrase | 1 | 1 | 100% |
+|     org.apache.lucene.queries.spans | 21 | 0 | 0% |
+|     org.apache.lucene.queryparser.classic | 4 | 0 | 0% |
+|     org.apache.lucene.queryparser.complexPhrase | 1 | 0 | 0% |
 |     org.apache.lucene.queryparser.ext | 2 | 0 | 0% |
 |         org.apache.lucene.queryparser.flexible.core.builders | 1 | 0 | 0% |
 |         org.apache.lucene.queryparser.flexible.core.nodes | 1 | 0 | 0% |
@@ -785,21 +784,21 @@
 |     org.apache.lucene.queryparser.simple | 1 | 0 | 0% |
 |       org.apache.lucene.queryparser.surround.query | 4 | 0 | 0% |
 |     org.apache.lucene.queryparser.xml | 3 | 0 | 0% |
-|   org.apache.lucene.search | 149 | 149 | 100% |
-|     org.apache.lucene.search.knn | 1 | 1 | 100% |
-|     org.apache.lucene.search.similarities | 25 | 25 | 100% |
-|   org.apache.lucene.store | 27 | 27 | 100% |
-|   org.apache.lucene.util | 63 | 62 | 98% |
-|     org.apache.lucene.util.automaton | 15 | 15 | 100% |
-|     org.apache.lucene.util.bkd | 8 | 8 | 100% |
-|     org.apache.lucene.util.compress | 3 | 3 | 100% |
-|     org.apache.lucene.util.fst | 8 | 8 | 100% |
-|     org.apache.lucene.util.graph | 1 | 1 | 100% |
-|     org.apache.lucene.util.hnsw | 8 | 8 | 100% |
-|     org.apache.lucene.util.mutable | 1 | 1 | 100% |
-|     org.apache.lucene.util.packed | 3 | 3 | 100% |
-|     org.apache.lucene.util.quantization | 3 | 3 | 100% |
-| Total | 1186 | 1140 | 96% |
+|   org.apache.lucene.search | 149 | 0 | 0% |
+|     org.apache.lucene.search.knn | 1 | 0 | 0% |
+|     org.apache.lucene.search.similarities | 25 | 0 | 0% |
+|   org.apache.lucene.store | 27 | 0 | 0% |
+|   org.apache.lucene.util | 63 | 0 | 0% |
+|     org.apache.lucene.util.automaton | 15 | 0 | 0% |
+|     org.apache.lucene.util.bkd | 8 | 0 | 0% |
+|     org.apache.lucene.util.compress | 3 | 0 | 0% |
+|     org.apache.lucene.util.fst | 8 | 0 | 0% |
+|     org.apache.lucene.util.graph | 1 | 0 | 0% |
+|     org.apache.lucene.util.hnsw | 8 | 0 | 0% |
+|     org.apache.lucene.util.mutable | 1 | 0 | 0% |
+|     org.apache.lucene.util.packed | 3 | 0 | 0% |
+|     org.apache.lucene.util.quantization | 3 | 0 | 0% |
+| Total | 1179 | 988 | 83% |
 
 
 ## Tests To Port
@@ -861,7 +860,6 @@
 | [org.apache.lucene.analysis.hunspell.TestTwoSuffixes](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/hunspell/TestTwoSuffixes.java) | org.gnit.lucenekmp.analysis.hunspell.TestTwoSuffixes |
 | [org.apache.lucene.analysis.hunspell.TestZeroAffix](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/hunspell/TestZeroAffix.java) | org.gnit.lucenekmp.analysis.hunspell.TestZeroAffix |
 | [org.apache.lucene.analysis.hunspell.TestZeroAffix2](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/hunspell/TestZeroAffix2.java) | org.gnit.lucenekmp.analysis.hunspell.TestZeroAffix2 |
-| [org.apache.lucene.analysis.hy.TestArmenianAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/hy/TestArmenianAnalyzer.java) | org.gnit.lucenekmp.analysis.hy.TestArmenianAnalyzer |
 | [org.apache.lucene.analysis.icu.TestICUCollationDocValuesField](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/test/org/apache/lucene/analysis/icu/TestICUCollationDocValuesField.java) | org.gnit.lucenekmp.analysis.icu.TestICUCollationDocValuesField |
 | [org.apache.lucene.analysis.icu.TestICUCollationKeyAnalyzer](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/test/org/apache/lucene/analysis/icu/TestICUCollationKeyAnalyzer.java) | org.gnit.lucenekmp.analysis.icu.TestICUCollationKeyAnalyzer |
 | [org.apache.lucene.analysis.icu.TestICUFoldingFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/icu/src/test/org/apache/lucene/analysis/icu/TestICUFoldingFilter.java) | org.gnit.lucenekmp.analysis.icu.TestICUFoldingFilter |
@@ -916,7 +914,6 @@
 | [org.apache.lucene.analysis.stempel.TestStempelPolishStemFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/stempel/src/test/org/apache/lucene/analysis/stempel/TestStempelPolishStemFilterFactory.java) | org.gnit.lucenekmp.analysis.stempel.TestStempelPolishStemFilterFactory |
 | [org.apache.lucene.analysis.synonym.TestMultiWordSynonyms](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/TestMultiWordSynonyms.java) | org.gnit.lucenekmp.analysis.synonym.TestMultiWordSynonyms |
 | [org.apache.lucene.analysis.synonym.TestSynonymGraphFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/TestSynonymGraphFilter.java) | org.gnit.lucenekmp.analysis.synonym.TestSynonymGraphFilter |
-| [org.apache.lucene.analysis.synonym.TestSynonymMapFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/TestSynonymMapFilter.java) | org.gnit.lucenekmp.analysis.synonym.TestSynonymMapFilter |
 | [org.apache.lucene.analysis.synonym.word2vec.TestDl4jModelReader](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestDl4jModelReader.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestDl4jModelReader |
 | [org.apache.lucene.analysis.synonym.word2vec.TestWord2VecSynonymFilter](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestWord2VecSynonymFilter.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestWord2VecSynonymFilter |
 | [org.apache.lucene.analysis.synonym.word2vec.TestWord2VecSynonymFilterFactory](https://github.com/apache/lucene/blob/ec75fcad5a4208c7b9e35e870229d9b703cda8f3/lucene/analysis/common/src/test/org/apache/lucene/analysis/synonym/word2vec/TestWord2VecSynonymFilterFactory.java) | org.gnit.lucenekmp.analysis.synonym.word2vec.TestWord2VecSynonymFilterFactory |

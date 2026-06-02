@@ -16,7 +16,7 @@ import java.io.File
 
 /** Lucene → Kotlin‑MPP progress dashboard (core + test‑framework) */
 
-data class Source(val fqn: String, val file: File)
+data class Source(val fqn: String, val file: File, val deprecated: Boolean = false)
 
 private val portingModules = listOf("core", "codecs", "queryparser", "analysis")
 
@@ -28,8 +28,34 @@ fun File.collectSources(ext: String): List<Source> =
             val pkgLine = f.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
             val pkg = pkgLine?.let(::parsePackageLine) ?: ""
             val fqn = if (pkg.isEmpty()) f.nameWithoutExtension else "$pkg.${f.nameWithoutExtension}"
-            Source(fqn, f)
+            Source(fqn, f, deprecated = ext == "java" && f.hasDeprecatedTopLevelAnnotation())
         }.toList()
+
+fun File.hasDeprecatedTopLevelAnnotation(): Boolean {
+    val text = readText()
+    val declaration = Regex("""\b(class|interface|enum|record)\s+${Regex.escape(nameWithoutExtension)}\b""")
+        .find(text) ?: return false
+    val linesBeforeDeclaration = text.substring(0, declaration.range.first).lines().asReversed()
+    val annotationAndModifierLines = linesBeforeDeclaration.take(20).takeWhile { line ->
+        val trimmed = line.trim()
+        trimmed.isEmpty() ||
+            trimmed.startsWith("@") ||
+            trimmed.split(Regex("\\s+")).all { token ->
+                token in setOf(
+                    "public",
+                    "protected",
+                    "private",
+                    "abstract",
+                    "final",
+                    "static",
+                    "sealed",
+                    "non-sealed",
+                    "strictfp"
+                )
+            }
+    }
+    return annotationAndModifierLines.any { it.contains("@Deprecated") }
+}
 
 fun parsePackageLine(line: String): String {
     var s = line.removePrefix("package ").trim()
@@ -180,6 +206,7 @@ class Progress : CliktCommand() {
         if (testDir.exists() && testDir.isDirectory) {
             testDir.walkTopDown()
                 .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
+                .filterNot { it.hasDeprecatedTopLevelAnnotation() }
                 .forEach { file ->
                     // Since we're already in org/apache/lucene, don't add the prefix again
                     val relativePath = file.parentFile.toRelativePath(testDir)
@@ -242,18 +269,39 @@ class Progress : CliktCommand() {
             return
         }
 
-        val javaCounts = mutableMapOf<String, Int>()
-        javaTestDirs.forEach { dir ->
-            countTestClasses(dir).forEach { (pkg, count) ->
-                javaCounts[pkg] = javaCounts.getOrDefault(pkg, 0) + count
-            }
+        val javaTests = mutableListOf<Source>()
+        javaTestDirs.forEach { javaTestDir ->
+            javaTestDir.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
+                .filterNot { it.hasDeprecatedTopLevelAnnotation() }
+                .forEach { file ->
+                    val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
+                    val pkg = pkgLine?.let(::parsePackageLine) ?: ""
+                    val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
+                    javaTests.add(Source(fqn, file))
+                }
         }
-        val ktCounts = mutableMapOf<String, Int>()
+
+        val ktTestFqns = mutableSetOf<String>()
         ktTestDirs.forEach { dir ->
-            countKotlinTestClasses(dir).forEach { (pkg, count) ->
-                ktCounts[pkg] = ktCounts.getOrDefault(pkg, 0) + count
-            }
+            dir.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("Test") && it.extension == "kt" }
+                .filter { it.useLines { lines -> lines.count() } > 5 }
+                .forEach { file ->
+                    val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
+                    val pkg = pkgLine?.let(::parsePackageLine) ?: ""
+                    val fqn = if (pkg.isEmpty()) file.nameWithoutExtension else "$pkg.${file.nameWithoutExtension}"
+                    ktTestFqns.add(fqn)
+                }
         }
+
+        val javaCounts = javaTests
+            .groupingBy { it.fqn.substringBeforeLast('.', "org.apache.lucene") }
+            .eachCount()
+        val ktCounts = javaTests
+            .filter { javaTest -> mapToKmp(javaTest.fqn) in ktTestFqns }
+            .groupingBy { it.fqn.substringBeforeLast('.', "org.apache.lucene") }
+            .eachCount()
         
         // Calculate totals
         val javaTotal = javaCounts.values.sum()
@@ -314,6 +362,7 @@ class Progress : CliktCommand() {
         javaTestDirs.forEach { javaTestDir ->
             javaTestDir.walkTopDown()
                 .filter { it.isFile && it.name.startsWith("Test") && it.extension == "java" }
+                .filterNot { it.hasDeprecatedTopLevelAnnotation() }
                 .forEach { file ->
                     val pkgLine = file.useLines { it.firstOrNull { l -> l.startsWith("package ") } }
                     val pkg = pkgLine?.let(::parsePackageLine) ?: ""
@@ -609,6 +658,7 @@ class Progress : CliktCommand() {
         require(javaSrcDirs.isNotEmpty())
 
         val javaSrc = javaSrcDirs.flatMap { it.collectSources("java") }
+            .filterNot { it.deprecated }
         val kmpSrc  = kmpRoot.collectSources("kt")
         index(javaSrc, javaIndex)
         index(kmpSrc, kmpIndex)
