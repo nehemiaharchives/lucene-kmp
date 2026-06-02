@@ -1,4 +1,26 @@
 # Lucene KMP Port Progress
+## Module Progress
+| Module | Java Classes | KMP Classes | Ported | % |
+| --- | --- | --- | --- | --- |
+| analysis:common | 524 | 690 | 404 | 77% |
+| analysis:extra | 0 | 301 | 0 | 100% |
+| analysis:hebmorph | 0 | 464 | 0 | 100% |
+| analysis:horn | 0 | 56 | 0 | 100% |
+| analysis:icu | 25 | 0 | 0 | 0% |
+| analysis:kuromoji | 58 | 109 | 54 | 93% |
+| analysis:morfologik | 8 | 28 | 6 | 75% |
+| analysis:nori | 39 | 94 | 36 | 92% |
+| analysis:opennlp | 19 | 0 | 0 | 0% |
+| analysis:phonetic | 9 | 0 | 0 | 0% |
+| analysis:smartcn | 20 | 31 | 18 | 90% |
+| analysis:stempel | 6 | 0 | 0 | 0% |
+| codecs | 94 | 51 | 51 | 54% |
+| core | 1135 | 2207 | 1081 | 95% |
+| progress | 0 | 2 | 0 | 100% |
+| queries | 164 | 54 | 27 | 16% |
+| queryparser | 248 | 18 | 12 | 4% |
+| test-framework | 234 | 215 | 162 | 69% |
+
 ## Package statistics (priority‑1 deps)
 | Java package | KMP mapped | Classes | Ported | % | Done |
 | --- | --- | --- | --- | --- | --- |

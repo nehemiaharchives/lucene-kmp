@@ -24,6 +24,26 @@
 
 ## Priority 1 Dependencies (KMP)
 ### Total KMP classes: 2833
+## Module Progress
+| Module | Java Classes | KMP Classes | Ported | % |
+| --- | --- | --- | --- | --- |
+| analysis:common | 489 | 478 | 407 | 83% |
+| analysis:extra | 0 | 194 | 0 | 100% |
+| analysis:hebmorph | 0 | 465 | 0 | 100% |
+| analysis:horn | 0 | 29 | 0 | 100% |
+| analysis:icu | 22 | 0 | 0 | 0% |
+| analysis:kuromoji | 54 | 77 | 53 | 98% |
+| analysis:morfologik | 6 | 62 | 6 | 100% |
+| analysis:nori | 36 | 82 | 36 | 100% |
+| analysis:opennlp | 17 | 0 | 0 | 0% |
+| analysis:phonetic | 8 | 0 | 0 | 0% |
+| analysis:smartcn | 18 | 29 | 18 | 100% |
+| codecs | 86 | 40 | 51 | 59% |
+| core | 1106 | 1133 | 1081 | 97% |
+| queries | 157 | 27 | 27 | 17% |
+| queryparser | 221 | 12 | 12 | 5% |
+| test-framework | 210 | 205 | 163 | 77% |
+
 
 ## Unit Test Dependencies (KMP)
 ### Total KMP Unit Test classes: 4036

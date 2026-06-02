@@ -198,6 +198,34 @@ class Progress : CliktCommand() {
     private fun index(src: List<Source>, dst: MutableMap<String, Source>) {
         src.forEach { dst[it.fqn] = it }
     }
+
+    private fun moduleNameForJavaSource(source: Source, javaRoot: File): String? {
+        val relativePath = source.file.relativeTo(javaRoot).invariantSeparatorsPath
+        if (!relativePath.startsWith("lucene/")) return null
+        val parts = relativePath.removePrefix("lucene/").split('/')
+        return when {
+            parts.isEmpty() -> null
+            parts[0] == "analysis" && parts.size >= 2 -> "analysis/${parts[1]}"
+            else -> parts[0]
+        }
+    }
+
+    private fun moduleNameForKotlinSource(source: Source, kmpRoot: File): String? {
+        val relativePath = source.file.relativeTo(kmpRoot).invariantSeparatorsPath
+        val parts = relativePath.split('/')
+        return when {
+            parts.isEmpty() -> null
+            parts[0] == "analysis" && parts.size >= 2 -> "analysis/${parts[1]}"
+            else -> parts[0]
+        }
+    }
+
+    private inline fun <K, V> List<V>.groupByNotNull(keySelector: (V) -> K?): Map<K, List<V>> =
+        mapNotNull { value -> keySelector(value)?.let { key -> key to value } }
+            .groupBy({ it.first }, { it.second })
+
+    private fun displayModuleName(module: String): String =
+        if (module.startsWith("analysis/")) "analysis:${module.removePrefix("analysis/")}" else module
     
     // ── test classes counter ────────────────────────────────────────────────
     private fun countTestClasses(testDir: File): Map<String, Int> {
@@ -564,6 +592,54 @@ class Progress : CliktCommand() {
         markDown.appendLine(mdTable)
     }
 
+    private data class ModuleProgressRow(
+        val module: String,
+        val javaTotal: Int,
+        val kmpTotal: Int,
+        val ported: Int,
+    )
+
+    private fun renderModuleProgress(javaRoot: File, kmpRoot: File, javaSrc: List<Source>, kmpSrc: List<Source>) {
+        val javaModules = javaSrc.groupByNotNull { moduleNameForJavaSource(it, javaRoot) }
+        val kmpModules = kmpSrc.groupByNotNull { moduleNameForKotlinSource(it, kmpRoot) }
+
+        val rows = javaModules.keys.union(kmpModules.keys)
+            .map { module ->
+            val javaSources = javaModules[module].orEmpty().filterNot { it.deprecated }
+            val javaFqns = javaSources.map { it.fqn }.toSet()
+            val javaTotal = javaFqns.count { it.startsWith("org.apache.lucene.") && it !in notToPort }
+            val kmpTotal = kmpModules[module].orEmpty().map { it.fqn }.toSet().count { it.startsWith("org.gnit.lucenekmp.") }
+            val ported = javaFqns.count { mapToKmp(it) in kmpIndex }
+            ModuleProgressRow(module, javaTotal, kmpTotal, ported)
+        }.filter { it.javaTotal > 0 || it.kmpTotal > 0 }
+            .sortedBy { displayModuleName(it.module) }
+
+        val section = "## Module Progress"
+        term.println(bold(section))
+        markDown.appendLine(section)
+
+        val tbl = table {
+            header { row("Module", "Java Classes", "KMP Classes", "Ported", "%") }
+            body {
+                rows.forEach { row ->
+                    val pct = if (row.javaTotal == 0) 100 else row.ported * 100 / row.javaTotal
+                    row(displayModuleName(row.module), row.javaTotal, row.kmpTotal, row.ported, "$pct%")
+                }
+            }
+        }
+
+        term.println(tbl)
+        markDown.appendLine(
+            mdTableBuilder(
+                listOf("Module", "Java Classes", "KMP Classes", "Ported", "%"),
+                rows.map { row ->
+                    val pct = if (row.javaTotal == 0) 100 else row.ported * 100 / row.javaTotal
+                    listOf(displayModuleName(row.module), row.javaTotal, row.kmpTotal, row.ported, "$pct%")
+                }
+            )
+        )
+    }
+
     private fun renderPriorityStats(javaRoot: File, kmpSet: Set<String>) {
         val pri1 = coreWrite + coreSearch
         val pri1Set = pri1.toSet()
@@ -674,6 +750,7 @@ class Progress : CliktCommand() {
         term.println(bold(section))
         markDown.appendLine(section)
 
+        renderModuleProgress(javaRoot, kmpRoot, javaSrc, kmpSrc)
         renderPackageStats(deps, kmpSet, "## Package statistics (priority‑1 deps)")
         renderPriorityStats(javaRoot, kmpSet)
 

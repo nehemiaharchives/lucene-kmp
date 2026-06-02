@@ -239,6 +239,79 @@ fun ClassInfo.hasDeprecatedAnnotation(): Boolean =
 fun isDeprecatedJavaClass(classInfo: ClassInfo, allClassesByName: Map<String, ClassInfo>): Boolean =
     topLevelClassInfo(classInfo, allClassesByName).hasDeprecatedAnnotation()
 
+fun moduleNameFromClasspath(path: String, isJava: Boolean): String? {
+    val needle = if (isJava) "/build/classes/java/" else "/build/classes/kotlin/jvm/"
+    val modulePath = path.substringBefore(needle, missingDelimiterValue = "")
+        .substringAfterLast('/')
+    if (modulePath.isBlank()) return null
+    return modulePath
+}
+
+fun mapToKmp(javaFqn: String): String = when {
+    javaFqn.startsWith("org.apache.lucene.") -> "org.gnit.lucenekmp." + javaFqn.removePrefix("org.apache.lucene.")
+    javaFqn.startsWith("java.") -> "org.gnit.lucenekmp.jdkport." + javaFqn.substringAfterLast('.')
+    else -> javaFqn
+}
+
+inline fun <K, V> Iterable<V>.groupByNotNull(keySelector: (V) -> K?): Map<K, List<V>> =
+    mapNotNull { value -> keySelector(value)?.let { key -> key to value } }
+        .groupBy({ it.first }, { it.second })
+
+fun displayModuleName(module: String): String =
+    if (module in setOf("common", "extra", "hebmorph", "horn", "icu", "kuromoji", "morfologik", "nori", "opennlp", "phonetic", "smartcn", "stempel")) {
+        "analysis:$module"
+    } else {
+        module
+    }
+
+data class ModuleProgressRow(
+    val module: String,
+    val javaTotal: Int,
+    val kmpTotal: Int,
+    val ported: Int,
+)
+
+fun renderModuleProgress(
+    ps: ProgressPrintStream,
+    javaClasses: List<ClassInfo>,
+    javaClassesByName: Map<String, ClassInfo>,
+    kmpClasses: Iterable<ClassInfo>,
+) {
+    val kmpClassList = kmpClasses.toList()
+    val kmpNames = kmpClassList.map { it.name }.toSet()
+    val javaModules = javaClasses
+        .filterNot { classInfo -> classInfo.name.contains("$") }
+        .groupByNotNull { classInfo ->
+            moduleNameFromClasspath(classInfo.classpathElementURL?.toString().orEmpty(), isJava = true)
+        }
+    val kmpModules = kmpClassList
+        .filterNot { classInfo -> classInfo.name.contains("$") }
+        .groupByNotNull { classInfo ->
+            moduleNameFromClasspath(classInfo.classpathElementURL?.toString().orEmpty(), isJava = false)
+        }
+
+    val rows = (javaModules.keys + kmpModules.keys).distinct().map { module ->
+        val javaModuleClasses = javaModules[module].orEmpty().filterNot { classInfo ->
+            isDeprecatedJavaClass(classInfo, javaClassesByName)
+        }
+        val kmpModuleClasses = kmpModules[module].orEmpty()
+        val javaTotal = javaModuleClasses.size
+        val kmpTotal = kmpModuleClasses.size
+        val ported = javaModuleClasses.count { classInfo -> mapToKmp(classInfo.name) in kmpNames }
+        ModuleProgressRow(module, javaTotal, kmpTotal, ported)
+    }.filter { it.javaTotal > 0 || it.kmpTotal > 0 }
+        .sortedBy { displayModuleName(it.module) }
+
+    ps.println("## Module Progress")
+    ps.printTable(
+        listOf("Module", "Java Classes", "KMP Classes", "Ported", "%"),
+        rows.map { row ->
+            val pct = if (row.javaTotal == 0) 100 else row.ported * 100 / row.javaTotal
+            listOf(displayModuleName(row.module), row.javaTotal, row.kmpTotal, row.ported, "$pct%")
+        }
+    )
+}
+
 fun topLevelClassMap(classes: Iterable<ClassInfo>, excludedPrefix: String? = null): Map<String, ClassInfo> =
     classes
         .filterNot { classInfo -> excludedPrefix != null && classInfo.name.startsWith(excludedPrefix) }
@@ -921,6 +994,7 @@ class Progress : CliktCommand() {
             topLevelClassMap(kmpSR.allClasses, excludedPrefix = "org.gnit.lucenekmp.jdkport.")
 
         ps.println("### Total KMP classes: ${kmpClasses.size}")
+        renderModuleProgress(ps, javaLuceneClasses, javaLuceneClassesByName, kmpClasses.values)
 
         // #
         // #  UNIT TEST DEPENDENCIES KMP
