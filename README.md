@@ -1,5 +1,6 @@
 # Lucene Kotlin Multiplatform
 
+[![Maven Central](https://img.shields.io/maven-central/v/org.gnit.lucene-kmp/lucene-kmp-core-jvm)](https://central.sonatype.com/search?namespace=org.gnit.lucene-kmp)
 [![CI](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/nehemiaharchives/lucene-kmp/graph/badge.svg?token=YRN8URPQA4)](https://codecov.io/gh/nehemiaharchives/lucene-kmp)
 
@@ -65,10 +66,11 @@ For indexed field types, filters, sort, phrase/fuzzy/wildcard queries, geo and I
 [docs/USAGE.md](docs/USAGE.md).
 
 ## Java Lucene and lucene-kmp
-lucene-kmp prioritizes the core indexing and search APIs, then adds common analyzers and codecs.
-`core` and `queryparser` classes ported so far get the index and search jobs done. Some optionals left not ported yet.
-Language with large population of speakers where Java Lucene does not cover, lucene-kmp provided extra language analyzers.
-See [LANGUAGE_COVERAGE.md](LANGUAGE_COVERAGE.md) for language coverage comparison table.
+* lucene-kmp prioritizes the core indexing and search APIs, then adds common analyzers and codecs.
+* `core` and `queryparser` classes ported so far get the index and search jobs done. 
+* Some optionals classes left not ported yet.
+* Languages with large speaker population not covered by Java Lucene got extra analyzers in lucene-kmp.
+* See [LANGUAGE_COVERAGE.md](LANGUAGE_COVERAGE.md) for language coverage comparison table.
 
 | Java Lucene                 | lucene-kmp            | Ported | Note                          |
 |-----------------------------|-----------------------|--------|-------------------------------|
