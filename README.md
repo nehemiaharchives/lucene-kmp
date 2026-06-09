@@ -8,7 +8,7 @@
 
 ## Overview
 
-lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [Apache Lucene](https://github.com/apache/lucene/) enabling On-device indexing and full text search capabilities in KMP/CMP mobile and desktop apps.
+lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) port of [Apache Lucene](https://github.com/apache/lucene/) enabling On-device indexing and full text search capabilities in KMP/CMP Android, iOS and desktop apps.
 
 ## Supported platforms
 * Kotlin/Jvm
