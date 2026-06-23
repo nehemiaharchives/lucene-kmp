@@ -40,6 +40,7 @@ fi
 rm -rf docs/api
 mkdir -p docs/api
 cp -R "$DOKKA_OUTPUT_DIR"/. docs/api/
+node scripts/fix-dokka-broken-links.mjs docs/api
 
 cd "$ROOT_DIR/docs"
 npm run build -- --baseURL "$BASE_URL"

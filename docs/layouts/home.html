@@ -1,39 +1,155 @@
 {{ define "main" }}
-<section class="section container-fluid mt-n3 pb-3">
-  <div class="row justify-content-center">
-    <div class="col-lg-12 text-center">
-      <h1>{{ .Title }}</h1>
+<section class="home-hero">
+  <div class="home-hero__media" aria-hidden="true">
+    <img src="{{ `cover.png` | relURL }}" alt="">
+  </div>
+  <div class="home-hero__shade" aria-hidden="true"></div>
+  <div class="container-fluid home-hero__content">
+    <div class="row">
+      <div class="col-lg-10 col-xl-8 col-xxl-7">
+        <p class="home-eyebrow">Apache Lucene APIs for Kotlin Multiplatform</p>
+        <h1>{{ .Title }}</h1>
+        <p class="lead">{{ .Params.lead | safeHTML }}</p>
+        <div class="home-actions">
+          <a class="btn btn-primary btn-cta btn-lg" href="{{ `docs/` | relURL }}" role="button">Read the docs</a>
+          <a class="btn btn-outline-light btn-cta btn-lg" href="{{ `api/` | relURL }}" role="button">API reference</a>
+        </div>
+        <ul class="home-platforms" aria-label="Supported platforms">
+          <li>JVM</li>
+          <li>Android</li>
+          <li>iOS</li>
+          <li>macOS</li>
+          <li>Linux</li>
+          <li>Windows</li>
+        </ul>
+      </div>
     </div>
-    <div class="col-lg-9 col-xl-8 text-center">
-      <p class="lead">{{ .Params.lead | safeHTML }}</p>
-      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="{{ relURL "docs/" }}" role="button">Read the docs</a>
-      <a class="btn btn-outline-primary btn-cta rounded-pill btn-lg my-3 ms-2" href="{{ relURL "api/" }}" role="button">API reference</a>
-      {{ .Content }}
+  </div>
+</section>
+
+<section class="home-section home-section--intro">
+  <div class="container-fluid">
+    <div class="row g-4 align-items-start">
+      <div class="col-lg-7">
+        <p class="home-section__label">Overview</p>
+        <h2>Local search without a backend service</h2>
+        <p class="home-copy">lucene-kmp ports Apache Lucene to common Kotlin so mobile, desktop, and native apps can build local indexes, run analyzer-based queries, and return relevance-ranked results while keeping private user data on device.</p>
+      </div>
+      <div class="col-lg-5">
+        <div class="home-install">
+          <div class="home-install__title">Maven Central</div>
+          <pre tabindex="0"><code>implementation("org.gnit.lucene-kmp:lucene-kmp-core:10.2.0-alpha13")
+implementation("org.gnit.lucene-kmp:lucene-kmp-queryparser:10.2.0-alpha13")</code></pre>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 {{ end }}
 
 {{ define "sidebar-prefooter" }}
-<section class="section section-md section-features">
-  <div class="container">
-    <div class="row justify-content-center text-center">
+<section class="home-section home-section--features">
+  <div class="container-fluid">
+    <div class="home-section__header">
+      <p class="home-section__label">Features</p>
+      <h2>Search building blocks for app data</h2>
+    </div>
+    <div class="home-feature-grid">
+      <article class="home-feature">
+        <h3>Full-text indexing</h3>
+        <p>Build and query local indexes for offline-first apps, private user data, and content-heavy screens.</p>
+      </article>
+      <article class="home-feature">
+        <h3>Relevance ranking</h3>
+        <p>Return the best matches first instead of only exact substring matches.</p>
+      </article>
+      <article class="home-feature">
+        <h3>Analyzer pipelines</h3>
+        <p>Normalize text with tokenization, case folding, stop words, stemming, and language-specific analysis.</p>
+      </article>
+      <article class="home-feature">
+        <h3>Rich queries</h3>
+        <p>Use phrases, boolean queries, wildcard queries, range queries, and query parsing.</p>
+      </article>
+      <article class="home-feature">
+        <h3>Fielded documents</h3>
+        <p>Index structured records with searchable and stored fields such as title, body, tags, and dates.</p>
+      </article>
+      <article class="home-feature">
+        <h3>Incremental updates</h3>
+        <p>Add, update, and delete documents as app data changes without rebuilding the whole index.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="home-section home-section--modules">
+  <div class="container-fluid">
+    <div class="row g-4">
       <div class="col-lg-5">
-        <h2 class="h4">Platform-neutral Lucene APIs</h2>
-        <p>Common Kotlin code targets JVM, Android, iOS through Kotlin/Native, and native-friendly shared code.</p>
+        <p class="home-section__label">Porting status</p>
+        <h2>Focused on the core indexing and search path</h2>
+        <p class="home-copy">The port prioritizes Lucene core APIs, query parsing, common analyzers, codecs, and shared test support. API compatibility with Apache Lucene is a goal while the project remains experimental.</p>
       </div>
+      <div class="col-lg-7">
+        <div class="home-module-list">
+          <div class="home-module"><span>core</span><strong>97%</strong><small>Indexing and searching</small></div>
+          <div class="home-module"><span>analysis/common</span><strong>83%</strong><small>Language analyzers</small></div>
+          <div class="home-module"><span>kuromoji</span><strong>98%</strong><small>JapaneseAnalyzer</small></div>
+          <div class="home-module"><span>morfologik</span><strong>100%</strong><small>Polish and Ukrainian analyzers</small></div>
+          <div class="home-module"><span>nori</span><strong>100%</strong><small>KoreanAnalyzer</small></div>
+          <div class="home-module"><span>smartcn</span><strong>100%</strong><small>SmartChineseAnalyzer</small></div>
+          <div class="home-module"><span>codecs</span><strong>59%</strong><small>Index format codecs</small></div>
+          <div class="home-module"><span>test-framework</span><strong>77%</strong><small>Shared test classes</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-section home-section--compare">
+  <div class="container-fluid">
+    <div class="row g-4 align-items-start">
       <div class="col-lg-5">
-        <h2 class="h4">Active porting work</h2>
-        <p>The project follows Apache Lucene behavior closely while the KMP port is still experimental.</p>
+        <p class="home-section__label">Lucene or SQL</p>
+        <h2>Use both for the jobs they do best</h2>
+        <p class="home-copy">SQLDelight and Room KMP are strong source-of-truth stores for relational app data. lucene-kmp is for search boxes over text: ranking, tokenization, stemming, phrase queries, typo-tolerant search, and fast lookup across fields.</p>
       </div>
-      <div class="col-lg-5">
-        <h2 class="h4">Generated API docs</h2>
-        <p>Dokka API reference is generated during CI and published alongside this site.</p>
+      <div class="col-lg-7">
+        <div class="home-compare">
+          <div>
+            <h3>Lucene</h3>
+            <p>Inverted indexes, relevance scoring, analyzer pipelines, phrase and fuzzy queries, fielded document search.</p>
+          </div>
+          <div>
+            <h3>SQL</h3>
+            <p>Tables, relations, transactions, joins, migrations, exact lookups, range queries, and source-of-truth storage.</p>
+          </div>
+        </div>
       </div>
-      <div class="col-lg-5">
-        <h2 class="h4">Project notes</h2>
-        <p>Existing release, performance, usage, and publishing notes remain available from the docs section.</p>
-      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-section home-section--docs">
+  <div class="container-fluid">
+    <div class="home-doc-links">
+      <a href="{{ `docs/project/` | relURL }}">
+        <span>Project</span>
+        <small>Targets, status, and project organization</small>
+      </a>
+      <a href="{{ `docs/api-reference/` | relURL }}">
+        <span>Generated API docs</span>
+        <small>Dokka reference for the published modules</small>
+      </a>
+      <a href="{{ `docs/release-notes/` | relURL }}">
+        <span>Release notes</span>
+        <small>Version notes for current alpha releases</small>
+      </a>
+      <a href="{{ `docs/local-documentation-build/` | relURL }}">
+        <span>Local build</span>
+        <small>Build Hugo and Dokka documentation locally</small>
+      </a>
     </div>
   </div>
 </section>

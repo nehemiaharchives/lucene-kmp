@@ -1,28 +1,14 @@
 ---
 title: "lucene-kmp"
-description: "Kotlin Multiplatform port of Apache Lucene APIs."
-lead: "A Kotlin Multiplatform port of Apache Lucene focused on preserving Lucene behavior in common Kotlin code."
+description: "On-device Apache Lucene-style indexing and full-text search for Kotlin Multiplatform apps."
+lead: "On-device indexing and relevance-ranked full-text search for Kotlin Multiplatform Android, iOS, desktop, and native apps."
 date: 2026-06-23T00:00:00+09:00
 lastmod: 2026-06-23T00:00:00+09:00
 draft: false
 params:
   seo:
     title: "lucene-kmp"
-    description: "Kotlin Multiplatform port of Apache Lucene APIs."
+    description: "On-device Apache Lucene-style indexing and full-text search for Kotlin Multiplatform apps."
     canonical: ""
     robots: ""
 ---
-
-lucene-kmp exists to make Lucene-style indexing, analysis, and search APIs available from Kotlin Multiplatform projects.
-
-The port targets JVM, Android, iOS through Kotlin/Native, and native-friendly shared code where platform behavior can stay compatible with upstream Lucene.
-
-This is active porting work. API compatibility with Apache Lucene is a goal, but the project is not an official Apache Lucene distribution and compatibility is not guaranteed yet.
-
-```bash
-./gradlew build
-```
-
-```bash
-./gradlew :dokkaGenerate
-```
