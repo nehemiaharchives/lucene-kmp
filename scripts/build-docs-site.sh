@@ -8,6 +8,7 @@ DOKKA_TASK="${DOKKA_TASK:-:dokkaGenerate}"
 DOKKA_OUTPUT_DIR="${DOKKA_OUTPUT_DIR:-build/dokka/html}"
 BASE_URL="${BASE_URL:-/lucene-kmp/}"
 GRADLE_ARGS="${GRADLE_ARGS:-}"
+DOKKA_FAST_EXCLUDES="${DOKKA_FAST_EXCLUDES:-true}"
 
 if [ ! -d docs ]; then
   echo "docs/ does not exist." >&2
@@ -28,7 +29,32 @@ if [ ! -d docs/node_modules ]; then
 fi
 
 read -r -a GRADLE_ARGS_ARRAY <<< "$GRADLE_ARGS"
-./gradlew "${GRADLE_ARGS_ARRAY[@]}" "$DOKKA_TASK"
+DOKKA_EXCLUDE_ARGS=()
+
+if [ "$DOKKA_FAST_EXCLUDES" != "false" ]; then
+  echo "Calculating Dokka task exclusions for non-common Kotlin source sets..."
+  mapfile -t DOKKA_EXCLUDED_TASKS < <(
+    ./gradlew "${GRADLE_ARGS_ARRAY[@]}" "$DOKKA_TASK" --dry-run --console=plain |
+      awk '
+        /^:/ {
+          task=$1
+          sub(/ .*/, "", task)
+          if (task ~ /(commonizeNativeDistribution|downloadKotlinNativeDistribution|transformNativeMain|compileNativeMainKotlinMetadata|metadataNativeMain|transformPosixNativeMain|compilePosixNativeMainKotlinMetadata|metadataPosixNativeMain|[A-Za-z0-9]+MetadataElements)$/) {
+            print task
+          }
+        }
+      ' |
+      sort -u
+  )
+
+  for task in "${DOKKA_EXCLUDED_TASKS[@]}"; do
+    DOKKA_EXCLUDE_ARGS+=("-x" "$task")
+  done
+
+  echo "Excluded ${#DOKKA_EXCLUDED_TASKS[@]} native/target metadata tasks from Dokka generation."
+fi
+
+./gradlew "${GRADLE_ARGS_ARRAY[@]}" "${DOKKA_EXCLUDE_ARGS[@]}" "$DOKKA_TASK"
 
 if [ ! -f "$DOKKA_OUTPUT_DIR/index.html" ]; then
   echo "Dokka output not found at $DOKKA_OUTPUT_DIR/index.html" >&2

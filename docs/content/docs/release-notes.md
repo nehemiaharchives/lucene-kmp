@@ -15,12 +15,19 @@ params:
     robots: ""
 ---
 
-Release notes are currently maintained as root-level markdown files in `docs/`.
+Current Latest Release:
 
-Recent release note files include:
+- [10.2.0-alpha14](https://github.com/nehemiaharchives/lucene-kmp/blob/master/RELEASE_NOTES_10.2.0-alpha14.md)
 
-- [10.2.0-alpha13](https://github.com/nehemiaharchives/lucene-kmp/blob/main/docs/RELEASE_NOTES_10.2.0-alpha13.md)
-- [10.2.0-alpha12](https://github.com/nehemiaharchives/lucene-kmp/blob/main/docs/RELEASE_NOTES_10.2.0-alpha12.md)
-- [10.2.0-alpha11](https://github.com/nehemiaharchives/lucene-kmp/blob/main/docs/RELEASE_NOTES_10.2.0-alpha11.md)
+Past release notes:
 
-The original files are kept in place so release documentation remains easy to review in Git.
+- [10.2.0-alpha13](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha13.md)
+- [10.2.0-alpha12](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha12.md)
+- [10.2.0-alpha11](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha11.md)
+- [10.2.0-alpha10](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha10.md)
+- [10.2.0-alpha09](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha09.md)
+- [10.2.0-alpha08](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha08.md)
+- [10.2.0-alpha07](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha07.md)
+- [10.2.0-alpha06](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha06.md)
+- [10.2.0-alpha05](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha05.md)
+- [10.2.0-alpha04](https://github.com/nehemiaharchives/lucene-kmp/blob/master/docs/RELEASE_NOTES_10.2.0-alpha04.md)

@@ -36,6 +36,12 @@ subprojects {
     group = providers.gradleProperty("group").get()
     version = providers.gradleProperty("version").get()
 
+    extensions.configure<org.jetbrains.dokka.gradle.DokkaExtension>("dokka") {
+        dokkaSourceSets.configureEach {
+            suppress.set(name != "commonMain")
+        }
+    }
+
     val kotlinDataDir = System.getProperty("kotlin.data.dir") ?: ""
     val duplicateKlibStrategyArg = "-Xklib-duplicated-unique-name-strategy=allow-first-with-warning"
     val disableNativeCastsOptimizationArg = "-Xdisable-phases=CastsOptimization"

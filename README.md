@@ -15,7 +15,7 @@ lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform
 * Kotlin/Android
 * Kotlin/Native iOS (iosArm64, iosSimulatorArm64, iosX64)
 * Kotlin/Native macOS (macosArm64, macosX64)
-* Kotlin/Native Linux (linuxX64)
+* Kotlin/Native Linux (linuxArm64, linuxX64)
 * Kotlin/Native Windows (mingwX64)
 
 ## Features
@@ -33,8 +33,8 @@ lucene-kmp is a [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform
 lucene-kmp is published to Maven Central. Add the `core` and `queryparser` module to your `build.gradle.kts`:
 
 ```kotlin
-implementation("org.gnit.lucene-kmp:lucene-kmp-core:10.2.0-alpha13")
-implementation("org.gnit.lucene-kmp:lucene-kmp-queryparser:10.2.0-alpha13")
+implementation("org.gnit.lucene-kmp:lucene-kmp-core:10.2.0-alpha14")
+implementation("org.gnit.lucene-kmp:lucene-kmp-queryparser:10.2.0-alpha14")
 ```
 
 Build a small index and search it (imports are omitted; class names live under `org.gnit.lucenekmp.*`):
