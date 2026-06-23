@@ -29,7 +29,7 @@ import kotlin.reflect.cast
  * a priority queue to only collect competitive terms and not hit this limitation.
  *
  *
- * Note that org.apache.lucene.queryparser.classic.QueryParser produces MultiTermQueries using
+ * Note that org.gnit.lucenekmp.queryparser.classic.QueryParser produces MultiTermQueries using
  * [.CONSTANT_SCORE_REWRITE] by default.
  */
 abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Query() {
@@ -240,7 +240,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
          * This method aims to balance the benefits of both [.CONSTANT_SCORE_BOOLEAN_REWRITE] and
          * [.CONSTANT_SCORE_REWRITE] by enabling skipping and early termination over costly terms
          * while limiting the overhead of a BooleanQuery with many terms. It also ensures you cannot hit
-         * [org.apache.lucene.search.IndexSearcher.TooManyClauses]. For some use-cases with all low
+         * [org.gnit.lucenekmp.search.IndexSearcher.TooManyClauses]. For some use-cases with all low
          * cost terms, [.CONSTANT_SCORE_REWRITE] may be more performant. While for some use-cases
          * with all high cost terms, [.CONSTANT_SCORE_BOOLEAN_REWRITE] may be better.
          */
@@ -266,7 +266,7 @@ abstract class MultiTermQuery(field: String, rewriteMethod: RewriteMethod) : Que
         }
 
         /**
-         * A rewrite method that uses [org.apache.lucene.index.DocValuesType.SORTED] / [ ][org.apache.lucene.index.DocValuesType.SORTED_SET] doc values to find matching docs through a
+         * A rewrite method that uses [org.gnit.lucenekmp.index.DocValuesType.SORTED] / [ ][org.gnit.lucenekmp.index.DocValuesType.SORTED_SET] doc values to find matching docs through a
          * post-filtering type approach. This will be very slow if used in isolation, but will likely be
          * the most performant option when combined with a sparse query clause. All matching docs are
          * assigned a constant score equal to the query's boost.

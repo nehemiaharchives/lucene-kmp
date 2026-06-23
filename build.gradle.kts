@@ -8,7 +8,6 @@ import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.api.tasks.Sync
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
@@ -19,12 +18,21 @@ import org.jetbrains.kotlin.konan.target.Family
 
 plugins {
     //alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.dokka.plugin)
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.vanniktech.mavenPublish) apply false
 }
 
+dependencies {
+    subprojects.forEach {
+        add("dokka", project(it.path))
+    }
+}
+
 subprojects {
+    apply(plugin = "org.jetbrains.dokka")
+
     group = providers.gradleProperty("group").get()
     version = providers.gradleProperty("version").get()
 

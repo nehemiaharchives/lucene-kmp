@@ -76,7 +76,7 @@ class ClassicTokenizer : Tokenizer {
     /*
      * (non-Javadoc)
      *
-     * @see org.apache.lucene.analysis.TokenStream#next()
+     * @see org.gnit.lucenekmp.analysis.TokenStream#next()
      */
     @Throws(IOException::class)
     override fun incrementToken(): Boolean {

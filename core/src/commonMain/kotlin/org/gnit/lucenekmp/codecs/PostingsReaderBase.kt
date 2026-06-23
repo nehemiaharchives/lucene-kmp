@@ -10,8 +10,8 @@ import okio.IOException
 
 /**
  * The core terms dictionaries (BlockTermsReader, BlockTreeTermsReader) interact with a single
- * instance of this class to manage creation of [org.apache.lucene.index.PostingsEnum] and
- * [org.apache.lucene.index.ImpactsEnum] instances. It provides an IndexInput (termsIn) where
+ * instance of this class to manage creation of [org.gnit.lucenekmp.index.PostingsEnum] and
+ * [org.gnit.lucenekmp.index.ImpactsEnum] instances. It provides an IndexInput (termsIn) where
  * this class may read any previously stored data that it had written in its corresponding [ ] at indexing time.
  *
  * @lucene.experimental

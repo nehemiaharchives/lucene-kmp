@@ -26,7 +26,7 @@ import org.gnit.lucenekmp.util.SmallFloat
  *
  *
  * <a id="indextime">Indexing Time</a> At indexing time, the indexer calls [ ][.computeNorm], allowing the Similarity implementation to set a per-document
- * value for the field that will be later accessible via [ ][org.apache.lucene.index.LeafReader.getNormValues]. Lucene makes no assumption about what
+ * value for the field that will be later accessible via [ ][org.gnit.lucenekmp.index.LeafReader.getNormValues]. Lucene makes no assumption about what
  * is in this norm, but it is most useful for encoding length normalization information.
  *
  *
@@ -40,7 +40,7 @@ import org.gnit.lucenekmp.util.SmallFloat
  *
  *
  * Additional scoring factors can be stored in named [NumericDocValuesField]s and accessed
- * at query-time with [org.apache.lucene.index.LeafReader.getNumericDocValues].
+ * at query-time with [org.gnit.lucenekmp.index.LeafReader.getNumericDocValues].
  * However this should not be done in the [Similarity] but externally, for instance by using
  * `FunctionScoreQuery`.
  *
@@ -71,7 +71,7 @@ import org.gnit.lucenekmp.util.SmallFloat
  * Similarity's DocScorer for an explanation of how it computed its score. The query passes in a the
  * document id and an explanation of how the frequency was computed.
  *
- * @see org.apache.lucene.index.IndexWriterConfig.setSimilarity
+ * @see org.gnit.lucenekmp.index.IndexWriterConfig.setSimilarity
  * @see IndexSearcher.setSimilarity
  * @lucene.experimental
  */

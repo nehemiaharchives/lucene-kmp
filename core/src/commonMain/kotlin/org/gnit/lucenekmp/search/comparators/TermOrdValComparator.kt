@@ -26,8 +26,8 @@ import kotlin.math.min
 
 /**
  * Sorts by field's natural Term sort order, using ordinals. This is functionally equivalent to
- * [org.apache.lucene.search.FieldComparator.TermValComparator], but it first resolves the
- * string to their relative ordinal positions (using the index returned by [ ][org.apache.lucene.index.LeafReader.getSortedDocValues]), and does most comparisons using
+ * [org.gnit.lucenekmp.search.FieldComparator.TermValComparator], but it first resolves the
+ * string to their relative ordinal positions (using the index returned by [ ][org.gnit.lucenekmp.index.LeafReader.getSortedDocValues]), and does most comparisons using
  * the ordinals. For medium to large results, this comparator will be much faster than [ ]. For very small result sets it may be
  * slower.
  */

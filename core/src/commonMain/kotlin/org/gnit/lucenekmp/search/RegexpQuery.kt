@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.util.automaton.Operations
 import org.gnit.lucenekmp.util.automaton.RegExp
 
 /**
- * A fast regular expression query based on the [org.apache.lucene.util.automaton] package.
+ * A fast regular expression query based on the [org.gnit.lucenekmp.util.automaton] package.
  *
  *
  *  * Comparisons are [fast](http://tusker.org/regex/regex_benchmark.html)
@@ -43,8 +43,8 @@ class RegexpQuery
  * @param doDeterminization whether do determinization to force the query to use DFA as
  * runAutomaton, if false, the query will not try to determinize the generated automaton from
  * regexp such that it might or might not be a DFA. In case it is an NFA, the query will
- * eventually use [org.apache.lucene.util.automaton.NFARunAutomaton] to execute. Notice
- * that [org.apache.lucene.util.automaton.NFARunAutomaton] is not thread-safe, so better
+ * eventually use [org.gnit.lucenekmp.util.automaton.NFARunAutomaton] to execute. Notice
+ * that [org.gnit.lucenekmp.util.automaton.NFARunAutomaton] is not thread-safe, so better
  * to avoid rewritten method like [.CONSTANT_SCORE_BLENDED_REWRITE] when searcher is
  * configured with an executor service
  */

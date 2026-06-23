@@ -48,7 +48,7 @@ import kotlin.test.assertTrue
  * consists of two poems of English poet [William Blake](http://en.wikipedia.org/wiki/William_blake).
  *
  * Note: the list of Similarities is maintained by hand. If a new Similarity is added to the
- * `org.apache.lucene.search.similarities` package, the list should be updated accordingly.
+ * `org.gnit.lucenekmp.search.similarities` package, the list should be updated accordingly.
  *
  * In the correctness tests, the score is verified against the result of manual computation.
  * Since it would be impossible to test all Similarities (e.g. all possible DFR combinations, all

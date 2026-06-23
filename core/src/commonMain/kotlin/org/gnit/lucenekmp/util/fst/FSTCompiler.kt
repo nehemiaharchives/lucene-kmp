@@ -935,7 +935,7 @@ class FSTCompiler<T> private constructor(
     </pre> *
      *
      *
-     * - If a non-FSTReader DataOutput was used, such as [ ], you need to first create the corresponding [ ], such as [org.apache.lucene.store.IndexInput] then
+     * - If a non-FSTReader DataOutput was used, such as [ ], you need to first create the corresponding [ ], such as [org.gnit.lucenekmp.store.IndexInput] then
      * pass it to the FST construct
      *
      * <pre class="prettyprint">

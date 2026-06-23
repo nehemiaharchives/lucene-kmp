@@ -40,7 +40,7 @@ import org.gnit.lucenekmp.jdkport.toHexString
  * (https://github.com/morfologik/morfologik-stemming).
  *
  *
- * See the [package documentation][org.apache.lucene.util.fst] for some simple examples.
+ * See the [package documentation][org.gnit.lucenekmp.util.fst] for some simple examples.
  *
  * @lucene.experimental
  */

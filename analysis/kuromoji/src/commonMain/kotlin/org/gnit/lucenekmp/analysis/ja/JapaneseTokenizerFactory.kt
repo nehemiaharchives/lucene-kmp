@@ -12,7 +12,7 @@ import org.gnit.lucenekmp.util.ResourceLoaderAware
 import kotlin.properties.Delegates
 
 /**
- * Factory for {@link org.apache.lucene.analysis.ja.JapaneseTokenizer}.
+ * Factory for {@link org.gnit.lucenekmp.analysis.ja.JapaneseTokenizer}.
  *
  * <pre class="prettyprint">
  * &lt;fieldType name="text_ja" class="solr.TextField"&gt;

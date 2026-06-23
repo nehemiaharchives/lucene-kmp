@@ -222,5 +222,19 @@ At that time, one line suggestion of GitHub Copilot was only AI assistant I used
 * [ANGENTS.md](ANGENTS.md) and [SKILL.md](.agents/skills/port/SKILL.md) are created based on the know-hows and lessons learned from the semi-manual porting process.
 * Codex with gpt-5.4 under the hood were the first model which is reliably able to port a whole class. gpt-5.5 managed to port a whole package.
 
+## Documentation
+The project website lives under [docs/](docs/) and is built with Doks / Thulite.
+
+Build the combined website and generated Dokka API docs locally:
+
+```bash
+scripts/build-docs-site.sh
+```
+
+Generated outputs are intentionally not committed:
+
+- `docs/public/` contains the Hugo site artifact.
+- `docs/api/` contains generated Dokka API docs for local preview and deployment.
+
 ## License
 Apache License 2.0, see [LICENSE](LICENSE) file.

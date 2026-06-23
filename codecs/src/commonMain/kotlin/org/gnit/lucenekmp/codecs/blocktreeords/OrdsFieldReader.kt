@@ -1,10 +1,3 @@
-/*
- * Port of org.apache.lucene.codecs.blocktreeords.OrdsFieldReader
- * - preserves member order and public API used by nearby classes
- * - uses kotlin/common equivalents where safe
- */
-
-/** BlockTree's implementation of {@link org.apache.lucene.index.Terms}. */
 package org.gnit.lucenekmp.codecs.blocktreeords
 
 import org.gnit.lucenekmp.index.FieldInfo
@@ -17,6 +10,7 @@ import org.gnit.lucenekmp.util.BytesRef
 import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
 import org.gnit.lucenekmp.util.fst.FST
 
+/** BlockTree's implementation of [org.gnit.lucenekmp.index.Terms]. */
 internal class OrdsFieldReader(
   internal val parent: OrdsBlockTreeTermsReader,
   internal val fieldInfo: FieldInfo,

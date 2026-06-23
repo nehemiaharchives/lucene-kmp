@@ -618,7 +618,7 @@ object Util {
         /**
          * Creates an unbounded TopNSearcher
          *
-         * @param fst the [org.apache.lucene.util.fst.FST] to search on
+         * @param fst the [org.gnit.lucenekmp.util.fst.FST] to search on
          * @param topN the number of top scoring entries to retrieve
          * @param maxQueueDepth the maximum size of the queue of possible top entries
          * @param comparator the comparator to select the top N

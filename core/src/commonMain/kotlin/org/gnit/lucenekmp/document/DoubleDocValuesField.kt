@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.jdkport.doubleToRawLongBits
  * Syntactic sugar for encoding doubles as NumericDocValues via [ ][Double.doubleToRawLongBits].
  *
  *
- * Per-document double values can be retrieved via [ ][org.apache.lucene.index.LeafReader.getNumericDocValues].
+ * Per-document double values can be retrieved via [ ][org.gnit.lucenekmp.index.LeafReader.getNumericDocValues].
  *
  *
  * **NOTE**: In most all cases this will be rather inefficient, requiring eight bytes per

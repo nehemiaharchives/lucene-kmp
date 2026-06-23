@@ -32,7 +32,7 @@ interface CommonQueryParserConfiguration {
     /**
      * By default QueryParser uses [ ][MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE] when creating a [ ], [WildcardQuery] or [TermRangeQuery]. This implementation is generally
      * preferable because it a) Runs faster b) Does not have the scarcity of terms unduly influence
-     * score c) avoids any [org.apache.lucene.search.IndexSearcher.TooManyClauses] exception.
+     * score c) avoids any [org.gnit.lucenekmp.search.IndexSearcher.TooManyClauses] exception.
      * However, if your application really needs to use the old-fashioned [BooleanQuery]
      * expansion rewriting and the above points are not relevant then use this to change the rewrite
      * method. As another alternative, if you prefer all terms to be rewritten as a filter up-front,

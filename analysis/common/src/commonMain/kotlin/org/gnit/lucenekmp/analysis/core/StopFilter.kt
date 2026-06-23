@@ -9,7 +9,7 @@ import org.gnit.lucenekmp.analysis.TokenStream
  * <p>This class moved to Lucene Core, but a reference in the {@code analysis/common} module is
  * preserved for documentation purposes and consistency with filter factory.
  *
- * @see org.apache.lucene.analysis.StopFilter
+ * @see org.gnit.lucenekmp.analysis.StopFilter
  * @see StopFilterFactory
  */
 class StopFilter

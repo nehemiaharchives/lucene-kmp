@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.util.BytesRef
  * minimum number of bytes necessary. Some codec implementations may optimize payload storage when
  * all payloads have the same length.
  *
- * @see org.apache.lucene.index.PostingsEnum
+ * @see org.gnit.lucenekmp.index.PostingsEnum
  */
 interface PayloadAttribute : Attribute {
     /**

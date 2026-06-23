@@ -96,7 +96,7 @@ class OrdToDocDISIReaderConfiguration internal constructor(
          * documents have values for a field. If equals to 0, sparse – some documents missing
          * values.
          *  * DocIds were encoded by [IndexedDISI.writeBitSet]
-         *  * OrdToDoc was encoded by [org.apache.lucene.util.packed.DirectMonotonicWriter], note
+         *  * OrdToDoc was encoded by [org.gnit.lucenekmp.util.packed.DirectMonotonicWriter], note
          * that only in sparse case
          *
          *
@@ -106,7 +106,7 @@ class OrdToDocDISIReaderConfiguration internal constructor(
          *
          *  * DocIds encoded by [IndexedDISI.writeBitSet],
          * note that only in sparse case
-         *  * OrdToDoc was encoded by [org.apache.lucene.util.packed.DirectMonotonicWriter], note
+         *  * OrdToDoc was encoded by [org.gnit.lucenekmp.util.packed.DirectMonotonicWriter], note
          * that only in sparse case
          *
          *

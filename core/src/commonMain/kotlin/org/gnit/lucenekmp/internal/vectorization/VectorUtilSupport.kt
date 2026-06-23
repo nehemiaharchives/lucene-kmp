@@ -36,8 +36,8 @@ interface VectorUtilSupport {
 
     /**
      * Compute the dot product between a quantized int4 vector and a binary quantized vector. It is
-     * assumed that the int4 quantized bits are packed in the byte array in the same way as the [ ][org.apache.lucene.util.quantization.OptimizedScalarQuantizer.transposeHalfByte]
-     * and that the binary bits are packed the same way as [ ][org.apache.lucene.util.quantization.OptimizedScalarQuantizer.packAsBinary].
+     * assumed that the int4 quantized bits are packed in the byte array in the same way as the [ ][org.gnit.lucenekmp.util.quantization.OptimizedScalarQuantizer.transposeHalfByte]
+     * and that the binary bits are packed the same way as [ ][org.gnit.lucenekmp.util.quantization.OptimizedScalarQuantizer.packAsBinary].
      *
      * @param int4Quantized half byte packed int4 quantized vector
      * @param binaryQuantized byte packed binary quantized vector

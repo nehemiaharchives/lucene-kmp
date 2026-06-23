@@ -82,7 +82,7 @@ import kotlin.experimental.or
  * [DocValuesFormat].
  *  * Attributes: a key-value map of codec-private attributes.
  *  * PointDimensionCount, PointNumBytes: these are non-zero only if the field is indexed as
- * points, e.g. using [org.apache.lucene.document.LongPoint]
+ * points, e.g. using [org.gnit.lucenekmp.document.LongPoint]
  *  * VectorDimension: it is non-zero if the field is indexed as vectors.
  *  * VectorEncoding: a byte containing the encoding of vector values:
  *

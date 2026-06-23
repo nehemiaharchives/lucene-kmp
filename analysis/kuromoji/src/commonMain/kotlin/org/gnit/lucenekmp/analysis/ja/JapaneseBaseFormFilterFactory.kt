@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.analysis.TokenFilterFactory
 import org.gnit.lucenekmp.analysis.TokenStream
 
 /**
- * Factory for {@link org.apache.lucene.analysis.ja.JapaneseBaseFormFilter}.
+ * Factory for {@link org.gnit.lucenekmp.analysis.ja.JapaneseBaseFormFilter}.
  *
  * <pre class="prettyprint">
  * &lt;fieldType name="text_ja" class="solr.TextField"&gt;

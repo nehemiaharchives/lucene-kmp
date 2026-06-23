@@ -15,7 +15,7 @@ import org.gnit.lucenekmp.util.automaton.CompiledAutomaton
  *
  *
  * This query will match documents that contain terms accepted by a given finite-state machine.
- * The automaton can be constructed with the [org.apache.lucene.util.automaton] API.
+ * The automaton can be constructed with the [org.gnit.lucenekmp.util.automaton] API.
  * Alternatively, it can be created from a regular expression with [RegexpQuery] or from the
  * standard Lucene wildcard syntax with [WildcardQuery].
  *

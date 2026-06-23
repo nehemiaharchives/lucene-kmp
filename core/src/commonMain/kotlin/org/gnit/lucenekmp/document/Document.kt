@@ -9,12 +9,12 @@ import org.gnit.lucenekmp.util.BytesRef
  *
  *
  * A Document is a set of fields. Each field has a name and a textual value. A field may be
- * [stored][org.apache.lucene.index.IndexableFieldType.stored] with the document, in which
+ * [stored][org.gnit.lucenekmp.index.IndexableFieldType.stored] with the document, in which
  * case it is returned with search hits on the document. Thus each document should typically contain
  * one or more stored fields which uniquely identify it.
  *
  *
- * Note that fields which are *not* [ ][org.apache.lucene.index.IndexableFieldType.stored] are *not* available in documents
+ * Note that fields which are *not* [ ][org.gnit.lucenekmp.index.IndexableFieldType.stored] are *not* available in documents
  * retrieved from the index, e.g. with [ScoreDoc.doc] or [StoredFields.document].
  */
 class Document

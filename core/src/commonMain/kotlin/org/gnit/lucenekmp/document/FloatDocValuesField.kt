@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.jdkport.floatToRawIntBits
  * Syntactic sugar for encoding floats as NumericDocValues via [ ][Float.floatToRawIntBits].
  *
  *
- * Per-document floating point values can be retrieved via [ ][org.apache.lucene.index.LeafReader.getNumericDocValues].
+ * Per-document floating point values can be retrieved via [ ][org.gnit.lucenekmp.index.LeafReader.getNumericDocValues].
  *
  *
  * **NOTE**: In most all cases this will be rather inefficient, requiring four bytes per

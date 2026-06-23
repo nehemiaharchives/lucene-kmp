@@ -16,9 +16,6 @@ import org.gnit.lucenekmp.util.fst.Util
 
 /**
  * Iterates through terms in this field.
- */
-/**
- * Port of org.apache.lucene.codecs.blocktreeords.OrdsSegmentTermsEnum
  * Preserves Java ordering and behavior; uses small Kotlin idiomatic adjustments
  * where safe (e.g. byte-array operations).
  */

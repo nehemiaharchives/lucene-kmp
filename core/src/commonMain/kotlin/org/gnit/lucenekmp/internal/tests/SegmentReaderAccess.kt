@@ -3,7 +3,7 @@ package org.gnit.lucenekmp.internal.tests
 import org.gnit.lucenekmp.index.SegmentReader
 
 /**
- * Access to [org.apache.lucene.index.SegmentReader] internals exposed to the test framework.
+ * Access to [org.gnit.lucenekmp.index.SegmentReader] internals exposed to the test framework.
  *
  * @lucene.internal
  */

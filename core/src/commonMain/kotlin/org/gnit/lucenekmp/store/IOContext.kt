@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.util.Constants
 
 /**
  * IOContext holds additional details on the merge/search context. An IOContext object can never be
- * passed as a `null` parameter to either [ ][org.apache.lucene.store.Directory.openInput] or [ ][org.apache.lucene.store.Directory.createOutput]
+ * passed as a `null` parameter to either [ ][org.gnit.lucenekmp.store.Directory.openInput] or [ ][org.gnit.lucenekmp.store.Directory.createOutput]
  *
  * @param context An object of a enumerator Context type
  * @param mergeInfo must be given when `context == MERGE`

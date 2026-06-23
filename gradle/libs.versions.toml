@@ -14,6 +14,7 @@ kotlinbignum = "0.3.10"
 kotlinenvvar = "1.0.6"
 vanniktech-maven-publish = "0.37.0"
 kover = "0.9.8"
+dokka = "2.2.0"
 androidx-test-runner = "1.7.0"
 
 [libraries]
@@ -41,3 +42,4 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+dokka-plugin = { id = "org.jetbrains.dokka", version.ref = "dokka" }

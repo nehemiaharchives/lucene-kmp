@@ -17,7 +17,7 @@ import org.gnit.lucenekmp.search.Query
  *
  *
  * Note that if you want to encode doubles or floats with proper sort order, you will need to
- * encode them with [org.apache.lucene.util.NumericUtils]:
+ * encode them with [org.gnit.lucenekmp.util.NumericUtils]:
  *
  * <pre class="prettyprint">
  * document.add(new SortedNumericDocValuesField(name, NumericUtils.floatToSortableInt(-5.3f)));

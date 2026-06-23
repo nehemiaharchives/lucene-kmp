@@ -11,7 +11,7 @@ import kotlin.math.min
  * maximum allowed search time limit. After this time is exceeded, the search thread is stopped by
  * throwing a [TimeLimitingBulkScorer.TimeExceededException].
  *
- * @see org.apache.lucene.index.ExitableDirectoryReader
+ * @see org.gnit.lucenekmp.index.ExitableDirectoryReader
  */
 internal class TimeLimitingBulkScorer(
     bulkScorer: BulkScorer,

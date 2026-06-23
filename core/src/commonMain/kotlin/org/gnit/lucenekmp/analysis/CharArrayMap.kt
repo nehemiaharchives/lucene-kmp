@@ -496,7 +496,7 @@ open class CharArrayMap<V> : AbstractMutableMap<Any, V> {
     }
 
     /**
-     * Empty [org.apache.lucene.analysis.CharArrayMap.UnmodifiableCharArrayMap] optimized for
+     * Empty [org.gnit.lucenekmp.analysis.CharArrayMap.UnmodifiableCharArrayMap] optimized for
      * speed. Contains checks will always return `false` or throw NPE if necessary.
      */
     private class EmptyCharArrayMap<V> : UnmodifiableCharArrayMap<V>(CharArrayMap(0, false)) {

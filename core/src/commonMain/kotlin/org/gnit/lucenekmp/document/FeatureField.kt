@@ -34,7 +34,7 @@ import kotlin.math.pow
  * Salvador, Brazil.
  *
  *
- * Feature values are internally encoded as term frequencies. Putting feature queries as [ ][org.apache.lucene.search.BooleanClause.Occur.SHOULD] clauses of a [BooleanQuery] allows to
+ * Feature values are internally encoded as term frequencies. Putting feature queries as [ ][org.gnit.lucenekmp.search.BooleanClause.Occur.SHOULD] clauses of a [BooleanQuery] allows to
  * combine query-dependent scores (eg. BM25) with query-independent scores using a linear
  * combination. The fact that feature values are stored as frequencies also allows search logic to
  * efficiently skip documents that can't be competitive when total hit counts are not requested.

@@ -6,7 +6,7 @@ import org.gnit.lucenekmp.index.Impacts
 import org.gnit.lucenekmp.index.IndexReader
 
 /**
- * Access to [org.apache.lucene.index] package internals exposed to the test framework.
+ * Access to [org.gnit.lucenekmp.index] package internals exposed to the test framework.
  *
  * @lucene.internal
  */

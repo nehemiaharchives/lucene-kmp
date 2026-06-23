@@ -7,7 +7,7 @@ import org.gnit.lucenekmp.jdkport.Objects
 
 /**
  * A [DoubleValuesSource] which computes the vector similarity scores between the query vector
- * and the [org.apache.lucene.document.KnnFloatVectorField] for documents.
+ * and the [org.gnit.lucenekmp.document.KnnFloatVectorField] for documents.
  */
 internal class FloatVectorSimilarityValuesSource(
     private val queryVector: FloatArray,

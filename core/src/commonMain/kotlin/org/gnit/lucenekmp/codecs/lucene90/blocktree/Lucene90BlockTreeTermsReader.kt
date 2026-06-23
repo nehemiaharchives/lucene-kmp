@@ -37,7 +37,7 @@ import okio.IOException
  * up too-large blocks of all terms sharing a given prefix into smaller ones.
  *
  *
- * Use [org.apache.lucene.index.CheckIndex] with the `-verbose` option to see
+ * Use [org.gnit.lucenekmp.index.CheckIndex] with the `-verbose` option to see
  * summary statistics on the blocks in the dictionary.
  *
  *

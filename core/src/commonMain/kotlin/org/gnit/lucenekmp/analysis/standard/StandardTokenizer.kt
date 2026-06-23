@@ -57,7 +57,7 @@ class StandardTokenizer : Tokenizer {
     }
 
     /**
-     * Creates a new instance of the [org.apache.lucene.analysis.standard.StandardTokenizer].
+     * Creates a new instance of the [org.gnit.lucenekmp.analysis.standard.StandardTokenizer].
      * Attaches the `input` to the newly created JFlex scanner!!.
      *
      *
@@ -68,7 +68,7 @@ class StandardTokenizer : Tokenizer {
     }
 
     /**
-     * Creates a new StandardTokenizer with a given [org.apache.lucene.util.AttributeFactory]
+     * Creates a new StandardTokenizer with a given [org.gnit.lucenekmp.util.AttributeFactory]
      */
     constructor(factory: AttributeFactory) : super(factory) {
         init()
@@ -88,7 +88,7 @@ class StandardTokenizer : Tokenizer {
     /*
    * (non-Javadoc)
    *
-   * @see org.apache.lucene.analysis.TokenStream#next()
+    * @see org.gnit.lucenekmp.analysis.TokenStream#next()
    */
     @Throws(IOException::class)
     override fun incrementToken(): Boolean {

@@ -41,8 +41,6 @@ import org.gnit.lucenekmp.search.TermRangeQuery
  *
  *
  *
- * Examples of appropriately formatted queries can be found in the [query syntax
- * documentation]({@docRoot}/org/apache/lucene/queryparser/classic/package-summary.html#package.description).
  *
  *
  *
@@ -51,7 +49,7 @@ import org.gnit.lucenekmp.search.TermRangeQuery
  * `date:[6/1/2005 TO 6/4/2005]` produces a range query that searches
  * for "date" fields between 2005-06-01 and 2005-06-04. Note that the format
  * of the accepted input depends on [the locale][.setLocale].
- * A [org.apache.lucene.document.DateTools.Resolution] has to be set,
+ * A [org.gnit.lucenekmp.document.DateTools.Resolution] has to be set,
  * if you want to use [DateTools] for date conversion.
  *
  *

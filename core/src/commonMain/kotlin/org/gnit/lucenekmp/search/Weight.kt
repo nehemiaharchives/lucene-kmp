@@ -19,7 +19,7 @@ private val logger = org.gnit.lucenekmp.util.getLogger()
  * [IndexSearcher] dependent state of the query should reside in the [Weight].
  *
  *
- * [org.apache.lucene.index.LeafReader] dependent state should reside in the [ ].
+ * [org.gnit.lucenekmp.index.LeafReader] dependent state should reside in the [ ].
  *
  *
  * Since [Weight] creates [Scorer] instances for a given [ ] ([ ][.scorer]) callers must maintain the relationship
@@ -104,7 +104,7 @@ abstract class Weight
      * **NOTE**: The returned [Scorer] does not have [LeafReader.getLiveDocs]
      * applied, they need to be checked on top.
      *
-     * @param context the [org.apache.lucene.index.LeafReaderContext] for which to return the
+     * @param context the [org.gnit.lucenekmp.index.LeafReaderContext] for which to return the
      * [Scorer].
      * @return a [Scorer] which scores documents in/out-of order.
      * @throws IOException if there is a low-level I/O error
@@ -180,7 +180,7 @@ abstract class Weight
      *
      * We use this property of the function to count hits in [IndexSearcher.count].
      *
-     * @param context the [org.apache.lucene.index.LeafReaderContext] for which to return the
+     * @param context the [org.gnit.lucenekmp.index.LeafReaderContext] for which to return the
      * count.
      * @return integer count of the number of matches
      * @throws IOException if there is a low-level I/O error

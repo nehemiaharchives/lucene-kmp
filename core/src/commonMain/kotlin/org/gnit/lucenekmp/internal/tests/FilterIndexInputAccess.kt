@@ -4,7 +4,7 @@ import org.gnit.lucenekmp.store.FilterIndexInput
 import kotlin.reflect.KClass
 
 /**
- * Access to [org.apache.lucene.store.FilterIndexInput] internals exposed to the test
+ * Access to [org.gnit.lucenekmp.store.FilterIndexInput] internals exposed to the test
  * framework.
  *
  * @lucene.internal

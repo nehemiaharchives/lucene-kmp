@@ -10,7 +10,7 @@ import org.gnit.lucenekmp.analysis.TokenStream
  * This class moved to Lucene Core, but a reference in the `analysis/common` module is
  * preserved for documentation purposes and consistency with filter factory.
  *
- * @see org.apache.lucene.analysis.LowerCaseFilter
+ * @see org.gnit.lucenekmp.analysis.LowerCaseFilter
  *
  * @see LowerCaseFilterFactory
  */

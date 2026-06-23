@@ -247,14 +247,14 @@ import org.gnit.lucenekmp.util.SmallFloat
  * that *tf(t in q)* is assumed to be *1* and therefore it does not appear in this
  * equation, However if a query contains twice the same term, there will be two term-queries
  * with that same term and hence the computation would still be correct (although not very
- * efficient). The default computation for *tf(t in d)* in [       ][org.apache.lucene.search.similarities.ClassicSimilarity.tf] is:
+ * efficient). The default computation for *tf(t in d)* in [       ][org.gnit.lucenekmp.search.similarities.ClassicSimilarity.tf] is:
  * <br></br>
  * &nbsp;<br></br>
  * <table class="padding2" style="border-spacing: 2px; border-collapse: separate; border: 0; width:auto; margin-left:auto; margin-right:auto">
  * <caption>term frequency computation</caption>
  * <tr>
  * <td style="vertical-align: middle; text-align: right" rowspan="1">
- * [tf(t in d)][org.apache.lucene.search.similarities.ClassicSimilarity.tf] &nbsp; = &nbsp;
+ * [tf(t in d)][org.gnit.lucenekmp.search.similarities.ClassicSimilarity.tf] &nbsp; = &nbsp;
 </td> *
  * <td style="vertical-align: top; text-align: center" rowspan="1">
  * frequency<sup><span style="font-size: larger"></span></sup>
@@ -267,14 +267,14 @@ import org.gnit.lucenekmp.util.SmallFloat
  * value correlates to the inverse of *docFreq* (the number of documents in which the
  * term *t* appears). This means rarer terms give higher contribution to the total score.
  * *idf(t)* appears for *t* in both the query and the document, hence it is squared
- * in the equation. The default computation for *idf(t)* in [       ][org.apache.lucene.search.similarities.ClassicSimilarity.idf]
+ * in the equation. The default computation for *idf(t)* in [       ][org.gnit.lucenekmp.search.similarities.ClassicSimilarity.idf]
  * is: <br></br>
  * &nbsp;<br></br>
  * <table class="padding2" style="border-spacing: 2px; border-collapse: separate; border: 0; width:auto; margin-left:auto; margin-right:auto">
  * <caption>inverse document frequency computation</caption>
  * <tr>
  * <td style="vertical-align: middle; text-align: right">
- * [idf(t)][org.apache.lucene.search.similarities.ClassicSimilarity.idf]&nbsp; = &nbsp;
+ * [idf(t)][org.gnit.lucenekmp.search.similarities.ClassicSimilarity.idf]&nbsp; = &nbsp;
 </td> *
  * <td style="vertical-align: middle; text-align: center">
  * 1 + log <span style="font-size: larger">(</span>
@@ -296,16 +296,16 @@ import org.gnit.lucenekmp.util.SmallFloat
  * &nbsp;<br></br>
  *  1. <a id="formula_termBoost"></a> ***t.getBoost()*** is a search time boost of term
  * *t* in the query *q* as specified in the query text (see <A HREF="{@docRoot}/../queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Boosting_a_Term">query
- * syntax</A>), or as set by wrapping with [       ][org.apache.lucene.search.BoostQuery.BoostQuery]. Notice that there is really no direct API for accessing a boost of one term in
+ * syntax</A>), or as set by wrapping with [       ][org.gnit.lucenekmp.search.BoostQuery.BoostQuery]. Notice that there is really no direct API for accessing a boost of one term in
  * a multi term query, but rather multi terms are represented in a query as multi [       ] objects, and so the boost of a term in the
- * query is accessible by calling the sub-query [       ][org.apache.lucene.search.BoostQuery.getBoost]. <br></br>
+ * query is accessible by calling the sub-query [       ][org.gnit.lucenekmp.search.BoostQuery.getBoost]. <br></br>
  * &nbsp;<br></br>
  *  1. <a id="formula_norm"></a> ***norm(t,d)*** is an index-time boost factor that solely
  * depends on the number of tokens of this field in the document, so that shorter fields
  * contribute more to the score.
  *
  *
- * @see org.apache.lucene.index.IndexWriterConfig.setSimilarity
+ * @see org.gnit.lucenekmp.index.IndexWriterConfig.setSimilarity
  * @see IndexSearcher.setSimilarity
  */
 abstract class TFIDFSimilarity : Similarity {
@@ -340,7 +340,7 @@ abstract class TFIDFSimilarity : Similarity {
      * idf(docFreq, docCount);
     </pre> *
      *
-     * Note that [CollectionStatistics.docCount] is used instead of [ ][org.apache.lucene.index.IndexReader.numDocs] because also [ ][TermStatistics.docFreq] is used, and when the latter is inaccurate, so is [ ][CollectionStatistics.docCount], and in the same direction. In addition, [ ][CollectionStatistics.docCount] does not skew when fields are sparse.
+     * Note that [CollectionStatistics.docCount] is used instead of [ ][org.gnit.lucenekmp.index.IndexReader.numDocs] because also [ ][TermStatistics.docFreq] is used, and when the latter is inaccurate, so is [ ][CollectionStatistics.docCount], and in the same direction. In addition, [ ][CollectionStatistics.docCount] does not skew when fields are sparse.
      *
      * @param collectionStats collection-level statistics
      * @param termStats term-level statistics for the term

@@ -119,7 +119,7 @@ import kotlin.reflect.KClass
  * among width of integers hence smaller indexes. Larger block size result in more
  * efficient bulk i/o hence better acceleration. This value should always be a multiple
  * of 64, currently fixed as 128 as a tradeoff. It is also the skip interval used to
- * accelerate [org.apache.lucene.index.PostingsEnum.advance].
+ * accelerate [org.gnit.lucenekmp.index.PostingsEnum.advance].
  *  * DocFPDelta determines the position of this term's TermFreqs within the .doc file. In
  * particular, it is the difference of file offset between this term's data and previous
  * term's data (or zero, for the first term in the block).On disk it is stored as the

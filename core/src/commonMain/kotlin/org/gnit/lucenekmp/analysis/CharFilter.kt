@@ -16,7 +16,7 @@ import org.gnit.lucenekmp.jdkport.Reader
  * You can optionally provide more efficient implementations of additional methods like [ ][.read], [.read], [.read], but this is not required.
  *
  *
- * For examples and integration with [Analyzer], see the [ Analysis package documentation][org.apache.lucene.analysis].
+ * For examples and integration with [Analyzer], see the [ Analysis package documentation][org.gnit.lucenekmp.analysis].
  */
 // the way java.io.FilterReader should work!
 abstract class CharFilter(input: Reader) : Reader() {

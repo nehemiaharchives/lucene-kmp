@@ -41,7 +41,7 @@ import kotlin.jvm.Transient
  * };
 </pre> *
  *
- * For more examples, see the [Analysis package documentation][org.apache.lucene.analysis].
+ * For more examples, see the [Analysis package documentation][org.gnit.lucenekmp.analysis].
  *
  *
  * For some concrete implementations bundled with Lucene, look in the analysis modules:
@@ -111,7 +111,7 @@ abstract class Analyzer
      *
      *
      * **NOTE:** After calling this method, the consumer must follow the workflow described in
-     * [TokenStream] to properly consume its contents. See the [ Analysis package documentation][org.apache.lucene.analysis] for some examples demonstrating this.
+     * [TokenStream] to properly consume its contents. See the [ Analysis package documentation][org.gnit.lucenekmp.analysis] for some examples demonstrating this.
      *
      *
      * **NOTE:** If your data is available as a `String`, use [.tokenStream] which reuses a `StringReader`-like instance internally.
@@ -144,7 +144,7 @@ abstract class Analyzer
      *
      *
      * **NOTE:** After calling this method, the consumer must follow the workflow described in
-     * [TokenStream] to properly consume its contents. See the [ Analysis package documentation][org.apache.lucene.analysis] for some examples demonstrating this.
+     * [TokenStream] to properly consume its contents. See the [ Analysis package documentation][org.gnit.lucenekmp.analysis] for some examples demonstrating this.
      *
      * @param fieldName the name of the field the created TokenStream is used for
      * @param text the String the streams source reads from

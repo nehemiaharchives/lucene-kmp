@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.index.LeafReaderContext
 
 /**
  * An abstract class that provides the vector similarity scores between the query vector and the
- * [org.apache.lucene.document.KnnFloatVectorField] or [ ] for documents.
+ * [org.gnit.lucenekmp.document.KnnFloatVectorField] or [ ] for documents.
  */
 internal abstract class VectorSimilarityValuesSource(protected val fieldName: String) :
     DoubleValuesSource() {

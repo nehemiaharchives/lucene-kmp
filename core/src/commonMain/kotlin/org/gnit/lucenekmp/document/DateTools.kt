@@ -23,7 +23,7 @@ import kotlin.time.Instant
  *
  *
  * Another approach is [LongPoint], which indexes the values in sorted order. For indexing
- * a [Date] or [Calendar], just get the unix timestamp as `long` using [ ][Date.getTime] or [Calendar.getTimeInMillis] and index this as a numeric value with [ ] and use [org.apache.lucene.search.PointRangeQuery] to query it.
+ * a [Date] or [Calendar], just get the unix timestamp as `long` using [ ][Date.getTime] or [Calendar.getTimeInMillis] and index this as a numeric value with [ ] and use [org.gnit.lucenekmp.search.PointRangeQuery] to query it.
  */
 object DateTools {
     val GMT: TimeZone = TimeZone.UTC

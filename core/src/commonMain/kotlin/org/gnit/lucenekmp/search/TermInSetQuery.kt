@@ -23,7 +23,7 @@ import org.gnit.lucenekmp.util.StringSorter
 import kotlin.reflect.cast
 
 /**
- * Specialization for a disjunction over many terms that, by default, behaves like a [ ] over a [BooleanQuery] containing only [ ][org.apache.lucene.search.BooleanClause.Occur.SHOULD] clauses.
+ * Specialization for a disjunction over many terms that, by default, behaves like a [ ] over a [BooleanQuery] containing only [ ][org.gnit.lucenekmp.search.BooleanClause.Occur.SHOULD] clauses.
  *
  *
  * For instance in the following example, both `q1` and `q2` would yield the same
@@ -178,7 +178,7 @@ class TermInSetQuery : MultiTermQuery, Accountable {
     }
 
     /**
-     * Like a baby [org.apache.lucene.index.AutomatonTermsEnum], ping-pong intersects the terms
+     * Like a baby [org.gnit.lucenekmp.index.AutomatonTermsEnum], ping-pong intersects the terms
      * dict against our encoded query terms.
      */
     private inner class SetEnum(termsEnum: TermsEnum) :

@@ -5,7 +5,7 @@ import org.gnit.lucenekmp.analysis.TokenStream
 import kotlin.properties.Delegates
 
 /**
- * Factory for {@link org.apache.lucene.analysis.ja.JapaneseReadingFormFilter}.
+ * Factory for {@link org.gnit.lucenekmp.analysis.ja.JapaneseReadingFormFilter}.
  *
  * <pre class="prettyprint">
  * &lt;fieldType name="text_ja" class="solr.TextField"&gt;

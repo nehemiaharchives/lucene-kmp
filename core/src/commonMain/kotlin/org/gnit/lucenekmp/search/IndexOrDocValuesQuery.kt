@@ -25,8 +25,8 @@ import org.gnit.lucenekmp.index.LeafReaderContext
  * still need the ability to verify that some documents match.
  *
  *
- * Some field types that work well with [IndexOrDocValuesQuery] are [ ], [org.apache.lucene.document.LongField], [ ], [org.apache.lucene.document.DoubleField], and
- * [org.apache.lucene.document.KeywordField]. These fields provide both an indexed structure
+ * Some field types that work well with [IndexOrDocValuesQuery] are [ ], [org.gnit.lucenekmp.document.LongField], [ ], [org.gnit.lucenekmp.document.DoubleField], and
+ * [org.gnit.lucenekmp.document.KeywordField]. These fields provide both an indexed structure
  * and doc values.
  *
  *

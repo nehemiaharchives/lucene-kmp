@@ -1,9 +1,3 @@
-/*
- * Kotlin port of org.apache.lucene.codecs.blocktreeords.OrdsIntersectTermsEnum
- * Preserves structure and behavior of the upstream Java implementation while
- * using Kotlin idioms where safe. Keep side-by-side comparison easy.
- */
-
 package org.gnit.lucenekmp.codecs.blocktreeords
 
 import org.gnit.lucenekmp.index.BaseTermsEnum

@@ -1,8 +1,3 @@
-/*
- * Port of org.apache.lucene.codecs.blocktreeords.OrdsSegmentTermsEnumFrame
- * Kept field/method order to ease side-by-side comparison with upstream Java.
- */
-
 package org.gnit.lucenekmp.codecs.blocktreeords
 
 import org.gnit.lucenekmp.codecs.BlockTermState

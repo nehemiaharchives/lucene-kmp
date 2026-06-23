@@ -34,7 +34,7 @@ import kotlin.jvm.JvmOverloads
  *
  * If you want to reuse functionality of this codec in another codec, extend [FilterCodec].
  *
- * @see org.apache.lucene.codecs.lucene101 package documentation for file format details.
+ * @see org.gnit.lucenekmp.codecs.lucene101 package documentation for file format details.
  *
  * @lucene.experimental
  */

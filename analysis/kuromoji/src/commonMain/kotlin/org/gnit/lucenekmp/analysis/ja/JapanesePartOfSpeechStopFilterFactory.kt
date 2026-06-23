@@ -8,7 +8,7 @@ import org.gnit.lucenekmp.util.ResourceLoader
 import org.gnit.lucenekmp.util.ResourceLoaderAware
 
 /**
- * Factory for {@link org.apache.lucene.analysis.ja.JapanesePartOfSpeechStopFilter}.
+ * Factory for {@link org.gnit.lucenekmp.analysis.ja.JapanesePartOfSpeechStopFilter}.
  *
  * <pre class="prettyprint">
  * &lt;fieldType name="text_ja" class="solr.TextField"&gt;

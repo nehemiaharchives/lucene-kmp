@@ -98,7 +98,7 @@ class BM25Similarity(k1: Float = 1.2f, b: Float = 0.75f, discountOverlaps: Boole
      * idf(docFreq, docCount);
     </pre> *
      *
-     * Note that [CollectionStatistics.docCount] is used instead of [ ][org.apache.lucene.index.IndexReader.numDocs] because also [ ][TermStatistics.docFreq] is used, and when the latter is inaccurate, so is [ ][CollectionStatistics.docCount], and in the same direction. In addition, [ ][CollectionStatistics.docCount] does not skew when fields are sparse.
+     * Note that [CollectionStatistics.docCount] is used instead of [ ][org.gnit.lucenekmp.index.IndexReader.numDocs] because also [ ][TermStatistics.docFreq] is used, and when the latter is inaccurate, so is [ ][CollectionStatistics.docCount], and in the same direction. In addition, [ ][CollectionStatistics.docCount] does not skew when fields are sparse.
      *
      * @param collectionStats collection-level statistics
      * @param termStats term-level statistics for the term

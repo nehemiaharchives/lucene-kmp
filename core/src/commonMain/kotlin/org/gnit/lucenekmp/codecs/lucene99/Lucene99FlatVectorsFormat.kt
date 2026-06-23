@@ -23,7 +23,7 @@ import okio.IOException
  * sample is stored as an IEEE float in little-endian byte order.
  *  * DocIds encoded by [IndexedDISI.writeBitSet],
  * note that only in sparse case
- *  * OrdToDoc was encoded by [org.apache.lucene.util.packed.DirectMonotonicWriter], note
+ *  * OrdToDoc was encoded by [org.gnit.lucenekmp.util.packed.DirectMonotonicWriter], note
  * that only in sparse case
  *
  *
@@ -42,7 +42,7 @@ import okio.IOException
  *  * **[int8]** if equals to -2, empty - no vector values. If equals to -1, dense – all
  * documents have values for a field. If equals to 0, sparse – some documents missing values.
  *  * DocIds were encoded by [IndexedDISI.writeBitSet]
- *  * OrdToDoc was encoded by [org.apache.lucene.util.packed.DirectMonotonicWriter], note
+ *  * OrdToDoc was encoded by [org.gnit.lucenekmp.util.packed.DirectMonotonicWriter], note
  * that only in sparse case
  *
  *

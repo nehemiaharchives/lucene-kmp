@@ -3,11 +3,11 @@ package org.gnit.lucenekmp.util
 import org.gnit.lucenekmp.jdkport.Cloneable
 
 /**
- * Base class for Attributes that can be added to a [org.apache.lucene.util.AttributeSource].
+ * Base class for Attributes that can be added to a [org.gnit.lucenekmp.util.AttributeSource].
  *
  *
  * Attributes are used to add data in a dynamic, yet type-safe way to a source of usually
- * streamed objects, e. g. a [org.apache.lucene.analysis.TokenStream].
+ * streamed objects, e. g. a [org.gnit.lucenekmp.analysis.TokenStream].
  *
  *
  * All implementations must list all implemented [Attribute] interfaces in their `implements` clause. `AttributeSource` reflectively identifies all attributes and makes them

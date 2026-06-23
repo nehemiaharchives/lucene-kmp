@@ -49,9 +49,9 @@ class ConcatenateGraphFilter(
     /*
      * Token stream which converts a provided token stream to an automaton.
      * The accepted strings enumeration from the automaton are available through the
-     * {@link org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute} attribute
-     * The token stream uses a {@link org.apache.lucene.analysis.tokenattributes.PayloadAttribute} to store
-     * a completion's payload (see {@link ConcatenateGraphFilter#setPayload(org.apache.lucene.util.BytesRef)})
+     * {@link org.gnit.lucenekmp.analysis.tokenattributes.TermToBytesRefAttribute} attribute
+     * The token stream uses a {@link org.gnit.lucenekmp.analysis.tokenattributes.PayloadAttribute} to store
+     * a completion's payload (see {@link ConcatenateGraphFilter#setPayload(org.gnit.lucenekmp.util.BytesRef)})
      */
 
     companion object {

@@ -38,7 +38,7 @@ import kotlin.jvm.JvmOverloads
  *
  * A choice of [BloomFilterFactory] can be passed to tailor Bloom Filter settings on a
  * per-field basis. The default configuration is [DefaultBloomFilterFactory] which allocates a
- * ~8mb bitset and hashes values using [ ][org.apache.lucene.util.StringHelper.murmurhash3_x64_128]. This should be suitable for
+ * ~8mb bitset and hashes values using [ ][org.gnit.lucenekmp.util.StringHelper.murmurhash3_x64_128]. This should be suitable for
  * most purposes.
  *
  *

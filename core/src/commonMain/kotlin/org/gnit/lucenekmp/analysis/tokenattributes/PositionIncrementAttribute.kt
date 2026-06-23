@@ -25,7 +25,7 @@ import org.gnit.lucenekmp.util.Attribute
  * occur with no intervening stop words.
  *
  *
- * @see org.apache.lucene.index.PostingsEnum
+ * @see org.gnit.lucenekmp.index.PostingsEnum
  */
 interface PositionIncrementAttribute : Attribute {
     /**

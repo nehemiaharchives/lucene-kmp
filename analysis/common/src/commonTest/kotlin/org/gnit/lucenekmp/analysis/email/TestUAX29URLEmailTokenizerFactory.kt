@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-/** A few tests based on org.apache.lucene.analysis.TestUAX29URLEmailTokenizer */
+/** A few tests based on org.gnit.lucenekmp.analysis.TestUAX29URLEmailTokenizer */
 class TestUAX29URLEmailTokenizerFactory : BaseTokenStreamFactoryTestCase() {
     companion object {
         init {
