@@ -482,7 +482,7 @@ class RamUsageEstimator {
          */
         fun shallowSizeOfInstance(clazz: KClass<*>): Long {
             var clazz: KClass<*> = clazz
-            require(clazz !is Array<*>) { "This method does not work with array classes." }
+            require(!clazz.isArrayClass()) { "This method does not work with array classes." }
             if (clazz.isPrimitive()) return primitiveSizes[clazz]!!.toLong()
 
             var size = NUM_BYTES_OBJECT_HEADER.toLong()
@@ -639,4 +639,17 @@ fun KClass<*>.isPrimitive(): Boolean {
             clazz == Float::class ||
             clazz == Double::class ||
             clazz == Long::class
+}
+
+private fun KClass<*>.isArrayClass(): Boolean {
+    val clazz = this
+    return clazz == emptyArray<Any?>()::class ||
+            clazz == BooleanArray::class ||
+            clazz == ByteArray::class ||
+            clazz == CharArray::class ||
+            clazz == ShortArray::class ||
+            clazz == IntArray::class ||
+            clazz == FloatArray::class ||
+            clazz == DoubleArray::class ||
+            clazz == LongArray::class
 }

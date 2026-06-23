@@ -6,6 +6,9 @@ import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.toStdlibInstant
+import kotlin.time.Instant
 import org.gnit.lucenekmp.analysis.Analyzer
 import org.gnit.lucenekmp.document.DateTools
 import org.gnit.lucenekmp.document.DateTools.Resolution
@@ -461,8 +464,10 @@ protected constructor() : QueryBuilder(/*null*/),
                     // The user can only specify the date, not the time, so make sure
                     // the time is set to the latest possible time of that date to really
                     // include all documents:
-                    val localDate = d2.toLocalDateTime(timeZone).date
-                    d2 = localDate.atTime(LocalTime(23, 59, 59, 999_000_000)).toInstant(timeZone)
+                    val kxD2 = Instant.fromEpochMilliseconds(d2.toEpochMilliseconds())
+                    val localDate = kxD2.toLocalDateTime(timeZone).date
+                    val adjusted = localDate.atTime(LocalTime(23, 59, 59, 999_000_000)).toInstant(timeZone)
+                    d2 = Instant.fromEpochMilliseconds(adjusted.toEpochMilliseconds())
                 }
                 part2 = DateTools.dateToString(d2, resolution)
             } catch (e: Exception) {
@@ -930,7 +935,7 @@ protected constructor() : QueryBuilder(/*null*/),
         return String.fromCharArray(output, 0, length)
     }
 
-    private fun parseDate(value: String): kotlinx.datetime.Instant {
+    private fun parseDate(value: String): Instant {
         val parts = value.split('/')
         require(parts.size == 3) { "Unsupported date format: $value" }
         val month = parts[0].toInt()
@@ -939,7 +944,8 @@ protected constructor() : QueryBuilder(/*null*/),
         if (year in 0..99) {
             year = if (year >= 70) 1900 + year else 2000 + year
         }
-        return LocalDateTime(year, month, day, 0, 0, 0, 0).toInstant(timeZone)
+        val kxInstant = LocalDateTime(year, month, day, 0, 0, 0, 0).toInstant(timeZone)
+        return Instant.fromEpochMilliseconds(kxInstant.toEpochMilliseconds())
     }
 
     companion object {

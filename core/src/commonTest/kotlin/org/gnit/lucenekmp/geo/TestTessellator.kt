@@ -9,6 +9,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 
+@Ignore
+// TODO: Restore tests when Tessellator implementation is re-enabled (KT-84561)
 class TestTessellator : LuceneTestCase() {
 
     @Test

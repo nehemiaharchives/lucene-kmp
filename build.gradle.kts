@@ -30,6 +30,7 @@ subprojects {
 
     val kotlinDataDir = System.getProperty("kotlin.data.dir") ?: ""
     val duplicateKlibStrategyArg = "-Xklib-duplicated-unique-name-strategy=allow-first-with-warning"
+    val disableNativeCastsOptimizationArg = "-Xdisable-phases=CastsOptimization"
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>().configureEach {
         inputs.property("kotlinDataDir", kotlinDataDir)
@@ -45,6 +46,9 @@ subprojects {
     pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
         extensions.configure<KotlinMultiplatformExtension>("kotlin") {
             targets.withType(KotlinNativeTarget::class.java).configureEach {
+                binaries.configureEach {
+                    freeCompilerArgs += disableNativeCastsOptimizationArg
+                }
                 compilations.configureEach {
                     compileTaskProvider.configure {
                         compilerOptions.freeCompilerArgs.add(duplicateKlibStrategyArg)
@@ -196,14 +200,12 @@ subprojects {
             }
 
             targets.withType(KotlinAndroidTarget::class.java).configureEach {
-                @OptIn(ExperimentalKotlinGradlePluginApi::class)
                 compilerOptions {
                     jvmTarget.set(JvmTarget.JVM_11)
                 }
             }
 
             targets.withType(KotlinJvmTarget::class.java).configureEach {
-                @OptIn(ExperimentalKotlinGradlePluginApi::class)
                 compilerOptions {
                     jvmTarget.set(JvmTarget.JVM_11)
                 }

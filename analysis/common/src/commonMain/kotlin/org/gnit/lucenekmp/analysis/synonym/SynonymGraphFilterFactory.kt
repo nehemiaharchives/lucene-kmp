@@ -192,9 +192,6 @@ class SynonymGraphFilterFactory : TokenFilterFactory, ResourceLoaderAware {
                 CJKAnalyzer::class -> CJKAnalyzer()
                 else -> throw RuntimeException("Cannot load class: $cname")
             }
-        if (analyzer is ResourceLoaderAware) {
-            analyzer.inform(loader)
-        }
         return analyzer
     }
 
