@@ -1,6 +1,8 @@
 package org.gnit.lucenekmp.internal.vectorization
 
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.native.OsFamily
+import kotlin.native.Platform
 
 @OptIn(ExperimentalNativeApi::class)
 internal actual fun hasValidVectorizationCallerPlatform(validCallers: Set<String>): Boolean {
@@ -8,6 +10,7 @@ internal actual fun hasValidVectorizationCallerPlatform(validCallers: Set<String
     // Try to match against known valid callers first.
     val matched = stack.any { frame ->
         validCallers.any { caller ->
+            frame.contains(caller) ||
             frame.contains(caller.replace('.', '/')) ||
             frame.contains("${caller.replace('.', '/')}.kt")
         }
@@ -19,6 +22,6 @@ internal actual fun hasValidVectorizationCallerPlatform(validCallers: Set<String
     // we cannot match against validCallers at all, so accept the call.
     // A real Kotlin source reference always includes ".kt:" followed by a line number.
     val hasKotlinSource = stack.any { frame -> frame.contains(".kt:") }
-    if (!hasKotlinSource) return true
+    if (!hasKotlinSource && Platform.osFamily == OsFamily.LINUX) return true
     return false
 }
