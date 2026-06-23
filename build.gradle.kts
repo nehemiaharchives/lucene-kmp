@@ -1,4 +1,6 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestListener
@@ -18,7 +20,7 @@ import org.jetbrains.kotlin.konan.target.Family
 plugins {
     //alias(libs.plugins.androidLibrary) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
-    alias(libs.plugins.kotlinMultiplatform) apply  false
+    alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.vanniktech.mavenPublish) apply false
 }
 
@@ -31,6 +33,13 @@ subprojects {
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>().configureEach {
         inputs.property("kotlinDataDir", kotlinDataDir)
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
+            optIn.add("kotlin.ExperimentalStdlibApi")
+            freeCompilerArgs.add("-Xexpect-actual-classes")
+        }
     }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
@@ -114,6 +123,71 @@ subprojects {
 
     pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
         extensions.configure<KotlinMultiplatformExtension>("kotlin") {
+
+            // All published modules support the same platform matrix.
+            jvm()
+            (this as ExtensionAware).extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
+                withHostTestBuilder {}.configure {}
+                withDeviceTestBuilder {
+                    sourceSetTreeName = "test"
+                }
+            }
+            iosArm64()
+            iosX64()
+            iosSimulatorArm64()
+            @Suppress("DEPRECATION")
+            macosX64()
+            macosArm64()
+            linuxX64()
+            linuxArm64()
+            mingwX64()
+
+            // The default hierarchy template is disabled, so keep the shared source-set graph
+            // in one place for every published multiplatform module.
+            val commonMain = sourceSets.getByName("commonMain")
+            val commonTest = sourceSets.getByName("commonTest")
+            val jvmAndroidMain = sourceSets.maybeCreate("jvmAndroidMain").apply {
+                dependsOn(commonMain)
+            }
+            val jvmAndroidTest = sourceSets.maybeCreate("jvmAndroidTest").apply {
+                dependsOn(commonTest)
+            }
+            val nativeMain = sourceSets.maybeCreate("nativeMain").apply {
+                compilerOptions.suppressWarnings = true
+                dependsOn(commonMain)
+            }
+            val posixNativeMain = sourceSets.maybeCreate("posixNativeMain").apply {
+                dependsOn(nativeMain)
+            }
+            val nativeTest = sourceSets.maybeCreate("nativeTest").apply {
+                dependsOn(commonTest)
+            }
+
+            // Target source sets are created by each module after its plugins are applied.
+            // configureEach connects both existing and subsequently-created source sets.
+            sourceSets.configureEach {
+                when (name) {
+                    "jvmMain", "androidMain" -> dependsOn(jvmAndroidMain)
+                    "jvmTest", "androidHostTest" -> dependsOn(jvmAndroidTest)
+                    "iosArm64Main",
+                    "iosX64Main",
+                    "iosSimulatorArm64Main",
+                    "macosArm64Main",
+                    "macosX64Main",
+                    "linuxArm64Main",
+                    "linuxX64Main" -> dependsOn(posixNativeMain)
+
+                    "mingwX64Main" -> dependsOn(nativeMain)
+                    "iosArm64Test",
+                    "iosX64Test",
+                    "iosSimulatorArm64Test",
+                    "macosArm64Test",
+                    "macosX64Test",
+                    "linuxArm64Test",
+                    "linuxX64Test",
+                    "mingwX64Test" -> dependsOn(nativeTest)
+                }
+            }
 
             extensions.configure<KotlinMultiplatformAndroidLibraryExtension>("androidLibrary") {
                 namespace = "${project.group}.lucenekmp.${project.name.replace('-', '.')}"

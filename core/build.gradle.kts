@@ -22,38 +22,13 @@ apply(from = rootProject.file("gradle/generateBreakIteratorData.gradle.kts"))
 apply(from = rootProject.file("gradle/generateGb2312Data.gradle.kts"))
 
 kotlin {
-    jvm()
-    //jvmToolchain(23) // we run build on jdk 24, so getting INFO saying "Kotlin does not yet support 24 JDK target, falling back to Kotlin JVM_23 JVM target"
-    /*androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }*/
     android {
-        //withJava() // enable java compilation support
-        withHostTestBuilder {}.configure {}
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }
-
         packaging {
             resources {
                 excludes += "META-INF/INDEX.LIST"
             }
         }
     }
-
-    iosArm64()
-    iosX64()
-    iosSimulatorArm64()
-
-    @Suppress("DEPRECATION")
-    macosX64() // intel mac
-    macosArm64() // m1/2/3/4 mac
-    linuxX64() // when you are in linux X64 machine, run ./gradlew core:compileKotlinLinuxX64 to check Kotlin/Native compilation error common to ios, macos and linux for developer convenience.
-    mingwX64() // windows native
 
     sourceSets {
         val commonMain by getting {
@@ -78,30 +53,16 @@ kotlin {
             }
         }
 
-        // below is additional source set configurations other than default hierarchy
 
-        // shared source for jvm and android
-        val jvmAndroidMain by creating {
-            dependsOn(commonMain)
-            // dependencies which are used both by jvm and android will be here
-        }
-        jvmMain.get().dependsOn(jvmAndroidMain)
         jvmMain.get().dependencies {
             implementation(libs.kotlin.logging.jvm)
             implementation(libs.logback)
         }
-        androidMain.get().dependsOn(jvmAndroidMain)
         androidMain.get().dependencies {
             implementation(libs.kotlin.logging.android)
             implementation(libs.slf4j.api)
         }
 
-        val jvmAndroidTest by creating {
-            dependsOn(commonTest)
-            // test dependencies which are used both by jvm and android will be here
-        }
-        jvmTest.get().dependsOn(jvmAndroidTest)
-        getByName("androidHostTest").dependsOn(jvmAndroidTest)
 
         val androidDeviceTest by getting {
             dependencies {
@@ -109,39 +70,7 @@ kotlin {
             }
         }
 
-        // shared source for ios and linux
-        val nativeMain by creating {
 
-            compilerOptions.suppressWarnings = true
-
-            dependsOn(commonMain)
-            // dependencies which are used by all native targets will be here
-        }
-        val posixNativeMain by creating {
-            dependsOn(nativeMain)
-            // dependencies and actual implementations shared by Unix-like native targets
-        }
-        iosArm64Main.get().dependsOn(posixNativeMain)
-        iosX64Main.get().dependsOn(posixNativeMain)
-        iosSimulatorArm64Main.get().dependsOn(posixNativeMain)
-
-        macosArm64Main.get().dependsOn(posixNativeMain)
-        macosX64Main.get().dependsOn(posixNativeMain)
-        linuxX64Main.get().dependsOn(posixNativeMain)
-        mingwX64Main.get().dependsOn(nativeMain)
-
-        val nativeTest by creating {
-            dependsOn(commonTest)
-            // test dependencies which are used both by ios and linux will be here
-        }
-        iosArm64Test.get().dependsOn(nativeTest)
-        iosX64Test.get().dependsOn(nativeTest)
-        iosSimulatorArm64Test.get().dependsOn(nativeTest)
-
-        macosArm64Test.get().dependsOn(nativeTest)
-        macosX64Test.get().dependsOn(nativeTest)
-        linuxX64Test.get().dependsOn(nativeTest)
-        mingwX64Test.get().dependsOn(nativeTest)
     }
 }
 
@@ -160,17 +89,6 @@ tasks.matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }.con
     dependsOn("generateGB2312MappingKotlin")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    compilerOptions{
-        optIn.addAll(
-            "kotlin.ExperimentalStdlibApi",
-        )
-        //suppressWarnings = true
-        freeCompilerArgs.addAll(
-            "-Xexpect-actual-classes",
-        )
-    }
-}
 
 // To enable hang detection, run ./gradlew commands with -PenableHangDetection=true
 val enableHangDetection = providers
