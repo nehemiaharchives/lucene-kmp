@@ -25,16 +25,16 @@
   weight = 10
 
 [[sidebar_docs]]
+  name = "Usage"
+  pageRef = "/docs/usage"
+  weight = 20
+
+[[sidebar_docs]]
   name = "API Reference"
   pageRef = "/docs/api-reference"
-  weight = 20
+  weight = 30
 
 [[sidebar_docs]]
   name = "Release Notes"
   pageRef = "/docs/release-notes"
-  weight = 30
-
-[[sidebar_docs]]
-  name = "Local Build"
-  pageRef = "/docs/local-build"
   weight = 40

@@ -1,3 +1,20 @@
+---
+title: "Usage"
+description: "How to use lucene-kmp to build index and search"
+summary: ""
+date: 2026-06-23T00:00:00+09:00
+lastmod: 2026-06-23T00:00:00+09:00
+draft: false
+weight: 10
+toc: true
+params:
+  seo:
+    title: "Usage"
+    description: "How to use lucene-kmp to build index and search"
+    canonical: ""
+    robots: ""
+---
+
 # Usage
 
 Lucene expects to have a inverted index on disk or in memory built prior to searching.

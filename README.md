@@ -65,7 +65,7 @@ directory.close()
 ```
 
 For indexed field types, filters, sort, phrase/fuzzy/wildcard queries, geo and IP queries, see
-[docs/USAGE.md](docs/USAGE.md).
+[docs/USAGE.md](docs/content/docs/usage.md).
 
 ## Java Lucene and lucene-kmp
 * lucene-kmp prioritizes the core indexing and search APIs, then adds common analyzers and codecs.
