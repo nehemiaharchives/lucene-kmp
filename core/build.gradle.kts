@@ -59,7 +59,6 @@ kotlin {
             implementation(libs.logback)
         }
         androidMain.get().dependencies {
-            implementation(libs.kotlin.logging.android)
             implementation(libs.slf4j.api)
         }
 

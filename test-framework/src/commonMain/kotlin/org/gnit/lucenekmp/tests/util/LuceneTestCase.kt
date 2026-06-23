@@ -292,13 +292,18 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
             return rule
         }
 
-        private val RANDOM_TIME_ZONES: List<TimeZone> = listOf(
-            TimeZone.UTC,
-            TimeZone.of("America/New_York"),
-            TimeZone.of("Europe/Berlin"),
-            TimeZone.of("Asia/Tokyo"),
-            TimeZone.of("Australia/Sydney")
-        )
+        private val RANDOM_TIME_ZONES: List<TimeZone> = run {
+            val zones = mutableListOf<TimeZone>(TimeZone.UTC)
+            val ids = listOf("America/New_York", "Europe/Berlin", "Asia/Tokyo", "Australia/Sydney")
+            for (id in ids) {
+                try {
+                    zones.add(TimeZone.of(id))
+                } catch (_: Exception) {
+                    // timezone database unavailable (e.g. Alpine Linux without tzdata)
+                }
+            }
+            zones
+        }
 
 
         /** A [QueryCachingPolicy] that randomly caches.  */
