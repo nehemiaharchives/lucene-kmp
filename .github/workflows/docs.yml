@@ -95,8 +95,9 @@ jobs:
           tar -C "${HOME}/.local/hugo" -xzf "${{ runner.temp }}/hugo.tar.gz"
           echo "${HOME}/.local/hugo" >> "${GITHUB_PATH}"
 
-      - name: Install Dart Sass
-        run: sudo snap install dart-sass
+      - name: Install website dependencies
+        working-directory: docs
+        run: npm ci
 
       - name: Verify tool versions
         run: |
@@ -106,10 +107,6 @@ jobs:
           npm --version
           hugo version
           sass --version
-
-      - name: Install website dependencies
-        working-directory: docs
-        run: npm ci
 
       - name: Build Doks site and Dokka API docs
         env:
