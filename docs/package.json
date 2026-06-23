@@ -25,13 +25,11 @@
   },
   "overrides": {
     "minimatch": "^10.2.2",
-    "glob": "^13.0.6"
+    "glob": "^13.0.6",
+    "esbuild": "$esbuild"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.2",
-    "@changesets/cli": "^2.29.8",
     "esbuild": ">=0.28.1",
-    "hugo-extended": "^0.163.3",
     "js-yaml": ">=4.2.0",
     "prettier": "^3.8.1",
     "sass": "^1.101.0",
