@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "9.1.0"
+androidGradlePlugin = "9.0.1"
 kotlin = "2.4.0"
 okio = "3.17.0"
 android-minSdk = "26"
