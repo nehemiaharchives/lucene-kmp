@@ -106,7 +106,7 @@ jobs:
           node --version
           npm --version
           hugo version
-          sass --version
+          docs/node_modules/.bin/sass --version
 
       - name: Build Doks site and Dokka API docs
         env:
