@@ -36,6 +36,8 @@ import org.gnit.lucenekmp.search.similarities.NormalizationH1
 import org.gnit.lucenekmp.search.similarities.NormalizationH2
 import org.gnit.lucenekmp.search.similarities.NormalizationH3
 import org.gnit.lucenekmp.search.similarities.NormalizationZ*/
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.search.similarities.PerFieldSimilarityWrapper
 import org.gnit.lucenekmp.search.similarities.Similarity
 import kotlin.math.abs
@@ -54,11 +56,11 @@ class RandomSimilarity(random: Random) : PerFieldSimilarityWrapper() {
     private val previousMappings: MutableMap<String, Similarity> = mutableMapOf()
     private val perFieldSeed: Int
     private val shouldQueryNorm: Boolean
+    private val lock = ReentrantLock()
 
-    /*@Synchronized*/
-    override fun get(name: String): Similarity {
+    override fun get(name: String): Similarity = lock.withLock {
         checkNotNull(name)
-        return previousMappings.computeIfAbsent(
+        previousMappings.computeIfAbsent(
             name
         ) { f: String ->
             knownSims.get(
@@ -77,9 +79,8 @@ class RandomSimilarity(random: Random) : PerFieldSimilarityWrapper() {
         knownSims.shuffle(random)
     }
 
-    /*@Synchronized*/
-    override fun toString(): String {
-        return "RandomSimilarity(queryNorm=$shouldQueryNorm): $previousMappings"
+    override fun toString(): String = lock.withLock {
+        "RandomSimilarity(queryNorm=$shouldQueryNorm): $previousMappings"
     }
 
     companion object {
