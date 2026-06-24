@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+  viewBox="16 16 810.24 624"
+  preserveAspectRatio="xMidYMid meet"
+  role="img" aria-labelledby="title desc">
+  <title id="title">lucene-kmp logo</title>
+  <desc id="desc">Simplified Lucene-inspired triangle and L mark with Kotlin Multiplatform-inspired global gradient from top-left blue to bottom-right purple.</desc>
+  
+      <defs>
+        <linearGradient id="luceneKmpGradient" gradientUnits="userSpaceOnUse"
+          x1="64" y1="64"
+          x2="778.24" y2="592">
+          <stop offset="0%" stop-color="#55b7ff"/>
+          <stop offset="52%" stop-color="#7377ff"/>
+          <stop offset="100%" stop-color="#b248f4"/>
+        </linearGradient>
+      </defs>
+      <g id="lucene-kmp-mark" fill="url(#luceneKmpGradient)" stroke="none">
+        <polygon id="upper-lucene-bar" points="64,64 370.24,64 370.24,184 133.6,184"/>
+        <polygon id="lower-lucene-triangle" points="161.44,232 370.24,232 370.24,592"/>
+        <path id="upright-l" d="M 418.24 64 H 538.24 V 472 H 778.24 V 592 H 418.24 Z"/>
+      </g>
+  
+</svg>

@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>lucene-kmp Logo Generator v4</title>
+  <style>
+    :root {
+      --bg: #111525;
+      --panel: #1b2035;
+      --panel2: #22283f;
+      --line: #343c5d;
+      --text: #eef3ff;
+      --muted: #9aa7c7;
+      --accent: #65b7ff;
+      --danger: #ff334d;
+      --ok: #76e0b2;
+      --input: #0e1323;
+      --checker-a: #20263b;
+      --checker-b: #171c2e;
+      --shadow: rgba(0,0,0,.35);
+      --radius: 14px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #151a2d, #111525);
+    }
+
+    h1 {
+      font-size: 18px;
+      line-height: 1.2;
+      margin: 0 0 6px;
+      letter-spacing: .2px;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 1160px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(330px, 420px) minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px;
+      min-height: calc(100vh - 78px);
+    }
+
+    @media (max-width: 1050px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 14px 40px var(--shadow);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .panel h2 {
+      font-size: 13px;
+      margin: 0;
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel2);
+    }
+
+    .controls {
+      padding: 13px;
+      display: grid;
+      gap: 12px;
+    }
+
+    fieldset {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px;
+      margin: 0;
+    }
+
+    legend {
+      color: var(--muted);
+      font-size: 11px;
+      padding: 0 6px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 90px;
+      gap: 9px;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .row:first-of-type { margin-top: 0; }
+    .row:last-child { margin-bottom: 0; }
+
+    label {
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .hint {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.3;
+    }
+
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      padding: 7px 8px;
+      background: var(--input);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      font-size: 12px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 32px;
+      background: var(--input);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .check-row {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      margin: 8px 0;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .check-row input { accent-color: var(--accent); }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: #26304d;
+      color: var(--text);
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-weight: 650;
+      font-size: 11px;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #4aaeff, #995cff);
+      border-color: #5f78c9;
+    }
+
+    button:hover { filter: brightness(1.08); }
+    button:active { transform: translateY(1px); }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .metric {
+      background: #151a2d;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 9px;
+      min-height: 50px;
+    }
+
+    .metric .k {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .metric .v {
+      display: block;
+      color: var(--text);
+      font-size: 12px;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .rules {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 10px 11px;
+      background: #151a2d;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .rules strong { color: var(--ok); }
+
+    .preview-wrap {
+      height: calc(100vh - 106px);
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 1050px) {
+      .preview-wrap { height: 72vh; min-height: 460px; }
+    }
+
+    .preview-topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 13px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel2);
+      min-height: 42px;
+    }
+
+    .preview-topbar h2 {
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .canvas {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(45deg, var(--checker-a) 25%, transparent 25%) 0 0 / 22px 22px,
+        linear-gradient(45deg, transparent 75%, var(--checker-a) 75%) 0 0 / 22px 22px,
+        linear-gradient(45deg, transparent 75%, var(--checker-a) 75%) 11px 11px / 22px 22px,
+        linear-gradient(45deg, var(--checker-a) 25%, var(--checker-b) 25%) 11px 11px / 22px 22px;
+    }
+
+    #preview {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #preview svg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      padding: 11px;
+      background: #0b1020;
+      color: #dce7ff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      tab-size: 2;
+    }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      background: #0b1020;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 14px 40px var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>lucene-kmp Logo Generator v4</h1>
+    <p>
+      WYSIWYG SVG editor for the simplified Lucene mark: upper parallelogram, lower triangle, and upright L.
+      Version 4 keeps the entire preview contained in the panel, expands the guide/ruler viewBox so labels are not clipped,
+      and locks all <strong>a</strong> and <strong>b</strong> measurements by construction.
+    </p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Parameters</h2>
+      <div class="controls">
+        <fieldset>
+          <legend>Locked proportions</legend>
+
+          <div class="row">
+            <label for="a">
+              a: shared thickness
+              <span class="hint">Top bar height = L vertical thickness = L bottom thickness.</span>
+            </label>
+            <input id="a" type="number" min="20" max="220" step="1" value="96">
+          </div>
+
+          <div class="row">
+            <label for="b">
+              b: shared length
+              <span class="hint">Triangle vertical height = L bottom total length.</span>
+            </label>
+            <input id="b" type="number" min="80" max="700" step="1" value="336">
+          </div>
+
+          <div class="row">
+            <label for="gap">
+              Gap
+              <span class="hint">Used for both the vertical left gap and the horizontal gap before the L.</span>
+            </label>
+            <input id="gap" type="number" min="0" max="160" step="1" value="32">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Geometry</legend>
+
+          <div class="row">
+            <label for="slope">
+              Guide slope
+              <span class="hint">x movement per 1px downward. This controls the Lucene-style diagonal.</span>
+            </label>
+            <input id="slope" type="number" min="0.15" max="1.4" step="0.01" value="0.58">
+          </div>
+
+          <div class="row">
+            <label for="x0">
+              Guide x at top
+              <span class="hint">Top-left x coordinate before padding is applied.</span>
+            </label>
+            <input id="x0" type="number" min="0" max="260" step="1" value="64">
+          </div>
+
+          <div class="row">
+            <label for="y0">
+              Top y
+              <span class="hint">Top y coordinate before padding is applied.</span>
+            </label>
+            <input id="y0" type="number" min="0" max="220" step="1" value="64">
+          </div>
+
+          <div class="row">
+            <label for="pad">
+              Clean SVG padding
+              <span class="hint">Extra empty area around the exported mark. Preview adds extra room for rulers.</span>
+            </label>
+            <input id="pad" type="number" min="0" max="160" step="1" value="48">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Color</legend>
+
+          <div class="row">
+            <label for="colorStart">
+              Top-left color
+              <span class="hint">Global gradient start.</span>
+            </label>
+            <input id="colorStart" type="color" value="#55b7ff">
+          </div>
+
+          <div class="row">
+            <label for="colorMid">
+              Middle color
+              <span class="hint">Optional Kotlin-style blue/violet midpoint.</span>
+            </label>
+            <input id="colorMid" type="color" value="#7377ff">
+          </div>
+
+          <div class="row">
+            <label for="colorEnd">
+              Bottom-right color
+              <span class="hint">Global gradient end.</span>
+            </label>
+            <input id="colorEnd" type="color" value="#b248f4">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Preview/export options</legend>
+          <label class="check-row"><input id="showRulers" type="checkbox" checked> Show a/b rulers</label>
+          <label class="check-row"><input id="showGuide" type="checkbox" checked> Show diagonal guide line</label>
+          <label class="check-row"><input id="showPoints" type="checkbox"> Show calculated points</label>
+          <label class="check-row"><input id="showOutline" type="checkbox"> Show logo outline</label>
+          <label class="check-row"><input id="exportMarks" type="checkbox"> Include rulers/guides in downloaded SVG</label>
+        </fieldset>
+
+        <div class="rules">
+          <strong>Restrictions applied:</strong><br>
+          a<sub>1</sub> = top bar thickness, a<sub>2</sub> = L vertical thickness, a<sub>3</sub> = L bottom thickness.<br>
+          b<sub>1</sub> = triangle height, b<sub>2</sub> = L bottom total length.<br>
+          There is only one <strong>a</strong> input and one <strong>b</strong> input, so those values cannot drift.
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="generateBtn">Generate SVG</button>
+          <button id="copyBtn">Copy SVG</button>
+          <button id="downloadBtn">Download SVG</button>
+        </div>
+
+        <div class="readout" id="readout"></div>
+
+        <textarea id="svgText" spellcheck="false"></textarea>
+      </div>
+    </section>
+
+    <section class="panel preview-wrap">
+      <div class="preview-topbar">
+        <h2>Preview</h2>
+        <div class="status" id="status">Ready</div>
+      </div>
+      <div class="canvas" id="canvas">
+        <div id="preview"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const inputIds = [
+    'a', 'b', 'gap', 'slope', 'x0', 'y0', 'pad',
+    'colorStart', 'colorMid', 'colorEnd',
+    'showRulers', 'showGuide', 'showPoints', 'showOutline', 'exportMarks'
+  ];
+
+  function n(id) { return Number($(id).value); }
+  function checked(id) { return $(id).checked; }
+  function fixed(v, digits = 2) {
+    const s = Number(v).toFixed(digits);
+    return s.replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  }
+
+  // Red guide line: x = x0 + slope * (y - y0).
+  // The upper parallelogram's left edge and the lower triangle's diagonal edge
+  // are both calculated from this same function.
+  function xOnGuideLine(y, p) {
+    return p.x0 + p.slope * (y - p.y0);
+  }
+
+  function yOnGuideLineForX(x, p) {
+    return p.y0 + (x - p.x0) / p.slope;
+  }
+
+  function getParams() {
+    return {
+      a: n('a'),
+      b: n('b'),
+      gap: n('gap'),
+      slope: n('slope'),
+      x0: n('x0'),
+      y0: n('y0'),
+      pad: n('pad'),
+      colorStart: $('colorStart').value,
+      colorMid: $('colorMid').value,
+      colorEnd: $('colorEnd').value,
+      showRulers: checked('showRulers'),
+      showGuide: checked('showGuide'),
+      showPoints: checked('showPoints'),
+      showOutline: checked('showOutline'),
+      exportMarks: checked('exportMarks')
+    };
+  }
+
+  function calculateGeometry(p) {
+    const yTop = p.y0;
+    const yUpperBottom = yTop + p.a;
+    const yTriangleTop = yUpperBottom + p.gap;
+    const yBottom = yTriangleTop + p.b;
+
+    const xTopLeft = xOnGuideLine(yTop, p);
+    const xUpperBottomLeft = xOnGuideLine(yUpperBottom, p);
+    const xTriangleTopLeft = xOnGuideLine(yTriangleTop, p);
+    const xRight = xOnGuideLine(yBottom, p);
+
+    const lX = xRight + p.gap;
+    const lY = yTop;
+    const lRight = lX + p.b;
+    const lInnerRight = lX + p.a;
+    const lBottom = yBottom;
+    const lBottomTop = lBottom - p.a;
+
+    const upper = [
+      [xTopLeft, yTop],
+      [xRight, yTop],
+      [xRight, yUpperBottom],
+      [xUpperBottomLeft, yUpperBottom]
+    ];
+
+    const triangle = [
+      [xTriangleTopLeft, yTriangleTop],
+      [xRight, yTriangleTop],
+      [xRight, yBottom]
+    ];
+
+    const lPath = [
+      ['M', lX, lY],
+      ['H', lInnerRight],
+      ['V', lBottomTop],
+      ['H', lRight],
+      ['V', lBottom],
+      ['H', lX],
+      ['Z']
+    ];
+
+    const artMinX = Math.min(xTopLeft, xUpperBottomLeft, xTriangleTopLeft, xRight, lX);
+    const artMinY = yTop;
+    const artMaxX = lRight;
+    const artMaxY = yBottom;
+
+    return {
+      yTop, yUpperBottom, yTriangleTop, yBottom,
+      xTopLeft, xUpperBottomLeft, xTriangleTopLeft, xRight,
+      lX, lY, lRight, lInnerRight, lBottom, lBottomTop,
+      upper, triangle, lPath,
+      artMinX, artMinY, artMaxX, artMaxY,
+      a1: p.a,
+      a2: p.a,
+      a3: p.a,
+      b1: p.b,
+      b2: p.b,
+      upperTopLength: xRight - xTopLeft,
+      triangleTopLength: xRight - xTriangleTopLeft,
+      lExtension: p.b - p.a,
+      guideFormula: `x = ${fixed(p.x0)} + ${fixed(p.slope)}(y - ${fixed(p.y0)})`
+    };
+  }
+
+  function calculateViewBox(p, g, includeMarks) {
+    let minX = g.artMinX - p.pad;
+    let minY = g.artMinY - p.pad;
+    let maxX = g.artMaxX + p.pad;
+    let maxY = g.artMaxY + p.pad;
+
+    if (includeMarks) {
+      const m = markLayout(p, g);
+      const extra = 66;
+      minX = Math.min(minX, m.upperAX - extra, m.b1X - extra, m.guideX1 - extra, m.guideX2 - extra);
+      maxX = Math.max(maxX, m.a3X + extra, g.lRight + extra, m.guideX1 + extra, m.guideX2 + extra);
+      minY = Math.min(minY, m.a2Y - extra, m.guideY1 - extra, g.yTop - extra);
+      maxY = Math.max(maxY, m.b2Y + extra, m.guideY2 + extra, g.yBottom + extra);
+    }
+
+    return { minX, minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  function pts(points) {
+    return points.map(([x,y]) => `${fixed(x)},${fixed(y)}`).join(' ');
+  }
+
+  function pathD(cmds) {
+    return cmds.map(cmd => {
+      if (cmd[0] === 'M') return `M ${fixed(cmd[1])} ${fixed(cmd[2])}`;
+      if (cmd[0] === 'H') return `H ${fixed(cmd[1])}`;
+      if (cmd[0] === 'V') return `V ${fixed(cmd[1])}`;
+      if (cmd[0] === 'Z') return 'Z';
+      return '';
+    }).join(' ');
+  }
+
+  function line(x1,y1,x2,y2, extra='') {
+    return `<line x1="${fixed(x1)}" y1="${fixed(y1)}" x2="${fixed(x2)}" y2="${fixed(y2)}" ${extra}/>`;
+  }
+
+  function text(x, y, content, extra='') {
+    return `<text x="${fixed(x)}" y="${fixed(y)}" ${extra}>${esc(content)}</text>`;
+  }
+
+  function rulerH(x1, x2, y, label, opts = {}) {
+    const tick = opts.tick ?? 10;
+    const labelOffset = opts.labelOffset ?? -24;
+    const cls = opts.cls ?? 'ruler';
+    const mid = (x1 + x2) / 2;
+    return `
+      <g class="${cls}">
+        ${line(x1,y,x2,y)}
+        ${line(x1,y-tick,x1,y+tick)}
+        ${line(x2,y-tick,x2,y+tick)}
+        ${text(mid, y + labelOffset, label, 'text-anchor="middle" dominant-baseline="central"')}
+      </g>`;
+  }
+
+  function rulerV(x, y1, y2, label, opts = {}) {
+    const tick = opts.tick ?? 10;
+    const side = opts.side ?? 'left';
+    const labelOffset = opts.labelOffset ?? 36;
+    const cls = opts.cls ?? 'ruler';
+    const mid = (y1 + y2) / 2;
+    const labelX = side === 'right' ? x + labelOffset : x - labelOffset;
+    const rotate = side === 'right' ? 90 : -90;
+    return `
+      <g class="${cls}">
+        ${line(x,y1,x,y2)}
+        ${line(x-tick,y1,x+tick,y1)}
+        ${line(x-tick,y2,x+tick,y2)}
+        ${text(labelX, mid, label, `text-anchor="middle" dominant-baseline="central" transform="rotate(${rotate} ${fixed(labelX)} ${fixed(mid)})"`)}
+      </g>`;
+  }
+
+  function pointMark(x, y, name) {
+    return `
+      <g class="point">
+        <circle cx="${fixed(x)}" cy="${fixed(y)}" r="4" />
+        ${text(x + 7, y - 7, name)}
+      </g>`;
+  }
+
+  function markLayout(p, g) {
+    const guideY1 = g.yTop - 24;
+    const guideY2 = g.yBottom + 24;
+    return {
+      upperAX: g.xTopLeft - 44,
+      a2Y: g.yTop - 44,
+      a3X: g.lRight + 44,
+      b1X: Math.min(g.xTriangleTopLeft, g.xRight) - 58,
+      b2Y: g.yBottom + 44,
+      guideY1,
+      guideY2,
+      guideX1: xOnGuideLine(guideY1, p),
+      guideX2: xOnGuideLine(guideY2, p)
+    };
+  }
+
+  function marksSvg(p, g) {
+    const m = markLayout(p, g);
+    const aLabel = `a = ${fixed(p.a)}px`;
+    const bLabel = `b = ${fixed(p.b)}px`;
+
+    let out = `
+      <style>
+        .ruler line { stroke: #ff3048; stroke-width: 3; vector-effect: non-scaling-stroke; }
+        .ruler text { fill: #ff3048; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif; font-size: 18px; font-weight: 850; paint-order: stroke; stroke: rgba(10,10,20,.88); stroke-width: 5px; stroke-linejoin: round; }
+        .guide-line { stroke: #ff3048; stroke-width: 3; stroke-dasharray: 10 9; vector-effect: non-scaling-stroke; opacity: .92; }
+        .point circle { fill: #ff3048; stroke: white; stroke-width: 2; vector-effect: non-scaling-stroke; }
+        .point text { fill: #ff3048; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 750; paint-order: stroke; stroke: rgba(10,10,20,.88); stroke-width: 3px; stroke-linejoin: round; }
+      </style>`;
+
+    if (p.showGuide) {
+      out += `\n${line(m.guideX1, m.guideY1, m.guideX2, m.guideY2, 'class="guide-line"')}`;
+    }
+
+    if (p.showRulers) {
+      out += `
+        ${rulerV(m.upperAX, g.yTop, g.yUpperBottom, aLabel, { side: 'left' })}
+        ${rulerH(g.lX, g.lInnerRight, m.a2Y, aLabel, { labelOffset: -22 })}
+        ${rulerV(m.a3X, g.lBottomTop, g.lBottom, aLabel, { side: 'right' })}
+        ${rulerV(m.b1X, g.yTriangleTop, g.yBottom, bLabel, { side: 'left' })}
+        ${rulerH(g.lX, g.lRight, m.b2Y, bLabel, { labelOffset: 26 })}
+      `;
+    }
+
+    if (p.showPoints) {
+      out += `
+        ${pointMark(g.xTopLeft, g.yTop, 'upper top-left')}
+        ${pointMark(g.xUpperBottomLeft, g.yUpperBottom, 'upper bottom-left')}
+        ${pointMark(g.xTriangleTopLeft, g.yTriangleTop, 'triangle top-left')}
+        ${pointMark(g.xRight, g.yBottom, 'shared right')}
+      `;
+    }
+
+    return out;
+  }
+
+  function logoSvg(p, g) {
+    const outline = p.showOutline
+      ? 'stroke="#20263b" stroke-width="2" vector-effect="non-scaling-stroke"'
+      : 'stroke="none"';
+
+    return `
+      <defs>
+        <linearGradient id="luceneKmpGradient" gradientUnits="userSpaceOnUse"
+          x1="${fixed(g.artMinX)}" y1="${fixed(g.artMinY)}"
+          x2="${fixed(g.artMaxX)}" y2="${fixed(g.artMaxY)}">
+          <stop offset="0%" stop-color="${p.colorStart}"/>
+          <stop offset="52%" stop-color="${p.colorMid}"/>
+          <stop offset="100%" stop-color="${p.colorEnd}"/>
+        </linearGradient>
+      </defs>
+      <g id="lucene-kmp-mark" fill="url(#luceneKmpGradient)" ${outline}>
+        <polygon id="upper-lucene-bar" points="${pts(g.upper)}"/>
+        <polygon id="lower-lucene-triangle" points="${pts(g.triangle)}"/>
+        <path id="upright-l" d="${pathD(g.lPath)}"/>
+      </g>`;
+  }
+
+  function fullSvg(includeMarks) {
+    const p = getParams();
+    const g = calculateGeometry(p);
+    const vb = calculateViewBox(p, g, includeMarks);
+    const marks = includeMarks ? marksSvg(p, g) : '';
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+  viewBox="${fixed(vb.minX)} ${fixed(vb.minY)} ${fixed(vb.w)} ${fixed(vb.h)}"
+  preserveAspectRatio="xMidYMid meet"
+  role="img" aria-labelledby="title desc">
+  <title id="title">lucene-kmp logo</title>
+  <desc id="desc">Simplified Lucene-inspired triangle and L mark with Kotlin Multiplatform-inspired global gradient from top-left blue to bottom-right purple.</desc>
+  ${logoSvg(p, g)}
+  ${marks}
+</svg>`;
+  }
+
+  function updateReadout(p, g, cleanVb, previewVb) {
+    const items = [
+      ['a locked', `${fixed(g.a1)} = ${fixed(g.a2)} = ${fixed(g.a3)}px`],
+      ['b locked', `${fixed(g.b1)} = ${fixed(g.b2)}px`],
+      ['gap', `${fixed(p.gap)}px`],
+      ['guide', g.guideFormula],
+      ['top length', `${fixed(g.upperTopLength)}px`],
+      ['triangle top', `${fixed(g.triangleTopLength)}px`],
+      ['clean viewBox', `${fixed(cleanVb.w)} × ${fixed(cleanVb.h)}`],
+      ['preview viewBox', `${fixed(previewVb.w)} × ${fixed(previewVb.h)}`]
+    ];
+
+    $('readout').innerHTML = items.map(([k,v]) => `
+      <div class="metric"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>
+    `).join('');
+  }
+
+  function render() {
+    const p = getParams();
+    const g = calculateGeometry(p);
+    const previewIncludesMarks = p.showRulers || p.showGuide || p.showPoints;
+    const cleanVb = calculateViewBox(p, g, p.exportMarks);
+    const previewVb = calculateViewBox(p, g, previewIncludesMarks);
+    const preview = fullSvg(previewIncludesMarks);
+    const clean = fullSvg(p.exportMarks);
+    $('preview').innerHTML = preview;
+    $('svgText').value = clean;
+    updateReadout(p, g, cleanVb, previewVb);
+    $('status').textContent = `a=${fixed(p.a)}px, b=${fixed(p.b)}px, gap=${fixed(p.gap)}px`;
+  }
+
+  async function copySvg() {
+    $('svgText').select();
+    try {
+      await navigator.clipboard.writeText($('svgText').value);
+      toast('SVG copied');
+    } catch (e) {
+      document.execCommand('copy');
+      toast('SVG copied');
+    }
+  }
+
+  function downloadSvg() {
+    const blob = new Blob([$('svgText').value], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lucene-kmp-logo-v4.svg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast('SVG downloaded');
+  }
+
+  let toastTimer;
+  function toast(message) {
+    const el = $('toast');
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1500);
+  }
+
+  inputIds.forEach(id => {
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+  $('generateBtn').addEventListener('click', () => { render(); toast('SVG generated'); });
+  $('copyBtn').addEventListener('click', copySvg);
+  $('downloadBtn').addEventListener('click', downloadSvg);
+
+  render();
+})();
+</script>
+</body>
+</html>
