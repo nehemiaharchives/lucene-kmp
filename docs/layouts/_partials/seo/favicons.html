@@ -1,0 +1,62 @@
+{{- $sizes := slice
+  (dict "size" "180x180" "rel" "apple-touch-icon")
+  (dict "size" "192x192")
+  (dict "size" "512x512")
+}}
+{{- $faviconName := default "favicon.png" .Site.Params.seo.favicons.icon }}
+{{- $svgIconName := default "favicon.svg" .Site.Params.seo.favicons.svgIcon }}
+{{- $favicon := resources.Get $faviconName }}
+{{- $svgIco := resources.Get $svgIconName }}
+{{- with $favicon }}
+  {{- if ne .MediaType.MainType "image" }}
+    {{- warnf "[Thulite SEO] the assets/%s isn't an image, media type: %s." $faviconName .MediaType.Type }}
+  {{- else if in (slice "svg") .MediaType.SubType }}
+    {{- warnf "[Thulite SEO] the assets/%s isn't resizable." $faviconName }}
+  {{- else }}
+    <link rel="icon" href="{{ `favicon.ico` | relURL }}" sizes="32x32">
+    {{- with $svgIco }}
+      {{- $svg := . | resources.Copy "/favicon.svg" }}
+      <link rel="icon" href="{{ $svg.RelPermalink }}" type="{{ .MediaType.Type }}">
+    {{- end }}
+    {{- range $sizes }}
+      {{- $iconName := printf "/favicon-%s" .size }}
+      {{- with .rel }}{{ $iconName = . }}{{ end }}
+      {{- $img := $favicon.Resize .size | resources.Copy (printf "%s%s" $iconName (path.Ext $favicon.Name)) }}
+      <link
+        rel="{{ default `icon` .rel }}"
+        href="{{ $img.RelPermalink }}"
+        sizes="{{ .size }}"
+        type="{{ $img.MediaType }}"
+      >
+    {{- end }}
+  {{- end }}
+{{- else }}
+    {{- warnf "[Thulite SEO] assets/%s does not exist. Add a file that's at least 512x512 pixels." $faviconName }}
+{{- end }}
+
+{{- $templ := `
+{
+  "name": "{{ site.Title }}",
+  "short_name": "{{ site.Title }}",
+  "lang": "{{ site.LanguageCode | default "en-us" }}",
+  "icons": [
+    {
+      "src": "{{ "favicon-192x192.png" | relURL }}",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "{{ "favicon-512x512.png" | relURL }}",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "{{ site.Home.RelPermalink }}"
+}
+` }}
+{{- $targetPath := "/manifest.webmanifest" }}
+{{- $res := $templ | resources.FromString $targetPath | resources.ExecuteAsTemplate $targetPath . }}
+<link rel="manifest" href="{{ $res.RelPermalink }}">

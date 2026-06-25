@@ -15,8 +15,6 @@ params:
     robots: ""
 ---
 
-# Usage
-
 Lucene expects to have a inverted index on disk or in memory built prior to searching.
 The examples below show how to build an index and run queries against it.
 

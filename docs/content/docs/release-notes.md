@@ -5,7 +5,7 @@ summary: ""
 date: 2026-06-23T00:00:00+09:00
 lastmod: 2026-06-23T00:00:00+09:00
 draft: false
-weight: 30
+weight: 40
 toc: true
 params:
   seo:

@@ -20,18 +20,18 @@
   weight = 10
 
 [[sidebar_docs]]
-  name = "Overview"
-  pageRef = "/docs/project"
-  weight = 10
-
-[[sidebar_docs]]
   name = "Usage"
   pageRef = "/docs/usage"
-  weight = 20
+  weight = 10
 
 [[sidebar_docs]]
   name = "API Reference"
   pageRef = "/docs/api-reference"
+  weight = 20
+
+[[sidebar_docs]]
+  name = "Project"
+  pageRef = "/docs/project"
   weight = 30
 
 [[sidebar_docs]]

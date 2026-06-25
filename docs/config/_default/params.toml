@@ -1,7 +1,7 @@
 # Hugo
 title = "lucene-kmp"
 description = "Kotlin Multiplatform port of Apache Lucene APIs."
-images = ["cover.png"]
+images = ["cover.svg"]
 
 # mainSections
 mainSections = ["docs"]
@@ -136,7 +136,7 @@ mathEngine = "KaTeX" # "KaTeX" (default) or "MathJax"
     logo = "favicon-512x512.png" # Logo of Organization — favicon-512x512.png (default)
     name = "lucene-kmp" # Name of Organization or Person
     sameAs = ["https://github.com/nehemiaharchives/lucene-kmp"] # E.g. ["https://github.com/thuliteio/thulite", "https://fosstodon.org/@thulite"]
-    images = ["cover.png"] # ["cover.png"] (default)
+    images = ["cover.svg"] # ["cover.png"] (default)
     article = [] # Article sections
     newsArticle = [] # NewsArticle sections
     blogPosting = [] # BlogPosting sections
