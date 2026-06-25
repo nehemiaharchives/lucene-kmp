@@ -4,16 +4,34 @@ name: CI
 on:
   push:
     branches: [ master ]
-    paths-ignore:
-      - '**.md'
-      - '**.sh'
-      - '**.main.kts'
+    paths:
+      - 'analysis/**'
+      - 'codecs/**'
+      - 'core/**'
+      - 'queries/**'
+      - 'queryparser/**'
+      - 'test-framework/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
   pull_request:
     branches: [ master ]
-    paths-ignore:
-      - '**.md'
-      - '**.sh'
-      - '**.main.kts'
+    paths:
+      - 'analysis/**'
+      - 'codecs/**'
+      - 'core/**'
+      - 'queries/**'
+      - 'queryparser/**'
+      - 'test-framework/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
   workflow_dispatch:
     inputs:
       test-core-index:
