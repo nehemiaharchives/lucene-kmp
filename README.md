@@ -1,7 +1,7 @@
 # Lucene Kotlin Multiplatform
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/org.gnit.lucene-kmp/lucene-kmp-core-jvm)](https://central.sonatype.com/search?namespace=org.gnit.lucene-kmp)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+[![Maven Central](https://img.shields.io/maven-central/v/org.gnit.lucene-kmp/lucene-kmp-core)](https://central.sonatype.com/search?namespace=org.gnit.lucene-kmp)
 [![CI](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/nehemiaharchives/lucene-kmp/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/nehemiaharchives/lucene-kmp/graph/badge.svg?token=YRN8URPQA4)](https://codecov.io/gh/nehemiaharchives/lucene-kmp)
 [![Apache 2 License](https://img.shields.io/github/license/nehemiaharchives/lucene-kmp)](https://github.com/nehemiaharchives/lucene-kmp/blob/master/LICENSE)
