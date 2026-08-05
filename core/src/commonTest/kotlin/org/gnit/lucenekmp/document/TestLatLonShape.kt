@@ -96,7 +96,7 @@ class TestLatLonShape : LuceneTestCase() {
     }
 
     /** test we can search for a point with a standard number of vertices */
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testBasicIntersects() {
         val numVertices = TestUtil.nextInt(random(), 50, 100)
@@ -135,7 +135,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testBasicContains() {
         val dir: Directory = newDirectory()
@@ -175,7 +175,7 @@ class TestLatLonShape : LuceneTestCase() {
     }
 
     /** test random polygons with a single hole */
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testPolygonWithHole() {
         val numVertices = TestUtil.nextInt(random(), 50, 100)
@@ -209,7 +209,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     /** test we can search for a point with a large number of vertices */
     @Test
     fun testLargeVertexPolygon() {
@@ -262,7 +262,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testWithinDateLine() {
         val dir: Directory = newDirectory()
@@ -330,7 +330,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(w, reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsDateLine() {
         val dir: Directory = newDirectory()
@@ -393,7 +393,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(w, reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testLUCENE8454() {
         val dir: Directory = newDirectory()
@@ -451,7 +451,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(r, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testLUCENE8669() {
         val dir: Directory = newDirectory()
@@ -653,7 +653,7 @@ class TestLatLonShape : LuceneTestCase() {
         assertFalse(containsTriangle)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testLUCENE8736() {
         val dir: Directory = newDirectory()
@@ -725,7 +725,7 @@ class TestLatLonShape : LuceneTestCase() {
         assertTrue(intersectsLine)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testLUCENE9055() {
         val dir: Directory = newDirectory()
@@ -754,7 +754,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(w, reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testIndexAndQuerySamePolygon() {
         val dir: Directory = newDirectory()
@@ -837,7 +837,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(r, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testLucene9239() {
         val lats = doubleArrayOf(-22.350172194105966, 90.0, 90.0, -22.350172194105966, -22.350172194105966)
@@ -868,7 +868,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(r, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsWrappingBooleanQuery() {
         val lats = doubleArrayOf(-30.0, -30.0, 30.0, 30.0, -30.0)
@@ -893,7 +893,7 @@ class TestLatLonShape : LuceneTestCase() {
         IOUtils.close(r, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsGeometryCollectionIntersectsPoint() {
         val polygon = Polygon(doubleArrayOf(-64.0, -64.0, 64.0, 64.0, -64.0), doubleArrayOf(-132.0, 132.0, 132.0, -132.0, -132.0))
@@ -903,7 +903,7 @@ class TestLatLonShape : LuceneTestCase() {
         )
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsGeometryCollectionIntersectsLine() {
         val polygon = Polygon(doubleArrayOf(-64.0, -64.0, 64.0, 64.0, -64.0), doubleArrayOf(-132.0, 132.0, 132.0, -132.0, -132.0))
@@ -914,7 +914,7 @@ class TestLatLonShape : LuceneTestCase() {
         )
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsGeometryCollectionIntersectsPolygon() {
         val polygon = Polygon(doubleArrayOf(-64.0, -64.0, 64.0, 64.0, -64.0), doubleArrayOf(-132.0, 132.0, 132.0, -132.0, -132.0))
@@ -925,7 +925,7 @@ class TestLatLonShape : LuceneTestCase() {
         )
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testFlatPolygonDoesNotContainIntersectingLine() {
         val lons = doubleArrayOf(-0.001, -0.001, 0.001, 0.001, -0.001)

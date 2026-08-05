@@ -55,7 +55,7 @@ import kotlin.jvm.JvmOverloads
 object Tessellator {
 
     // TODO: Original implementation (~1760 lines) is disabled and preserved below in a block comment.
-    // Kotlin/Native compiler crashes with StackOverflowError in CastsOptimization (KT-84561)
+    // Kotlin/Native compiler crashes with StackOverflowError in CastsOptimization (KT-88316)
     // due to FIR2IR converting object $instance, $companion, and sort SAM lambda into
     // IrConstantObjectImpl that the backend cannot handle.
     // When the Kotlin bug is fixed, uncomment the original implementation block and delete the stubs in this object.
@@ -65,12 +65,12 @@ object Tessellator {
     @JvmOverloads
     fun tessellate(
         polygon: Polygon, checkSelfIntersections: Boolean, monitor: Monitor? = null
-    ): MutableList<Triangle> = TODO("Disabled due to Kotlin/Native compiler bug (KT-84561)")
+    ): MutableList<Triangle> = TODO("Disabled due to Kotlin/Native compiler bug (KT-88316)")
 
     @JvmOverloads
     fun tessellate(
         polygon: XYPolygon, checkSelfIntersections: Boolean, monitor: Monitor? = null
-    ): MutableList<Triangle> = TODO("Disabled due to Kotlin/Native compiler bug (KT-84561)")
+    ): MutableList<Triangle> = TODO("Disabled due to Kotlin/Native compiler bug (KT-88316)")
 
     /** Determines whether two line segments intersect. *  */
     fun linesIntersect(

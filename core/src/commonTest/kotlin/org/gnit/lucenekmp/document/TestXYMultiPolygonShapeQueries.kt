@@ -83,26 +83,26 @@ class TestXYMultiPolygonShapeQueries : BaseXYShapeTestCase() {
 
     // tests inherited from BaseSpatialTestCase
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @LuceneTestCase.Companion.Nightly
     @Test
     override fun testRandomBig() {
         doTestRandom(10) // TODO reduced from 10000 to 10 for dev speed
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     override fun testSameShapeManyTimes() = super.testSameShapeManyTimes()
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     override fun testLowCardinalityShapeManyTimes() = super.testLowCardinalityShapeManyTimes()
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     override fun testRandomTiny() = super.testRandomTiny()
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     override fun testRandomMedium() = super.testRandomMedium()
 }

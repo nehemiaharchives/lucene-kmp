@@ -61,7 +61,7 @@ class TestXYShape : LuceneTestCase() {
     }
 
     /** test we can search for a point with a standard number of vertices */
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testBasicIntersects() {
         val numVertices = TestUtil.nextInt(random(), 50, 100)
@@ -117,7 +117,7 @@ class TestXYShape : LuceneTestCase() {
         IOUtils.close(reader, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testBoundingBoxQueries() {
         val random = random()
@@ -198,7 +198,7 @@ class TestXYShape : LuceneTestCase() {
         IOUtils.close(r, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsWrappingBooleanQuery() {
         val ys = floatArrayOf(-30f, -30f, 30f, 30f, -30f)
@@ -223,7 +223,7 @@ class TestXYShape : LuceneTestCase() {
         IOUtils.close(r, dir)
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
+    @Ignore // TODO enable after solving KT-88316 workaround in (Tessellator.kt:68)
     @Test
     fun testContainsIndexedGeometryCollection() {
         val dir: Directory = newDirectory()
