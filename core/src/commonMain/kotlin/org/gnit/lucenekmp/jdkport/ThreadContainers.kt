@@ -21,6 +21,7 @@ object ThreadContainers {
     // the set of thread containers registered with this class
     private val CONTAINER_REGISTRY: MutableSet<WeakReference<ThreadContainer>> = mutableSetOf()
     private val QUEUE: ReferenceQueue<ThreadContainer> = ReferenceQueue()
+    private val registryLock = ReentrantLock()
 
     init {
         val s: String? = EnvVar["jdk.trackAllThreads"] /*java.lang.System.getProperty("jdk.trackAllThreads")*/
@@ -55,10 +56,12 @@ object ThreadContainers {
      * that is used to remove it from the registry.
      */
     fun registerContainer(container: ThreadContainer?): Any {
-        expungeStaleEntries()
-        val ref: WeakReference<ThreadContainer> = WeakReference(container, QUEUE as ReferenceQueue<ThreadContainer?>?)
-        CONTAINER_REGISTRY.add(ref)
-        return ref
+        return registryLock.withLock {
+            expungeStaleEntries()
+            val ref: WeakReference<ThreadContainer> = WeakReference(container, QUEUE as ReferenceQueue<ThreadContainer?>?)
+            CONTAINER_REGISTRY.add(ref)
+            ref
+        }
     }
 
     /**
@@ -67,7 +70,9 @@ object ThreadContainers {
      */
     fun deregisterContainer(key: Any) {
         assert(key is WeakReference<*>)
-        CONTAINER_REGISTRY.remove(key)
+        registryLock.withLock {
+            CONTAINER_REGISTRY.remove(key)
+        }
     }
 
     /**
@@ -102,10 +107,11 @@ object ThreadContainers {
      */
     fun children(container: ThreadContainer): Sequence<ThreadContainer> {
         // children of registered containers
-        val s1: Sequence<ThreadContainer> = CONTAINER_REGISTRY
-            .asSequence()
-            .mapNotNull { it.get() }
-            .filter { it.parent() === container }
+        val s1: Sequence<ThreadContainer> = registryLock.withLock {
+            CONTAINER_REGISTRY
+                .mapNotNull { it.get() }
+                .filter { it.parent() === container }
+        }.asSequence()
 
         // container may enclose another container
         var s2: Sequence<ThreadContainer> = emptySequence()
