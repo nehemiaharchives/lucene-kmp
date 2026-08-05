@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.konan.target.Family
 
 plugins {
     //alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.dokka.plugin)
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false

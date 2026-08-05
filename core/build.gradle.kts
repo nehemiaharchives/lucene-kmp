@@ -28,6 +28,12 @@ kotlin {
                 excludes += "META-INF/INDEX.LIST"
             }
         }
+        optimization {
+            consumerKeepRules.apply {
+                publish = true
+                file("src/commonMain/resources/META-INF/proguard/lucene-kmp-core.pro")
+            }
+        }
     }
 
     sourceSets {
