@@ -3,6 +3,8 @@ package org.gnit.lucenekmp.store
 import kotlinx.coroutines.delay
 import okio.IOException
 import org.gnit.lucenekmp.jdkport.System
+import org.gnit.lucenekmp.jdkport.ReentrantLock
+import org.gnit.lucenekmp.jdkport.withLock
 import org.gnit.lucenekmp.util.ThreadInterruptedException
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CancellationException
@@ -49,6 +51,7 @@ abstract class RateLimiter {
 
         @Volatile
         override var minPauseCheckBytes: Long = 0
+        private val lock = ReentrantLock()
         private var lastNS: Long
 
         /** mbPerSec is the MB/sec max IO rate  */
@@ -68,15 +71,20 @@ abstract class RateLimiter {
             val startNS: Long = System.nanoTime()
             val secondsToPause = (bytes / 1024.0 / 1024.0) / mBPerSec
 
-            // Inline syncAndGetTargetNS logic
-            val computedTargetNS = lastNS + (1_000_000_000 * secondsToPause).toLong()
-            val targetNS: Long
-            if (startNS >= computedTargetNS) {
-                lastNS = startNS
-                targetNS = startNS
-            } else {
-                lastNS = computedTargetNS
-                targetNS = computedTargetNS
+            val targetNS = lock.withLock {
+                // Time we should sleep until; this is purely instantaneous
+                // rate (just adds seconds onto the last time we had paused to);
+                // maybe we should also offer decayed recent history one?
+                val computedTargetNS = lastNS + (1_000_000_000 * secondsToPause).toLong()
+                if (startNS >= computedTargetNS) {
+                    // Set to startNS, not computedTargetNS, to enforce the instant rate, not
+                    // the "averaged over all history" rate:
+                    lastNS = startNS
+                    startNS
+                } else {
+                    lastNS = computedTargetNS
+                    computedTargetNS
+                }
             }
 
             var curNS = startNS
