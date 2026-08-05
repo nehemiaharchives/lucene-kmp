@@ -19,7 +19,6 @@ import org.gnit.lucenekmp.tests.util.LuceneTestCase
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -37,7 +36,6 @@ class TestShapeDocValues : LuceneTestCase() {
         }
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
     @Test
     @Throws(Exception::class)
     fun testSimpleDocValue() {
@@ -53,7 +51,6 @@ class TestShapeDocValues : LuceneTestCase() {
         )
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
     @Test
     fun testLatLonPolygonBBox() {
         val p = GeoTestUtil.nextPolygon()
@@ -67,7 +64,6 @@ class TestShapeDocValues : LuceneTestCase() {
         }
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
     @Test
     fun testXYPolygonBBox() {
         val p = nextTessellatableXYPolygon()
@@ -79,7 +75,6 @@ class TestShapeDocValues : LuceneTestCase() {
         assertEquals(expected.maxY, dv.getBoundingBox().maxY, TOLERANCE.toFloat())
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
     @Test
     fun testLatLonPolygonCentroid() {
         val p = GeoTestUtil.nextPolygon()
@@ -92,7 +87,6 @@ class TestShapeDocValues : LuceneTestCase() {
         assertEquals(ShapeField.DecodedTriangle.TYPE.TRIANGLE, dvField.getHighestDimensionType())
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
     @Test
     fun testXYPolygonCentroid() {
         val p = nextTessellatableXYPolygon()
@@ -189,7 +183,6 @@ class TestShapeDocValues : LuceneTestCase() {
         return createRectangle(arrayOf(minX, minY), arrayOf(maxX, maxY))
     }
 
-    @Ignore // TODO enable after solving KT-84561 workaround in (Tessellator.kt:68)
     @Test
     @Throws(Exception::class)
     fun testExplicitLatLonPolygonCentroid() {
