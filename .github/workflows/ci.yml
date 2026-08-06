@@ -46,6 +46,34 @@ on:
           - "true"
 
 jobs:
+  reproduce-kotlin-native-stack-overflow:
+    name: Reproduce Kotlin/Native FIR stack overflow
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'kt2-4-10-stack-overflow' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 24
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '24'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Reproduce compiler stack overflow
+        run: >
+          ./gradlew
+          :analysis:common:clean
+          :analysis:common:compileKotlinLinuxX64
+          -Pkotlin.incremental.native=false
+          --no-build-cache
+          -Dorg.gradle.jvmargs="-Xmx16384M -Xss512k -Dfile.encoding=UTF-8"
+          --console=plain
+
   tests:
     name: Test (${{ matrix.platform }}/${{ matrix.module_name }})
     runs-on: ${{ matrix.os }}
