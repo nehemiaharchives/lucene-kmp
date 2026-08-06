@@ -18,21 +18,27 @@ private fun configureLogging(level: Level) {
     luceneLoggingConfigured = true
 }
 
-private fun parseConfiguredLogLevel(): Level {
-    return when (EnvVar[LOG_LEVEL_ENV_VAR]?.uppercase()) {
+private fun parseConfiguredLogLevel(configuredLogLevel: String?): Level? {
+    return when (configuredLogLevel?.uppercase()) {
         "TRACE" -> Level.TRACE
         "DEBUG" -> Level.DEBUG
         "INFO" -> Level.INFO
         "WARN" -> Level.WARN
         "ERROR" -> Level.ERROR
-        else -> Level.OFF
+        "OFF" -> Level.OFF
+        else -> null
     }
+}
+
+internal fun configureProductionLogging(configuredLogLevel: String?) {
+    parseConfiguredLogLevel(configuredLogLevel)?.let(::configureLogging)
 }
 
 @PublishedApi
 internal fun ensureProductionLoggingConfigured() {
     if (!luceneLoggingConfigured) {
-        configureLogging(parseConfiguredLogLevel())
+        luceneLoggingConfigured = true
+        configureProductionLogging(EnvVar[LOG_LEVEL_ENV_VAR])
     }
 }
 
