@@ -99,7 +99,7 @@ class IntervalQuery private constructor(
         return (if (this.field != field) this.field + ":" else "") + intervalsSource.toString()
     }
 
-    @Throws(IOException::class)
+    @Throws(Exception::class)
     override fun createWeight(
         searcher: IndexSearcher,
         scoreMode: ScoreMode,
