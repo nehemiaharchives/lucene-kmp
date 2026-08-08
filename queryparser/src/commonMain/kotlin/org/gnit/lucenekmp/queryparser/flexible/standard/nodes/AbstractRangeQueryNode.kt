@@ -151,6 +151,8 @@ open class AbstractRangeQueryNode<T : FieldValuePairQueryNode<*>> protected cons
         val lower = lowerBound
         val upper = upperBound
 
+        sb.append(field).append(':')
+
         if (lowerInclusive) {
             sb.append('[')
         } else {
@@ -158,15 +160,15 @@ open class AbstractRangeQueryNode<T : FieldValuePairQueryNode<*>> protected cons
         }
 
         if (lower != null) {
-            sb.append(lower.toQueryString(escapeSyntaxParser))
+            appendBoundQueryString(sb, lower, escapeSyntaxParser)
         } else {
             sb.append("...")
         }
 
-        sb.append(' ')
+        sb.append(" TO ")
 
         if (upper != null) {
-            sb.append(upper.toQueryString(escapeSyntaxParser))
+            appendBoundQueryString(sb, upper, escapeSyntaxParser)
         } else {
             sb.append("...")
         }
@@ -178,6 +180,20 @@ open class AbstractRangeQueryNode<T : FieldValuePairQueryNode<*>> protected cons
         }
 
         return sb.toString()
+    }
+
+    private fun appendBoundQueryString(
+        sb: StringBuilder,
+        bound: FieldValuePairQueryNode<*>,
+        escapeSyntaxParser: EscapeQuerySyntax,
+    ) {
+        val boundQueryString = bound.toQueryString(escapeSyntaxParser).toString()
+        val fieldPrefix = bound.field?.let { "$it:" }
+        if (fieldPrefix != null && boundQueryString.startsWith(fieldPrefix)) {
+            sb.append(boundQueryString.removePrefix(fieldPrefix))
+        } else {
+            sb.append(boundQueryString)
+        }
     }
 
     override fun toString(): String {
