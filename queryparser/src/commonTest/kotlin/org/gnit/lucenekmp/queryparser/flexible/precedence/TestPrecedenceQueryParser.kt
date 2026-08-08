@@ -23,7 +23,9 @@ import org.gnit.lucenekmp.queryparser.flexible.standard.CommonQueryParserConfigu
 import org.gnit.lucenekmp.queryparser.flexible.standard.StandardQueryParser
 import org.gnit.lucenekmp.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator
 import org.gnit.lucenekmp.queryparser.util.QueryParserTestBase
+import org.gnit.lucenekmp.search.BooleanQuery
 import org.gnit.lucenekmp.search.Query
+import org.gnit.lucenekmp.search.TermQuery
 import org.gnit.lucenekmp.tests.analysis.MockAnalyzer
 import org.gnit.lucenekmp.tests.analysis.MockTokenizer
 import kotlin.test.Test
@@ -40,7 +42,30 @@ class TestPrecedenceQueryParser : QueryParserTestBase() {
     @Test override fun testSlop() = super.testSlop()
     @Test override fun testNumber() = super.testNumber()
     @Test override fun testWildcard() = super.testWildcard()
-    @Test override fun testQPA() = super.testQPA()
+
+    @Test
+    override fun testQPA() {
+        val analyzer = QueryParserTestBase.qpAnalyzer
+        assertQueryEquals("term term term", analyzer, "term term term")
+        assertQueryEquals("term +stop term", analyzer, "term term")
+        assertQueryEquals("term -stop term", analyzer, "term term")
+        assertQueryEquals("drop AND stop AND roll", analyzer, "+drop +roll")
+        assertQueryEquals("term phrase term", analyzer, "term (phrase1 phrase2) term")
+
+        // PrecedenceQueryParser groups the AND/NOT clause before the trailing OR term.
+        // This intentionally differs from QueryParserTestBase.testQPA().
+        assertQueryEquals(
+            "term AND NOT phrase term",
+            analyzer,
+            "(+term -(phrase1 phrase2)) term",
+        )
+
+        assertMatchNoDocsQuery("stop", analyzer)
+        assertMatchNoDocsQuery("stop OR stop AND stop", analyzer)
+        assertTrue(getQuery("term term term", analyzer) is BooleanQuery)
+        assertTrue(getQuery("term +stop", analyzer) is TermQuery)
+    }
+
     @Test override fun testRange() = super.testRange()
     @Test override fun testDateRange() = super.testDateRange()
     @Test override fun testEscaped() = super.testEscaped()
