@@ -17,7 +17,12 @@ class BreakIteratorProviderImplTest {
         val locales = provider.getAvailableLocales()
         assertEquals(2, locales.size)
 
-        val enLocale = locales.firstOrNull { it === Locale.US }
+        // OpenJDK's LocaleProviderAdapter.toLocaleArray() delegates ordinary tags to
+        // Locale.forLanguageTag(). The tag "en" therefore represents an English
+        // language-only locale, not Locale.US.
+        val enLocale = locales.firstOrNull {
+            it.language == "en" && it.country.isNullOrEmpty() && it.variant.isNullOrEmpty()
+        }
         assertNotNull(enLocale)
 
         val thLocale = locales.firstOrNull {
