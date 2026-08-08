@@ -594,7 +594,7 @@ abstract class QueryParserTestBase : LuceneTestCase() {
         val month = parts[0].toInt()
         val day = parts[1].toInt()
         val year = 2000 + parts[2].toInt()
-        return LocalDateTime(year, month, day, 0, 0, 0, 0).toInstant(TimeZone.UTC)
+        return LocalDateTime(year, month, day, 0, 0, 0, 0).toInstant(TimeZone.currentSystemDefault())
     }
 
     open fun testDateRange() {
@@ -602,7 +602,8 @@ abstract class QueryParserTestBase : LuceneTestCase() {
         val endDate = getLocalizedDate(2002, 1, 4)
         // we use the default Locale/TZ since LuceneTestCase randomizes it
         val endDateExpected =
-            LocalDateTime(2002, 2, 4, 23, 59, 59, 999_000_000).toInstant(TimeZone.UTC)
+            LocalDateTime(2002, 2, 4, 23, 59, 59, 999_000_000)
+                .toInstant(TimeZone.currentSystemDefault())
         val defaultField = "default"
         val monthField = "month"
         val hourField = "hour"
