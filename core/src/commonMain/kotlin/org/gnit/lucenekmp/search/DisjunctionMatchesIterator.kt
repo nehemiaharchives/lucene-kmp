@@ -160,7 +160,7 @@ internal class DisjunctionMatchesIterator private constructor(matches: MutableLi
     override val subMatches: MatchesIterator?
         get() = queue.top().subMatches
 
-    override val query: Query
+    override val query: Query?
         get() = queue.top().query
 
 

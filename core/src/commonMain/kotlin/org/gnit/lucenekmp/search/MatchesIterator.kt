@@ -76,5 +76,5 @@ interface MatchesIterator {
      *
      * Should only be called after [.next] has returned `true`
      */
-    val query: Query
+    val query: Query?
 }

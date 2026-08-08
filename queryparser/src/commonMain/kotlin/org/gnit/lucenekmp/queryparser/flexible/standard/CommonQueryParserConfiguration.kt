@@ -53,7 +53,7 @@ interface CommonQueryParserConfiguration {
 
     var timeZone: TimeZone
 
-    val analyzer: Analyzer
+    val analyzer: Analyzer?
 
     /**
      * @see .setAllowLeadingWildcard
