@@ -98,7 +98,7 @@ protected constructor() : QueryBuilder(/*null*/),
      */
     override var fuzzyPrefixLength: Int = FuzzyQuery.defaultPrefixLength
     override var locale: Locale = Locale() /*Locale.getDefault()*/
-    override var timeZone: TimeZone = TimeZone.UTC
+    override var timeZone: TimeZone = TimeZone.currentSystemDefault()
 
     // the default date resolution
     private var nullableDateResolution: Resolution? = null
