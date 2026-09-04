@@ -13,7 +13,11 @@ class LocaleProviderAdapterTest {
         val locales = LocaleProviderAdapter.toLocaleArray(tags)
 
         assertEquals(3, locales.size)
-        assertTrue(locales.any { it === Locale.US })
+        assertTrue(
+            locales.any {
+                it.language == "en" && it.country.isNullOrEmpty() && it.variant.isNullOrEmpty()
+            }
+        )
         assertTrue(locales.any { it.language == "th" && it.country == "TH" && it.variant == "TH" })
         assertTrue(locales.any { it.language == "ja" && it.country == "JP" && it.variant == "JP" })
     }

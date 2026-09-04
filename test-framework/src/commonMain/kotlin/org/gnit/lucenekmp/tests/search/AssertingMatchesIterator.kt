@@ -55,7 +55,7 @@ internal class AssertingMatchesIterator(private val `in`: MatchesIterator) :
             return `in`.subMatches
         }
 
-    override val query: Query
+    override val query: Query?
         get() {
             assert(state == State.ITERATING) { state }
             return `in`.query

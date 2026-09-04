@@ -11,6 +11,7 @@ on:
       - 'queries/**'
       - 'queryparser/**'
       - 'test-framework/**'
+      - 'integration-tests/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
@@ -26,6 +27,7 @@ on:
       - 'queries/**'
       - 'queryparser/**'
       - 'test-framework/**'
+      - 'integration-tests/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
@@ -1221,6 +1223,56 @@ jobs:
           echo "* Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
           echo "* Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "* Branch: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+
+  r8-android:
+    name: R8 Android integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 24
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '24'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM group permissions
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build Android library AAR
+        run: ./gradlew :core:bundleAndroidMainAar --console=plain
+
+      - name: Run minified Android integration test
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: ./gradlew :integration-tests:r8:connectedReleaseAndroidTest --console=plain
+
+      - name: Upload Android library and test reports
+        if: ${{ always() && env.ACT != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: r8-android-artifacts
+          path: |
+            core/build/outputs/aar/core.aar
+            integration-tests/r8/build/reports/androidTests/
+            integration-tests/r8/build/outputs/androidTest-results/
+          if-no-files-found: warn
 
   coverage:
     name: Coverage (${{ matrix.module_name }})

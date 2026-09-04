@@ -19,27 +19,40 @@ class Locale(
 ) {
     companion object {
         val ROOT: Locale = Locale("", "")
+        val ENGLISH: Locale = Locale("en")
+        val JAPANESE: Locale = Locale("ja")
         val US: Locale = Locale(language = "en", country = "US")
 
         fun forLanguageTag(languageTag: String): Locale {
-/*            val tag: LanguageTag? = LanguageTag.parse(languageTag, null)
-            val bldr: InternalLocaleBuilder = InternalLocaleBuilder()
-            bldr.setLanguageTag(tag)
-            val base: BaseLocale = bldr.getBaseLocale()
-            var exts: LocaleExtensions? = bldr.getLocaleExtensions()
-            if (exts == null && !base.getVariant().isEmpty()) {
-                exts = getCompatibilityExtensions(
-                    base.getLanguage(), base.getScript(),
-                    base.getRegion(), base.getVariant()
-                )
-            }
-            return getInstance(base, exts)*/
-            return when(languageTag) {
-                "en" -> US
-                else -> throw UnsupportedOperationException()
-            }
+            val parts = languageTag.split('-')
+            return Locale(
+                language = parts.getOrNull(0)?.lowercase(),
+                country = parts.getOrNull(1)?.uppercase(),
+                variant = parts.drop(2).joinToString("-").ifEmpty { null },
+            )
         }
 
         fun getDefault() = US
+    }
+
+    class Builder {
+        private var languageTag: String = ""
+
+        fun setLanguageTag(languageTag: String): Builder {
+            this.languageTag = languageTag
+            return this
+        }
+
+        fun build(): Locale {
+            return forLanguageTag(languageTag)
+        }
+    }
+
+    fun toLanguageTag(): String {
+        return listOfNotNull(language, country, variant).filter { it.isNotEmpty() }.joinToString("-")
+    }
+
+    override fun toString(): String {
+        return listOfNotNull(language, country, variant).filter { it.isNotEmpty() }.joinToString("_")
     }
 }

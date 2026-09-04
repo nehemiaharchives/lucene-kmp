@@ -150,7 +150,7 @@ abstract class MatchesTestBase : LuceneTestCase() {
             } else {
                 assertNotNull(it)
             }
-            val labels = mutableSetOf<Query>()
+            val labels = mutableSetOf<Query?>()
             while (it!!.next()) {
                 labels.add(it.query)
             }

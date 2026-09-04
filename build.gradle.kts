@@ -12,12 +12,14 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import org.jetbrains.kotlin.konan.target.Family
 
 plugins {
     //alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.dokka.plugin)
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
@@ -140,6 +142,10 @@ subprojects {
     }*/
 
     pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
+        }
+
         extensions.configure<KotlinMultiplatformExtension>("kotlin") {
 
             // All published modules support the same platform matrix.
