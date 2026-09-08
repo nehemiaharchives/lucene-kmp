@@ -503,6 +503,13 @@ open class LuceneTestCase/*: org.junit.Assert*/ { // Java lucene version inherit
         }
         //↑ line 871 of LuceneTestCase.java
 
+        fun assertFloatUlpEquals(x: Float, y: Float, maxUlps: Short) {
+            assertTrue(
+                TestUtil.floatUlpEquals(x, y, maxUlps),
+                x.toString() + " and " + y + " are not within " + maxUlps + " ULPs of each other"
+            )
+        }
+
 
         // line 932 of LuceneTestCase.java
         /** create a new index writer config with a snapshot deletion policy */

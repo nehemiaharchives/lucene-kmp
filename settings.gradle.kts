@@ -35,3 +35,5 @@ include(":queries")
 include(":queryparser")
 include(":test-framework")
 include(":integration-tests:r8")
+
+include("facet")

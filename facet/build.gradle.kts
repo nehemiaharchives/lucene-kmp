@@ -1,0 +1,44 @@
+plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    //alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.vanniktech.mavenPublish)
+    alias(libs.plugins.kover)
+}
+
+kotlin {
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":core"))
+
+                // TODO add following after these modules
+                // implementation(project(":queries"))
+                // implementation(project(":sandbox"))
+
+                implementation(libs.kotlinx.coroutines)
+                implementation(libs.okio)
+                implementation(libs.kotlinenvvar)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlin.logging)
+                implementation(libs.kotlinbignum)
+            }
+        }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(project(":core"))
+                implementation(project(":test-framework"))
+                implementation(project(":queries"))
+                implementation(libs.kotlin.test)
+            }
+        }
+
+
+        jvmMain.get().dependencies {
+            implementation(libs.logback)
+        }
+
+
+    }
+}

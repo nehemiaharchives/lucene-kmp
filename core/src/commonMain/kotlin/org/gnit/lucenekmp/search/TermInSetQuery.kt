@@ -53,8 +53,8 @@ import kotlin.reflect.cast
  *
  * NOTE: This query produces scores that are equal to its boost
  */
-class TermInSetQuery : MultiTermQuery, Accountable {
-    override val field: String
+open class TermInSetQuery : MultiTermQuery, Accountable {
+    final override val field: String
     private val termData: PrefixCodedTerms
     private val termDataHashCode: Int // cached hashcode of termData
 
