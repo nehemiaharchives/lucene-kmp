@@ -10,7 +10,7 @@ Under this directory you find two sub directories:
 
 ## Porting Guideline
 
-- The GitHub copilot never make any change to lucene java source code but only read, copy from, analyze and answer question based on its content. If it's in agent mode, it can use git commands which does not change any code but only read the code and history.
+- Never make any change to lucene java source code but only read, copy from, analyze and answer question based on its content. If it's in agent mode, it can use git commands which does not change any code but only read the code and history.
 
 - **Do not deviate from Java Lucene logic.** The Kotlin port must be an exact behavioral port. Only deviate when unavoidable for KMP (e.g., okio for IO, coroutines for threading). Any deviation must be explicitly justified and minimized.
 - Exception for development speed: Java-Kotlin numeric-value discrepancies are allowed only when reducing test/runtime iteration counts to speed up local iteration or CI.
@@ -130,9 +130,11 @@ Under this directory you find two sub directories:
 
 ## Tool Use Priority
 
+### IMPORTANT: When applicable, prefer using intellij-index MCP tools for code navigation and refactoring.
+
 ### Priority 1, jetbrains MCP Server (always)
 When you have access to jetbrains MCP server, you should use the IDEA's internal test runner. `.run` dir contains.
-Example agent runtime environment: locally running ai coding agent in desktop/laptop of a developer such as codex cli, GitHub Copilot Agent.
+Example agent runtime environment: locally running ai coding agent in desktop/laptop of a developer such as codex.
 
 ### Priority 2, Gradle command line (avoid as much as possible)
 When you don't have access to jetbrains MCP server, first ask Human developer to enable it and wait until it is enabled! Never use Gradle wrapper (./gradlew).

@@ -269,20 +269,17 @@ open class LinkedBlockingQueue<E>(capacity: Int = Int.MAX_VALUE) :
         val count: AtomicInteger = this.count
         if (count.get() == capacity) return false
         val node = Node(e)
-        // Instead of runBlocking, do not call suspend function. Only allow non-blocking offer.
-        // This is a non-blocking offer, so only add if mutex is available and no contention.
-        var enqueued = false
-        if (mutex.tryLock()) {
-            try {
+        // Like Java's putLock.lock(), wait for the internal lock. An untimed
+        // offer does not wait for capacity, but contention must not report a full queue.
+        val c = runBlocking {
+            mutex.withLock {
+                if (count.get() == capacity) return@withLock -1
                 last.next = node
-                last = last.next!!
-                enqueued = true
-            } finally {
-                mutex.unlock()
+                last = node
+                count.fetchAndIncrement()
             }
         }
-        if (!enqueued) return false
-        val c = count.fetchAndIncrement()
+        if (c == -1) return false
         if (c + 1 < capacity) notFullCh.trySend(Unit)
         if (c == 0) notEmptyCh.trySend(Unit)
         return true
